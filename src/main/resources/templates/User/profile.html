@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
+<html lang="en" xmlns:th="http://thymeleaf.org">
+  <head th:replace="fragments/general.html :: head" />
+  <body>
+    <header th:replace="fragments/general.html :: header"></header>
+    <nav th:replace="fragments/general.html :: nav"></nav>
+
+    <main class="container min-vh-100">
+      <br />
+      <h1 th:text="${user.name}">User profile</h1>
+      <h2 class="h3">Profile info</h2>
+      <p>
+       Basic user profile page displaying assigned groups via keycloak (provided by the token)
+      </p>
+      <p><a aria-current="page" href="/logout">Logout</a></p>
+      <p>Your id: <span class="muted" th:text="${user.id}"></span></p>
+      <p>Hello <b th:text="${user.name}"></b>! You have access to following gams projects: </p>
+      <ol>
+        <li th:each="group : ${user.groups}" th:text="${group}"></li>
+      </ol>
+
+      <h3>Full token (only displayed during dev)</h3>
+      <p th:text="${user.info}"></p>
+
+    </main>
+
+    <footer th:replace="fragments/general.html :: footer"></footer>
+  </body>
+</html>

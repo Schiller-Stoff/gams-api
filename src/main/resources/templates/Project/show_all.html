@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
+<html lang="en" xmlns:th="http://thymeleaf.org">
+  <head th:replace="fragments/general.html :: head" />
+  <body>
+    <header th:replace="fragments/general.html :: header"></header>
+    <nav th:replace="fragments/general.html :: nav"></nav>
+
+    <main class="container min-vh-100">
+      <br />
+      <h1>GAMS projects</h1>
+      <h2 class="h3">overview</h2>
+      <p>
+        Overview over your authorized GAMS projects.
+      </p>
+      <p>If you can't see your project - talk to the sysadmins for the required oauth2 group access</p>
+      <ul>
+        <li th:each="group : ${user.groups}">
+          <a th:href="'projects/' + ${group} + '/objects'" th:text="${group}"></a>
+        </li>
+      </ul>
+    </main>
+
+    <footer th:replace="fragments/general.html :: footer"></footer>
+  </body>
+</html>

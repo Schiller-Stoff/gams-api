@@ -1,0 +1,67 @@
+
+## default connection pool
+# spring.datasource.hikari.connectionTimeout=20000
+# spring.datasource.hikari.maximumPoolSize=5
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5431/gams
+    username: admin
+    password: admin
+  jpa:
+    hibernate:
+      #drop n create table again, good for testing, comment this in production
+      ddl-auto: create
+      properties:
+        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+        hibernate.jdbc.lob.non_contextual_creation: true
+
+  #####
+  # Thymeleaf config
+  # enables thymeleaf creation of hidden input fields for PUT and POST requests via html forms
+  # https://stackoverflow.com/questions/38370011/thymeleaf-button-click-to-call-http-delete-method
+  mvc:
+    hiddenmethod:
+      filter.enabled: "true"
+
+  # sets the limit for multi-part files send via requests
+  servlet:
+    multipart:
+      max-file-size: 10GB
+      max-request-size: 10GB
+
+  # spring profiles
+  # profiles:
+    # Override with  -Dspring-boot.run.profiles=<prod,stage,test>
+    # active: ${SPRING_PROFILE:dev}
+
+########
+# Logging
+# (handled in different profiles)
+logging:
+  file:
+    name: ${LOG_FILE:log/app.log}
+  level:
+    org.zim.gamsapi: TRACE
+
+server:
+  error:
+    # includes stacktrace on error ( devtools will include it in dev)
+    include-stacktrace: always
+
+
+#####
+# Custom properties for GAMS
+#
+gams:
+  docker:
+    # fedora6
+    repository-dns: "localhost:8082"
+    #
+    gateway-dns: "localhost:8087"
+    #
+    solr: "localhost:8983"
+    # fileserver
+    apache: "localhost:4585"
+    # system triplestoree
+    systemTriplestore: "localhost:3030"
