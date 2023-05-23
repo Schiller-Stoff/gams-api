@@ -48,13 +48,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .dublinCore(
               DCBaseEntity
                 .builder()
-                .title("A LIDO object title")
+                .title(List.of("A LIDO object title"))
                 .creator(List.of("Sebastian David Schiller-Stoff"))
                 .contributor(List.of("Sebastian David Schiller-Stoff", "Moria"))
                 .description("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
                 .publisher(List.of("ZIM Graz", "Universität Graz"))
                 .subject(List.of("History", "Art History"))
-                .language("DE")
+                .language(List.of("DE"))
                 .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
                 .build()
             )
@@ -70,11 +70,11 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .dublinCore(
               DCBaseEntity
                 .builder()
-                .title("Chair of the king")
+                .title(List.of("Chair of the king"))
                 .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
                 .subject(List.of("Chemistry", "Physics", "Architecture"))
                 .description("This source datastream contains some information about...")
-                .language("de")
+                .language(List.of("de"))
                 .type(List.of("Building"))
                 .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
                 .build()
@@ -90,11 +90,11 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .dublinCore(
               DCBaseEntity
                 .builder()
-                .title("An Image of something")
+                .title(List.of("An Image of something"))
                 .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
                 .subject(List.of("Chemistry", "Physics", "Architecture"))
                 .description("This source datastream contains some information about...")
-                .language("de")
+                .language(List.of("de"))
                 .type(List.of("Building"))
                 .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
                 .build()
