@@ -3,6 +3,7 @@ package org.zim.gamsapi;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import java.util.List;
@@ -24,18 +25,22 @@ public class DCBaseEntity {
   //private String dcIdentifier;
 
   @NotEmpty
+  @NotNull
   private List<String> identifier;
 
   @NotEmpty
+  @NotNull
   private List<String> title;
 
   @NotEmpty
   private List<String> rights;
 
+  @NotNull
   @NotEmpty
   private List<String> format;
 
   @NotEmpty
+  @NotNull
   private List<String> publisher;
 
   private List<String> creator;
