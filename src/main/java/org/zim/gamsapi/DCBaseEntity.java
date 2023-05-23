@@ -1,6 +1,9 @@
 package org.zim.gamsapi;
 
 import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import java.util.List;
 
@@ -20,33 +23,42 @@ public class DCBaseEntity {
   // Note: expected to be managed by parent entity
   //private String dcIdentifier;
 
-  private String title;
+  @NotEmpty
+  private List<String> identifier;
+
+  @NotEmpty
+  private List<String> title;
+
+  @NotEmpty
+  private List<String> rights;
+
+  @NotEmpty
+  private List<String> format;
+
+  @NotEmpty
+  private List<String> publisher;
 
   private List<String> creator;
 
+  @Size(min = 0, max = 2000)
   private String description;
 
   private List<String> subject;
 
-  private List<String> publisher;
-
   private List<String> contributor;
 
-  private String date;
+  private List<String> date;
 
   private List<String> type;
 
-  private String format;
+  private List<String> source;
 
-  private String source;
-
-  private String language;
+  private List<String> language;
 
   private List<String> relation;
 
   private List<String> coverage;
 
-  private List<String> rights;
 
 
 }

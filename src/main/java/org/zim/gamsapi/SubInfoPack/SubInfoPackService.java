@@ -234,7 +234,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       // TODO mapping could be done via jackson!!!!
       switch (child.getNodeName()){
-        case "dc:title" -> dcEntity.setTitle(dcNodeValue);
+        case "dc:title" -> dcEntity.setTitle(addToNullableList(dcEntity.getTitle(), dcNodeValue));
         case "dc:creator" -> dcEntity.setCreator(
             addToNullableList(dcEntity.getCreator(), dcNodeValue)
           );
@@ -248,13 +248,13 @@ public class SubInfoPackService implements ISubInfoPackService {
         case "dc:contributor" -> dcEntity.setContributor(
             addToNullableList(dcEntity.getContributor(), dcNodeValue)
         );
-        case "dc:date" -> dcEntity.setDate(dcNodeValue);
+        case "dc:date" -> dcEntity.setDate(addToNullableList(dcEntity.getDate(), dcNodeValue));
         case "dc:type" -> dcEntity.setType(
             addToNullableList(dcEntity.getType(), dcNodeValue)
         );
-        case "dc:format" -> dcEntity.setFormat(dcNodeValue);
-        case "dc:source" -> dcEntity.setSource(dcNodeValue);
-        case "dc:language" -> dcEntity.setLanguage(dcNodeValue);
+        case "dc:format" -> dcEntity.setFormat(addToNullableList(dcEntity.getFormat(), dcNodeValue));
+        case "dc:source" -> dcEntity.setSource(addToNullableList(dcEntity.getSource(), dcNodeValue));
+        case "dc:language" -> dcEntity.setLanguage(addToNullableList(dcEntity.getLanguage(), dcNodeValue));
         case "dc:relation" -> dcEntity.setRelation(
             addToNullableList(dcEntity.getRelation(), dcNodeValue)
         );
