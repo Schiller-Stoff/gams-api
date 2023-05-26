@@ -15,10 +15,33 @@ REST-API built with spring boot and additional libraries
 # cd to clone root 
 docker-compose up
 
-# run spring boot applicaton via maven or from SpringFedoraApplication.java
+# run spring boot application via maven or from SpringFedoraApplication.java
 # e.g. from wsl:
-mvn spring-boot:run
+./mvnw spring-boot:run
 
 # or easier: start spring boot app from your IDE
 
 ```
+
+## Production
+
+### Spring native workflow / AOT ("Ahead of Time")
+
+```sh
+# build gams-api via native profile  
+./mvnw -Pnative spring-boot:build-image
+
+# run with turned on error stack trace
+./mvnw -Pnative -e spring-boot:build-image
+
+```
+
+
+
+## Deployment
+
+### 
+
+
+
+
