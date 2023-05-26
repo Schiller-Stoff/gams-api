@@ -113,8 +113,8 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       String fileName = split[1];
 
-      // process contained dc.xml for digital objects
-      if(fileName.equalsIgnoreCase("dc.xml")){
+      // process contained meta.xml for digital objects
+      if(fileName.equalsIgnoreCase("meta.xml")){
         digitalObject.get().setDublinCore(
                 extractDublinCore(byteArrayOutputStream.toByteArray())
         );
@@ -223,7 +223,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
     Document parsedDcXml = XMLUtils.parseXml(dcXml);
     // xpath returns all children of the dc root element
-    NodeList dcChildren = XMLUtils.getAllXpath("//dc/*", parsedDcXml);
+    NodeList dcChildren = XMLUtils.getAllXpath("//Description/*", parsedDcXml);
     DCBaseEntity dcEntity = DCBaseEntity.builder().build();
 
     for (int i = 0; i < dcChildren.getLength(); i++) {
@@ -234,34 +234,34 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       // TODO mapping could be done via jackson!!!!
       switch (child.getNodeName()){
-        case "dc:title" -> dcEntity.setTitle(addToNullableList(dcEntity.getTitle(), dcNodeValue));
-        case "dc:creator" -> dcEntity.setCreator(
+        case "dh:title" -> dcEntity.setTitle(addToNullableList(dcEntity.getTitle(), dcNodeValue));
+        case "dh:creator" -> dcEntity.setCreator(
             addToNullableList(dcEntity.getCreator(), dcNodeValue)
           );
-        case "dc:description" -> dcEntity.setDescription(dcNodeValue);
-        case "dc:subject" -> dcEntity.setSubject(
+        case "dh:description" -> dcEntity.setDescription(dcNodeValue);
+        case "dh:subject" -> dcEntity.setSubject(
             addToNullableList(dcEntity.getSubject(), dcNodeValue)
         );
-        case "dc:publisher" -> dcEntity.setPublisher(
+        case "dh:publisher" -> dcEntity.setPublisher(
             addToNullableList(dcEntity.getPublisher(), dcNodeValue)
         );
-        case "dc:contributor" -> dcEntity.setContributor(
+        case "dh:contributor" -> dcEntity.setContributor(
             addToNullableList(dcEntity.getContributor(), dcNodeValue)
         );
-        case "dc:date" -> dcEntity.setDate(addToNullableList(dcEntity.getDate(), dcNodeValue));
-        case "dc:type" -> dcEntity.setType(
+        case "dh:date" -> dcEntity.setDate(addToNullableList(dcEntity.getDate(), dcNodeValue));
+        case "dh:type" -> dcEntity.setType(
             addToNullableList(dcEntity.getType(), dcNodeValue)
         );
-        case "dc:format" -> dcEntity.setFormat(addToNullableList(dcEntity.getFormat(), dcNodeValue));
-        case "dc:source" -> dcEntity.setSource(addToNullableList(dcEntity.getSource(), dcNodeValue));
-        case "dc:language" -> dcEntity.setLanguage(addToNullableList(dcEntity.getLanguage(), dcNodeValue));
-        case "dc:relation" -> dcEntity.setRelation(
+        case "dh:format" -> dcEntity.setFormat(addToNullableList(dcEntity.getFormat(), dcNodeValue));
+        case "dh:source" -> dcEntity.setSource(addToNullableList(dcEntity.getSource(), dcNodeValue));
+        case "dh:language" -> dcEntity.setLanguage(addToNullableList(dcEntity.getLanguage(), dcNodeValue));
+        case "dh:relation" -> dcEntity.setRelation(
             addToNullableList(dcEntity.getRelation(), dcNodeValue)
         );
-        case "dc:coverage" -> dcEntity.setCoverage(
+        case "dh:coverage" -> dcEntity.setCoverage(
             addToNullableList(dcEntity.getCoverage(), dcNodeValue)
         );
-        case "dc:rights" -> dcEntity.setRights(
+        case "dh:rights" -> dcEntity.setRights(
             addToNullableList(dcEntity.getRights(), dcNodeValue)
         );
         default -> log.warn("DC ingest processing: Skipping unrecognized dc element {} with value {}", child.getNodeName(), dcNodeValue);
