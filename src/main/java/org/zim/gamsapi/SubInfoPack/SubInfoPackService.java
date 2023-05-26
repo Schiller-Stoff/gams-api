@@ -55,6 +55,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
     AtomicReference<DigitalObject> digitalObject =  new AtomicReference<>();
     AtomicReference<Boolean> containsSourceXml = new AtomicReference<>(false);
+    AtomicReference<Boolean> containsMetadataXml = new AtomicReference<>(false);
 
     // Construct pid from the folder-name and the current project
     ZipUtils.walkZippedDir(subInfoPack.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
@@ -119,6 +120,7 @@ public class SubInfoPackService implements ISubInfoPackService {
                 extractMetaData(byteArrayOutputStream.toByteArray())
         );
         log.info("Successfully applied detected meta.xml inside SIP {} for the object {}", subInfoPack, fileName);
+        containsMetadataXml.set(true);
         return;
       }
 
@@ -150,8 +152,16 @@ public class SubInfoPackService implements ISubInfoPackService {
       log.info("Successfully saved datastream {} for SIP {}", savedDatastream, subInfoPack);
     });
 
+    // validation after loop is completed
+
     if(!containsSourceXml.get()){
       String msg = String.format("Sent SIP does not contain the required source.xml - denying ingest. For SIP %s", subInfoPack);
+      log.error(msg);
+      throw new SubInfoPackProcessingException(msg);
+    }
+
+    if(!containsMetadataXml.get()){
+      String msg = String.format("Sent SIP does not contain the required metadata.xml - denying ingest. For SIP %s", subInfoPack);
       log.error(msg);
       throw new SubInfoPackProcessingException(msg);
     }
