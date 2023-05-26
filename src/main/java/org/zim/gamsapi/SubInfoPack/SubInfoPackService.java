@@ -114,12 +114,12 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       String fileName = split[1];
 
-      // process contained meta.xml for digital objects
+      // process contained metadata.xml for digital objects
       if(fileName.equalsIgnoreCase("metadata.xml")){
         digitalObject.get().setBaseMetadata(
                 extractMetaData(byteArrayOutputStream.toByteArray())
         );
-        log.info("Successfully applied detected meta.xml inside SIP {} for the object {}", subInfoPack, fileName);
+        log.info("Successfully applied detected metadata.xml inside SIP {} for the object {}", subInfoPack, fileName);
         containsMetadataXml.set(true);
         return;
       }
