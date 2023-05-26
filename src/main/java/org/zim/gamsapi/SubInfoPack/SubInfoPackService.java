@@ -231,55 +231,55 @@ public class SubInfoPackService implements ISubInfoPackService {
    */
   private MetadataBaseEntity extractMetaData(byte[] metadataXml){
 
-    Document parsedDcXml = XMLUtils.parseXml(metadataXml);
-    // xpath returns all children of the dc root element
-    NodeList dcChildren = XMLUtils.getAllXpath("//Description/*", parsedDcXml);
-    MetadataBaseEntity dcEntity = MetadataBaseEntity.builder().build();
+    Document parsedMetadataXml = XMLUtils.parseXml(metadataXml);
+    // xpath returns all children of the root element
+    NodeList children = XMLUtils.getAllXpath("//Description/*", parsedMetadataXml);
+    MetadataBaseEntity metadataBaseEntity = MetadataBaseEntity.builder().build();
 
-    for (int i = 0; i < dcChildren.getLength(); i++) {
-      Node child = dcChildren.item(i);
-      String dcNodeValue = child.getTextContent();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node child = children.item(i);
+      String nodeValue = child.getTextContent();
 
-      log.trace("Looping through dc node: {}", child.getNodeName());
+      log.trace("Looping through node: {}", child.getNodeName());
 
       // TODO mapping could be done via jackson!!!!
       switch (child.getNodeName()){
-        case "dh:title" -> dcEntity.setTitle(addToNullableList(dcEntity.getTitle(), dcNodeValue));
-        case "dh:creator" -> dcEntity.setCreator(
-            addToNullableList(dcEntity.getCreator(), dcNodeValue)
+        case "dh:title" -> metadataBaseEntity.setTitle(addToNullableList(metadataBaseEntity.getTitle(), nodeValue));
+        case "dh:creator" -> metadataBaseEntity.setCreator(
+            addToNullableList(metadataBaseEntity.getCreator(), nodeValue)
           );
-        case "dh:description" -> dcEntity.setDescription(dcNodeValue);
-        case "dh:subject" -> dcEntity.setSubject(
-            addToNullableList(dcEntity.getSubject(), dcNodeValue)
+        case "dh:description" -> metadataBaseEntity.setDescription(nodeValue);
+        case "dh:subject" -> metadataBaseEntity.setSubject(
+            addToNullableList(metadataBaseEntity.getSubject(), nodeValue)
         );
-        case "dh:publisher" -> dcEntity.setPublisher(
-            addToNullableList(dcEntity.getPublisher(), dcNodeValue)
+        case "dh:publisher" -> metadataBaseEntity.setPublisher(
+            addToNullableList(metadataBaseEntity.getPublisher(), nodeValue)
         );
-        case "dh:contributor" -> dcEntity.setContributor(
-            addToNullableList(dcEntity.getContributor(), dcNodeValue)
+        case "dh:contributor" -> metadataBaseEntity.setContributor(
+            addToNullableList(metadataBaseEntity.getContributor(), nodeValue)
         );
-        case "dh:date" -> dcEntity.setDate(addToNullableList(dcEntity.getDate(), dcNodeValue));
-        case "dh:type" -> dcEntity.setType(
-            addToNullableList(dcEntity.getType(), dcNodeValue)
+        case "dh:date" -> metadataBaseEntity.setDate(addToNullableList(metadataBaseEntity.getDate(), nodeValue));
+        case "dh:type" -> metadataBaseEntity.setType(
+            addToNullableList(metadataBaseEntity.getType(), nodeValue)
         );
-        case "dh:format" -> dcEntity.setFormat(addToNullableList(dcEntity.getFormat(), dcNodeValue));
-        case "dh:source" -> dcEntity.setSource(addToNullableList(dcEntity.getSource(), dcNodeValue));
-        case "dh:language" -> dcEntity.setLanguage(addToNullableList(dcEntity.getLanguage(), dcNodeValue));
-        case "dh:relation" -> dcEntity.setRelation(
-            addToNullableList(dcEntity.getRelation(), dcNodeValue)
+        case "dh:format" -> metadataBaseEntity.setFormat(addToNullableList(metadataBaseEntity.getFormat(), nodeValue));
+        case "dh:source" -> metadataBaseEntity.setSource(addToNullableList(metadataBaseEntity.getSource(), nodeValue));
+        case "dh:language" -> metadataBaseEntity.setLanguage(addToNullableList(metadataBaseEntity.getLanguage(), nodeValue));
+        case "dh:relation" -> metadataBaseEntity.setRelation(
+            addToNullableList(metadataBaseEntity.getRelation(), nodeValue)
         );
-        case "dh:coverage" -> dcEntity.setCoverage(
-            addToNullableList(dcEntity.getCoverage(), dcNodeValue)
+        case "dh:coverage" -> metadataBaseEntity.setCoverage(
+            addToNullableList(metadataBaseEntity.getCoverage(), nodeValue)
         );
-        case "dh:rights" -> dcEntity.setRights(
-            addToNullableList(dcEntity.getRights(), dcNodeValue)
+        case "dh:rights" -> metadataBaseEntity.setRights(
+            addToNullableList(metadataBaseEntity.getRights(), nodeValue)
         );
-        default -> log.warn("DC ingest processing: Skipping unrecognized dc element {} with value {}", child.getNodeName(), dcNodeValue);
+        default -> log.warn("Metadata.xml ingest processing: Skipping unrecognized element {} with value {}", child.getNodeName(), nodeValue);
       }
     }
 
-    log.info("Built DCEntity: {}", dcEntity);
-    return dcEntity;
+    log.info("Built: {}", metadataBaseEntity);
+    return metadataBaseEntity;
 
   }
 
