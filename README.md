@@ -23,9 +23,11 @@ docker-compose up
 
 ```
 
-## Production
+# Production
 
-### Spring native workflow / AOT ("Ahead of Time")
+## Compilation / Packaging
+
+### Spring native workflow / AOT ("Ahead of Time") Processing
 
 ```sh
 # build gams-api via native profile  
@@ -36,6 +38,14 @@ docker-compose up
 
 ```
 
+### Standard compilation to .jar
+
+```shell
+
+./mvnw spring-boot:build-image
+
+
+```
 
 
 ## Deployment
