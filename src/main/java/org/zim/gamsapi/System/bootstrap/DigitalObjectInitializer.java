@@ -9,7 +9,7 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.DCBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntity;
 
 import java.util.List;
 
@@ -45,8 +45,8 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     DigitalObject lidoObject = DigitalObject.builder()
             .pid("testlido")
             .objectType("LIDO")
-            .dublinCore(
-              DCBaseEntity
+            .baseMetadata(
+              MetadataBaseEntity
                 .builder()
                 .title(List.of("A LIDO object title"))
                 .creator(List.of("Sebastian David Schiller-Stoff"))
@@ -67,8 +67,8 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .data("test".getBytes())
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
-            .dublinCore(
-              DCBaseEntity
+            .baseMetadata(
+              MetadataBaseEntity
                 .builder()
                 .title(List.of("Chair of the king"))
                 .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
@@ -87,8 +87,8 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .data("test".getBytes())
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
-            .dublinCore(
-              DCBaseEntity
+            .baseMetadata(
+              MetadataBaseEntity
                 .builder()
                 .title(List.of("An Image of something"))
                 .creator(List.of("Eva Musterfrau", "Ada Lovelace"))

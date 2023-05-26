@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.zim.gamsapi.DCBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -114,11 +114,11 @@ public class SubInfoPackService implements ISubInfoPackService {
       String fileName = split[1];
 
       // process contained meta.xml for digital objects
-      if(fileName.equalsIgnoreCase("meta.xml")){
-        digitalObject.get().setDublinCore(
-                extractDublinCore(byteArrayOutputStream.toByteArray())
+      if(fileName.equalsIgnoreCase("metadata.xml")){
+        digitalObject.get().setBaseMetadata(
+                extractMetaData(byteArrayOutputStream.toByteArray())
         );
-        log.info("Successfully applied detected dc.xml inside SIP {} for the object {}", subInfoPack, fileName);
+        log.info("Successfully applied detected meta.xml inside SIP {} for the object {}", subInfoPack, fileName);
         return;
       }
 
@@ -156,7 +156,7 @@ public class SubInfoPackService implements ISubInfoPackService {
       throw new SubInfoPackProcessingException(msg);
     }
 
-    // again save for additional content being created (like dc.xml)
+    // again save for additional content being created (like metadata.xml)
     digitalObjectRepository.save(digitalObject.get());
     log.info("Successfully finished ingest simple operation for SIP: {}. Created digital object: {}", subInfoPack, digitalObject.get());
   }
@@ -216,15 +216,15 @@ public class SubInfoPackService implements ISubInfoPackService {
 
   /**
    * Extracts metadata from given dublin core xml and stores data inside dublin core wrapper class.
-   * @param dcXml dublin core xml as byte array
+   * @param metadataXml metadata xml as byte array
    * @return built dublin core wrapper class.
    */
-  private DCBaseEntity extractDublinCore(byte[] dcXml){
+  private MetadataBaseEntity extractMetaData(byte[] metadataXml){
 
-    Document parsedDcXml = XMLUtils.parseXml(dcXml);
+    Document parsedDcXml = XMLUtils.parseXml(metadataXml);
     // xpath returns all children of the dc root element
     NodeList dcChildren = XMLUtils.getAllXpath("//Description/*", parsedDcXml);
-    DCBaseEntity dcEntity = DCBaseEntity.builder().build();
+    MetadataBaseEntity dcEntity = MetadataBaseEntity.builder().build();
 
     for (int i = 0; i < dcChildren.getLength(); i++) {
       Node child = dcChildren.item(i);

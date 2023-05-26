@@ -1,7 +1,6 @@
 package org.zim.gamsapi;
 
 import jakarta.persistence.Embeddable;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DCBaseEntity {
+public class MetadataBaseEntity {
 
   // Note: expected to be managed by parent entity
   //private String dcIdentifier;

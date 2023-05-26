@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DCBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntity;
 
 /**
  * Domain class for datastream domain objects.
@@ -65,6 +65,6 @@ public class Datastream {
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
-  private DCBaseEntity dublinCore;
+  private MetadataBaseEntity baseMetadata;
 
 }

@@ -93,62 +93,62 @@
         </li>
       </ul>
       <p>Auxiliary metadata as dublin core</p>
-      <ul class="list-group-flush p-0" th:if="${do.dublinCore}">
+      <ul class="list-group-flush p-0" th:if="${do.baseMetadata}">
           <li class="list-group-item bg-light">
             <small>dc:title</small>
-            <p th:text="${do.dublinCore.title}"></p>
+            <p th:text="${do.baseMetadata.title}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:creator</small>
-            <p th:text="${do.dublinCore.creator}"></p>
+            <p th:text="${do.baseMetadata.creator}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:description</small>
-            <p th:text="${do.dublinCore.description}"></p>
+            <p th:text="${do.baseMetadata.description}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:subject</small>
-            <p th:text="${do.dublinCore.subject}"></p>
+            <p th:text="${do.baseMetadata.subject}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:publisher</small>
-            <p th:text="${do.dublinCore.publisher}"></p>
+            <p th:text="${do.baseMetadata.publisher}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:contributor</small>
-            <p th:text="${do.dublinCore.contributor}"></p>
+            <p th:text="${do.baseMetadata.contributor}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:date</small>
-            <p th:text="${do.dublinCore.date}"></p>
+            <p th:text="${do.baseMetadata.date}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:type</small>
-            <p th:text="${do.dublinCore.type}"></p>
+            <p th:text="${do.baseMetadata.type}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:format</small>
-            <p th:text="${do.dublinCore.format}"></p>
+            <p th:text="${do.baseMetadata.format}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:source</small>
-            <p th:text="${do.dublinCore.source}"></p>
+            <p th:text="${do.baseMetadata.source}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:language</small>
-            <p th:text="${do.dublinCore.language}"></p>
+            <p th:text="${do.baseMetadata.language}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:relation</small>
-            <p th:text="${do.dublinCore.relation}"></p>
+            <p th:text="${do.baseMetadata.relation}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:coverage</small>
-            <p th:text="${do.dublinCore.coverage}"></p>
+            <p th:text="${do.baseMetadata.coverage}"></p>
           </li>
           <li class="list-group-item bg-light">
             <small>dc:rights</small>
-            <p th:text="${do.dublinCore.rights}"></p>
+            <p th:text="${do.baseMetadata.rights}"></p>
           </li>
       </ul>
 
