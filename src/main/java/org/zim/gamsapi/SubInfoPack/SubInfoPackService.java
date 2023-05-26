@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.zim.gamsapi.DCBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -55,6 +55,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
     AtomicReference<DigitalObject> digitalObject =  new AtomicReference<>();
     AtomicReference<Boolean> containsSourceXml = new AtomicReference<>(false);
+    AtomicReference<Boolean> containsMetadataXml = new AtomicReference<>(false);
 
     // Construct pid from the folder-name and the current project
     ZipUtils.walkZippedDir(subInfoPack.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
@@ -113,12 +114,13 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       String fileName = split[1];
 
-      // process contained dc.xml for digital objects
-      if(fileName.equalsIgnoreCase("dc.xml")){
-        digitalObject.get().setDublinCore(
-                extractDublinCore(byteArrayOutputStream.toByteArray())
+      // process contained metadata.xml for digital objects
+      if(fileName.equalsIgnoreCase("metadata.xml")){
+        digitalObject.get().setBaseMetadata(
+                extractMetaData(byteArrayOutputStream.toByteArray())
         );
-        log.info("Successfully applied detected dc.xml inside SIP {} for the object {}", subInfoPack, fileName);
+        log.info("Successfully applied detected metadata.xml inside SIP {} for the object {}", subInfoPack, fileName);
+        containsMetadataXml.set(true);
         return;
       }
 
@@ -150,13 +152,21 @@ public class SubInfoPackService implements ISubInfoPackService {
       log.info("Successfully saved datastream {} for SIP {}", savedDatastream, subInfoPack);
     });
 
+    // validation after loop is completed
+
     if(!containsSourceXml.get()){
       String msg = String.format("Sent SIP does not contain the required source.xml - denying ingest. For SIP %s", subInfoPack);
       log.error(msg);
       throw new SubInfoPackProcessingException(msg);
     }
 
-    // again save for additional content being created (like dc.xml)
+    if(!containsMetadataXml.get()){
+      String msg = String.format("Sent SIP does not contain the required metadata.xml - denying ingest. For SIP %s", subInfoPack);
+      log.error(msg);
+      throw new SubInfoPackProcessingException(msg);
+    }
+
+    // again save for additional content being created (like metadata.xml)
     digitalObjectRepository.save(digitalObject.get());
     log.info("Successfully finished ingest simple operation for SIP: {}. Created digital object: {}", subInfoPack, digitalObject.get());
   }
@@ -216,60 +226,60 @@ public class SubInfoPackService implements ISubInfoPackService {
 
   /**
    * Extracts metadata from given dublin core xml and stores data inside dublin core wrapper class.
-   * @param dcXml dublin core xml as byte array
+   * @param metadataXml metadata xml as byte array
    * @return built dublin core wrapper class.
    */
-  private DCBaseEntity extractDublinCore(byte[] dcXml){
+  private MetadataBaseEntity extractMetaData(byte[] metadataXml){
 
-    Document parsedDcXml = XMLUtils.parseXml(dcXml);
-    // xpath returns all children of the dc root element
-    NodeList dcChildren = XMLUtils.getAllXpath("//dc/*", parsedDcXml);
-    DCBaseEntity dcEntity = DCBaseEntity.builder().build();
+    Document parsedMetadataXml = XMLUtils.parseXml(metadataXml);
+    // xpath returns all children of the root element
+    NodeList children = XMLUtils.getAllXpath("//Description/*", parsedMetadataXml);
+    MetadataBaseEntity metadataBaseEntity = MetadataBaseEntity.builder().build();
 
-    for (int i = 0; i < dcChildren.getLength(); i++) {
-      Node child = dcChildren.item(i);
-      String dcNodeValue = child.getTextContent();
+    for (int i = 0; i < children.getLength(); i++) {
+      Node child = children.item(i);
+      String nodeValue = child.getTextContent();
 
-      log.trace("Looping through dc node: {}", child.getNodeName());
+      log.trace("Looping through node: {}", child.getNodeName());
 
       // TODO mapping could be done via jackson!!!!
       switch (child.getNodeName()){
-        case "dc:title" -> dcEntity.setTitle(addToNullableList(dcEntity.getTitle(), dcNodeValue));
-        case "dc:creator" -> dcEntity.setCreator(
-            addToNullableList(dcEntity.getCreator(), dcNodeValue)
+        case "dh:title" -> metadataBaseEntity.setTitle(addToNullableList(metadataBaseEntity.getTitle(), nodeValue));
+        case "dh:creator" -> metadataBaseEntity.setCreator(
+            addToNullableList(metadataBaseEntity.getCreator(), nodeValue)
           );
-        case "dc:description" -> dcEntity.setDescription(dcNodeValue);
-        case "dc:subject" -> dcEntity.setSubject(
-            addToNullableList(dcEntity.getSubject(), dcNodeValue)
+        case "dh:description" -> metadataBaseEntity.setDescription(nodeValue);
+        case "dh:subject" -> metadataBaseEntity.setSubject(
+            addToNullableList(metadataBaseEntity.getSubject(), nodeValue)
         );
-        case "dc:publisher" -> dcEntity.setPublisher(
-            addToNullableList(dcEntity.getPublisher(), dcNodeValue)
+        case "dh:publisher" -> metadataBaseEntity.setPublisher(
+            addToNullableList(metadataBaseEntity.getPublisher(), nodeValue)
         );
-        case "dc:contributor" -> dcEntity.setContributor(
-            addToNullableList(dcEntity.getContributor(), dcNodeValue)
+        case "dh:contributor" -> metadataBaseEntity.setContributor(
+            addToNullableList(metadataBaseEntity.getContributor(), nodeValue)
         );
-        case "dc:date" -> dcEntity.setDate(addToNullableList(dcEntity.getDate(), dcNodeValue));
-        case "dc:type" -> dcEntity.setType(
-            addToNullableList(dcEntity.getType(), dcNodeValue)
+        case "dh:date" -> metadataBaseEntity.setDate(addToNullableList(metadataBaseEntity.getDate(), nodeValue));
+        case "dh:type" -> metadataBaseEntity.setType(
+            addToNullableList(metadataBaseEntity.getType(), nodeValue)
         );
-        case "dc:format" -> dcEntity.setFormat(addToNullableList(dcEntity.getFormat(), dcNodeValue));
-        case "dc:source" -> dcEntity.setSource(addToNullableList(dcEntity.getSource(), dcNodeValue));
-        case "dc:language" -> dcEntity.setLanguage(addToNullableList(dcEntity.getLanguage(), dcNodeValue));
-        case "dc:relation" -> dcEntity.setRelation(
-            addToNullableList(dcEntity.getRelation(), dcNodeValue)
+        case "dh:format" -> metadataBaseEntity.setFormat(addToNullableList(metadataBaseEntity.getFormat(), nodeValue));
+        case "dh:source" -> metadataBaseEntity.setSource(addToNullableList(metadataBaseEntity.getSource(), nodeValue));
+        case "dh:language" -> metadataBaseEntity.setLanguage(addToNullableList(metadataBaseEntity.getLanguage(), nodeValue));
+        case "dh:relation" -> metadataBaseEntity.setRelation(
+            addToNullableList(metadataBaseEntity.getRelation(), nodeValue)
         );
-        case "dc:coverage" -> dcEntity.setCoverage(
-            addToNullableList(dcEntity.getCoverage(), dcNodeValue)
+        case "dh:coverage" -> metadataBaseEntity.setCoverage(
+            addToNullableList(metadataBaseEntity.getCoverage(), nodeValue)
         );
-        case "dc:rights" -> dcEntity.setRights(
-            addToNullableList(dcEntity.getRights(), dcNodeValue)
+        case "dh:rights" -> metadataBaseEntity.setRights(
+            addToNullableList(metadataBaseEntity.getRights(), nodeValue)
         );
-        default -> log.warn("DC ingest processing: Skipping unrecognized dc element {} with value {}", child.getNodeName(), dcNodeValue);
+        default -> log.warn("Metadata.xml ingest processing: Skipping unrecognized element {} with value {}", child.getNodeName(), nodeValue);
       }
     }
 
-    log.info("Built DCEntity: {}", dcEntity);
-    return dcEntity;
+    log.info("Built: {}", metadataBaseEntity);
+    return metadataBaseEntity;
 
   }
 

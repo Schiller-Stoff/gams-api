@@ -37,62 +37,62 @@
         </li>
     </ul>
     <p>Auxiliary metadata as dublin core (if available)</p>
-    <ul class="list-group-flush p-0" th:if="${datastream.dublinCore}">
+    <ul class="list-group-flush p-0" th:if="${datastream.baseMetadata}">
         <li class="list-group-item bg-light">
             <small>dc:title</small>
-            <p th:text="${datastream.dublinCore.title}"></p>
+            <p th:text="${datastream.baseMetadata.title}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:creator</small>
-            <p th:text="${datastream.dublinCore.creator}"></p>
+            <p th:text="${datastream.baseMetadata.creator}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:description</small>
-            <p th:text="${datastream.dublinCore.description}"></p>
+            <p th:text="${datastream.baseMetadata.description}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:subject</small>
-            <p th:text="${datastream.dublinCore.subject}"></p>
+            <p th:text="${datastream.baseMetadata.subject}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:publisher</small>
-            <p th:text="${datastream.dublinCore.publisher}"></p>
+            <p th:text="${datastream.baseMetadata.publisher}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:contributor</small>
-            <p th:text="${datastream.dublinCore.contributor}"></p>
+            <p th:text="${datastream.baseMetadata.contributor}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:date</small>
-            <p th:text="${datastream.dublinCore.date}"></p>
+            <p th:text="${datastream.baseMetadata.date}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:type</small>
-            <p th:text="${datastream.dublinCore.type}"></p>
+            <p th:text="${datastream.baseMetadata.type}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:format</small>
-            <p th:text="${datastream.dublinCore.format}"></p>
+            <p th:text="${datastream.baseMetadata.format}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:source</small>
-            <p th:text="${datastream.dublinCore.source}"></p>
+            <p th:text="${datastream.baseMetadata.source}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:language</small>
-            <p th:text="${datastream.dublinCore.language}"></p>
+            <p th:text="${datastream.baseMetadata.language}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:relation</small>
-            <p th:text="${datastream.dublinCore.relation}"></p>
+            <p th:text="${datastream.baseMetadata.relation}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:coverage</small>
-            <p th:text="${datastream.dublinCore.coverage}"></p>
+            <p th:text="${datastream.baseMetadata.coverage}"></p>
         </li>
         <li class="list-group-item bg-light">
             <small>dc:rights</small>
-            <p th:text="${datastream.dublinCore.rights}"></p>
+            <p th:text="${datastream.baseMetadata.rights}"></p>
         </li>
     </ul>
 

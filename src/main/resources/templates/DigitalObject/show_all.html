@@ -119,13 +119,13 @@
             <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=pid'">PID</a>
           </th>
           <th scope="col">
-            <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=dublinCore.title'">dc:title</a>
+            <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=baseMetadata.title'">dc:title</a>
           </th>
           <th scope="col">
-            <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=dublinCore.date'">dc:date</a>
+            <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=baseMetadata.date'">dc:date</a>
           </th>
           <th scope="col">
-            <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=dublinCore.type'">dc:type</a>
+            <a class="link-dark text-decoration-none" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=baseMetadata.type'">dc:type</a>
           </th>
           <th scope="col">Delete</th>
         </tr>
@@ -138,9 +138,9 @@
                   th:text="${do.pid}"
                   th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid}"
           ></a></td>
-          <td><span th:if="${do.dublinCore}" th:text="${do.dublinCore.title}"></span></td>
-          <td><span th:if="${do.dublinCore}" th:text="${do.dublinCore.date}"></span></td>
-          <td><span th:if="${do.dublinCore}" th:text="${do.dublinCore.type}"></span></td>
+          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.title}"></span></td>
+          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.date}"></span></td>
+          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>
           <td><div>
             <!--<a th:href="${do.metaAddress}" target="_blank">Fedora6 profile</a> -->
             <form

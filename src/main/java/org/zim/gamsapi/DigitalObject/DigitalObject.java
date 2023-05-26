@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.DCBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +55,6 @@ public class DigitalObject {
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
-  private DCBaseEntity dublinCore;
+  private MetadataBaseEntity baseMetadata;
 
 }
