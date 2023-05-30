@@ -15,7 +15,7 @@ services:
     image: postgres:12.3
     container_name: relationalDB
     ports:
-      - "5431:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
@@ -50,32 +50,6 @@ services:
     # imports mounted realm.json on startup (as required from keycloak 18.x)
     command: start-dev --import-realm --http-port=8182
 
-  fcrepo:
-    image: docker.io/zimgraz/fcrepo-java:6.2.0.2-slim
-    container_name: fcrepo
-    ports:
-      - "8082:8080"
-    volumes:
-      - ${PWD}/docker/apps/fedora/fcrepo-home:/fcrepo-home
-    environment:
-      - FCREPO_AUTH=${FCREPO_AUTH:-false}
-      - FCREPO_METRICS=${FCREPO_METRICS:-false}
-      - FCREPO_REBUILD=${FCREPO_REBUILD:-false}
-      - FCREPO_STORAGE=${FCREPO_STORAGE:-ocfl-fs}
-      - FCREPO_VERSIONING=${FCREPO_VERSIONING:-false}
-    depends_on:
-      - fedora_postgres
-
-  fedora_postgres:
-    image: postgres:12.3
-    container_name: fedora_postgres
-    ports: 
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=fcrepo-user
-      - POSTGRES_PASSWORD=fcrepo-pw
-      - POSTGRES_DB=fcrepo
-
   activemq:
     image: zimgraz/activemq:5.15.9.1
     container_name: activemq
@@ -88,4 +62,26 @@ services:
       - ./docker/apps/activemq/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
       - ./docker/apps/activemq/activemq/log4j.properties:/opt/activemq/conf/log4j.properties
 
+#
+#  gams-api:
+#    image: gams-api
+#    container_name: gams-api
+#    # optionally directly open up gams-api (delivering web-cirilo)
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - keycloak
+#    environment:
+#      # is by default set to 'dev' (will deactivate security)
+#      - SPRING_PROFILE=prod
+#      # sets the log file of the spring app inside the container
+#      - LOG_FILE=/home/log/app.log
+#      - OAUTH2_CLIENT_ID=${OAUTH2_CLIENT_ID:-spring-fedora-client}
+#      - OAUTH2_CLIENT_SECRET=${OAUTH2_CLIENT_SECRET:-MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
+#      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/spring-fedora-client}
+#      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-http://keycloak:8182/realms/spring-fedora}
+#    # somewhat hacky - ensures that gams-api is restarted when an error occurs
+#    restart: unless-stopped
+#    volumes:
+#      - ${PWD}/apps/gams-api/log:/home/log/
 
