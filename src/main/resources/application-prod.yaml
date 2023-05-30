@@ -1,7 +1,8 @@
 spring:
-  autoconfigure:
-    # disables gams-api handled security
-    # exclude: org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.reactive.ReactiveManagementWebSecurityAutoConfiguration, org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  datasource:
+    url: jdbc:postgresql://relationalDB:5432/gams
+    username: admin
+    password: admin
   security:
     oauth2:
       client:
@@ -34,3 +35,22 @@ spring:
             issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8182/realms/spring-fedora}
             # provider: spring-fedora-client
             # authorization-uri: http://localhost:8182/o/oauth2/v2/auth
+
+
+#####
+# Custom properties for GAMS
+#
+gams:
+  docker:
+    # postgres
+    relational-db: "relationalDB:5432"
+    # fedora6
+    repository-dns: "fcrepo:8080"
+    #
+    gateway-dns: "gateway:8080"
+    #
+    solr: "solr:8983"
+    # fileserver
+    apache: "apache:8080"
+    # system triplestoree
+    systemTriplestore: "localhost:3030"

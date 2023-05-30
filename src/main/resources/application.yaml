@@ -4,8 +4,10 @@
 # spring.datasource.hikari.maximumPoolSize=5
 
 spring:
+  profiles:
+    active: ${SPRING_PROFILE:dev}
   datasource:
-    url: jdbc:postgresql://localhost:5431/gams
+    url: jdbc:postgresql://localhost:5432/gams
     username: admin
     password: admin
   jpa:
@@ -55,6 +57,8 @@ server:
 #
 gams:
   docker:
+    # postgres
+    relational-db: "localhost:5431"
     # fedora6
     repository-dns: "localhost:8082"
     #
