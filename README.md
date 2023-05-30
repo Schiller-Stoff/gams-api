@@ -23,6 +23,26 @@ docker-compose up
 
 ```
 
+# Development
+
+Run application in 'dev' profile (best via IDE settings)
+
+```sh
+# runs spring
+./mvnw spring-boot:run -P dev
+
+# the production profile is for production purposes (has enabled security etc.)
+./mvnw spring-boot:run -P prod
+
+```
+
+
+## Profiles
+
+dev - development profile with disabled security etc.
+prod - production profile with enabled security etc.
+
+
 # Production
 
 ## Compilation / Packaging

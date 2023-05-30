@@ -1,0 +1,36 @@
+spring:
+  autoconfigure:
+    # disables gams-api handled security
+    # exclude: org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.reactive.ReactiveManagementWebSecurityAutoConfiguration, org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration, org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+  security:
+    oauth2:
+      client:
+        registration:
+          spring-fedora-client:
+            # CLIENT-ID
+            # using name of configured keycloak client
+            # in property value AND key
+            client-id: ${OAUTH2_CLIENT_ID:spring-fedora-client}
+            # CLIENT_SECRET paste in set client secret from keycloak here
+            client-secret: ${OAUTH2_CLIENT_SECRET:MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
+            # SCOPE
+            scope: openid, profile, roles
+            # AUTHORIZATION GRANTTYPE
+            # authorization flow of client
+            # in case of spring + thymeleaf web client -> authorization-code!
+            authorization-grant-type: authorization_code
+            # REDIRECT URI
+            # url which keycloak server will call when authentication was succesful
+            # redirect uri is defined by spring security
+            redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:8080/login/oauth2/code/spring-fedora-client}
+            # ISSUER-URI
+            # under open id configuration on current realm of keycloak
+            # urls that are defined being part of our realm
+            # according to oauth2 standard!
+            # all other endpoints are constructed from issuer endpoint like where to get the actual token etc.
+            # issuer-uri: http://localhost:8182/auth/realms/spring-fedora-realm
+        provider:
+          spring-fedora-client:
+            issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8182/realms/spring-fedora}
+            # provider: spring-fedora-client
+            # authorization-uri: http://localhost:8182/o/oauth2/v2/auth
