@@ -31,7 +31,8 @@ Run application in 'dev' profile (best via IDE settings)
 # runs spring
 ./mvnw spring-boot:run -P dev
 
-# the production profile is for production purposes (has enabled security etc.)
+# the production profile is only for production purposes (has enabled security etc.)
+# will crash if an external spring application tries to access it.
 ./mvnw spring-boot:run -P prod
 
 ```
