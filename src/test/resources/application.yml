@@ -1,0 +1,4 @@
+spring:
+  profiles:
+    # loads tests in dev profile.
+    active: dev
