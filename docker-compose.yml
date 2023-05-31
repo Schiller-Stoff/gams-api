@@ -14,6 +14,7 @@ services:
   relationalDB:
     image: postgres:12.3
     container_name: relationalDB
+    hostname: relationalDB
     ports:
       - "5432:5432"
     environment:
@@ -26,6 +27,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin4_container
+    hostname: pgadmin
     restart: always
     ports:
       - "5050:80"
@@ -38,6 +40,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:18.0.0
     container_name: keycloak
+    hostname: keycloak
     ports:
       - "8182:8182"
     # needed to import default keycloak setting
