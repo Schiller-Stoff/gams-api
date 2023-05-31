@@ -50,17 +50,6 @@ services:
     # imports mounted realm.json on startup (as required from keycloak 18.x)
     command: start-dev --import-realm --http-port=8182
 
-  activemq:
-    image: zimgraz/activemq:5.15.9.1
-    container_name: activemq
-    ports:
-      # - "61616:61616"
-      - "4051:8161"
-    environment:
-      - ACTIVEMQ_CONF=/opt/activemq/conf
-    volumes:
-      - ./docker/apps/activemq/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
-      - ./docker/apps/activemq/activemq/log4j.properties:/opt/activemq/conf/log4j.properties
 
 #
 #  gams-api:
