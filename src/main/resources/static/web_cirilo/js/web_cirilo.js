@@ -112,10 +112,14 @@ const webCirilo = (() => {
               // corePrototype no multi select
               formData.append(selects[0].getAttribute("name"), selects[0].value);
 
+              const csrfHeader = buildCSRFTokenHeader();
+
               fetch(url, {
                 method: 'POST',
                 body: formData,
-                redirect: "follow"
+                redirect: "follow",
+                credentials: 'include',
+                headers: csrfHeader
               }).then(response => {
                 if(response.ok){
                   console.info("Successfully ingested object:", foldername);
@@ -168,10 +172,14 @@ const webCirilo = (() => {
         formData.append(metaPropertyKey,metaPropertyValue );
       }
 
+      const csrfHeader = buildCSRFTokenHeader();
+
       fetch(url, {
         method: 'PUT',
         body: formData,
-        redirect: "manual"
+        redirect: "manual",
+        credentials: "include",
+        headers: csrfHeader
       }).then(response => {
         // fetch might return 0 (which is not okay but somehow a bug related to redirects)
         if(!response.ok && (response.status !== 0)){
@@ -243,6 +251,21 @@ const webCirilo = (() => {
 
     console.info("*** Constructed filemap: ", fileMap);
     return  fileMap;
+  }
+
+  /**
+   * Returns csrf relevant information (as header entry) based on hidden inputs applied by thymeleaf + spring-security.
+   * e.g. {"X-CSRF-TOKEN": "MY_TOKEN_VALUE"}
+   * @return {X-CSRF-TOKEN: string} Object containing the name of the csrf header as propertName and value of csrf input as property value.
+   */
+  const buildCSRFTokenHeader = () => {
+    const csrfInputs = document.querySelectorAll("input[name='_csrf']");
+    if(csrfInputs.length === 0) console.error("No input with csrf token assigned found on current page (Usually themyleaf + spring security should apply a hidden input field with name _csrf to each form element)");
+    let csrfInput = csrfInputs[0];
+
+    let csrfObject = {};
+    csrfObject["X-CSRF-TOKEN"] =csrfInput.value;
+    return csrfObject;
   }
 
 
