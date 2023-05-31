@@ -11,6 +11,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DCBaseEntity;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +26,8 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   @Override
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
+    logAvailableSystemResources();
+
 
     DigitalObject teiObject = DigitalObject.builder()
             .pid("testtei")
@@ -121,6 +125,19 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     //lidoObject.setDatastreams(List.of(lidoSource, image));
     //digitalObjectRepository.save(teiObject);
     //digitalObjectRepository.save(lidoObject);
+  }
+
+  /**
+   * Info logs available system resources.
+   */
+  private void logAvailableSystemResources(){
+
+    int mb = 1024 * 1024;
+    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+    long xmx = memoryBean.getHeapMemoryUsage().getMax() / mb;
+    long xms = memoryBean.getHeapMemoryUsage().getInit() / mb;
+    log.info("*** GAMS-API Initialization: Initial Memory (xms) : {}mb", xms);
+    log.info("*** GAMS-API Initialization: Max Memory (xmx) : {}mb", xmx);
   }
 
 }
