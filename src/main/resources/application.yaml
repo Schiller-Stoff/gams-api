@@ -45,6 +45,7 @@ logging:
     name: ${LOG_FILE:log/app.log}
   level:
     org.zim.gamsapi: TRACE
+    org.springframework.security: DEBUG
 
 server:
   error:
