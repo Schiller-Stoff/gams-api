@@ -17,7 +17,7 @@ docker-compose up
 
 # run spring boot application via maven or from SpringFedoraApplication.java
 # e.g. from wsl:
-./mvnw spring-boot:run
+./mvnw spring-boot:run -P dev
 
 # or easier: start spring boot app from your IDE
 
