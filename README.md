@@ -71,7 +71,22 @@ prod - production profile with enabled security etc.
 
 ## Deployment
 
-### 
+### Docker Hub (Manual workflow)
+
+```sh
+
+# 1. Build image
+# build image - naming is controlled by pom.xml
+./mvnw spring-boot:build-image
+
+# 2. Tag the image with current version
+docker tag <IMAGE-ID> zimgraz/gams-api:<VERSION> 
+
+# 3. push newest version  
+docker push zimgraz/gams-api-<VERSION>
+
+
+```
 
 
 
