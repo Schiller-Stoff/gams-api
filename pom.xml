@@ -114,9 +114,14 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<!-- Name of docker image to be built by build-packs (calling e.g. spring-boot:build-image) -->
+					<image>
+						<name>gams-api</name>
+					</image>
 				</configuration>
 			</plugin>
 		</plugins>
+		<finalName>gams-api-${project.version}</finalName>
 	</build>
 
 </project>

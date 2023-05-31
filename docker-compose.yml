@@ -14,8 +14,9 @@ services:
   relationalDB:
     image: postgres:12.3
     container_name: relationalDB
+    hostname: relationalDB
     ports:
-      - "5431:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
@@ -26,6 +27,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin4_container
+    hostname: pgadmin
     restart: always
     ports:
       - "5050:80"
@@ -38,6 +40,7 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:18.0.0
     container_name: keycloak
+    hostname: keycloak
     ports:
       - "8182:8182"
     # needed to import default keycloak setting
@@ -50,42 +53,33 @@ services:
     # imports mounted realm.json on startup (as required from keycloak 18.x)
     command: start-dev --import-realm --http-port=8182
 
-  fcrepo:
-    image: docker.io/zimgraz/fcrepo-java:6.2.0.2-slim
-    container_name: fcrepo
-    ports:
-      - "8082:8080"
-    volumes:
-      - ${PWD}/docker/apps/fedora/fcrepo-home:/fcrepo-home
-    environment:
-      - FCREPO_AUTH=${FCREPO_AUTH:-false}
-      - FCREPO_METRICS=${FCREPO_METRICS:-false}
-      - FCREPO_REBUILD=${FCREPO_REBUILD:-false}
-      - FCREPO_STORAGE=${FCREPO_STORAGE:-ocfl-fs}
-      - FCREPO_VERSIONING=${FCREPO_VERSIONING:-false}
-    depends_on:
-      - fedora_postgres
 
-  fedora_postgres:
-    image: postgres:12.3
-    container_name: fedora_postgres
-    ports: 
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=fcrepo-user
-      - POSTGRES_PASSWORD=fcrepo-pw
-      - POSTGRES_DB=fcrepo
-
-  activemq:
-    image: zimgraz/activemq:5.15.9.1
-    container_name: activemq
-    ports:
-      # - "61616:61616"
-      - "4051:8161"
-    environment:
-      - ACTIVEMQ_CONF=/opt/activemq/conf
-    volumes:
-      - ./docker/apps/activemq/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
-      - ./docker/apps/activemq/activemq/log4j.properties:/opt/activemq/conf/log4j.properties
-
+#
+#  gams-api:
+#    image: zimgraz/gams-api:0.0.1
+#    container_name: gams-api
+#    # optionally directly open up gams-api (delivering web-cirilo)
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - keycloak
+#      - relationalDB
+#    environment:
+#      # is by default set to 'dev' (will deactivate security)
+#      - SPRING_PROFILE=prod
+#      # sets the log file of the spring app inside the container
+#      - LOG_FILE=/home/log/app.log
+#      - OAUTH2_CLIENT_ID=${OAUTH2_CLIENT_ID:-spring-fedora-client}
+#      - OAUTH2_CLIENT_SECRET=${OAUTH2_CLIENT_SECRET:-MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
+#      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/spring-fedora-client}
+#      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-http://keycloak:8182/realms/spring-fedora}
+#      # Setting java tool options  https://www.baeldung.com/ops/docker-jvm-heap-size
+#      - JAVA_TOOL_OPTIONS=
+#          -Xms256M
+#          -Xmx1g
+#          -XX:MaxDirectMemorySize=512m
+#    # somewhat hacky - ensures that gams-api is restarted when an error occurs
+#    restart: unless-stopped
+#    volumes:
+#      - ${PWD}/apps/gams-api/log:/home/log/
 
