@@ -63,6 +63,7 @@ services:
 #      - "8080:8080"
 #    depends_on:
 #      - keycloak
+#      - relationalDB
 #    environment:
 #      # is by default set to 'dev' (will deactivate security)
 #      - SPRING_PROFILE=prod
@@ -73,7 +74,6 @@ services:
 #      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/spring-fedora-client}
 #      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-http://keycloak:8182/realms/spring-fedora}
 #      # Setting java tool options  https://www.baeldung.com/ops/docker-jvm-heap-size
-#      # increase
 #      - JAVA_TOOL_OPTIONS=
 #          -Xms256M
 #          -Xmx1g
