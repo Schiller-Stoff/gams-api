@@ -29,3 +29,8 @@ test:
   stage: test
   script:
     - ./mvnw $MAVEN_CLI_OPTS clean test
+
+# build-native:
+#   stage: build
+#   script:
+#     - ./mvnw $MAVEN_CLI_OPTS -Pnative spring-boot:build-image
