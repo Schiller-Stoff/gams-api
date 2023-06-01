@@ -20,6 +20,11 @@ cache:
   paths:
     - .m2/repository
 
+stages:
+  - build
+  - test
+  - deploy
+
 build:
   stage: build
   script:
@@ -28,9 +33,11 @@ build:
 test:
   stage: test
   script:
-    - ./mvnw $MAVEN_CLI_OPTS clean test
+    - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS test
 
-# build-native:
-#   stage: build
-#   script:
-#     - ./mvnw $MAVEN_CLI_OPTS -Pnative spring-boot:build-image
+build-native:
+  stage: deploy
+  script:
+    - ./mvnw $MAVEN_CLI_OPTS -Pnative spring-boot:build-image -DskipTests
+  only:
+    - /^[^(develop|main)].*/
