@@ -116,12 +116,18 @@
 					</excludes>
 					<!-- Name of docker image to be built by build-packs (calling e.g. spring-boot:build-image) -->
 					<image>
-						<name>gams-api</name>
+						<name>${project.artifactId}</name>
+						<tags>${project.artifactId}:${project.version}</tags>
 					</image>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+				<version>0.9.20</version>
+			</plugin>
 		</plugins>
-		<finalName>gams-api-${project.version}</finalName>
+		<finalName>{project.artifactId}-${project.version}</finalName>
 	</build>
 
 </project>
