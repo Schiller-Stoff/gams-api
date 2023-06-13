@@ -48,6 +48,11 @@ prod - production profile with enabled security etc.
 
 ## Compilation / Packaging
 
+### Via make
+
+see deployment section
+
+
 ### Spring native workflow / AOT ("Ahead of Time") Processing
 
 ```sh
@@ -71,7 +76,25 @@ prod - production profile with enabled security etc.
 
 ## Deployment
 
-### Docker Hub (Manual workflow)
+### Automatic via make
+
+1. Increment version in .release
+
+2. Run make command:
+
+```sh
+# 01. increment version in .release
+# e.g. to 0.0.5
+
+# 02. run make command on project root
+make
+
+# Optional: (Same as above but will push result image as to docker-hub) 
+make push
+
+```
+
+### Manual workflow (via Docker Hub )
 
 ```sh
 
