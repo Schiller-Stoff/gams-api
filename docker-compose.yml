@@ -25,7 +25,7 @@ services:
     # optional: persist postgres data via volume
     # volumes:
       # needs additional wsl config to work if under wsl and bug occurs: https://stackoverflow.com/questions/65582382/wsl2-docker-linux-permission-issue-with-volumes
-      # - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
+     # - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
 
 
 #  pgadmin:

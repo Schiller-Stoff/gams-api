@@ -27,7 +27,26 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
     logAvailableSystemResources();
+    // saveTestData();
+  }
 
+  /**
+   * Info logs available system resources.
+   */
+  private void logAvailableSystemResources(){
+
+    int mb = 1024 * 1024;
+    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+    long xmx = memoryBean.getHeapMemoryUsage().getMax() / mb;
+    long xms = memoryBean.getHeapMemoryUsage().getInit() / mb;
+    log.info("*** GAMS-API Initialization: Initial Memory (xms) : {}mb", xms);
+    log.info("*** GAMS-API Initialization: Max Memory (xmx) : {}mb", xmx);
+  }
+
+  /**
+   * Saves some test data to the database, like some digital objects and datastreams.
+   */
+  private void saveTestData(){
 
     DigitalObject teiObject = DigitalObject.builder()
             .pid("testtei")
@@ -50,17 +69,17 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .pid("testlido")
             .objectType("LIDO")
             .baseMetadata(
-              MetadataBaseEntity
-                .builder()
-                .title(List.of("A LIDO object title"))
-                .creator(List.of("Sebastian David Schiller-Stoff"))
-                .contributor(List.of("Sebastian David Schiller-Stoff", "Moria"))
-                .description("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
-                .publisher(List.of("ZIM Graz", "Universität Graz"))
-                .subject(List.of("History", "Art History"))
-                .language(List.of("DE"))
-                .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
-                .build()
+                    MetadataBaseEntity
+                            .builder()
+                            .title(List.of("A LIDO object title"))
+                            .creator(List.of("Sebastian David Schiller-Stoff"))
+                            .contributor(List.of("Sebastian David Schiller-Stoff", "Moria"))
+                            .description("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
+                            .publisher(List.of("ZIM Graz", "Universität Graz"))
+                            .subject(List.of("History", "Art History"))
+                            .language(List.of("DE"))
+                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            .build()
             )
             .projectAbbr("derla")
             .build();
@@ -72,16 +91,16 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
-              MetadataBaseEntity
-                .builder()
-                .title(List.of("Chair of the king"))
-                .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
-                .subject(List.of("Chemistry", "Physics", "Architecture"))
-                .description("This source datastream contains some information about...")
-                .language(List.of("de"))
-                .type(List.of("Building"))
-                .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
-                .build()
+                    MetadataBaseEntity
+                            .builder()
+                            .title(List.of("Chair of the king"))
+                            .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
+                            .subject(List.of("Chemistry", "Physics", "Architecture"))
+                            .description("This source datastream contains some information about...")
+                            .language(List.of("de"))
+                            .type(List.of("Building"))
+                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            .build()
             )
             .build();
     datastreamRepository.save(lidoSource);
@@ -92,16 +111,16 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
-              MetadataBaseEntity
-                .builder()
-                .title(List.of("An Image of something"))
-                .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
-                .subject(List.of("Chemistry", "Physics", "Architecture"))
-                .description("This source datastream contains some information about...")
-                .language(List.of("de"))
-                .type(List.of("Building"))
-                .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
-                .build()
+                    MetadataBaseEntity
+                            .builder()
+                            .title(List.of("An Image of something"))
+                            .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
+                            .subject(List.of("Chemistry", "Physics", "Architecture"))
+                            .description("This source datastream contains some information about...")
+                            .language(List.of("de"))
+                            .type(List.of("Building"))
+                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            .build()
             )
             .build();
 
@@ -125,19 +144,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     //lidoObject.setDatastreams(List.of(lidoSource, image));
     //digitalObjectRepository.save(teiObject);
     //digitalObjectRepository.save(lidoObject);
-  }
 
-  /**
-   * Info logs available system resources.
-   */
-  private void logAvailableSystemResources(){
-
-    int mb = 1024 * 1024;
-    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-    long xmx = memoryBean.getHeapMemoryUsage().getMax() / mb;
-    long xms = memoryBean.getHeapMemoryUsage().getInit() / mb;
-    log.info("*** GAMS-API Initialization: Initial Memory (xms) : {}mb", xms);
-    log.info("*** GAMS-API Initialization: Max Memory (xmx) : {}mb", xmx);
   }
 
 }
