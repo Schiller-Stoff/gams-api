@@ -12,11 +12,12 @@ spring:
     password: admin
   jpa:
     hibernate:
-      #drop n create table again, good for testing, comment this in production
-      ddl-auto: create
+      # set to create if you want to drop existing data on app startup
+      # ddl-auto: create
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
         hibernate.jdbc.lob.non_contextual_creation: true
+
 
   #####
   # Thymeleaf config
