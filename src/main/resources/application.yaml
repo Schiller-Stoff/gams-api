@@ -13,7 +13,8 @@ spring:
   jpa:
     hibernate:
       # set to create if you want to drop existing data on app startup
-      # ddl-auto: create
+      # value "none" would require to initialize a schema via SQL va extra file
+      ddl-auto: update
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
         hibernate.jdbc.lob.non_contextual_creation: true
