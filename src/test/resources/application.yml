@@ -2,3 +2,7 @@ spring:
   profiles:
     # loads tests in dev profile.
     active: dev
+  jpa:
+    hibernate:
+      # delete database on application startup during tests
+      ddl-auto: create

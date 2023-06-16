@@ -1,6 +1,6 @@
 {
-  "id" : "spring-fedora",
-  "realm" : "spring-fedora",
+  "id" : "gams-realm",
+  "realm" : "gams-realm",
   "notBefore" : 0,
   "defaultSignatureAlgorithm" : "RS256",
   "revokeRefreshToken" : false,
@@ -50,11 +50,11 @@
       "description" : "${role_offline-access}",
       "composite" : false,
       "clientRole" : false,
-      "containerId" : "spring-fedora",
+      "containerId" : "gams-realm",
       "attributes" : { }
     }, {
       "id" : "fce0cd1b-d8b8-4322-beb3-9da5e815b551",
-      "name" : "default-roles-spring-fedora",
+      "name" : "default-roles-gams-realm",
       "description" : "${role_default-roles}",
       "composite" : true,
       "composites" : {
@@ -64,7 +64,7 @@
         }
       },
       "clientRole" : false,
-      "containerId" : "spring-fedora",
+      "containerId" : "gams-realm",
       "attributes" : { }
     }, {
       "id" : "a66f0af8-2380-432b-bc90-4c6aa97ae1a9",
@@ -72,7 +72,7 @@
       "description" : "${role_uma_authorization}",
       "composite" : false,
       "clientRole" : false,
-      "containerId" : "spring-fedora",
+      "containerId" : "gams-realm",
       "attributes" : { }
     } ],
     "client" : {
@@ -323,7 +323,7 @@
         "containerId" : "bc0f2827-812e-41e6-b846-672128d4aeef",
         "attributes" : { }
       } ],
-      "spring-fedora-client" : [ ]
+      "gams-client" : [ ]
     }
   },
   "groups" : [ {
@@ -339,7 +339,7 @@
     "name" : "derla",
     "path" : "/derla",
     "attributes" : { },
-    "realmRoles" : [ "default-roles-spring-fedora" ],
+    "realmRoles" : [ "default-roles-gams-realm" ],
     "clientRoles" : { },
     "subGroups" : [ ]
   }, {
@@ -353,11 +353,11 @@
   } ],
   "defaultRole" : {
     "id" : "fce0cd1b-d8b8-4322-beb3-9da5e815b551",
-    "name" : "default-roles-spring-fedora",
+    "name" : "default-roles-gams-realm",
     "description" : "${role_default-roles}",
     "composite" : true,
     "clientRole" : false,
-    "containerId" : "spring-fedora"
+    "containerId" : "gams-realm"
   },
   "requiredCredentials" : [ "password" ],
   "otpPolicyType" : "totp",
@@ -403,7 +403,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-spring-fedora" ],
+    "realmRoles" : [ "default-roles-gams-realm" ],
     "notBefore" : 0,
     "groups" : [ "/cantus", "/derla", "/lipfa" ]
   } ],
@@ -422,12 +422,12 @@
     "clientId" : "account",
     "name" : "${client_account}",
     "rootUrl" : "${authBaseUrl}",
-    "baseUrl" : "/realms/spring-fedora/account/",
+    "baseUrl" : "/realms/gams-realm/account/",
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
-    "redirectUris" : [ "/realms/spring-fedora/account/*" ],
+    "redirectUris" : [ "/realms/gams-realm/account/*" ],
     "webOrigins" : [ ],
     "notBefore" : 0,
     "bearerOnly" : false,
@@ -450,12 +450,12 @@
     "clientId" : "account-console",
     "name" : "${client_account-console}",
     "rootUrl" : "${authBaseUrl}",
-    "baseUrl" : "/realms/spring-fedora/account/",
+    "baseUrl" : "/realms/gams-realm/account/",
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
-    "redirectUris" : [ "/realms/spring-fedora/account/*" ],
+    "redirectUris" : [ "/realms/gams-realm/account/*" ],
     "webOrigins" : [ ],
     "notBefore" : 0,
     "bearerOnly" : false,
@@ -566,12 +566,12 @@
     "clientId" : "security-admin-console",
     "name" : "${client_security-admin-console}",
     "rootUrl" : "${authAdminUrl}",
-    "baseUrl" : "/admin/spring-fedora/console/",
+    "baseUrl" : "/admin/gams-realm/console/",
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
-    "redirectUris" : [ "/admin/spring-fedora/console/*" ],
+    "redirectUris" : [ "/admin/gams-realm/console/*" ],
     "webOrigins" : [ "+" ],
     "notBefore" : 0,
     "bearerOnly" : false,
@@ -608,13 +608,13 @@
     "optionalClientScopes" : [ "address", "phone", "offline_access", "microprofile-jwt" ]
   }, {
     "id" : "3b6832be-5621-424d-b4a6-eadede7a4fa9",
-    "clientId" : "spring-fedora-client",
+    "clientId" : "gams-client",
     "surrogateAuthRequired" : false,
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT",
-    "redirectUris" : [ "http://localhost:8080/login/oauth2/code/spring-fedora-client", "http://localhost:8182/*", "http://localhost:8087/*", "http://keycloak:8182/*" ],
+    "redirectUris" : [ "http://localhost:8080/login/oauth2/code/gams-client", "http://localhost:8182/*", "http://localhost:8087/*", "http://keycloak:8182/*" ],
     "webOrigins" : [ ],
     "notBefore" : 0,
     "bearerOnly" : false,

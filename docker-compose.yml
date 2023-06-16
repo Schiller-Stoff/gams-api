@@ -12,7 +12,7 @@ networks:
 services:
 
   relationalDB:
-    image: postgres:12.3
+    image: postgres:15.3
     container_name: relationalDB
     hostname: relationalDB
     ports:
@@ -21,21 +21,25 @@ services:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=gams
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    # optional: persist postgres data via volume
     # volumes:
-      # - local_pgdata:/var/lib/postgresql/data
+      # needs additional wsl config to work if under wsl and bug occurs: https://stackoverflow.com/questions/65582382/wsl2-docker-linux-permission-issue-with-volumes
+     # - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin4_container
-    hostname: pgadmin
-    restart: always
-    ports:
-      - "5050:80"
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=SebastianStoff@gmx.at
-      - PGADMIN_DEFAULT_PASSWORD=admin
-#    volumes:
-#      - ${PWD}/docker/apps/pgadmin:/var/lib/pgadmin
+
+#  pgadmin:
+#    image: dpage/pgadmin4
+#    container_name: pgadmin4_container
+#    hostname: pgadmin
+#    restart: always
+#    ports:
+#      - "5050:80"
+#    environment:
+#      - PGADMIN_DEFAULT_EMAIL=SebastianStoff@gmx.at
+#      - PGADMIN_DEFAULT_PASSWORD=admin
+#    # volumes:
+#    #   - ${PWD}/docker/apps/pgadmin:/var/lib/pgadmin
 
   keycloak:
     image: quay.io/keycloak/keycloak:18.0.0
@@ -69,10 +73,10 @@ services:
 #      - SPRING_PROFILE=prod
 #      # sets the log file of the spring app inside the container
 #      - LOG_FILE=/home/log/app.log
-#      - OAUTH2_CLIENT_ID=${OAUTH2_CLIENT_ID:-spring-fedora-client}
+#      - OAUTH2_CLIENT_ID=${OAUTH2_CLIENT_ID:-gams-client}
 #      - OAUTH2_CLIENT_SECRET=${OAUTH2_CLIENT_SECRET:-MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
-#      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/spring-fedora-client}
-#      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-http://keycloak:8182/realms/spring-fedora}
+#      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI:-http://localhost:8080/login/oauth2/code/gams-client}
+#      - OAUTH2_ISSUER_URI=${OAUTH2_ISSUER_URI:-http://keycloak:8182/realms/gams-auth}
 #      # Setting java tool options  https://www.baeldung.com/ops/docker-jvm-heap-size
 #      - JAVA_TOOL_OPTIONS=
 #          -Xms256M

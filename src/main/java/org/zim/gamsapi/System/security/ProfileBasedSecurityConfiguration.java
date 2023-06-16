@@ -19,26 +19,25 @@ public class ProfileBasedSecurityConfiguration {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http, Environment environment) throws Exception {
 
-    final String DEV_PROFILE = "dev";
+    final String PROD_PROFILE = "prod";
 
     String[] currentlyActiveProfiles = environment.getActiveProfiles();
-    boolean devProfileActive = Arrays.asList(currentlyActiveProfiles).contains(DEV_PROFILE);
+    boolean prodProfileActive = Arrays.asList(currentlyActiveProfiles).contains(PROD_PROFILE);
 
-    if(devProfileActive){
-      log.info("*** Deactivating spring security for currently active dev profile");
+    if(prodProfileActive){
+      log.info("*** Activating oauth2 based security because detected prod profile");
+      http
+        .authorizeHttpRequests(authorize -> authorize
+                .anyRequest().authenticated()
+        )
+        .oauth2Login(withDefaults());
+    } else {
+      log.info("*** Deactivating spring security for currently active profile (not prod profile)");
       http.authorizeHttpRequests(authorize -> {
         authorize.anyRequest().permitAll();
       });
-    } else {
-      log.info("*** Activating spring security because dev profile not active");
-      http
-        .authorizeHttpRequests(authorize -> authorize
-          .anyRequest().authenticated()
-        )
-        .oauth2Login(withDefaults());
     }
     return http.build();
   }
-
 
 }
