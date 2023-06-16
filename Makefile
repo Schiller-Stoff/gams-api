@@ -4,6 +4,9 @@ PREFIX ?= zimgraz
 IMAGE ?= $(IMAGENAME):$(VERSION)
 FULL_IMAGE_TAG = "$(PREFIX)/$(IMAGE)"
 
+# allows to pass through cli arguments to ./mvnw call during pre-tag. Like -DskipTests
+MVN_OPTIONS ?=
+
 all: pre-tag build
 
 pre-tag:
@@ -14,7 +17,7 @@ pre-tag:
 
 build: pre-tag
 	@echo "*** Building image $(FULL_IMAGE_TAG) ***"
-	./mvnw spring-boot:build-image
+	./mvnw spring-boot:build-image $(MVN_OPTIONS)
 	@echo "*** Tagging $(IMAGENAME) as $(FULL_IMAGE_TAG)"
 	docker tag $(IMAGENAME) $(FULL_IMAGE_TAG)
 
