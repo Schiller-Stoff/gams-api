@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/api/v1/management/projects/{projectAbbr}/objects")
+@RequestMapping(value = {"/api/v1/management/projects/{projectAbbr}/objects", "/api/v1/management/projects/{projectAbbr}/objects/"})
 @Slf4j
 @RequiredArgsConstructor
 public class DigitalObjectController {
@@ -24,7 +24,7 @@ public class DigitalObjectController {
   private final DigitalObjectService digitalObjectService;
   private final IProjectService projectService;
 
-  @GetMapping(value =  "/{pid}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = {"/{pid}", "/{pid}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public DigitalObject getObjectJson(DigitalObject digitalObject, Project project, Model model) {
     DigitalObject foundObject = digitalObjectService.findByPid(digitalObject.getPid());
@@ -33,7 +33,7 @@ public class DigitalObjectController {
     return foundObject;
   }
 
-  @GetMapping("/{pid}")
+  @GetMapping(value = {"/{pid}", "/{pid}/"})
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     DigitalObject foundDigitalObject = digitalObjectService.findByPid(digitalObject.getPid());
     Project curProject = projectService.findPlain(project);
@@ -91,7 +91,7 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("pid"))).toList();
   }
 
-  @PutMapping("/{pid}")
+  @PutMapping(value = {"/{pid}", "/{pid}/"})
   public String createObject(
           DigitalObject digitalObject,
           Project project,
@@ -108,7 +108,7 @@ public class DigitalObjectController {
     return "redirect:" + origin + "api/v1/management/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getPid();
   }
 
-  @DeleteMapping("/{pid}")
+  @DeleteMapping(value = {"/{pid}", "/{pid}/"})
   public String deleteObject(
           DigitalObject digitalObject,
           Project project,

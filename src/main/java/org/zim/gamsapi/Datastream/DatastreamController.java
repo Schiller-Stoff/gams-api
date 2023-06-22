@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/management/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}")
+@RequestMapping({"/api/v1/management/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}", "/api/v1/management/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}/"})
 @Controller
 public class DatastreamController {
 
@@ -86,7 +86,7 @@ public class DatastreamController {
    * @param datastream incoming datastream dto
    * @return binary-data of the datastream
    */
-  @GetMapping(path = "/content")
+  @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
   public ResponseEntity<InputStreamResource> getDatastreamContent(DigitalObject digitalObject, Datastream datastream) {
     Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getPid(), datastream.getDsid());
