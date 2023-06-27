@@ -1,9 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://relationalDB:5432/gams
+    url: jdbc:postgresql://localhost:5432/gams
     username: admin
     password: admin
-
 
 #####
 # Custom properties for GAMS
@@ -11,14 +10,14 @@ spring:
 gams:
   docker:
     # postgres
-    relational-db: "relationalDB:5432"
+    relational-db: "localhost:5431"
     # fedora6
-    repository-dns: "fcrepo:8080"
+    repository-dns: "localhost:8082"
     #
-    gateway-dns: "gateway:8080"
+    gateway-dns: "localhost:8087"
     #
-    solr: "solr:8983"
+    solr: "localhost:8983"
     # fileserver
-    apache: "apache:8080"
+    apache: "localhost:4585"
     # system triplestoree
     systemTriplestore: "localhost:3030"
