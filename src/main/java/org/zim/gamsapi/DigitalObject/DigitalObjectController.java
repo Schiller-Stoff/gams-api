@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping(value = {"/api/v1/management/projects/{projectAbbr}/objects", "/api/v1/management/projects/{projectAbbr}/objects/"})
+@RequestMapping(value = {"/api/v1/projects/{projectAbbr}/objects", "/api/v1/projects/{projectAbbr}/objects/"})
 @Slf4j
 @RequiredArgsConstructor
 public class DigitalObjectController {
@@ -105,7 +105,7 @@ public class DigitalObjectController {
 
     // needed to consider proxy forwarding
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/management/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getPid();
+    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getPid();
   }
 
   @DeleteMapping(value = {"/{pid}", "/{pid}/"})
@@ -116,7 +116,7 @@ public class DigitalObjectController {
     this.digitalObjectService.delete(digitalObject);
     log.info("Deleted object {} for project {}", digitalObject, project);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/management/projects/" + project.getProjectAbbr() + "/objects";
+    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
 
   @DeleteMapping
@@ -124,7 +124,7 @@ public class DigitalObjectController {
     digitalObjectService.deleteAllForProject(project);
     log.info("Deleted all objects for project {}", project);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/management/projects/" + project.getProjectAbbr() + "/objects";
+    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
 
 }

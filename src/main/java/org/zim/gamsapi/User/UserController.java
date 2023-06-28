@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.zim.gamsapi.User.interfaces.IUserService;
 
 @Controller
-@RequestMapping("/api/v1/management/user")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
   public IUserService userService;

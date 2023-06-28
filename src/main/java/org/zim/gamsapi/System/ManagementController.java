@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@RequestMapping({"/api/v1/management", "/api/v1/management/"})
+@RequestMapping({"/api/v1/", "/api/v1"})
 @RequiredArgsConstructor
 @Controller
 public class ManagementController {
