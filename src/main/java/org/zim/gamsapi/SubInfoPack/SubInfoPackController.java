@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping({"/api/v1/management/projects/{projectAbbr}", "/api/v1/management/projects/{projectAbbr}/"})
+@RequestMapping({"/api/v1/projects/{projectAbbr}", "/api/v1/projects/{projectAbbr}/"})
 @Slf4j
 public class SubInfoPackController {
 

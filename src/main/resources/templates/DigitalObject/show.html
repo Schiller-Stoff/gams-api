@@ -13,14 +13,14 @@
         Overview over a singular digital object
       </p>
       <div>
-        <a class="btn btn-outline-success mb-3" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>
+        <a class="btn btn-outline-success mb-3" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>
       </div>
       <div class="bg-light p-2">
       
       <p><b>Pid:</b> <span th:text="${do.pid}"></span></p>
       <p><b>Owned by project:</b> <span th:text="${do.projectAbbr}"></span></p>
       <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
-      <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'" th:text="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'"></a></p> -->
+      <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'"></a></p> -->
     </div>
       <br/>
       <h2 class="h4">Datastreams</h2>
@@ -29,20 +29,20 @@
       <ul class="list-group-flush p-0">
         <li th:each="dstream : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item bg-light">
           
-          <a style="color:black" th:text="${dstream.dsid}" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}"></a>
+          <a style="color:black" th:text="${dstream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}"></a>
 
           <div>
             <span th:text="${dstream.id + ' (global datastream id)'}"> </span>
             <!-- <span th:text="${dstream.mimeType}"></span> -->
             <!--
             <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>
-            <a target="_blank" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>
-            <a target="_blank" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>
+            <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>
+            <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>
             -->
             <form
               onsubmit="return confirm('Are you sure you want to delete this datastream?');"
               action="#"
-              th:action="@{'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}}"
+              th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}}"
               th:object="${do}"
               method="delete"
               th:method="DELETE"
@@ -60,7 +60,7 @@
         onsubmit="return webCirilo.appendFormSubmitPath('add_datastream_form', 'datastream_id_input')"
         id="add_datastream_form"
         action="#"
-        th:action="@{'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/'}"
+        th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/'}"
         th:object="${do}"
         method="put"
         th:method="PUT"
@@ -158,7 +158,7 @@
       <form
         onsubmit="return confirm('Are you sure you want to delete this digital object?');"
         action="#"
-        th:action="@{'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid}}"
+        th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid}}"
         method="delete"
         th:method="DELETE"
         class="d-inline"

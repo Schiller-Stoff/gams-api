@@ -12,7 +12,7 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/v1/management/projects/{projectAbbr}", "/api/v1/management/projects/{projectAbbr}/"})
+@RequestMapping({"/api/v1/projects/{projectAbbr}", "/api/v1/projects/{projectAbbr}/"})
 public class ProjectController {
 
   private final IProjectService projectService;

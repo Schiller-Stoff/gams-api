@@ -24,17 +24,17 @@
     <header th:fragment="header"></header>
     <nav th:fragment="nav" class="navbar navbar-expand-lg navbar-light border-bottom sticky-top bg-white">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/api/v1/management"><img style="width:30px;" src="https://gams.uni-graz.at/templates/img/gams_solo.png"/></a>
+        <a class="navbar-brand" href="/api/v1"><img style="width:30px;" src="https://gams.uni-graz.at/templates/img/gams_solo.png"/></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/api/v1/management">Home</a>
+              <a class="nav-link active" aria-current="page" href="/api/v1">Home</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/api/v1/management/projects">Manage projects</a>
+              <a class="nav-link active" aria-current="page" href="/api/v1/projects">Manage projects</a>
             </li>
             
             <!-- <li class="nav-item">
@@ -57,7 +57,7 @@
           </ul>
 <!--          <ul class="navbar-nav ms-2 mb-2 mb-lg-0">-->
 <!--            <li class="nav-item" >-->
-<!--              <a th:text="${user.name}" href="/api/v1/management/user/profile"></a>-->
+<!--              <a th:text="${user.name}" href="/api/v1/user/profile"></a>-->
 <!--            </li>-->
 <!--          </ul>-->
         </div>

@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping({"/api/v1/management/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}", "/api/v1/management/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}/"})
+@RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}", "/api/v1/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}/"})
 @Controller
 public class DatastreamController {
 
@@ -63,7 +63,7 @@ public class DatastreamController {
     model.addAttribute("datastream", savedDatastream);
     model.addAttribute(foundObject);
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/management/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getPid();
+    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getPid();
   }
 
   @DeleteMapping
@@ -75,7 +75,7 @@ public class DatastreamController {
   ) {
     datastreamService.delete(digitalObject, datastream.getDsid());
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/management/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getPid();
+    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getPid();
   }
 
 
