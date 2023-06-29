@@ -33,7 +33,7 @@ public class DigitalObjectController {
     return foundObject;
   }
 
-  @GetMapping(value = {"/{pid}", "/{pid}/"})
+  @GetMapping(value = {"/{pid}", "/{pid}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     DigitalObject foundDigitalObject = digitalObjectService.findByPid(digitalObject.getPid());
     Project curProject = projectService.findPlain(project);
@@ -44,7 +44,7 @@ public class DigitalObjectController {
   }
 
 
-  @GetMapping
+  @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getProjectObjects(
           Model model,
           Project project,
