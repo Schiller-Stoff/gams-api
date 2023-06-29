@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
@@ -30,13 +31,23 @@ public class DatastreamController {
   private final IProjectService projectService;
   private final IDigitalObjectService digitalObjectService;
 
-  @GetMapping
+  @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
     Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getPid(), datastream.getDsid());
     Project foundProject = projectService.getUserProjectByEntity(project);
     model.addAttribute(foundDatastream);
     model.addAttribute(foundProject);
     return "Datastream/show";
+  }
+
+  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public Datastream getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
+    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getPid(), datastream.getDsid());
+    Project foundProject = projectService.getUserProjectByEntity(project);
+    model.addAttribute(foundDatastream);
+    model.addAttribute(foundProject);
+    return foundDatastream;
   }
 
   @PutMapping
