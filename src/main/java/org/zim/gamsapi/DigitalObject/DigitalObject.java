@@ -2,6 +2,8 @@ package org.zim.gamsapi.DigitalObject;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +32,7 @@ public class DigitalObject {
   @Id
   // @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "pid")
-  @NotEmpty
+  @NotBlank
   private String pid;
 
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "digitalObject")
@@ -55,6 +57,7 @@ public class DigitalObject {
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
+  @Valid  // Add Bean validation to embedded tables
   private MetadataBaseEntity baseMetadata;
 
 }

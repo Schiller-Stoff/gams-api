@@ -37,6 +37,7 @@ class IDigitalObjectRepositoryTest {
     @AfterAll
     static void afterAll() {
         postgres.stop();
+        postgres.close();
     }
 
     @DynamicPropertySource
