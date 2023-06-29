@@ -1,4 +1,3 @@
-
 # GAMS API
 
 REST-API built with spring boot and additional libraries
@@ -17,7 +16,7 @@ docker-compose up
 
 # run spring boot application via maven or from SpringFedoraApplication.java
 # e.g. from wsl:
-./mvnw spring-boot:run -P dev
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
 # or easier: start spring boot app from your IDE
 
