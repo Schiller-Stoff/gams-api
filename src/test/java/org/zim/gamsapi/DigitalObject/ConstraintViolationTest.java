@@ -6,9 +6,13 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.zim.gamsapi.MetadataBaseEntity;
 
 import java.util.Set;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,7 +33,7 @@ public class ConstraintViolationTest {
         DigitalObject digitalObject = new DigitalObject("foo", null, "", "", null);
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
-        assertTrue(violationSet.isEmpty());
+        assertThat(violationSet, is(empty()));
     }
 
     @Test
@@ -37,6 +41,15 @@ public class ConstraintViolationTest {
         DigitalObject digitalObject = new DigitalObject(null, null, "", "", null);
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
-        assertEquals(1, violationSet.size());
+        assertThat(violationSet.size(), is(1));
+    }
+
+
+    @Test
+    public void shouldRaiseConstraintViolationIfMetadataIsEmpty() {
+        MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
+
+        Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
+        assertThat(violationSet.size(), is(3));
     }
 }

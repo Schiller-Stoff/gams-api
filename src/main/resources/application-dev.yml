@@ -10,7 +10,7 @@ spring:
 gams:
   docker:
     # postgres
-    relational-db: "localhost:5431"
+    relational-db: "localhost:5432"
     # fedora6
     repository-dns: "localhost:8082"
     #

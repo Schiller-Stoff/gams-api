@@ -4,7 +4,11 @@ import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 /**
@@ -23,23 +27,19 @@ public class MetadataBaseEntity {
   // Note: expected to be managed by parent entity
   //private String dcIdentifier;
 
-  @NotEmpty
-  @NotNull
+  // system controlled
   private List<String> identifier;
 
+  // system controlled
+  private List<String> format;
+
   @NotEmpty
-  @NotNull
   private List<String> title;
 
   @NotEmpty
   private List<String> rights;
 
-  @NotNull
   @NotEmpty
-  private List<String> format;
-
-  @NotEmpty
-  @NotNull
   private List<String> publisher;
 
   private List<String> creator;
@@ -62,7 +62,5 @@ public class MetadataBaseEntity {
   private List<String> relation;
 
   private List<String> coverage;
-
-
 
 }
