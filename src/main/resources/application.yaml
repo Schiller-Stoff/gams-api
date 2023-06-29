@@ -51,6 +51,9 @@ server:
   error:
     # includes stacktrace on error ( devtools will include it in dev)
     include-stacktrace: always
+  # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
+  # Needed to consider reverse-proxy / api-gateway in front
+  forward-headers-strategy: framework
 
 
 #####
@@ -70,3 +73,12 @@ gams:
     apache: "apache:8080"
     # system triplestoree
     systemTriplestore: "localhost:3030"
+
+# swagger ui base path
+springdoc:
+  swagger-ui:
+    path: "/api/v1/openapi"
+    # config-url: ${SWAGGER_CONFIG_URL:http://localhost:18085/v3/api-docs/swagger-config}
+  api-docs:
+    path: "/api/v1/openapi"
+
