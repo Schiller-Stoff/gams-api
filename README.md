@@ -15,7 +15,7 @@ REST-API built with spring boot and additional libraries
 docker-compose up
 
 # run spring boot application via maven or from SpringFedoraApplication.java
-# e.g. from wsl:
+# e.g. from wsl with 'dev' profile (needs application-dev.yml):
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
 # or easier: start spring boot app from your IDE
@@ -28,11 +28,12 @@ Run application in 'dev' profile (best via IDE settings)
 
 ```sh
 # runs spring
-./mvnw spring-boot:run -P dev
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
 # the production profile is only for production purposes (has enabled security etc.)
 # will crash if an external spring application tries to access it.
-./mvnw spring-boot:run -P prod
+# The production profile should be the default profile(?)
+./mvnw spring-boot:run [-Dspring-boot.run.profiles=prod]
 
 ```
 
