@@ -3,6 +3,7 @@ package org.zim.gamsapi.System.security;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.util.MimeTypeUtils;
@@ -26,7 +27,7 @@ public class SpringSecurityConfiguration {
                 .and()
                 .csrf()
                 .ignoringRequestMatchers(request -> {
-                  String acceptHeaderValue = request.getHeader("Accept");
+                  String acceptHeaderValue = request.getHeader(HttpHeaders.ACCEPT);
                   if(acceptHeaderValue == null) return true;
                   boolean containsTextHtml = acceptHeaderValue.contains(MimeTypeUtils.TEXT_HTML_VALUE);
                   // disable csrf for all requests that don't demand html = only html pages are csrf protected
