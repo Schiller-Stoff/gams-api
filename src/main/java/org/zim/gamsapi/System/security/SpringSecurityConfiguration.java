@@ -27,7 +27,7 @@ public class SpringSecurityConfiguration {
                 .csrf()
                 .ignoringRequestMatchers(request -> {
                   String acceptHeaderValue = request.getHeader("Accept");
-                  if(acceptHeaderValue == null) return false;
+                  if(acceptHeaderValue == null) return true;
                   boolean containsTextHtml = acceptHeaderValue.contains(MimeTypeUtils.TEXT_HTML_VALUE);
                   // disable csrf for all requests that don't demand html = only html pages are csrf protected
                   return !containsTextHtml;
