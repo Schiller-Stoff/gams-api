@@ -32,11 +32,6 @@ spring:
       max-file-size: 10GB
       max-request-size: 10GB
 
-  # spring profiles
-  # profiles:
-    # Override with  -Dspring-boot.run.profiles=<prod,stage,test>
-    # active: ${SPRING_PROFILE:dev}
-
 ########
 # Logging
 # (handled in different profiles)
@@ -45,7 +40,7 @@ logging:
     name: ${LOG_FILE:log/app.log}
   level:
     org.zim.gamsapi: ${LOG_LEVEL:TRACE}
-    # org.springframework.security: DEBUG
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
 
 server:
   error:
