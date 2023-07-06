@@ -1,6 +1,7 @@
 package org.zim.gamsapi.SubInfoPack;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
@@ -8,6 +9,7 @@ import lombok.ToString;
  *
  */
 @Data
+@NoArgsConstructor
 public class SubInfoPack {
 
   // contained in metadata
