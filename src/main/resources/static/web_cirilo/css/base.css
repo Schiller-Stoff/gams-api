@@ -1,0 +1,46 @@
+
+/**
+Color-Scheme:
+#2F4858
+#275462
+#206066
+#266C65
+#39775F
+#538056
+ */
+
+
+.bg-light {
+    background: #F4F4F4 !important;
+}
+
+.webcirilo-box {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.webcirilo-card {
+    transition: transform .3s cubic-bezier(.155,1.105,.295,1.12),box-shadow .3s,-webkit-transform .3s cubic-bezier(.155,1.105,.295,1.12);
+}
+
+.webcirilo-card:hover {
+    transform: scale(1.02);
+    cursor: pointer;
+}
+
+b {
+    color: #2F4858;
+}
+
+h1 {
+    color: #538056;
+}
+
+h2,h3, h4, h5, h6 {
+    color: #39775F;
+}
+
+p {
+    color: #2F4858;
+}
