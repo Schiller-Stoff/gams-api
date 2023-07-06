@@ -2,51 +2,49 @@
 <!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
 <html lang="en" xmlns:th="http://thymeleaf.org">
   <head th:replace="fragments/general.html :: head" />
-  <body>
+  <body class="bg-light">
     <header th:replace="fragments/general.html :: header"></header>
     <nav th:replace="fragments/general.html :: nav"></nav>
-
-    <main class="container min-vh-100">
-      <br />
-      <h1>GAMS5</h1>
-      <p>
-        Welcome to the GAMS5 portal!
-      </p>
+    <main class="container min-vh-100 mt-4">
+      <div class="webcirilo-box shadow-sm">
+        <h1>GAMS5 - Portal</h1>
+        <p>Functionalities provided by GAMS5 and surrounding systems.</p>
+      </div>
       <div class="row">
         <div class="col-md-4">
-          <a class="card p-3 text-dark text-decoration-none" href="/api/v1/projects" style="border: 2px solid #538056">
+          <a class="card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm webcirilo-card" href="/api/v1/projects">
             <p><b>Manage project data (RDM)</b></p>
             <p><small>Provides CRUD for digital <i>objects and datastreams</i> based on <i>projects and users</i>.</small></p>
           </a>
           <br/>
-          <a class="card p-3 text-dark text-decoration-none" style="border: 2px solid #538056" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" target="_blank">
+          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" target="_blank">
             <p><b>Documentation</b></p>
             <p><small>Documentation and additional material for GAMS usage and development.</small></p>
           </a>
           <br />
-          <a class="card p-3 text-dark text-decoration-none" style="border: 2px solid #538056" href="https://zimlab.uni-graz.at/gams5/production/issue-backlog/-/issues" target="_blank">
+          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5/production/issue-backlog/-/issues" target="_blank">
             <p><b>Report an issue</b></p>
             <p><small>Report bugs, feature-requests or refactoring suggestions here.</small></p>
           </a>
           <br />
-          <a class="card p-3 text-dark text-decoration-none" style="border: 2px solid #538056" href="/api/v1/openapi" target="_blank">
+          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="/api/v1/openapi" target="_blank">
             <p><b>REST-API Documentation</b></p>
             <p><small>Overview for the REST endpoints provided by GAMS5.</small></p>
           </a>
           <br />
         </div>
         <div class="col-md-4">
-          <a class="card p-3 text-dark text-decoration-none" style="border: 2px solid #538056" href="https://zimlab.uni-graz.at/gams5" target="_blank">
+          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5" target="_blank">
             <p><b>Contribute to development (via VCS)</b></p>
             <p><small>GAMS development structure in the version control system. Code repositories and gitlab grtoups.</small></p>
           </a>
           <br/>
-          <a class="card p-3 text-dark text-decoration-none" style="border: 2px solid #538056" href="https://zimlab.uni-graz.at/gams5/gams-dissemination/gams-web/gams-projecttemplate" target="_blank">
+          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5/gams-dissemination/gams-web/gams-projecttemplate" target="_blank">
             <p><b>Initialize a project dissemination template</b></p>
             <p><small>Frontend template for a GAMS project. Develop a custom <i>frontend</i> for your research project based on forking.</small></p>
           </a>
           <br/>
-          <a class="card p-3 text-dark text-decoration-none" style="border: 2px solid #538056" href="https://zimlab.uni-graz.at/groups/gams5/-/milestones/" target="_blank">
+          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/groups/gams5/-/milestones/" target="_blank">
             <p><b>Sprints and Milestones</b></p>
             <p><small>Check ongoing development efforts for GAMS5</small></p>
           </a>
