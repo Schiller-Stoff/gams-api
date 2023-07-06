@@ -17,7 +17,6 @@ Color-Scheme:
 .webcirilo-box {
     background: white;
     padding: 20px;
-    margin-bottom: 20px;
 }
 
 .webcirilo-card {
@@ -43,4 +42,16 @@ h2,h3, h4, h5, h6 {
 
 p {
     color: #2F4858;
+}
+
+.btn-outline-secondary {
+    border-color: #206066 !important;
+}
+
+.btn-outline-secondary:hover {
+    background: #206066 !important;
+}
+
+a {
+    color: #538056;
 }
