@@ -33,6 +33,16 @@
         >
           + Ingest
         </button>
+        <button
+                class="btn btn-outline-success"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#integrateCollapse"
+                aria-expanded="false"
+                aria-controls="integrateCollapse"
+        >
+          + Integrate
+        </button>
 
       </p>
       <div class="collapse" id="collapseExample">
@@ -96,6 +106,28 @@
           <script>
             webCirilo.postIngestSubmit("ingest-form");
           </script>
+        </div>
+        <br/>
+        <br/>
+      </div>
+
+      <div class="collapse" id="integrateCollapse">
+        <div class="card card-body">
+          <!-- <p>Ingest form</p> -->
+          <form
+            th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr}}"
+            method="POST"
+            enctype="multipart/form-data"
+            id="integrate-form"
+          >
+            <div class="mb-3">
+              <div id="ingegrateHelp" class="form-text">Integrates all project objects to dependent services</div>
+            </div>
+            <div>
+              <button type="submit" class="btn btn-outline-success d-block">Start integration</button>
+              <small class="form-text d-block">Check browser console for ingest report</small>
+            </div>
+          </form>
         </div>
         <br/>
         <br/>
