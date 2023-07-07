@@ -9,7 +9,6 @@ import lombok.ToString;
  *
  */
 @Data
-@NoArgsConstructor
 public class SubInfoPack {
 
   // contained in metadata
