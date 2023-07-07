@@ -3,10 +3,7 @@ package org.zim.gamsapi.SubInfoPack;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
@@ -22,7 +19,7 @@ public class SubInfoPackController {
 
   @PostMapping(produces = "application/json")
   @ResponseBody
-  public void ingestSubInfoPack(SubInfoPack subInfoPack, @RequestParam MultipartFile subInfoPackZIP){
+  public void ingestSubInfoPack(@ModelAttribute SubInfoPack subInfoPack, @RequestParam MultipartFile subInfoPackZIP){
 
     byte[] sipAsZIP;
     try {
