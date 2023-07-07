@@ -1,6 +1,6 @@
 # GAMS API
 
-REST-API built with spring boot and additional libraries
+REST-API built with spring boot and dependent libraries
 
 # Quick start / Development setup
 
@@ -30,18 +30,15 @@ Run application in 'dev' profile (best via IDE settings)
 # runs spring
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
-# the production profile is only for production purposes (has enabled security etc.)
-# will crash if an external spring application tries to access it.
-# The production profile should be the default profile(?)
-./mvnw spring-boot:run [-Dspring-boot.run.profiles=prod]
+# default profile is the production profile
 
 ```
 
 
 ## Profiles
 
-dev - development profile with disabled security etc.
-prod - production profile with enabled security etc.
+default - production profile
+dev - development profile
 
 
 # Production
@@ -80,19 +77,7 @@ see deployment section
 
 1. Increment version in .release
 
-2. Run make command:
-
-```sh
-# 01. increment version in .release
-# e.g. to 0.0.5
-
-# 02. run make command on project root
-make
-
-# Optional: (Same as above but will push result image as to docker-hub) 
-make push
-
-```
+2. Run make command (take a look at Makefile on root) - either native or default profile.
 
 ### Manual workflow (via Docker Hub )
 
