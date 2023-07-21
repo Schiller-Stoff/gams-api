@@ -124,6 +124,19 @@
               </div>
               <div>
                 <button type="submit" class="btn btn-outline-success d-block">Start integration</button>
+                <small class="form-text d-block">Check browser console for integration report</small>
+              </div>
+            </form>
+
+            <form
+                    th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr}}"
+                    action="#"
+                    method="delete"
+                    th:method="DELETE"
+                    id="des-integrate-form"
+            >
+              <div>
+                <input type="submit" class="btn btn-outline-dark" value="Undo integration" />
                 <small class="form-text d-block">Check browser console for ingest report</small>
               </div>
             </form>
@@ -159,6 +172,7 @@
             <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pid=' + ${searchPid} + '&sortBy=baseMetadata.type'">dc:type</a>
           </th>
           <th scope="col">Delete</th>
+          <th scope="col">Integrate</th>
         </tr>
         </thead>
         <tbody>
@@ -184,6 +198,15 @@
             >
               <input type="submit" class="btn btn-outline-dark" value="Delete" />
             </form>
+          </div></td>
+          <td><div>
+            <form
+                    th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid}}"
+                    method="POST"
+            >
+                <button type="submit" class="btn btn-outline-success d-block">Integrate</button>
+            </form>
+
           </div></td>
         </tr>
         </tbody>
