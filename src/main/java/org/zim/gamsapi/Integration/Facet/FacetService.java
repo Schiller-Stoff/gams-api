@@ -1,0 +1,284 @@
+package org.zim.gamsapi.Integration.Facet;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.zim.gamsintegrationapi.GamsCMS.Datastream;
+import org.zim.gamsintegrationapi.GamsCMS.DigitalObject;
+import org.zim.gamsintegrationapi.GamsCMS.DigitalObjectRepository;
+import org.zim.gamsintegrationapi.GamsCMS.enums.GamsDatastreamIds;
+import org.zim.gamsintegrationapi.GamsCMS.exceptions.ProcessingException;
+import org.zim.gamsintegrationapi.GamsCMS.utils.XMLUtils;
+import org.zim.gamsintegrationapi.IIntegrationService;
+import org.zim.gamsintegrationapi.IndexingReport;
+import org.zim.gamsintegrationapi.System.GAMSConfigProperties;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class FacetService implements IIntegrationService {
+
+  private final DigitalObjectRepository digitalObjectRepository;
+  private final GAMSConfigProperties configProperties;
+
+  // TODO elaborate usage of resttemplate
+  private final RestTemplate restTemplate = new RestTemplate();
+
+  @Override
+  public List<IndexingReport> indexObjects(String projectAbbr) {
+
+    SolrClient client = getSolrClient();
+    List<IndexingReport> facetsDatastreamReports = new ArrayList<>();
+
+    List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProjectAbbr(projectAbbr);
+    digitalObjects.forEach(digitalObject -> {
+      log.trace("*** SOLR Indexing now object: {}", digitalObject);
+      SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
+      try {
+        final UpdateResponse updateResponse = client.add(solrInputDocument);
+        String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getPid());
+        log.info(msg);
+        facetsDatastreamReports.add(
+                new IndexingReport(projectAbbr, "success", msg)
+        );
+      } catch (SolrServerException | IOException e) {
+        String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getPid(), e);
+        log.error(msg);
+        // abort complete operation if digital object document cannot be created.
+        throw new ProcessingException(msg);
+      }
+
+      try {
+        postSolrDatastream(digitalObject);
+        facetsDatastreamReports.add(
+                new IndexingReport(projectAbbr, "success","Indexed facets datastream for digital object " + digitalObject.getPid())
+        );
+      } catch (ProcessingException e){
+        // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
+        String msg = String.format("Failed indexing facets datastream for digital object %s. Root cause: %s", digitalObject.getPid(), e);
+        facetsDatastreamReports.add(
+                new IndexingReport(projectAbbr, "error", msg)
+        );
+      }
+
+    });
+
+    try {
+      client.commit();
+      String msg = String.format("Successfully committed SOLR indexing operation for project %s", projectAbbr);
+      log.info(msg);
+      return facetsDatastreamReports;
+    } catch (SolrServerException | IOException e) {
+      String msg = String.format("Failed to commit SOLR indexing operation for project %s . Original error message: %s", projectAbbr, e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+  }
+
+  @Override
+  public IndexingReport deleteIndexedObjects(String projectAbbr) {
+    log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
+
+    SolrClient client = getSolrClient();
+    String solrDeletionQuery = String.format("%s:%s",SearchProperties.PROJECT.name, projectAbbr);
+    try {
+      client.deleteByQuery(solrDeletionQuery);
+      client.commit();
+      String msg = String.format("Committed SOLR delete all indexing operation for project %s via built solr-query %s", projectAbbr, solrDeletionQuery);
+      log.info(msg);
+      return new IndexingReport(projectAbbr, "success", msg);
+    } catch (SolrServerException | IOException e){
+      String msg = String.format("Failed to delete all solr documents for project %s", projectAbbr);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+  }
+
+  @Override
+  public List<IndexingReport> indexObject(String projectAbbr, String pid) {
+    SolrClient client = getSolrClient();
+    DigitalObject digitalObject = digitalObjectRepository.findByPid(pid)
+            .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", pid)));
+
+    log.trace("*** SOLR Indexing now object: {}", digitalObject.getPid());
+    SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
+
+    List<IndexingReport> indexingReports = new ArrayList<>();
+
+    try {
+      final UpdateResponse updateResponse = client.add(solrInputDocument);
+      client.commit();
+      String msg = String.format("Successfully SOLR indexed digital object representing document %s", digitalObject.getPid());
+      log.info(msg);
+      indexingReports.add(
+              new IndexingReport(projectAbbr, "success", msg)
+      );
+    } catch (SolrServerException | IOException e) {
+      String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getPid(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    // posts custom search datastream
+    try {
+      postSolrDatastream(digitalObject);
+      String msg = String.format("Successfully index facets datastream of digital object %s", digitalObject.getPid());
+      log.info(msg);
+      indexingReports.add(new IndexingReport(projectAbbr,"success", msg));
+    } catch (ProcessingException e){
+      String msg = String.format("Failed to index facets datastream of digital object %s. Root cause: %s", digitalObject.getPid(), e);
+      log.error(msg);
+      indexingReports.add(new IndexingReport(projectAbbr, "error", msg));
+    }
+
+    return indexingReports;
+
+  }
+
+  @Override
+  public IndexingReport deleteIndexedObject(String projectAbbr, String pid) {
+    SolrClient client = getSolrClient();
+    String solrDeletionQuery = String.format("%s:%s",SearchProperties.PID.name, pid);
+    try {
+      client.deleteByQuery(solrDeletionQuery);
+      client.commit();
+      String msg = String.format("Committed SOLR delete object %s operation for project %s via built solr-query %s",pid, projectAbbr, solrDeletionQuery);
+      log.info(msg);
+      return new IndexingReport(projectAbbr, "success", msg);
+    } catch (SolrServerException | IOException e){
+      String msg = String.format("Failed to delete all solr documents for digital object with pid %s project %s", pid, projectAbbr);
+      log.error(msg);
+      return new IndexingReport(projectAbbr, "error", msg);
+    }
+  }
+
+
+  public SolrClient getSolrClient(){
+    //final String solrUrl = "http://localhost:8983/solr/gams";
+    final String solrUrl = configProperties.getFacetSearchUrl();
+    return new HttpSolrClient.Builder(solrUrl)
+            .build();
+  }
+
+
+  /**
+   * Creates a solr input document from a digital object (does not include the solr datastream)
+   * @param digitalObject digital object to be indexed
+   * @return SolrInputDocument
+   */
+  private SolrInputDocument createSolrInputDocument(DigitalObject digitalObject){
+    SolrInputDocument solrInputDocument = new SolrInputDocument();
+    // id needs to stay the same -- otherwise multiple entries with same pids will be created.
+    solrInputDocument.addField(SearchProperties.ID.name, digitalObject.getPid());
+    solrInputDocument.addField(SearchProperties.PID.name, digitalObject.getPid());
+    solrInputDocument.addField(SearchProperties.PROJECT.name, digitalObject.getProjectAbbr());
+    // index datastream ids
+    solrInputDocument.addField(SearchProperties.DATASTREAMS.name, digitalObject.getDatastreams().stream().map(Datastream::getDsid).collect(Collectors.toList()));
+    solrInputDocument.addField(SearchProperties.TYPE.name, SearchTypes.DIGITAL_OBJECT.name);
+
+    // index full text
+    // TODO add missing validation (there must be a source_xml?)
+    digitalObject.getDatastreams().stream().filter(datastream -> datastream.getDsid().equals(GamsDatastreamIds.SOURCE_DATASTREAM_ID.name)).forEach(datastream -> {
+      String fulltext = XMLUtils.extractText(XMLUtils.parseXml(datastream.getData()));
+      solrInputDocument.addField(SearchProperties.FULLTEXT.name, fulltext);
+    });
+    return solrInputDocument;
+  }
+
+
+  /**
+   * Posts a custom solr datastream to the solr instance via a post request if available
+   * and valid.
+   * @param digitalObject digital object to be indexed
+   */
+  private void postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
+    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GamsDatastreamIds.SOLR_DATASTREAM_ID.name)).findFirst();
+    Datastream datastream;
+    if(datastreamOptional.isEmpty()) {
+      // if no search.json - skip processing
+      String msg = String.format("Failed / Skipped  indexing custom facets datastream because none found at digital object %s", digitalObject.getPid());
+      log.error(msg);
+      throw new ProcessingException(msg);
+    } else {
+      datastream = datastreamOptional.get();
+    }
+
+    Facet[] facets;
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    try {
+      facets = objectMapper.readValue(datastream.getData(), Facet[].class);
+    } catch (IOException e){
+      String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getPid(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    // ensures that each solr entity = document has gams-controlled properties assigned
+    Arrays.stream(facets).forEach(facet -> {
+      facet.properties.put(SearchProperties.PID.name, digitalObject.getPid());
+      facet.properties.put(SearchProperties.PROJECT.name, digitalObject.getProjectAbbr());
+      facet.properties.put(SearchProperties.TYPE.name, SearchTypes.DERIVATIVE.name);
+      // id must be defined outside
+    });
+
+    String builtJson = "";
+    try {
+      builtJson = objectMapper.writeValueAsString(facets);
+    } catch (JsonProcessingException e){
+      String msg = String.format("Failed to marshal Facet objects to json array. Skipping solr indexing. Digital object %s . Cause: %s Original error message: %s", digitalObject.getPid(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    log.info("Built json: {}", builtJson);
+
+    // TODO need to block sending of json if a add document operation.
+    // TODO this json needs some kind of validation e.g. every doc must have a projectAbbreviation assigned etc.
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(builtJson, httpHeaders);
+
+    //TODO improve handling of RestClientException?
+    ResponseEntity<String> response;
+    try {
+      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getFacetSearchUrl());
+      response = restTemplate.postForEntity(postUrl, request, String.class);
+    } catch (RestClientException e){
+      String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getPid(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    if(response.getStatusCode().isError()){
+      String msg = String.format("Failed to post custom solr datastream to solr instance for object %s Response status code: %s", digitalObject.getPid(), response.getStatusCode());
+      log.error(msg);
+      throw new ProcessingException(msg);
+    } else {
+      log.trace("Successfully posted custom solr xml datastream for object {} to  solr instance. Response status code: {}", digitalObject.getPid(), response.getStatusCode());
+    }
+
+  }
+
+}
