@@ -16,15 +16,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.zim.gamsintegrationapi.GamsCMS.Datastream;
-import org.zim.gamsintegrationapi.GamsCMS.DigitalObject;
-import org.zim.gamsintegrationapi.GamsCMS.DigitalObjectRepository;
-import org.zim.gamsintegrationapi.GamsCMS.enums.GamsDatastreamIds;
-import org.zim.gamsintegrationapi.GamsCMS.exceptions.ProcessingException;
-import org.zim.gamsintegrationapi.GamsCMS.utils.XMLUtils;
-import org.zim.gamsintegrationapi.IIntegrationService;
-import org.zim.gamsintegrationapi.IndexingReport;
-import org.zim.gamsintegrationapi.System.GAMSConfigProperties;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Integration.*;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,8 +34,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FacetService implements IIntegrationService {
 
-  private final DigitalObjectRepository digitalObjectRepository;
-  private final GAMSConfigProperties configProperties;
+  private final IDigitalObjectRepository digitalObjectRepository;
+  private final GAMSDockerDNS configProperties;
 
   // TODO elaborate usage of resttemplate
   private final RestTemplate restTemplate = new RestTemplate();
@@ -117,7 +113,7 @@ public class FacetService implements IIntegrationService {
   @Override
   public List<IndexingReport> indexObject(String projectAbbr, String pid) {
     SolrClient client = getSolrClient();
-    DigitalObject digitalObject = digitalObjectRepository.findByPid(pid)
+    DigitalObject digitalObject = digitalObjectRepository.findById(pid)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", pid)));
 
     log.trace("*** SOLR Indexing now object: {}", digitalObject.getPid());

@@ -9,24 +9,22 @@ import org.apache.jena.sparql.core.*;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.zim.gamsintegrationapi.GamsCMS.DigitalObject;
-import org.zim.gamsintegrationapi.GamsCMS.DigitalObjectRepository;
-import org.zim.gamsintegrationapi.GamsCMS.enums.GamsDatastreamIds;
-import org.zim.gamsintegrationapi.GamsCMS.exceptions.ProcessingException;
-import org.zim.gamsintegrationapi.IIntegrationService;
-import org.zim.gamsintegrationapi.IndexingReport;
-import org.zim.gamsintegrationapi.RDF.utils.JenaFusekiClient;
-import org.zim.gamsintegrationapi.RDF.utils.RDFSearchProperties;
-
+import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Integration.GamsDatastreamIds;
+import org.zim.gamsapi.Integration.IIntegrationService;
+import org.zim.gamsapi.Integration.IndexingReport;
+import org.zim.gamsapi.Integration.ProcessingException;
+import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
 import java.io.IOException;
 import java.util.List;
-
+import org.zim.gamsapi.Integration.RDF.utils.RDFSearchProperties;
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RDFService implements IIntegrationService {
 
-  private final DigitalObjectRepository digitalObjectRepository;
+  private final IDigitalObjectRepository digitalObjectRepository;
   private final JenaFusekiClient tripleStoreClient;
 
 
@@ -61,7 +59,7 @@ public class RDFService implements IIntegrationService {
 
   public List<IndexingReport> indexObject(String projectAbbr, String pid){
 
-    DigitalObject digitalObject = digitalObjectRepository.findByPid(pid)
+    DigitalObject digitalObject = digitalObjectRepository.findById(pid)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", pid)));
     log.trace("*** FUSEKI Indexing now object: {}", digitalObject.getPid());
     // 01. Post custom indexing triples.

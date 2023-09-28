@@ -20,40 +20,15 @@ import org.springframework.context.annotation.Configuration;
 public class GAMSDockerDNS {
 
   /**
-   * FEDORA Docker DNS (= DNS-entry + port)
-   * - e.g. fedora: "fedora:8082"
-   */
-  @NotBlank
-  private String repositoryDns;
-
-  /**
-   * api-gateway DNS
-   */
-  @NotBlank
-  private String gamsApigateway;
-
-  /**
-   * solr-DNS
-   */
-  @NotBlank
-  private String solr;
-
-  /**
-   * DNS of apache-webserver (fileserver used in the setup)
-   */
-  @NotBlank
-  private String apache;
-
-  /**
-   * DNS of system-triplestore
-   */
-  @NotBlank
-  private String systemTriplestore;
-
-  /**
    * Docker DNS of relationalDB
    */
   @NotBlank
   private String relationalDb;
+
+  @NotBlank
+  private String facetSearchUrl;
+
+  @NotBlank
+  private String triplestoreUrl;
 
 }

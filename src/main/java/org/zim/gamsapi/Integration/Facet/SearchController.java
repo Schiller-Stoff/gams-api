@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.zim.gamsintegrationapi.System.GAMSConfigProperties;
-import org.zim.gamsintegrationapi.System.IProxyService;
+import org.zim.gamsapi.System.IProxyService;
+import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 /**
  * Routes incoming search request to dedicated GAMS search service.
@@ -23,7 +23,7 @@ import org.zim.gamsintegrationapi.System.IProxyService;
 public class SearchController {
 
   private final IProxyService proxyService;
-  private final GAMSConfigProperties gamsConfigProperties;
+  private final GAMSDockerDNS gamsConfigProperties;
 
   @GetMapping("/**")
   public ResponseEntity<String> proxySolr(

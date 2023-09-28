@@ -11,9 +11,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.zim.gamsintegrationapi.GamsCMS.DigitalObject;
-import org.zim.gamsintegrationapi.GamsCMS.exceptions.ProcessingException;
-import org.zim.gamsintegrationapi.System.GAMSConfigProperties;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.Integration.ProcessingException;
+import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 
 /**
@@ -26,7 +26,7 @@ import org.zim.gamsintegrationapi.System.GAMSConfigProperties;
 public class JenaFusekiClient {
 
   private final RestTemplate restTemplate = new RestTemplate();
-  private final GAMSConfigProperties configProperties;
+  private final GAMSDockerDNS configProperties;
 
   /**
    * Posts given turtle to jena-fuseki.
