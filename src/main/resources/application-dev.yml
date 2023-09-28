@@ -11,13 +11,6 @@ gams:
   docker:
     # postgres
     relational-db: "localhost:5432"
-    # fedora6
-    repository-dns: "localhost:8082"
-    #
-    gateway-dns: "localhost:8087"
-    #
-    solr: "localhost:8983"
-    # fileserver
-    apache: "localhost:4585"
-    # system triplestoree
-    systemTriplestore: "localhost:3030"
+    # from integration-api
+    facetSearchUrl: ${FACETED_SEARCH_URL:http://localhost:8983/solr/gams}
+    triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}

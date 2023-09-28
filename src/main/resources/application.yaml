@@ -58,16 +58,9 @@ gams:
   docker:
     # postgres
     relational-db: "relationalDB:5432"
-    # fedora6
-    repository-dns: "fcrepo:8080"
-    #
-    gateway-dns: "gateway:8080"
-    #
-    solr: "solr:8983"
-    # fileserver
-    apache: "apache:8080"
-    # system triplestoree
-    systemTriplestore: "localhost:3030"
+    # TODO
+    facetSearchUrl: ${FACET_SEARCH_URL:http://facetSearch:8983/solr/gams}
+    triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
 
 # swagger ui base path
 springdoc:
