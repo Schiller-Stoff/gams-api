@@ -30,12 +30,12 @@ public class IntegrationActionController {
     return indexingReports;
   }
 
-  @DeleteMapping("/objects/{pid}")
-  public List<IndexingReport> deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String pid){
-    log.trace("*** Trying now to default delete object {} for project {}", pid, projectAbbr);
+  @DeleteMapping("/objects/{id}")
+  public List<IndexingReport> deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
+    log.trace("*** Trying now to default delete object {} for project {}", id, projectAbbr);
     ArrayList<IndexingReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.add(integrationService.deleteIndexedObject(projectAbbr, pid));
+      indexingReports.add(integrationService.deleteIndexedObject(projectAbbr, id));
     });
     return indexingReports;
   }
