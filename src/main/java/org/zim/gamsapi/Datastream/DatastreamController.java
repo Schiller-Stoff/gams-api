@@ -23,7 +23,7 @@ import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}", "/api/v1/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}/"})
+@RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}", "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/"})
 @Controller
 public class DatastreamController {
 
