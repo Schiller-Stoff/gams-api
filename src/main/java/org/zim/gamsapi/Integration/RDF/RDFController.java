@@ -30,15 +30,15 @@ public class RDFController implements IIntegrationController {
     return rdfService.deleteIndexedObjects(projectAbbr);
   }
 
-  @PostMapping("/objects/{pid}")
+  @PostMapping("/objects/{id}")
   @Override
-  public List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
-    return rdfService.indexObject(projectAbbr, pid);
+  public List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String id){
+    return rdfService.indexObject(projectAbbr, id);
   }
 
-  @DeleteMapping("/objects/{pid}")
+  @DeleteMapping("/objects/{id}")
   @Override
-  public IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid) {
-    return rdfService.deleteIndexedObject(projectAbbr, pid);
+  public IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String id) {
+    return rdfService.deleteIndexedObject(projectAbbr, id);
   }
 }
