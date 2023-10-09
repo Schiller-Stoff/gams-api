@@ -8,10 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.MetadataBaseEntity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,7 +32,6 @@ public class DigitalObject {
    * ID of the digital object (= old PID of digital object)
    */
   @Id
-  // @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
   @NotBlank
   private String id;
@@ -52,11 +54,30 @@ public class DigitalObject {
   @Column(name = "projectAbbr", nullable = false)
   private String projectAbbr;
 
-
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
   @Valid  // Add Bean validation to embedded tables
   private MetadataBaseEntity baseMetadata;
+
+  /**
+   * Creation date of the digital object
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreationTimestamp
+  private Date created;
+
+  /**
+   * Last modified date of the digital object
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @UpdateTimestamp
+  private Date modified;
+
+  /**
+   * Date of publication
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date published;
 
 }
