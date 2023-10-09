@@ -51,7 +51,7 @@ class IDigitalObjectRepositoryTest {
     public void saveTestObject() {
         repository.save(
                 new DigitalObject(
-                        PID, null, "TEI", PROJECT_ABBR, null
+                        PID, null, "TEI", PROJECT_ABBR, null, null, null,null
                 ));
     }
 
