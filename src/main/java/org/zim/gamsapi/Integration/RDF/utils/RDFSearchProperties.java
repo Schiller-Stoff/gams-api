@@ -15,7 +15,7 @@ public enum RDFSearchProperties {
   /**
    * GAMS predicate defining the pid of a triple (in sense of the sourcePID)
    */
-  HAS_PID("<https://gams.uni-graz.at/ontology#hasPid>"),
+  HAS_ID("<https://gams.uni-graz.at/ontology#hasId>"),
 
   /**
    * GAMS predicate defining GAMS project origin - e.g. like from DERLA project

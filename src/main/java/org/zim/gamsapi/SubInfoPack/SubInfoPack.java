@@ -12,7 +12,7 @@ import lombok.ToString;
 public class SubInfoPack {
 
   // contained in metadata
-  //private String pid;
+  //private String id;
 
   // TODO use for validation?
   private String projectAbbr;

@@ -8,7 +8,7 @@
     
     <main class="container mt-4">
     <div class="webcirilo-box shadow-sm mb-1">
-      <h1 th:text="${do.pid}" class="mb-3"></h1>
+      <h1 th:text="${do.id}" class="mb-3"></h1>
       <p>
         Overview over a singular digital object
       </p>
@@ -17,10 +17,10 @@
       </div>
         <div class="bg-light p-2">
 
-          <p><b>Pid:</b> <span th:text="${do.pid}"></span></p>
+          <p><b>Id:</b> <span th:text="${do.id}"></span></p>
           <p><b>Owned by project:</b> <span th:text="${do.projectAbbr}"></span></p>
           <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
-          <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'"></a></p> -->
+          <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'"></a></p> -->
         </div>
       </div>
         <div class="webcirilo-box shadow-sm mb-1">
@@ -30,26 +30,26 @@
       <ul class="list-group-flush p-0">
         <li th:each="dstream : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item bg-light">
           
-          <a style="color:black" th:text="${dstream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}"></a>
+          <a style="color:black" th:text="${dstream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid}"></a>
 
           <div>
             <span th:text="${dstream.id + ' (global datastream id)'}"> </span>
             <!-- <span th:text="${dstream.mimeType}"></span> -->
             <!--
             <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>
-            <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>
-            <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>
+            <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>
+            <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>
             -->
             <form
               onsubmit="return confirm('Are you sure you want to delete this datastream?');"
               action="#"
-              th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}}"
+              th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid}}"
               th:object="${do}"
               method="delete"
               th:method="DELETE"
               class="d-inline"
             >
-              <!-- <input type="hidden" name="pid" th:field="*{pid}"/> -->
+              <!-- <input type="hidden" name="id" th:field="*{id}"/> -->
               <!-- <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> -->
               <input type="submit" class="btn btn-outline-dark" value="Delete"/>
             </form>
@@ -61,7 +61,7 @@
         onsubmit="return webCirilo.appendFormSubmitPath('add_datastream_form', 'datastream_id_input')"
         id="add_datastream_form"
         action="#"
-        th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/'}"
+        th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/'}"
         th:object="${do}"
         method="put"
         th:method="PUT"
@@ -69,7 +69,7 @@
         class="w-25"
       >
         <div class="form-group">
-          <!-- <input class="form-control" id="pid" type="hidden" th:field="*{pid}"/> -->
+          <!-- <input class="form-control" id="id" type="hidden" th:field="*{id}"/> -->
           <p><b>New datastream</b> (via datastream-id) <input required class="form-control" type="text" id="datastream_id_input"/></p>
           <input class="form-control" type="file" id="file" name="file" value="Upload file" required/>
       </div>
@@ -90,7 +90,7 @@
       <ul class="list-group-flush p-0">
         <li class="list-group-item bg-light">
           <small>dc:identifier</small>
-          <p th:text="${do.pid}"></p>
+          <p th:text="${do.id}"></p>
         </li>
       </ul>
       <p>Auxiliary metadata as dublin core</p>
@@ -159,7 +159,7 @@
       <form
         onsubmit="return confirm('Are you sure you want to delete this digital object?');"
         action="#"
-        th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid}}"
+        th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
         method="delete"
         th:method="DELETE"
         class="d-inline"

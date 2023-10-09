@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,13 +26,13 @@ import java.util.List;
 public class DigitalObject {
 
   /**
-   * PID of the digital object
+   * ID of the digital object (= old PID of digital object)
    */
   @Id
   // @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "pid")
+  @Column(name = "id")
   @NotBlank
-  private String pid;
+  private String id;
 
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "digitalObject")
   @Builder.Default

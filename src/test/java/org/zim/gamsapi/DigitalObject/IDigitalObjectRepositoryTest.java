@@ -65,10 +65,10 @@ class IDigitalObjectRepositoryTest {
                 .isNotNull()
                 .isPresent()
                 .get()
-                .extracting(DigitalObject::getPid, DigitalObject::getObjectType, DigitalObject::getProjectAbbr)
+                .extracting(DigitalObject::getId, DigitalObject::getObjectType, DigitalObject::getProjectAbbr)
                 .containsExactly(PID, "TEI", PROJECT_ABBR);
 
-        assertThat(digitalObject.get().getPid())
+        assertThat(digitalObject.get().getId())
                 .isNotNull()
                 .isEqualTo(PID);
     }
@@ -83,7 +83,7 @@ class IDigitalObjectRepositoryTest {
                 .isNotNull()
                 .isExactlyInstanceOf(ArrayList.class)
                 .first()
-                .extracting(DigitalObject::getPid, DigitalObject::getObjectType, DigitalObject::getProjectAbbr)
+                .extracting(DigitalObject::getId, DigitalObject::getObjectType, DigitalObject::getProjectAbbr)
                 .containsExactly(PID, "TEI", PROJECT_ABBR);
     }
 

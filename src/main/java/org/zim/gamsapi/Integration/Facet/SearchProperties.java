@@ -4,7 +4,7 @@ public enum SearchProperties {
 
   ID("id"),
   PROJECT("_projectAbbr"),
-  PID("_pid"),
+  OBJECT_ID("_id"),
   DATASTREAMS("_datastreams"),
 
   TYPE("_type"),

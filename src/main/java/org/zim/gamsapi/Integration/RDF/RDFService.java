@@ -49,7 +49,7 @@ public class RDFService implements IIntegrationService {
     // delete every subject belonging to a project.
     digitalObjectRepository.findAll().forEach(digitalObject -> {
       //TODO use enum
-      String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, digitalObject.getPid());
+      String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, digitalObject.getId());
       tripleStoreClient.postSPARQL(projectAbbr, deleteQuery);
     });
 
@@ -57,11 +57,11 @@ public class RDFService implements IIntegrationService {
     return new IndexingReport("demo", "nice", "haha");
   }
 
-  public List<IndexingReport> indexObject(String projectAbbr, String pid){
+  public List<IndexingReport> indexObject(String projectAbbr, String id){
 
-    DigitalObject digitalObject = digitalObjectRepository.findById(pid)
-            .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", pid)));
-    log.trace("*** FUSEKI Indexing now object: {}", digitalObject.getPid());
+    DigitalObject digitalObject = digitalObjectRepository.findById(id)
+            .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", id)));
+    log.trace("*** FUSEKI Indexing now object: {}", digitalObject.getId());
     // 01. Post custom indexing triples.
     indexObjectDefaultRdf(digitalObject);
     // 02. Load datastream "RDF_TTL" and send to jena-fuseki
@@ -71,13 +71,13 @@ public class RDFService implements IIntegrationService {
   }
 
   @Override
-  public IndexingReport deleteIndexedObject(String projectAbbr, String pid) {
+  public IndexingReport deleteIndexedObject(String projectAbbr, String id) {
     // OUTDATED delete query based on triples
     // deletes all subjects where gams:hasPid = given pid
     // String deleteQuery = String.format("DELETE WHERE { ?s %s \"%s\". ?s ?p ?o.}", RDFSearchProperties.HAS_PID.name, pid);
 
-    String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, pid);
-    tripleStoreClient.postSPARQL(pid,deleteQuery);
+    String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, id);
+    tripleStoreClient.postSPARQL(id,deleteQuery);
     // TODO build an indexing report?
     return new IndexingReport("demo", "nice", "haha");
   }
@@ -125,7 +125,7 @@ public class RDFService implements IIntegrationService {
                 // create quad statements assigning the named graph of the project.
                 DatasetGraph newDatasetGraph = DatasetGraphFactory.create();
                 rdfModel.listStatements().forEach(statement -> {
-                  Property namedGraphStmt = rdfModel.createProperty( RDFSearchProperties.GAMS_BASE_URL.name +  "/" + digitalObject.getPid());
+                  Property namedGraphStmt = rdfModel.createProperty( RDFSearchProperties.GAMS_BASE_URL.name +  "/" + digitalObject.getId());
                   Quad quad = Quad.create(namedGraphStmt.asNode(),statement.asTriple());
                   newDatasetGraph.add(quad);
                 });
@@ -133,7 +133,7 @@ public class RDFService implements IIntegrationService {
                 String quads = RDFWriter.source(newDatasetGraph).lang(Lang.NQUADS).asString();
                 tripleStoreClient.postNQuads(digitalObject,quads);
               } catch (IOException e) {
-                String msg = String.format("Failed to send rdf datastream to triplestore. For object %s. Original error: %s", digitalObject.getPid(), e);
+                String msg = String.format("Failed to send rdf datastream to triplestore. For object %s. Original error: %s", digitalObject.getId(), e);
                 log.error(msg);
                 throw new ProcessingException(msg);
               }

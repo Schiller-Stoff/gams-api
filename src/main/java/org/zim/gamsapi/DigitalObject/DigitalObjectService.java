@@ -39,8 +39,8 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable) {
-    return digitalObjectRepository.findDigitalObjectsByProjectAbbrAndPidIsContainingIgnoreCase(projectAbbr, containedInPid, pageable);
+  public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
+    return digitalObjectRepository.findDigitalObjectsByProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable);
   }
 
 
@@ -50,9 +50,9 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  public DigitalObject findByPid(String pid) throws DigitalObjectNotFoundException {
-    DigitalObject foundObject =  digitalObjectRepository.findById(pid).orElseThrow(() -> {
-      String msg = String.format("Cannot find digital object via pid: %s", pid);
+  public DigitalObject findById(String id) throws DigitalObjectNotFoundException {
+    DigitalObject foundObject =  digitalObjectRepository.findById(id).orElseThrow(() -> {
+      String msg = String.format("Cannot find digital object via id: %s", id);
       log.info(msg);
       return new DigitalObjectNotFoundException(msg);
     });

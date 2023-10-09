@@ -14,7 +14,7 @@ import org.zim.gamsapi.MetadataBaseEntity;
 @Table(
         name = "datastream",
         // this will guarantee that the dsid field is unique per referenced digital object!
-        uniqueConstraints = {@UniqueConstraint(name = "DatastreamNameUniquePerObject", columnNames = { "digital_object_pid", "dsid" })})
+        uniqueConstraints = {@UniqueConstraint(name = "DatastreamNameUniquePerObject", columnNames = { "digital_object_id", "dsid" })})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

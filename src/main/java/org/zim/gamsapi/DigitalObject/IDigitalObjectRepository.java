@@ -14,6 +14,6 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
 
   Page<DigitalObject> findDigitalObjectsByProjectAbbr(String projectAbbr, Pageable pageable);
 
-  Page<DigitalObject> findDigitalObjectsByProjectAbbrAndPidIsContainingIgnoreCase(String projectAbbr, String pid, Pageable pageable);
+  Page<DigitalObject> findDigitalObjectsByProjectAbbrAndIdIsContainingIgnoreCase(String projectAbbr, String id, Pageable pageable);
 
 }

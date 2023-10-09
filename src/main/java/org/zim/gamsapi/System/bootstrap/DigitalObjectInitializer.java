@@ -49,7 +49,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   private void saveTestData(){
 
     DigitalObject teiObject = DigitalObject.builder()
-            .pid("testtei")
+            .id("testtei")
             .objectType("TEI")
             .projectAbbr("derla")
             .build();
@@ -66,7 +66,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     //teiObject.setDatastreams(List.of(teiSource));
 
     DigitalObject lidoObject = DigitalObject.builder()
-            .pid("testlido")
+            .id("testlido")
             .objectType("LIDO")
             .baseMetadata(
                     MetadataBaseEntity
@@ -127,7 +127,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     datastreamRepository.save(image);
 
     DigitalObject gmlObject = DigitalObject.builder()
-            .pid("testgml")
+            .id("testgml")
             .objectType("GML")
             .projectAbbr("derla")
             .build();

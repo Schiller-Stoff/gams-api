@@ -57,7 +57,7 @@ public class SubInfoPackService implements ISubInfoPackService {
     AtomicReference<Boolean> containsSourceXml = new AtomicReference<>(false);
     AtomicReference<Boolean> containsMetadataXml = new AtomicReference<>(false);
 
-    // Construct pid from the folder-name and the current project
+    // Construct id from the folder-name and the current project
     ZipUtils.walkZippedDir(subInfoPack.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
 
       log.trace("Walking through zip entry during simple ingest: {}", zipEntry);
@@ -66,12 +66,12 @@ public class SubInfoPackService implements ISubInfoPackService {
       boolean isRootFolder = zipEntry.isDirectory() && (StringUtils.countOccurrencesOf(zipEntry.getName(), "/") == 1);
       if(isRootFolder){
         String folderName = zipEntry.getName().replace("/", "");
-        //String pid = String.format("o:%s.%s", subInfoPack.getProjectAbbr(), folderName);
+        //String id = String.format("o:%s.%s", subInfoPack.getProjectAbbr(), folderName);
 
         // no o:derla.sty1 --> just sty1
         digitalObject.set(DigitalObject
                 .builder()
-                .pid(folderName)
+                .id(folderName)
                 .projectAbbr(subInfoPack.getProjectAbbr())
                 .build());
 
@@ -186,7 +186,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
 
 
-    // TODO 1. save digital object via pid from metadata.xml?
+    // TODO 1. save digital object via id from metadata.xml?
 
 
     // TODO 2 save datastreams

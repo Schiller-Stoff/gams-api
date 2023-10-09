@@ -38,7 +38,7 @@ public class DatastreamService implements IDatastreamService {
 
   @Override
   public Datastream findByDsid(String pid, String dsid) throws DatastreamNotFoundException {
-    DigitalObject digitalObject = DigitalObject.builder().pid(pid).build();
+    DigitalObject digitalObject = DigitalObject.builder().id(pid).build();
     return datastreamRepository.findByDigitalObjectAndDsid(digitalObject, dsid).orElseThrow(() -> {
       String msg = String.format("Cannot find datastreams via pid %s and dsid %s", pid, dsid);
       log.info(msg);

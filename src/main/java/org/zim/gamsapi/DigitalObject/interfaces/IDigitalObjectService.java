@@ -20,7 +20,7 @@ public interface IDigitalObjectService {
 
   List<DigitalObject> findAllByProjectAbbr(String projectAbbr);
 
-  DigitalObject findByPid(String pid) throws DigitalObjectNotFoundException;
+  DigitalObject findById(String pid) throws DigitalObjectNotFoundException;
 
   void delete(DigitalObject digitalObject);
 

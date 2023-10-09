@@ -24,18 +24,18 @@ public class DigitalObjectController {
   private final DigitalObjectService digitalObjectService;
   private final IProjectService projectService;
 
-  @GetMapping(value = {"/{pid}", "/{pid}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public DigitalObject getObjectJson(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObject foundObject = digitalObjectService.findByPid(digitalObject.getPid());
+    DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
     model.addAttribute(foundObject);
     log.info("Found digital object {} for project {}", digitalObject, project);
     return foundObject;
   }
 
-  @GetMapping(value = {"/{pid}", "/{pid}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObject foundDigitalObject = digitalObjectService.findByPid(digitalObject.getPid());
+    DigitalObject foundDigitalObject = digitalObjectService.findById(digitalObject.getId());
     Project curProject = projectService.findPlain(project);
     model.addAttribute("do", foundDigitalObject);
     model.addAttribute(curProject);
@@ -51,14 +51,14 @@ public class DigitalObjectController {
           // for pagination
           @RequestParam(defaultValue = "0") int pageIndex,
           @RequestParam(defaultValue = "10") int pageSize,
-          @RequestParam(defaultValue = "") String pid,
-          @RequestParam(defaultValue = "pid") String sortBy
+          @RequestParam(defaultValue = "") String id,
+          @RequestParam(defaultValue = "id") String sortBy
 
   ) {
-    //Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("pid")));
+    //Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id")));
     Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(
             project.getProjectAbbr(),
-            pid,
+            id,
             PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
 
@@ -69,7 +69,7 @@ public class DigitalObjectController {
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("totalItems", digitalObjects.getTotalElements());
     model.addAttribute("totalPages", digitalObjects.getTotalPages());
-    model.addAttribute("searchPid", pid);
+    model.addAttribute("searchId", id);
     model.addAttribute("sortBy", sortBy);
 
     //log.info("Found objects {} for project {}", digitalObjects, project);
@@ -88,10 +88,10 @@ public class DigitalObjectController {
     Project curProject = this.projectService.getUserProjectByEntity(project);
     model.addAttribute(curProject);
     log.info("Found objects for project {}", project.getProjectAbbr());
-    return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("pid"))).toList();
+    return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
   }
 
-  @PutMapping(value = {"/{pid}", "/{pid}/"})
+  @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
           DigitalObject digitalObject,
           Project project,
@@ -105,10 +105,10 @@ public class DigitalObjectController {
 
     // needed to consider proxy forwarding
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getPid();
+    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getId();
   }
 
-  @DeleteMapping(value = {"/{pid}", "/{pid}/"})
+  @DeleteMapping(value = {"/{id}", "/{id}/"})
   public String deleteObject(
           DigitalObject digitalObject,
           Project project,

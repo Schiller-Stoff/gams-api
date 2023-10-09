@@ -13,7 +13,7 @@
         Overview over a singular datastream
     </p>
     <div>
-        <a class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.pid})" th:text="'Back to object (' + ${digitalObject.pid} + ')'"></a>
+        <a class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id})" th:text="'Back to object (' + ${digitalObject.id} + ')'"></a>
     </div>
     </div>
     <div class="webcirilo-box shadow-sm mb-1">
@@ -26,7 +26,7 @@
     </div>
     <br/>
     <div>
-        <a target="_blank" class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.pid} + '/datastreams/' + ${datastream.dsid} + '/content')">Stored data</a>
+        <a target="_blank" class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Stored data</a>
     </div>
     </div>
     <div class="webcirilo-box shadow-sm mb-1">

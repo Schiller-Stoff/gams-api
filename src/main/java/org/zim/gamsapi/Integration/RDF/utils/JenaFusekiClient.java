@@ -48,24 +48,24 @@ public class JenaFusekiClient {
       String postUrl = configProperties.getTriplestoreUrl();
       response = restTemplate.postForEntity(postUrl, request, String.class);
     } catch (RestClientException e){
-      String msg = String.format("Failed to post custom RDF datastream to triplestore instance. Digital object: %s. Cause: %s Original error message: %s", digitalObject.getPid(), e.getMessage(), e);
+      String msg = String.format("Failed to post custom RDF datastream to triplestore instance. Digital object: %s. Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
       log.error(msg);
       throw new ProcessingException(msg);
     }
 
     if(response.getStatusCode().isError()){
-      String msg = String.format("Failed to post custom rdf datastream to triplestore instance for object %s Response status code: %s", digitalObject.getPid(), response.getStatusCode());
+      String msg = String.format("Failed to post custom rdf datastream to triplestore instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
       log.error(msg);
       throw new ProcessingException(msg);
     } else {
-      log.trace("Successfully posted custom rdf datastream for object {} to  fuseki instance. Response status code: {}", digitalObject.getPid(), response.getStatusCode());
+      log.trace("Successfully posted custom rdf datastream for object {} to  fuseki instance. Response status code: {}", digitalObject.getId(), response.getStatusCode());
     }
 
   }
 
   /**
    * Sends given updated SPARQL to jena-fuseki.
-   * @param context context of the operation - e.g. project abbreviation or pid.
+   * @param context context of the operation - e.g. project abbreviation or id.
    * @param sparql sparql to be performed.
    */
   public void postSPARQL(String context, String sparql){
@@ -109,14 +109,14 @@ public class JenaFusekiClient {
 
     StringBuilder turtle = new StringBuilder();
     turtle.append(
-            String.format("<https://gams.uni-graz.at/%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://gams.uni-graz.at/ontology#digitalObject> <https://gams.uni-graz.at/%s>.", digitalObject.getPid(), digitalObject.getPid())
+            String.format("<https://gams.uni-graz.at/%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://gams.uni-graz.at/ontology#digitalObject> <https://gams.uni-graz.at/%s>.", digitalObject.getId(), digitalObject.getId())
     );
-    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getPid(), RDFSearchProperties.HAS_PID.name, digitalObject.getPid(), digitalObject.getPid()));
+    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_ID.name, digitalObject.getId(), digitalObject.getId()));
 
-    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getPid(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProjectAbbr(), digitalObject.getPid()));
+    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProjectAbbr(), digitalObject.getId()));
 
     digitalObject.getDatastreams().forEach(datastream -> {
-      turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getPid(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getPid()));
+      turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
     });
 
     return turtle.toString();

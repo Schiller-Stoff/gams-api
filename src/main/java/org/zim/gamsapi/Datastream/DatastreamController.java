@@ -33,7 +33,7 @@ public class DatastreamController {
 
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
-    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getPid(), datastream.getDsid());
+    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
     Project foundProject = projectService.getUserProjectByEntity(project);
     model.addAttribute(foundDatastream);
     model.addAttribute(foundProject);
@@ -43,7 +43,7 @@ public class DatastreamController {
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public Datastream getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
-    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getPid(), datastream.getDsid());
+    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
     Project foundProject = projectService.getUserProjectByEntity(project);
     model.addAttribute(foundDatastream);
     model.addAttribute(foundProject);
@@ -64,7 +64,7 @@ public class DatastreamController {
 
     //TODO refactor - might be encapsulated in business layer?
 
-    DigitalObject foundObject = digitalObjectService.findByPid(digitalObject.getPid());
+    DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
 
     datastream.setData(file.getBytes());
     datastream.setMimeType(file.getContentType());
@@ -74,7 +74,7 @@ public class DatastreamController {
     model.addAttribute("datastream", savedDatastream);
     model.addAttribute(foundObject);
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getPid();
+    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
   }
 
   @DeleteMapping
@@ -86,7 +86,7 @@ public class DatastreamController {
   ) {
     datastreamService.delete(digitalObject, datastream.getDsid());
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getPid();
+    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
   }
 
 
@@ -100,7 +100,7 @@ public class DatastreamController {
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
   public ResponseEntity<InputStreamResource> getDatastreamContent(DigitalObject digitalObject, Datastream datastream) {
-    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getPid(), datastream.getDsid());
+    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
     InputStream in = new ByteArrayInputStream(foundDatastream.getData());
     return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))

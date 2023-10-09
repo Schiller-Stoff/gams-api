@@ -24,17 +24,17 @@ public interface IIntegrationService {
   /**
    * Indexes a single object
    * @param projectAbbr project to be indexed
-   * @param pid pid of the object to be indexed
+   * @param id id of the object to be indexed
    * @return IndexingReport
    */
-  List<IndexingReport> indexObject(String projectAbbr, String pid);
+  List<IndexingReport> indexObject(String projectAbbr, String id);
 
   /**
    * Deletes a single object from the a database alongside dependent entities, like persons etc.
    * @param projectAbbr project to be indexed to facets database
-   * @param pid pid of the object to be deleted
+   * @param id id of the object to be deleted
    * @return IndexingReport
    */
-  IndexingReport deleteIndexedObject(String projectAbbr, String pid);
+  IndexingReport deleteIndexedObject(String projectAbbr, String id);
 
 }
