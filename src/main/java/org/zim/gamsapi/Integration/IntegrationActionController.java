@@ -20,12 +20,12 @@ public class IntegrationActionController {
    */
   private final List<IIntegrationService> integrationServices;
 
-  @PostMapping("/objects/{pid}")
-  public List<IndexingReport> indexProjectObject(@PathVariable String projectAbbr, @PathVariable String pid){
-    log.trace("*** Trying now to default index object {} for project {}", pid, projectAbbr);
+  @PostMapping("/objects/{id}")
+  public List<IndexingReport> indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
+    log.trace("*** Trying now to default index object {} for project {}", id, projectAbbr);
     ArrayList<IndexingReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.addAll(integrationService.indexObject(projectAbbr, pid));
+      indexingReports.addAll(integrationService.indexObject(projectAbbr, id));
     });
     return indexingReports;
   }
