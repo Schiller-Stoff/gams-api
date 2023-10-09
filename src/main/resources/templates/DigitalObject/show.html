@@ -33,7 +33,7 @@
           <a style="color:black" th:text="${dstream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid}"></a>
 
           <div>
-            <span th:text="${dstream.id + ' (global datastream id)'}"> </span>
+            <span th:text="${dstream.globalId + ' (global datastream id)'}"> </span>
             <!-- <span th:text="${dstream.mimeType}"></span> -->
             <!--
             <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>

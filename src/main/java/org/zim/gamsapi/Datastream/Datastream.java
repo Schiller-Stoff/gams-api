@@ -26,8 +26,8 @@ public class Datastream {
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "id")
-  private Long id;
+  @Column(name = "global_id")
+  private Long globalId;
 
   @ManyToOne
   @ToString.Exclude
