@@ -48,7 +48,6 @@ public class DigitalObject {
 
 
   @ManyToOne
-  @ToString.Exclude
   @JsonBackReference
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Project project;
