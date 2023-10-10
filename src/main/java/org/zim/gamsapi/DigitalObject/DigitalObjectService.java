@@ -9,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.Project;
-
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +20,18 @@ import java.util.List;
 public class DigitalObjectService implements IDigitalObjectService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IProjectRepository projectRepository;
 
   @Override
   @Transactional
   public DigitalObject save(DigitalObject digitalObject) {
+    projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+            () -> {
+              String msg = String.format("Aborting saving of digital object. Cannot find project %s for digital object %s",digitalObject.getProject().getProjectAbbr(), digitalObject );
+              log.error(msg);
+              return new ProjectNotFoundException(msg);
+            }
+    );
     return digitalObjectRepository.save(digitalObject);
   }
 
@@ -35,17 +44,40 @@ public class DigitalObjectService implements IDigitalObjectService {
 
   @Override
   public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, Pageable pageable) {
+
+    projectRepository.findById(projectAbbr).orElseThrow(
+      () -> {
+        String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
+        log.error(msg);
+        return new ProjectNotFoundException(msg);
+      }
+    );
+
     return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable);
   }
 
   @Override
   public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
+    projectRepository.findById(projectAbbr).orElseThrow(
+            () -> {
+              String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
+              log.error(msg);
+              return new ProjectNotFoundException(msg);
+            }
+    );
     return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable);
   }
 
 
   @Override
   public List<DigitalObject> findAllByProjectAbbr(String projectAbbr) {
+    projectRepository.findById(projectAbbr).orElseThrow(
+            () -> {
+              String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
+              log.error(msg);
+              return new ProjectNotFoundException(msg);
+            }
+    );
     return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
   }
 
