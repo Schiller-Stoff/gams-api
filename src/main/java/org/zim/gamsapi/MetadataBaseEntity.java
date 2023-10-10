@@ -34,7 +34,7 @@ public class MetadataBaseEntity {
   private List<String> format;
 
   @NotEmpty
-  private List<String> title;
+  private String title;
 
   @NotEmpty
   private List<String> rights;

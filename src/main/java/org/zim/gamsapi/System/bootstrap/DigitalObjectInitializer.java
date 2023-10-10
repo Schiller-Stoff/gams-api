@@ -71,7 +71,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .baseMetadata(
                     MetadataBaseEntity
                             .builder()
-                            .title(List.of("A LIDO object title"))
+                            .title("A LIDO object title")
                             .creator(List.of("Sebastian David Schiller-Stoff"))
                             .contributor(List.of("Sebastian David Schiller-Stoff", "Moria"))
                             .description("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
@@ -93,7 +93,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .baseMetadata(
                     MetadataBaseEntity
                             .builder()
-                            .title(List.of("Chair of the king"))
+                            .title("Digital object representing a Chair of the king")
                             .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
                             .subject(List.of("Chemistry", "Physics", "Architecture"))
                             .description("This source datastream contains some information about...")
@@ -113,7 +113,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .baseMetadata(
                     MetadataBaseEntity
                             .builder()
-                            .title(List.of("An Image of something"))
+                            .title("An Image of something")
                             .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
                             .subject(List.of("Chemistry", "Physics", "Architecture"))
                             .description("This source datastream contains some information about...")

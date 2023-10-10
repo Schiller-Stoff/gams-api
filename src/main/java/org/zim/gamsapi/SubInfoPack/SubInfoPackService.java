@@ -244,7 +244,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       // TODO mapping could be done via jackson!!!!
       switch (child.getNodeName()){
-        case "dh:title" -> metadataBaseEntity.setTitle(addToNullableList(metadataBaseEntity.getTitle(), nodeValue));
+        case "dh:title" -> metadataBaseEntity.setTitle(nodeValue);
         case "dh:creator" -> metadataBaseEntity.setCreator(
             addToNullableList(metadataBaseEntity.getCreator(), nodeValue)
           );
