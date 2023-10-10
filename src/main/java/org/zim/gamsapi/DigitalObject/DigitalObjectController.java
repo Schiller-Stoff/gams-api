@@ -98,7 +98,8 @@ public class DigitalObjectController {
           Model model,
           @RequestHeader Map<String, String> requestHeader
   ) {
-
+    // project membership is not automatically bound by spring.
+    digitalObject.setProject(project);
     DigitalObject savedObject = digitalObjectService.save(digitalObject);
     model.addAttribute("do", savedObject);
     log.info("Created object {} for project {}", savedObject, project);
