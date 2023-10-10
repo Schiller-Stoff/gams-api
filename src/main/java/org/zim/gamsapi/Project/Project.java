@@ -3,10 +3,7 @@ package org.zim.gamsapi.Project;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 
 import java.util.List;
@@ -30,6 +27,7 @@ public class Project {
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "project")
   //@Builder.Default
   @JsonManagedReference
+  @ToString.Exclude
   private List<DigitalObject> digitalObjects;
 
   @Column(name = "description")
