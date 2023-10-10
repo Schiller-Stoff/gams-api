@@ -271,9 +271,7 @@ public class SubInfoPackService implements ISubInfoPackService {
         case "dh:coverage" -> metadataBaseEntity.setCoverage(
             addToNullableList(metadataBaseEntity.getCoverage(), nodeValue)
         );
-        case "dh:rights" -> metadataBaseEntity.setRights(
-            addToNullableList(metadataBaseEntity.getRights(), nodeValue)
-        );
+        case "dh:rights" -> metadataBaseEntity.setRights(nodeValue);
         default -> log.warn("Metadata.xml ingest processing: Skipping unrecognized element {} with value {}", child.getNodeName(), nodeValue);
       }
     }

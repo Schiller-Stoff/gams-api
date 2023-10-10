@@ -78,7 +78,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                             .publisher(List.of("ZIM Graz", "Universität Graz"))
                             .subject(List.of("History", "Art History"))
                             .language(List.of("DE"))
-                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
             .projectAbbr("derla")
@@ -99,7 +99,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                             .description("This source datastream contains some information about...")
                             .language(List.of("de"))
                             .type(List.of("Building"))
-                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
             .build();
@@ -119,7 +119,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                             .description("This source datastream contains some information about...")
                             .language(List.of("de"))
                             .type(List.of("Building"))
-                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
             .build();
