@@ -1,17 +1,16 @@
 package org.zim.gamsapi.DigitalObject;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.Project.Project;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +52,12 @@ public class DigitalObject {
    */
   @Column(name = "projectAbbr", nullable = false)
   private String projectAbbr;
+
+  @ManyToOne
+  @ToString.Exclude
+  @JsonBackReference
+  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  private Project project;
 
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity

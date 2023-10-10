@@ -19,4 +19,6 @@ public interface IProjectService {
    */
   public Project getUserProjectByEntity(Project project);
 
+  Project saveProject(Project project);
+
 }

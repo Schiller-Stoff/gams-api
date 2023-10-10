@@ -10,10 +10,12 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
-
+import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,11 +24,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final IProjectRepository projectRepository;
 
   @Override
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
     logAvailableSystemResources();
+    initializeProjects();
     // saveTestData();
   }
 
@@ -144,6 +148,20 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     //lidoObject.setDatastreams(List.of(lidoSource, image));
     //digitalObjectRepository.save(teiObject);
     //digitalObjectRepository.save(lidoObject);
+
+  }
+
+  private void initializeProjects(){
+
+    Project project = new Project();
+    project.setProjectAbbr("admin");
+    project.setDescription("Demo admin project");
+
+    Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
+    if(projectOptional.isEmpty()){
+      projectRepository.save(project);
+    }
+
 
   }
 
