@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,6 +49,7 @@ public class DigitalObject {
 
   @ManyToOne
   @JsonBackReference
+  @NotNull
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Project project;
 
