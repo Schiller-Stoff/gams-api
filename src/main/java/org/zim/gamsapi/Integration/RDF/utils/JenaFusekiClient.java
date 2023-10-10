@@ -113,7 +113,7 @@ public class JenaFusekiClient {
     );
     turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_ID.name, digitalObject.getId(), digitalObject.getId()));
 
-    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProjectAbbr(), digitalObject.getId()));
+    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProject().getProjectAbbr(), digitalObject.getId()));
 
     digitalObject.getDatastreams().forEach(datastream -> {
       turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));

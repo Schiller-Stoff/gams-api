@@ -46,7 +46,7 @@ public class FacetService implements IIntegrationService {
     SolrClient client = getSolrClient();
     List<IndexingReport> facetsDatastreamReports = new ArrayList<>();
 
-    List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProjectAbbr(projectAbbr);
+    List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
       log.trace("*** SOLR Indexing now object: {}", digitalObject);
       SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
@@ -187,7 +187,7 @@ public class FacetService implements IIntegrationService {
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
     solrInputDocument.addField(SearchProperties.ID.name, digitalObject.getId());
     solrInputDocument.addField(SearchProperties.OBJECT_ID.name, digitalObject.getId());
-    solrInputDocument.addField(SearchProperties.PROJECT.name, digitalObject.getProjectAbbr());
+    solrInputDocument.addField(SearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
     // index datastream ids
     solrInputDocument.addField(SearchProperties.DATASTREAMS.name, digitalObject.getDatastreams().stream().map(Datastream::getDsid).collect(Collectors.toList()));
     solrInputDocument.addField(SearchProperties.TYPE.name, SearchTypes.DIGITAL_OBJECT.name);
@@ -233,7 +233,7 @@ public class FacetService implements IIntegrationService {
     // ensures that each solr entity = document has gams-controlled properties assigned
     Arrays.stream(facets).forEach(facet -> {
       facet.properties.put(SearchProperties.OBJECT_ID.name, digitalObject.getId());
-      facet.properties.put(SearchProperties.PROJECT.name, digitalObject.getProjectAbbr());
+      facet.properties.put(SearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
       facet.properties.put(SearchProperties.TYPE.name, SearchTypes.DERIVATIVE.name);
       // id must be defined outside
     });

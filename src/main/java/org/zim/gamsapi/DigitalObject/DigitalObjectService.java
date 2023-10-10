@@ -35,18 +35,18 @@ public class DigitalObjectService implements IDigitalObjectService {
 
   @Override
   public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, Pageable pageable) {
-    return digitalObjectRepository.findDigitalObjectsByProjectAbbr(projectAbbr, pageable);
+    return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable);
   }
 
   @Override
   public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
-    return digitalObjectRepository.findDigitalObjectsByProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable);
+    return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable);
   }
 
 
   @Override
   public List<DigitalObject> findAllByProjectAbbr(String projectAbbr) {
-    return digitalObjectRepository.findDigitalObjectsByProjectAbbr(projectAbbr);
+    return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
   }
 
   @Override
@@ -68,7 +68,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void deleteAllForProject(Project project) {
-    digitalObjectRepository.deleteAllByProjectAbbr(project.getProjectAbbr());
+    digitalObjectRepository.deleteAllByProject_ProjectAbbr(project.getProjectAbbr());
     log.info("Successfully deleted all digital objects for project {}", project);
   }
 

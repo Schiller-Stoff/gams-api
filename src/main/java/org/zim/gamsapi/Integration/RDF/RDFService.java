@@ -30,7 +30,7 @@ public class RDFService implements IIntegrationService {
 
   @Override
   public List<IndexingReport> indexObjects(String projectAbbr) {
-    digitalObjectRepository.findDigitalObjectsByProjectAbbr(projectAbbr).forEach(digitalObject -> {
+    digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr).forEach(digitalObject -> {
       indexObjectDefaultRdf(digitalObject);
       indexObjectCustomRdf(digitalObject);
     });

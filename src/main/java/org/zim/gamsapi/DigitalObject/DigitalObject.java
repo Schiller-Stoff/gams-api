@@ -47,12 +47,6 @@ public class DigitalObject {
   private String objectType;
 
 
-  /**
-   * Project this digital object belongs to
-   */
-  @Column(name = "projectAbbr", nullable = false)
-  private String projectAbbr;
-
   @ManyToOne
   @ToString.Exclude
   @JsonBackReference

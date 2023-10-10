@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-//@Builder
+@Builder
 public class Project {
 
   @NotBlank

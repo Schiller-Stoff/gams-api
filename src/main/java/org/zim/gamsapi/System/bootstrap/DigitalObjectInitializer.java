@@ -55,7 +55,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     DigitalObject teiObject = DigitalObject.builder()
             .id("testtei")
             .objectType("TEI")
-            .projectAbbr("derla")
             .build();
     digitalObjectRepository.save(teiObject);
 
@@ -85,7 +84,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                             .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
-            .projectAbbr("derla")
             .build();
     digitalObjectRepository.save(lidoObject);
 
@@ -133,7 +131,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     DigitalObject gmlObject = DigitalObject.builder()
             .id("testgml")
             .objectType("GML")
-            .projectAbbr("derla")
             .build();
     digitalObjectRepository.save(gmlObject);
 

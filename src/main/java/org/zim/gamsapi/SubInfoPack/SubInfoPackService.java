@@ -14,6 +14,7 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.MimeTypeDetector;
@@ -72,7 +73,7 @@ public class SubInfoPackService implements ISubInfoPackService {
         digitalObject.set(DigitalObject
                 .builder()
                 .id(folderName)
-                .projectAbbr(subInfoPack.getProjectAbbr())
+                .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
                 .build());
 
         // if the object already exists --> delete (cascades to all datastreams)

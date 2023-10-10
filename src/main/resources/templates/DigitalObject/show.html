@@ -18,7 +18,7 @@
         <div class="bg-light p-2">
 
           <p><b>Id:</b> <span th:text="${do.id}"></span></p>
-          <p><b>Owned by project:</b> <span th:text="${do.projectAbbr}"></span></p>
+          <p><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></p>
           <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
           <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'"></a></p> -->
         </div>

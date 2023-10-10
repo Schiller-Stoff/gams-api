@@ -8,12 +8,12 @@ import java.util.List;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String> {
 
-  void deleteAllByProjectAbbr(String projectAbbr);
+  void deleteAllByProject_ProjectAbbr(String projectAbbr);
 
-  List<DigitalObject> findDigitalObjectsByProjectAbbr(String projectAbbr);
+  List<DigitalObject> findDigitalObjectsByProject_ProjectAbbr(String projectAbbr);
 
-  Page<DigitalObject> findDigitalObjectsByProjectAbbr(String projectAbbr, Pageable pageable);
+  Page<DigitalObject> findDigitalObjectsByProject_ProjectAbbr(String projectAbbr, Pageable pageable);
 
-  Page<DigitalObject> findDigitalObjectsByProjectAbbrAndIdIsContainingIgnoreCase(String projectAbbr, String id, Pageable pageable);
+  Page<DigitalObject> findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(String projectAbbr, String id, Pageable pageable);
 
 }
