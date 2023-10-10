@@ -15,6 +15,8 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.MimeTypeDetector;
@@ -33,6 +35,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final IProjectRepository projectRepository;
 
   @Override
   @Transactional
@@ -53,6 +56,14 @@ public class SubInfoPackService implements ISubInfoPackService {
    * @param subInfoPack submission information package to be processed.
    */
   private void ingestSimple(SubInfoPack subInfoPack){
+
+    projectRepository.findById(subInfoPack.getProjectAbbr()).orElseThrow(
+            () -> {
+              String msg = String.format("Aborting ingest. Cannot find project %s", subInfoPack.getProjectAbbr());
+              log.error(msg);
+              return new ProjectNotFoundException(msg);
+            }
+    );
 
     AtomicReference<DigitalObject> digitalObject =  new AtomicReference<>();
     AtomicReference<Boolean> containsSourceXml = new AtomicReference<>(false);
