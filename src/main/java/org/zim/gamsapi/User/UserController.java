@@ -19,19 +19,21 @@ public class UserController {
     this.userService = userService;
   }
 
-  @GetMapping(path = "/profile")
-  public String showUser(HttpServletRequest httpServletRequest, Model model){
-    // user model is added globally via controller advice
-    // TODO null is okay for demo service
-    User user = userService.getCurrentUser(httpServletRequest);
+
+  @GetMapping(path = "/{username}")
+  public String showUserProjects(User user, Model model){
+    user = userService.findByUsername(user.getUsername());
     model.addAttribute(user);
-    return "User/profile";
+    return "User/userprojects";
   }
 
-  @GetMapping(path = "/profile", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-  @ResponseBody
-  public User showUserJson(HttpServletRequest request){
-    return userService.getCurrentUser(request);
+  @GetMapping
+  public String showUserProjectsViaCredentials(HttpServletRequest request,User user, Model model){
+    String authUsername = request.getRemoteUser();
+    // TODO error handling here
+    user = userService.findByUsername(authUsername);
+    model.addAttribute(user);
+    return "User/userprojects";
   }
 
 }

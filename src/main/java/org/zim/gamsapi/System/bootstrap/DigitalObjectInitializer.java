@@ -2,6 +2,7 @@ package org.zim.gamsapi.System.bootstrap;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MimeTypeUtils;
@@ -12,6 +13,8 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.User.User;
+import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.List;
@@ -25,6 +28,8 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
+  private final IUserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public void run(String... args) {
@@ -150,14 +155,30 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
   private void initializeProjects(){
 
+    // added hardcoded admin user here
+    User admin = userRepository.findByUsername("admin");
+    if(admin == null){
+      admin = User.builder()
+              .username("admin")
+              .password(
+                passwordEncoder.encode("admin")
+              )
+              .build();
+      userRepository.save(admin);
+    }
+
     Project project = new Project();
     project.setProjectAbbr("admin");
     project.setDescription("Demo admin project");
+    project.setUsers(List.of(admin));
 
     Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
     if(projectOptional.isEmpty()){
       projectRepository.save(project);
     }
+
+    admin.setProjects(List.of(project));
+    userRepository.save(admin);
 
 
   }
