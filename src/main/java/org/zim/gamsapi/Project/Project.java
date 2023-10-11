@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.User.User;
 
 import java.util.List;
 
@@ -32,5 +33,8 @@ public class Project {
 
   @Column(name = "description")
   private String description;
+
+  @ManyToMany(mappedBy = "projects")
+  private List<User> users;
 
 }
