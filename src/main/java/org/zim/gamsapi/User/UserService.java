@@ -9,6 +9,7 @@ import org.zim.gamsapi.User.interfaces.IUserRepository;
 import org.zim.gamsapi.User.interfaces.IUserService;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Demo userservice. Returns a static testuser.
@@ -25,9 +26,8 @@ public class UserService implements IUserService {
   @Override
   public User findByUsername(String username) {
 
-    // TODO error handling should work via optionals
-    User foundUser = userRepository.findByUsername(username);
-    if(foundUser == null){
+    Optional<User> foundUser = userRepository.findByUsername(username);
+    if(foundUser.isEmpty()){
       String msg = String.format("Cannot find user with name %s.", username);
       log.error(msg);
       throw new UserNotFoundException(msg);
@@ -35,7 +35,7 @@ public class UserService implements IUserService {
 
     log.info("Found user {}", foundUser);
 
-    return foundUser;
+    return foundUser.get();
   }
 
 }
