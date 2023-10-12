@@ -35,6 +35,8 @@ public class Project {
   private String description;
 
   @ManyToMany(mappedBy = "projects")
+  @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  @ToString.Exclude
   private List<User> users;
 
 }
