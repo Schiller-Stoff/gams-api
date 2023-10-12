@@ -172,13 +172,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
               .password(
                 passwordEncoder.encode(generatedPassword)
               )
-              .roles(Set.of(SecurityRoles.ADMIN.name))
+              .roles(Set.of(SecurityRoles.ADMINISTRATOR.name))
               .build();
 
       userRepository.save(admin);
 
       Project project = new Project();
-      project.setProjectAbbr(SecurityRoles.ADMIN.name);
+      project.setProjectAbbr("admin");
       project.setDescription("Demo admin project");
       project.setUsers(List.of(admin));
 
