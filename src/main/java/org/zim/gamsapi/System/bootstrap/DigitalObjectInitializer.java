@@ -14,6 +14,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.security.SecurityRoles;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
@@ -171,13 +172,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
               .password(
                 passwordEncoder.encode(generatedPassword)
               )
-              .roles(Set.of("admin"))
+              .roles(Set.of(SecurityRoles.ADMIN.name))
               .build();
 
       userRepository.save(admin);
 
       Project project = new Project();
-      project.setProjectAbbr("admin");
+      project.setProjectAbbr(SecurityRoles.ADMIN.name);
       project.setDescription("Demo admin project");
       project.setUsers(List.of(admin));
 
