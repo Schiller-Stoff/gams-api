@@ -17,11 +17,5 @@ public class ProjectController {
 
   private final IProjectService projectService;
 
-  @GetMapping
-  public String showProjectDigitalObjects(Model model, @ModelAttribute Project project) {
-    Project curProject = projectService.findPlain(project);
-    model.addAttribute(curProject);
-    return "Project/show";
-  }
 
 }

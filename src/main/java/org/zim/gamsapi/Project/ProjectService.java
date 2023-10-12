@@ -12,15 +12,6 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 public class ProjectService implements IProjectService {
 
   private final IProjectRepository projectRepository;
-  @Override
-  public Project findPlain(Project project) {
-    return project;
-  }
-
-  @Override
-  public Project getUserProjectByEntity(Project project) {
-    return project;
-  }
 
   @Override
   public Project saveProject(Project project) {

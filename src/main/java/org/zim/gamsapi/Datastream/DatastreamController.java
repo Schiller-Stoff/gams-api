@@ -34,9 +34,8 @@ public class DatastreamController {
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
     Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
-    Project foundProject = projectService.getUserProjectByEntity(project);
     model.addAttribute(foundDatastream);
-    model.addAttribute(foundProject);
+    model.addAttribute(project);
     return "Datastream/show";
   }
 
@@ -44,9 +43,8 @@ public class DatastreamController {
   @ResponseBody
   public Datastream getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
     Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
-    Project foundProject = projectService.getUserProjectByEntity(project);
     model.addAttribute(foundDatastream);
-    model.addAttribute(foundProject);
+    model.addAttribute(project);
     return foundDatastream;
   }
 

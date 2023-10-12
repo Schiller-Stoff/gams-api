@@ -36,9 +36,8 @@ public class DigitalObjectController {
   @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     DigitalObject foundDigitalObject = digitalObjectService.findById(digitalObject.getId());
-    Project curProject = projectService.findPlain(project);
     model.addAttribute("do", foundDigitalObject);
-    model.addAttribute(curProject);
+    model.addAttribute(project);
     log.info("Found digital object {} for project {}", foundDigitalObject, project.getProjectAbbr());
     return "DigitalObject/show";
   }
@@ -62,9 +61,8 @@ public class DigitalObjectController {
             PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
 
-    Project curProject = this.projectService.getUserProjectByEntity(project);
     model.addAttribute("digitalObjects", digitalObjects.toList());
-    model.addAttribute(curProject);
+    model.addAttribute(project);
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("totalItems", digitalObjects.getTotalElements());
@@ -85,8 +83,7 @@ public class DigitalObjectController {
           @RequestParam(defaultValue = "0") int pageIndex,
           @RequestParam(defaultValue = "15") int pageSize
   ) {
-    Project curProject = this.projectService.getUserProjectByEntity(project);
-    model.addAttribute(curProject);
+    model.addAttribute(project);
     log.info("Found objects for project {}", project.getProjectAbbr());
     return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
   }
