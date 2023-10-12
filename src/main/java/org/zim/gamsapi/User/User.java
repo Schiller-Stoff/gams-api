@@ -32,7 +32,8 @@ public class User {
   @ToString.Exclude
   private String password;
 
-  @ManyToMany
+  // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
           name = "projects_users",
           joinColumns = @JoinColumn(name = "users_userid"),
@@ -40,7 +41,8 @@ public class User {
   )
   private List<Project> projects;
 
-  @ElementCollection
+  // // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   private Set<String> roles;
 }
