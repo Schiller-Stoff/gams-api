@@ -10,8 +10,9 @@
     <div class="webcirilo-box shadow-sm mb-1">
         <h1>GAMS projects</h1>
         <p>
-            Hi <span th:tet="${user.username}">!</span> Overview over your authorized GAMS projects.
+            Hi <b th:text="${user.username}"></b>! Overview over your authorized GAMS projects.
         </p>
+        <p>Your assigned roles: <span th:text="${user.roles}"></span></p>
     </div>
     <div class="webcirilo-box shadow-sm mb-1">
         <ul class="list-group list-group-flush" style="list-style: none;">
