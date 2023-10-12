@@ -7,6 +7,7 @@ import lombok.*;
 import org.zim.gamsapi.Project.Project;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Model representing an user in terms of user management.
@@ -38,4 +39,8 @@ public class User {
           inverseJoinColumns = @JoinColumn(name = "project_id")
   )
   private List<Project> projects;
+
+  @ElementCollection
+  @NotNull
+  private Set<String> roles;
 }
