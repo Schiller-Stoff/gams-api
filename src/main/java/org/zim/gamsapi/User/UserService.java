@@ -38,4 +38,8 @@ public class UserService implements IUserService {
     return foundUser.get();
   }
 
+  public User saveUser(User user){
+    return userRepository.save(user);
+  }
+
 }

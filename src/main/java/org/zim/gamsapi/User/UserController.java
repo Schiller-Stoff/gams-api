@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zim.gamsapi.User.interfaces.IUserService;
@@ -32,6 +33,13 @@ public class UserController {
     String authUsername = request.getRemoteUser();
     // TODO error handling here
     user = userService.findByUsername(authUsername);
+    model.addAttribute(user);
+    return "User/userprojects";
+  }
+
+  @PostMapping
+  public String createUser(User user, Model model){
+    user = userService.saveUser(user);
     model.addAttribute(user);
     return "User/userprojects";
   }
