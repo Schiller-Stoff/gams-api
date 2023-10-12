@@ -7,4 +7,6 @@ public interface IProjectService {
 
   Project saveProject(Project project);
 
+  Project findProject(String projectAbbr);
+
 }
