@@ -1,6 +1,7 @@
 package org.zim.gamsapi.System.bootstrap;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,11 +20,14 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class DigitalObjectInitializer implements CommandLineRunner {
+
+  private final String ADMIN_USERNAME = "admin";
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
@@ -35,7 +39,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
     logAvailableSystemResources();
-    initializeProjects();
+    initializeAdmin();
     // saveTestData();
   }
 
@@ -153,34 +157,46 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
   }
 
-  private void initializeProjects(){
+  private void initializeAdmin(){
 
     // added hardcoded admin user here
-    User admin = userRepository.findByUsername("admin");
-    if(admin == null){
+    Optional<User> adminOptional = userRepository.findByUsername(ADMIN_USERNAME);
+    User admin;
+    if(adminOptional.isEmpty()){
+
+      String generatedPassword = RandomStringUtils.random(20, true, true);
+
       admin = User.builder()
-              .username("admin")
+              .username(ADMIN_USERNAME)
               .password(
-                passwordEncoder.encode("admin")
+                passwordEncoder.encode(generatedPassword)
               )
+              .roles(Set.of("admin"))
               .build();
+
       userRepository.save(admin);
+
+      Project project = new Project();
+      project.setProjectAbbr("admin");
+      project.setDescription("Demo admin project");
+      project.setUsers(List.of(admin));
+
+      Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
+      if(projectOptional.isEmpty()){
+        projectRepository.save(project);
+      }
+
+      admin.setProjects(List.of(project));
+      userRepository.save(admin);
+
+      System.out.println("*** Generated admin password : " + generatedPassword);
+      log.info("*** Successfully initialized admin user and project ***");
+
+    } else {
+      log.info("*** Admin user and project already initialized. Skipping process... ***");
     }
-
-    Project project = new Project();
-    project.setProjectAbbr("admin");
-    project.setDescription("Demo admin project");
-    project.setUsers(List.of(admin));
-
-    Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
-    if(projectOptional.isEmpty()){
-      projectRepository.save(project);
-    }
-
-    admin.setProjects(List.of(project));
-    userRepository.save(admin);
-
-
   }
+
+
 
 }
