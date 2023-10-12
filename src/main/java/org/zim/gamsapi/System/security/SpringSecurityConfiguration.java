@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,10 +21,21 @@ public class SpringSecurityConfiguration {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    log.info("*** Deactivating spring security ***");
+    log.info("*** Initializing spring security config ***");
     http.authorizeHttpRequests(authorize -> {
       try {
         authorize
+                // TODO looks awful
+                // only admin is allowed to CRUD on projects + users
+                .requestMatchers( HttpMethod.POST, "/api/v1/user/**", "/api/v1/projects/**")
+                .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
+                .requestMatchers( HttpMethod.DELETE, "/api/v1/user/**", "/api/v1/projects/**")
+                .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
+                .requestMatchers( HttpMethod.PATCH, "/api/v1/user/**", "/api/v1/projects/**")
+                .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
+                .requestMatchers( HttpMethod.PUT, "/api/v1/user/**", "/api/v1/projects/**")
+                .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
+                //
                 .anyRequest()
                 .authenticated()
                 .and()
