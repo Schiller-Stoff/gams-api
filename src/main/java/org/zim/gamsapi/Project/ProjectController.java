@@ -6,6 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
+import org.zim.gamsapi.User.User;
+import org.zim.gamsapi.User.interfaces.IUserService;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -14,13 +17,26 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 public class ProjectController {
 
   private final IProjectService projectService;
+  private final IUserService userService;
 
   @PutMapping
-  public String createProject(Project project, Model model){
-    Project savedProject = projectService.saveProject(project);
-    model.addAttribute(savedProject);
+  public String createProject(Project project, User user, Model model){
+    User updatedUser = projectService.createNewProject(project, user);
+    model.addAttribute(updatedUser);
     return "User/userprojects";
   }
 
+  @DeleteMapping
+  public String deleteProject(Project project, User user, Model model){
+    user = userService.findByUsername(user.getUsername());
+    projectService.deleteProject(project);
+    List<Project> filteredProjects = user.getProjects().stream()
+            .filter(projectToFilter -> !projectToFilter.getProjectAbbr().equals(project.getProjectAbbr()))
+            .toList();
+    user.setProjects(filteredProjects);
+    userService.saveUser(user);
+    model.addAttribute(user);
+    return "User/userprojects";
+  }
 
 }
