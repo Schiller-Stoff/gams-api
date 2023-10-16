@@ -39,7 +39,7 @@ public class User {
           joinColumns = @JoinColumn(name = "users_userid"),
           inverseJoinColumns = @JoinColumn(name = "project_id")
   )
-  private List<Project> projects;
+  private Set<Project> projects;
 
   // // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
   @ElementCollection(fetch = FetchType.EAGER)

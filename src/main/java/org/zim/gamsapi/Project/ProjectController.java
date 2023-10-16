@@ -9,6 +9,8 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserService;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,9 +32,9 @@ public class ProjectController {
   public String deleteProject(Project project, User user, Model model){
     user = userService.findByUsername(user.getUsername());
     projectService.deleteProject(project);
-    List<Project> filteredProjects = user.getProjects().stream()
+    Set<Project> filteredProjects = user.getProjects().stream()
             .filter(projectToFilter -> !projectToFilter.getProjectAbbr().equals(project.getProjectAbbr()))
-            .toList();
+            .collect(Collectors.toSet());
     user.setProjects(filteredProjects);
     userService.saveUser(user);
     model.addAttribute(user);

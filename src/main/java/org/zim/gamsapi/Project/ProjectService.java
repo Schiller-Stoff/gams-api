@@ -14,6 +14,7 @@ import org.zim.gamsapi.User.interfaces.IUserRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +43,7 @@ public class ProjectService implements IProjectService {
 
     User userToSave = userOptional.get();
     // add user to project and save project
-    project.setUsers(List.of(user));
+    project.setUsers(Set.of(user));
     projectRepository.save(project);
     // add project to user and save user
     userToSave.getProjects().add(project);

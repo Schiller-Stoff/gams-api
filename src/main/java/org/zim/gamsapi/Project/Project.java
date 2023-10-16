@@ -8,6 +8,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.User.User;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class representing a GAMS project.
@@ -37,6 +38,6 @@ public class Project {
   @ManyToMany(mappedBy = "projects")
   @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @ToString.Exclude
-  private List<User> users;
+  private Set<User> users;
 
 }
