@@ -18,6 +18,13 @@ import org.springframework.util.MimeTypeUtils;
 @Slf4j
 public class SpringSecurityConfiguration {
 
+  /**
+   * Combined spring security matchers.
+   * Matches all endpoints that require an admin authorization
+   * (e.g. used along restrictions to DELETE / POST requests.)
+   */
+  private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user/**", "/api/v1/projects/**"};
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -25,15 +32,14 @@ public class SpringSecurityConfiguration {
     http.authorizeHttpRequests(authorize -> {
       try {
         authorize
-                // TODO looks awful
-                // only admin is allowed to CRUD on projects + users
-                .requestMatchers( HttpMethod.POST, "/api/v1/user/**", "/api/v1/projects/**")
+                // only admin is allowed to change projects + users
+                .requestMatchers( HttpMethod.POST, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.DELETE, "/api/v1/user/**", "/api/v1/projects/**")
+                .requestMatchers( HttpMethod.DELETE, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.PATCH, "/api/v1/user/**", "/api/v1/projects/**")
+                .requestMatchers( HttpMethod.PATCH, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.PUT, "/api/v1/user/**", "/api/v1/projects/**")
+                .requestMatchers( HttpMethod.PUT, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
                 //
                 .anyRequest()
