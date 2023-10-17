@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserService;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
