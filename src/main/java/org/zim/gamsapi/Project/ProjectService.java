@@ -88,12 +88,10 @@ public class ProjectService implements IProjectService {
               .collect(Collectors.toSet());
       foundProject.setUsers(new HashSet<>(newAssignedUsers));
       projectRepository.save(foundProject);
-
-      //TODO add removal of digital objects too?
     });
 
-    projectRepository.delete(project);
-    log.info("Successfully deleted project {}", project);
+    projectRepository.delete(foundProject);
+    log.info("Successfully deleted project {}", foundProject);
   }
 
   @Override
