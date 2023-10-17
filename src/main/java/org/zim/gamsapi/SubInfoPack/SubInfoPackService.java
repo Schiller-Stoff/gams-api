@@ -303,7 +303,7 @@ public class SubInfoPackService implements ISubInfoPackService {
    */
   private List<String> addToNullableList(@Nullable List<String> nullableList, String itemToAdd){
     if((nullableList == null) || (nullableList.size() == 0)) {
-      return List.of(itemToAdd);
+      return new ArrayList<>(List.of(itemToAdd));
     } else {
       List<String> copiedList = new ArrayList<>(nullableList);
       copiedList.add(itemToAdd);

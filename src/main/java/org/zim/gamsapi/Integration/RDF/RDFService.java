@@ -17,6 +17,7 @@ import org.zim.gamsapi.Integration.IndexingReport;
 import org.zim.gamsapi.Integration.ProcessingException;
 import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.zim.gamsapi.Integration.RDF.utils.RDFSearchProperties;
 @Service
@@ -36,7 +37,7 @@ public class RDFService implements IIntegrationService {
     });
 
     // TODO build missing indexing report
-    return List.of(new IndexingReport("demo", "nice", "haha"));
+    return new ArrayList<>(List.of(new IndexingReport("demo", "nice", "haha")));
   }
 
   @Override
@@ -67,7 +68,7 @@ public class RDFService implements IIntegrationService {
     // 02. Load datastream "RDF_TTL" and send to jena-fuseki
     indexObjectCustomRdf(digitalObject);
     // TODO construct valid indexing report.
-    return List.of(new IndexingReport("demo", "nice", "haha"));
+    return new ArrayList<>(List.of(new IndexingReport("demo", "nice", "haha")));
   }
 
   @Override
