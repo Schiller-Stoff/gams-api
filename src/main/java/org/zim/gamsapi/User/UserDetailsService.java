@@ -8,6 +8,10 @@ import org.zim.gamsapi.User.interfaces.IUserRepository;
 
 import java.util.Optional;
 
+/**
+ * Necessary for spring security workflow.
+ * Loads a user from the database and makes him/her available for the auth processes.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
