@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Project;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -36,7 +37,8 @@ public class Project {
   private String description;
 
   @ManyToMany(mappedBy = "projects")
-  @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  @JsonIgnore
+  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Set<User> users;
 
 }
