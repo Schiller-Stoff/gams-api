@@ -1,6 +1,7 @@
 package org.zim.gamsapi.User;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.zim.gamsapi.Project.Project;
@@ -25,6 +26,7 @@ public class User {
   private Long userid;
 
   @Column(nullable = false, unique = true)
+  @NotBlank
   private String username;
 
   @ToString.Exclude
