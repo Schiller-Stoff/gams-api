@@ -28,16 +28,9 @@ public class ProjectController {
   }
 
   @DeleteMapping
-  public String deleteProject(Project project, User user, Model model){
-    user = userService.findByUsername(user.getUsername());
+  @ResponseBody
+  public void deleteProject(Project project){
     projectService.deleteProject(project);
-    Set<Project> filteredProjects = user.getProjects().stream()
-            .filter(projectToFilter -> !projectToFilter.getProjectAbbr().equals(project.getProjectAbbr()))
-            .collect(Collectors.toSet());
-    user.setProjects(filteredProjects);
-    userService.saveUser(user);
-    model.addAttribute(user);
-    return "User/userprojects";
   }
 
 }
