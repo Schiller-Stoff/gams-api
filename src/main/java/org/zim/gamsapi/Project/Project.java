@@ -6,14 +6,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.User.User;
-
 import java.util.List;
 import java.util.Set;
 
 /**
  * Class representing a GAMS project.
  */
-@Data
+@Getter
+@Setter
 @Table(name = "project")
 @Entity
 @AllArgsConstructor
@@ -26,7 +26,7 @@ public class Project {
   @Column(name = "project_abbr")
   private String projectAbbr;
 
-  @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "project")
+  @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "project")
   //@Builder.Default
   @JsonManagedReference
   @ToString.Exclude
@@ -37,7 +37,6 @@ public class Project {
 
   @ManyToMany(mappedBy = "projects")
   @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  @ToString.Exclude
   private Set<User> users;
 
 }
