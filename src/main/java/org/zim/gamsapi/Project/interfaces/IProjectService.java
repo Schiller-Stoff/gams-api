@@ -7,8 +7,6 @@ public interface IProjectService {
 
   User createNewProject(Project project, User user);
 
-  Project saveProject(Project project);
-
   void deleteProject(Project project);
 
   Project findProject(String projectAbbr);

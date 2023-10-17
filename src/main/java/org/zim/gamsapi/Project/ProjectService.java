@@ -56,11 +56,6 @@ public class ProjectService implements IProjectService {
     return userToSave;
   }
 
-  @Override
-  @Transactional
-  public Project saveProject(Project project) {
-    return projectRepository.save(project);
-  }
 
   @Override
   @Transactional
