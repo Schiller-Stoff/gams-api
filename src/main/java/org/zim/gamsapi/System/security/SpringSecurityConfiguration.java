@@ -23,16 +23,21 @@ public class SpringSecurityConfiguration {
    * Matches all endpoints that require an admin authorization
    * (e.g. used along restrictions to DELETE / POST requests.)
    */
-  private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user/**", "/api/v1/projects/**"};
+  private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user**", "/api/v1/projects/**"};
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     log.info("*** Initializing spring security config ***");
+
     http.authorizeHttpRequests(authorize -> {
       try {
         authorize
                 // only admin is allowed to change projects + users
+                // but: allow all GET requests
+                .requestMatchers(HttpMethod.GET, ALL_ADMIN_AUTH_MATCHER)
+                .permitAll()
+                // auth protect state changes except if admin.
                 .requestMatchers( HttpMethod.POST, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
                 .requestMatchers( HttpMethod.DELETE, ALL_ADMIN_AUTH_MATCHER)
@@ -41,9 +46,11 @@ public class SpringSecurityConfiguration {
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
                 .requestMatchers( HttpMethod.PUT, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                //
+
+                // any request that is not defined in patterns before will require authentication!
                 .anyRequest()
                 .authenticated()
+
                 .and()
                 .httpBasic()
                 .and()
