@@ -1,14 +1,12 @@
 package org.zim.gamsapi.User;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.User.exceptions.UserNotFoundException;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import org.zim.gamsapi.User.interfaces.IUserService;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -34,10 +32,10 @@ public class UserService implements IUserService {
     }
 
     log.info("Found user {}", foundUser);
-
     return foundUser.get();
   }
 
+  @Transactional
   public User saveUser(User user){
     return userRepository.save(user);
   }
