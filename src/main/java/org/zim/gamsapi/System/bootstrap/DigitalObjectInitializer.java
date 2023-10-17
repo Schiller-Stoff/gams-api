@@ -20,10 +20,7 @@ import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -78,7 +75,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
 
     datastreamRepository.save(teiSource);
-    //teiObject.setDatastreams(List.of(teiSource));
+    //teiObject.setDatastreams(new ArrayList<>(List.of(teiSource)));
 
     DigitalObject lidoObject = DigitalObject.builder()
             .id("testlido")
@@ -87,12 +84,12 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                     MetadataBaseEntity
                             .builder()
                             .title("A LIDO object title")
-                            .creator(List.of("Sebastian David Schiller-Stoff"))
-                            .contributor(List.of("Sebastian David Schiller-Stoff", "Moria"))
+                            .creator(new ArrayList<>(List.of("Sebastian David Schiller-Stoff")))
+                            .contributor(new ArrayList<>(List.of("Sebastian David Schiller-Stoff", "Moria")))
                             .description("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
-                            .publisher(List.of("ZIM Graz", "Universität Graz"))
-                            .subject(List.of("History", "Art History"))
-                            .language(List.of("DE"))
+                            .publisher(new ArrayList<>(List.of("ZIM Graz", "Universität Graz")))
+                            .subject(new ArrayList<>(List.of("History", "Art History")))
+                            .language(new ArrayList<>(List.of("DE")))
                             .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
@@ -108,11 +105,11 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                     MetadataBaseEntity
                             .builder()
                             .title("Digital object representing a Chair of the king")
-                            .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
-                            .subject(List.of("Chemistry", "Physics", "Architecture"))
+                            .creator(new ArrayList<>(List.of("Eva Musterfrau", "Ada Lovelace")))
+                            .subject(new ArrayList<>(List.of("Chemistry", "Physics", "Architecture")))
                             .description("This source datastream contains some information about...")
-                            .language(List.of("de"))
-                            .type(List.of("Building"))
+                            .language(new ArrayList<>(List.of("de")))
+                            .type(new ArrayList<>(List.of("Building")))
                             .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
@@ -128,11 +125,11 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                     MetadataBaseEntity
                             .builder()
                             .title("An Image of something")
-                            .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
-                            .subject(List.of("Chemistry", "Physics", "Architecture"))
+                            .creator(new ArrayList<>(List.of("Eva Musterfrau", "Ada Lovelace")))
+                            .subject(new ArrayList<>(List.of("Chemistry", "Physics", "Architecture")))
                             .description("This source datastream contains some information about...")
-                            .language(List.of("de"))
-                            .type(List.of("Building"))
+                            .language(new ArrayList<>(List.of("de")))
+                            .type(new ArrayList<>(List.of("Building")))
                             .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
@@ -154,7 +151,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
     datastreamRepository.save(gmlImage);
 
-    //lidoObject.setDatastreams(List.of(lidoSource, image));
+    //lidoObject.setDatastreams(new ArrayList<>(List.of(lidoSource, image)));
     //digitalObjectRepository.save(teiObject);
     //digitalObjectRepository.save(lidoObject);
 
@@ -174,7 +171,8 @@ public class DigitalObjectInitializer implements CommandLineRunner {
       admin = User.builder()
               .username(ADMIN_USERNAME)
               .password(
-                passwordEncoder.encode(generatedPassword)
+                //passwordEncoder.encode(generatedPassword)
+                passwordEncoder.encode("admin")
               )
               .roles(new HashSet<>(Set.of(SecurityRoles.ADMINISTRATOR.name)))
               .build();
