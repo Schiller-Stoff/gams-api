@@ -1,24 +1,22 @@
 package org.zim.gamsapi.User;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.zim.gamsapi.Project.Project;
-
-import java.util.List;
 import java.util.Set;
 
 /**
  * Model representing an user in terms of user management.
  */
-@Data
 // 'user' is a reserverd keyowrd in PSQL (therefore users table)
 @Table(name = "users")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 public class User {
 
   @Id
@@ -34,11 +32,6 @@ public class User {
 
   // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
   @ManyToMany(fetch = FetchType.EAGER)
-  @JoinTable(
-          name = "projects_users",
-          joinColumns = @JoinColumn(name = "users_userid"),
-          inverseJoinColumns = @JoinColumn(name = "project_id")
-  )
   private Set<Project> projects;
 
   // // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
