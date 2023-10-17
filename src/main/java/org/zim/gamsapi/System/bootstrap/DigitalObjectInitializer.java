@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
@@ -19,6 +20,7 @@ import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -158,11 +160,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
   }
 
-  private void initializeAdmin(){
+
+  public void initializeAdmin(){
 
     // added hardcoded admin user here
     Optional<User> adminOptional = userRepository.findByUsername(ADMIN_USERNAME);
     User admin;
+
     if(adminOptional.isEmpty()){
 
       String generatedPassword = RandomStringUtils.random(20, true, true);
@@ -172,7 +176,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
               .password(
                 passwordEncoder.encode(generatedPassword)
               )
-              .roles(Set.of(SecurityRoles.ADMINISTRATOR.name))
+              .roles(new HashSet<>(Set.of(SecurityRoles.ADMINISTRATOR.name)))
               .build();
 
       userRepository.save(admin);
@@ -180,18 +184,18 @@ public class DigitalObjectInitializer implements CommandLineRunner {
       Project project = new Project();
       project.setProjectAbbr("admin");
       project.setDescription("Demo admin project");
-      project.setUsers(List.of(admin));
+      project.setUsers(new HashSet<>(Set.of(admin)));
 
       Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
       if(projectOptional.isEmpty()){
-        projectRepository.save(project);
+        project = projectRepository.save(project);
       }
 
-      admin.setProjects(List.of(project));
-      userRepository.save(admin);
+      admin.setProjects(new HashSet<>(Set.of(project)));
+      admin = userRepository.save(admin);
 
       System.out.println("*** Generated admin password : " + generatedPassword);
-      log.info("*** Successfully initialized admin user and project ***");
+      log.info("*** Successfully initialized admin user {} for project {}. Assigned project user: {} ***",admin, project.getProjectAbbr(), project.getUsers());
 
     } else {
       log.info("*** Admin user and project already initialized. Skipping process... ***");
