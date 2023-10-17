@@ -2,6 +2,7 @@ package org.zim.gamsapi.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.User.exceptions.UserNotFoundException;
@@ -22,6 +23,7 @@ import java.util.Optional;
 public class UserService implements IUserService {
 
   private final IUserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public User findByUsername(String username) {
@@ -43,6 +45,9 @@ public class UserService implements IUserService {
     Optional<User> foundUserOptional = userRepository.findByUsername(user.getUsername());
 
     if(foundUserOptional.isEmpty()) {
+      user.setPassword(
+        passwordEncoder.encode(user.getPassword())
+      );
       return userRepository.save(user);
     } else {
       log.info("Found existing user {}. Updating now...", user.getUsername());
@@ -50,6 +55,7 @@ public class UserService implements IUserService {
 
     User foundUser = foundUserOptional.get();
     user.setUserid(foundUser.getUserid());
+
     return userRepository.save(user);
   }
 
