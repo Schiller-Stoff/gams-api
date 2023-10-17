@@ -18,6 +18,7 @@ import java.util.Set;
 @Builder
 @Getter
 @Setter
+@ToString
 public class User {
 
   @Id
@@ -34,6 +35,7 @@ public class User {
 
   // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
   @ManyToMany(fetch = FetchType.EAGER)
+  @ToString.Exclude
   private Set<Project> projects;
 
   // // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
