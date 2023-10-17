@@ -2,12 +2,13 @@ package org.zim.gamsapi.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.User.exceptions.UserNotFoundException;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import org.zim.gamsapi.User.interfaces.IUserService;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -50,6 +51,13 @@ public class UserService implements IUserService {
     User foundUser = foundUserOptional.get();
     user.setUserid(foundUser.getUserid());
     return userRepository.save(user);
+  }
+
+  @Override
+  public List<User> findAll() {
+    List<User> users = new ArrayList<>();
+    userRepository.findAll().forEach(users::add);
+    return users;
   }
 
 }
