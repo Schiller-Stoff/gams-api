@@ -2,6 +2,7 @@ package org.zim.gamsapi.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.User.exceptions.UserNotFoundException;
@@ -37,6 +38,17 @@ public class UserService implements IUserService {
 
   @Transactional
   public User saveUser(User user){
+
+    Optional<User> foundUserOptional = userRepository.findByUsername(user.getUsername());
+
+    if(foundUserOptional.isEmpty()) {
+      return userRepository.save(user);
+    } else {
+      log.info("Found existing user {}. Updating now...", user.getUsername());
+    }
+
+    User foundUser = foundUserOptional.get();
+    user.setUserid(foundUser.getUserid());
     return userRepository.save(user);
   }
 
