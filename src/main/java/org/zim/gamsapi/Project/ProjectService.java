@@ -11,9 +11,8 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.exceptions.UserNotFoundException;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,5 +95,12 @@ public class ProjectService implements IProjectService {
       log.error(msg);
       return new ProjectNotFoundException(msg);
     });
+  }
+
+  @Override
+  public List<Project> findAll() {
+    List<Project> projects = new ArrayList<>();
+    projectRepository.findAll().forEach(projects::add);
+    return projects;
   }
 }

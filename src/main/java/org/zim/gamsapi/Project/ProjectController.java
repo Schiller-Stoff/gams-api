@@ -7,30 +7,33 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.User.User;
-import org.zim.gamsapi.User.interfaces.IUserService;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/v1/projects/{projectAbbr}", "/api/v1/projects/{projectAbbr}/"})
+@RequestMapping({"/api/v1/projects", "/api/v1/projects/"})
 public class ProjectController {
 
   private final IProjectService projectService;
-  private final IUserService userService;
 
-  @PutMapping
+  @PutMapping(path = "/{projectAbbr}")
   public String createProject(Project project, User user, Model model){
     User updatedUser = projectService.createNewProject(project, user);
     model.addAttribute(updatedUser);
     return "User/userprojects";
   }
 
-  @DeleteMapping
+  @DeleteMapping(path = "/{projectAbbr}")
   @ResponseBody
   public void deleteProject(Project project){
     projectService.deleteProject(project);
+  }
+
+  @GetMapping
+  @ResponseBody
+  public List<Project> showProjects(){
+    return projectService.findAll();
   }
 
 }
