@@ -66,4 +66,15 @@ public class UserService implements IUserService {
     return users;
   }
 
+  @Override
+  @Transactional
+  public void deleteByUsername(String username) {
+    userRepository.findByUsername(username).orElseThrow(() -> {
+      String msg = String.format("Cannot delete a user that doesn't exist. Failed to find user with name %s", username);
+      log.error(msg);
+      return new UserNotFoundException(msg);
+    });
+    userRepository.deleteUserByUsername(username);
+  }
+
 }

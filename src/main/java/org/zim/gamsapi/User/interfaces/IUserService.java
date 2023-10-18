@@ -18,4 +18,6 @@ public interface IUserService {
 
   List<User> findAll();
 
+  void deleteByUsername(String username);
+
 }
