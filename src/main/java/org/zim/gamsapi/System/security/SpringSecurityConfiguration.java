@@ -25,6 +25,8 @@ public class SpringSecurityConfiguration {
    */
   private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user**", "/api/v1/projects/**"};
 
+  private final String[] PUBLIC_GET_PATHS = {"/api/v1**", "/api/v1/**"};
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -35,7 +37,7 @@ public class SpringSecurityConfiguration {
         authorize
                 // only admin is allowed to change projects + users
                 // but: allow all GET requests
-                .requestMatchers(HttpMethod.GET, ALL_ADMIN_AUTH_MATCHER)
+                .requestMatchers(HttpMethod.GET, "/**")
                 .permitAll()
                 // auth protect state changes except if admin.
                 .requestMatchers( HttpMethod.POST, ALL_ADMIN_AUTH_MATCHER)
