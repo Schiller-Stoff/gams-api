@@ -12,20 +12,19 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * Domain object representing a digital object in sense of OAIS.
  */
 @Entity
 @Table(name = "digital_object")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Getter
+@Setter
 public class DigitalObject {
 
   /**
@@ -46,7 +45,8 @@ public class DigitalObject {
    * A digital object can contain other digital objects.
    */
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-  private Set<DigitalObject> childObjects;
+  @NotNull
+  private Set<DigitalObject> childObjects = new HashSet<>();
 
   /**
    * Content Model representation
@@ -87,4 +87,16 @@ public class DigitalObject {
   @Temporal(TemporalType.TIMESTAMP)
   private Date published;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    DigitalObject that = (DigitalObject) o;
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }
