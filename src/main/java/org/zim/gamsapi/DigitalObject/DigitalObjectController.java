@@ -14,6 +14,9 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = {"/api/v1/projects/{projectAbbr}/objects", "/api/v1/projects/{projectAbbr}/objects/"})
@@ -91,12 +94,19 @@ public class DigitalObjectController {
   @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
           DigitalObject digitalObject,
+          @RequestParam Optional<Set<String>> childObjects,
           Project project,
           Model model,
           @RequestHeader Map<String, String> requestHeader
   ) {
     // project membership is not automatically bound by spring.
     digitalObject.setProject(project);
+    // assign child objects if available
+    childObjects
+      .ifPresent(
+        strings -> digitalObject.setChildObjects(strings.stream().map(id -> DigitalObject.builder().id(id).build()).collect(Collectors.toSet()))
+      );
+
     DigitalObject savedObject = digitalObjectService.save(digitalObject);
     model.addAttribute("do", savedObject);
     log.info("Created object {} for project {}", savedObject, project);
