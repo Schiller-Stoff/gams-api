@@ -15,6 +15,7 @@ import org.zim.gamsapi.Project.Project;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Domain object representing a digital object in sense of OAIS.
@@ -39,6 +40,12 @@ public class DigitalObject {
   @Builder.Default
   @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private List<Datastream> datastreams = new ArrayList<>();
+
+  /**
+   * A digital object can contain other digital objects.
+   */
+  @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private Set<DigitalObject> childObjects;
 
   /**
    * Content Model representation
