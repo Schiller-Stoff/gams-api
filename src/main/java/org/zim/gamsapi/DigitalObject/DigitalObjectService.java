@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.Project;
@@ -32,6 +33,14 @@ public class DigitalObjectService implements IDigitalObjectService {
               return new ProjectNotFoundException(msg);
             }
     );
+
+    // throw if child objects contain a self reference
+    if(digitalObject.getChildObjects().contains(digitalObject)){
+      String msg = String.format("Detected self reference in digital object's child objects. At digital object with pid: %s", digitalObject.getId());
+      log.error(msg);
+      throw new DigitalObjectChildSelfReferenceException(msg);
+    }
+
     return digitalObjectRepository.save(digitalObject);
   }
 
