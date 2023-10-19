@@ -45,7 +45,7 @@ public class DigitalObject {
   /**
    * A digital object can contain other digital objects.
    */
-  @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+  @OneToMany
   @NotNull
   private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
 
