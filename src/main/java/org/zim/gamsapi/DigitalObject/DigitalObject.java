@@ -25,6 +25,7 @@ import java.util.*;
 @Builder
 @Getter
 @Setter
+@ToString
 public class DigitalObject {
 
   /**
@@ -46,7 +47,7 @@ public class DigitalObject {
    */
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
   @NotNull
-  private Set<DigitalObject> childObjects = new HashSet<>();
+  private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
 
   /**
    * Content Model representation
