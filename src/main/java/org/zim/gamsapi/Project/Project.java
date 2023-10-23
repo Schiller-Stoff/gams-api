@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.User.User;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -28,10 +28,10 @@ public class Project {
   private String projectAbbr;
 
   @OneToMany(cascade = {CascadeType.REMOVE}, orphanRemoval = true, mappedBy = "project")
-  //@Builder.Default
+  @Builder.Default
   @JsonManagedReference
   @ToString.Exclude
-  private List<DigitalObject> digitalObjects;
+  private Set<DigitalObject> digitalObjects = new HashSet<>();
 
   @Column(name = "description")
   private String description;
