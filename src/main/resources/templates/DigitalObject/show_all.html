@@ -166,11 +166,11 @@
             <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.title'">dc:title</a>
           </th>
           <th scope="col">
-            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.date'">dc:date</a>
+            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=created'">created</a>
           </th>
-          <th scope="col">
-            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>
-          </th>
+<!--          <th scope="col">-->
+<!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
+<!--          </th>-->
           <th scope="col">Delete</th>
           <th scope="col">Integrate</th>
         </tr>
@@ -184,8 +184,8 @@
                   th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"
           ></a></td>
           <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.title}"></span></td>
-          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.date}"></span></td>
-          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>
+          <td><span th:if="${do.baseMetadata}" th:text="${do.created}"></span></td>
+<!--          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>-->
           <td><div>
             <!--<a th:href="${do.metaAddress}" target="_blank">Fedora6 profile</a> -->
             <form
