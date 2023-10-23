@@ -257,32 +257,18 @@ public class SubInfoPackService implements ISubInfoPackService {
       // TODO mapping could be done via jackson!!!!
       switch (child.getNodeName()){
         case "dh:title" -> metadataBaseEntity.setTitle(nodeValue);
-        case "dh:creator" -> metadataBaseEntity.setCreator(
-            addToNullableList(metadataBaseEntity.getCreator(), nodeValue)
-          );
+        case "dh:creator" -> metadataBaseEntity.setCreator(nodeValue);
         case "dh:description" -> metadataBaseEntity.setDescription(nodeValue);
-        case "dh:subject" -> metadataBaseEntity.setSubject(
-            addToNullableList(metadataBaseEntity.getSubject(), nodeValue)
-        );
-        case "dh:publisher" -> metadataBaseEntity.setPublisher(
-            addToNullableList(metadataBaseEntity.getPublisher(), nodeValue)
-        );
-        case "dh:contributor" -> metadataBaseEntity.setContributor(
-            addToNullableList(metadataBaseEntity.getContributor(), nodeValue)
-        );
-        case "dh:date" -> metadataBaseEntity.setDate(addToNullableList(metadataBaseEntity.getDate(), nodeValue));
-        case "dh:type" -> metadataBaseEntity.setType(
-            addToNullableList(metadataBaseEntity.getType(), nodeValue)
-        );
-        case "dh:format" -> metadataBaseEntity.setFormat(addToNullableList(metadataBaseEntity.getFormat(), nodeValue));
-        case "dh:source" -> metadataBaseEntity.setSource(addToNullableList(metadataBaseEntity.getSource(), nodeValue));
-        case "dh:language" -> metadataBaseEntity.setLanguage(addToNullableList(metadataBaseEntity.getLanguage(), nodeValue));
-        case "dh:relation" -> metadataBaseEntity.setRelation(
-            addToNullableList(metadataBaseEntity.getRelation(), nodeValue)
-        );
-        case "dh:coverage" -> metadataBaseEntity.setCoverage(
-            addToNullableList(metadataBaseEntity.getCoverage(), nodeValue)
-        );
+        //case "dh:subject" -> metadataBaseEntity.setSubject(addToNullableList(metadataBaseEntity.getSubject(), nodeValue));
+        case "dh:publisher" -> metadataBaseEntity.setPublisher(nodeValue);
+        //case "dh:contributor" -> metadataBaseEntity.setContributor(addToNullableList(metadataBaseEntity.getContributor(), nodeValue));
+        //case "dh:date" -> metadataBaseEntity.setDate(addToNullableList(metadataBaseEntity.getDate(), nodeValue));
+        //case "dh:type" -> metadataBaseEntity.setType(addToNullableList(metadataBaseEntity.getType(), nodeValue));
+        //case "dh:format" -> metadataBaseEntity.setFormat(addToNullableList(metadataBaseEntity.getFormat(), nodeValue));
+        //case "dh:source" -> metadataBaseEntity.setSource(addToNullableList(metadataBaseEntity.getSource(), nodeValue));
+        //case "dh:language" -> metadataBaseEntity.setLanguage(addToNullableList(metadataBaseEntity.getLanguage(), nodeValue));
+        //case "dh:relation" -> metadataBaseEntity.setRelation(addToNullableList(metadataBaseEntity.getRelation(), nodeValue));
+        //case "dh:coverage" -> metadataBaseEntity.setCoverage(addToNullableList(metadataBaseEntity.getCoverage(), nodeValue));
         case "dh:rights" -> metadataBaseEntity.setRights(nodeValue);
         default -> log.warn("Metadata.xml ingest processing: Skipping unrecognized element {} with value {}", child.getNodeName(), nodeValue);
       }
