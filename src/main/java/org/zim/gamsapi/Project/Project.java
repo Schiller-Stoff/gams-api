@@ -8,6 +8,7 @@ import lombok.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.User.User;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -41,4 +42,16 @@ public class Project {
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Set<User> users;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Project project = (Project) o;
+    return Objects.equals(projectAbbr, project.projectAbbr);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(projectAbbr);
+  }
 }
