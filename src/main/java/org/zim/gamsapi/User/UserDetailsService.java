@@ -1,6 +1,7 @@
 package org.zim.gamsapi.User;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.zim.gamsapi.User.exceptions.UserNotFoundException;
@@ -14,6 +15,7 @@ import java.util.Optional;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
 
   private final IUserRepository userRepository;
@@ -22,7 +24,9 @@ public class UserDetailsService implements org.springframework.security.core.use
   public UserDetails loadUserByUsername(String username) throws UserNotFoundException {
     Optional<User> user = userRepository.findByUsername(username);
     if (user.isEmpty()) {
-      throw new UserNotFoundException(username);
+      String msg = String.format("Cannot find user with name %s inside database layer.", username);
+      log.error(msg);
+      throw new UserNotFoundException(msg);
     }
     return new UserPrincipal(user.get());
   }
