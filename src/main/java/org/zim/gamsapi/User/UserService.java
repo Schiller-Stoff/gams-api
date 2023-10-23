@@ -50,7 +50,7 @@ public class UserService implements IUserService {
       );
       return userRepository.save(user);
     } else {
-      log.info("Found existing user {}. Updating now...", user.getUsername());
+      log.info("Found existing user with name {}. Updating now... {}", user.getUsername(), user);
     }
 
     User foundUser = foundUserOptional.get();
