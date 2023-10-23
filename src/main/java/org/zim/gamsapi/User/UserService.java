@@ -43,11 +43,10 @@ public class UserService implements IUserService {
   public User saveUser(User user){
 
     Optional<User> foundUserOptional = userRepository.findByUsername(user.getUsername());
+    // encode incoming password (no matter what)
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
 
     if(foundUserOptional.isEmpty()) {
-      user.setPassword(
-        passwordEncoder.encode(user.getPassword())
-      );
       return userRepository.save(user);
     } else {
       log.info("Found existing user with name {}. Updating now... {}", user.getUsername(), user);
