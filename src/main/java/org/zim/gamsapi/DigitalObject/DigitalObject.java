@@ -47,6 +47,7 @@ public class DigitalObject {
    */
   @OneToMany
   @NotNull
+  @Builder.Default
   private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
 
   /**
@@ -55,7 +56,29 @@ public class DigitalObject {
   @Column(name = "object_type")
   private String objectType;
 
+  /**
+   * Date of publication
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date published;
 
+  /**
+   * Creation date of the digital object / datastream
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreationTimestamp
+  private Date created;
+
+  /**
+   * Last modified date of the digital object / datatream
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @UpdateTimestamp
+  private Date modified;
+
+  /**
+   * Project to which the digital object belongs to
+   */
   @ManyToOne
   @JsonBackReference
   @NotNull
@@ -67,26 +90,6 @@ public class DigitalObject {
   @AttributeOverride(name = "description", column = @Column(length = 2000))
   @Valid  // Add Bean validation to embedded tables
   private MetadataBaseEntity baseMetadata;
-
-  /**
-   * Creation date of the digital object
-   */
-  @Temporal(TemporalType.TIMESTAMP)
-  @CreationTimestamp
-  private Date created;
-
-  /**
-   * Last modified date of the digital object
-   */
-  @Temporal(TemporalType.TIMESTAMP)
-  @UpdateTimestamp
-  private Date modified;
-
-  /**
-   * Date of publication
-   */
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date published;
 
   @Override
   public boolean equals(Object o) {
