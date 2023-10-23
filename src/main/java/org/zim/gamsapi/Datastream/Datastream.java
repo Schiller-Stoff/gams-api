@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
+import java.util.Date;
 
 /**
  * Domain class for datastream domain objects.
@@ -58,9 +61,26 @@ public class Datastream {
   @Column(name = "file_name")
   private String fileName;
 
+  @Column
+  private Long size;
 
+  @Column
+  private String type;
 
-  private String metaAddress = "DEFAULT_VALUE";
+  /**
+   * Creation date of the digital object / datastream
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreationTimestamp
+  private Date created;
+
+  /**
+   * Last modified date of the digital object / datatream
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @UpdateTimestamp
+  private Date modified;
+
 
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity
