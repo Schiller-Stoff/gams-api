@@ -7,7 +7,9 @@ package org.zim.gamsapi.System.configproperties;
  */
 public enum GAMSAPIProperties {
 
-  DEMO_PROJECT_ABBR("admin");
+  ADMIN_USER_NAME("admin"),
+
+  DEMO_PROJECT_ABBR("demo");
 
   public final String name;
   GAMSAPIProperties(String name){

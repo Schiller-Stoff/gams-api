@@ -14,6 +14,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
 import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
@@ -25,8 +26,6 @@ import java.util.*;
 @RequiredArgsConstructor
 @Component
 public class DigitalObjectInitializer implements CommandLineRunner {
-
-  private final String ADMIN_USERNAME = "admin";
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
@@ -160,7 +159,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   public void initializeAdmin(){
 
     // added hardcoded admin user here
-    Optional<User> adminOptional = userRepository.findByUsername(ADMIN_USERNAME);
+    Optional<User> adminOptional = userRepository.findByUsername(GAMSAPIProperties.ADMIN_USER_NAME.name);
     User admin;
 
     if(adminOptional.isEmpty()){
@@ -168,7 +167,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
       String generatedPassword = RandomStringUtils.random(20, true, true);
 
       admin = User.builder()
-              .username(ADMIN_USERNAME)
+              .username(GAMSAPIProperties.ADMIN_USER_NAME.name)
               .password(
                 //passwordEncoder.encode(generatedPassword)
                 passwordEncoder.encode("admin")
@@ -179,7 +178,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
       userRepository.save(admin);
 
       Project project = new Project();
-      project.setProjectAbbr("admin");
+      project.setProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);
       project.setDescription("Demo admin project");
       project.setUsers(new HashSet<>(Set.of(admin)));
 
