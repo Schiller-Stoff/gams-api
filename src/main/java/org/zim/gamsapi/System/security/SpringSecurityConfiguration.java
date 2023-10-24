@@ -1,5 +1,6 @@
 package org.zim.gamsapi.System.security;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,18 +13,21 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.util.MimeTypeUtils;
 
 /**
- * Conditionally enables spring security for different profiles.
+ * Spring security configuration
  */
 @Configuration
 @Slf4j
+@RequiredArgsConstructor
 public class SpringSecurityConfiguration {
+
+  private final UserProjectAuthorizationManager userProjectAuthorizationManager;
 
   /**
    * Combined spring security matchers.
    * Matches all endpoints that require an admin authorization
    * (e.g. used along restrictions to DELETE / POST requests.)
    */
-  private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user**", "/api/v1/projects/**"};
+  private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user**", "/api/v1/projects/{projectAbbr}"};
 
   private final String[] PUBLIC_GET_PATHS = {"/api/v1**", "/api/v1/**"};
 
@@ -39,7 +43,7 @@ public class SpringSecurityConfiguration {
                 // but: allow all GET requests
                 .requestMatchers(HttpMethod.GET, "/**")
                 .permitAll()
-                // auth protect state changes except if admin.
+                // authorization: protect state changes against projects + users except if admin.
                 .requestMatchers( HttpMethod.POST, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
                 .requestMatchers( HttpMethod.DELETE, ALL_ADMIN_AUTH_MATCHER)
@@ -48,11 +52,13 @@ public class SpringSecurityConfiguration {
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
                 .requestMatchers( HttpMethod.PUT, ALL_ADMIN_AUTH_MATCHER)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
+                //configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams.
+                .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**")
+                .access(userProjectAuthorizationManager)
 
                 // any request that is not defined in patterns before will require authentication!
                 .anyRequest()
                 .authenticated()
-
                 .and()
                 .httpBasic()
                 .and()
