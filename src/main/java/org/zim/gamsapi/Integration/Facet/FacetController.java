@@ -9,7 +9,7 @@ import org.zim.gamsapi.Integration.IndexingReport;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/facets", "/api/v1/integration/projects/{projectAbbr}/facets/"})
+@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/facets", "/api/v1/integration/projects/{projectAbbr}/objects/facets/"})
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -29,13 +29,13 @@ public class FacetController {
     return facetService.deleteIndexedObjects(projectAbbr);
   }
 
-  @PostMapping("/objects/{pid}")
+  @PostMapping("/{pid}")
   public List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to index object with pid {}", pid);
     return facetService.indexObject(projectAbbr, pid);
   }
 
-  @DeleteMapping("/objects/{pid}")
+  @DeleteMapping("/{pid}")
   public IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
     return facetService.deleteIndexedObject(projectAbbr, pid);

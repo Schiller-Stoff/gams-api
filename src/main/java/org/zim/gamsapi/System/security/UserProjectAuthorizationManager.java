@@ -11,7 +11,6 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.System.security.exceptions.UserAssignedToProjectButMissingEditorRoleException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
-
 import java.util.List;
 import java.util.function.Supplier;
 

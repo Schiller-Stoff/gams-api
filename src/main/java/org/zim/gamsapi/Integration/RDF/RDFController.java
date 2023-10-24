@@ -10,7 +10,7 @@ import org.zim.gamsapi.Integration.IndexingReport;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/rdf", "/api/v1/integration/projects/{projectAbbr}/rdf/"})
+@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/rdf", "/api/v1/integration/projects/{projectAbbr}/objects/rdf/"})
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -30,13 +30,13 @@ public class RDFController implements IIntegrationController {
     return rdfService.deleteIndexedObjects(projectAbbr);
   }
 
-  @PostMapping("/objects/{id}")
+  @PostMapping("/{id}")
   @Override
   public List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String id){
     return rdfService.indexObject(projectAbbr, id);
   }
 
-  @DeleteMapping("/objects/{id}")
+  @DeleteMapping("/{id}")
   @Override
   public IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String id) {
     return rdfService.deleteIndexedObject(projectAbbr, id);

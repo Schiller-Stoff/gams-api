@@ -53,7 +53,7 @@ public class SpringSecurityConfiguration {
                 .requestMatchers( HttpMethod.PUT, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
                 //configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams (including ingest)
-                .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**")
+                .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
                 .access(userProjectAuthorizationManager)
 
                 // any request that is not defined in patterns before will require authentication!

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/", "/api/v1/integration/projects/{projectAbbr}"})
+@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/", "/api/v1/integration/projects/{projectAbbr}/objects"})
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -20,7 +20,7 @@ public class IntegrationActionController {
    */
   private final List<IIntegrationService> integrationServices;
 
-  @PostMapping("/objects/{id}")
+  @PostMapping("/{id}")
   public List<IndexingReport> indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default index object {} for project {}", id, projectAbbr);
     ArrayList<IndexingReport> indexingReports = new ArrayList<>();
@@ -30,7 +30,7 @@ public class IntegrationActionController {
     return indexingReports;
   }
 
-  @DeleteMapping("/objects/{id}")
+  @DeleteMapping("/{id}")
   public List<IndexingReport> deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default delete object {} for project {}", id, projectAbbr);
     ArrayList<IndexingReport> indexingReports = new ArrayList<>();
