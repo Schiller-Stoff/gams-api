@@ -9,6 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
+import org.zim.gamsapi.System.security.exceptions.UserAssignedToProjectButMissingEditorRoleException;
+import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
+
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -57,12 +60,14 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
         log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}", username, projectAbbr, SecurityRoles.EDITOR.name, requestUri, requestMethod);
         return new AuthorizationDecision(true);
       } else {
-        log.debug("ACCESS DENIED - User {} has access to project {} BUT is missing the required {} role. Url: {}, Method: {}", username, projectAbbr, SecurityRoles.EDITOR.name, requestUri, requestMethod);
-        return new AuthorizationDecision(false);
+        String msg = String.format("ACCESS DENIED - User %s has access to project %s BUT is missing the required %s role. Url: %s, Method: %s", username, projectAbbr, SecurityRoles.EDITOR.name, requestUri, requestMethod);
+        log.debug(msg);
+        throw new UserAssignedToProjectButMissingEditorRoleException(msg);
       }
     } else {
-      log.debug("ACCESS DENIED - User {} is not authorized for project {}. Url: {}, Method: {}", username, projectAbbr, requestUri, requestMethod);
-      return new AuthorizationDecision(false);
+      String msg = String.format("ACCESS DENIED - User %s is not authorized for project %s. Url: %s, Method: %s", username, projectAbbr, requestUri, requestMethod);
+      log.debug(msg);
+      throw new UserNotAssignedToProjectException(msg);
     }
   }
 
