@@ -7,9 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
 import org.zim.gamsapi.util.container.PostgresContainer;
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class IDigitalObjectRepositoryTest {
 
     private final static String PID = "testPid";
-    private final static String PROJECT_ABBR = "testProject";
+
 
     @Autowired
     IDigitalObjectRepository repository;
@@ -50,9 +50,10 @@ class IDigitalObjectRepositoryTest {
     @BeforeEach
     public void saveTestObject() {
         repository.save(
-                new DigitalObject(
-                        PID, null, "TEI", PROJECT_ABBR, null, null, null,null
-                ));
+                DigitalObject.builder()
+                        .id(PID)
+                        .project(Project.builder().projectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name).build())
+                        .build());
     }
 
     @Test
@@ -65,8 +66,8 @@ class IDigitalObjectRepositoryTest {
                 .isNotNull()
                 .isPresent()
                 .get()
-                .extracting(DigitalObject::getId, DigitalObject::getObjectType, DigitalObject::getProjectAbbr)
-                .containsExactly(PID, "TEI", PROJECT_ABBR);
+                .extracting(DigitalObject::getId)
+                .isEqualTo(PID);
 
         assertThat(digitalObject.get().getId())
                 .isNotNull()
@@ -77,21 +78,21 @@ class IDigitalObjectRepositoryTest {
     @Order(2)
     public void testFindByProjectAbbr() {
 
-        List<DigitalObject> digitalObjects = repository.findDigitalObjectsByProjectAbbr(PROJECT_ABBR);
+        List<DigitalObject> digitalObjects = repository.findDigitalObjectsByProject_ProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);
 
         assertThat(digitalObjects)
                 .isNotNull()
                 .isExactlyInstanceOf(ArrayList.class)
                 .first()
-                .extracting(DigitalObject::getId, DigitalObject::getObjectType, DigitalObject::getProjectAbbr)
-                .containsExactly(PID, "TEI", PROJECT_ABBR);
+                .extracting(DigitalObject::getId)
+                .isEqualTo(PID);
     }
 
     @Test
     @Order(3)
     public void testDeleteAllByProjectAbbr() {
 
-        repository.deleteAllByProjectAbbr(PROJECT_ABBR);
+        repository.deleteAllByProject_ProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);
 
         Optional<DigitalObject> digitalObject = repository.findById(PID);
 
