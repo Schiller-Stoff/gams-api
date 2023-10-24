@@ -7,16 +7,14 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
-
+import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.UnitTest;
 import java.util.Set;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ConstraintViolationTest {
+public class ConstraintViolationTest extends UnitTest {
 
     private static ValidatorFactory validatorFactory;
     private static Validator validator;
@@ -30,15 +28,22 @@ public class ConstraintViolationTest {
 
     @Test
     public void shouldRaiseNoConstraintViolation() {
-        DigitalObject digitalObject = new DigitalObject("foo", null, "", "", null);
+        DigitalObject digitalObject = DigitalObject.builder()
+                .id("foo")
+                .project(Project.builder().projectAbbr("Foo").build())
+                .build();
+
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet, is(empty()));
     }
 
     @Test
-    public void shouldRaiseContraintViolationIfPidIsNull() {
-        DigitalObject digitalObject = new DigitalObject(null, null, "", "", null);
+    public void shouldRaiseConstraintViolationIfPidIsNull() {
+        DigitalObject digitalObject = DigitalObject.builder()
+                .id(null)
+                .project(Project.builder().projectAbbr("FOO").build())
+                .build();
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));
@@ -50,6 +55,6 @@ public class ConstraintViolationTest {
         MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
 
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(3));
+        assertThat(violationSet.size(), is(5));
     }
 }
