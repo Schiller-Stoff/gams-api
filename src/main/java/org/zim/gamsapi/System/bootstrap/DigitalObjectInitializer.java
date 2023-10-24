@@ -6,7 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
@@ -15,7 +14,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.System.security.SecurityRoles;
+import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
@@ -174,7 +173,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
                 //passwordEncoder.encode(generatedPassword)
                 passwordEncoder.encode("admin")
               )
-              .roles(new HashSet<>(Set.of(SecurityRoles.ADMINISTRATOR.name)))
+              .roles(new HashSet<>(Set.of(GAMSAPISecurityRoles.ADMINISTRATOR.name)))
               .build();
 
       userRepository.save(admin);

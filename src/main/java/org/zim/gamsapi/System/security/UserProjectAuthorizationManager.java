@@ -46,8 +46,8 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     String username = authorizationContext.getRequest().getRemoteUser();
 
     // administrator is allowed to do everything
-    if(userAuthorities.contains(SecurityRoles.ADMINISTRATOR.name)) {
-      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, SecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
+    if(userAuthorities.contains(GAMSAPISecurityRoles.ADMINISTRATOR.name)) {
+      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
       return new AuthorizationDecision(true);
     }
 
@@ -55,11 +55,11 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     String projectAbbr = authorizationContext.getVariables().get("projectAbbr"); //defined in request matcher in SpringSecurityConfiguration.java
     if(userAuthorities.contains(projectAbbr)){
       // grant access only if assigned project AND editor role.
-      if(userAuthorities.contains(SecurityRoles.EDITOR.name)){
-        log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}", username, projectAbbr, SecurityRoles.EDITOR.name, requestUri, requestMethod);
+      if(userAuthorities.contains(GAMSAPISecurityRoles.EDITOR.name)){
+        log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}", username, projectAbbr, GAMSAPISecurityRoles.EDITOR.name, requestUri, requestMethod);
         return new AuthorizationDecision(true);
       } else {
-        String msg = String.format("ACCESS DENIED - User %s has access to project %s BUT is missing the required %s role. Url: %s, Method: %s", username, projectAbbr, SecurityRoles.EDITOR.name, requestUri, requestMethod);
+        String msg = String.format("ACCESS DENIED - User %s has access to project %s BUT is missing the required %s role. Url: %s, Method: %s", username, projectAbbr, GAMSAPISecurityRoles.EDITOR.name, requestUri, requestMethod);
         log.debug(msg);
         throw new UserAssignedToProjectButMissingEditorRoleException(msg);
       }
