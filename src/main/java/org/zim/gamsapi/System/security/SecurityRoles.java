@@ -5,8 +5,8 @@ package org.zim.gamsapi.System.security;
  */
 public enum SecurityRoles {
 
-  ADMINISTRATOR("administrator"),
-  EDITOR("editor");
+  ADMINISTRATOR("ROLE_administrator"),
+  EDITOR("ROLE_editor");
 
   public final String name;
 
