@@ -27,7 +27,7 @@ public class SpringSecurityConfiguration {
    * Matches all endpoints that require an admin authorization
    * (e.g. used along restrictions to DELETE / POST requests.)
    */
-  private final String[] ALL_ADMIN_AUTH_MATCHER = {"/api/v1/user**", "/api/v1/projects/{projectAbbr}"};
+  private final String[] ADMIN_ONLY_PATHS = {"/api/v1/user**", "/api/v1/projects/{projectAbbr}"};
 
   private final String[] PUBLIC_GET_PATHS = {"/api/v1**", "/api/v1/**"};
 
@@ -44,15 +44,15 @@ public class SpringSecurityConfiguration {
                 .requestMatchers(HttpMethod.GET, "/**")
                 .permitAll()
                 // authorization: protect state changes against projects + users except if admin.
-                .requestMatchers( HttpMethod.POST, ALL_ADMIN_AUTH_MATCHER)
+                .requestMatchers( HttpMethod.POST, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.DELETE, ALL_ADMIN_AUTH_MATCHER)
+                .requestMatchers( HttpMethod.DELETE, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.PATCH, ALL_ADMIN_AUTH_MATCHER)
+                .requestMatchers( HttpMethod.PATCH, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.PUT, ALL_ADMIN_AUTH_MATCHER)
+                .requestMatchers( HttpMethod.PUT, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(SecurityRoles.ADMINISTRATOR.name)
-                //configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams.
+                //configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams (including ingest)
                 .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**")
                 .access(userProjectAuthorizationManager)
 

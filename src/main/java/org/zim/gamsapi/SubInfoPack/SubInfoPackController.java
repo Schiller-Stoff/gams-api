@@ -11,13 +11,13 @@ import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping({"/api/v1/projects/{projectAbbr}", "/api/v1/projects/{projectAbbr}/"})
+@RequestMapping
 @Slf4j
 public class SubInfoPackController {
 
   private final ISubInfoPackService subInfoPackService;
 
-  @PostMapping(produces = "application/json")
+  @PostMapping(produces = "application/json", path = {"/api/v1/projects/{projectAbbr}/objects/", "/api/v1/projects/{projectAbbr}/objects"})
   @ResponseBody
   public void ingestSubInfoPack(@ModelAttribute SubInfoPack subInfoPack, @RequestParam MultipartFile subInfoPackZIP){
 
