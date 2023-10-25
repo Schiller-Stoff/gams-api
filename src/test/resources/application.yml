@@ -6,3 +6,9 @@ spring:
     hibernate:
       # delete database on application startup during tests
       ddl-auto: create
+
+# ensures that testcontainers reuses started containers
+# (not sure if properties actually do something)
+testcontainers:
+  reuse:
+    enable: true
