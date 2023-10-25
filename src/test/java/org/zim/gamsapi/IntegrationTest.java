@@ -1,14 +1,12 @@
 package org.zim.gamsapi;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.zim.gamsapi.util.container.PostgresContainer;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -20,20 +18,16 @@ import org.zim.gamsapi.util.container.PostgresContainer;
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Transactional
 public abstract class IntegrationTest {
 
   // First launch postgres for all integration tests
-  static PostgreSQLContainer<?> postgres = PostgresContainer.getInstance();
+  static final PostgreSQLContainer<?> postgres;
 
-  @BeforeAll
-  static void beforeAll() {
+  // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
+  static {
+    postgres = new PostgreSQLContainer<>("postgres:13-alpine");
     postgres.start();
-  }
-
-  @AfterAll
-  static void afterAll() {
-    postgres.stop();
-    postgres.close();
   }
 
   @DynamicPropertySource
