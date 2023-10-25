@@ -14,7 +14,7 @@ import org.zim.gamsapi.IntegrationTest;
  * Like all state changing operations require authentication.
  */
 @AutoConfigureMockMvc
-public class BasicAuthenticationIT extends IntegrationTest {
+public class AuthenticationIT extends IntegrationTest {
 
 
   @Autowired
