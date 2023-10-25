@@ -39,10 +39,12 @@ public class SpringSecurityConfiguration {
     http.authorizeHttpRequests(authorize -> {
       try {
         authorize
-                // only admin is allowed to change projects + users
-                // but: allow all GET requests
+                // allow all GET requests
                 .requestMatchers(HttpMethod.GET, "/**")
                 .permitAll()
+                // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
+                .requestMatchers(request -> !request.getMethod().equals(HttpMethod.GET.name()))
+                .authenticated()
                 // authorization: protect state changes against projects + users except if admin.
                 .requestMatchers( HttpMethod.POST, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
@@ -55,10 +57,8 @@ public class SpringSecurityConfiguration {
                 //configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams (including ingest)
                 .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
                 .access(userProjectAuthorizationManager)
-
-                // any request that is not defined in patterns before will require authentication!
-                .anyRequest()
-                .authenticated()
+                //.anyRequest()
+                //.authenticated()
                 .and()
                 .httpBasic()
                 .and()
