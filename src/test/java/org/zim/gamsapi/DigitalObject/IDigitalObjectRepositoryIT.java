@@ -1,25 +1,18 @@
 package org.zim.gamsapi.DigitalObject;
 
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
-import org.zim.gamsapi.util.container.PostgresContainer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class IDigitalObjectRepositoryTest {
+class IDigitalObjectRepositoryIT extends IntegrationTest {
 
     private final static String PID = "testPid";
 
@@ -27,25 +20,6 @@ class IDigitalObjectRepositoryTest {
     @Autowired
     IDigitalObjectRepository repository;
 
-    static PostgreSQLContainer<?> postgres = PostgresContainer.getInstance();
-
-    @BeforeAll
-    static void beforeAll() {
-        postgres.start();
-    }
-
-    @AfterAll
-    static void afterAll() {
-        postgres.stop();
-        postgres.close();
-    }
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
 
     @BeforeEach
     public void saveTestObject() {
