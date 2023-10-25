@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.System.security.exceptions.UserAssignedToProjectButMissingEditorRoleException;
+import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 import java.util.List;
 import java.util.function.Supplier;
@@ -40,11 +41,15 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     }
 
     // (if user is actually available is already done via authentication workflow (UserDetailsService)
+    if(!authentication.get().isAuthenticated()){
+      String msg = String.format("User authentication is required for state changing operations on GAMS. Against url %s for method: %s", requestUri, requestMethod);
+      log.trace(msg);
+      throw new UserAuthenticationRequiredException(msg);
+    }
 
+    String username = authorizationContext.getRequest().getRemoteUser();
     // access authorities from authentication workflow
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-    String username = authorizationContext.getRequest().getRemoteUser();
-
     // administrator is allowed to do everything
     if(userAuthorities.contains(GAMSAPISecurityRoles.ADMINISTRATOR.name)) {
       log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
