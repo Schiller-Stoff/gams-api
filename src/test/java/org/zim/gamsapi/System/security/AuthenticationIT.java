@@ -7,6 +7,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
 
 
 /**
@@ -45,6 +46,14 @@ public class AuthenticationIT extends IntegrationTest {
     mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)).andExpect(
             MockMvcResultMatchers.status().isUnauthorized()
     );;
+  }
+
+  @Test
+  public void objectCreationRequiresAuthentication() throws Exception {
+    final String USER_CREATION_URL = "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/demo";
+    mockMvc.perform(MockMvcRequestBuilders.put(USER_CREATION_URL)).andExpect(
+            MockMvcResultMatchers.status().isUnauthorized()
+    );
   }
 
 }
