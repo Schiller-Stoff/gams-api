@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.Integration.IIntegrationController;
 import org.zim.gamsapi.Integration.IndexingReport;
 
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class FacetController {
+public class FacetController implements IIntegrationController {
 
   private final FacetService facetService;
 
