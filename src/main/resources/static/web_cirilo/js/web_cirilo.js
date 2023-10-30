@@ -63,10 +63,6 @@ const webCirilo = (() => {
     let url = window.location.pathname
         .replace("ingest", "");
 
-    // remove last trailing /
-    url = url.substring(0, url.length -1);
-
-
     const form = document.getElementById(formId);
 
     form.addEventListener('submit', e => {
