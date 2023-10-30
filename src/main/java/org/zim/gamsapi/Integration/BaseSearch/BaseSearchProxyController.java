@@ -32,6 +32,7 @@ public class BaseSearchProxyController implements IIntegrationProxyController {
           HttpServletRequest request
   ) {
     log.trace("*** Proxying request: {}", request.getRequestURI());
+    // proxy against read only endpoint.
     String targetUrl = String.format("%s/select", gamsConfigProperties.getFacetSearchUrl());
     return proxyService.proxy(request, body, targetUrl);
   }
