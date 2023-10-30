@@ -25,7 +25,7 @@ services:
     # optional: persist postgres data via volume
     volumes:
       # needs additional wsl config to work if under wsl and bug occurs: https://stackoverflow.com/questions/65582382/wsl2-docker-linux-permission-issue-with-volumes
-     - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
+      - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
 
   facetSearch:
     container_name: facetSearch
@@ -48,3 +48,16 @@ services:
       - "3030:3030"
     environment:
       - "FUSEKI_DATASET_1=gams"
+
+  pgadmin:
+    user: root
+    image: dpage/pgadmin4:7.8
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - ${PWD}/docker/apps/pgadmin:/var/lib/pgadmin
