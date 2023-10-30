@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Facet;
+package org.zim.gamsapi.Integration.BaseSearch;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -13,7 +13,7 @@ import java.util.Map;
  */
 @Slf4j
 @ToString
-public class Facet {
+public class BaseSearch {
 
   /**
    * JSON Any-Setter: All properties will be mapped to this map.

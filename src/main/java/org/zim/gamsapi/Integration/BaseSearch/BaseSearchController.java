@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Facet;
+package org.zim.gamsapi.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,36 +10,36 @@ import org.zim.gamsapi.Integration.IndexingReport;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/facets", "/api/v1/integration/projects/{projectAbbr}/objects/facets/"})
+@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/search", "/api/v1/integration/projects/{projectAbbr}/objects/search/"})
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class FacetController implements IIntegrationController {
+public class BaseSearchController implements IIntegrationController {
 
-  private final FacetService facetService;
+  private final BaseSearchService baseSearchService;
 
   @PostMapping
   public List<IndexingReport> indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
-    return facetService.indexObjects(projectAbbr);
+    return baseSearchService.indexObjects(projectAbbr);
   }
 
   @DeleteMapping
   public IndexingReport deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
-    return facetService.deleteIndexedObjects(projectAbbr);
+    return baseSearchService.deleteIndexedObjects(projectAbbr);
   }
 
   @PostMapping("/{pid}")
   public List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to index object with pid {}", pid);
-    return facetService.indexObject(projectAbbr, pid);
+    return baseSearchService.indexObject(projectAbbr, pid);
   }
 
   @DeleteMapping("/{pid}")
   public IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
-    return facetService.deleteIndexedObject(projectAbbr, pid);
+    return baseSearchService.deleteIndexedObject(projectAbbr, pid);
   }
 
 }

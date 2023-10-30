@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Facet;
+package org.zim.gamsapi.Integration.BaseSearch;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class SearchController {
+public class BaseSearchProxyController {
 
   private final IProxyService proxyService;
   private final GAMSDockerDNS gamsConfigProperties;

@@ -1,13 +1,13 @@
-package org.zim.gamsapi.Integration.Facet;
+package org.zim.gamsapi.Integration.BaseSearch;
 
-public enum SearchTypes {
+public enum BaseSearchTypes {
 
   DIGITAL_OBJECT("digitalObject"),
   DERIVATIVE("derivative");
 
   public final String name;
 
-  SearchTypes(String name){
+  BaseSearchTypes(String name){
     this.name = name;
   }
 }

@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Facet;
+package org.zim.gamsapi.Integration.BaseSearch;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class FacetService implements IIntegrationService {
+public class BaseSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final GAMSDockerDNS configProperties;
@@ -96,7 +96,7 @@ public class FacetService implements IIntegrationService {
     log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
 
     SolrClient client = getSolrClient();
-    String solrDeletionQuery = String.format("%s:%s",SearchProperties.PROJECT.name, projectAbbr);
+    String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
     try {
       client.deleteByQuery(solrDeletionQuery);
       client.commit();
@@ -154,7 +154,7 @@ public class FacetService implements IIntegrationService {
   @Override
   public IndexingReport deleteIndexedObject(String projectAbbr, String id) {
     SolrClient client = getSolrClient();
-    String solrDeletionQuery = String.format("%s:%s",SearchProperties.OBJECT_ID.name, id);
+    String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
     try {
       client.deleteByQuery(solrDeletionQuery);
       client.commit();
@@ -185,18 +185,18 @@ public class FacetService implements IIntegrationService {
   private SolrInputDocument createSolrInputDocument(DigitalObject digitalObject){
     SolrInputDocument solrInputDocument = new SolrInputDocument();
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-    solrInputDocument.addField(SearchProperties.ID.name, digitalObject.getId());
-    solrInputDocument.addField(SearchProperties.OBJECT_ID.name, digitalObject.getId());
-    solrInputDocument.addField(SearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+    solrInputDocument.addField(BaseSearchProperties.ID.name, digitalObject.getId());
+    solrInputDocument.addField(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+    solrInputDocument.addField(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
     // index datastream ids
-    solrInputDocument.addField(SearchProperties.DATASTREAMS.name, digitalObject.getDatastreams().stream().map(Datastream::getDsid).collect(Collectors.toList()));
-    solrInputDocument.addField(SearchProperties.TYPE.name, SearchTypes.DIGITAL_OBJECT.name);
+    solrInputDocument.addField(BaseSearchProperties.DATASTREAMS.name, digitalObject.getDatastreams().stream().map(Datastream::getDsid).collect(Collectors.toList()));
+    solrInputDocument.addField(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
 
     // index full text
     // TODO add missing validation (there must be a source_xml?)
     digitalObject.getDatastreams().stream().filter(datastream -> datastream.getDsid().equals(GamsDatastreamIds.SOURCE_DATASTREAM_ID.name)).forEach(datastream -> {
       String fulltext = XMLUtils.extractText(XMLUtils.parseXml(datastream.getData()));
-      solrInputDocument.addField(SearchProperties.FULLTEXT.name, fulltext);
+      solrInputDocument.addField(BaseSearchProperties.FULLTEXT.name, fulltext);
     });
     return solrInputDocument;
   }
@@ -219,11 +219,11 @@ public class FacetService implements IIntegrationService {
       datastream = datastreamOptional.get();
     }
 
-    Facet[] facets;
+    BaseSearch[] facets;
     ObjectMapper objectMapper = new ObjectMapper();
 
     try {
-      facets = objectMapper.readValue(datastream.getData(), Facet[].class);
+      facets = objectMapper.readValue(datastream.getData(), BaseSearch[].class);
     } catch (IOException e){
       String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
       log.error(msg);
@@ -232,9 +232,9 @@ public class FacetService implements IIntegrationService {
 
     // ensures that each solr entity = document has gams-controlled properties assigned
     Arrays.stream(facets).forEach(facet -> {
-      facet.properties.put(SearchProperties.OBJECT_ID.name, digitalObject.getId());
-      facet.properties.put(SearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-      facet.properties.put(SearchProperties.TYPE.name, SearchTypes.DERIVATIVE.name);
+      facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+      facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+      facet.properties.put(BaseSearchProperties.TYPE.name, BaseSearchTypes.DERIVATIVE.name);
       // id must be defined outside
     });
 

@@ -1,6 +1,6 @@
-package org.zim.gamsapi.Integration.Facet;
+package org.zim.gamsapi.Integration.BaseSearch;
 
-public enum SearchProperties {
+public enum BaseSearchProperties {
 
   ID("id"),
   PROJECT("_projectAbbr"),
@@ -13,7 +13,7 @@ public enum SearchProperties {
 
   public final String name;
 
-  SearchProperties(String name){
+  BaseSearchProperties(String name){
     this.name = name;
   }
 
