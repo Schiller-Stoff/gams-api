@@ -81,7 +81,7 @@ public class ProxyService implements IProxyService {
       responseHeaders.put(HttpHeaders.CONTENT_TYPE, serverResponse.getHeaders().get(HttpHeaders.CONTENT_TYPE));
       return serverResponse;
     } catch (HttpStatusCodeException e) {
-      String msg = String.format("Failed to proxy to solr via %s. Original error message: %s", targetUrl, e);
+      String msg = String.format("Failed to proxy to integrated service via %s. Original error message: %s", targetUrl, e);
       log.error(msg);
       return ResponseEntity.status(e.getRawStatusCode())
               .headers(e.getResponseHeaders())
