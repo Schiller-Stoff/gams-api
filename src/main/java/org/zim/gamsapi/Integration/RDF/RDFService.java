@@ -100,7 +100,7 @@ public class RDFService implements IIntegrationService {
    */
   private void indexObjectCustomRdf(DigitalObject digitalObject){
 
-    // 02. Load datastream "RDF_TTL" and send to jena-fuseki
+    // Load datastream "RDF_TTL" and send to jena-fuseki
     digitalObject.getDatastreams()
             .stream()
             .filter(datastream -> datastream.getDsid().toLowerCase().equals(GamsDatastreamIds.RDF_DATASTREAM_ID.name))
@@ -113,15 +113,6 @@ public class RDFService implements IIntegrationService {
                     .source(datastreamData.getInputStream())
                     .base(RDFSearchProperties.GAMS_BASE_URL.name)
                     .toModel();
-
-                // TODO think about: would be necessary to delete based on pid / project abbreviation aside from named graphs.
-                // TODO can then formulate SPARQL DELETE queries based on this properties (risk of inconsistency)
-//                Property hasProjectAbbr = rdfModel.createProperty("https://gams.uni-graz.at/ontology#hasProjectAbbr");
-//                Property hasPid = rdfModel.createProperty("https://gams.uni-graz.at/ontology#hasPid");
-//                rdfModel.listSubjects().forEach(subject -> {
-//                  subject.addProperty(hasProjectAbbr, digitalObject.getProjectAbbr());
-//                  subject.addProperty(hasPid, digitalObject.getPid());
-//                });
 
                 // create quad statements assigning the named graph of the project.
                 DatasetGraph newDatasetGraph = DatasetGraphFactory.create();
