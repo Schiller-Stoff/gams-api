@@ -98,22 +98,20 @@ public class JenaFusekiClient {
    * @return Turtle of digital object.
    */
   public String buildDefaultIndexingTriple(DigitalObject digitalObject){
-
-    //TODO refactor building of indexing triple via using the jena rdf-api
-
     StringBuilder turtle = new StringBuilder();
     turtle.append(
-            String.format("<https://gams.uni-graz.at/%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://gams.uni-graz.at/ontology#digitalObject> <https://gams.uni-graz.at/%s>.", digitalObject.getId(), digitalObject.getId())
+            String.format("<SERVER_REPLACEMENT/%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <SERVER_REPLACEMENT/ontology#digitalObject> <SERVER_REPLACEMENT/%s>.", digitalObject.getId(), digitalObject.getId())
     );
-    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_ID.name, digitalObject.getId(), digitalObject.getId()));
+    turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_ID.name, digitalObject.getId(), digitalObject.getId()));
 
-    turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProject().getProjectAbbr(), digitalObject.getId()));
+    turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProject().getProjectAbbr(), digitalObject.getId()));
 
     digitalObject.getDatastreams().forEach(datastream -> {
-      turtle.append(String.format("<https://gams.uni-graz.at/%s> %s \"%s\" <https://gams.uni-graz.at/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
+      turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
     });
 
-    return turtle.toString();
+    // replace server names to the defined via enums.
+    return turtle.toString().replaceAll("SERVER_REPLACEMENT", RDFSearchProperties.GAMS_BASE_URL.name);
   }
 
 }
