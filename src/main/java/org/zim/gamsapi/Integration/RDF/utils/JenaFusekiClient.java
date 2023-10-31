@@ -33,14 +33,10 @@ public class JenaFusekiClient {
    * @param digitalObject needed for context information in logging.
    * @param turtle turtle as string to be posted.
    */
-  public void postNQuads(DigitalObject digitalObject, String turtle) {
+  public void postNQuads(DigitalObject digitalObject, String turtle) throws ProcessingException {
 
     HttpHeaders httpHeaders = new HttpHeaders();
-    // TODO reminder: fuseki needs special content-types, like text/turtle or json+ld to handle triple processing
-    // standard content-types like text/plain will not work
-    // atm only text/turtle allowed!
-    // TODO enum for content-type?
-    httpHeaders.add("content-type", "text/n-quads");
+    httpHeaders.add(HttpHeaders.CONTENT_TYPE, RDFHttpContentTypes.TEXT_N_QUADS.name);
     HttpEntity<String> request = new HttpEntity<>(turtle, httpHeaders);
 
     ResponseEntity<String> response;
