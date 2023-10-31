@@ -14,7 +14,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionType;
-import org.zim.gamsapi.Integration.Common.enums.GamsDatastreamIds;
+import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
@@ -105,7 +105,7 @@ public class RDFService implements IIntegrationService {
     // Load datastream "RDF_TTL" and send to jena-fuseki
     digitalObject.getDatastreams()
             .stream()
-            .filter(datastream -> datastream.getDsid().toLowerCase().equals(GamsDatastreamIds.RDF_DATASTREAM_ID.name))
+            .filter(datastream -> datastream.getDsid().toLowerCase().equals(GAMSAPIntegrationDatastreamId.RDF_DATASTREAM_ID.name))
             .forEach(datastream -> {
               Resource datastreamData = new ByteArrayResource(datastream.getData());
               try {

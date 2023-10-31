@@ -22,7 +22,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionType;
-import org.zim.gamsapi.Integration.Common.enums.GamsDatastreamIds;
+import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
@@ -200,7 +200,7 @@ public class BaseSearchService implements IIntegrationService {
 
     // index full text
     // TODO add missing validation (there must be a source_xml?)
-    digitalObject.getDatastreams().stream().filter(datastream -> datastream.getDsid().equals(GamsDatastreamIds.SOURCE_DATASTREAM_ID.name)).forEach(datastream -> {
+    digitalObject.getDatastreams().stream().filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SOURCE_DATASTREAM_ID.name)).forEach(datastream -> {
       String fulltext = XMLUtils.extractText(XMLUtils.parseXml(datastream.getData()));
       solrInputDocument.addField(BaseSearchProperties.FULLTEXT.name, fulltext);
     });
@@ -214,7 +214,7 @@ public class BaseSearchService implements IIntegrationService {
    * @param digitalObject digital object to be indexed
    */
   private void postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
-    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GamsDatastreamIds.SOLR_DATASTREAM_ID.name)).findFirst();
+    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SOLR_DATASTREAM_ID.name)).findFirst();
     Datastream datastream;
     if(datastreamOptional.isEmpty()) {
       // if no search.json - skip processing
