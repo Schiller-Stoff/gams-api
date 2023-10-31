@@ -71,10 +71,8 @@ public class BaseSearchService implements IIntegrationService {
       }
 
       try {
-        postSolrDatastream(digitalObject);
-        facetsDatastreamReports.add(
-                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS,"Indexed facets datastream for digital object " + digitalObject.getId())
-        );
+        IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
+        facetsDatastreamReports.add(integrationActionReport);
       } catch (ProcessingException e){
         // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
         String msg = String.format("Failed indexing facets datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
@@ -143,10 +141,8 @@ public class BaseSearchService implements IIntegrationService {
 
     // posts custom search datastream
     try {
-      postSolrDatastream(digitalObject);
-      String msg = String.format("Successfully index facets datastream of digital object %s", digitalObject.getId());
-      log.info(msg);
-      indexingReports.add(new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg));
+      IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
+      indexingReports.add(integrationActionReport);
     } catch (ProcessingException e){
       String msg = String.format("Failed to index facets datastream of digital object %s. Root cause: %s", digitalObject.getId(), e);
       log.error(msg);
@@ -213,14 +209,14 @@ public class BaseSearchService implements IIntegrationService {
    * and valid.
    * @param digitalObject digital object to be indexed
    */
-  private void postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
+  private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
     Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)).findFirst();
     Datastream datastream;
     if(datastreamOptional.isEmpty()) {
       // if no search.json - skip processing
-      String msg = String.format("Failed / Skipped  indexing custom facets datastream because none found at digital object %s", digitalObject.getId());
-      log.error(msg);
-      throw new ProcessingException(msg);
+      String msg = String.format("Skipped indexing custom search datastream because none found at digital object %s", digitalObject.getId());
+      log.debug(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
     } else {
       datastream = datastreamOptional.get();
     }
@@ -278,7 +274,9 @@ public class BaseSearchService implements IIntegrationService {
       log.error(msg);
       throw new ProcessingException(msg);
     } else {
-      log.trace("Successfully posted custom solr xml datastream for object {} to  solr instance. Response status code: {}", digitalObject.getId(), response.getStatusCode());
+      String msg = String.format("Successfully posted custom search xml datastream for object %s to solr instance. Response status code: %s", digitalObject.getId(), response.getStatusCode());
+      log.trace(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
     }
 
   }
