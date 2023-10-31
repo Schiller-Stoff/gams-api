@@ -8,7 +8,7 @@ package org.zim.gamsapi.Integration.RDF.utils;
 public enum RDFSearchProperties {
 
   /**
-   * Base URI / root of GAMS triples
+   * Base URI / root of GAMS triples. WITHOUT trailing slash.
    */
   GAMS_BASE_URL("https://gams.uni-graz.at"),
 
