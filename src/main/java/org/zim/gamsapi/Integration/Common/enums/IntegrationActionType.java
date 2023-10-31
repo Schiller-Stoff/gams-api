@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Common;
+package org.zim.gamsapi.Integration.Common.enums;
 
 /**
  * Represents the type of the integration action -- e.g. create object indices.

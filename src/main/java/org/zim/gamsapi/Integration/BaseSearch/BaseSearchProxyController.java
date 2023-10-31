@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.zim.gamsapi.Integration.IIntegrationProxyController;
+import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationProxyController;
 import org.zim.gamsapi.System.IProxyService;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 

@@ -12,7 +12,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.Integration.ProcessingException;
+import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 

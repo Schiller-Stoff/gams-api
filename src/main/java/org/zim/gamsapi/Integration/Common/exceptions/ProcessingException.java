@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;

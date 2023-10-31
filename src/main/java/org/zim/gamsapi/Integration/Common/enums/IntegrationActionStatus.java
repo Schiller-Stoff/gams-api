@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Common;
+package org.zim.gamsapi.Integration.Common.enums;
 
 /**
  * Representing the status of an indexing operation per digital object via gams-api.

@@ -1,4 +1,6 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common.interfaces;
+
+import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 
 import java.util.List;
 

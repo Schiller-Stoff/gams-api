@@ -1,9 +1,10 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

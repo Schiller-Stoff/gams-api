@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common.enums;
 
 /**
  * Contains specific datastream ids for GAMS CMS.

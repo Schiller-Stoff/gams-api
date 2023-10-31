@@ -1,10 +1,10 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
-import org.zim.gamsapi.Integration.Common.IntegrationActionStatus;
-import org.zim.gamsapi.Integration.Common.IntegrationActionType;
+import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
+import org.zim.gamsapi.Integration.Common.enums.IntegrationActionType;
 
 /**
  * Basic report for indexing status.

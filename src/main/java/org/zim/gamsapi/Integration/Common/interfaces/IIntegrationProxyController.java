@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common.interfaces;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;

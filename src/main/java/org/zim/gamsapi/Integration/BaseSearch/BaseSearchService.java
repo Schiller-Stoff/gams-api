@@ -17,11 +17,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.Integration.*;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.Integration.Common.IntegrationActionStatus;
-import org.zim.gamsapi.Integration.Common.IntegrationActionType;
+import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
+import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
+import org.zim.gamsapi.Integration.Common.enums.IntegrationActionType;
+import org.zim.gamsapi.Integration.Common.enums.GamsDatastreamIds;
+import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
+import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
+import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;

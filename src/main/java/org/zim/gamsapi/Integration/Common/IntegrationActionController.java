@@ -1,9 +1,10 @@
-package org.zim.gamsapi.Integration;
+package org.zim.gamsapi.Integration.Common;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 
 import java.util.ArrayList;
 import java.util.List;
