@@ -77,19 +77,17 @@ public class JenaFusekiClient {
       String postUrl = configProperties.getTriplestoreUrl();
       response = restTemplate.postForEntity(postUrl, request, String.class);
     } catch (RestClientException e){
-      // TODO refactor logging message
       String msg = String.format("Failed to post SPARQL to triplestore instance. Context: %s. Cause: %s Original error message: %s", context, e.getMessage(), e);
       log.error(msg);
       throw new ProcessingException(msg);
     }
 
     if(response.getStatusCode().isError()){
-      // TODO refactor logging message
-      String msg = String.format("Failed to post custom rdf datastream to triplestore instance for object %s Response status code: %s", context, response.getStatusCode());
+      String msg = String.format("Failed to post custom rdf datastream to triplestore instance in context %s Response status code: %s", context, response.getStatusCode());
       log.error(msg);
       throw new ProcessingException(msg);
     } else {
-      log.trace("Successfully posted custom rdf datastream for object {} to  fuseki instance. Response status code: {}", context, response.getStatusCode());
+      log.trace("Successfully posted custom rdf datastream in context {} to  fuseki instance. Response status code: {}", context, response.getStatusCode());
     }
 
   }
