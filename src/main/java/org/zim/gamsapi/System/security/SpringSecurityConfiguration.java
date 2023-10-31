@@ -42,6 +42,9 @@ public class SpringSecurityConfiguration {
                 // allow all GET requests
                 .requestMatchers(HttpMethod.GET, "/**")
                 .permitAll()
+                // allow post requests against specific integration api endpoints (because: might get queries via POST)
+                .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
+                .permitAll()
                 // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
                 .requestMatchers(request -> !request.getMethod().equals(HttpMethod.GET.name()))
                 .authenticated()
@@ -54,7 +57,7 @@ public class SpringSecurityConfiguration {
                 .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
                 .requestMatchers( HttpMethod.PUT, ADMIN_ONLY_PATHS)
                 .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
-                //configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams (including ingest)
+                // configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams (including ingest)
                 .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
                 .access(userProjectAuthorizationManager)
                 //.anyRequest()
