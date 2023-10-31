@@ -21,9 +21,9 @@ public class IntegrationActionController {
   private final List<IIntegrationService> integrationServices;
 
   @PostMapping("/{id}")
-  public List<IndexingReport> indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
+  public List<IntegrationActionReport> indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default index object {} for project {}", id, projectAbbr);
-    ArrayList<IndexingReport> indexingReports = new ArrayList<>();
+    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
       indexingReports.addAll(integrationService.indexObject(projectAbbr, id));
     });
@@ -31,9 +31,9 @@ public class IntegrationActionController {
   }
 
   @DeleteMapping("/{id}")
-  public List<IndexingReport> deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
+  public List<IntegrationActionReport> deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default delete object {} for project {}", id, projectAbbr);
-    ArrayList<IndexingReport> indexingReports = new ArrayList<>();
+    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
       indexingReports.add(integrationService.deleteIndexedObject(projectAbbr, id));
     });
@@ -41,9 +41,9 @@ public class IntegrationActionController {
   }
 
   @PostMapping
-  public List<IndexingReport> indexProjectObjects(@PathVariable String projectAbbr){
+  public List<IntegrationActionReport> indexProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying now to default index all objects for project {}", projectAbbr);
-    ArrayList<IndexingReport> indexingReports = new ArrayList<>();
+    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
       indexingReports.addAll(integrationService.indexObjects(projectAbbr));
     });
@@ -51,9 +51,9 @@ public class IntegrationActionController {
   }
 
   @DeleteMapping
-  public List<IndexingReport> deleteProjectIndices(@PathVariable String projectAbbr){
+  public List<IntegrationActionReport> deleteProjectIndices(@PathVariable String projectAbbr){
     log.trace("*** Trying now to default delete all indices of objects for project {}", projectAbbr);
-    ArrayList<IndexingReport> indexingReports = new ArrayList<>();
+    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
       indexingReports.add(integrationService.deleteIndexedObjects(projectAbbr));
     });

@@ -9,12 +9,12 @@ import java.util.List;
  */
 public interface IIntegrationController {
 
-  List<IndexingReport> indexProjectObjects(@PathVariable String projectAbbr);
+  List<IntegrationActionReport> indexProjectObjects(@PathVariable String projectAbbr);
 
-  IndexingReport deleteProjectObjects(@PathVariable String projectAbbr);
+  IntegrationActionReport deleteProjectObjects(@PathVariable String projectAbbr);
 
-  List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid);
+  List<IntegrationActionReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid);
 
-  IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid);
+  IntegrationActionReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid);
 
 }

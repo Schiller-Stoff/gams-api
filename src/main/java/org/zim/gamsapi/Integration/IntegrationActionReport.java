@@ -11,7 +11,7 @@ import lombok.ToString;
 @Data
 @ToString
 @AllArgsConstructor
-public class IndexingReport {
+public class IntegrationActionReport {
   private String projectAbbr;
   private String indexingStatus;
   private String indexingMessage;

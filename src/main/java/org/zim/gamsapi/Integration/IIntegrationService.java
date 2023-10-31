@@ -12,14 +12,14 @@ public interface IIntegrationService {
   /**
    * Indexes digital objects of given project
    */
-  List<IndexingReport> indexObjects(String projectAbbr);
+  List<IntegrationActionReport> indexObjects(String projectAbbr);
 
 
   /**
    * Deletes all data dependent on the digital objects, like direct
    * representations of the object AND derived entities, like persons, etc.
    */
-  IndexingReport deleteIndexedObjects(String projectAbbr);
+  IntegrationActionReport deleteIndexedObjects(String projectAbbr);
 
   /**
    * Indexes a single object
@@ -27,7 +27,7 @@ public interface IIntegrationService {
    * @param id id of the object to be indexed
    * @return IndexingReport
    */
-  List<IndexingReport> indexObject(String projectAbbr, String id);
+  List<IntegrationActionReport> indexObject(String projectAbbr, String id);
 
   /**
    * Deletes a single object from the a database alongside dependent entities, like persons etc.
@@ -35,6 +35,6 @@ public interface IIntegrationService {
    * @param id id of the object to be deleted
    * @return IndexingReport
    */
-  IndexingReport deleteIndexedObject(String projectAbbr, String id);
+  IntegrationActionReport deleteIndexedObject(String projectAbbr, String id);
 
 }

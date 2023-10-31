@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Integration.IIntegrationController;
-import org.zim.gamsapi.Integration.IndexingReport;
+import org.zim.gamsapi.Integration.IntegrationActionReport;
 
 import java.util.List;
 
@@ -19,25 +19,25 @@ public class BaseSearchController implements IIntegrationController {
   private final BaseSearchService baseSearchService;
 
   @PostMapping
-  public List<IndexingReport> indexProjectObjects(@PathVariable String projectAbbr){
+  public List<IntegrationActionReport> indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
     return baseSearchService.indexObjects(projectAbbr);
   }
 
   @DeleteMapping
-  public IndexingReport deleteProjectObjects(@PathVariable String projectAbbr){
+  public IntegrationActionReport deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     return baseSearchService.deleteIndexedObjects(projectAbbr);
   }
 
   @PostMapping("/{pid}")
-  public List<IndexingReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
+  public List<IntegrationActionReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to index object with pid {}", pid);
     return baseSearchService.indexObject(projectAbbr, pid);
   }
 
   @DeleteMapping("/{pid}")
-  public IndexingReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
+  public IntegrationActionReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
     return baseSearchService.deleteIndexedObject(projectAbbr, pid);
   }

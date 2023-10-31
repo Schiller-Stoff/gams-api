@@ -41,10 +41,10 @@ public class BaseSearchService implements IIntegrationService {
   private final RestTemplate restTemplate = new RestTemplate();
 
   @Override
-  public List<IndexingReport> indexObjects(String projectAbbr) {
+  public List<IntegrationActionReport> indexObjects(String projectAbbr) {
 
     SolrClient client = getSolrClient();
-    List<IndexingReport> facetsDatastreamReports = new ArrayList<>();
+    List<IntegrationActionReport> facetsDatastreamReports = new ArrayList<>();
 
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
@@ -55,7 +55,7 @@ public class BaseSearchService implements IIntegrationService {
         String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getId());
         log.info(msg);
         facetsDatastreamReports.add(
-                new IndexingReport(projectAbbr, "success", msg)
+                new IntegrationActionReport(projectAbbr, "success", msg)
         );
       } catch (SolrServerException | IOException e) {
         String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
@@ -67,13 +67,13 @@ public class BaseSearchService implements IIntegrationService {
       try {
         postSolrDatastream(digitalObject);
         facetsDatastreamReports.add(
-                new IndexingReport(projectAbbr, "success","Indexed facets datastream for digital object " + digitalObject.getId())
+                new IntegrationActionReport(projectAbbr, "success","Indexed facets datastream for digital object " + digitalObject.getId())
         );
       } catch (ProcessingException e){
         // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
         String msg = String.format("Failed indexing facets datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
         facetsDatastreamReports.add(
-                new IndexingReport(projectAbbr, "error", msg)
+                new IntegrationActionReport(projectAbbr, "error", msg)
         );
       }
 
@@ -92,7 +92,7 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   @Override
-  public IndexingReport deleteIndexedObjects(String projectAbbr) {
+  public IntegrationActionReport deleteIndexedObjects(String projectAbbr) {
     log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
 
     SolrClient client = getSolrClient();
@@ -102,7 +102,7 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Committed SOLR delete all indexing operation for project %s via built solr-query %s", projectAbbr, solrDeletionQuery);
       log.info(msg);
-      return new IndexingReport(projectAbbr, "success", msg);
+      return new IntegrationActionReport(projectAbbr, "success", msg);
     } catch (SolrServerException | IOException e){
       String msg = String.format("Failed to delete all solr documents for project %s", projectAbbr);
       log.error(msg);
@@ -111,7 +111,7 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   @Override
-  public List<IndexingReport> indexObject(String projectAbbr, String id) {
+  public List<IntegrationActionReport> indexObject(String projectAbbr, String id) {
     SolrClient client = getSolrClient();
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with id %s not found", id)));
@@ -119,7 +119,7 @@ public class BaseSearchService implements IIntegrationService {
     log.trace("*** SOLR Indexing now object: {}", digitalObject.getId());
     SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
 
-    List<IndexingReport> indexingReports = new ArrayList<>();
+    List<IntegrationActionReport> indexingReports = new ArrayList<>();
 
     try {
       final UpdateResponse updateResponse = client.add(solrInputDocument);
@@ -127,7 +127,7 @@ public class BaseSearchService implements IIntegrationService {
       String msg = String.format("Successfully SOLR indexed digital object representing document %s", digitalObject.getId());
       log.info(msg);
       indexingReports.add(
-              new IndexingReport(projectAbbr, "success", msg)
+              new IntegrationActionReport(projectAbbr, "success", msg)
       );
     } catch (SolrServerException | IOException e) {
       String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
@@ -140,11 +140,11 @@ public class BaseSearchService implements IIntegrationService {
       postSolrDatastream(digitalObject);
       String msg = String.format("Successfully index facets datastream of digital object %s", digitalObject.getId());
       log.info(msg);
-      indexingReports.add(new IndexingReport(projectAbbr,"success", msg));
+      indexingReports.add(new IntegrationActionReport(projectAbbr,"success", msg));
     } catch (ProcessingException e){
       String msg = String.format("Failed to index facets datastream of digital object %s. Root cause: %s", digitalObject.getId(), e);
       log.error(msg);
-      indexingReports.add(new IndexingReport(projectAbbr, "error", msg));
+      indexingReports.add(new IntegrationActionReport(projectAbbr, "error", msg));
     }
 
     return indexingReports;
@@ -152,7 +152,7 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   @Override
-  public IndexingReport deleteIndexedObject(String projectAbbr, String id) {
+  public IntegrationActionReport deleteIndexedObject(String projectAbbr, String id) {
     SolrClient client = getSolrClient();
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
     try {
@@ -160,11 +160,11 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Committed SOLR delete object %s operation for project %s via built solr-query %s", id, projectAbbr, solrDeletionQuery);
       log.info(msg);
-      return new IndexingReport(projectAbbr, "success", msg);
+      return new IntegrationActionReport(projectAbbr, "success", msg);
     } catch (SolrServerException | IOException e){
       String msg = String.format("Failed to delete all solr documents for digital object with id %s project %s", id, projectAbbr);
       log.error(msg);
-      return new IndexingReport(projectAbbr, "error", msg);
+      return new IntegrationActionReport(projectAbbr, "error", msg);
     }
   }
 
