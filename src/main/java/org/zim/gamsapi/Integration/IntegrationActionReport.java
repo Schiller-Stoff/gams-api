@@ -3,6 +3,8 @@ package org.zim.gamsapi.Integration;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.ToString;
+import org.zim.gamsapi.Integration.Common.IntegrationActionStatus;
+import org.zim.gamsapi.Integration.Common.IntegrationActionType;
 
 /**
  * Basic report for indexing status.
@@ -13,6 +15,7 @@ import lombok.ToString;
 @AllArgsConstructor
 public class IntegrationActionReport {
   private String projectAbbr;
-  private String indexingStatus;
-  private String indexingMessage;
+  private IntegrationActionType type;
+  private IntegrationActionStatus status;
+  private String message;
 }

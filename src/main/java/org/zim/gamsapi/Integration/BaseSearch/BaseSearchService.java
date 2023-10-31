@@ -20,6 +20,8 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Integration.*;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.Integration.Common.IntegrationActionStatus;
+import org.zim.gamsapi.Integration.Common.IntegrationActionType;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
@@ -55,7 +57,7 @@ public class BaseSearchService implements IIntegrationService {
         String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getId());
         log.info(msg);
         facetsDatastreamReports.add(
-                new IntegrationActionReport(projectAbbr, "success", msg)
+                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
         );
       } catch (SolrServerException | IOException e) {
         String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
@@ -67,13 +69,13 @@ public class BaseSearchService implements IIntegrationService {
       try {
         postSolrDatastream(digitalObject);
         facetsDatastreamReports.add(
-                new IntegrationActionReport(projectAbbr, "success","Indexed facets datastream for digital object " + digitalObject.getId())
+                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS,"Indexed facets datastream for digital object " + digitalObject.getId())
         );
       } catch (ProcessingException e){
         // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
         String msg = String.format("Failed indexing facets datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
         facetsDatastreamReports.add(
-                new IntegrationActionReport(projectAbbr, "error", msg)
+                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
         );
       }
 
@@ -102,7 +104,7 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Committed SOLR delete all indexing operation for project %s via built solr-query %s", projectAbbr, solrDeletionQuery);
       log.info(msg);
-      return new IntegrationActionReport(projectAbbr, "success", msg);
+      return new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg);
     } catch (SolrServerException | IOException e){
       String msg = String.format("Failed to delete all solr documents for project %s", projectAbbr);
       log.error(msg);
@@ -127,7 +129,7 @@ public class BaseSearchService implements IIntegrationService {
       String msg = String.format("Successfully SOLR indexed digital object representing document %s", digitalObject.getId());
       log.info(msg);
       indexingReports.add(
-              new IntegrationActionReport(projectAbbr, "success", msg)
+              new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
       );
     } catch (SolrServerException | IOException e) {
       String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
@@ -140,11 +142,11 @@ public class BaseSearchService implements IIntegrationService {
       postSolrDatastream(digitalObject);
       String msg = String.format("Successfully index facets datastream of digital object %s", digitalObject.getId());
       log.info(msg);
-      indexingReports.add(new IntegrationActionReport(projectAbbr,"success", msg));
+      indexingReports.add(new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg));
     } catch (ProcessingException e){
       String msg = String.format("Failed to index facets datastream of digital object %s. Root cause: %s", digitalObject.getId(), e);
       log.error(msg);
-      indexingReports.add(new IntegrationActionReport(projectAbbr, "error", msg));
+      indexingReports.add(new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg));
     }
 
     return indexingReports;
@@ -160,11 +162,11 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Committed SOLR delete object %s operation for project %s via built solr-query %s", id, projectAbbr, solrDeletionQuery);
       log.info(msg);
-      return new IntegrationActionReport(projectAbbr, "success", msg);
+      return new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg);
     } catch (SolrServerException | IOException e){
       String msg = String.format("Failed to delete all solr documents for digital object with id %s project %s", id, projectAbbr);
       log.error(msg);
-      return new IntegrationActionReport(projectAbbr, "error", msg);
+      return new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.ERROR, msg);
     }
   }
 

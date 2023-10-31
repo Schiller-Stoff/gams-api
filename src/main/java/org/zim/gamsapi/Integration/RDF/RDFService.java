@@ -11,10 +11,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.Integration.GamsDatastreamIds;
-import org.zim.gamsapi.Integration.IIntegrationService;
-import org.zim.gamsapi.Integration.IntegrationActionReport;
-import org.zim.gamsapi.Integration.ProcessingException;
+import org.zim.gamsapi.Integration.*;
+import org.zim.gamsapi.Integration.Common.IntegrationActionStatus;
+import org.zim.gamsapi.Integration.Common.IntegrationActionType;
 import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class RDFService implements IIntegrationService {
     });
 
     // TODO build missing indexing report
-    return new ArrayList<>(List.of(new IntegrationActionReport("demo", "nice", "haha")));
+    return new ArrayList<>(List.of(new IntegrationActionReport("demo", IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "haha")));
   }
 
   @Override
@@ -55,7 +54,7 @@ public class RDFService implements IIntegrationService {
     });
 
     // TODO construct indexing reports
-    return new IntegrationActionReport("demo", "nice", "haha");
+    return new IntegrationActionReport("demo", IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, "haha");
   }
 
   public List<IntegrationActionReport> indexObject(String projectAbbr, String id){
@@ -68,7 +67,7 @@ public class RDFService implements IIntegrationService {
     // 02. Load datastream "RDF_TTL" and send to jena-fuseki
     indexObjectCustomRdf(digitalObject);
     // TODO construct valid indexing report.
-    return new ArrayList<>(List.of(new IntegrationActionReport("demo", "nice", "haha")));
+    return new ArrayList<>(List.of(new IntegrationActionReport("demo", IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "haha")));
   }
 
   @Override
@@ -80,7 +79,7 @@ public class RDFService implements IIntegrationService {
     String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, id);
     tripleStoreClient.postSPARQL(id,deleteQuery);
     // TODO build an indexing report?
-    return new IntegrationActionReport("demo", "nice", "haha");
+    return new IntegrationActionReport("demo", IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, "haha");
   }
 
 
