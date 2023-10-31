@@ -214,7 +214,7 @@ public class BaseSearchService implements IIntegrationService {
    * @param digitalObject digital object to be indexed
    */
   private void postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
-    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SOLR_DATASTREAM_ID.name)).findFirst();
+    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)).findFirst();
     Datastream datastream;
     if(datastreamOptional.isEmpty()) {
       // if no search.json - skip processing

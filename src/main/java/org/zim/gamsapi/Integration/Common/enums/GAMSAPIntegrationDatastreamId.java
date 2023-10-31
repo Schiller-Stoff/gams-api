@@ -18,7 +18,7 @@ public enum GAMSAPIntegrationDatastreamId {
   /**
    * Datastream id of integrated basic search.
    */
-  SOLR_DATASTREAM_ID("search_json");
+  SEARCH_DATASTREAM_ID("search_json");
 
 
   public final String name;
