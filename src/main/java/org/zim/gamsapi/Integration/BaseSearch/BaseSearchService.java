@@ -75,7 +75,7 @@ public class BaseSearchService implements IIntegrationService {
         integrationActionReports.add(integrationActionReport);
       } catch (ProcessingException e){
         // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
-        String msg = String.format("Failed indexing facets datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
+        String msg = String.format("Failed indexing base search datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
         integrationActionReports.add(
                 new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
         );
@@ -144,7 +144,7 @@ public class BaseSearchService implements IIntegrationService {
       IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
       indexingReports.add(integrationActionReport);
     } catch (ProcessingException e){
-      String msg = String.format("Failed to index facets datastream of digital object %s. Root cause: %s", digitalObject.getId(), e);
+      String msg = String.format("Failed to index base search datastream of digital object %s. Root cause: %s", digitalObject.getId(), e);
       log.error(msg);
       indexingReports.add(new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg));
     }
