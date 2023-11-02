@@ -49,6 +49,8 @@ server:
   # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
   # Needed to consider reverse-proxy / api-gateway in front
   forward-headers-strategy: framework
+  # sets application port https://www.baeldung.com/spring-boot-change-port
+  port: 18085
 
 
 #####
