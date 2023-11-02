@@ -76,7 +76,7 @@ public class RDFService implements IIntegrationService {
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", id)));
     log.trace("*** FUSEKI Indexing now object: {}", digitalObject.getId());
 
-    // list of reports for follow up operations
+    // list of reports for follow-up operations
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
     // 01. Post custom indexing triples.
