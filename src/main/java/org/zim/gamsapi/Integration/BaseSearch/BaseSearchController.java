@@ -25,7 +25,7 @@ public class BaseSearchController implements IIntegrationController {
   }
 
   @DeleteMapping
-  public IntegrationActionReport deleteProjectObjects(@PathVariable String projectAbbr){
+  public List<IntegrationActionReport> deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     return baseSearchService.deleteIndexedObjects(projectAbbr);
   }
@@ -37,7 +37,7 @@ public class BaseSearchController implements IIntegrationController {
   }
 
   @DeleteMapping("/{pid}")
-  public IntegrationActionReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
+  public List<IntegrationActionReport> deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
     return baseSearchService.deleteIndexedObject(projectAbbr, pid);
   }

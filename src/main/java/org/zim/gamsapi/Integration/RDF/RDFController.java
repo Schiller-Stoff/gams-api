@@ -26,7 +26,7 @@ public class RDFController implements IIntegrationController {
 
   @Override
   @DeleteMapping
-  public IntegrationActionReport deleteProjectObjects(@PathVariable String projectAbbr) {
+  public List<IntegrationActionReport> deleteProjectObjects(@PathVariable String projectAbbr) {
     return rdfService.deleteIndexedObjects(projectAbbr);
   }
 
@@ -38,7 +38,7 @@ public class RDFController implements IIntegrationController {
 
   @DeleteMapping("/{id}")
   @Override
-  public IntegrationActionReport deleteObject(@PathVariable String projectAbbr, @PathVariable String id) {
+  public List<IntegrationActionReport> deleteObject(@PathVariable String projectAbbr, @PathVariable String id) {
     return rdfService.deleteIndexedObject(projectAbbr, id);
   }
 }

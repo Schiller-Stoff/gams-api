@@ -15,6 +15,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
+import java.io.IOException;
+
 
 /**
  * Client encapsulating basic functionalities for handling jena - fuseki
@@ -33,7 +35,7 @@ public class JenaFusekiClient {
    * @param digitalObject needed for context information in logging.
    * @param turtle turtle as string to be posted.
    */
-  public void postNQuads(DigitalObject digitalObject, String turtle) throws ProcessingException {
+  public void postNQuads(DigitalObject digitalObject, String turtle) throws IOException {
 
     HttpHeaders httpHeaders = new HttpHeaders();
     httpHeaders.add(HttpHeaders.CONTENT_TYPE, RDFHttpContentTypes.TEXT_N_QUADS.name);
@@ -46,13 +48,13 @@ public class JenaFusekiClient {
     } catch (RestClientException e){
       String msg = String.format("Failed to post custom RDF datastream to triplestore instance. Digital object: %s. Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
       log.error(msg);
-      throw new ProcessingException(msg);
+      throw new IOException(msg);
     }
 
     if(response.getStatusCode().isError()){
       String msg = String.format("Failed to post custom rdf datastream to triplestore instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
       log.error(msg);
-      throw new ProcessingException(msg);
+      throw new IOException(msg);
     } else {
       log.trace("Successfully posted custom rdf datastream for object {} to  fuseki instance. Response status code: {}", digitalObject.getId(), response.getStatusCode());
     }
@@ -63,8 +65,9 @@ public class JenaFusekiClient {
    * Sends given updated SPARQL to jena-fuseki.
    * @param context context of the operation - e.g. project abbreviation or id.
    * @param sparql sparql to be performed.
+   * @throws IOException when request against triplestore failed.
    */
-  public void postSPARQL(String context, String sparql){
+  public void postSPARQL(String context, String sparql) throws IOException {
     HttpHeaders httpHeaders = new HttpHeaders();
     // reminder: SPARQL update needs to be done via formdata request.
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -79,13 +82,13 @@ public class JenaFusekiClient {
     } catch (RestClientException e){
       String msg = String.format("Failed to post SPARQL to triplestore instance. Context: %s. Cause: %s Original error message: %s", context, e.getMessage(), e);
       log.error(msg);
-      throw new ProcessingException(msg);
+      throw new IOException(msg);
     }
 
     if(response.getStatusCode().isError()){
       String msg = String.format("Failed to post custom rdf datastream to triplestore instance in context %s Response status code: %s", context, response.getStatusCode());
       log.error(msg);
-      throw new ProcessingException(msg);
+      throw new IOException(msg);
     } else {
       log.trace("Successfully posted custom rdf datastream in context {} to  fuseki instance. Response status code: {}", context, response.getStatusCode());
     }

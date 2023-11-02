@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class IntegrationActionController {
     log.trace("*** Trying now to default delete object {} for project {}", id, projectAbbr);
     ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.add(integrationService.deleteIndexedObject(projectAbbr, id));
+      indexingReports.addAll(integrationService.deleteIndexedObject(projectAbbr, id));
     });
     return indexingReports;
   }
@@ -56,7 +55,7 @@ public class IntegrationActionController {
     log.trace("*** Trying now to default delete all indices of objects for project {}", projectAbbr);
     ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.add(integrationService.deleteIndexedObjects(projectAbbr));
+      indexingReports.addAll(integrationService.deleteIndexedObjects(projectAbbr));
     });
     return indexingReports;
   }

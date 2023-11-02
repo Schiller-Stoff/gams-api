@@ -96,7 +96,7 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   @Override
-  public IntegrationActionReport deleteIndexedObjects(String projectAbbr) {
+  public List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr) {
     log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
 
     SolrClient client = getSolrClient();
@@ -106,7 +106,7 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Committed SOLR delete all indexing operation for project %s via built solr-query %s", projectAbbr, solrDeletionQuery);
       log.info(msg);
-      return new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+      return List.of(new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg));
     } catch (SolrServerException | IOException e){
       String msg = String.format("Failed to delete all solr documents for project %s", projectAbbr);
       log.error(msg);
@@ -154,7 +154,7 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   @Override
-  public IntegrationActionReport deleteIndexedObject(String projectAbbr, String id) {
+  public List<IntegrationActionReport> deleteIndexedObject(String projectAbbr, String id) {
     SolrClient client = getSolrClient();
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
     try {
@@ -162,11 +162,11 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Committed SOLR delete object %s operation for project %s via built solr-query %s", id, projectAbbr, solrDeletionQuery);
       log.info(msg);
-      return new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+      return List.of(new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg));
     } catch (SolrServerException | IOException e){
       String msg = String.format("Failed to delete all solr documents for digital object with id %s project %s", id, projectAbbr);
       log.error(msg);
-      return new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.ERROR, msg);
+      return List.of(new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.ERROR, msg));
     }
   }
 

@@ -30,34 +30,44 @@ public class RDFService implements IIntegrationService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final JenaFusekiClient tripleStoreClient;
 
-
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
+
+    List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
+
     digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr).forEach(digitalObject -> {
-      indexObjectDefaultRdf(digitalObject);
-      indexObjectCustomRdf(digitalObject);
+      IntegrationActionReport defaultIndexReport = indexObjectDefaultRdf(digitalObject);
+      integrationActionReports.add(defaultIndexReport);
+      IntegrationActionReport customIndexReport = indexObjectCustomRdf(digitalObject);
+      integrationActionReports.add(customIndexReport);
     });
 
-    // TODO build missing indexing report
-    return new ArrayList<>(List.of(new IntegrationActionReport("demo", IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "haha")));
+    return integrationActionReports;
   }
 
   @Override
-  public IntegrationActionReport deleteIndexedObjects(String projectAbbr) {
+  public List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr) {
 
-    // ~Outdated deletion based on triples
-    // delete every subject belonging to a project.
-    //String deleteQuery = String.format("DELETE WHERE { ?subject %s \"%s\". ?subject ?predicate ?object. }", RDFSearchProperties.HAS_PROJECT_ABBR.name, projectAbbr);
+    List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
     // delete every subject belonging to a project.
     digitalObjectRepository.findAll().forEach(digitalObject -> {
-      //TODO use enum
       String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, digitalObject.getId());
-      tripleStoreClient.postSPARQL(projectAbbr, deleteQuery);
+      try {
+        tripleStoreClient.postSPARQL(projectAbbr, deleteQuery);
+        String msg = String.format("Successfully deleted object indices for %s for project %s", digitalObject.getId(), projectAbbr);
+        integrationActionReports.add(
+          new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg)
+        );
+      } catch (IOException e) {
+        String msg = String.format("Failed to delete object indices for %s for project %s", digitalObject.getId(), projectAbbr);
+        integrationActionReports.add(
+                new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.ERROR, msg)
+        );
+      }
     });
 
-    // TODO construct indexing reports
-    return new IntegrationActionReport("demo", IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, "haha");
+    return integrationActionReports;
   }
 
   public List<IntegrationActionReport> indexObject(String projectAbbr, String id){
@@ -65,24 +75,41 @@ public class RDFService implements IIntegrationService {
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", id)));
     log.trace("*** FUSEKI Indexing now object: {}", digitalObject.getId());
+
+    // list of reports for follow up operations
+    List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
+
     // 01. Post custom indexing triples.
-    indexObjectDefaultRdf(digitalObject);
+    IntegrationActionReport indexObjectDefaultRdfReport = indexObjectDefaultRdf(digitalObject);
+    integrationActionReports.add(indexObjectDefaultRdfReport);
     // 02. Load datastream "RDF_TTL" and send to jena-fuseki
-    indexObjectCustomRdf(digitalObject);
-    // TODO construct valid indexing report.
-    return new ArrayList<>(List.of(new IntegrationActionReport("demo", IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "haha")));
+    IntegrationActionReport indexCustomRdfReport = indexObjectCustomRdf(digitalObject);
+    integrationActionReports.add(indexCustomRdfReport);
+    return integrationActionReports;
   }
 
   @Override
-  public IntegrationActionReport deleteIndexedObject(String projectAbbr, String id) {
-    // OUTDATED delete query based on triples
-    // deletes all subjects where gams:hasPid = given pid
-    // String deleteQuery = String.format("DELETE WHERE { ?s %s \"%s\". ?s ?p ?o.}", RDFSearchProperties.HAS_PID.name, pid);
+  public List<IntegrationActionReport> deleteIndexedObject(String projectAbbr, String id) {
 
+    List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
     String deleteQuery = String.format("DROP GRAPH <%s/%s>",RDFSearchProperties.GAMS_BASE_URL.name, id);
-    tripleStoreClient.postSPARQL(id,deleteQuery);
-    // TODO build an indexing report?
-    return new IntegrationActionReport("demo", IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, "haha");
+
+    try {
+      tripleStoreClient.postSPARQL(id, deleteQuery);
+      String msg = String.format("Successfully deleted object indices %s for project %s", id, projectAbbr);
+      log.trace(msg);
+      integrationActionReports.add(
+        new IntegrationActionReport(projectAbbr,IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg)
+      );
+    } catch (IOException e){
+      String msg = String.format("Failed to delete object indices for %s for project %s. Original error: %s", projectAbbr, id, e);
+      log.trace(msg);
+      integrationActionReports.add(
+        new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.ERROR, msg)
+      );
+    }
+
+    return integrationActionReports;
   }
 
 
@@ -90,9 +117,17 @@ public class RDFService implements IIntegrationService {
    * Sends default RDF to the triplestore, like statements about being a digital object having a pid.
    * @param digitalObject object to be indexed.
    */
-  private void indexObjectDefaultRdf(DigitalObject digitalObject){
+  private IntegrationActionReport indexObjectDefaultRdf(DigitalObject digitalObject){
     String turtle = tripleStoreClient.buildDefaultIndexingTriple(digitalObject);
-    tripleStoreClient.postNQuads(digitalObject, turtle);
+    try {
+      tripleStoreClient.postNQuads(digitalObject, turtle);
+      String msg = String.format("Successfully created default indices for digital object %s for project %s", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+    } catch (IOException e){
+      String msg = String.format("Failed to creat default indices for digital object %s for project %s", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg);
+    }
+
   }
 
 
@@ -100,7 +135,10 @@ public class RDFService implements IIntegrationService {
    * Checks if the required datastream is available and sends to the triplestore.
    * @param digitalObject Origin of the rdf datastream.
    */
-  private void indexObjectCustomRdf(DigitalObject digitalObject){
+  private IntegrationActionReport indexObjectCustomRdf(DigitalObject digitalObject){
+    // some values are being set later --> by default operation is being skipped
+    String defaultMsg = String.format("Skipped indexing custom RDF of object %s for project %s because no custom rdf datastream was found.", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
+    IntegrationActionReport integrationActionReport = new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, defaultMsg);
 
     // Load datastream "RDF_TTL" and send to jena-fuseki
     digitalObject.getDatastreams()
@@ -126,12 +164,19 @@ public class RDFService implements IIntegrationService {
 
                 String quads = RDFWriter.source(newDatasetGraph).lang(Lang.NQUADS).asString();
                 tripleStoreClient.postNQuads(digitalObject,quads);
+                String msg = String.format("Successfully indexed custom object RDF for object %s , for project: %s", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
+                integrationActionReport.setMessage(msg);
+                integrationActionReport.setStatus(IntegrationActionStatus.SUCCESS);
               } catch (IOException e) {
-                String msg = String.format("Failed to send rdf datastream to triplestore. For object %s. Original error: %s", digitalObject.getId(), e);
+                String msg = String.format("Failed to send custom rdf datastream to triplestore. For object %s and project %s. Original error: %s", digitalObject.getId(),digitalObject.getProject().getProjectAbbr(), e);
                 log.error(msg);
-                throw new ProcessingException(msg);
+                integrationActionReport.setMessage(msg);
+                integrationActionReport.setStatus(IntegrationActionStatus.ERROR);
               }
             });
+
+        return integrationActionReport;
+
   }
 
 }
