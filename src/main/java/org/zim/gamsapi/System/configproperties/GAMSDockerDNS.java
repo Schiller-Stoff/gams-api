@@ -26,7 +26,7 @@ public class GAMSDockerDNS {
   private String relationalDb;
 
   @NotBlank
-  private String facetSearchUrl;
+  private String baseSearchUrl;
 
   @NotBlank
   private String triplestoreUrl;

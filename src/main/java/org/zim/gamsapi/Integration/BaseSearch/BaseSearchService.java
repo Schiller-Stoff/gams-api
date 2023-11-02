@@ -173,7 +173,7 @@ public class BaseSearchService implements IIntegrationService {
 
   public SolrClient getSolrClient(){
     //final String solrUrl = "http://localhost:8983/solr/gams";
-    final String solrUrl = configProperties.getFacetSearchUrl();
+    final String solrUrl = configProperties.getBaseSearchUrl();
     return new HttpSolrClient.Builder(solrUrl)
             .build();
   }
@@ -261,7 +261,7 @@ public class BaseSearchService implements IIntegrationService {
     //TODO improve handling of RestClientException?
     ResponseEntity<String> response;
     try {
-      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getFacetSearchUrl());
+      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl());
       response = restTemplate.postForEntity(postUrl, request, String.class);
     } catch (RestClientException e){
       String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);

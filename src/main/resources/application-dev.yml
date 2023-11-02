@@ -12,5 +12,5 @@ gams:
     # postgres
     relational-db: "localhost:5432"
     # from integration-api
-    facetSearchUrl: ${FACETED_SEARCH_URL:http://localhost:8983/solr/gams}
+    baseSearchUrl: ${BASE_SEARCH_URL:http://localhost:8983/solr/gams}
     triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}

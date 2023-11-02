@@ -58,8 +58,7 @@ gams:
   docker:
     # postgres
     relational-db: "relationalDB:5432"
-    # TODO
-    facetSearchUrl: ${FACET_SEARCH_URL:http://facetSearch:8983/solr/gams}
+    baseSearchUrl: ${BASE_SEARCH_URL:http://baseSearch:8983/solr/gams}
     triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
 
 # swagger ui base path
