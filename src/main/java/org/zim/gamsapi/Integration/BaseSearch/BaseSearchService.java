@@ -50,7 +50,7 @@ public class BaseSearchService implements IIntegrationService {
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
 
     SolrClient client = getSolrClient();
-    List<IntegrationActionReport> facetsDatastreamReports = new ArrayList<>();
+    List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
@@ -60,7 +60,7 @@ public class BaseSearchService implements IIntegrationService {
         final UpdateResponse updateResponse = client.add(solrInputDocument);
         String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getId());
         log.info(msg);
-        facetsDatastreamReports.add(
+        integrationActionReports.add(
                 new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
         );
       } catch (SolrServerException | IOException e) {
@@ -72,11 +72,11 @@ public class BaseSearchService implements IIntegrationService {
 
       try {
         IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
-        facetsDatastreamReports.add(integrationActionReport);
+        integrationActionReports.add(integrationActionReport);
       } catch (ProcessingException e){
         // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
         String msg = String.format("Failed indexing facets datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
-        facetsDatastreamReports.add(
+        integrationActionReports.add(
                 new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
         );
       }
@@ -87,7 +87,7 @@ public class BaseSearchService implements IIntegrationService {
       client.commit();
       String msg = String.format("Successfully committed SOLR indexing operation for project %s", projectAbbr);
       log.info(msg);
-      return facetsDatastreamReports;
+      return integrationActionReports;
     } catch (SolrServerException | IOException e) {
       String msg = String.format("Failed to commit SOLR indexing operation for project %s . Original error message: %s", projectAbbr, e);
       log.error(msg);
