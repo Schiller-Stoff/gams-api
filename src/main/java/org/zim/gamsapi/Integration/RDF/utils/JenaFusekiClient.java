@@ -12,7 +12,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class JenaFusekiClient {
     HttpHeaders httpHeaders = new HttpHeaders();
     // reminder: SPARQL update needs to be done via formdata request.
     httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    MultiValueMap<String, String> formData = new LinkedMultiValueMap<String, String>();
+    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
     formData.add("update", sparql);
     HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(formData, httpHeaders);
 
