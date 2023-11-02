@@ -12,10 +12,10 @@ public interface IIntegrationController {
 
   List<IntegrationActionReport> indexProjectObjects(@PathVariable String projectAbbr);
 
-  IntegrationActionReport deleteProjectObjects(@PathVariable String projectAbbr);
+  List<IntegrationActionReport> deleteProjectObjects(@PathVariable String projectAbbr);
 
   List<IntegrationActionReport> indexObject(@PathVariable String projectAbbr, @PathVariable String pid);
 
-  IntegrationActionReport deleteObject(@PathVariable String projectAbbr, @PathVariable String pid);
+  List<IntegrationActionReport> deleteObject(@PathVariable String projectAbbr, @PathVariable String pid);
 
 }

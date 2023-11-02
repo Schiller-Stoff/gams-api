@@ -21,7 +21,7 @@ public interface IIntegrationService {
    * Deletes all data dependent on the digital objects, like direct
    * representations of the object AND derived entities, like persons, etc.
    */
-  IntegrationActionReport deleteIndexedObjects(String projectAbbr);
+  List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr);
 
   /**
    * Indexes a single object
@@ -37,6 +37,6 @@ public interface IIntegrationService {
    * @param id id of the object to be deleted
    * @return IndexingReport
    */
-  IntegrationActionReport deleteIndexedObject(String projectAbbr, String id);
+  List<IntegrationActionReport> deleteIndexedObject(String projectAbbr, String id);
 
 }
