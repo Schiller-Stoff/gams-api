@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head th:replace="fragments/general.html :: head" />
+<body class="bg-light">
+<header th:replace="fragments/general.html :: header"></header>
+<nav th:replace="fragments/general.html :: nav"></nav>
+
+<main class="container min-vh-100 mt-4">
+    <div class="webcirilo-box shadow-sm mb-1">
+        <h1>GAMS projects</h1>
+        <p>
+            Overview over all stored GAMS projects.
+        </p>
+    </div>
+    <div class="webcirilo-box shadow-sm mb-1">
+        <ul class="list-group list-group-flush" style="list-style: none;">
+            <li th:each="user : ${users}" class="list-group-item">
+                <div><b>Username</b>: <span th:text="${user.username}"></span></div>
+                <div><b>Roles</b>: <span th:text="${user.roles}"></span></div>
+                <div>
+                    <b>Assigned projects</b>
+                    <ul>
+                        <li th:each="project : ${user.projects}" th:text="${project.projectAbbr}"></li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</main>
+
+<footer th:replace="fragments/general.html :: footer"></footer>
+</body>
+</html>
