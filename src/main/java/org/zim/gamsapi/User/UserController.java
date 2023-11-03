@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.User.interfaces.IUserService;
 
@@ -55,6 +56,13 @@ public class UserController {
   @ResponseBody
   public List<User> showAllUsers(){
     return userService.findAll();
+  }
+
+  @GetMapping(path = "/users", produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String showAllUsersViaWebclient(Model model){
+    List<User> users = userService.findAll();
+    model.addAttribute("users",users);
+    return "User/show_all";
   }
 
 }
