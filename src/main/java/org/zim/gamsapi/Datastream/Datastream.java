@@ -6,6 +6,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.Date;
@@ -22,6 +25,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class Datastream {
 
   /**
@@ -86,5 +90,15 @@ public class Datastream {
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
   private MetadataBaseEntity baseMetadata;
+
+
+  @Column(name = "created_by")
+  @CreatedBy
+  private String createdBy;
+
+
+  @Column(name = "modified_by")
+  @LastModifiedBy
+  private String modifiedBy;
 
 }
