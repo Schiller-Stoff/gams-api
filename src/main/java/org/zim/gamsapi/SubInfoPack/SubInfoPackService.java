@@ -24,8 +24,11 @@ import org.zim.gamsapi.SubInfoPack.utils.XMLUtils;
 import org.zim.gamsapi.SubInfoPack.utils.ZipUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -40,6 +43,9 @@ public class SubInfoPackService implements ISubInfoPackService {
   @Override
   @Transactional
   public void ingest(SubInfoPack subInfoPack) {
+
+    unzipBagToTempDir(subInfoPack);
+
     switch (subInfoPack.getIngestProfile()) {
       case "simple" -> ingestSimple(subInfoPack);
       case "basic" -> ingestBasic(subInfoPack);
@@ -296,5 +302,78 @@ public class SubInfoPackService implements ISubInfoPackService {
       return copiedList;
     }
   }
+
+  /**
+   * Unzips given submission information package to temporary directory.
+   * @param subInfoPack submission information package to be processed.
+   * @return path to temporary directory containing unzipped submission information package as bagit.
+   * @throws SubInfoPackProcessingException if unzipping fails.
+   */
+  private Path unzipBagToTempDir(SubInfoPack subInfoPack) throws SubInfoPackProcessingException {
+
+    // first create random named temp directory
+    Path tempBagDirPath;
+    try {
+      //tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr() + "_" + UUID.randomUUID().toString());
+       tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr());
+    } catch (IOException e){
+      String msg = String.format("Failed to create root temporary directory for given subinfopack %s. Original error %s", subInfoPack, e);
+      log.error(msg);
+      throw new SubInfoPackProcessingException(msg);
+    }
+
+    // walk through zipped directory and create directories and files in temp directory
+    ZipUtils.walkZippedDir(subInfoPack.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
+      Path tempFilePath = tempBagDirPath.resolve(zipEntry.getName());
+      if(zipEntry.isDirectory()){
+        try {
+          Files.createDirectories(tempFilePath);
+          log.info("Created temporary bag directory: {}", tempFilePath);
+        } catch (IOException e) {
+          String msg = String.format("Failed to create directory %s for given subinfopack %s. Original error %s", tempFilePath, subInfoPack, e);
+          log.error(msg);
+          throw new SubInfoPackProcessingException(msg);
+        }
+      } else {
+        try {
+          // zip might contain entries like /datastreams/derla.sty1 --> need to create /datastreams/ directory first
+          ensureParentDir(tempFilePath);
+          Files.createFile(tempFilePath);
+          Files.write(tempFilePath, byteArrayOutputStream.toByteArray());
+          log.info("Successfully wrote file {} to temporary bag directory: {}", zipEntry.getName(), tempFilePath);
+        } catch (IOException e) {
+          String msg = String.format("Failed to create file %s for given subinfopack %s. Original error %s", tempFilePath, subInfoPack, e);
+          log.error(msg);
+          throw new SubInfoPackProcessingException(msg);
+        }
+      }
+    });
+
+    return tempBagDirPath;
+  }
+
+
+  /**
+   * Makes sure that all parent directories of the given path exist.
+   * @param path path to check
+   * @throws SubInfoPackProcessingException if missing parent directories cannot be created
+   */
+  private void ensureParentDir(Path path) throws SubInfoPackProcessingException {
+    if(Files.exists(path.getParent())){
+      return;
+    } else {
+      try {
+        // recursively call itself until parent directory exists
+        ensureParentDir(path.getParent());
+        Files.createDirectory(path.getParent());
+      } catch (IOException e){
+        String msg = String.format("Failed to verify existence of parent directories of path: %s. Original error: %s", path, e);
+        log.error(msg);
+        throw new SubInfoPackProcessingException(msg);
+      }
+
+    }
+  }
+
 
 }
