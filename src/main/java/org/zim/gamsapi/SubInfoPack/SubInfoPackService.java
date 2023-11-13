@@ -13,11 +13,14 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -34,22 +37,27 @@ public class SubInfoPackService implements ISubInfoPackService {
 
     // 01. unzip bagitinfo to temp
     Path unzippedBag = unzipBagToTempDir(subInfoPack);
-    BagItInfo bagItInfo = BagitUtils.mapBagItInfo(unzippedBag);
 
-    log.info("****** Successfully extracted bagit-info.txt: {}", bagItInfo);
+    try {
+      BagItInfo bagItInfo = BagitUtils.mapBagItInfo(unzippedBag);
+      log.info("****** Successfully extracted bagit-info.txt: {}", bagItInfo);
 
-    // 02. build and save digital object from bag-info.txt
-    DigitalObject digitalObject = DigitalObject.builder()
-            .id(bagItInfo.getId())
-            .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
-            .build();
+      // 02. build and save digital object from bag-info.txt
+      DigitalObject digitalObject = DigitalObject.builder()
+              .id(bagItInfo.getId())
+              .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
+              .build();
 
-    digitalObjectRepository.save(digitalObject);
-    log.info("****** Successfully saved digital object: {}", digitalObject);
+      digitalObjectRepository.save(digitalObject);
+      log.info("****** Successfully saved digital object: {}", digitalObject);
 
-    // TODO loop through data directory and create datastreams accordingly
+      // TODO loop through data directory and create datastreams per file
 
-    // TODO at the end remove temp directory
+    } catch (Exception e){
+      // make sure that in any case the temp directory is deleted
+      deleteDir(unzippedBag);
+      throw e;
+    }
 
   }
 
@@ -143,5 +151,25 @@ public class SubInfoPackService implements ISubInfoPackService {
     }
   }
 
+
+  /**
+   * Deletes given directory and all its subdirectories and files.
+   * @param dirPath path to directory to be deleted.
+   * @throws SubInfoPackProcessingException if deletion fails.
+   */
+  private void deleteDir(Path dirPath) throws SubInfoPackProcessingException {
+    // delete temp directory last
+    try (Stream<Path> entries = Files.walk(dirPath)){
+      entries
+              .sorted(Comparator.reverseOrder())
+              .map(Path::toFile)
+              .forEach(File::delete);
+      log.info("DELETED TEMP DIR: {}", dirPath);
+    } catch (IOException e){
+      String msg = String.format("Failed to delete temporary directory %s. Original error %s", dirPath, e);
+      log.error(msg);
+      throw new SubInfoPackProcessingException(msg);
+    }
+  }
 
 }
