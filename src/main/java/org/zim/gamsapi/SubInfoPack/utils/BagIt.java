@@ -1,0 +1,24 @@
+package org.zim.gamsapi.SubInfoPack.utils;
+
+/**
+ * Represents the different files that are required to be present in a valid BagIt archive.
+ */
+public enum BagIt {
+
+  /**
+   * The bag-info.txt file is a tag file that contains metadata about the bag as a whole.
+   */
+  BAG_INFO_FILE_PATH("bag-info.txt"),
+
+  /**
+   * The bagit.txt file is a tag file that identifies the version of the BagIt specification that governs the structure of the bag.
+   */
+  BAG_TXT_FILE_PATH("bagit.txt");
+
+
+  public final String name;
+  BagIt(String name){
+    this.name = name;
+  }
+
+}
