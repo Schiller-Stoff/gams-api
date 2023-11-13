@@ -13,7 +13,12 @@ public enum BagIt {
   /**
    * The bagit.txt file is a tag file that identifies the version of the BagIt specification that governs the structure of the bag.
    */
-  BAG_TXT_FILE_PATH("bagit.txt");
+  BAG_TXT_FILE_PATH("bagit.txt"),
+
+  /**
+   * The data directory is a data directory that contains the files that comprise the content of the bag.
+   */
+  BAG_PAYLOAD_DIR_PATH("data");
 
 
   public final String name;
