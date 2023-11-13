@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -51,7 +52,30 @@ public class SubInfoPackService implements ISubInfoPackService {
       digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {}", digitalObject);
 
-      // TODO loop through data directory and create datastreams per file
+      // datastreams are created per file in the bagit payload.
+      try ( Stream<Path> entries = Files.walk(Path.of(unzippedBag + File.separator + BagItFilePaths.BAG_PAYLOAD_DIR_PATH.name))){
+        entries.forEach(path -> {
+          if(Files.isDirectory(path)) return;
+          try {
+            byte[] datastreamBytes = Files.readAllBytes(path);
+            log.info("****** Found file: {}", path);
+            Datastream datastream = Datastream.builder().dsid(path.getFileName().toString())
+                    .digitalObject(digitalObject)
+                    .data(datastreamBytes)
+                    .build();
+
+            datastreamRepository.save(datastream);
+          } catch (IOException e) {
+            String msg = String.format("Failed to read file %s for given subinfopack %s for object %s. Original error %s", path, subInfoPack, digitalObject, e);
+            log.error(msg);
+            throw new SubInfoPackProcessingException(msg);
+          }
+        });
+      } catch (IOException e){
+        String msg = String.format("Failed to read data directory %s for given subinfopack %s for object %s. Original error %s", BagItFilePaths.BAG_PAYLOAD_DIR_PATH, subInfoPack, digitalObject, e);
+        log.error(msg);
+        throw new SubInfoPackProcessingException(msg);
+      }
 
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
