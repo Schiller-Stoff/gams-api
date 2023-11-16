@@ -18,4 +18,5 @@ public class BagItInfo {
   private String publisher;
   private String rights;
   private String creator;
+  private String childObjectIds;
 }

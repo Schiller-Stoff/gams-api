@@ -38,6 +38,7 @@ public class BagitUtils {
               .publisher(fileValues.get("Publisher"))
               .rights(fileValues.get("Rights"))
               .creator(fileValues.get("Creator"))
+              .childObjectIds(fileValues.get("Child-Object-Ids"))
               .build();
     } catch(NullPointerException e){
       String msg = String.format("Failed to extract a required key from %s to intern BagItInfo class. Original error: %s", BagItFilePaths.BAG_INFO_FILE_PATH.name, e);

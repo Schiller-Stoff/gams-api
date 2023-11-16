@@ -19,10 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -45,13 +43,21 @@ public class SubInfoPackService implements ISubInfoPackService {
       BagItInfo bagItInfo = BagitUtils.mapBagItInfo(unzippedBag);
       log.info("****** Successfully extracted bagit-info.txt: {}", bagItInfo);
 
+      String childObjectStatement = bagItInfo.getChildObjectIds();
+      Set<DigitalObject> childObjects = new HashSet<>();
+      // if there are child objects -> save a reference
+      if(childObjectStatement != null){
+        childObjects = Arrays.stream(childObjectStatement.split(","))
+                .map(childObjectId -> DigitalObject.builder().id(childObjectId).build())
+                .collect(Collectors.toSet());
+      }
+
       // 02. build and save digital object from bag-info.txt
       DigitalObject digitalObject = DigitalObject.builder()
             .id(bagItInfo.getId())
             .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
             .objectType(bagItInfo.getType())
-            // TODO need to add child-objects?
-            //.childObjects(new HashSet<>()) - system controlled
+            .childObjects(childObjects)
             // .createdBy() - system controlled
             // .modifiedBy() - system controlled
             // .created() - system controlled
