@@ -2,7 +2,6 @@ package org.zim.gamsapi.SubInfoPack.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,6 +34,10 @@ public class BagitUtils {
               .title(fileValues.get("Title"))
               .contactMail(fileValues.get("Contact-Email"))
               .type(fileValues.get("Type"))
+              .externalDescription(fileValues.get("External-Description"))
+              .publisher(fileValues.get("Publisher"))
+              .rights(fileValues.get("Rights"))
+              .creator(fileValues.get("Creator"))
               .build();
     } catch(NullPointerException e){
       String msg = String.format("Failed to extract a required key from %s to intern BagItInfo class. Original error: %s", BagItFilePaths.BAG_INFO_FILE_PATH.name, e);

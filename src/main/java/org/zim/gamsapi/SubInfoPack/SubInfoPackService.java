@@ -9,6 +9,7 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -45,9 +47,26 @@ public class SubInfoPackService implements ISubInfoPackService {
 
       // 02. build and save digital object from bag-info.txt
       DigitalObject digitalObject = DigitalObject.builder()
-              .id(bagItInfo.getId())
-              .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
-              .build();
+            .id(bagItInfo.getId())
+            .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
+            .objectType(bagItInfo.getType())
+            // TODO need to add child-objects?
+            //.childObjects(new HashSet<>()) - system controlled
+            // .createdBy() - system controlled
+            // .modifiedBy() - system controlled
+            // .created() - system controlled
+            // .modified() - system controlled
+            // datastreams is being filled later on
+            .datastreams(new ArrayList<>())
+            .baseMetadata(MetadataBaseEntity.builder()
+              .title(bagItInfo.getTitle())
+              .creator(bagItInfo.getCreator())
+              .description(bagItInfo.getExternalDescription())
+              .publisher(bagItInfo.getPublisher())
+              .rights(bagItInfo.getRights())
+              .build()
+            )
+            .build();
 
       digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {}", digitalObject);
