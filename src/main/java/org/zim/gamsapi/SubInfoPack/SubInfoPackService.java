@@ -75,31 +75,34 @@ public class SubInfoPackService implements ISubInfoPackService {
       digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {}", digitalObject);
 
-      // datastreams are created per file in the bagit payload.
-      try ( Stream<Path> entries = Files.walk(Path.of(unzippedBag + File.separator + BagItFilePaths.BAG_PAYLOAD_DIR_PATH.name))){
-        entries.forEach(path -> {
-          if(Files.isDirectory(path)) return;
-          try {
-            byte[] datastreamBytes = Files.readAllBytes(path);
-            log.info("****** Found file: {}", path);
-            Datastream datastream = Datastream.builder().dsid(path.getFileName().toString())
-                    .digitalObject(digitalObject)
-                    .data(datastreamBytes)
-                    .mimeType(MimeTypeDetector.detect(path.toString()))
-                    .build();
-
-            datastreamRepository.save(datastream);
-          } catch (IOException e) {
-            String msg = String.format("Failed to read file %s for given subinfopack %s for object %s. Original error %s", path, subInfoPack, digitalObject, e);
-            log.error(msg);
-            throw new SubInfoPackProcessingException(msg);
-          }
-        });
-      } catch (IOException e){
-        String msg = String.format("Failed to read data directory %s for given subinfopack %s for object %s. Original error %s", BagItFilePaths.BAG_PAYLOAD_DIR_PATH, subInfoPack, digitalObject, e);
-        log.error(msg);
-        throw new SubInfoPackProcessingException(msg);
-      }
+      // 03. build and save datastreams from sip.json in the bagit payload
+      bagitSipJson.getContentFiles().stream()
+            .map(contentFile -> {
+              byte[] datastreamContent;
+              Path contentFilePath = Path.of(unzippedBag + File.separator + contentFile.getBagpath());
+              try {
+                datastreamContent = Files.readAllBytes(contentFilePath);
+              } catch (IOException e) {
+                String msg = String.format("Failed to read file %s for given subinfopack %s for object %s. Original error %s", contentFilePath, subInfoPack, digitalObject, e);
+                log.error(msg);
+                throw new SubInfoPackProcessingException(msg);
+              }
+              return Datastream.builder()
+                      .dsid(contentFile.getDsid())
+                      .digitalObject(digitalObject)
+                      .data(datastreamContent)
+                      .mimeType(contentFile.getMimetype())
+                      .size(contentFile.getSize())
+                      .baseMetadata(MetadataBaseEntity.builder()
+                              .title(contentFile.getTitle())
+                              .creator(contentFile.getCreator())
+                              .description(contentFile.getDescription())
+                              .publisher(contentFile.getPublisher())
+                              .rights(contentFile.getRights())
+                              .build())
+                      .build();
+            })
+            .forEach(datastreamRepository::save);
 
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
