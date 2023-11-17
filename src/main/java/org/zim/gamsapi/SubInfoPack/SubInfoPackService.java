@@ -11,7 +11,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.*;
@@ -30,7 +29,6 @@ public class SubInfoPackService implements ISubInfoPackService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
-  private final IProjectRepository projectRepository;
 
   @Override
   @Transactional
@@ -40,23 +38,23 @@ public class SubInfoPackService implements ISubInfoPackService {
     Path unzippedBag = unzipBagToTempDir(subInfoPack);
 
     try {
-      BagItInfo bagItInfo = BagitUtils.mapBagItInfo(unzippedBag);
-      log.info("****** Successfully extracted bagit-info.txt: {}", bagItInfo);
+      BagitSipJson bagitSipJson = BagitUtils.mapSipJson(unzippedBag);
+      log.error("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
-      String childObjectStatement = bagItInfo.getChildObjectIds();
+      Set<String> childObjectStatement = bagitSipJson.getChildObjects();
       Set<DigitalObject> childObjects = new HashSet<>();
       // if there are child objects -> save a reference
-      if(childObjectStatement != null){
-        childObjects = Arrays.stream(childObjectStatement.split(","))
+      if(!childObjectStatement.isEmpty()){
+        childObjects = childObjectStatement.stream()
                 .map(childObjectId -> DigitalObject.builder().id(childObjectId).build())
                 .collect(Collectors.toSet());
       }
 
       // 02. build and save digital object from bag-info.txt
       DigitalObject digitalObject = DigitalObject.builder()
-            .id(bagItInfo.getId())
+            .id(bagitSipJson.getId())
             .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
-            .objectType(bagItInfo.getType())
+            .objectType(bagitSipJson.getObjectType())
             .childObjects(childObjects)
             // .createdBy() - system controlled
             // .modifiedBy() - system controlled
@@ -65,11 +63,11 @@ public class SubInfoPackService implements ISubInfoPackService {
             // datastreams is being filled later on
             .datastreams(new ArrayList<>())
             .baseMetadata(MetadataBaseEntity.builder()
-              .title(bagItInfo.getTitle())
-              .creator(bagItInfo.getCreator())
-              .description(bagItInfo.getExternalDescription())
-              .publisher(bagItInfo.getPublisher())
-              .rights(bagItInfo.getRights())
+              .title(bagitSipJson.getTitle())
+              .creator(bagitSipJson.getCreator())
+              .description(bagitSipJson.getDescription())
+              .publisher(bagitSipJson.getPublisher())
+              .rights(bagitSipJson.getRights())
               .build()
             )
             .build();
