@@ -93,6 +93,7 @@ public class SubInfoPackService implements ISubInfoPackService {
                       .data(datastreamContent)
                       .mimeType(contentFile.getMimetype())
                       .size(contentFile.getSize())
+                      .fileName(contentFilePath.getFileName().toString())
                       .baseMetadata(MetadataBaseEntity.builder()
                               .title(contentFile.getTitle())
                               .creator(contentFile.getCreator())
