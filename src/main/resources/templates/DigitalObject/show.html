@@ -85,26 +85,26 @@
         </p>
       </form>
       <br/>
-      <h2 class="h4">Dublin Core</h2>
-      <p>Primary Dublin Core metadata derived from the GAMS-API</p>
+      <h2 class="h4">Metadata</h2>
+      <p>Primary metadata derived from the GAMS-API</p>
       <ul class="list-group-flush p-0">
         <li class="list-group-item bg-light">
-          <small>dc:identifier</small>
+          <small>identifier</small>
           <p th:text="${do.id}"></p>
         </li>
       </ul>
       <p>Auxiliary metadata as dublin core</p>
       <ul class="list-group-flush p-0" th:if="${do.baseMetadata}">
           <li class="list-group-item bg-light">
-            <small>dc:title</small>
+            <small>title</small>
             <p th:text="${do.baseMetadata.title}"></p>
           </li>
           <li class="list-group-item bg-light">
-            <small>dc:creator</small>
+            <small>creator</small>
             <p th:text="${do.baseMetadata.creator}"></p>
           </li>
           <li class="list-group-item bg-light">
-            <small>dc:description</small>
+            <small>description</small>
             <p th:text="${do.baseMetadata.description}"></p>
           </li>
 <!--          <li class="list-group-item bg-light">-->
@@ -112,7 +112,7 @@
 <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
 <!--          </li>-->
           <li class="list-group-item bg-light">
-            <small>dc:publisher</small>
+            <small>publisher</small>
             <p th:text="${do.baseMetadata.publisher}"></p>
           </li>
 <!--          <li class="list-group-item bg-light">-->
@@ -148,7 +148,7 @@
 <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
 <!--          </li>-->
           <li class="list-group-item bg-light">
-            <small>dc:rights</small>
+            <small>rights</small>
             <p th:text="${do.baseMetadata.rights}"></p>
           </li>
       </ul>
