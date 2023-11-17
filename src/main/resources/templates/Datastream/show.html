@@ -23,6 +23,7 @@
         <p><b>Datastream id (global):</b> <span th:text="${datastream.globalId}"></span></p>
         <p><b>Project:</b> <span th:text="${project.projectAbbr}"></span></p>
         <p><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></p>
+        <p><b>Filename:</b> <span th:text="${datastream.fileName}"></span></p>
     </div>
     <br/>
     <div>
@@ -34,7 +35,7 @@
     <p>Primary Dublin Core metadata derived from the GAMS-API</p>
     <ul class="list-group-flush p-0">
         <li class="list-group-item bg-light">
-            <small>dc:identifier</small>
+            <small>identifier</small>
             <p th:text="${datastream.globalId}"></p>
         </li>
     </ul>
