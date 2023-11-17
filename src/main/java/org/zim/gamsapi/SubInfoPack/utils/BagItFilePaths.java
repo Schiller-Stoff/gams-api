@@ -18,7 +18,22 @@ public enum BagItFilePaths {
   /**
    * The data directory is a data directory that contains the files that comprise the content of the bag.
    */
-  BAG_PAYLOAD_DIR_PATH("data");
+  BAG_PAYLOAD_DIR_PATH("data"),
+
+  /**
+   * Path to the sip.json file.
+   */
+  BAG_SIP_JSON("data/meta/sip.json"),
+
+  /**
+   * Path to the bagit content directory.
+   */
+  BAG_CONTENT_DIR("data/content"),
+
+  /**
+   * Path to the bagit metadata directory.
+   */
+  BAG_METADATA_DIR("data/meta");
 
 
   public final String name;
