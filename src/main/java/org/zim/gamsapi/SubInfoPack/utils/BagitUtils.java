@@ -100,6 +100,7 @@ public class BagitUtils {
 
     BagitSipJson bagitSipJson;
     try {
+      // TODO instantiation of own object mapper might be just a waste of resources. (inject object mapper instead)
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       bagitSipJson = new ObjectMapper().readValue(jsonContent, BagitSipJson.class);
@@ -109,6 +110,7 @@ public class BagitUtils {
       throw new SubInfoPackProcessingException(msg);
     }
 
+    // TODO maybe inject instead of creating new validator factory every time?
     // validate sip.json mapping
     try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()){
       Validator validator = factory.getValidator();

@@ -38,5 +38,6 @@ public class BagitSipJson {
 
     private Set<String> childObjects = new HashSet<>();
 
+    private Set<BagitContentFile> contentFiles = new HashSet<>();
 
 }
