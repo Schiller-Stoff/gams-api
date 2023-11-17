@@ -85,6 +85,7 @@ public class SubInfoPackService implements ISubInfoPackService {
             Datastream datastream = Datastream.builder().dsid(path.getFileName().toString())
                     .digitalObject(digitalObject)
                     .data(datastreamBytes)
+                    .mimeType(MimeTypeDetector.detect(path.toString()))
                     .build();
 
             datastreamRepository.save(datastream);
