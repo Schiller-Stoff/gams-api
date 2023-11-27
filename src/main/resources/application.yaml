@@ -32,6 +32,7 @@ spring:
       max-file-size: 10GB
       max-request-size: 10GB
 
+
 ########
 # Logging
 # (handled in different profiles)
@@ -51,6 +52,10 @@ server:
   forward-headers-strategy: framework
   # sets application port https://www.baeldung.com/spring-boot-change-port
   port: 18085
+  # sets the max size of a http form post for tomcat (additional to other config that sets the limit for spring)
+  # https://stackoverflow.com/questions/33232849/increase-http-post-maxpostsize-in-spring-boot
+  tomcat:
+    max-http-form-post-size: 10000000
 
 
 #####
