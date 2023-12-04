@@ -121,8 +121,10 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void deleteAllForProject(Project project) {
-    datastreamRepository.deleteAllCustom(project.getProjectAbbr());
-    digitalObjectRepository.deleteAllCustom(project.getProjectAbbr());
+    // need to delete all the datastreams first --> otherwise constraint violation.
+    // using custom performant query for large batch operations
+    datastreamRepository.deleteAll(project.getProjectAbbr());
+    digitalObjectRepository.deleteAll(project.getProjectAbbr());
     log.info("Successfully deleted all digital objects for project {}", project);
   }
 

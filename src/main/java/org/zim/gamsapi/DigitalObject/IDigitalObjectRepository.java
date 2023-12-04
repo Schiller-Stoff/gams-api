@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -13,10 +14,13 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   @Modifying(flushAutomatically = true)
   void deleteAllByProject_ProjectAbbr(String projectAbbr);
 
-  //@Query("DELETE FROM DigitalObject d WHERE d.project.projectAbbr = ?1 AND d.id = ?2")
+  /**
+   * Deletes all digital objects for a given project (with project abbreviation).
+   * @param projectAbbr identifier of the project to be deleted
+   */
   @Query("DELETE FROM DigitalObject d WHERE d.project.projectAbbr = :projectAbbr")
   @Modifying(flushAutomatically = true)
-  void deleteAllCustom(String projectAbbr);
+  void deleteAll(@Param("projectAbbr") String projectAbbr);
 
   List<DigitalObject> findDigitalObjectsByProject_ProjectAbbr(String projectAbbr);
 
