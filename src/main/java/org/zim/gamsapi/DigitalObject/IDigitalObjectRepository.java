@@ -13,6 +13,11 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   @Modifying(flushAutomatically = true)
   void deleteAllByProject_ProjectAbbr(String projectAbbr);
 
+  //@Query("DELETE FROM DigitalObject d WHERE d.project.projectAbbr = ?1 AND d.id = ?2")
+  @Query("DELETE FROM DigitalObject d WHERE d.project.projectAbbr = :projectAbbr")
+  @Modifying(flushAutomatically = true)
+  void deleteAllCustom(String projectAbbr);
+
   List<DigitalObject> findDigitalObjectsByProject_ProjectAbbr(String projectAbbr);
 
   Page<DigitalObject> findDigitalObjectsByProject_ProjectAbbr(String projectAbbr, Pageable pageable);

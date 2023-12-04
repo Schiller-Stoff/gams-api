@@ -1,5 +1,7 @@
 package org.zim.gamsapi.Datastream;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 
@@ -22,4 +24,16 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Long> 
    * @param dsid datastream-id like TEI_SOURCE
    */
   void deleteByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+
+
+  //@Query("DELETE FROM Datastream d WHERE d.digitalObject.project.projectAbbr = 'demo'")
+  @Query(nativeQuery = true, value = "DELETE FROM datastream\n" +
+          "WHERE digital_object_id IN (\n" +
+          "    SELECT dig_obj.id\n" +
+          "    FROM digital_object dig_obj\n" +
+          "             JOIN project cur_proj ON cur_proj.project_abbr = dig_obj.project_project_abbr\n" +
+          "    WHERE cur_proj.project_abbr = 'demo'\n" +
+          ")")
+  @Modifying(flushAutomatically = true)
+  void deleteAllCustom(String projectAbbr);
 }

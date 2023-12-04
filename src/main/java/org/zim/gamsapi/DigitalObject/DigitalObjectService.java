@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
@@ -21,6 +22,7 @@ import java.util.List;
 public class DigitalObjectService implements IDigitalObjectService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
 
   @Override
@@ -119,7 +121,8 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void deleteAllForProject(Project project) {
-    digitalObjectRepository.deleteAllByProject_ProjectAbbr(project.getProjectAbbr());
+    datastreamRepository.deleteAllCustom(project.getProjectAbbr());
+    digitalObjectRepository.deleteAllCustom(project.getProjectAbbr());
     log.info("Successfully deleted all digital objects for project {}", project);
   }
 
