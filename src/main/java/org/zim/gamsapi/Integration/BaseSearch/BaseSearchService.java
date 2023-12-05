@@ -155,6 +155,11 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public List<IntegrationActionReport> deleteIndexedObject(String projectAbbr, String id) {
+
+    // id might contain values that need to be escaped for solr
+    // (otherwise a SOLRException would be thrown)
+    id = id.replaceAll(":", "\\\\:");
+
     SolrClient client = getSolrClient();
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
     try {
