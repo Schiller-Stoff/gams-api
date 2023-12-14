@@ -11,27 +11,22 @@
     <aside th:replace="fragments/general.html :: aside"></aside>
     <div class="body-wrapper">
         <div class="container-fluid">
-            <div class="container-fluid">
-                <div class="card">
-                    <div class="card-body">
-                        <h2>GAMS Users</h2>
-                        <p>Overview over all GAMS5 users (with roles and project assignment)</p>
-                        <br/>
-                        <ul class="list-group" style="list-style: none;">
-                            <li th:each="user : ${users}" class="list-group-item">
-                                <div><b>Username</b>: <span th:text="${user.username}"></span></div>
-                                <div><b>Roles</b>: <span th:text="${user.roles}"></span></div>
-                                <div>
-                                    <b>Assigned projects</b>
-                                    <ul>
-                                        <li th:each="project : ${user.projects}" th:text="${project.projectAbbr}"></li>
-                                    </ul>
-                                </div>
-                            </li>
+
+            <h2>GAMS Users</h2>
+            <p>Overview over all GAMS5 users (with roles and project assignment)</p>
+            <br/>
+            <ul class="list-group" style="list-style: none;">
+                <li th:each="user : ${users}" class="list-group-item">
+                    <div><b>Username</b>: <span th:text="${user.username}"></span></div>
+                    <div><b>Roles</b>: <span th:text="${user.roles}"></span></div>
+                    <div>
+                        <b>Assigned projects</b>
+                        <ul>
+                            <li th:each="project : ${user.projects}" th:text="${project.projectAbbr}"></li>
                         </ul>
                     </div>
-                </div>
-            </div>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
