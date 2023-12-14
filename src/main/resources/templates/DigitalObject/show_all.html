@@ -118,7 +118,7 @@
       <div>
         <form id="idSearchForm" class="form w-50">
           <div class="input-group mb-3">
-            <button class="btn btn-outline-success" type="submit" id="button-addon1">Search</button>
+            <button class="btn btn-outline-dark" type="submit" id="button-addon1">Search</button>
             <input name="id" th:value="${searchId}" type="text" class="form-control" placeholder="ID substring">
             <input name="pageSize" th:value="${pageSize}" type="hidden" class="form-control">
             <input name="sortBy" th:value="${sortBy}" type="hidden" class="form-control">
@@ -177,7 +177,7 @@
                       th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                       method="POST"
               >
-                <button type="submit" class="btn btn-outline-success d-block">Integrate</button>
+                <button type="submit" class="btn btn-outline-dark d-block">Integrate</button>
               </form>
 
             </div></td>
@@ -201,7 +201,7 @@
             </li>
 
             <li class="page-item" style="background:lightgreen">
-              <a style="font-weight: 1000" class="page-link link-success text-decoration-underline" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${pageIndex} + '&pageSize=' + ${pageSize}  + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}" th:text="${pageIndex + 1}"></a>
+              <a style="font-weight: 1000" class="page-link text-decoration-underline" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${pageIndex} + '&pageSize=' + ${pageSize}  + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}" th:text="${pageIndex + 1}"></a>
             </li>
 
             <li th:if="${(totalPages > 3) and (pageIndex < totalPages-2)}" class="page-item">
@@ -244,7 +244,7 @@
         >
           <!-- <input type="hidden" name="id" th:field="*{id}"/> -->
           <!-- <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> -->
-          <input type="submit" class="btn btn-outline-success d-inline" value="Delete all objects"/>
+          <input type="submit" class="btn btn-danger d-inline" value="Delete all objects"/>
         </form>
       </div>
 
