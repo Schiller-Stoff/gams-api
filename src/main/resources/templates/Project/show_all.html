@@ -10,17 +10,15 @@
 
     <aside th:replace="fragments/general.html :: aside"></aside>
     <div class="body-wrapper">
-    <div class="container-fluid">
-
-
-                    <h2>GAMS Projects</h2>
-                    <p>List of all GAMS projects. Projects categorized by discipline, temporal (antiquity, Middle Ages, modern times, present) and spatial (Graz and Styria, Austria, international) classification; if for use in teaching tagged with Didactics</p>
-                    <br/>
-                    <ul class="list-group" style="list-style: none;">
-                        <li th:each="project : ${projects}" class="list-group-item">
-                            <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>
-                        </li>
-                    </ul>
+        <div class="container-fluid">
+            <h2>GAMS Projects</h2>
+            <p>List of all GAMS projects. Projects categorized by discipline, temporal (antiquity, Middle Ages, modern times, present) and spatial (Graz and Styria, Austria, international) classification; if for use in teaching tagged with Didactics</p>
+            <br/>
+            <ul class="list-group" style="list-style: none;">
+                <li th:each="project : ${projects}" class="list-group-item">
+                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>
+                </li>
+            </ul>
 
 
 <!--                    <br/>-->
