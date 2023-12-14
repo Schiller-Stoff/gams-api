@@ -26,6 +26,12 @@ spring:
     hiddenmethod:
       filter.enabled: "true"
 
+  # solves a bug where the thymeleaf template is not created correctly
+  # https://stackoverflow.com/questions/52982246/spring-thymeleaf-throws-cannot-create-a-session-after-the-response-has-been-com
+  thymeleaf:
+    servlet:
+      produce-partial-output-while-processing: "false"
+
   # sets the limit for multi-part files send via requests
   servlet:
     multipart:
