@@ -1,107 +1,124 @@
-<!DOCTYPE html>
-<!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
-<html lang="en" xmlns:th="http://thymeleaf.org">
-<head th:replace="fragments/general.html :: head"/>
-<body class="bg-light">
-<header th:replace="fragments/general.html :: header"></header>
-<nav th:replace="fragments/general.html :: nav"></nav>
+<!doctype html>
+<html lang="en">
 
-<main class="container mt-4">
-    <div class="webcirilo-box shadow-sm mb-1">
-    <h1 th:text="${datastream.dsid}"></h1>
-    <p>
-        Overview over a singular datastream
-    </p>
-    <div>
-        <a class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id})" th:text="'Back to object (' + ${digitalObject.id} + ')'"></a>
-    </div>
-    </div>
-    <div class="webcirilo-box shadow-sm mb-1">
-    <div class="bg-light p-2">
-        <p><b>Metadata</b></p>
-        <p><b>Dsid:</b> <span th:text="${datastream.dsid}"></span></p>
-        <p><b>Datastream id (global):</b> <span th:text="${datastream.globalId}"></span></p>
-        <p><b>Project:</b> <span th:text="${project.projectAbbr}"></span></p>
-        <p><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></p>
-        <p><b>Filename:</b> <span th:text="${datastream.fileName}"></span></p>
-    </div>
-    <br/>
-    <div>
-        <a target="_blank" class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Stored data</a>
-    </div>
-    </div>
-    <div class="webcirilo-box shadow-sm mb-1">
-    <h2 class="h4">Metadata</h2>
-    <p>Primary Dublin Core metadata derived from the GAMS-API</p>
-    <ul class="list-group-flush p-0">
-        <li class="list-group-item bg-light">
-            <small>identifier</small>
-            <p th:text="${datastream.globalId}"></p>
-        </li>
-    </ul>
-    <p>Auxiliary metadata as dublin core (if available)</p>
-    <ul class="list-group-flush p-0" th:if="${datastream.baseMetadata}">
-        <li class="list-group-item bg-light">
-            <small>title</small>
-            <p th:text="${datastream.baseMetadata.title}"></p>
-        </li>
-        <li class="list-group-item bg-light">
-            <small>creator</small>
-            <p th:text="${datastream.baseMetadata.creator}"></p>
-        </li>
-        <li class="list-group-item bg-light">
-            <small>description</small>
-            <p th:text="${datastream.baseMetadata.description}"></p>
-        </li>
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:subject</small>-->
-<!--            <p th:text="${datastream.baseMetadata.subject}"></p>-->
-<!--        </li>-->
-        <li class="list-group-item bg-light">
-            <small>publisher</small>
-            <p th:text="${datastream.baseMetadata.publisher}"></p>
-        </li>
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>contributor</small>-->
-<!--            <p th:text="${datastream.baseMetadata.contributor}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>date</small>-->
-<!--            <p th:text="${datastream.baseMetadata.date}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:type</small>-->
-<!--            <p th:text="${datastream.baseMetadata.type}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:format</small>-->
-<!--            <p th:text="${datastream.baseMetadata.format}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:source</small>-->
-<!--            <p th:text="${datastream.baseMetadata.source}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:language</small>-->
-<!--            <p th:text="${datastream.baseMetadata.language}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:relation</small>-->
-<!--            <p th:text="${datastream.baseMetadata.relation}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:coverage</small>-->
-<!--            <p th:text="${datastream.baseMetadata.coverage}"></p>-->
-<!--        </li>-->
-<!--        <li class="list-group-item bg-light">-->
-<!--            <small>dc:rights</small>-->
-<!--            <p th:text="${datastream.baseMetadata.rights}"></p>-->
-<!--        </li>-->
-    </ul>
-    </div>
+<head th:replace="fragments/general.html :: headtemplate" />
 
-</main>
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
 
-<footer th:replace="fragments/general.html :: footer"></footer>
+    <aside th:replace="fragments/general.html :: aside"></aside>
+    <div class="body-wrapper">
+        <div class="container-fluid">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body">
+                        <div>
+                            <h1 th:text="${datastream.dsid}"></h1>
+                            <p>
+                                Overview over a singular datastream
+                            </p>
+                            <div>
+                                <a class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id})" th:text="'Back to object (' + ${digitalObject.id} + ')'"></a>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="bg-light p-2">
+                                <p><b>Metadata</b></p>
+                                <p><b>Dsid:</b> <span th:text="${datastream.dsid}"></span></p>
+                                <p><b>Datastream id (global):</b> <span th:text="${datastream.globalId}"></span></p>
+                                <p><b>Project:</b> <span th:text="${project.projectAbbr}"></span></p>
+                                <p><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></p>
+                                <p><b>Filename:</b> <span th:text="${datastream.fileName}"></span></p>
+                            </div>
+                            <br/>
+                            <div>
+                                <a target="_blank" class="btn btn-outline-success mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Stored data</a>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="h4">Metadata</h2>
+                            <p>Primary Dublin Core metadata derived from the GAMS-API</p>
+                            <ul class="list-group-flush p-0">
+                                <li class="list-group-item bg-light">
+                                    <small>identifier</small>
+                                    <p th:text="${datastream.globalId}"></p>
+                                </li>
+                            </ul>
+                            <p>Auxiliary metadata as dublin core (if available)</p>
+                            <ul class="list-group-flush p-0" th:if="${datastream.baseMetadata}">
+                                <li class="list-group-item bg-light">
+                                    <small>title</small>
+                                    <p th:text="${datastream.baseMetadata.title}"></p>
+                                </li>
+                                <li class="list-group-item bg-light">
+                                    <small>creator</small>
+                                    <p th:text="${datastream.baseMetadata.creator}"></p>
+                                </li>
+                                <li class="list-group-item bg-light">
+                                    <small>description</small>
+                                    <p th:text="${datastream.baseMetadata.description}"></p>
+                                </li>
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:subject</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.subject}"></p>-->
+                                <!--        </li>-->
+                                <li class="list-group-item bg-light">
+                                    <small>publisher</small>
+                                    <p th:text="${datastream.baseMetadata.publisher}"></p>
+                                </li>
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>contributor</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.contributor}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>date</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.date}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:type</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.type}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:format</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.format}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:source</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.source}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:language</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.language}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:relation</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.relation}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:coverage</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.coverage}"></p>-->
+                                <!--        </li>-->
+                                <!--        <li class="list-group-item bg-light">-->
+                                <!--            <small>dc:rights</small>-->
+                                <!--            <p th:text="${datastream.baseMetadata.rights}"></p>-->
+                                <!--        </li>-->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/sidebarmenu.js"></script>
+<script src="/assets/js/app.min.js"></script>
+<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
 </body>
+
 </html>
