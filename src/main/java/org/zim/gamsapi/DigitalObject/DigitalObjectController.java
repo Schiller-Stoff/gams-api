@@ -52,7 +52,7 @@ public class DigitalObjectController {
           Project project,
           // for pagination
           @RequestParam(defaultValue = "0") int pageIndex,
-          @RequestParam(defaultValue = "10") int pageSize,
+          @RequestParam(defaultValue = "100") int pageSize,
           @RequestParam(defaultValue = "") String id,
           @RequestParam(defaultValue = "id") String sortBy
 
