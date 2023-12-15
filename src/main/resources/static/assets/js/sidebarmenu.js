@@ -31,7 +31,7 @@ $(function () {
     });
   
     element.addClass("active");
-    $("#sidebarnav a").on("click", function (e) {
+    $("#sidebarnav a:not(.external)").on("click", function (e) {
       if (!$(this).hasClass("active")) {
         // hide any open menus and remove all other classes
         $("ul", $(this).parents("ul:first")).removeClass("in");
