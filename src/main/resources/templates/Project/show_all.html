@@ -12,6 +12,12 @@
     <div class="body-wrapper">
         <header th:replace="fragments/general.html :: header"></header>
         <div class="container-fluid">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+                    <li class="breadcrumb-item">Projects</li>
+                </ol>
+            </nav>
             <h2>GAMS Projects</h2>
             <p>List of all GAMS projects.</p>
             <ul class="list-group" style="list-style: none;">

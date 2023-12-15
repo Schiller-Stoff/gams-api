@@ -13,6 +13,14 @@
   <div class="body-wrapper">
     <header th:replace="fragments/general.html :: header"></header>
       <div class="container-fluid">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
+            <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
+            <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
+          </ol>
+        </nav>
         <h2 th:text="${do.id}" class="mb-3"></h2>
         <p>
           Overview over a singular digital object

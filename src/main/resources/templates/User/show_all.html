@@ -12,7 +12,12 @@
     <div class="body-wrapper">
         <header th:replace="fragments/general.html :: header"></header>
         <div class="container-fluid">
-
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+                    <li class="breadcrumb-item">Users</li>
+                </ol>
+            </nav>
             <h2>GAMS Users</h2>
             <p>Overview over all GAMS5 users (with roles and project assignment)</p>
             <br/>

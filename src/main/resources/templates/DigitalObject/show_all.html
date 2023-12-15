@@ -12,6 +12,13 @@
   <div class="body-wrapper">
     <header th:replace="fragments/general.html :: header"></header>
     <div class="container-fluid">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
+          <li class="breadcrumb-item" th:text="${project.projectAbbr}"></li>
+        </ol>
+      </nav>
       <h2 class="mb-3" th:text="${project.projectAbbr}"></h2>
       <p>
         Overview over all stored digital objects for project <i th:text="${project.projectAbbr}"></i>.
