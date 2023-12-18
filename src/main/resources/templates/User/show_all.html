@@ -11,7 +11,7 @@
     <aside th:replace="fragments/general.html :: aside"></aside>
     <div class="body-wrapper">
         <header th:replace="fragments/general.html :: header"></header>
-        <div class="container-fluid">
+        <div class="container-fluid" style="min-height: 100vh">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
@@ -34,6 +34,7 @@
                 </li>
             </ul>
         </div>
+        <footer th:replace="fragments/general.html :: footer"></footer>
     </div>
 </div>
 </div>
