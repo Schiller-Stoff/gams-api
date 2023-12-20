@@ -103,6 +103,14 @@ public class DigitalObject {
   @LastModifiedBy
   private String modifiedBy;
 
+  /**
+   * Arbitrary types associated with the digital object.
+   */
+  @ElementCollection
+  @NotNull
+  @Builder.Default
+  private Set<String> types = new HashSet<>();
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
