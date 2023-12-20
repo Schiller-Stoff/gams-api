@@ -56,6 +56,7 @@ public class SubInfoPackService implements ISubInfoPackService {
             .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
             .objectType(bagitSipJson.getObjectType())
             .childObjects(childObjects)
+            .types(bagitSipJson.getTypes())
             // .createdBy() - system controlled
             // .modifiedBy() - system controlled
             // .created() - system controlled
