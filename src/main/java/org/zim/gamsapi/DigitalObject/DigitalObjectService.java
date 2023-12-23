@@ -15,6 +15,7 @@ import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -128,5 +129,27 @@ public class DigitalObjectService implements IDigitalObjectService {
     log.info("Successfully deleted all digital objects for project {}", project);
   }
 
+  @Transactional
+  @Override
+  public DigitalObject assignChildObjects(DigitalObject parentObject, Set<DigitalObject> childObjects) {
+
+   DigitalObject foundParentObject = digitalObjectRepository.findById(parentObject.getId()).orElseThrow(
+        () -> {
+          String msg = String.format("Aborting assign child objects. Cannot find parent object %s", parentObject);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        }
+    );
+
+   // assign child objects
+   foundParentObject.setChildObjects(childObjects);
+  // DON'T NEED / MUST NOT EXTRA SAVE BECAUSE ALREADY PERSISTED BY CONTEXT e.g. digitalObjectRepository.save(foundParentObject);
+  // via findById() object is already managed by persistence context (if marked as @transactional)
+  // https://www.baeldung.com/hibernate-entity-lifecycle#managed-entity
+
+   log.info("Successfully assigned child objects {} to parent object {}", childObjects, foundParentObject);
+
+   return foundParentObject;
+  }
 
 }
