@@ -117,7 +117,9 @@
                 </li>
                 <li class="list-group-item bg-light">
                   <small>child objects</small>
-                  <p th:text="${do.childObjects}"></p>
+                  <div>
+                    <span th:each="child : ${do.childObjects}" th:text="${child.id} + ', '"></span>
+                  </div>
                 </li>
               </ul>
               <p>Auxiliary metadata as dublin core</p>
