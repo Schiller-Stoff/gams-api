@@ -2,6 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,10 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -89,6 +88,26 @@ public class DigitalObjectController {
     model.addAttribute(project);
     log.info("Found objects for project {}", project.getProjectAbbr());
     return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
+  }
+
+  @PatchMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/{id}/collect", "/{id}/collect/"})
+  @ResponseBody
+  public DigitalObject collectObjects(
+          @PathVariable String id,
+          @RequestParam Set<String> childObjects,
+          Project project
+  ) {
+
+    Set<DigitalObject> childrenToBeCollected = childObjects
+            .stream()
+            .map(childId -> DigitalObject.builder().id(childId).project(project).build())
+            .collect(Collectors.toSet());
+
+    DigitalObject foundObject = digitalObjectService.assignChildObjects(
+            DigitalObject.builder().id(id).project(project).build(), childrenToBeCollected
+    );
+
+    return foundObject;
   }
 
   @PutMapping(value = {"/{id}", "/{id}/"})
