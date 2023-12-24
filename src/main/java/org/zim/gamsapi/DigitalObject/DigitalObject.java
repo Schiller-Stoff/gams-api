@@ -1,7 +1,9 @@
 package org.zim.gamsapi.DigitalObject;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -17,6 +19,7 @@ import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Domain object representing a digital object in sense of OAIS.
@@ -28,8 +31,9 @@ import java.util.*;
 @Builder
 @Getter
 @Setter
-@ToString
 @EntityListeners(AuditingEntityListener.class)
+// manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class DigitalObject {
 
   /**
@@ -52,6 +56,7 @@ public class DigitalObject {
   @OneToMany
   @NotNull
   @Builder.Default
+  @JsonManagedReference
   private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
 
   /**
@@ -122,5 +127,28 @@ public class DigitalObject {
   @Override
   public int hashCode() {
     return Objects.hash(id);
+  }
+
+  @Override
+  public String toString() {
+
+    String childObjectsString = childObjects.stream()
+            .map(DigitalObject::getId)
+            .collect(Collectors.joining(", "));
+
+    return "DigitalObject{" +
+            "id='" + id + '\'' +
+            ", datastreams=" + datastreams +
+            ", childObjects=[" + childObjectsString + "]" +
+            ", objectType='" + objectType + '\'' +
+            ", published=" + published +
+            ", created=" + created +
+            ", modified=" + modified +
+            ", project=" + project +
+            ", baseMetadata=" + baseMetadata +
+            ", createdBy='" + createdBy + '\'' +
+            ", modifiedBy='" + modifiedBy + '\'' +
+            ", types=" + types +
+            '}';
   }
 }

@@ -28,6 +28,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
+// manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "globalId")
 public class Datastream {
 
