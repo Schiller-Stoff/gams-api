@@ -1,9 +1,6 @@
 package org.zim.gamsapi.DigitalObject;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -32,8 +29,6 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-// manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class DigitalObject {
 
   /**
@@ -56,7 +51,8 @@ public class DigitalObject {
   @OneToMany
   @NotNull
   @Builder.Default
-  @JsonManagedReference
+  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
 
   /**
