@@ -28,8 +28,6 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-// manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "globalId")
 public class Datastream {
 
   /**
@@ -42,7 +40,8 @@ public class Datastream {
 
   @ManyToOne
   @ToString.Exclude
-  @JsonBackReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   private DigitalObject digitalObject;
 
   /**
