@@ -61,7 +61,7 @@ server:
   # sets the max size of a http form post for tomcat (additional to other config that sets the limit for spring)
   # https://stackoverflow.com/questions/33232849/increase-http-post-maxpostsize-in-spring-boot
   tomcat:
-    max-http-form-post-size: 10000000
+    max-http-form-post-size: 10000000000
 
 
 #####
