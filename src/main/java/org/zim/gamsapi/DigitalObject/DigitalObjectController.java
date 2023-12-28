@@ -1,5 +1,6 @@
 package org.zim.gamsapi.DigitalObject;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -57,6 +58,11 @@ public class DigitalObjectController {
           @RequestParam(defaultValue = "id") String sortBy
 
   ) {
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
     //Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id")));
     Page<DigitalObjectListItemView> digitalObjects = digitalObjectService.findAllByProjectAbbr(
             project.getProjectAbbr(),
@@ -86,6 +92,11 @@ public class DigitalObjectController {
           @RequestParam(defaultValue = "0") int pageIndex,
           @RequestParam(defaultValue = "15") int pageSize
   ) {
+    // limit page size
+    if (pageSize >= 20) {
+      pageSize = 20;
+    }
+
     model.addAttribute(project);
     log.info("Found objects for project {}", project.getProjectAbbr());
     return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
