@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
@@ -57,7 +58,7 @@ public class DigitalObjectController {
 
   ) {
     //Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id")));
-    Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(
+    Page<DigitalObjectListItemView> digitalObjects = digitalObjectService.findAllByProjectAbbr(
             project.getProjectAbbr(),
             id,
             PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
@@ -78,10 +79,10 @@ public class DigitalObjectController {
 
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public List<DigitalObject> getProjectObjectsJson(
+  public List<DigitalObjectListItemView> getProjectObjectsJson(
           Model model,
           Project project,
-          // for pagenination
+          // for pagination
           @RequestParam(defaultValue = "0") int pageIndex,
           @RequestParam(defaultValue = "15") int pageSize
   ) {
@@ -90,6 +91,13 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
   }
 
+  /**
+   * Allows to assign child objects to given parent object
+   * @param id the id of the parent object
+   * @param childObjects the child objects ids
+   * @param project the project
+   * @return the parent object with the assigned child objects
+   */
   @PatchMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/{id}/collect", "/{id}/collect/"})
   @ResponseBody
   public DigitalObject collectObjects(

@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -65,7 +66,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, Pageable pageable) {
+  public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Pageable pageable) {
 
     projectRepository.findById(projectAbbr).orElseThrow(
       () -> {
@@ -79,7 +80,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  public Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
+  public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
     projectRepository.findById(projectAbbr).orElseThrow(
             () -> {
               String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);

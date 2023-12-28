@@ -13,14 +13,42 @@ public interface IDigitalObjectService {
 
   DigitalObject save(DigitalObject digitalObject);
 
+  /**
+   * Find all digital objects.
+   * @return list of digital objects
+   */
   List<DigitalObject> findAll();
 
-  Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, Pageable pageable);
+  /**
+   * Find all digital objects for a given project (with project abbreviation).
+   * @param projectAbbr identifier of the project
+   * @param pageable pagination
+   * @return a page of digital objects as projection
+   */
+  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Pageable pageable);
 
-  Page<DigitalObject> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
+  /**
+   * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
+   * @param projectAbbr identifier of the project
+   * @param containedInPid substring filter for digital object's id
+   * @param pageable pagination
+   * @return a page of digital objects as projection
+   */
+  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
 
+  /**
+   * Find all digital objects for a given project (with project abbreviation).
+   * @param projectAbbr identifier of the project
+   * @return a list of digital objects
+   */
   List<DigitalObject> findAllByProjectAbbr(String projectAbbr);
 
+  /**
+   * Find a digital object by its id.
+   * @param pid the id of the digital object
+   * @return the digital object
+   * @throws DigitalObjectNotFoundException if the digital object cannot be found
+   */
   DigitalObject findById(String pid) throws DigitalObjectNotFoundException;
 
   void delete(DigitalObject digitalObject);
