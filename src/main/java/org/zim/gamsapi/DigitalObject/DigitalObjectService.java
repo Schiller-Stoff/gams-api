@@ -16,6 +16,7 @@ import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -153,4 +154,34 @@ public class DigitalObjectService implements IDigitalObjectService {
    return foundParentObject;
   }
 
+
+    @Override
+    public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Optional<Set<String>> types, Pageable pageable) {
+        projectRepository.findById(projectAbbr).orElseThrow(
+                () -> {
+                    String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
+                    log.error(msg);
+                    return new ProjectNotFoundException(msg);
+                }
+        );
+
+        // search for all objects
+        if(objectType.isEmpty() && types.isEmpty()){
+            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable);
+        }
+
+        // search for all objects with given object type
+        if(objectType.isPresent() && types.isEmpty()){
+            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectType(projectAbbr, objectType.get(), pageable);
+        }
+
+        // search for all objects with given types
+        if(objectType.isEmpty() && types.isPresent()){
+            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndTypesIn(projectAbbr, types.get(), pageable);
+        }
+
+        // search for all objects with given object type and types
+        return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectTypeAndTypesIn(projectAbbr, objectType.get(), types.get(), pageable);
+
+    }
 }

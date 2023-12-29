@@ -7,6 +7,7 @@ import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.Project.Project;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface IDigitalObjectService {
@@ -35,6 +36,16 @@ public interface IDigitalObjectService {
    * @return a page of digital objects as projection
    */
   Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
+
+  /**
+   * Find all digital objects for a given project (with project abbreviation). Filter by object type.
+   * @param projectAbbr identifier of the project
+   * @param objectType filter by object type (optionally)
+   * @param types filter by types (optionally)
+   * @param pageable pagination
+   * @return a page of digital objects as projection
+   */
+  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Optional<Set<String>> types, Pageable pageable);
 
   /**
    * Find all digital objects for a given project (with project abbreviation).
