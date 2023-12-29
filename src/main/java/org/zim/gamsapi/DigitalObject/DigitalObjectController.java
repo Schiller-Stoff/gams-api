@@ -90,7 +90,10 @@ public class DigitalObjectController {
           Project project,
           // for pagination
           @RequestParam(defaultValue = "0") int pageIndex,
-          @RequestParam(defaultValue = "15") int pageSize
+          @RequestParam(defaultValue = "15") int pageSize,
+          // optional parameters searching for explicit types?
+          @RequestParam Optional<String> objectType,
+          @RequestParam Optional<Set<String>> types
   ) {
     // limit page size
     if (pageSize >= 20) {
@@ -98,8 +101,14 @@ public class DigitalObjectController {
     }
 
     model.addAttribute(project);
-    log.info("Found objects for project {}", project.getProjectAbbr());
-    return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
+
+    return digitalObjectService.findAllByProjectAbbr(
+            project.getProjectAbbr(),
+            objectType,
+            types,
+            PageRequest.of(pageIndex, pageSize, Sort.by("id"))
+    ).toList();
+
   }
 
   /**
@@ -172,5 +181,7 @@ public class DigitalObjectController {
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
+
+
 
 }
