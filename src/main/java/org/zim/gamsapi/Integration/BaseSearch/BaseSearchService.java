@@ -241,7 +241,6 @@ public class BaseSearchService implements IIntegrationService {
     Arrays.stream(facets).forEach(facet -> {
       facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
       facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-      facet.properties.put(BaseSearchProperties.TYPE.name, BaseSearchTypes.DERIVATIVE.name);
       // id must be defined outside
     });
 
