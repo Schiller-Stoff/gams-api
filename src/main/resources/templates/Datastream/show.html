@@ -31,20 +31,19 @@
 
 
             <div class="bg-light p-2">
-                <p><b>Metadata</b></p>
-                <p><b>Dsid:</b> <span th:text="${datastream.dsid}"></span></p>
-                <p><b>Datastream id (global):</b> <span th:text="${datastream.globalId}"></span></p>
-                <p><b>Project:</b> <span th:text="${project.projectAbbr}"></span></p>
+                <p><b>File metadata</b></p>
+<!--                <p><b>Dsid:</b> <span th:text="${datastream.dsid}"></span></p>-->
+<!--                <p><b>Datastream id (global):</b> <span th:text="${datastream.globalId}"></span></p>-->
                 <p><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></p>
                 <p><b>Filename:</b> <span th:text="${datastream.fileName}"></span></p>
+                <p><b>Filesize:</b> <span th:text="${datastream.size}"></span></p>
             </div>
-            <br/>
-            <div>
+            <div class="mt-2">
                 <a target="_blank" class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Stored data</a>
             </div>
 
             <h2 class="h4">Metadata</h2>
-            <p>Primary Dublin Core metadata derived from the GAMS-API</p>
+            <p>Primary metadata derived from the GAMS-API</p>
             <ul class="list-group-flush p-0">
                 <li class="list-group-item bg-light">
                     <small>identifier</small>
