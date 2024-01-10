@@ -153,7 +153,7 @@
             <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
             <!--          </th>-->
             <th scope="col">Delete</th>
-            <th scope="col">Integrate</th>
+<!--            <th scope="col">Integrate</th>-->
           </tr>
           </thead>
           <tbody>
@@ -180,15 +180,15 @@
                 <input type="submit" class="btn btn-outline-dark" value="Delete" />
               </form>
             </div></td>
-            <td><div>
-              <form
-                      th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
-                      method="POST"
-              >
-                <button type="submit" class="btn btn-outline-dark d-block">Integrate</button>
-              </form>
+<!--            <td><div>-->
+<!--              <form-->
+<!--                      th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
+<!--                      method="POST"-->
+<!--              >-->
+<!--                <button type="submit" class="btn btn-outline-dark d-block">Integrate</button>-->
+<!--              </form>-->
 
-            </div></td>
+<!--            </div></td>-->
           </tr>
           </tbody>
         </table>
