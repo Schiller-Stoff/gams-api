@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
@@ -30,8 +31,8 @@ public class DigitalObjectController {
 
   @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public DigitalObject getObjectJson(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
+  public DigitalObjectDetailsView getObjectJson(DigitalObject digitalObject, Project project, Model model) {
+    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
     model.addAttribute(foundObject);
     log.info("Found digital object {} for project {}", digitalObject, project);
     return foundObject;
@@ -39,7 +40,7 @@ public class DigitalObjectController {
 
   @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObject foundDigitalObject = digitalObjectService.findById(digitalObject.getId());
+    DigitalObjectDetailsView foundDigitalObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
     model.addAttribute("do", foundDigitalObject);
     model.addAttribute(project);
     log.info("Found digital object {} for project {}", foundDigitalObject, project.getProjectAbbr());

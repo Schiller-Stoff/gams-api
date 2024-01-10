@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 
 import java.util.List;
@@ -76,4 +77,13 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return a page of digital objects as projection
    */
   Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndTypesIn(String projectAbbr, Set<String> types, Pageable pageable);
+
+
+  /**
+   * Find a digital object by its id.
+   * @param id the id of the digital object
+   * @return a digital object as projection
+   */
+  DigitalObjectDetailsView findDigitalObjectById(String id);
+
 }

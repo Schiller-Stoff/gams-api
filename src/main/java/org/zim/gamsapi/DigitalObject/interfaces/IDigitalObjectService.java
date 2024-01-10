@@ -74,4 +74,12 @@ public interface IDigitalObjectService {
    */
   DigitalObject assignChildObjects(DigitalObject parentObject, Set<DigitalObject> childObjects);
 
+
+  /**
+   * Find a digital object by its id.
+   * @param id the id of the digital object
+   * @return a digital object as projection
+   */
+  DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id);
+
 }

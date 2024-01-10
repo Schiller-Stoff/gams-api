@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.Project;
@@ -183,5 +184,10 @@ public class DigitalObjectService implements IDigitalObjectService {
         // search for all objects with given object type and types
         return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectTypeAndTypesIn(projectAbbr, objectType.get(), types.get(), pageable);
 
+    }
+
+    @Override
+    public DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id) {
+        return digitalObjectRepository.findDigitalObjectById(id);
     }
 }

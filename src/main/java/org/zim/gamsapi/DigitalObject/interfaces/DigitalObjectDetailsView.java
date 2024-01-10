@@ -1,0 +1,44 @@
+package org.zim.gamsapi.DigitalObject.interfaces;
+
+
+import org.zim.gamsapi.MetadataBaseEntity;
+
+import java.util.List;
+import java.util.Set;
+
+/**
+ * Spring Data JPA Projection Interface for a singular DigitalObject.
+ *
+ * Represents a DTO for a digital object BUT excluding data from datastreams. (like the binary content)
+ *
+ * https://thorben-janssen.com/spring-data-jpa-query-projections/
+ *
+ * (Names of the mapped getter methods must be same as in DigitalObject)
+ */
+public interface DigitalObjectDetailsView {
+
+    String getId();
+    ProjectView getProject();
+    String getObjectType();
+
+    MetadataBaseEntity getBaseMetadata();
+
+    String getCreated();
+
+    Set<String> getTypes();
+
+    List<DatastreamView> getDatastreams();
+
+    Set<DigitalObjectDetailsView> getChildObjects();
+
+    interface ProjectView {
+        String getProjectAbbr();
+    }
+
+    interface DatastreamView {
+        String getDsid();
+
+
+    }
+
+}
