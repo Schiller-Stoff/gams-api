@@ -73,6 +73,8 @@ public class SpringSecurityConfiguration {
                   // disable csrf for all requests that don't demand html = only html pages are csrf protected
                   return !containsTextHtml;
                 })
+                // allows to load e.g. datastream content directly via an embed / iframe tag.
+                // https://stackoverflow.com/questions/28647136/how-to-disable-x-frame-options-response-header-in-spring-security
                 .and()
                 .headers()
                 .frameOptions()
