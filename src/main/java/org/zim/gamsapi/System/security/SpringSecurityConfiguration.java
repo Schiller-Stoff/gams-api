@@ -72,7 +72,11 @@ public class SpringSecurityConfiguration {
                   boolean containsTextHtml = acceptHeaderValue.contains(MimeTypeUtils.TEXT_HTML_VALUE);
                   // disable csrf for all requests that don't demand html = only html pages are csrf protected
                   return !containsTextHtml;
-                });
+                })
+                .and()
+                .headers()
+                .frameOptions()
+                .sameOrigin();
       } catch (Exception e) {
         String msg = String.format("Failed to correctly configure spring security - Might be an issue with CSRF protection settings %s", e);
         log.error(msg);
