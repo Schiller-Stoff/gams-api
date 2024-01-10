@@ -39,10 +39,10 @@
                 <p><b>Filesize:</b> <span th:text="${datastream.size}"></span></p>
             </div>
             <div class="mt-2">
-                <a target="_blank" class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Stored data</a>
+                <a target="_blank" class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Download</a>
             </div>
 
-            <h2 class="h4">Metadata</h2>
+            <h2 class="h4 mt-1">Metadata</h2>
             <p>Primary metadata derived from the GAMS-API</p>
             <ul class="list-group-flush p-0">
                 <li class="list-group-item bg-light">
@@ -109,6 +109,16 @@
                 <!--            <p th:text="${datastream.baseMetadata.rights}"></p>-->
                 <!--        </li>-->
             </ul>
+            <br/>
+            <h4>Content preview</h4>
+            <div class="border border-2">
+                <embed
+                        th:src="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"
+                        width="100%"
+                        height="600px"
+                        th:type="${datastream.mimeType}"
+                ></embed>
+            </div>
 
         </div>
 
