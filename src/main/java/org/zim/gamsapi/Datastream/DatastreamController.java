@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
@@ -33,16 +34,16 @@ public class DatastreamController {
 
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
-    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
-    model.addAttribute(foundDatastream);
+    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsByDsid(digitalObject.getId(), datastream.getDsid());
+    model.addAttribute("datastream", foundDatastream);
     model.addAttribute(project);
     return "Datastream/show";
   }
 
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public Datastream getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
-    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
+  public IDatastreamDetailsView getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
+    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsByDsid(digitalObject.getId(), datastream.getDsid());
     model.addAttribute(foundDatastream);
     model.addAttribute(project);
     return foundDatastream;

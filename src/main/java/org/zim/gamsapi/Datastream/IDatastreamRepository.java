@@ -3,8 +3,8 @@ package org.zim.gamsapi.Datastream;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -40,5 +40,20 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Long> 
   void deleteAll(String projectAbbr);
 
 
+  /**
+   * Projection method to return a list of datastream details views. Excludes the actual datastream content.
+   * Searches a datastream based on the parent digital object and it's datastream-identifier.
+   * @param digitalObjectId Digital object to be found
+   * @return list of datastream projections.
+   */
+  List<IDatastreamDetailsView> findAllByDigitalObjectId(String digitalObjectId);
+
+  /**
+   * Projection method to return a datastream details views. Excludes the actual datastream content.
+   * @param digitalObject Digital object to be found
+   * @param dsid Datastream identifier
+   * @return datastream projection.
+   */
+  IDatastreamDetailsView findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
 
 }

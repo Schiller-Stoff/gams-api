@@ -5,8 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -51,5 +54,29 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public Datastream save(Datastream datastream) {
     return datastreamRepository.save(datastream);
+  }
+
+  /**
+   * Returns a list of datastream projections based on the parent digital object.
+   * The projection excludes the actual datastream content. (to improve performance)
+   * @param digitalObject parent digital object
+   * @return list of datastream projections
+   */
+  @Override
+  public List<IDatastreamDetailsView> findAll(DigitalObject digitalObject) {
+    return datastreamRepository.findAllByDigitalObjectId(digitalObject.getId());
+  }
+
+  /**
+   * Returns a datastream projection based on the parent digital object, and it's datastream-identifier.
+   * The projection excludes the actual datastream content. (to improve performance
+   * @param objectId of the parent digital object
+   * @param dsid user defined datastream-identifier (must be unique per object)
+   * @return found Datastream projection
+   * @throws DatastreamNotFoundException if no datastream is found
+   */
+  @Override
+  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, String dsid) throws DatastreamNotFoundException {
+    return datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject.builder().id(objectId).build(), dsid);
   }
 }

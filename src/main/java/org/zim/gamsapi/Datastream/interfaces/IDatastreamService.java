@@ -4,6 +4,8 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 
+import java.util.List;
+
 public interface IDatastreamService {
   void delete(Datastream datastream);
 
@@ -25,5 +27,10 @@ public interface IDatastreamService {
   Datastream findByDsid(String pid, String dsid) throws DatastreamNotFoundException;
 
   Datastream save(Datastream datastream);
+
+
+  List<IDatastreamDetailsView> findAll(DigitalObject digitalObject);
+
+  IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, String dsid) throws DatastreamNotFoundException;
 
 }
