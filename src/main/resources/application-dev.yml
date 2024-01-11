@@ -3,6 +3,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/gams
     username: admin
     password: admin
+  # shows hibernate sql statements in console
+  jpa:
+    show-sql: true
 
 #####
 # Custom properties for GAMS
