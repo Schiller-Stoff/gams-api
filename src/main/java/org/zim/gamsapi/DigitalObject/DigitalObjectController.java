@@ -12,6 +12,7 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Datastream.DatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
@@ -36,10 +37,14 @@ public class DigitalObjectController {
   @ResponseBody
   public DigitalObjectCompactDTO getObjectJson(DigitalObject digitalObject, Project project, Model model) {
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    // TODO exception in repo layer?
     var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    // TODO exception in repo layer?
     DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject, DigitalObjectCompactDTO.class);
+
+    if(digitalObjectCompactDTO == null){
+      String msg = String.format("Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s", digitalObject, project);
+      log.error(msg);
+      throw new DigitalObjectConversionException(msg);
+    }
 
     // TODO exception if converson fails?
     digitalObjectCompactDTO.setDatastreams(datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
@@ -54,16 +59,15 @@ public class DigitalObjectController {
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     // first query digital object projection dto
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    // TODO exception if nothing found!!!
-    // convert to dto
     DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject, DigitalObjectCompactDTO.class);
-
-    // TODO add an optional base exception
+    if(digitalObjectCompactDTO == null){
+      String msg = String.format("Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s", digitalObject, project);
+      log.error(msg);
+      throw new DigitalObjectConversionException(msg);
+    }
 
     // then query datastreams projections and assign to dto
     var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    // TODO exception in repo layer?
-
     digitalObjectCompactDTO.setDatastreams(datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
 
     model.addAttribute("do", digitalObjectCompactDTO);
