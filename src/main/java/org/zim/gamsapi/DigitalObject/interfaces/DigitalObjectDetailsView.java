@@ -1,9 +1,7 @@
 package org.zim.gamsapi.DigitalObject.interfaces;
 
-
 import org.zim.gamsapi.MetadataBaseEntity;
-
-import java.util.List;
+import java.util.Date;
 import java.util.Set;
 
 /**
@@ -23,22 +21,19 @@ public interface DigitalObjectDetailsView {
 
     MetadataBaseEntity getBaseMetadata();
 
-    String getCreated();
+    Date getCreated();
+
+    Date getPublished();
+
+    Date getModified();
 
     Set<String> getTypes();
 
-    List<DatastreamView> getDatastreams();
-
+    // TODO exclude?
     Set<DigitalObjectDetailsView> getChildObjects();
 
     interface ProjectView {
         String getProjectAbbr();
-    }
-
-    interface DatastreamView {
-        String getDsid();
-
-
     }
 
 }
