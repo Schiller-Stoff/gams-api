@@ -1,9 +1,8 @@
 package org.zim.gamsapi.DigitalObject;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.Datastream.DatastreamService;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
@@ -27,23 +28,47 @@ import java.util.stream.Collectors;
 public class DigitalObjectController {
 
   private final DigitalObjectService digitalObjectService;
+  private final DatastreamService datastreamService;
   private final IProjectService projectService;
+  private final ConversionService conversionService;
 
   @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public DigitalObjectDetailsView getObjectJson(DigitalObject digitalObject, Project project, Model model) {
+  public DigitalObjectCompactDTO getObjectJson(DigitalObject digitalObject, Project project, Model model) {
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    model.addAttribute(foundObject);
+    // TODO exception in repo layer?
+    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
+    // TODO exception in repo layer?
+    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject, DigitalObjectCompactDTO.class);
+
+    // TODO exception if converson fails?
+    digitalObjectCompactDTO.setDatastreams(datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
+
+
+    model.addAttribute(digitalObjectCompactDTO);
     log.info("Found digital object {} for project {}", digitalObject, project);
-    return foundObject;
+    return digitalObjectCompactDTO;
   }
 
   @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObjectDetailsView foundDigitalObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    model.addAttribute("do", foundDigitalObject);
+    // first query digital object projection dto
+    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
+    // TODO exception if nothing found!!!
+    // convert to dto
+    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject, DigitalObjectCompactDTO.class);
+
+    // TODO add an optional base exception
+
+    // then query datastreams projections and assign to dto
+    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
+    // TODO exception in repo layer?
+
+    digitalObjectCompactDTO.setDatastreams(datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
+
+    model.addAttribute("do", digitalObjectCompactDTO);
     model.addAttribute(project);
-    log.info("Found digital object {} for project {}", foundDigitalObject, project.getProjectAbbr());
+    log.info("Found digital object {} for project {}", digitalObjectCompactDTO, project.getProjectAbbr());
     return "DigitalObject/show";
   }
 
