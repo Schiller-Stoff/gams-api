@@ -10,6 +10,7 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String> {
@@ -84,6 +85,6 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @param id the id of the digital object
    * @return a digital object as projection
    */
-  DigitalObjectDetailsView findDigitalObjectById(String id);
+  Optional<DigitalObjectDetailsView> findDigitalObjectById(String id);
 
 }

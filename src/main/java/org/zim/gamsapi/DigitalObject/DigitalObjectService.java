@@ -188,6 +188,11 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     @Override
     public DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id) {
-        return digitalObjectRepository.findDigitalObjectById(id);
+        return digitalObjectRepository.findDigitalObjectById(id).orElseThrow(
+                () -> {
+                    String msg = String.format("Cannot find digital object via id: %s", id);
+                    log.info(msg);
+                    return new DigitalObjectNotFoundException(msg);
+                });
     }
 }

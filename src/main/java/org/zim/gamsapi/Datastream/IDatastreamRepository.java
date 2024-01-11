@@ -54,6 +54,6 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Long> 
    * @param dsid Datastream identifier
    * @return datastream projection.
    */
-  IDatastreamDetailsView findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+  Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
 
 }
