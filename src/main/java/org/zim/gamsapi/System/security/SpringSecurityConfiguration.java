@@ -42,11 +42,21 @@ public class SpringSecurityConfiguration {
                 // allow all GET requests
                 .requestMatchers(HttpMethod.GET, "/**")
                 .permitAll()
+                // allow all HEAD requests
+                .requestMatchers(HttpMethod.HEAD, "/**")
+                .permitAll()
                 // allow post requests against specific integration api endpoints (because: might get queries via POST)
                 .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
                 .permitAll()
+                // setup which endpoints need authentication
                 // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
-                .requestMatchers(request -> !request.getMethod().equals(HttpMethod.GET.name()))
+                .requestMatchers(request -> {
+                    String requestMethod = request.getMethod();
+                    return switch (requestMethod) {
+                        case "POST", "PUT", "PATCH", "DELETE" -> true;
+                        default -> false;
+                    };
+                })
                 .authenticated()
                 // authorization: protect state changes against projects + users except if admin.
                 .requestMatchers( HttpMethod.POST, ADMIN_ONLY_PATHS)

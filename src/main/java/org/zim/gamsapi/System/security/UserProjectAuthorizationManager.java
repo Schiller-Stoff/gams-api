@@ -36,7 +36,13 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
 
     // all GET requests are being authorized
     if(requestMethod.equals(HttpMethod.GET.name())){
-      log.debug("ACCESS GRANTED - GET requests are not protected for url {}", requestUri);
+      log.trace("ACCESS GRANTED - GET requests are not protected for url {}", requestUri);
+      return new AuthorizationDecision(true);
+    }
+
+    // all HEAD requests are being authorized
+    if(requestMethod.equals(HttpMethod.HEAD.name())){
+      log.trace("ACCESS GRANTED - HEAD requests are not protected for url {}", requestUri);
       return new AuthorizationDecision(true);
     }
 
