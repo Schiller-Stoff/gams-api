@@ -1,6 +1,7 @@
 package org.zim.gamsapi.System.security;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,7 +20,7 @@ import java.util.Optional;
  */
 @Component
 @Slf4j
-public class UserPrincipalAuditorMapping implements AuditorAware<String> {
+public class UserPrincipalAuditorMapping implements IUserPrincipalAuditorMapping {
   @Override
   public Optional<String> getCurrentAuditor() {
 
