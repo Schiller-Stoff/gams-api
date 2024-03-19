@@ -4,6 +4,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.zim.gamsapi.System.security.IUserPrincipalAuditorMapping;
+import org.zim.gamsapi.enums.TestUser;
 
 import java.util.Optional;
 
@@ -26,7 +27,7 @@ public class IntegrationTestAuditingConfiguration {
     public static class UserPrincipalAuditorMapping implements IUserPrincipalAuditorMapping {
         @Override
         public Optional<String> getCurrentAuditor() {
-            return Optional.of("test");
+            return Optional.of(TestUser.USERNAME.getValue());
         }
     }
 
