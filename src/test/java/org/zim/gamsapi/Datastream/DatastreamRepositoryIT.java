@@ -51,6 +51,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     }
 
 
+    /**
+     * Tests if a datastream that does not exist returns an empty optional.
+     */
     @Test
     public void findByIdReturnsEmptyOptionalIfDatastreamDoesNotExist() {
         Assertions.assertThat(
