@@ -51,6 +51,15 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     }
 
 
+    @Test
+    public void findByIdReturnsEmptyOptionalIfDatastreamDoesNotExist() {
+        Assertions.assertThat(
+                datastreamRepository.findById(5L))
+                .isNotNull()
+                .isNotPresent();
+    }
+
+
 
 
 }
