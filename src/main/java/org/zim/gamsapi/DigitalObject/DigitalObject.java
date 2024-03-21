@@ -39,11 +39,10 @@ public class DigitalObject {
   @NotBlank
   private String id;
 
-  // TODO datatype should be a set instead of list (same datastream cannot be contained twice)
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "digitalObject")
   @Builder.Default
   @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  private List<Datastream> datastreams = new ArrayList<>();
+  private Set<Datastream> datastreams = new HashSet<>();
 
   /**
    * A digital object can contain other digital objects.
