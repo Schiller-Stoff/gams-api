@@ -62,7 +62,7 @@ public class SubInfoPackService implements ISubInfoPackService {
             // .created() - system controlled
             // .modified() - system controlled
             // datastreams is being filled later on
-            .datastreams(new ArrayList<>())
+            .datastreams(new HashSet<>())
             .baseMetadata(MetadataBaseEntity.builder()
               .title(bagitSipJson.getTitle())
               .creator(bagitSipJson.getCreator())
