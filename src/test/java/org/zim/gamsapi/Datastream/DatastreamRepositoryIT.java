@@ -259,6 +259,25 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         }
 
+        @Test
+        public void deleteByDigitalObjectAndDsidDeletesDatastream(){
+            DigitalObject digitalObject = DigitalObject.builder().id("TO_BE_DELETED").project(testProject).build();
+            digitalObject = digitalObjectRepository.save(digitalObject);
+
+            String TEST_DSID = "TO_BE_DELETED";
+            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TEST_DSID).build();
+            datastream = datastreamRepository.save(datastream);
+            datastream.setDigitalObject(digitalObject);
+            digitalObject.setDatastreams(Set.of(datastream));
+
+            datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, TEST_DSID);
+
+            Assertions.assertThat(
+                    datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue()))
+                    .isNotNull()
+                    .isNotPresent();
+        }
+
 
     }
 
