@@ -278,6 +278,23 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     .isNotPresent();
         }
 
+        @Test
+        public void deleteAllRemovesTestDatastream(){
+            // first test datastream is available
+            Assertions.assertThat(
+                            datastreamRepository.findById(testDatastream.getGlobalId()))
+                    .isNotNull()
+                    .isPresent();
+
+            datastreamRepository.deleteAll();
+
+            // test datastream is not available anymore
+            Assertions.assertThat(
+                    datastreamRepository.findById(testDatastream.getGlobalId()))
+                    .isNotNull()
+                    .isNotPresent();
+        }
+
 
     }
 
