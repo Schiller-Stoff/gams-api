@@ -307,6 +307,17 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     });
         }
 
+        @Test
+        public void findDatastreamDetailsViewByDigitalObjectAndDsidReturnsDatastreamDetailsView(){
+            datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(testDigitalObject, TestDatastream.DSID.getValue())
+                    .ifPresentOrElse(
+                            datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
+                                    .isNotNull()
+                                    .extracting(IDatastreamDetailsView::getDsid)
+                                    .isEqualTo(testDatastream.getDsid()),
+                            () -> Assertions.fail("Datastream not found")
+                    );
+        }
 
 
     }
