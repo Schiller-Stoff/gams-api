@@ -1,7 +1,9 @@
 package org.zim.gamsapi.Datastream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -12,11 +14,12 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
+import java.util.Set;
 
 /**
  * Integration test for the DatastreamRepository.
- *
  */
+@Slf4j
 public class DatastreamRepositoryIT extends IntegrationTest {
 
     @Autowired
@@ -67,6 +70,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void deleteDatastreamRemovesDatastream() {
         Datastream datastream = datastreamRepository.save(Datastream.builder().build());
+        Assertions.assertThat(
+                        datastreamRepository.findById(datastream.getGlobalId()))
+                .isNotNull()
+                .isPresent();
+        log.info("****** Deleting datastream: {}", datastream);
         datastreamRepository.delete(datastream);
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.getGlobalId()))
@@ -154,9 +162,51 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 projectRepository.findById(project.getProjectAbbr()))
                 .isNotNull()
                 .isNotPresent();
+    }
 
+    /**
+     * Tests against delete cascading.
+     */
+    @Nested
+    public class CascadingDeleteTest {
+
+        /**
+         * Verifies that a datastream is deleted if its parent digital object was deleted.
+         */
+        @Test
+        public void datastreamCascadeDeletedFromDigitalObject(){
+            // first create and save test project
+            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+            projectRepository.save(project);
+
+            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
+            digitalObject = digitalObjectRepository.save(digitalObject);
+
+            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
+            datastreamRepository.save(datastream);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            digitalObject.setDatastreams(Set.of(datastream));
+
+            // delete parent object
+            digitalObjectRepository.delete(digitalObject);
+
+            // verify that the object was deleted
+            Assertions.assertThat(
+                            digitalObjectRepository.findById(digitalObject.getId()))
+                    .isNotNull()
+                    .isNotPresent();
+
+            // verify that the datastream was deleted
+            Assertions.assertThat(
+                            datastreamRepository.findById(datastream.getGlobalId()))
+                    .isNotNull()
+                    .isNotPresent();
+
+        }
 
     }
+
+
 
 
 
