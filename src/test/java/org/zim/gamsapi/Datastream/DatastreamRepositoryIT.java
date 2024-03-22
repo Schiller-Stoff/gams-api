@@ -166,7 +166,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      * Tests against delete cascading.
      */
     @Nested
-    public class CascadingDelete {
+    public class TestCascadingDelete {
 
         /**
          * Verifies that a datastream is deleted if its parent digital object was deleted.
