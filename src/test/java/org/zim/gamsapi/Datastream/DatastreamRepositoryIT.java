@@ -168,7 +168,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      * Tests against delete cascading.
      */
     @Nested
-    public class CascadingDeleteTest {
+    public class CascadingDelete {
 
         /**
          * Verifies that a datastream is deleted if its parent digital object was deleted.
@@ -235,6 +235,43 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                             datastreamRepository.findById(datastream.getGlobalId()))
                     .isNotNull()
                     .isNotPresent();
+
+        }
+
+        @Test
+        public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
+            // first create and save test project
+            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+            projectRepository.save(project);
+
+            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
+            digitalObject = digitalObjectRepository.save(digitalObject);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            project.setDigitalObjects(Set.of(digitalObject));
+
+            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
+            datastreamRepository.save(datastream);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            digitalObject.setDatastreams(Set.of(datastream));
+
+            // delete parent object
+            datastreamRepository.delete(datastream);
+
+            // datastream deleted
+            Assertions.assertThat(
+                        datastreamRepository.findById(datastream.getGlobalId()))
+                    .isNotNull()
+                    .isNotPresent();
+
+            Assertions.assertThat(
+                        digitalObjectRepository.findById(digitalObject.getId()))
+                    .isNotNull()
+                    .isPresent();
+
+            // additionally check if project is still available
+            Assertions.assertThat(projectRepository.findById(project.getProjectAbbr()))
+                    .isNotNull()
+                    .isPresent();
 
         }
 
