@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -294,6 +295,18 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     .isNotNull()
                     .isNotPresent();
         }
+
+        @Test
+        public void findAllByDigitalObjectIdReturnsDatastreamDetailsViewWithSameDsid(){
+            datastreamRepository.findAllByDigitalObjectId(testDigitalObject.getId())
+                    .forEach(datastreamDetailsView -> {
+                        Assertions.assertThat(datastreamDetailsView)
+                                .isNotNull()
+                                .extracting(IDatastreamDetailsView::getDsid)
+                                .isEqualTo(testDatastream.getDsid());
+                    });
+        }
+
 
 
     }
