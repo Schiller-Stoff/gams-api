@@ -204,6 +204,40 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         }
 
+
+        @Test
+        public void datastreamCascadeDeletedFromProject(){
+            // first create and save test project
+            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+            projectRepository.save(project);
+
+            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
+            digitalObject = digitalObjectRepository.save(digitalObject);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            project.setDigitalObjects(Set.of(digitalObject));
+
+            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
+            datastreamRepository.save(datastream);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            digitalObject.setDatastreams(Set.of(datastream));
+
+            // delete parent object
+            projectRepository.delete(project);
+
+            // verify that the object was deleted
+            Assertions.assertThat(
+                            projectRepository.findById(project.getProjectAbbr()))
+                    .isNotNull()
+                    .isNotPresent();
+
+            // verify that the datastream was deleted
+            Assertions.assertThat(
+                            datastreamRepository.findById(datastream.getGlobalId()))
+                    .isNotNull()
+                    .isNotPresent();
+
+        }
+
     }
 
 
