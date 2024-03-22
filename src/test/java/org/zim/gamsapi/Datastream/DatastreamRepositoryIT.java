@@ -3,6 +3,7 @@ package org.zim.gamsapi.Datastream;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +32,55 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Autowired
     IProjectRepository projectRepository;
 
+    private Project testProject;
+    private DigitalObject testDigitalObject;
+    private Datastream testDatastream;
+
+
+    /**
+     * Creates a test project, digital object and datastream before each test.
+     * All created objects are deleted after each test.
+     * All are in child relationship between project -> digital object -> datastream
+     * no additional data is provided.
+     */
+    @BeforeEach
+    public void setup(){
+        // first create and save test project
+        testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+        projectRepository.save(testProject);
+
+        testDigitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(testProject).build();
+        testDigitalObject = digitalObjectRepository.save(testDigitalObject);
+        // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+        testProject.setDigitalObjects(Set.of(testDigitalObject));
+
+        testDatastream = Datastream.builder().digitalObject(testDigitalObject).dsid(TestDatastream.DSID.getValue()).build();
+        datastreamRepository.save(testDatastream);
+        // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+        testDigitalObject.setDatastreams(Set.of(testDatastream));
+    }
+
+    /**
+     * Deletes the test data after each test.
+     */
     @AfterEach
     public void tearDown(){
         // verify that the test data is being deleted after each test
-        projectRepository.delete(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+        projectRepository.delete(testProject);
         Assertions.assertThat(
-                projectRepository.findById(TestProject.PROJECT_ABBR.getValue()))
+                projectRepository.findById(testProject.getProjectAbbr()))
+                .isNotNull()
+                .isNotPresent();
+
+        // assert deletion of parent object
+        Assertions.assertThat(
+                        digitalObjectRepository.findById(testDigitalObject.getId()))
+                .isNotNull()
+                .isNotPresent();
+
+        // verify that the datastream was deleted
+        Assertions.assertThat(
+                        datastreamRepository.findById(testDatastream.getGlobalId()))
                 .isNotNull()
                 .isNotPresent();
     }
@@ -100,30 +144,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void findByDigitalObjectAndDsidReturnsEmptyOptionalIfDatastreamDoesNotExist() {
-        // first create and save test project
-        Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-        projectRepository.save(project);
-        // then create and save testobject
-        DigitalObject objectToBeFound = DigitalObject.builder().id("1").project(project).build();
-        digitalObjectRepository.save(objectToBeFound);
-
         Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(objectToBeFound, "NOT_THERE"))
-                .isNotNull()
-                .isNotPresent();
-
-        // cleanup
-        digitalObjectRepository.delete(objectToBeFound);
-        // verify that the object was deleted
-        Assertions.assertThat(
-                digitalObjectRepository.findById(objectToBeFound.getId()))
-                .isNotNull()
-                .isNotPresent();
-
-        projectRepository.delete(project);
-        // verify that the project was deleted
-        Assertions.assertThat(
-                projectRepository.findById(project.getProjectAbbr()))
+                datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, "NOT_THERE"))
                 .isNotNull()
                 .isNotPresent();
     }
@@ -133,35 +155,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void findByDigitalAndDsidReturnsDatastreamIfDatastreamExists() {
-        // first create and save test project
-        Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-        projectRepository.save(project);
-
-        DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
-        digitalObject = digitalObjectRepository.save(digitalObject);
-
-        Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
-        datastreamRepository.save(datastream);
-        Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(digitalObject, datastream.getDsid()))
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, testDatastream.getDsid()))
                 .isNotNull()
                 .isPresent()
                 .get()
-                .isEqualTo(datastream);
-
-        // cleanup
-        digitalObjectRepository.delete(digitalObject);
-        // verify that the object was deleted
-        Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
-                .isNotNull()
-                .isNotPresent();
-        // project cleanup
-        projectRepository.delete(project);
-        // verify that the project was deleted
-        Assertions.assertThat(
-                projectRepository.findById(project.getProjectAbbr()))
-                .isNotNull()
-                .isNotPresent();
+                .isEqualTo(testDatastream);
     }
 
     /**
@@ -175,30 +173,19 @@ public class DatastreamRepositoryIT extends IntegrationTest {
          */
         @Test
         public void datastreamCascadeDeletedFromDigitalObject(){
-            // first create and save test project
-            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-            projectRepository.save(project);
-
-            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
-            digitalObject = digitalObjectRepository.save(digitalObject);
-
-            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
-            datastreamRepository.save(datastream);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            digitalObject.setDatastreams(Set.of(datastream));
 
             // delete parent object
-            digitalObjectRepository.delete(digitalObject);
+            digitalObjectRepository.delete(testDigitalObject);
 
             // verify that the object was deleted
             Assertions.assertThat(
-                            digitalObjectRepository.findById(digitalObject.getId()))
+                            digitalObjectRepository.findById(testDigitalObject.getId()))
                     .isNotNull()
                     .isNotPresent();
 
             // verify that the datastream was deleted
             Assertions.assertThat(
-                            datastreamRepository.findById(datastream.getGlobalId()))
+                            datastreamRepository.findById(testDatastream.getGlobalId()))
                     .isNotNull()
                     .isNotPresent();
 
@@ -207,32 +194,24 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void datastreamCascadeDeletedFromProject(){
-            // first create and save test project
-            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-            projectRepository.save(project);
-
-            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
-            digitalObject = digitalObjectRepository.save(digitalObject);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            project.setDigitalObjects(Set.of(digitalObject));
-
-            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
-            datastreamRepository.save(datastream);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            digitalObject.setDatastreams(Set.of(datastream));
 
             // delete parent object
-            projectRepository.delete(project);
+            projectRepository.delete(testProject);
 
             // verify that the object was deleted
             Assertions.assertThat(
-                            projectRepository.findById(project.getProjectAbbr()))
+                            projectRepository.findById(testProject.getProjectAbbr()))
+                    .isNotNull()
+                    .isNotPresent();
+
+            Assertions.assertThat(
+                            digitalObjectRepository.findById(testDigitalObject.getId()))
                     .isNotNull()
                     .isNotPresent();
 
             // verify that the datastream was deleted
             Assertions.assertThat(
-                            datastreamRepository.findById(datastream.getGlobalId()))
+                            datastreamRepository.findById(testDatastream.getGlobalId()))
                     .isNotNull()
                     .isNotPresent();
 
@@ -240,36 +219,23 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
-            // first create and save test project
-            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-            projectRepository.save(project);
-
-            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
-            digitalObject = digitalObjectRepository.save(digitalObject);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            project.setDigitalObjects(Set.of(digitalObject));
-
-            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DATASTREAM_NAME.getValue()).build();
-            datastreamRepository.save(datastream);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            digitalObject.setDatastreams(Set.of(datastream));
 
             // delete parent object
-            datastreamRepository.delete(datastream);
+            datastreamRepository.delete(testDatastream);
 
             // datastream deleted
             Assertions.assertThat(
-                        datastreamRepository.findById(datastream.getGlobalId()))
+                        datastreamRepository.findById(testDatastream.getGlobalId()))
                     .isNotNull()
                     .isNotPresent();
 
             Assertions.assertThat(
-                        digitalObjectRepository.findById(digitalObject.getId()))
+                        digitalObjectRepository.findById(testDigitalObject.getId()))
                     .isNotNull()
                     .isPresent();
 
             // additionally check if project is still available
-            Assertions.assertThat(projectRepository.findById(project.getProjectAbbr()))
+            Assertions.assertThat(projectRepository.findById(testProject.getProjectAbbr()))
                     .isNotNull()
                     .isPresent();
 
@@ -283,26 +249,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void datastreamIsFindabelViaDsid(){
-            // first create and save test project
-            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-            projectRepository.save(project);
-
-            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
-            digitalObject = digitalObjectRepository.save(digitalObject);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            project.setDigitalObjects(Set.of(digitalObject));
-
-            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DSID.getValue()).build();
-            datastreamRepository.save(datastream);
-            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-            digitalObject.setDatastreams(Set.of(datastream));
-
-            // test
-            datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue())
+            datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, TestDatastream.DSID.getValue())
                     .ifPresentOrElse(
                             datastream1 -> Assertions.assertThat(datastream1)
                                     .isNotNull()
-                                    .isEqualTo(datastream),
+                                    .isEqualTo(testDatastream),
                             () -> Assertions.fail("Datastream not found")
                     );
 
