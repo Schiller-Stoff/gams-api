@@ -278,6 +278,38 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     }
 
 
+    @Nested
+    public class TestCustomRepositoryMethods {
+
+        @Test
+        public void datastreamIsFindabelViaDsid(){
+            // first create and save test project
+            Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+            projectRepository.save(project);
+
+            DigitalObject digitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(project).build();
+            digitalObject = digitalObjectRepository.save(digitalObject);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            project.setDigitalObjects(Set.of(digitalObject));
+
+            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TestDatastream.DSID.getValue()).build();
+            datastreamRepository.save(datastream);
+            // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
+            digitalObject.setDatastreams(Set.of(datastream));
+
+            // test
+            datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue())
+                    .ifPresentOrElse(
+                            datastream1 -> Assertions.assertThat(datastream1)
+                                    .isNotNull()
+                                    .isEqualTo(datastream),
+                            () -> Assertions.fail("Datastream not found")
+                    );
+
+        }
+
+
+    }
 
 
 
