@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+@Slf4j
 public class DigitalObject {
 
   /**
@@ -117,11 +119,15 @@ public class DigitalObject {
    */
   public void addDatastream(Datastream datastream) {
     if (datastream == null) {
-      throw new NullPointerException("Cannot assign a null datastream to a digital object.");
+      String msg = String.format("Cannot assign a datastream with value null to a digital object %s", this);
+      log.error(msg);
+      throw new NullPointerException(msg);
     }
 
     if(datastream.getDigitalObject() != null) {
-      throw new IllegalArgumentException("Datastream is already assigned to a digital object. Make sure that no setter is used to assign the datastream to a digital object (in the code before).");
+      String msg = String.format("Datastream %s is already assigned to a digital object. Make sure that no setter is used to assign the datastream to a digital object (in the code before).", datastream);
+      log.error(msg);
+      throw new IllegalStateException(msg);
     }
     datastreams.add(datastream);
     datastream.setDigitalObject(this);
@@ -133,11 +139,15 @@ public class DigitalObject {
      */
     public void removeDatastream(Datastream datastream) {
         if (datastream == null) {
-            throw new NullPointerException("Cannot remove a datastream with the value null.");
+          String msg = String.format("Cannot remove a datastream with value null from a digital object %s", this);
+          log.error(msg);
+          throw new NullPointerException("Cannot remove a datastream with the value null.");
         }
 
         if(datastream.getDigitalObject() == null) {
-            throw new IllegalArgumentException("Datastream is not assigned to any digital object and so cannot be removed. Make sure that no setter is used to assign the datastream to a digital object (in the code before).");
+          String msg = String.format("Datastream %s is not assigned to any digital object and so cannot be removed. Make sure that no setter is used to assign the datastream to a digital object (in the code before).", datastream);
+          log.error(msg);
+          throw new IllegalArgumentException(msg);
         }
         datastreams.remove(datastream);
         datastream.setDigitalObject(null);
