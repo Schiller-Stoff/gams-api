@@ -50,16 +50,17 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
         projectRepository.save(testProject);
 
-        testDigitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).project(testProject).build();
+        testDigitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).build();
+        // also establishes reverse bidirectional relationships
+        testProject.addDigitalObject(testDigitalObject);
         testDigitalObject = digitalObjectRepository.save(testDigitalObject);
-        // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-        testProject.setDigitalObjects(Set.of(testDigitalObject));
 
         testDatastream = Datastream.builder().dsid(TestDatastream.DSID.getValue()).build();
+        // establishes reverse bidirectional relationship
+        testDigitalObject.addDatastream(testDatastream);
+
         datastreamRepository.save(testDatastream);
 
-        // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-        testDigitalObject.addDatastream(testDatastream);
     }
 
     /**
