@@ -55,10 +55,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
         testProject.setDigitalObjects(Set.of(testDigitalObject));
 
-        testDatastream = Datastream.builder().digitalObject(testDigitalObject).dsid(TestDatastream.DSID.getValue()).build();
+        testDatastream = Datastream.builder().dsid(TestDatastream.DSID.getValue()).build();
         datastreamRepository.save(testDatastream);
+
         // ! establish reverse bidirectional relationship ! otherwise the cascade delete will not work
-        testDigitalObject.setDatastreams(Set.of(testDatastream));
+        testDigitalObject.addDatastream(testDatastream);
     }
 
     /**
@@ -266,10 +267,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             digitalObject = digitalObjectRepository.save(digitalObject);
 
             String TEST_DSID = "TO_BE_DELETED";
-            Datastream datastream = Datastream.builder().digitalObject(digitalObject).dsid(TEST_DSID).build();
+            Datastream datastream = Datastream.builder().dsid(TEST_DSID).build();
             datastream = datastreamRepository.save(datastream);
-            datastream.setDigitalObject(digitalObject);
-            digitalObject.setDatastreams(Set.of(datastream));
+            digitalObject.addDatastream(datastream);
 
             datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, TEST_DSID);
 

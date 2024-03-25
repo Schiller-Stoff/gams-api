@@ -111,6 +111,38 @@ public class DigitalObject {
   @Builder.Default
   private Set<String> types = new HashSet<>();
 
+  /**
+   * Adds a child digital object to the current digital object.
+   * @param datastream Datastream to be added.
+   */
+  public void addDatastream(Datastream datastream) {
+    if (datastream == null) {
+      throw new NullPointerException("Cannot assign a null datastream to a digital object.");
+    }
+
+    if(datastream.getDigitalObject() != null) {
+      throw new IllegalArgumentException("Datastream is already assigned to a digital object. Make sure that no setter is used to assign the datastream to a digital object (in the code before).");
+    }
+    datastreams.add(datastream);
+    datastream.setDigitalObject(this);
+  }
+
+    /**
+     * Removes a child digital object from the current digital object.
+     * @param datastream Datastream to be removed
+     */
+    public void removeDatastream(Datastream datastream) {
+        if (datastream == null) {
+            throw new NullPointerException("Cannot remove a datastream with the value null.");
+        }
+
+        if(datastream.getDigitalObject() == null) {
+            throw new IllegalArgumentException("Datastream is not assigned to any digital object and so cannot be removed. Make sure that no setter is used to assign the datastream to a digital object (in the code before).");
+        }
+        datastreams.remove(datastream);
+        datastream.setDigitalObject(null);
+    }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -145,5 +177,14 @@ public class DigitalObject {
             ", modifiedBy='" + modifiedBy + '\'' +
             ", types=" + types +
             '}';
+  }
+
+  /**
+   * Package private set datastreams to prevent direct manipulation of the datastreams
+   * (Hibernate does not allow complete private setters)
+   * @param datastreams
+   */
+  void setDatastreams(Set<Datastream> datastreams) {
+    this.datastreams = datastreams;
   }
 }
