@@ -33,7 +33,9 @@ public class DigitalObjectBuilderTest extends UnitTest {
                 .addProject(TEST_PROJECT_ABBR)
                     .withDescription("description")
                     .add()
-                .withMetadataBaseEnity(MetadataBaseEntity.builder().build())
+                .addBaseMetadata()
+                    .withTitle("title")
+                    .add()
                 .withTypes(Set.of("test"))
                 .build();
 
@@ -64,7 +66,9 @@ public class DigitalObjectBuilderTest extends UnitTest {
                 .addProject(TEST_PROJECT_ABBR)
                     .withDescription("description")
                     .add()
-                .withMetadataBaseEnity(MetadataBaseEntity.builder().build())
+                .addBaseMetadata()
+                    .withTitle("title")
+                    .add()
                 .withTypes(Set.of("test"))
                 .build();
 

@@ -40,6 +40,9 @@ public class DigitalObjectBuilder {
         return new ProjectBuilder(projectAbbr);
     }
 
+    public MetadataBaseEntityBuilder addBaseMetadata() {
+        return new MetadataBaseEntityBuilder();
+    }
 
     public DigitalObjectBuilder withChildObjects(Set<DigitalObject> childObjects) {
         digitalObject.setChildObjects(childObjects);
@@ -51,19 +54,10 @@ public class DigitalObjectBuilder {
         return this;
     }
 
-
-
-    public DigitalObjectBuilder withMetadataBaseEnity(MetadataBaseEntity metadataBaseEnity) {
-        digitalObject.setBaseMetadata(metadataBaseEnity);
-        return this;
-    }
-
     public DigitalObjectBuilder withTypes(Set<String> types) {
         digitalObject.setTypes(types);
         return this;
     }
-
-
 
     public class DatastreamBuilder {
 
@@ -116,8 +110,6 @@ public class DigitalObjectBuilder {
                 return datastream;
             }
 
-
-
     }
 
     public class ProjectBuilder {
@@ -141,6 +133,44 @@ public class DigitalObjectBuilder {
 
             return DigitalObjectBuilder.this;
         }
+    }
+
+
+    public class MetadataBaseEntityBuilder {
+
+        MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
+
+        public MetadataBaseEntityBuilder withTitle(String title) {
+            metadataBaseEntity.setTitle(title);
+            return this;
+        }
+
+        public MetadataBaseEntityBuilder withRights(String rights) {
+            metadataBaseEntity.setRights(rights);
+            return this;
+        }
+
+        public MetadataBaseEntityBuilder withPublisher(String publisher) {
+            metadataBaseEntity.setPublisher(publisher);
+            return this;
+        }
+
+        public MetadataBaseEntityBuilder withCreator(String creator) {
+            metadataBaseEntity.setCreator(creator);
+            return this;
+        }
+
+        public MetadataBaseEntityBuilder withDescription(String description) {
+            metadataBaseEntity.setDescription(description);
+            return this;
+        }
+
+        public DigitalObjectBuilder add() {
+            digitalObject.setBaseMetadata(metadataBaseEntity);
+            // TODO could call some validation here?
+            return DigitalObjectBuilder.this;
+        }
+
     }
 
 
