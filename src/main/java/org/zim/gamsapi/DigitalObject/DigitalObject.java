@@ -40,7 +40,7 @@ public class DigitalObject {
   @NotBlank
   private String id;
 
-  @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "digitalObject")
+  @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true, mappedBy = "digitalObject")
   @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Set<Datastream> datastreams = new HashSet<>();
 
