@@ -82,7 +82,7 @@ public class DigitalObject {
   /**
    * Project to which the digital object belongs to
    */
-  @ManyToOne
+  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
   @JsonBackReference
   @NotNull
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
