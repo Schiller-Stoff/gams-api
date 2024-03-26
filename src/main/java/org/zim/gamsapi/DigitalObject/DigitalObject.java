@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @Table(name = "digital_object")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
@@ -42,7 +41,6 @@ public class DigitalObject {
   private String id;
 
   @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "digitalObject")
-  @Builder.Default
   @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Set<Datastream> datastreams = new HashSet<>();
 
@@ -51,7 +49,6 @@ public class DigitalObject {
    */
   @OneToMany
   @NotNull
-  @Builder.Default
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
@@ -110,7 +107,6 @@ public class DigitalObject {
    */
   @ElementCollection
   @NotNull
-  @Builder.Default
   private Set<String> types = new HashSet<>();
 
   /**

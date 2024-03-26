@@ -13,6 +13,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
@@ -50,12 +51,17 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
         projectRepository.save(testProject);
 
-        testDigitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).build();
-        // also establishes reverse bidirectional relationships
-        testProject.addDigitalObject(testDigitalObject);
+        // TODO refactor!
+
+        testDigitalObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+                .withProject(testProject)
+                .build();
+
         testDigitalObject = digitalObjectRepository.save(testDigitalObject);
 
         testDatastream = Datastream.builder().dsid(TestDatastream.DSID.getValue()).build();
+
+        // TODO should this be done in the builder?
         // establishes reverse bidirectional relationship
         testDigitalObject.addDatastream(testDatastream);
 
@@ -264,7 +270,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
-            DigitalObject digitalObject = DigitalObject.builder().id("TO_BE_DELETED").project(testProject).build();
+            DigitalObject digitalObject = new DigitalObjectBuilder("TO_BE_DELETED").withProject(testProject).build();
             digitalObject = digitalObjectRepository.save(digitalObject);
 
             String TEST_DSID = "TO_BE_DELETED";

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 import org.zim.gamsapi.UnitTest;
 import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,9 +29,9 @@ public class ConstraintViolationTest extends UnitTest {
 
     @Test
     public void shouldRaiseNoConstraintViolation() {
-        DigitalObject digitalObject = DigitalObject.builder()
-                .id("foo")
-                .project(Project.builder().projectAbbr("Foo").build())
+        DigitalObject digitalObject = new DigitalObjectBuilder("foo")
+                .addProject("Foo")
+                .add()
                 .build();
 
 
@@ -40,9 +41,9 @@ public class ConstraintViolationTest extends UnitTest {
 
     @Test
     public void shouldRaiseConstraintViolationIfPidIsNull() {
-        DigitalObject digitalObject = DigitalObject.builder()
-                .id(null)
-                .project(Project.builder().projectAbbr("FOO").build())
+        DigitalObject digitalObject = new DigitalObjectBuilder(null)
+                .addProject("Foo")
+                    .add()
                 .build();
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);

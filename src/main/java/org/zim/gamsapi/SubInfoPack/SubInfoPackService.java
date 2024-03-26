@@ -14,6 +14,8 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.*;
+import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,31 +48,31 @@ public class SubInfoPackService implements ISubInfoPackService {
       // if there are child objects -> save a reference
       if(!childObjectStatement.isEmpty()){
         childObjects = childObjectStatement.stream()
-                .map(childObjectId -> DigitalObject.builder().id(childObjectId).build())
+                .map(childObjectId -> new DigitalObjectBuilder(childObjectId).build())
                 .collect(Collectors.toSet());
       }
 
       // 02. build and save digital object from bag-info.txt
-      DigitalObject digitalObject = DigitalObject.builder()
-            .id(bagitSipJson.getId())
-            .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
-            .objectType(bagitSipJson.getObjectType())
-            .childObjects(childObjects)
-            .types(bagitSipJson.getTypes())
+      DigitalObject digitalObject = new DigitalObjectBuilder(bagitSipJson.getId())
+              .addProject(subInfoPack.getProjectAbbr())
+              .add()
+            .withObjectType(bagitSipJson.getObjectType())
+            .withChildObjects(childObjects)
+            .withTypes(bagitSipJson.getTypes())
+            // datastreams is being filled later on
+            //.addDatastream()
+            .addBaseMetadata()
+              .withTitle(bagitSipJson.getTitle())
+              .withCreator(bagitSipJson.getCreator())
+              .withDescription(bagitSipJson.getDescription())
+              .withPublisher(bagitSipJson.getPublisher())
+              .withRights(bagitSipJson.getRights())
+              .add()
             // .createdBy() - system controlled
             // .modifiedBy() - system controlled
             // .created() - system controlled
             // .modified() - system controlled
             // datastreams is being filled later on
-            .datastreams(new HashSet<>())
-            .baseMetadata(MetadataBaseEntity.builder()
-              .title(bagitSipJson.getTitle())
-              .creator(bagitSipJson.getCreator())
-              .description(bagitSipJson.getDescription())
-              .publisher(bagitSipJson.getPublisher())
-              .rights(bagitSipJson.getRights())
-              .build()
-            )
             .build();
 
       digitalObjectRepository.save(digitalObject);

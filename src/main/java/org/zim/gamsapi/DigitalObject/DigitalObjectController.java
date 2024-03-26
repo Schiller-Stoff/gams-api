@@ -18,6 +18,7 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
+import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -158,11 +159,11 @@ public class DigitalObjectController {
 
     Set<DigitalObject> childrenToBeCollected = childObjects
             .stream()
-            .map(childId -> DigitalObject.builder().id(childId).project(project).build())
+            .map(childId -> new DigitalObjectBuilder(childId).withProject(project).build())
             .collect(Collectors.toSet());
 
     DigitalObject foundObject = digitalObjectService.assignChildObjects(
-            DigitalObject.builder().id(id).project(project).build(), childrenToBeCollected
+            new DigitalObjectBuilder(id).withProject(project).build(), childrenToBeCollected
     );
 
     return foundObject;
@@ -181,7 +182,7 @@ public class DigitalObjectController {
     // assign child objects if available
     childObjects
       .ifPresent(
-        strings -> digitalObject.setChildObjects(strings.stream().map(id -> DigitalObject.builder().id(id).build()).collect(Collectors.toSet()))
+        strings -> digitalObject.setChildObjects(strings.stream().map(id -> new DigitalObjectBuilder(id).build()).collect(Collectors.toSet()))
       );
 
     DigitalObject savedObject = digitalObjectService.save(digitalObject);

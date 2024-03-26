@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
+import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,10 +26,11 @@ class IDigitalObjectRepositoryIT extends IntegrationTest {
     @BeforeEach
     public void saveTestObject() {
         repository.save(
-                DigitalObject.builder()
-                        .id(PID)
-                        .project(Project.builder().projectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name).build())
-                        .build());
+                new DigitalObjectBuilder(PID)
+                        .addProject(GAMSAPIProperties.DEMO_PROJECT_ABBR.name)
+                        .add()
+                        .build()
+        );
     }
 
     @Test
