@@ -23,7 +23,7 @@ public class DigitalObjectBuilder {
         if(digitalObject.getProject() == null){
             String msg = String.format("Project missing: Digital object must have a valid project assigned to it. Don't forget to call the appropriate builder method. %s", digitalObject);
             log.error(msg);
-            throw new IllegalStateException("Project must be set.");
+            throw new IllegalStateException(msg);
         }
 
         // TODO call validation here?
@@ -38,6 +38,12 @@ public class DigitalObjectBuilder {
 
     public ProjectBuilder addProject(String projectAbbr) {
         return new ProjectBuilder(projectAbbr);
+    }
+
+    public DigitalObjectBuilder withProject(Project project) {
+        //set bidirectional relationship
+        project.addDigitalObject(digitalObject);
+        return this;
     }
 
     public MetadataBaseEntityBuilder addBaseMetadata() {
