@@ -74,4 +74,33 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
 
     }
 
+    @Test
+    public void builderWithProjectWorksAsExpected(){
+
+        DigitalObject digitalObject = new DigitalObjectBuilder(TEST_PID)
+                .addProject(TEST_PROJECT_ABBR)
+                .add()
+                .addDatastream(TEST_DSID)
+                .add()
+                .build();
+
+        digitalObjectRepository.save(digitalObject);
+
+        DigitalObject digitalObject2 = new DigitalObjectBuilder("peterzwerg")
+                .withProject(digitalObject.getProject())
+                .addDatastream(TEST_DSID)
+                .add()
+                .build();
+
+        digitalObjectRepository.save(digitalObject2);
+        // check if the datastream is present of second object
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject2, TEST_DSID))
+                .isPresent();
+
+        // cleanup
+        projectRepository.delete(digitalObject.getProject());
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject2, TEST_DSID))
+                .isEmpty();
+    }
+
 }
