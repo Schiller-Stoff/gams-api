@@ -3,15 +3,22 @@ package org.zim.gamsapi.System.utils;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
 
 
 public class DigitalObjectBuilderIT extends IntegrationTest  {
+
+    final String TEST_PID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+    final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
+
+    final String TEST_DSID = TestDatastream.DSID.getValue();
 
     @Autowired
     IDigitalObjectRepository digitalObjectRepository;
@@ -19,11 +26,11 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
     @Autowired
     IProjectRepository projectRepository;
 
+    @Autowired
+    IDatastreamRepository datastreamRepository;
+
     @Test
     public void cascadePersistMergeProjectWhenSavingADigitalObject() {
-
-        final String TEST_PID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
-        final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
 
         DigitalObject digitalObject = new DigitalObjectBuilder(TEST_PID)
                 // would need to be saved first via repository
@@ -46,5 +53,25 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
     }
 
 
+    @Test
+    public void cascadePersistMergeDatastreamWhenSavingADigitalObject(){
+
+        DigitalObject digitalObject = new DigitalObjectBuilder(TEST_PID)
+                .addProject(TEST_PROJECT_ABBR)
+                .add()
+                .addDatastream(TEST_DSID)
+                .add()
+                .build();
+
+        digitalObjectRepository.save(digitalObject);
+
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TEST_DSID))
+                .isPresent();
+
+        //clean up - cascade delete from project to individual datastreams
+        projectRepository.delete(digitalObject.getProject());
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TEST_DSID)).isEmpty();
+
+    }
 
 }
