@@ -102,4 +102,15 @@ public class Datastream {
   @LastModifiedBy
   private String modifiedBy;
 
+  /**
+   * Makes sure that the bidirectional relationship is removed before deleting from the database.
+   * https://stackoverflow.com/questions/22688402/delete-not-working-with-jparepository
+   */
+  @PreRemove
+  private void removeDigitalObjectFromDatastream() {
+    if (digitalObject != null) {
+      digitalObject.removeDatastream(this);
+    }
+  }
+
 }
