@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -47,25 +48,17 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @BeforeEach
     public void setup(){
-        // first create and save test project
-        testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-        projectRepository.save(testProject);
-
-        // TODO refactor!
 
         testDigitalObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-                .withProject(testProject)
+                .addProject(TestProject.PROJECT_ABBR.getValue())
+                .add()
+                .addDatastream(TestDatastream.DSID.getValue())
+                .add()
                 .build();
 
         testDigitalObject = digitalObjectRepository.save(testDigitalObject);
-
-        testDatastream = Datastream.builder().dsid(TestDatastream.DSID.getValue()).build();
-
-        // TODO should this be done in the builder?
-        // establishes reverse bidirectional relationship
-        testDigitalObject.addDatastream(testDatastream);
-
-        datastreamRepository.save(testDatastream);
+        testDatastream = testDigitalObject.getDatastreams().iterator().next();
+        testProject = testDigitalObject.getProject();
 
     }
 
@@ -270,18 +263,38 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
-            DigitalObject digitalObject = new DigitalObjectBuilder("TO_BE_DELETED").withProject(testProject).build();
+            String TEST_DSID = "DSID_FOR_DATASTREAM";
+            DigitalObject digitalObject = new DigitalObjectBuilder("TO_BE_DELETED")
+                    // TODO why does withProject not work?
+                    //.withProject(testProject)
+                    .addProject("karotte")
+                    .add()
+                    .addDatastream(TEST_DSID)
+                    .add()
+                    .build();
+
             digitalObject = digitalObjectRepository.save(digitalObject);
+            Long globalDatastreamId = digitalObject.getDatastreams().iterator().next().getGlobalId();
 
-            String TEST_DSID = "TO_BE_DELETED";
-            Datastream datastream = Datastream.builder().dsid(TEST_DSID).build();
-            datastream = datastreamRepository.save(datastream);
-            digitalObject.addDatastream(datastream);
-
+            // actual test
             datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, TEST_DSID);
 
-            Assertions.assertThat(
-                    datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue()))
+            // assertions
+            Assertions.assertThat(datastreamRepository.findById(globalDatastreamId))
+                    .isNotNull()
+                    .isNotPresent();
+
+            Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TEST_DSID))
+                    .isNotNull()
+                    .isNotPresent();
+
+            Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
+                    .isNotNull()
+                    .isPresent();
+
+            // clean up
+            digitalObjectRepository.delete(digitalObject);
+            Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
                     .isNotNull()
                     .isNotPresent();
         }
