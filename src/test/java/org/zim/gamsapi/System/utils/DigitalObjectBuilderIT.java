@@ -132,4 +132,33 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
 
     }
 
+    /**
+     * Changes made to a datastream of a DigitalObject instance will be reflected in the database.
+     * (no need to extra save via datastreamRepository.save())
+     */
+    @Test
+    public void cascadeUpdatesExistingDatastreamDsid(){
+
+        DigitalObject digitalObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+                .addProject(TestProject.PROJECT_ABBR.getValue())
+                .add()
+                .addDatastream(TestDatastream.DSID.getValue())
+                .add()
+                .build();
+
+        digitalObject = digitalObjectRepository.save(digitalObject);
+
+        // update the datastream
+        digitalObject.getDatastreams().iterator().next().setDsid("newdsid");
+
+        digitalObjectRepository.save(digitalObject);
+
+        // expect the datastream to have been updated
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, "newdsid"))
+                .isPresent();
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue()))
+                .isEmpty();
+
+    }
+
 }
