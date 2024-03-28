@@ -40,11 +40,6 @@ public class DigitalObjectBuilder {
         return new ProjectBuilder(projectAbbr);
     }
 
-    public DigitalObjectBuilder withProject(Project project) {
-        //set bidirectional relationship
-        project.addDigitalObject(digitalObject);
-        return this;
-    }
 
     public MetadataBaseEntityBuilder addBaseMetadata() {
         return new MetadataBaseEntityBuilder();
