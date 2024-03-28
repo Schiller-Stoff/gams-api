@@ -75,7 +75,7 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
     }
 
     @Test
-    public void builderWithProjectWorksAsExpected(){
+    public void mayAssignObjectToExistingProject(){
 
         DigitalObject digitalObject = new DigitalObjectBuilder(TEST_PID)
                 .addProject(TEST_PROJECT_ABBR)
@@ -84,9 +84,7 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
                 .add()
                 .build();
 
-        // NOTE: this will throw later on - (as the project is not saved?)
         digitalObject = digitalObjectRepository.save(digitalObject);
-//        digitalObjectRepository.save(digitalObject);
 
         DigitalObject digitalObject2 = new DigitalObjectBuilder("peterzwerg")
                 .addProject(TEST_PROJECT_ABBR)
@@ -95,7 +93,6 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
                 .add()
                 .build();
 
-        // throws? - reason: project is not saved with digital object reference?
         digitalObjectRepository.save(digitalObject2);
         // check if the datastream is present of second object
         Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject2, TEST_DSID))
@@ -105,6 +102,34 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
         projectRepository.delete(digitalObject.getProject());
         Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject2, TEST_DSID))
                 .isEmpty();
+    }
+
+
+    /**
+     * Test that the builder can create a digital object with a datastream
+     * and persist both to the database.
+     */
+    @Test
+    public void cascadeCreationOfDatastreams(){
+
+        DigitalObject digitalObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+                .addProject(TestProject.PROJECT_ABBR.getValue())
+                .add()
+                .addDatastream(TestDatastream.DSID.getValue())
+                .add()
+                .build();
+
+        digitalObjectRepository.save(digitalObject);
+
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue()))
+                .isPresent();
+
+        // cleanup
+        projectRepository.delete(digitalObject.getProject());
+        // ensure cleanup
+        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject, TestDatastream.DSID.getValue()))
+                .isEmpty();
+
     }
 
 }
