@@ -84,14 +84,18 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
                 .add()
                 .build();
 
-        digitalObjectRepository.save(digitalObject);
+        // NOTE: this will throw later on - (as the project is not saved?)
+        digitalObject = digitalObjectRepository.save(digitalObject);
+//        digitalObjectRepository.save(digitalObject);
 
         DigitalObject digitalObject2 = new DigitalObjectBuilder("peterzwerg")
-                .withProject(digitalObject.getProject())
+                .addProject(TEST_PROJECT_ABBR)
+                .add()
                 .addDatastream(TEST_DSID)
                 .add()
                 .build();
 
+        // throws? - reason: project is not saved with digital object reference?
         digitalObjectRepository.save(digitalObject2);
         // check if the datastream is present of second object
         Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(digitalObject2, TEST_DSID))

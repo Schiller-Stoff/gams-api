@@ -159,11 +159,17 @@ public class DigitalObjectController {
 
     Set<DigitalObject> childrenToBeCollected = childObjects
             .stream()
-            .map(childId -> new DigitalObjectBuilder(childId).withProject(project).build())
+            .map(childId -> new DigitalObjectBuilder(childId)
+                .addProject(project.getProjectAbbr())
+                .add()
+              .build())
             .collect(Collectors.toSet());
 
     DigitalObject foundObject = digitalObjectService.assignChildObjects(
-            new DigitalObjectBuilder(id).withProject(project).build(), childrenToBeCollected
+            new DigitalObjectBuilder(id)
+                .addProject(project.getProjectAbbr())
+                  .add()
+                .build(), childrenToBeCollected
     );
 
     return foundObject;

@@ -265,8 +265,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
             String TEST_DSID = "DSID_FOR_DATASTREAM";
             DigitalObject digitalObject = new DigitalObjectBuilder("TO_BE_DELETED")
-                    // TODO why does withProject not work?
-                    //.withProject(testProject)
                     .addProject(TestProject.PROJECT_ABBR.getValue())
                     .add()
                     .addDatastream(TEST_DSID)
