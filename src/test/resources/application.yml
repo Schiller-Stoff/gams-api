@@ -7,7 +7,7 @@ spring:
       # delete database on application startup during tests
       ddl-auto: create
     # show SQL statments
-    show-sql: true
+    # show-sql: true
     # format SQL statements
     properties:
       hibernate:
