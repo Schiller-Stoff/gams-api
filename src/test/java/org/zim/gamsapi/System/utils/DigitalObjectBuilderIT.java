@@ -161,4 +161,26 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
 
     }
 
+    @Test
+    public void cascadeSaveWillCreateNoneExistentProject(){
+
+        Assertions.assertThat(projectRepository.findById(TestProject.PROJECT_ABBR.getValue())).isEmpty();
+
+        DigitalObject digitalObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+                .addProject(TestProject.PROJECT_ABBR.getValue())
+                .add()
+                .addDatastream(TestDatastream.DSID.getValue())
+                .add()
+                .build();
+
+        digitalObjectRepository.save(digitalObject);
+
+        Assertions.assertThat(projectRepository.findById(TestProject.PROJECT_ABBR.getValue())).isPresent();
+
+        // cleanup
+        projectRepository.delete(digitalObject.getProject());
+        Assertions.assertThat(projectRepository.findById(TestProject.PROJECT_ABBR.getValue())).isEmpty();
+
+    }
+
 }
