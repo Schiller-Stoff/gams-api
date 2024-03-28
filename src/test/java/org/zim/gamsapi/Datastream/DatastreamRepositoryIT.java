@@ -267,7 +267,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             DigitalObject digitalObject = new DigitalObjectBuilder("TO_BE_DELETED")
                     // TODO why does withProject not work?
                     //.withProject(testProject)
-                    .addProject("karotte")
+                    .addProject(TestProject.PROJECT_ABBR.getValue())
                     .add()
                     .addDatastream(TEST_DSID)
                     .add()
