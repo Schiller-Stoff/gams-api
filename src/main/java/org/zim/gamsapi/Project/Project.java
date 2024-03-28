@@ -30,7 +30,7 @@ public class Project {
   @Column(name = "project_abbr")
   private String projectAbbr;
 
-  @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true, mappedBy = "project")
+  @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true, mappedBy = "project")
   @Builder.Default
   @JsonManagedReference
   @ToString.Exclude
