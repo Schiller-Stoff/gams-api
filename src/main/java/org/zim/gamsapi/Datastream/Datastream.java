@@ -3,14 +3,17 @@ package org.zim.gamsapi.Datastream;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Domain class for datastream domain objects.
@@ -25,6 +28,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
+@Slf4j
 public class Datastream {
 
   /**
@@ -111,6 +115,32 @@ public class Datastream {
     if (digitalObject != null) {
       digitalObject.removeDatastream(this);
     }
+  }
+
+  /**
+   * equals and hashCode for JPA entities with DB-generated IDs
+   * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/
+   */
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null) return false;
+    Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) return false;
+    Datastream datastream = (Datastream) o;
+    return getGlobalId() != null && Objects.equals(getGlobalId(), datastream.getGlobalId());
+  }
+
+  /**
+   * equals and hashCode for JPA entities with DB-generated IDs
+   * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/
+   */
+  @Override
+  public final int hashCode() {
+    return this instanceof HibernateProxy
+        ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+        : getClass().hashCode();
   }
 
 }

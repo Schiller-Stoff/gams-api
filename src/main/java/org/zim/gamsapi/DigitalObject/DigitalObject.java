@@ -9,6 +9,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -149,17 +150,30 @@ public class DigitalObject {
         datastream.setDigitalObject(null);
     }
 
+  /**
+   * equals and hashCode for JPA entities with DB-generated IDs
+   * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/
+   */
   @Override
-  public boolean equals(Object o) {
+  public final boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    DigitalObject that = (DigitalObject) o;
-    return Objects.equals(id, that.id);
+    if (o == null) return false;
+    Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) return false;
+    DigitalObject digitalObject = (DigitalObject) o;
+    return getId() != null && Objects.equals(getId(), digitalObject.getId());
   }
 
+  /**
+   * equals and hashCode for JPA entities with DB-generated IDs
+   * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/
+   */
   @Override
-  public int hashCode() {
-    return Objects.hash(id);
+  public final int hashCode() {
+    return this instanceof HibernateProxy
+        ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
+        : getClass().hashCode();
   }
 
   @Override
