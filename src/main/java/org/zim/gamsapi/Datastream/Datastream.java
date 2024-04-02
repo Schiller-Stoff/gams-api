@@ -2,6 +2,8 @@ package org.zim.gamsapi.Datastream;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
@@ -44,6 +46,7 @@ public class Datastream {
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   @JsonIdentityReference(alwaysAsId = true)
+  @NotNull
   private DigitalObject digitalObject;
 
   /**
@@ -51,6 +54,7 @@ public class Datastream {
    * Like TEI_SOURCE - MUST be unique per Digital object.
    */
   @Column(name = "dsid")
+  @NotEmpty
   private String dsid;
 
   /**
