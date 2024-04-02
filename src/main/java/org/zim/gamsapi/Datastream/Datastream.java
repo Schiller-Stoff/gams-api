@@ -41,7 +41,7 @@ public class Datastream {
   @Column(name = "global_id")
   private Long globalId;
 
-  @ManyToOne
+  @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @ToString.Exclude
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
