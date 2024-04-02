@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Datastream;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -93,7 +94,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void saveDatastreamExistsWithExpectedID() {
-        Datastream datastream = datastreamRepository.save(Datastream.builder().build());
+
+        Datastream datastream = datastreamRepository.save(Datastream.builder()
+            .digitalObject(testDigitalObject)
+                .dsid("SOME_RANDOM_DSID")
+            .build());
+
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.getGlobalId()))
                 .isNotNull()
@@ -115,12 +121,15 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void deleteDatastreamRemovesDatastream() {
-        Datastream datastream = datastreamRepository.save(Datastream.builder().build());
+        Datastream datastream = datastreamRepository.save(Datastream.builder()
+            .digitalObject(testDigitalObject)
+            .dsid("SOME_RANDOM_DSID")
+            .build());
         Assertions.assertThat(
                         datastreamRepository.findById(datastream.getGlobalId()))
                 .isNotNull()
                 .isPresent();
-        log.info("****** Deleting datastream: {}", datastream);
+
         datastreamRepository.delete(datastream);
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.getGlobalId()))
@@ -337,6 +346,39 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     );
         }
 
+
+    }
+
+    @Test
+    public void saveThrowsConstraintViolationIfDigitalObjectNotAssigned(){
+
+        Datastream datastream = Datastream.builder()
+                // no digital object assigned
+                .dsid("DSID")
+                .build();
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+            ConstraintViolationException.class,
+            () -> datastreamRepository.save(datastream)
+        );
+
+    }
+
+    @Test
+    public void savesUnsavedObjectIfItDoesntExist(){
+
+        DigitalObject notSavedObject = new DigitalObject();
+        notSavedObject.setProject(testProject);
+        notSavedObject.setId("DOESNT_EXIST");
+
+        Datastream datastream = Datastream.builder()
+                //.digitalObject(notSavedObject)
+                .dsid("DSID")
+                .build();
+
+        notSavedObject.addDatastream(datastream);
+
+        datastreamRepository.save(datastream);
 
     }
 
