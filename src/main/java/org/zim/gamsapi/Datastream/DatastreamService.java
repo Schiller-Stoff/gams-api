@@ -8,6 +8,8 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 
 import java.util.List;
@@ -18,6 +20,9 @@ import java.util.List;
 public class DatastreamService implements IDatastreamService {
 
   private final IDatastreamRepository datastreamRepository;
+
+  private final IDigitalObjectRepository digitalObjectRepository;
+
   @Override
   @Transactional
   public void delete(Datastream datastream) {
@@ -54,7 +59,15 @@ public class DatastreamService implements IDatastreamService {
   @Override
   @Transactional
   public Datastream save(Datastream datastream) {
-    return datastreamRepository.save(datastream);
+    if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
+      String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
+      log.info(msg);
+      return datastreamRepository.save(datastream);
+    } else {
+      String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
   }
 
   /**
