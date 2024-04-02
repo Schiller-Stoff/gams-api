@@ -368,6 +368,21 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         }
 
+        @Test
+        public void saveThrowsConstraintViolationIfDsidNotAssigned(){
+
+            Datastream datastream = Datastream.builder()
+                .digitalObject(testDigitalObject)
+                // no dsid assigned
+                .build();
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                ConstraintViolationException.class,
+                () -> datastreamRepository.save(datastream)
+            );
+
+        }
+
 
 
     }
