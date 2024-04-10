@@ -30,12 +30,6 @@ public class Project {
   @Column(name = "project_abbr")
   private String projectAbbr;
 
-  @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true, mappedBy = "project")
-  @Builder.Default
-  @JsonManagedReference
-  @ToString.Exclude
-  private Set<DigitalObject> digitalObjects = new HashSet<>();
-
   @Column(name = "description")
   private String description;
 
@@ -61,7 +55,7 @@ public class Project {
       throw new IllegalArgumentException(msg);
     }
 
-    digitalObjects.add(digitalObject);
+    //digitalObjects.add(digitalObject);
     digitalObject.setProject(this);
   }
 
@@ -82,7 +76,7 @@ public class Project {
       throw new IllegalArgumentException(msg);
     }
 
-    digitalObjects.remove(digitalObject);
+    //digitalObjects.remove(digitalObject);
     digitalObject.setProject(null);
   }
 
@@ -99,7 +93,5 @@ public class Project {
     return Objects.hash(projectAbbr);
   }
 
-  void setDigitalObjects(Set<DigitalObject> digitalObjects) {
-    this.digitalObjects = digitalObjects;
-  }
+
 }

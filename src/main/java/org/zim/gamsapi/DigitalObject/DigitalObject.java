@@ -41,9 +41,6 @@ public class DigitalObject {
   @NotBlank
   private String id;
 
-  @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, mappedBy = "digitalObject")
-  @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  private Set<Datastream> datastreams = new HashSet<>();
 
   /**
    * A digital object can contain other digital objects.
@@ -83,7 +80,7 @@ public class DigitalObject {
   /**
    * Project to which the digital object belongs to
    */
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToOne
   @JsonBackReference
   @NotNull
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
@@ -126,7 +123,6 @@ public class DigitalObject {
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-    datastreams.add(datastream);
     datastream.setDigitalObject(this);
   }
 
@@ -146,7 +142,6 @@ public class DigitalObject {
           log.error(msg);
           throw new IllegalArgumentException(msg);
         }
-        datastreams.remove(datastream);
         datastream.setDigitalObject(null);
     }
 
@@ -185,7 +180,6 @@ public class DigitalObject {
 
     return "DigitalObject{" +
             "id='" + id + '\'' +
-            ", datastreams=" + datastreams +
             ", childObjects=[" + childObjectsString + "]" +
             ", objectType='" + objectType + '\'' +
             ", published=" + published +
@@ -199,12 +193,4 @@ public class DigitalObject {
             '}';
   }
 
-  /**
-   * Package private set datastreams to prevent direct manipulation of the datastreams
-   * (Hibernate does not allow complete private setters)
-   * @param datastreams
-   */
-  void setDatastreams(Set<Datastream> datastreams) {
-    this.datastreams = datastreams;
-  }
 }

@@ -2,12 +2,12 @@ package org.zim.gamsapi.Datastream;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -41,12 +41,14 @@ public class Datastream {
   @Column(name = "global_id")
   private Long globalId;
 
-  @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @ToString.Exclude
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  // TODO next two annotations not necessary because no bidirectional relationship any longer?
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
   @JsonIdentityReference(alwaysAsId = true)
   @NotNull
+  @JoinColumn(nullable = false)
   private DigitalObject digitalObject;
 
   /**
