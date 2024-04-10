@@ -40,8 +40,10 @@ public class DigitalObjectBuilderTest extends UnitTest {
 
         Assertions.assertThat(digitalObject.getProject().getProjectAbbr())
                 .isEqualTo(TEST_PROJECT_ABBR);
-        Assertions.assertThat(digitalObject.getDatastreams().iterator().next().getDsid())
-                .isEqualTo(TEST_DSID);
+//        Assertions.assertThat(digitalObject.getDatastreams().iterator().next().getDsid())
+//                .isEqualTo(TEST_DSID);
+
+        org.junit.jupiter.api.Assertions.fail("Test needs to be updated to reflect the new implementation");
 
     }
 
@@ -71,11 +73,12 @@ public class DigitalObjectBuilderTest extends UnitTest {
                 .build();
 
         // Project reference inside digital object points to digital object itself
-        Assertions.assertThat(digitalObject.getProject().getDigitalObjects()).contains(digitalObject);
+        //Assertions.assertThat(digitalObject.getProject().getDigitalObjects()).contains(digitalObject);
 
         // Datastream reference inside digital object points to digital object itself
-        Datastream datastream = digitalObject.getDatastreams().iterator().next();
-        Assertions.assertThat(digitalObject).isEqualTo(datastream.getDigitalObject());
+        //Datastream datastream = digitalObject.getDatastreams().iterator().next();
+        //Assertions.assertThat(digitalObject).isEqualTo(datastream.getDigitalObject());
+        org.junit.jupiter.api.Assertions.fail("Test needs to be updated to reflect the new implementation");
 
     }
 

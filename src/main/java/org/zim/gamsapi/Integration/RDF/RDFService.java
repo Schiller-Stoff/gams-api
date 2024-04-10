@@ -141,41 +141,42 @@ public class RDFService implements IIntegrationService {
     IntegrationActionReport integrationActionReport = new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, defaultMsg);
 
     // Load datastream "RDF_TTL" and send to jena-fuseki
-    digitalObject.getDatastreams()
-            .stream()
-            .filter(datastream -> datastream.getDsid().toLowerCase().equals(GAMSAPIntegrationDatastreamId.RDF_DATASTREAM_ID.name))
-            .forEach(datastream -> {
-              Resource datastreamData = new ByteArrayResource(datastream.getData());
-              try {
-                // parse given RDF first
-                Model rdfModel = RDFParser.create()
-                    .lang(RDFLanguages.TURTLE)
-                    .source(datastreamData.getInputStream())
-                    .base(RDFSearchProperties.GAMS_BASE_URL.name)
-                    .toModel();
-
-                // create quad statements assigning the named graph of the project.
-                DatasetGraph newDatasetGraph = DatasetGraphFactory.create();
-                rdfModel.listStatements().forEach(statement -> {
-                  Property namedGraphStmt = rdfModel.createProperty( RDFSearchProperties.GAMS_BASE_URL.name +  "/" + digitalObject.getId());
-                  Quad quad = Quad.create(namedGraphStmt.asNode(),statement.asTriple());
-                  newDatasetGraph.add(quad);
-                });
-
-                String quads = RDFWriter.source(newDatasetGraph).lang(Lang.NQUADS).asString();
-                tripleStoreClient.postNQuads(digitalObject,quads);
-                String msg = String.format("Successfully indexed custom object RDF for object %s , for project: %s", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
-                integrationActionReport.setMessage(msg);
-                integrationActionReport.setStatus(IntegrationActionStatus.SUCCESS);
-              } catch (IOException e) {
-                String msg = String.format("Failed to send custom rdf datastream to triplestore. For object %s and project %s. Original error: %s", digitalObject.getId(),digitalObject.getProject().getProjectAbbr(), e);
-                log.error(msg);
-                integrationActionReport.setMessage(msg);
-                integrationActionReport.setStatus(IntegrationActionStatus.ERROR);
-              }
-            });
-
-        return integrationActionReport;
+//    digitalObject.getDatastreams()
+//            .stream()
+//            .filter(datastream -> datastream.getDsid().toLowerCase().equals(GAMSAPIntegrationDatastreamId.RDF_DATASTREAM_ID.name))
+//            .forEach(datastream -> {
+//              Resource datastreamData = new ByteArrayResource(datastream.getData());
+//              try {
+//                // parse given RDF first
+//                Model rdfModel = RDFParser.create()
+//                    .lang(RDFLanguages.TURTLE)
+//                    .source(datastreamData.getInputStream())
+//                    .base(RDFSearchProperties.GAMS_BASE_URL.name)
+//                    .toModel();
+//
+//                // create quad statements assigning the named graph of the project.
+//                DatasetGraph newDatasetGraph = DatasetGraphFactory.create();
+//                rdfModel.listStatements().forEach(statement -> {
+//                  Property namedGraphStmt = rdfModel.createProperty( RDFSearchProperties.GAMS_BASE_URL.name +  "/" + digitalObject.getId());
+//                  Quad quad = Quad.create(namedGraphStmt.asNode(),statement.asTriple());
+//                  newDatasetGraph.add(quad);
+//                });
+//
+//                String quads = RDFWriter.source(newDatasetGraph).lang(Lang.NQUADS).asString();
+//                tripleStoreClient.postNQuads(digitalObject,quads);
+//                String msg = String.format("Successfully indexed custom object RDF for object %s , for project: %s", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
+//                integrationActionReport.setMessage(msg);
+//                integrationActionReport.setStatus(IntegrationActionStatus.SUCCESS);
+//              } catch (IOException e) {
+//                String msg = String.format("Failed to send custom rdf datastream to triplestore. For object %s and project %s. Original error: %s", digitalObject.getId(),digitalObject.getProject().getProjectAbbr(), e);
+//                log.error(msg);
+//                integrationActionReport.setMessage(msg);
+//                integrationActionReport.setStatus(IntegrationActionStatus.ERROR);
+//              }
+//            });
+//
+//        return integrationActionReport;
+    return null;
 
   }
 

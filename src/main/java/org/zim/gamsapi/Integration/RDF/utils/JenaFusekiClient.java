@@ -108,9 +108,10 @@ public class JenaFusekiClient {
 
     turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProject().getProjectAbbr(), digitalObject.getId()));
 
-    digitalObject.getDatastreams().forEach(datastream -> {
-      turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
-    });
+    // TODO must be done via datastream repository now
+//    digitalObject.getDatastreams().forEach(datastream -> {
+//      turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
+//    });
 
     // replace server names to the defined via enums.
     return turtle.toString().replaceAll("SERVER_REPLACEMENT", RDFSearchProperties.GAMS_BASE_URL.name);

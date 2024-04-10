@@ -24,10 +24,12 @@ public class DigitalObjectTest extends UnitTest {
 
     // check equality
     Assertions.assertEquals(digitalObject, datastream.getDigitalObject());
-    Assertions.assertEquals(digitalObject.getDatastreams().iterator().next(), datastream);
+    //Assertions.assertEquals(digitalObject.getDatastreams().iterator().next(), datastream);
 
     // check if the datastream is in the digital object
-    Assertions.assertTrue(digitalObject.getDatastreams().contains(datastream));
+    //Assertions.assertTrue(digitalObject.getDatastreams().contains(datastream));
+
+    Assertions.fail("Test needs to be updated to reflect the new implementation");
 
   }
 
@@ -62,17 +64,17 @@ public class DigitalObjectTest extends UnitTest {
 
     // check equality
     Assertions.assertEquals(digitalObject, datastream.getDigitalObject());
-    Assertions.assertEquals(digitalObject.getDatastreams().iterator().next(), datastream);
-
+    //Assertions.assertEquals(digitalObject.getDatastreams().iterator().next(), datastream);
+    Assertions.fail("Test needs to be updated to reflect the new implementation");
     //System.out.println("*****object: " + digitalObject);
 
     // check if the datastream is in the digital object
-    Assertions.assertTrue(digitalObject.getDatastreams().contains(datastream));
+    //Assertions.assertTrue(digitalObject.getDatastreams().contains(datastream));
 
     digitalObject.removeDatastream(datastream);
 
     // check if the datastream is removed from the digital object
-    Assertions.assertFalse(digitalObject.getDatastreams().contains(datastream));
+    //Assertions.assertFalse(digitalObject.getDatastreams().contains(datastream));
     Assertions.assertNull(datastream.getDigitalObject());
 
   }

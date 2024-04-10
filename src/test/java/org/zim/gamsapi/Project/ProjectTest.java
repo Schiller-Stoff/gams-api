@@ -19,12 +19,14 @@ public class ProjectTest extends UnitTest {
 
     project.addDigitalObject(digitalObject);
 
+    Assertions.fail("Test needs to be updated to reflect the new implementation");
+
     // check equality
     Assertions.assertEquals(project, digitalObject.getProject());
-    Assertions.assertEquals(project.getDigitalObjects().iterator().next(), digitalObject);
+    //Assertions.assertEquals(project.getDigitalObjects().iterator().next(), digitalObject);
 
     // check if the digital object is in the project
-    Assertions.assertTrue(project.getDigitalObjects().contains(digitalObject));
+    //Assertions.assertTrue(project.getDigitalObjects().contains(digitalObject));
 
 
   }
@@ -40,16 +42,18 @@ public class ProjectTest extends UnitTest {
     project.addDigitalObject(digitalObject);
 
     // check equality
-    Assertions.assertEquals(project, digitalObject.getProject());
-    Assertions.assertEquals(project.getDigitalObjects().iterator().next(), digitalObject);
+//    Assertions.assertEquals(project, digitalObject.getProject());
+//    Assertions.assertEquals(project.getDigitalObjects().iterator().next(), digitalObject);
+//
+//    // check if the digital object is in the project
+//    Assertions.assertTrue(project.getDigitalObjects().contains(digitalObject));
+//
+//    project.removeDigitalObject(digitalObject);
+//
+//    // check if the digital object is not in the project
+//    Assertions.assertFalse(project.getDigitalObjects().contains(digitalObject));
 
-    // check if the digital object is in the project
-    Assertions.assertTrue(project.getDigitalObjects().contains(digitalObject));
-
-    project.removeDigitalObject(digitalObject);
-
-    // check if the digital object is not in the project
-    Assertions.assertFalse(project.getDigitalObjects().contains(digitalObject));
+    Assertions.fail("Test needs to be updated to reflect the new implementation");
 
   }
 

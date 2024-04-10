@@ -56,4 +56,7 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Long> 
    */
   Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
 
+
+  void deleteAllByDigitalObject(DigitalObject digitalObject);
+
 }

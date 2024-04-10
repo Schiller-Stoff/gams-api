@@ -149,8 +149,8 @@ public class DigitalObjectBuilderIT extends IntegrationTest  {
         digitalObject = digitalObjectRepository.save(digitalObject);
 
         // update the datastream
-        digitalObject.getDatastreams().iterator().next().setDsid("newdsid");
-
+        //digitalObject.getDatastreams().iterator().next().setDsid("newdsid");
+        org.junit.jupiter.api.Assertions.fail("Test needs to be updated to reflect the new implementation");
         digitalObjectRepository.save(digitalObject);
 
         // expect the datastream to have been updated
