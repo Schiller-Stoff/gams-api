@@ -38,27 +38,6 @@ public class Project {
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Set<User> users;
 
-  /**
-   * Adds a digital object to the project.
-   * @param digitalObject the digital object to add
-   */
-  public void addDigitalObject(DigitalObject digitalObject) {
-    if(digitalObject == null){
-      String msg = String.format("Cannot assign a digital object with value null to the project %s", this);
-      log.error(msg);
-      throw new NullPointerException(msg);
-    }
-
-    if(digitalObject.getProject() != null){
-      String msg = String.format("Digital object %s is already assigned to a project.", digitalObject);
-      log.error(msg);
-      throw new IllegalArgumentException(msg);
-    }
-
-    digitalObject.setProject(this);
-  }
-
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
