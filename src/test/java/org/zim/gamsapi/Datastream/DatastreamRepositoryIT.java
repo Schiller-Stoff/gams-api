@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
@@ -176,12 +177,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     public class TestCascadingDelete {
 
         @Test
-        @Transactional
         public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
 
             final String TEST_DSID = "DSID_12345";
-
-            //
             DigitalObject toBeDeleted = new DigitalObjectBuilder("SOME_PID_12345")
                 .addProject(TestProject.PROJECT_ABBR.getValue())
                     .add()
@@ -190,15 +188,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .build();
 
             digitalObjectRepository.save(toBeDeleted);
-            datastreamRepository.save(Datastream.builder()
+            Datastream savedDatastream = datastreamRepository.save(Datastream.builder()
                 .digitalObject(toBeDeleted)
                 .dsid(TEST_DSID)
                 .build());
 
             // try to delete the object if datastream is still available
-            // TODO this should raise an error!
             org.junit.jupiter.api.Assertions.assertThrows(
-                Exception.class,
+                DataIntegrityViolationException.class,
                 () -> digitalObjectRepository.delete(toBeDeleted)
             );
 
@@ -209,7 +206,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             ).isPresent();
 
             // clean up
-
+            datastreamRepository.delete(savedDatastream);
+            digitalObjectRepository.delete(toBeDeleted);
 
 
         }
