@@ -271,15 +271,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     public class TestCustomRepositoryMethods {
 
         @Test
-        public void datastreamIsFindabelViaDsid(){
-            datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, TestDatastream.DSID.getValue())
-                    .ifPresentOrElse(
-                            datastream1 -> Assertions.assertThat(datastream1)
-                                    .isNotNull()
-                                    .isEqualTo(testDatastream),
-                            () -> Assertions.fail("Datastream not found")
-                    );
-
+        public void findsSameDatastreamViaDsid(){
+            Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, TestDatastream.DSID.getValue()))
+                    .isNotNull()
+                    .isPresent()
+                    .get()
+                    .isEqualTo(testDatastream);
         }
 
         @Test
