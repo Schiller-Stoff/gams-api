@@ -80,10 +80,9 @@ public class DigitalObject {
   /**
    * Project to which the digital object belongs to
    */
-  @ManyToOne
-  @JsonBackReference
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   @NotNull
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Project project;
 
   @Embedded
