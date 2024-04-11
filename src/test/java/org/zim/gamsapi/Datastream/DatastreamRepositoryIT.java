@@ -23,6 +23,7 @@ import java.util.Optional;
 
 /**
  * Integration test for the DatastreamRepository.
+ * TODO make sure that tests don't cause any side effects -> seems possible atm!
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
