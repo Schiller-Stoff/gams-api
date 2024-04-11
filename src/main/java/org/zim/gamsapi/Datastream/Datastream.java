@@ -42,11 +42,6 @@ public class Datastream {
   private Long globalId;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @ToString.Exclude
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  // TODO next two annotations not necessary because no bidirectional relationship any longer?
-  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  @JsonIdentityReference(alwaysAsId = true)
   @NotNull
   @JoinColumn(nullable = false)
   private DigitalObject digitalObject;
