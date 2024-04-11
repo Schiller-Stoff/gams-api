@@ -52,8 +52,21 @@ public class ProjectRepositoryIT extends IntegrationTest {
     digitalObjectRepository.delete(digitalObject);
     projectRepository.delete(project);
 
-    ;
 
+  }
+
+  @Test
+  public void savedProjectIsFindable(){
+
+    Project project = Project.builder()
+        .projectAbbr(TestProject.PROJECT_ABBR.getValue())
+        .build();
+
+    projectRepository.save(project);
+
+    org.assertj.core.api.Assertions.assertThat(
+        projectRepository.findById(project.getProjectAbbr()).get()
+    ).isEqualTo(project);
 
   }
 
