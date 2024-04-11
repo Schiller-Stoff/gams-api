@@ -59,12 +59,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .add()
                 .build();
 
+        testProject = testDigitalObject.getProject();
+
         testDatastream = Datastream.builder()
             .dsid(TestDatastream.DSID.getValue())
             .digitalObject(testDigitalObject)
             .build();
 
-        projectRepository.save(testDigitalObject.getProject());
+        projectRepository.save(testProject);
         digitalObjectRepository.save(testDigitalObject);
         datastreamRepository.save(testDatastream);
 
@@ -215,31 +217,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
         @Test
-        public void datastreamCascadeDeletedFromProject(){
-
-
-
-
-            // delete parent object
-            projectRepository.delete(testProject);
-
-            // verify that the object was deleted
-            Assertions.assertThat(
-                            projectRepository.findById(testProject.getProjectAbbr()))
-                    .isNotNull()
-                    .isNotPresent();
-
-            Assertions.assertThat(
-                            digitalObjectRepository.findById(testDigitalObject.getId()))
-                    .isNotNull()
-                    .isNotPresent();
-
-            // verify that the datastream was deleted
-            Assertions.assertThat(
-                            datastreamRepository.findById(testDatastream.getGlobalId()))
-                    .isNotNull()
-                    .isNotPresent();
-
+        public void datastreamDoesNotCascadeDeletedFromProject(){
+            // because the testdatastream should still exist
+            org.junit.jupiter.api.Assertions.assertThrows(
+                DataIntegrityViolationException.class,
+                () -> projectRepository.delete(testProject)
+            );
         }
 
         @Test
