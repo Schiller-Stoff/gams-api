@@ -228,15 +228,30 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            // delete parent object
-            datastreamRepository.delete(testDatastream);
+            Datastream datastreamToBeDeleted = Datastream.builder()
+                .dsid("DSID_TO_BE_DELETED")
+                .digitalObject(testDigitalObject)
+                .build();
+
+            datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
+
+            // saved datastream should exist
+            Assertions.assertThat(
+                        datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamToBeDeleted.getDsid()))
+                    .isNotNull()
+                    .isPresent();
+
+
+            // delete datastream
+            datastreamRepository.delete(datastreamToBeDeleted);
 
             // datastream deleted
             Assertions.assertThat(
-                        datastreamRepository.findById(testDatastream.getGlobalId()))
+                        datastreamRepository.findById(datastreamToBeDeleted.getGlobalId()))
                     .isNotNull()
                     .isNotPresent();
 
+            // object + project still available!
             Assertions.assertThat(
                         digitalObjectRepository.findById(testDigitalObject.getId()))
                     .isNotNull()
