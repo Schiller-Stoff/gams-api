@@ -55,30 +55,9 @@ public class Project {
       throw new IllegalArgumentException(msg);
     }
 
-    //digitalObjects.add(digitalObject);
     digitalObject.setProject(this);
   }
 
-  /**
-   * Removes a digital object from the project.
-   * @param digitalObject the digital object to remove
-   */
-  public void removeDigitalObject(DigitalObject digitalObject) {
-    if(digitalObject == null){
-      String msg = String.format("Cannot remove a digital object with value null from the project %s", this);
-      log.error(msg);
-      throw new NullPointerException(msg);
-    }
-
-    if(digitalObject.getProject() == null){
-      String msg = String.format("Digital object %s is not assigned to a project.", digitalObject);
-      log.error(msg);
-      throw new IllegalArgumentException(msg);
-    }
-
-    //digitalObjects.remove(digitalObject);
-    digitalObject.setProject(null);
-  }
 
   @Override
   public boolean equals(Object o) {
