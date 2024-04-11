@@ -10,6 +10,7 @@ import java.util.Set;
 @Slf4j
 /**
  * Builder for DigitalObject.
+ * TODO whole class feels outdated because of refactored bidirectional relationships
  */
 public class DigitalObjectBuilder {
 
@@ -127,11 +128,7 @@ public class DigitalObjectBuilder {
         }
 
         public DigitalObjectBuilder add() {
-            // establishes bidirectional relationship
-            project.addDigitalObject(digitalObject);
-
-            //TODO call validation methods here?
-
+            digitalObject.setProject(project);
             return DigitalObjectBuilder.this;
         }
     }
