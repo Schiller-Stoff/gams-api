@@ -106,43 +106,6 @@ public class DigitalObject {
   @NotNull
   private Set<String> types = new HashSet<>();
 
-  /**
-   * Adds a child digital object to the current digital object.
-   * @param datastream Datastream to be added.
-   */
-  public void addDatastream(Datastream datastream) {
-    if (datastream == null) {
-      String msg = String.format("Cannot assign a datastream with value null to a digital object %s", this);
-      log.error(msg);
-      throw new NullPointerException(msg);
-    }
-
-    if(datastream.getDigitalObject() != null) {
-      String msg = String.format("Datastream %s is already assigned to a digital object. Make sure that no setter is used to assign the datastream to a digital object (in the code before).", datastream);
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    datastream.setDigitalObject(this);
-  }
-
-    /**
-     * Removes a child digital object from the current digital object.
-     * @param datastream Datastream to be removed
-     */
-    public void removeDatastream(Datastream datastream) {
-        if (datastream == null) {
-          String msg = String.format("Cannot remove a datastream with value null from a digital object %s", this);
-          log.error(msg);
-          throw new NullPointerException("Cannot remove a datastream with the value null.");
-        }
-
-        if(datastream.getDigitalObject() == null) {
-          String msg = String.format("Datastream %s is not assigned to any digital object and so cannot be removed. Make sure that no setter is used to assign the datastream to a digital object (in the code before).", datastream);
-          log.error(msg);
-          throw new IllegalArgumentException(msg);
-        }
-        datastream.setDigitalObject(null);
-    }
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

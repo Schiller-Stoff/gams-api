@@ -101,11 +101,7 @@ public class DigitalObjectBuilder {
             }
 
             public DigitalObjectBuilder add(){
-                // establishes bidirectional relationship
-                digitalObject.addDatastream(datastream);
-
-                // TODO call validation here?
-
+                datastream.setDigitalObject(digitalObject);
                 return DigitalObjectBuilder.this;
             }
             public Datastream build() {

@@ -10,29 +10,6 @@ import org.zim.gamsapi.enums.TestDigitalObject;
 public class DigitalObjectTest extends UnitTest {
 
 
-
-  @Test
-  public void addDatastreamEstablishesBidirectionalRelationship(){
-
-    Datastream datastream = new Datastream();
-    datastream.setGlobalId(1L);
-
-    DigitalObject digitalObject = new DigitalObject();
-    digitalObject.setId(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-
-    digitalObject.addDatastream(datastream);
-
-    // check equality
-    Assertions.assertEquals(digitalObject, datastream.getDigitalObject());
-    //Assertions.assertEquals(digitalObject.getDatastreams().iterator().next(), datastream);
-
-    // check if the datastream is in the digital object
-    //Assertions.assertTrue(digitalObject.getDatastreams().contains(datastream));
-
-    Assertions.fail("Test needs to be updated to reflect the new implementation");
-
-  }
-
   @Test
   public void digitalObjectsWithSameIdAreEqual(){
     DigitalObject digitalObject = new DigitalObject();
@@ -51,33 +28,6 @@ public class DigitalObjectTest extends UnitTest {
     Assertions.assertNotEquals(digitalObject, digitalObject2);
   }
 
-  @Test
-  public void removeDatastreamRemovesBidirectionalRelationship(){
-
-    Datastream datastream = new Datastream();
-    datastream.setGlobalId(1L);
-
-    DigitalObject digitalObject = new DigitalObject();
-    digitalObject.setId(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-
-    digitalObject.addDatastream(datastream);
-
-    // check equality
-    Assertions.assertEquals(digitalObject, datastream.getDigitalObject());
-    //Assertions.assertEquals(digitalObject.getDatastreams().iterator().next(), datastream);
-    Assertions.fail("Test needs to be updated to reflect the new implementation");
-    //System.out.println("*****object: " + digitalObject);
-
-    // check if the datastream is in the digital object
-    //Assertions.assertTrue(digitalObject.getDatastreams().contains(datastream));
-
-    digitalObject.removeDatastream(datastream);
-
-    // check if the datastream is removed from the digital object
-    //Assertions.assertFalse(digitalObject.getDatastreams().contains(datastream));
-    Assertions.assertNull(datastream.getDigitalObject());
-
-  }
 
 
 }
