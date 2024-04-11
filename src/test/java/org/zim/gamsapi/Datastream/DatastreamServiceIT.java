@@ -26,6 +26,9 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Autowired
   IProjectRepository projectRepository;
 
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
   private DigitalObject testObject;
 
   private Project testProject;
@@ -81,19 +84,20 @@ public class DatastreamServiceIT extends IntegrationTest {
       final String RANDOM_DSID = "SOME_RANDOM_DSID";
       Datastream datastream = Datastream.builder()
           .dsid(RANDOM_DSID)
-          .digitalObject(
-              new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-                  .addProject(TestProject.PROJECT_ABBR.getValue())
-                  .add()
-                  .build()
-          )
+          .digitalObject(testObject)
           .build();
 
       datastreamService.save(datastream);
 
       org.assertj.core.api.Assertions.assertThat(
-          datastreamService.findByDsid(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), RANDOM_DSID)
-      ).isNotNull();
+          datastreamRepository.findByDigitalObjectAndDsid(testObject, datastream.getDsid())
+      ).isNotNull().isPresent();
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamRepository.findByDigitalObjectAndDsid(testObject, datastream.getDsid())
+      ).isNotNull().isEmpty();
 
     }
 
