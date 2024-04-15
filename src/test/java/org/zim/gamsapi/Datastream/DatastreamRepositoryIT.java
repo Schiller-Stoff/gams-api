@@ -268,12 +268,25 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     public class TestCustomRepositoryMethods {
 
         @Test
-        public void findsSameDatastreamViaDsid(){
-            Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, TestDatastream.DSID.getValue()))
-                    .isNotNull()
-                    .isPresent()
-                    .get()
-                    .isEqualTo(testDatastream);
+        @Transactional
+        public void findsExpectedDatastreamViaDsid(){
+            Datastream foundDatastream = datastreamRepository.findByDigitalObjectAndDsid(
+                testDigitalObject, TestDatastream.DSID.getValue()
+            ).orElseThrow();
+
+            String foundDsid = foundDatastream.getDsid();
+            String foundDigitalObjectId = foundDatastream.getDigitalObject().getId();
+
+            Assertions.assertThat(foundDsid)
+                    .isNotEmpty()
+                    .isEqualTo(foundDatastream.getDsid());
+
+            Assertions.assertThat(foundDigitalObjectId)
+                .isNotEmpty()
+                .isEqualTo(foundDatastream.getDigitalObject().getId());
+
+
+
         }
 
         @Test
@@ -301,7 +314,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         @Ignore
         public void deleteAllRemovesTestDatastream(){
-            // TODO first refactor id handling of datastream? globalID and dsid is a bad idea.
 
             // first test datastream is available
             Assertions.assertThat(
