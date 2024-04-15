@@ -15,7 +15,6 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
@@ -53,12 +52,10 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @BeforeAll
     public void setup(){
 
-        testDigitalObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-                .addProject(TestProject.PROJECT_ABBR.getValue())
-                .add()
-                .addDatastream(TestDatastream.DSID.getValue())
-                .add()
-                .build();
+        testDigitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            .project(
+                Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+            .build();
 
         testProject = testDigitalObject.getProject();
 
@@ -184,12 +181,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
 
             final String TEST_DSID = "DSID_12345";
-            DigitalObject toBeDeleted = new DigitalObjectBuilder("SOME_PID_12345")
-                .addProject(TestProject.PROJECT_ABBR.getValue())
-                    .add()
-                .addDatastream(TEST_DSID)
-                    .add()
+            DigitalObject toBeDeleted = DigitalObject.builder()
+                .id("SOME_PID_12345")
+                .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
                 .build();
+
 
             digitalObjectRepository.save(toBeDeleted);
             Datastream savedDatastream = datastreamRepository.save(Datastream.builder()
@@ -392,12 +388,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void throwsIfObjectIsNotSaved(){
 
-        DigitalObject unsavedObject = new DigitalObjectBuilder("UNSAVED_12345")
-                .addProject(TestProject.PROJECT_ABBR.getValue())
-                .add()
-                .addDatastream(TestDatastream.DSID.getValue())
-                .add()
-                .build();
+        DigitalObject unsavedObject = DigitalObject.builder()
+            .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+            .build();
 
         Datastream aDatastream = Datastream.builder()
             .dsid("RANDOM_DSID_123456")

@@ -10,7 +10,6 @@ import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
@@ -35,9 +34,9 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   @BeforeAll
   public void setup(){
-    testObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .addProject(TestProject.PROJECT_ABBR.getValue())
-        .add()
+    testObject = DigitalObject.builder()
+        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+        .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
         .build();
 
     testProject = testObject.getProject();
@@ -64,9 +63,9 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream datastream = Datastream.builder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(
-              new DigitalObjectBuilder(RANDOM_PID)
-                  .addProject(TestProject.PROJECT_ABBR.getValue())
-                  .add()
+              DigitalObject.builder()
+                  .id(RANDOM_PID)
+                  .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
                   .build()
           )
           .build();

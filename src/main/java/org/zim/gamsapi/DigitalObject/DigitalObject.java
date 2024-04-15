@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
+@Builder
 public class DigitalObject {
 
   /**
@@ -49,6 +50,7 @@ public class DigitalObject {
   @NotNull
   // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+  @Builder.Default
   private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
 
   /**
@@ -104,6 +106,7 @@ public class DigitalObject {
    */
   @ElementCollection
   @NotNull
+  @Builder.Default
   private Set<String> types = new HashSet<>();
 
 

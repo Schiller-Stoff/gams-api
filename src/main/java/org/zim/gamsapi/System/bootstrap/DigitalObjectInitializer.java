@@ -16,7 +16,6 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
 import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
@@ -60,9 +59,10 @@ public class DigitalObjectInitializer implements CommandLineRunner {
    */
   private void saveTestData(){
 
-    DigitalObject teiObject = new DigitalObjectBuilder("testtei")
-            .withObjectType("TEI")
-            .build();
+    DigitalObject teiObject = DigitalObject.builder()
+        .id("testtei")
+        .objectType("TEI")
+        .build();
     digitalObjectRepository.save(teiObject);
 
     Datastream teiSource = Datastream.builder()
@@ -75,19 +75,18 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     datastreamRepository.save(teiSource);
     //teiObject.setDatastreams(new ArrayList<>(List.of(teiSource)));
 
-    DigitalObject lidoObject = new DigitalObjectBuilder("testlido")
-            .withObjectType("LIDO")
-            .addBaseMetadata()
-              .withTitle("A LIDO object title")
-              .withCreator("Sebastian David Schiller-Stoff")
-              //.withContributor(new ArrayList<>(List.of("Sebastian David Schiller-Stoff", "Moria")))
-              .withDescription("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
-              .withPublisher("Universität Graz")
-              //.withSubject(new ArrayList<>(List.of("History", "Art History")))
-              //.withLanguage(new ArrayList<>(List.of("DE")))
-              .withRights("Creative Commons BY-NC 4.0")
-              .add()
-            .build();
+    DigitalObject lidoObject = DigitalObject.builder()
+        .objectType("testlido")
+        .baseMetadata(
+            MetadataBaseEntity.builder()
+                .title("Digital object representing a Chair of the king")
+                .creator("Ada Lovelace")
+                .description("This source datastream contains some information about...")
+                .publisher("Universität Graz")
+                .rights("Creative Commons BY-NC 4.0")
+                .build())
+        .build();
+
     digitalObjectRepository.save(lidoObject);
 
     Datastream lidoSource = Datastream.builder()
@@ -131,9 +130,11 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     datastreamRepository.save(image);
 
-    DigitalObject gmlObject = new DigitalObjectBuilder("testgml")
-            .withObjectType("GML")
-            .build();
+    DigitalObject gmlObject = DigitalObject.builder()
+        .id("testgml")
+        .objectType("GML")
+        .build();
+
     digitalObjectRepository.save(gmlObject);
 
     Datastream gmlImage = Datastream.builder()
