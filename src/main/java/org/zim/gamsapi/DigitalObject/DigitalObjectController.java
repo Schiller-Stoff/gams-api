@@ -166,14 +166,13 @@ public class DigitalObjectController {
 
     Set<DigitalObject> childrenToBeCollected = childObjects
             .stream()
-            .map(childId -> DigitalObject
-                .builder()
+            .map(childId -> new DigitalObjectBuilder()
                 .project(project)
                 .build())
             .collect(Collectors.toSet());
 
     DigitalObject foundObject = digitalObjectService.assignChildObjects(
-            DigitalObject.builder()
+            new DigitalObjectBuilder()
                 .id(id)
                 .project(project)
                 .build(),
@@ -196,7 +195,7 @@ public class DigitalObjectController {
     // assign child objects if available
     childObjects
       .ifPresent(
-        strings -> digitalObject.setChildObjects(strings.stream().map(id -> DigitalObject.builder().id(id).build()).collect(Collectors.toSet()))
+        strings -> digitalObject.setChildObjects(strings.stream().map(id -> new DigitalObjectBuilder().id(id).build()).collect(Collectors.toSet()))
       );
 
     DigitalObject savedObject = digitalObjectService.save(digitalObject);

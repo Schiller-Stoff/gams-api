@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
@@ -32,7 +33,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          DigitalObject.builder().id("FOO_BAR").build()
+          new DigitalObjectBuilder().id("FOO_BAR").build()
       );
 
       Datastream datastream2 = new Datastream();

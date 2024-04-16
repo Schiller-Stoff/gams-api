@@ -9,6 +9,7 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
@@ -47,12 +48,12 @@ public class SubInfoPackService implements ISubInfoPackService {
       // if there are child objects -> save a reference
       if(!childObjectStatement.isEmpty()){
         childObjects = childObjectStatement.stream()
-                .map(childObjectId -> DigitalObject.builder().id(childObjectId).build())
+                .map(childObjectId -> new DigitalObjectBuilder().id(childObjectId).build())
                 .collect(Collectors.toSet());
       }
 
       // 02. build and save digital object from bag-info.txt
-      DigitalObject digitalObject = DigitalObject.builder()
+      DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
           .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
           .objectType(bagitSipJson.getObjectType())

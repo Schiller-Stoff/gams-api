@@ -28,7 +28,7 @@ public class ConstraintViolationTest extends UnitTest {
 
     @Test
     public void shouldRaiseNoConstraintViolation() {
-        DigitalObject digitalObject = DigitalObject.builder()
+        DigitalObject digitalObject = new DigitalObjectBuilder()
             .project(Project.builder().projectAbbr("Foo").build())
             .id("foo")
             .build();
@@ -39,10 +39,9 @@ public class ConstraintViolationTest extends UnitTest {
 
     @Test
     public void shouldRaiseConstraintViolationIfPidIsNull() {
-        DigitalObject digitalObject = DigitalObject.builder()
-            .id(null)
-            .project(Project.builder().projectAbbr("Foo").build())
-            .build();
+        DigitalObject digitalObject = new DigitalObject();
+        digitalObject.setId(null);
+        digitalObject.setProject(Project.builder().projectAbbr("Foo").build());
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));

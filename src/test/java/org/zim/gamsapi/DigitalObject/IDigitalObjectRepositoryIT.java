@@ -25,7 +25,7 @@ class IDigitalObjectRepositoryIT extends IntegrationTest {
     @BeforeEach
     public void saveTestObject() {
         repository.save(
-                DigitalObject.builder()
+                new DigitalObjectBuilder()
                     .id(PID)
                     .project(Project.builder().projectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name).build())
                     .build()

@@ -11,6 +11,7 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
@@ -60,7 +61,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
    */
   private void saveTestData(){
 
-    DigitalObject teiObject = DigitalObject.builder()
+    DigitalObject teiObject = new DigitalObjectBuilder()
         .id("testtei")
         .objectType("TEI")
         .build();
@@ -75,7 +76,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     datastreamRepository.save(teiSource);
 
-    DigitalObject lidoObject = DigitalObject.builder()
+    DigitalObject lidoObject = new DigitalObjectBuilder()
         .objectType("testlido")
         .baseMetadata(
             MetadataBaseEntity.builder()
@@ -130,7 +131,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     datastreamRepository.save(image);
 
-    DigitalObject gmlObject = DigitalObject.builder()
+    DigitalObject gmlObject = new DigitalObjectBuilder()
         .id("testgml")
         .objectType("GML")
         .build();

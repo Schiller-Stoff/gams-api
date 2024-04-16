@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
@@ -34,7 +35,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   @BeforeAll
   public void setup(){
-    testObject = DigitalObject.builder()
+    testObject = new DigitalObjectBuilder()
         .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
         .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
         .build();
@@ -63,7 +64,7 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(
-              DigitalObject.builder()
+              new DigitalObjectBuilder()
                   .id(RANDOM_PID)
                   .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
                   .build()

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
@@ -35,7 +36,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
 
     projectRepository.save(project);
 
-    DigitalObject digitalObject = DigitalObject.builder()
+    DigitalObject digitalObject = new DigitalObjectBuilder()
         .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
         .project(project)
         .build() ;

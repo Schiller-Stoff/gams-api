@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
@@ -49,7 +50,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @BeforeAll
     public void setup(){
 
-        testDigitalObject = DigitalObject.builder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+        testDigitalObject = new DigitalObjectBuilder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
             .project(
                 Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
             .build();
@@ -195,7 +196,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
 
             final String TEST_DSID = "DSID_12345";
-            DigitalObject toBeDeleted = DigitalObject.builder()
+            DigitalObject toBeDeleted = new DigitalObjectBuilder()
                 .id("SOME_PID_12345")
                 .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
                 .build();
@@ -409,7 +410,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             Datastream datastream = new Datastream();
             datastream.setDigitalObject(
-                DigitalObject.builder().id("123456").build()
+                new DigitalObjectBuilder().id("123456").build()
             );
 
             org.junit.jupiter.api.Assertions.assertThrows(
@@ -433,7 +434,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void throwsIfObjectIsNotSaved(){
 
-        DigitalObject unsavedObject = DigitalObject.builder()
+        DigitalObject unsavedObject = new DigitalObjectBuilder()
             .id("UNSAVED_OBJECT")
             .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
             .build();
