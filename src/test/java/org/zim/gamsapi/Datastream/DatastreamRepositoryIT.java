@@ -56,7 +56,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         testProject = testDigitalObject.getProject();
 
-        testDatastream = Datastream.builder()
+        testDatastream = new DatastreamBuilder()
             .dsid(TestDatastream.DSID.getValue())
             .digitalObject(testDigitalObject)
             .build();
@@ -89,7 +89,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void saveDatastreamExistsWithExpectedID() {
         Datastream datastream = datastreamRepository.save(
-            Datastream.builder()
+            new DatastreamBuilder()
                 .digitalObject(testDigitalObject)
                 .dsid("SOME_RANDOM_DSID")
                 .build()
@@ -117,7 +117,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void deleteDatastreamRemovesDatastream() {
-        Datastream datastream = datastreamRepository.save(Datastream.builder()
+        Datastream datastream = datastreamRepository.save(new DatastreamBuilder()
             .digitalObject(testDigitalObject)
             .dsid("SOME_RANDOM_DSID_45123")
             .build());
@@ -202,7 +202,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
             digitalObjectRepository.save(toBeDeleted);
-            Datastream savedDatastream = datastreamRepository.save(Datastream.builder()
+            Datastream savedDatastream = datastreamRepository.save(new DatastreamBuilder()
                 .digitalObject(toBeDeleted)
                 .dsid(TEST_DSID)
                 .build());
@@ -239,7 +239,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            Datastream datastreamToBeDeleted = Datastream.builder()
+            Datastream datastreamToBeDeleted = new DatastreamBuilder()
                 .dsid("DSID_TO_BE_DELETED")
                 .digitalObject(testDigitalObject)
                 .build();
@@ -315,7 +315,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
             String TEST_DSID = "DSID_FOR_DATASTREAM";
 
-            Datastream datastreamToBeDeleted = datastreamRepository.save(Datastream.builder()
+            Datastream datastreamToBeDeleted = datastreamRepository.save(
+                new DatastreamBuilder()
                     .dsid(TEST_DSID)
                     .digitalObject(testDigitalObject)
                     .build());
@@ -393,9 +394,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void saveThrowsIfDigitalObjectIsNull(){
-            Datastream datastream = Datastream.builder()
-                .dsid("DSID")
-                .build();
+            Datastream datastream = new Datastream();
+            datastream.setDsid("DSID");
+
 
             org.junit.jupiter.api.Assertions.assertThrows(
                 Exception.class,
@@ -405,9 +406,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void saveThrowsIfDsidIsNull(){
-            Datastream datastream = Datastream.builder()
-                .digitalObject(DigitalObject.builder().id("123456").build())
-                .build();
+
+            Datastream datastream = new Datastream();
+            datastream.setDigitalObject(
+                DigitalObject.builder().id("123456").build()
+            );
 
             org.junit.jupiter.api.Assertions.assertThrows(
                 Exception.class,
@@ -435,7 +438,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
             .build();
 
-        Datastream aDatastream = Datastream.builder()
+        Datastream aDatastream = new DatastreamBuilder()
             .dsid("RANDOM_DSID_123456")
             .digitalObject(unsavedObject)
             .build();

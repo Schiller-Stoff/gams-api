@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -81,7 +82,7 @@ public class SubInfoPackService implements ISubInfoPackService {
                 log.error(msg);
                 throw new SubInfoPackProcessingException(msg);
               }
-              return Datastream.builder()
+              return new DatastreamBuilder()
                       .dsid(contentFile.getDsid())
                       .digitalObject(digitalObject)
                       .data(datastreamContent)

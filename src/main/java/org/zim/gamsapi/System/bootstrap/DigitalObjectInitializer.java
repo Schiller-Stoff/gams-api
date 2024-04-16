@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -65,7 +66,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
         .build();
     digitalObjectRepository.save(teiObject);
 
-    Datastream teiSource = Datastream.builder()
+    Datastream teiSource = new DatastreamBuilder()
             .dsid("TEI_SOURCE")
             .data("test".getBytes())
             .digitalObject(teiObject)
@@ -73,7 +74,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
 
     datastreamRepository.save(teiSource);
-    //teiObject.setDatastreams(new ArrayList<>(List.of(teiSource)));
 
     DigitalObject lidoObject = DigitalObject.builder()
         .objectType("testlido")
@@ -89,7 +89,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     digitalObjectRepository.save(lidoObject);
 
-    Datastream lidoSource = Datastream.builder()
+    Datastream lidoSource = new DatastreamBuilder()
             .dsid("LIDO_SOURCE")
             .data("test".getBytes())
             .digitalObject(lidoObject)
@@ -109,7 +109,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
     datastreamRepository.save(lidoSource);
 
-    Datastream image = Datastream.builder()
+    Datastream image = new DatastreamBuilder()
             .dsid("IMAGE_1")
             .data("test".getBytes())
             .digitalObject(lidoObject)
@@ -137,7 +137,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     digitalObjectRepository.save(gmlObject);
 
-    Datastream gmlImage = Datastream.builder()
+    Datastream gmlImage = new DatastreamBuilder()
             .dsid("IMAGE_1")
             .data("test".getBytes())
             .digitalObject(gmlObject)

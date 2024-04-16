@@ -28,7 +28,6 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
 @IdClass(DatastreamId.class)

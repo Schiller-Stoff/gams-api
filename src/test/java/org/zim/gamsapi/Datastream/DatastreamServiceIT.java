@@ -60,7 +60,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
       final String RANDOM_PID = "SOME_RANDOM_PID";
 
-      Datastream datastream = Datastream.builder()
+      Datastream datastream = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(
               DigitalObject.builder()
@@ -81,7 +81,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void datastreamExistsAfterSaving(){
 
       final String RANDOM_DSID = "SOME_RANDOM_DSID";
-      Datastream datastream = Datastream.builder()
+      Datastream datastream = new DatastreamBuilder()
           .dsid(RANDOM_DSID)
           .digitalObject(testObject)
           .build();
