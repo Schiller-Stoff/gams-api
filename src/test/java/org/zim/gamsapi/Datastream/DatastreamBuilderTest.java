@@ -15,6 +15,7 @@ public class DatastreamBuilderTest extends UnitTest {
     });
   }
 
+  @Test
   public void throwsIfDigitalObjectIdIsEmpty(){
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new DatastreamBuilder()
