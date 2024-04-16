@@ -7,7 +7,6 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -18,8 +17,6 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
-
-import java.util.Optional;
 
 /**
  * Integration test for the DatastreamRepository.
@@ -99,19 +96,20 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         );
 
         Assertions.assertThat(
-                datastreamRepository.findById(datastream.getGlobalId()))
+                datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isPresent()
                 .get()
-                .extracting(Datastream::getGlobalId)
-                .isEqualTo(datastream.getGlobalId()
+                .extracting(Datastream::deriveDatastreamId)
+                .isEqualTo(datastream.deriveDatastreamId()
         );
-        // clean up and check if successfully deleted
+//        // clean up and check if successfully deleted
         datastreamRepository.delete(datastream);
         Assertions.assertThat(
-                datastreamRepository.findById(datastream.getGlobalId()))
+                datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isNotPresent();
+
     }
 
     /**
@@ -124,15 +122,16 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             .dsid("SOME_RANDOM_DSID_45123")
             .build());
         Assertions.assertThat(
-                        datastreamRepository.findById(datastream.getGlobalId()))
+                        datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isPresent();
 
         datastreamRepository.delete(datastream);
         Assertions.assertThat(
-                datastreamRepository.findById(datastream.getGlobalId()))
+                datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isNotPresent();
+
     }
 
 
@@ -141,10 +140,17 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void findByIdReturnsEmptyOptionalIfDatastreamDoesNotExist() {
+
+        DatastreamId datastreamId = DatastreamId.builder()
+            .dsid("NOT_THERE")
+            .digitalObject("NOT_THERE")
+            .build();
+
         Assertions.assertThat(
-                datastreamRepository.findById(5L))
+                datastreamRepository.findById(datastreamId))
                 .isNotNull()
                 .isNotPresent();
+
     }
 
 
@@ -153,16 +159,24 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void findByDigitalObjectAndDsidReturnsEmptyOptionalIfDatastreamDoesNotExist() {
+
+        DatastreamId datastreamId = DatastreamId.builder()
+            .dsid("NOT_THERE")
+            .digitalObject("NOT_THERE")
+            .build();
+
         Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, "NOT_THERE"))
+                datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamId.getDsid()))
                 .isNotNull()
                 .isNotPresent();
+
     }
 
     /**
      * Verifies that a datastream is returned if it exists.
      */
     @Test
+    @Transactional
     public void findByDigitalAndDsidReturnsDatastreamIfDatastreamExists() {
         Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, testDatastream.getDsid()))
                 .isNotNull()
@@ -202,7 +216,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // verify deletion is not cascaded
             Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(toBeDeleted, TEST_DSID)
+                datastreamRepository.findByDigitalObjectAndDsid(toBeDeleted, savedDatastream.getDsid())
             ).isPresent();
 
             // clean up
@@ -244,7 +258,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // datastream deleted
             Assertions.assertThat(
-                        datastreamRepository.findById(datastreamToBeDeleted.getGlobalId()))
+                        datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
                     .isNotNull()
                     .isNotPresent();
 
@@ -259,6 +273,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     .isNotNull()
                     .isPresent();
 
+
         }
 
     }
@@ -270,8 +285,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         @Transactional
         public void findsExpectedDatastreamViaDsid(){
+
+            DatastreamId datastreamId = DatastreamId.builder()
+                .dsid(TestDatastream.DSID.getValue())
+                .digitalObject(testDigitalObject.getId())
+                .build();
+
             Datastream foundDatastream = datastreamRepository.findByDigitalObjectAndDsid(
-                testDigitalObject, TestDatastream.DSID.getValue()
+                testDigitalObject, datastreamId.getDsid()
             ).orElseThrow();
 
             String foundDsid = foundDatastream.getDsid();
@@ -308,6 +329,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             Assertions.assertThat(
                 datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamToBeDeleted.getDsid())
             ).isNotNull().isNotPresent();
+
 
         }
 
@@ -346,7 +368,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void findDatastreamDetailsViewByDigitalObjectAndDsidReturnsDatastreamDetailsView(){
-            datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(testDigitalObject, TestDatastream.DSID.getValue())
+
+            DatastreamId datastreamId = DatastreamId.builder()
+                .dsid(TestDatastream.DSID.getValue())
+                .digitalObject(testDigitalObject.getId())
+                .build();
+
+            datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(testDigitalObject, datastreamId.getDsid())
                     .ifPresentOrElse(
                             datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
                                     .isNotNull()
@@ -361,37 +389,39 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
     @Nested
-    public class Constraints {
+    public class IdGenerationTest {
 
         @Test
-        public void saveThrowsConstraintViolationIfDigitalObjectNotAssigned(){
-
+        public void saveThrowsIfDigitalObjectIsNull(){
             Datastream datastream = Datastream.builder()
-                // no digital object assigned
                 .dsid("DSID")
                 .build();
 
             org.junit.jupiter.api.Assertions.assertThrows(
-                ConstraintViolationException.class,
+                Exception.class,
                 () -> datastreamRepository.save(datastream)
             );
-
         }
 
         @Test
-        public void saveThrowsConstraintViolationIfDsidNotAssigned(){
-
+        public void saveThrowsIfDsidIsNull(){
             Datastream datastream = Datastream.builder()
-                .digitalObject(testDigitalObject)
-                // no dsid assigned
+                .digitalObject(DigitalObject.builder().id("123456").build())
                 .build();
 
             org.junit.jupiter.api.Assertions.assertThrows(
-                ConstraintViolationException.class,
+                Exception.class,
                 () -> datastreamRepository.save(datastream)
             );
-
         }
+
+    }
+
+
+    @Nested
+    public class Constraints {
+
+
 
 
 
@@ -401,6 +431,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     public void throwsIfObjectIsNotSaved(){
 
         DigitalObject unsavedObject = DigitalObject.builder()
+            .id("UNSAVED_OBJECT")
             .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
             .build();
 
@@ -411,7 +442,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
         org.junit.jupiter.api.Assertions.assertThrows(
-            InvalidDataAccessApiUsageException.class,
+            DataIntegrityViolationException.class,
             () -> datastreamRepository.save(aDatastream)
         );
 

@@ -30,13 +30,13 @@ public class DatastreamService implements IDatastreamService {
 
   @Override
   @Transactional
-  public void delete(DigitalObject digitalObject, String dsid) {
-    datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, dsid);
+  public void delete(DigitalObject digitalObject, DatastreamId dsid) {
+    datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, dsid.getDsid());
   }
 
 
   @Override
-  public Datastream findById(Long id) throws DatastreamNotFoundException {
+  public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
     return datastreamRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream with id %s", id);
       log.info(msg);
@@ -45,9 +45,9 @@ public class DatastreamService implements IDatastreamService {
   }
 
   @Override
-  public Datastream findByDsid(String pid, String dsid) throws DatastreamNotFoundException {
+  public Datastream findByDsid(String pid, DatastreamId dsid) throws DatastreamNotFoundException {
     DigitalObject digitalObject = DigitalObject.builder().id(pid).build();
-    return datastreamRepository.findByDigitalObjectAndDsid(digitalObject, dsid).orElseThrow(() -> {
+    return datastreamRepository.findByDigitalObjectAndDsid(digitalObject, dsid.getDsid()).orElseThrow(() -> {
       String msg = String.format("Cannot find datastreams via pid %s and dsid %s", pid, dsid);
       log.info(msg);
       return new DatastreamNotFoundException(msg);
@@ -89,9 +89,9 @@ public class DatastreamService implements IDatastreamService {
    * @throws DatastreamNotFoundException if no datastream is found
    */
   @Override
-  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, String dsid) throws DatastreamNotFoundException {
+  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, DatastreamId dsid) throws DatastreamNotFoundException {
     DigitalObject digitalObjectToFind = DigitalObject.builder().id(objectId).build();
-    return datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(digitalObjectToFind, dsid).orElseThrow(() -> {
+    return datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(digitalObjectToFind, dsid.getDsid()).orElseThrow(() -> {
       String msg = String.format("Cannot find datastreams via pid %s and dsid %s", objectId, dsid);
       log.info(msg);
       return new DatastreamNotFoundException(msg);

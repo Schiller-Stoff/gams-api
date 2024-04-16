@@ -1,6 +1,7 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 
@@ -14,9 +15,9 @@ public interface IDatastreamService {
    * @param digitalObject Parent digital object
    * @param dsid datastream-id like TEI_SOURCE
    */
-  void delete(DigitalObject digitalObject, String dsid);
+  void delete(DigitalObject digitalObject, DatastreamId dsid);
 
-  Datastream findById(Long id) throws DatastreamNotFoundException;
+  Datastream findById(DatastreamId id) throws DatastreamNotFoundException;
 
   /**
    * Returns a datastream based on the parent digital object, and it's datastream-identifier.
@@ -24,13 +25,13 @@ public interface IDatastreamService {
    * @param dsid user defined datastream-identifier (must be unique per object)
    * @return found Datastream
    */
-  Datastream findByDsid(String pid, String dsid) throws DatastreamNotFoundException;
+  Datastream findByDsid(String pid, DatastreamId dsid) throws DatastreamNotFoundException;
 
   Datastream save(Datastream datastream);
 
 
   List<IDatastreamDetailsView> findAll(DigitalObject digitalObject);
 
-  IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, String dsid) throws DatastreamNotFoundException;
+  IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, DatastreamId dsid) throws DatastreamNotFoundException;
 
 }

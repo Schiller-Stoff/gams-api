@@ -8,7 +8,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import java.util.List;
 import java.util.Optional;
 
-public interface IDatastreamRepository extends CrudRepository<Datastream, Long> {
+public interface IDatastreamRepository extends CrudRepository<Datastream, DatastreamId> {
 
   /**
    * Searches a datastream based on the parent digital object and it's datastream-identifier.

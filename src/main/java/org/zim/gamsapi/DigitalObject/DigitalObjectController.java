@@ -47,7 +47,15 @@ public class DigitalObjectController {
     }
 
     // TODO exception if converson fails?
-    digitalObjectCompactDTO.setDatastreams(datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
+    digitalObjectCompactDTO.setDatastreams(
+        datastreamDetailsViews
+            .stream()
+            .map(
+                // TODO this call is weird!
+                IDatastreamDetailsView::getDsid
+            )
+            .collect(Collectors.toList())
+    );
 
 
     model.addAttribute(digitalObjectCompactDTO);
