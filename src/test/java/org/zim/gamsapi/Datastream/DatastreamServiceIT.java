@@ -90,13 +90,13 @@ public class DatastreamServiceIT extends IntegrationTest {
       datastreamService.save(datastream);
 
       org.assertj.core.api.Assertions.assertThat(
-          datastreamRepository.findByDigitalObjectAndDsid(testObject, datastream.getDsid())
+          datastreamRepository.findById(datastream.deriveDatastreamId())
       ).isNotNull().isPresent();
 
       // cleanup
       datastreamRepository.delete(datastream);
       org.assertj.core.api.Assertions.assertThat(
-          datastreamRepository.findByDigitalObjectAndDsid(testObject, datastream.getDsid())
+          datastreamRepository.findById(datastream.deriveDatastreamId())
       ).isNotNull().isEmpty();
 
 

@@ -84,9 +84,7 @@ public class DatastreamController {
           Project project,
           @RequestHeader Map<String, String> requestHeader
   ) {
-    datastreamService.delete(
-        digitalObject,
-        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
+    datastreamService.delete(datastream);
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
   }
@@ -102,11 +100,7 @@ public class DatastreamController {
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
   public ResponseEntity<InputStreamResource> getDatastreamContent(DigitalObject digitalObject, Datastream datastream) {
-    Datastream foundDatastream = datastreamService.findByDsid(
-        digitalObject.getId(),
-        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build()
-    );
-
+    Datastream foundDatastream = datastreamService.findById(datastream.deriveDatastreamId());
     InputStream in = new ByteArrayInputStream(foundDatastream.getData());
     return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))

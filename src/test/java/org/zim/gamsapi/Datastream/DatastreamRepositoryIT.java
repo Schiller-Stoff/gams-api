@@ -156,37 +156,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
     /**
-     * Verifies that a datastream is empty optional if it does not exist.
-     */
-    @Test
-    public void findByDigitalObjectAndDsidReturnsEmptyOptionalIfDatastreamDoesNotExist() {
-
-        DatastreamId datastreamId = DatastreamId.builder()
-            .dsid("NOT_THERE")
-            .digitalObject("NOT_THERE")
-            .build();
-
-        Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamId.getDsid()))
-                .isNotNull()
-                .isNotPresent();
-
-    }
-
-    /**
-     * Verifies that a datastream is returned if it exists.
-     */
-    @Test
-    @Transactional
-    public void findByDigitalAndDsidReturnsDatastreamIfDatastreamExists() {
-        Assertions.assertThat(datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, testDatastream.getDsid()))
-                .isNotNull()
-                .isPresent()
-                .get()
-                .isEqualTo(testDatastream);
-    }
-
-    /**
      * Tests against delete cascading.
      */
     @Nested
@@ -217,7 +186,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // verify deletion is not cascaded
             Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(toBeDeleted, savedDatastream.getDsid())
+                datastreamRepository.findById(savedDatastream.deriveDatastreamId())
             ).isPresent();
 
             // clean up
@@ -249,7 +218,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // saved datastream should exist
             Assertions.assertThat(
-                        datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamToBeDeleted.getDsid()))
+                datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
                     .isNotNull()
                     .isPresent();
 
@@ -292,9 +261,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .digitalObject(testDigitalObject.getId())
                 .build();
 
-            Datastream foundDatastream = datastreamRepository.findByDigitalObjectAndDsid(
-                testDigitalObject, datastreamId.getDsid()
-            ).orElseThrow();
+            var foundDatastream = datastreamRepository.findById(datastreamId).orElseThrow();
 
             String foundDsid = foundDatastream.getDsid();
             String foundDigitalObjectId = foundDatastream.getDigitalObject().getId();
@@ -323,13 +290,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     .build());
 
             Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamToBeDeleted.getDsid())
+                datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
             ).isNotNull().isPresent();
 
-            datastreamRepository.deleteByDigitalObjectAndDsid(testDigitalObject, datastreamToBeDeleted.getDsid());
+            datastreamRepository.delete(datastreamToBeDeleted);
 
             Assertions.assertThat(
-                datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, datastreamToBeDeleted.getDsid())
+                datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
             ).isNotNull().isNotPresent();
 
 
@@ -341,7 +308,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // first test datastream is available
             Assertions.assertThat(
-                    datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, testDatastream.getDsid()))
+                    datastreamRepository.findById(testDatastream.deriveDatastreamId()))
                     .isNotNull()
                     .isPresent();
 
@@ -349,7 +316,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // test datastream is not available anymore
             Assertions.assertThat(
-                    datastreamRepository.findByDigitalObjectAndDsid(testDigitalObject, testDatastream.getDsid()))
+                    datastreamRepository.findById(testDatastream.deriveDatastreamId()))
                     .isNotNull()
                     .isNotPresent();
 

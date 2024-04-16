@@ -29,11 +29,6 @@ public class DatastreamService implements IDatastreamService {
     datastreamRepository.delete(datastream);
   }
 
-  @Override
-  @Transactional
-  public void delete(DigitalObject digitalObject, DatastreamId dsid) {
-    datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, dsid.getDsid());
-  }
 
 
   @Override
@@ -44,17 +39,6 @@ public class DatastreamService implements IDatastreamService {
       return new DatastreamNotFoundException(msg);
     });
   }
-
-  @Override
-  public Datastream findByDsid(String pid, DatastreamId dsid) throws DatastreamNotFoundException {
-    DigitalObject digitalObject = new DigitalObjectBuilder().id(pid).build();
-    return datastreamRepository.findByDigitalObjectAndDsid(digitalObject, dsid.getDsid()).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastreams via pid %s and dsid %s", pid, dsid);
-      log.info(msg);
-      return new DatastreamNotFoundException(msg);
-    });
-  }
-
 
   @Override
   @Transactional
