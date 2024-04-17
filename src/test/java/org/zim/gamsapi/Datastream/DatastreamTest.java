@@ -50,7 +50,40 @@ public class DatastreamTest extends UnitTest {
   @Nested
   public class DeriveDatastreamId {
 
-    // TODO include some tests here
+    @Test
+    public void deriveDatastreamIdFromDigitalObjectAndDsidReturnsExpectedValues(){
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+      datastream.setDigitalObject(
+          new DigitalObjectBuilder().id("FOO_BAR").build()
+      );
+
+      DatastreamId datastreamId = datastream.deriveDatastreamId();
+      Assertions.assertEquals(datastream.getDigitalObject().getId(), datastreamId.getDigitalObject());
+      Assertions.assertEquals(datastream.getDsid(), datastreamId.getDsid());
+    }
+
+    @Test
+    public void throwsExceptionWhenDigitalObjectIsNull(){
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+      Assertions.assertThrows(
+          IllegalStateException.class,
+          datastream::deriveDatastreamId
+      );
+    }
+
+    @Test
+    public void throwsExceptionWhenDsidIsNull(){
+      Datastream datastream = new Datastream();
+      datastream.setDigitalObject(
+          new DigitalObjectBuilder().id("FOO_BAR").build()
+      );
+      Assertions.assertThrows(
+          IllegalStateException.class,
+          datastream::deriveDatastreamId
+      );
+    }
 
   }
 
