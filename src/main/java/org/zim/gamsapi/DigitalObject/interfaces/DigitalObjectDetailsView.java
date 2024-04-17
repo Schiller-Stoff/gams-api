@@ -29,7 +29,6 @@ public interface DigitalObjectDetailsView {
 
     Set<String> getTypes();
 
-    // TODO exclude?
     String getParent();
 
     interface ProjectView {
