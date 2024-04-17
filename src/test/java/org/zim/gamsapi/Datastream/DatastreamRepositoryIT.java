@@ -343,7 +343,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .digitalObject(testDigitalObject.getId())
                 .build();
 
-            datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(testDigitalObject, datastreamId.getDsid())
+            datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid())
                     .ifPresentOrElse(
                             datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
                                     .isNotNull()

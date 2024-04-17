@@ -35,11 +35,11 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
 
   /**
    * Projection method to return a datastream details views. Excludes the actual datastream content.
-   * @param digitalObject Digital object to be found
-   * @param dsid Datastream identifier
+   * @param digitalObjectId Digital object to be found
+   * @param dsid datastream identifier
    * @return datastream projection.
    */
-  Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+  Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObject_IdAndDsid(String digitalObjectId, String dsid);
 
 
   void deleteAllByDigitalObject(DigitalObject digitalObject);

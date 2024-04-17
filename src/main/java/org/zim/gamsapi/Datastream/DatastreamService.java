@@ -69,15 +69,14 @@ public class DatastreamService implements IDatastreamService {
    * Returns a datastream projection based on the parent digital object, and it's datastream-identifier.
    * The projection excludes the actual datastream content. (to improve performance
    * @param objectId of the parent digital object
-   * @param dsid user defined datastream-identifier (must be unique per object)
+   * @param datastreamId of the datastream
    * @return found Datastream projection
    * @throws DatastreamNotFoundException if no datastream is found
    */
   @Override
-  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, DatastreamId dsid) throws DatastreamNotFoundException {
-    DigitalObject digitalObjectToFind = new DigitalObjectBuilder().id(objectId).build();
-    return datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(digitalObjectToFind, dsid.getDsid()).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastreams via pid %s and dsid %s", objectId, dsid);
+  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, DatastreamId datastreamId) throws DatastreamNotFoundException {
+    return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(objectId, datastreamId.getDsid()).orElseThrow(() -> {
+      String msg = String.format("Cannot find datastreams via pid %s and dsid %s", objectId, datastreamId);
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
