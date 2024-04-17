@@ -51,9 +51,6 @@ public class DigitalObjectBuilder {
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-
-    // TODO add more validation
-
     return digitalObject;
   }
 
