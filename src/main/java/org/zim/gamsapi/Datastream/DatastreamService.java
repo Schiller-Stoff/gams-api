@@ -8,10 +8,8 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
-
 import java.util.List;
 
 @Slf4j
@@ -68,15 +66,15 @@ public class DatastreamService implements IDatastreamService {
   /**
    * Returns a datastream projection based on the parent digital object, and it's datastream-identifier.
    * The projection excludes the actual datastream content. (to improve performance
-   * @param objectId of the parent digital object
+   *
    * @param datastreamId of the datastream
    * @return found Datastream projection
    * @throws DatastreamNotFoundException if no datastream is found
    */
   @Override
-  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, DatastreamId datastreamId) throws DatastreamNotFoundException {
-    return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(objectId, datastreamId.getDsid()).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastreams via pid %s and dsid %s", objectId, datastreamId);
+  public IDatastreamDetailsView findDatastreamDetailsById(DatastreamId datastreamId) throws DatastreamNotFoundException {
+    return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid()).orElseThrow(() -> {
+      String msg = String.format("Cannot find datastream-details-view via pid %s and dsid %s", datastreamId.getDigitalObject(), datastreamId.getDsid());
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });

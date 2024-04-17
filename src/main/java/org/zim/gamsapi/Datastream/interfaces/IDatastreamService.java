@@ -18,6 +18,6 @@ public interface IDatastreamService {
 
   List<IDatastreamDetailsView> findAll(DigitalObject digitalObject);
 
-  IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, DatastreamId dsid) throws DatastreamNotFoundException;
+  IDatastreamDetailsView findDatastreamDetailsById(DatastreamId dsid) throws DatastreamNotFoundException;
 
 }
