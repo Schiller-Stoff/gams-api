@@ -45,11 +45,10 @@ public class DigitalObject {
   /**
    * A digital object can contain other digital objects.
    */
-  @OneToMany
-  @NotNull
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  @OneToOne(fetch = FetchType.LAZY)
+  // manages infinite reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
+  private DigitalObject parent;
 
   /**
    * Content Model representation
@@ -135,14 +134,9 @@ public class DigitalObject {
 
   @Override
   public String toString() {
-
-    String childObjectsString = childObjects.stream()
-            .map(DigitalObject::getId)
-            .collect(Collectors.joining(", "));
-
     return "DigitalObject{" +
             "id='" + id + '\'' +
-            ", childObjects=[" + childObjectsString + "]" +
+            ", parent=[" + parent + "]" +
             ", objectType='" + objectType + '\'' +
             ", published=" + published +
             ", created=" + created +

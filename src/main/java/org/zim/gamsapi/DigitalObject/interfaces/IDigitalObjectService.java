@@ -68,11 +68,11 @@ public interface IDigitalObjectService {
 
   /**
    * Allows to assign child objects to a parent object.
-   * @param parentObject the parent object
-   * @param childObjects the child objects
+   * @param digitalObject object to which the parent should be assigned to
+   * @param parent the parent object
    * @return the parent object with the assigned child objects
    */
-  DigitalObject assignChildObjects(DigitalObject parentObject, Set<DigitalObject> childObjects);
+  DigitalObject assignParentObject(DigitalObject digitalObject, DigitalObject parent);
 
 
   /**

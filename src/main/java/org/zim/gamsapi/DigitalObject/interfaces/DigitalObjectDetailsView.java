@@ -30,7 +30,7 @@ public interface DigitalObjectDetailsView {
     Set<String> getTypes();
 
     // TODO exclude?
-    Set<DigitalObjectDetailsView> getChildObjects();
+    String getParent();
 
     interface ProjectView {
         String getProjectAbbr();

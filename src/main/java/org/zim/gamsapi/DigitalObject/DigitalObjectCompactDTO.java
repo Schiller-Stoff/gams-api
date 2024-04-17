@@ -20,15 +20,13 @@ public class DigitalObjectCompactDTO {
 
     /**
      * List of datastream ids
+     * TODO this seems wrong here?
      */
     @Builder.Default
     private List<String> datastreams = new ArrayList<>();
 
-    /**
-     * List of child object ids
-     */
-    @Builder.Default
-    private Set<@NotNull String> childObjects = new HashSet<>();
+
+    private String parent;
 
     private String objectType;
 
@@ -65,12 +63,10 @@ public class DigitalObjectCompactDTO {
     @Override
     public String toString() {
 
-        String childObjectsString = String.join(", ", childObjects);
-
         return "DigitalObjectCompactDTO{" +
                 "id='" + id + '\'' +
                 ", datastreams=" + datastreams +
-                ", childObjects=[" + childObjectsString + "]" +
+                ", parent=" + parent +
                 ", objectType='" + objectType + '\'' +
                 ", published=" + published +
                 ", created=" + created +

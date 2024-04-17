@@ -43,21 +43,15 @@ public class SubInfoPackService implements ISubInfoPackService {
       BagitSipJson bagitSipJson = BagitUtils.mapSipJson(unzippedBag);
       log.error("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
-      Set<String> childObjectStatement = bagitSipJson.getChildObjects();
-      Set<DigitalObject> childObjects = new HashSet<>();
+      String parentId = bagitSipJson.getParent();
       // if there are child objects -> save a reference
-      if(!childObjectStatement.isEmpty()){
-        childObjects = childObjectStatement.stream()
-                .map(childObjectId -> new DigitalObjectBuilder().id(childObjectId).build())
-                .collect(Collectors.toSet());
-      }
 
       // 02. build and save digital object from bag-info.txt
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
           .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
           .objectType(bagitSipJson.getObjectType())
-          .childObjects(childObjects)
+          .parent(new DigitalObjectBuilder().id(parentId).build())
           .types(bagitSipJson.getTypes())
           .baseMetadata(MetadataBaseEntity.builder()
               .title(bagitSipJson.getTitle())

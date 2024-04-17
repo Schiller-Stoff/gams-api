@@ -22,7 +22,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .published(source.getPublished())
                 .types(source.getTypes())
                 .datastreams(new ArrayList<>())
-                .childObjects(source.getChildObjects().stream().map(DigitalObjectDetailsView::getId).collect(Collectors.toSet()))
+                .parent(source.getParent())
                 .build();
     }
 }

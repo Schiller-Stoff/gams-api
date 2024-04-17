@@ -151,8 +151,8 @@ public class DigitalObjectController {
 
   /**
    * Allows to assign child objects to given parent object
-   * @param id the id of the parent object
-   * @param childObjects the child objects ids
+   * @param id the id of the object
+   * @param parentId id of the parent object
    * @param project the project
    * @return the parent object with the assigned child objects
    */
@@ -160,23 +160,20 @@ public class DigitalObjectController {
   @ResponseBody
   public DigitalObject collectObjects(
           @PathVariable String id,
-          @RequestParam Set<String> childObjects,
+          @RequestParam String parentId,
           Project project
   ) {
 
-    Set<DigitalObject> childrenToBeCollected = childObjects
-            .stream()
-            .map(childId -> new DigitalObjectBuilder()
-                .project(project)
-                .build())
-            .collect(Collectors.toSet());
-
-    DigitalObject foundObject = digitalObjectService.assignChildObjects(
-            new DigitalObjectBuilder()
-                .id(id)
-                .project(project)
-                .build(),
-        childrenToBeCollected
+    // TODO this method is completely outdated -> core API now only supports assignment of one parent object!
+    DigitalObject foundObject = digitalObjectService.assignParentObject(
+        new DigitalObjectBuilder()
+            .id(id)
+            .project(project)
+            .build(),
+        new DigitalObjectBuilder()
+            .id(parentId)
+            .project(project)
+            .build()
     );
 
     return foundObject;
@@ -185,7 +182,7 @@ public class DigitalObjectController {
   @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
           DigitalObject digitalObject,
-          @RequestParam Optional<Set<String>> childObjects,
+          @RequestParam Optional<String> parent,
           Project project,
           Model model,
           @RequestHeader Map<String, String> requestHeader
@@ -193,9 +190,9 @@ public class DigitalObjectController {
     // project membership is not automatically bound by spring.
     digitalObject.setProject(project);
     // assign child objects if available
-    childObjects
+    parent
       .ifPresent(
-        strings -> digitalObject.setChildObjects(strings.stream().map(id -> new DigitalObjectBuilder().id(id).build()).collect(Collectors.toSet()))
+        strings -> digitalObject.setParent(new DigitalObjectBuilder().id(parent.get()).build())
       );
 
     DigitalObject savedObject = digitalObjectService.save(digitalObject);

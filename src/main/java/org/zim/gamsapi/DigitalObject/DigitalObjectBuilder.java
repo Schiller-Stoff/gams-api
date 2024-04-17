@@ -15,8 +15,8 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder childObjects(Set<DigitalObject> childObjects) {
-    digitalObject.setChildObjects(childObjects);
+  public DigitalObjectBuilder parent(DigitalObject parent) {
+    digitalObject.setParent(parent);
     return this;
   }
 
