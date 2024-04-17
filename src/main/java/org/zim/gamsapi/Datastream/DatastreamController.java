@@ -34,7 +34,7 @@ public class DatastreamController {
 
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
-    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsByDsid(digitalObject.getId(), datastream.getDsid());
+    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(DatastreamId.builder().dsid(datastream.getDsid()).digitalObject(digitalObject.getId()).build());
     model.addAttribute("datastream", foundDatastream);
     model.addAttribute(project);
     return "Datastream/show";
@@ -43,7 +43,8 @@ public class DatastreamController {
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public IDatastreamDetailsView getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
-    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsByDsid(digitalObject.getId(), datastream.getDsid());
+    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
+        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
     model.addAttribute(foundDatastream);
     model.addAttribute(project);
     return foundDatastream;
@@ -83,7 +84,7 @@ public class DatastreamController {
           Project project,
           @RequestHeader Map<String, String> requestHeader
   ) {
-    datastreamService.delete(digitalObject, datastream.getDsid());
+    datastreamService.delete(datastream);
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
   }
@@ -99,7 +100,7 @@ public class DatastreamController {
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
   public ResponseEntity<InputStreamResource> getDatastreamContent(DigitalObject digitalObject, Datastream datastream) {
-    Datastream foundDatastream = datastreamService.findByDsid(digitalObject.getId(), datastream.getDsid());
+    Datastream foundDatastream = datastreamService.findById(datastream.deriveDatastreamId());
     InputStream in = new ByteArrayInputStream(foundDatastream.getData());
     return ResponseEntity.ok()
             .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))

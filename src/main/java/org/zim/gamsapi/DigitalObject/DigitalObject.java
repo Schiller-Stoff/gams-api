@@ -41,18 +41,14 @@ public class DigitalObject {
   @NotBlank
   private String id;
 
-  @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true, mappedBy = "digitalObject")
-  @JsonManagedReference // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  private Set<Datastream> datastreams = new HashSet<>();
 
   /**
    * A digital object can contain other digital objects.
    */
-  @OneToMany
-  @NotNull
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
+  @OneToOne(fetch = FetchType.LAZY)
+  // manages infinite reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  private Set<@NotNull DigitalObject> childObjects = new HashSet<>();
+  private DigitalObject parent;
 
   /**
    * Content Model representation
@@ -83,10 +79,9 @@ public class DigitalObject {
   /**
    * Project to which the digital object belongs to
    */
-  @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-  @JsonBackReference
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(nullable = false)
   @NotNull
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
   private Project project;
 
   @Embedded
@@ -110,45 +105,6 @@ public class DigitalObject {
   @NotNull
   private Set<String> types = new HashSet<>();
 
-  /**
-   * Adds a child digital object to the current digital object.
-   * @param datastream Datastream to be added.
-   */
-  public void addDatastream(Datastream datastream) {
-    if (datastream == null) {
-      String msg = String.format("Cannot assign a datastream with value null to a digital object %s", this);
-      log.error(msg);
-      throw new NullPointerException(msg);
-    }
-
-    if(datastream.getDigitalObject() != null) {
-      String msg = String.format("Datastream %s is already assigned to a digital object. Make sure that no setter is used to assign the datastream to a digital object (in the code before).", datastream);
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    datastreams.add(datastream);
-    datastream.setDigitalObject(this);
-  }
-
-    /**
-     * Removes a child digital object from the current digital object.
-     * @param datastream Datastream to be removed
-     */
-    public void removeDatastream(Datastream datastream) {
-        if (datastream == null) {
-          String msg = String.format("Cannot remove a datastream with value null from a digital object %s", this);
-          log.error(msg);
-          throw new NullPointerException("Cannot remove a datastream with the value null.");
-        }
-
-        if(datastream.getDigitalObject() == null) {
-          String msg = String.format("Datastream %s is not assigned to any digital object and so cannot be removed. Make sure that no setter is used to assign the datastream to a digital object (in the code before).", datastream);
-          log.error(msg);
-          throw new IllegalArgumentException(msg);
-        }
-        datastreams.remove(datastream);
-        datastream.setDigitalObject(null);
-    }
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs
@@ -178,15 +134,9 @@ public class DigitalObject {
 
   @Override
   public String toString() {
-
-    String childObjectsString = childObjects.stream()
-            .map(DigitalObject::getId)
-            .collect(Collectors.joining(", "));
-
     return "DigitalObject{" +
             "id='" + id + '\'' +
-            ", datastreams=" + datastreams +
-            ", childObjects=[" + childObjectsString + "]" +
+            ", parent=[" + parent + "]" +
             ", objectType='" + objectType + '\'' +
             ", published=" + published +
             ", created=" + created +
@@ -199,12 +149,4 @@ public class DigitalObject {
             '}';
   }
 
-  /**
-   * Package private set datastreams to prevent direct manipulation of the datastreams
-   * (Hibernate does not allow complete private setters)
-   * @param datastreams
-   */
-  void setDatastreams(Set<Datastream> datastreams) {
-    this.datastreams = datastreams;
-  }
 }

@@ -19,7 +19,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Transactional
 @Import(IntegrationTestAuditingConfiguration.class)
 public abstract class IntegrationTest {
 

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
@@ -15,43 +16,73 @@ public class DatastreamTest extends UnitTest {
   public class IdentityTests {
 
     @Test
-    public void datastreamsWithSameDsidAreNotEqual(){
+    public void comparingDatastreamsWithJustSameDsidThrows(){
       Datastream datastream = new Datastream();
       datastream.setDsid(TestDatastream.DSID.getValue());
       Datastream datastream2 = new Datastream();
       datastream2.setDsid(TestDatastream.DSID.getValue());
-      Assertions.assertNotEquals(datastream, datastream2);
+
+      Assertions.assertThrows(
+          IllegalStateException.class,
+          () -> Assertions.assertEquals(datastream, datastream2)
+      );
     }
 
     @Test
-    public void datastreamsWithSameGlobalIdAreEqual(){
+    public void datastreamsWithSamdeDsidAndDigitalObjectAreEqual(){
       Datastream datastream = new Datastream();
-      datastream.setGlobalId(1L);
+      datastream.setDsid("dsid");
+      datastream.setDigitalObject(
+          new DigitalObjectBuilder().id("FOO_BAR").build()
+      );
+
       Datastream datastream2 = new Datastream();
-      datastream2.setGlobalId(1L);
+      datastream2.setDsid(datastream.getDsid());
+      datastream2.setDigitalObject(datastream.getDigitalObject());
+
       Assertions.assertEquals(datastream, datastream2);
+
+    }
+
+
+  }
+
+  @Nested
+  public class DeriveDatastreamId {
+
+    @Test
+    public void deriveDatastreamIdFromDigitalObjectAndDsidReturnsExpectedValues(){
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+      datastream.setDigitalObject(
+          new DigitalObjectBuilder().id("FOO_BAR").build()
+      );
+
+      DatastreamId datastreamId = datastream.deriveDatastreamId();
+      Assertions.assertEquals(datastream.getDigitalObject().getId(), datastreamId.getDigitalObject());
+      Assertions.assertEquals(datastream.getDsid(), datastreamId.getDsid());
     }
 
     @Test
-    public void datastreamsWithDifferentGlobalIdAreNotEqual(){
+    public void throwsExceptionWhenDigitalObjectIsNull(){
       Datastream datastream = new Datastream();
-      datastream.setGlobalId(1L);
-      Datastream datastream2 = new Datastream();
-      datastream2.setGlobalId(2L);
-      Assertions.assertNotEquals(datastream, datastream2);
+      datastream.setDsid("dsid");
+      Assertions.assertThrows(
+          IllegalStateException.class,
+          datastream::deriveDatastreamId
+      );
     }
 
     @Test
-    public void datastreamsWithSamePidAndDsidAreNotEqualIfDifferentGlobalId(){
+    public void throwsExceptionWhenDsidIsNull(){
       Datastream datastream = new Datastream();
-      DigitalObject digitalObject = new DigitalObject();
-      digitalObject.setId(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-      datastream.setDigitalObject(digitalObject);
-      datastream.setDsid(TestDatastream.DSID.getValue());
-      Datastream datastream2 = new Datastream();
-      datastream2.setDsid(TestDatastream.DSID.getValue());
-      datastream2.setDigitalObject(digitalObject);
-      Assertions.assertNotEquals(datastream, datastream2);
+      datastream.setDigitalObject(
+          new DigitalObjectBuilder().id("FOO_BAR").build()
+      );
+      Assertions.assertThrows(
+          IllegalStateException.class,
+          datastream::deriveDatastreamId
+      );
     }
 
   }

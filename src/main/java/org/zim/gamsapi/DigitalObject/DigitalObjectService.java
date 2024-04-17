@@ -41,21 +41,18 @@ public class DigitalObjectService implements IDigitalObjectService {
     );
 
     // throw if child objects contain a self reference
-    if(digitalObject.getChildObjects().contains(digitalObject)){
-      String msg = String.format("Detected self reference in digital object's child objects. At digital object with pid: %s", digitalObject.getId());
+    if(digitalObject.getParent().equals(digitalObject)){
+      String msg = String.format("Detected self reference in digital object's parent object. At digital object with pid: %s", digitalObject.getId());
       log.error(msg);
       throw new DigitalObjectChildSelfReferenceException(msg);
     }
 
-    // referenced child object MUST EXIST
-    digitalObject.getChildObjects().forEach(childObject -> {
-      log.info("Checking child object: {} of parent: {}", childObject, digitalObject);
-        if(!digitalObjectRepository.existsById(childObject.getId())){
-          String msg = String.format("Cannot find contained child object %s in parent digital object %s", childObject.getId(), digitalObject.getId());
-          log.error(msg);
-          throw new DigitalObjectNotFoundException(msg);
-        }
-    });
+    // referenced parent object must exist
+    if(!digitalObjectRepository.existsById(digitalObject.getParent().getId())){
+      String msg = String.format("Cannot find contained parent object %s in digital object %s", digitalObject.getParent().getId(), digitalObject.getId());
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
 
     return digitalObjectRepository.save(digitalObject);
   }
@@ -134,25 +131,25 @@ public class DigitalObjectService implements IDigitalObjectService {
 
   @Transactional
   @Override
-  public DigitalObject assignChildObjects(DigitalObject parentObject, Set<DigitalObject> childObjects) {
+  public DigitalObject assignParentObject(DigitalObject digitalObject, DigitalObject parent) {
 
-   DigitalObject foundParentObject = digitalObjectRepository.findById(parentObject.getId()).orElseThrow(
+   DigitalObject foundObject = digitalObjectRepository.findById(digitalObject.getId()).orElseThrow(
         () -> {
-          String msg = String.format("Aborting assign child objects. Cannot find parent object %s", parentObject);
+          String msg = String.format("Aborting assign child objects. Cannot find parent object %s", digitalObject);
           log.error(msg);
           return new DigitalObjectNotFoundException(msg);
         }
     );
 
    // assign child objects
-   foundParentObject.setChildObjects(childObjects);
+    foundObject.setParent(parent);
   // DON'T NEED / MUST NOT EXTRA SAVE BECAUSE ALREADY PERSISTED BY CONTEXT e.g. digitalObjectRepository.save(foundParentObject);
   // via findById() object is already managed by persistence context (if marked as @transactional)
   // https://www.baeldung.com/hibernate-entity-lifecycle#managed-entity
 
-   log.info("Successfully assigned child objects {} to parent object {}", childObjects, foundParentObject);
+   log.info("Successfully assigned parent object {} to object {}", parent, foundObject);
 
-   return foundParentObject;
+   return foundObject;
   }
 
 

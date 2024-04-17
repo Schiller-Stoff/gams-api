@@ -6,16 +6,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.*;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,37 +43,24 @@ public class SubInfoPackService implements ISubInfoPackService {
       BagitSipJson bagitSipJson = BagitUtils.mapSipJson(unzippedBag);
       log.error("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
-      Set<String> childObjectStatement = bagitSipJson.getChildObjects();
-      Set<DigitalObject> childObjects = new HashSet<>();
+      String parentId = bagitSipJson.getParent();
       // if there are child objects -> save a reference
-      if(!childObjectStatement.isEmpty()){
-        childObjects = childObjectStatement.stream()
-                .map(childObjectId -> new DigitalObjectBuilder(childObjectId).build())
-                .collect(Collectors.toSet());
-      }
 
       // 02. build and save digital object from bag-info.txt
-      DigitalObject digitalObject = new DigitalObjectBuilder(bagitSipJson.getId())
-              .addProject(subInfoPack.getProjectAbbr())
-              .add()
-            .withObjectType(bagitSipJson.getObjectType())
-            .withChildObjects(childObjects)
-            .withTypes(bagitSipJson.getTypes())
-            // datastreams is being filled later on
-            //.addDatastream()
-            .addBaseMetadata()
-              .withTitle(bagitSipJson.getTitle())
-              .withCreator(bagitSipJson.getCreator())
-              .withDescription(bagitSipJson.getDescription())
-              .withPublisher(bagitSipJson.getPublisher())
-              .withRights(bagitSipJson.getRights())
-              .add()
-            // .createdBy() - system controlled
-            // .modifiedBy() - system controlled
-            // .created() - system controlled
-            // .modified() - system controlled
-            // datastreams is being filled later on
-            .build();
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id(bagitSipJson.getId())
+          .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
+          .objectType(bagitSipJson.getObjectType())
+          .parent(new DigitalObjectBuilder().id(parentId).build())
+          .types(bagitSipJson.getTypes())
+          .baseMetadata(MetadataBaseEntity.builder()
+              .title(bagitSipJson.getTitle())
+              .creator(bagitSipJson.getCreator())
+              .description(bagitSipJson.getDescription())
+              .publisher(bagitSipJson.getPublisher())
+              .rights(bagitSipJson.getRights())
+              .build())
+          .build();
 
       digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {}", digitalObject);
@@ -90,7 +77,7 @@ public class SubInfoPackService implements ISubInfoPackService {
                 log.error(msg);
                 throw new SubInfoPackProcessingException(msg);
               }
-              return Datastream.builder()
+              return new DatastreamBuilder()
                       .dsid(contentFile.getDsid())
                       .digitalObject(digitalObject)
                       .data(datastreamContent)

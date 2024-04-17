@@ -2,12 +2,12 @@ package org.zim.gamsapi.Datastream;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -28,25 +28,16 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
+@IdClass(DatastreamId.class)
 public class Datastream {
 
-  /**
-   * Global id of datastream - each datastream has an unique identifier
-   */
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "global_id")
-  private Long globalId;
 
-  @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  @ToString.Exclude
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  @JsonIdentityReference(alwaysAsId = true)
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
+  @JoinColumn(nullable = false)
+  @Id
   private DigitalObject digitalObject;
 
   /**
@@ -55,6 +46,7 @@ public class Datastream {
    */
   @Column(name = "dsid")
   @NotEmpty
+  @Id
   private String dsid;
 
   /**
@@ -110,41 +102,63 @@ public class Datastream {
   @LastModifiedBy
   private String modifiedBy;
 
+
   /**
-   * Makes sure that the bidirectional relationship is removed before deleting from the database.
-   * https://stackoverflow.com/questions/22688402/delete-not-working-with-jparepository
+   * Derives the DatastreamId from the current Datastream object.
+   * Follows the pattern of the DatastreamId class which represents the logic stored in the database.
+   * @return
    */
-  @PreRemove
-  private void removeDigitalObjectFromDatastream() {
-    if (digitalObject != null) {
-      digitalObject.removeDatastream(this);
+  public DatastreamId deriveDatastreamId() {
+    if(dsid == null || digitalObject == null) {
+      String msg = String.format("Encountered unexpected null value - Tried to derive DatastreamId from Datastream with dsid: %s and digitalObject: %s", dsid, digitalObject);
+      log.error(msg);
+      throw new IllegalStateException(msg);
     }
+
+    if(dsid.isEmpty() || digitalObject.getId().isEmpty()){
+      String msg = String.format("Encountered unexpected empty value - Tried to derive DatastreamId from Datastream with dsid: %s and digitalObject: %s", dsid, digitalObject);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    return new DatastreamId(dsid, digitalObject.getId());
   }
 
   /**
-   * equals and hashCode for JPA entities with DB-generated IDs
-   * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/
+   * Two datastreams are considered equal if they have the same digital object and dsid.
+   * @param o
+   * @return
    */
   @Override
-  public final boolean equals(Object o) {
+  public boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null) return false;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    // check hibernate proxy
     Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
     if (thisEffectiveClass != oEffectiveClass) return false;
-    Datastream datastream = (Datastream) o;
-    return getGlobalId() != null && Objects.equals(getGlobalId(), datastream.getGlobalId());
+
+    Datastream that = (Datastream) o;
+    if(digitalObject == null || that.digitalObject == null) {
+      String msg = String.format("Encountered unexpected null value when comparing two digital objects via .equals of a datastream: First %s and that.digitalObject: %s", digitalObject, that.digitalObject);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+      //return false;
+    }
+
+    if(dsid == null || that.dsid == null) {
+      String msg = String.format("Encountered unexpected null value when comparing two dsids via .equals of a datastream: First %s and that.dsid: %s", dsid, that.dsid);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+      //return false;
+    }
+
+    return Objects.equals(digitalObject, that.digitalObject) && Objects.equals(dsid, that.dsid);
   }
 
-  /**
-   * equals and hashCode for JPA entities with DB-generated IDs
-   * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/
-   */
   @Override
-  public final int hashCode() {
-    return this instanceof HibernateProxy
-        ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
-        : getClass().hashCode();
+  public int hashCode() {
+    return Objects.hash(digitalObject, dsid);
   }
-
 }

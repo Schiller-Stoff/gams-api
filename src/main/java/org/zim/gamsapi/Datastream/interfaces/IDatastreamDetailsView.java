@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.MetadataBaseEntity;
 
 import java.util.Date;
@@ -12,7 +13,6 @@ import java.util.Date;
  */
 public interface IDatastreamDetailsView {
 
-    Long getGlobalId();
 
     DigitalObjectView getDigitalObject();
 

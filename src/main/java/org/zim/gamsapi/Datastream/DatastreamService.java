@@ -10,8 +10,6 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
-
 import java.util.List;
 
 @Slf4j
@@ -29,32 +27,16 @@ public class DatastreamService implements IDatastreamService {
     datastreamRepository.delete(datastream);
   }
 
-  @Override
-  @Transactional
-  public void delete(DigitalObject digitalObject, String dsid) {
-    datastreamRepository.deleteByDigitalObjectAndDsid(digitalObject, dsid);
-  }
 
 
   @Override
-  public Datastream findById(Long id) throws DatastreamNotFoundException {
+  public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
     return datastreamRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream with id %s", id);
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
   }
-
-  @Override
-  public Datastream findByDsid(String pid, String dsid) throws DatastreamNotFoundException {
-    DigitalObject digitalObject = new DigitalObjectBuilder(pid).build();
-    return datastreamRepository.findByDigitalObjectAndDsid(digitalObject, dsid).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastreams via pid %s and dsid %s", pid, dsid);
-      log.info(msg);
-      return new DatastreamNotFoundException(msg);
-    });
-  }
-
 
   @Override
   @Transactional
@@ -84,16 +66,15 @@ public class DatastreamService implements IDatastreamService {
   /**
    * Returns a datastream projection based on the parent digital object, and it's datastream-identifier.
    * The projection excludes the actual datastream content. (to improve performance
-   * @param objectId of the parent digital object
-   * @param dsid user defined datastream-identifier (must be unique per object)
+   *
+   * @param datastreamId of the datastream
    * @return found Datastream projection
    * @throws DatastreamNotFoundException if no datastream is found
    */
   @Override
-  public IDatastreamDetailsView findDatastreamDetailsByDsid(String objectId, String dsid) throws DatastreamNotFoundException {
-    DigitalObject digitalObjectToFind = new DigitalObjectBuilder(objectId).build();
-    return datastreamRepository.findDatastreamDetailsViewByDigitalObjectAndDsid(digitalObjectToFind, dsid).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastreams via pid %s and dsid %s", objectId, dsid);
+  public IDatastreamDetailsView findDatastreamDetailsById(DatastreamId datastreamId) throws DatastreamNotFoundException {
+    return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid()).orElseThrow(() -> {
+      String msg = String.format("Cannot find datastream-details-view via pid %s and dsid %s", datastreamId.getDigitalObject(), datastreamId.getDsid());
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });

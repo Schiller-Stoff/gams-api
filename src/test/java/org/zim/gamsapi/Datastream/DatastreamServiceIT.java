@@ -1,13 +1,16 @@
 package org.zim.gamsapi.Datastream;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
+import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
@@ -20,18 +23,34 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Autowired
   IDigitalObjectRepository digitalObjectRepository;
 
+  @Autowired
+  IProjectRepository projectRepository;
+
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  private DigitalObject testObject;
+
+  private Project testProject;
+
   @BeforeAll
   public void setup(){
-    DigitalObject testObject = new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .addProject(TestProject.PROJECT_ABBR.getValue())
-        .add()
+    testObject = new DigitalObjectBuilder()
+        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+        .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
         .build();
+
+    testProject = testObject.getProject();
+
+    projectRepository.save(testObject.getProject());
     digitalObjectRepository.save(testObject);
+
   }
 
   @AfterAll
   public void tearDown(){
-    digitalObjectRepository.deleteAll();
+    digitalObjectRepository.delete(testObject);
+    projectRepository.delete(testProject);
   }
 
   @Nested
@@ -42,43 +61,44 @@ public class DatastreamServiceIT extends IntegrationTest {
 
       final String RANDOM_PID = "SOME_RANDOM_PID";
 
-      DigitalObject digitalObject = new DigitalObjectBuilder(RANDOM_PID)
-          .addDatastream(TestDatastream.DSID.getValue())
-          .add()
-          .addProject(TestProject.PROJECT_ABBR.getValue())
-          .add()
+      Datastream datastream = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(
+              new DigitalObjectBuilder()
+                  .id(RANDOM_PID)
+                  .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+                  .build()
+          )
           .build();
-
-
-      final Datastream datastream = digitalObject.getDatastreams().iterator().next();
 
       Assertions.assertThrows(
           DigitalObjectNotFoundException.class,
           () -> datastreamService.save(datastream)
       );
 
-      digitalObjectRepository.delete(digitalObject);
     }
 
     @Test
     public void datastreamExistsAfterSaving(){
 
       final String RANDOM_DSID = "SOME_RANDOM_DSID";
-      Datastream datastream = Datastream.builder()
+      Datastream datastream = new DatastreamBuilder()
           .dsid(RANDOM_DSID)
-          .digitalObject(
-              new DigitalObjectBuilder(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-                  .addProject(TestProject.PROJECT_ABBR.getValue())
-                  .add()
-                  .build()
-          )
+          .digitalObject(testObject)
           .build();
 
       datastreamService.save(datastream);
 
       org.assertj.core.api.Assertions.assertThat(
-          datastreamService.findByDsid(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), RANDOM_DSID)
-      ).isNotNull();
+          datastreamRepository.findById(datastream.deriveDatastreamId())
+      ).isNotNull().isPresent();
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamRepository.findById(datastream.deriveDatastreamId())
+      ).isNotNull().isEmpty();
+
 
     }
 

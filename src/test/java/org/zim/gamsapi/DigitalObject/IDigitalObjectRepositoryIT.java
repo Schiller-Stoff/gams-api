@@ -2,11 +2,10 @@ package org.zim.gamsapi.DigitalObject;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +25,10 @@ class IDigitalObjectRepositoryIT extends IntegrationTest {
     @BeforeEach
     public void saveTestObject() {
         repository.save(
-                new DigitalObjectBuilder(PID)
-                        .addProject(GAMSAPIProperties.DEMO_PROJECT_ABBR.name)
-                        .add()
-                        .build()
+                new DigitalObjectBuilder()
+                    .id(PID)
+                    .project(Project.builder().projectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name).build())
+                    .build()
         );
     }
 
@@ -67,6 +66,7 @@ class IDigitalObjectRepositoryIT extends IntegrationTest {
 
     @Test
     @Order(3)
+    @Transactional
     public void testDeleteAllByProjectAbbr() {
 
         repository.deleteAllByProject_ProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);

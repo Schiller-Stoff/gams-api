@@ -8,15 +8,16 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
 import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
-import org.zim.gamsapi.System.utils.DigitalObjectBuilder;
 import org.zim.gamsapi.User.User;
 import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
@@ -60,12 +61,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
    */
   private void saveTestData(){
 
-    DigitalObject teiObject = new DigitalObjectBuilder("testtei")
-            .withObjectType("TEI")
-            .build();
+    DigitalObject teiObject = new DigitalObjectBuilder()
+        .id("testtei")
+        .objectType("TEI")
+        .build();
     digitalObjectRepository.save(teiObject);
 
-    Datastream teiSource = Datastream.builder()
+    Datastream teiSource = new DatastreamBuilder()
             .dsid("TEI_SOURCE")
             .data("test".getBytes())
             .digitalObject(teiObject)
@@ -73,24 +75,22 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
 
     datastreamRepository.save(teiSource);
-    //teiObject.setDatastreams(new ArrayList<>(List.of(teiSource)));
 
-    DigitalObject lidoObject = new DigitalObjectBuilder("testlido")
-            .withObjectType("LIDO")
-            .addBaseMetadata()
-              .withTitle("A LIDO object title")
-              .withCreator("Sebastian David Schiller-Stoff")
-              //.withContributor(new ArrayList<>(List.of("Sebastian David Schiller-Stoff", "Moria")))
-              .withDescription("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
-              .withPublisher("Universität Graz")
-              //.withSubject(new ArrayList<>(List.of("History", "Art History")))
-              //.withLanguage(new ArrayList<>(List.of("DE")))
-              .withRights("Creative Commons BY-NC 4.0")
-              .add()
-            .build();
+    DigitalObject lidoObject = new DigitalObjectBuilder()
+        .objectType("testlido")
+        .baseMetadata(
+            MetadataBaseEntity.builder()
+                .title("Digital object representing a Chair of the king")
+                .creator("Ada Lovelace")
+                .description("This source datastream contains some information about...")
+                .publisher("Universität Graz")
+                .rights("Creative Commons BY-NC 4.0")
+                .build())
+        .build();
+
     digitalObjectRepository.save(lidoObject);
 
-    Datastream lidoSource = Datastream.builder()
+    Datastream lidoSource = new DatastreamBuilder()
             .dsid("LIDO_SOURCE")
             .data("test".getBytes())
             .digitalObject(lidoObject)
@@ -110,7 +110,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
     datastreamRepository.save(lidoSource);
 
-    Datastream image = Datastream.builder()
+    Datastream image = new DatastreamBuilder()
             .dsid("IMAGE_1")
             .data("test".getBytes())
             .digitalObject(lidoObject)
@@ -131,12 +131,14 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     datastreamRepository.save(image);
 
-    DigitalObject gmlObject = new DigitalObjectBuilder("testgml")
-            .withObjectType("GML")
-            .build();
+    DigitalObject gmlObject = new DigitalObjectBuilder()
+        .id("testgml")
+        .objectType("GML")
+        .build();
+
     digitalObjectRepository.save(gmlObject);
 
-    Datastream gmlImage = Datastream.builder()
+    Datastream gmlImage = new DatastreamBuilder()
             .dsid("IMAGE_1")
             .data("test".getBytes())
             .digitalObject(gmlObject)

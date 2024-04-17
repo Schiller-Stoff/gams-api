@@ -8,22 +8,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import java.util.List;
 import java.util.Optional;
 
-public interface IDatastreamRepository extends CrudRepository<Datastream, Long> {
-
-  /**
-   * Searches a datastream based on the parent digital object and it's datastream-identifier.
-   * @param digitalObject Digital object to be found
-   * @param dsid Datastream identifier
-   * @return found Datastream
-   */
-  Optional<Datastream> findByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
-
-  /**
-   * Deletes a datastream defined by it's parent digital object and it's user specified datastream-id.
-   * @param digitalObject Parent digital object
-   * @param dsid datastream-id like TEI_SOURCE
-   */
-  void deleteByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+public interface IDatastreamRepository extends CrudRepository<Datastream, DatastreamId> {
 
   /**
    * Deletes all datastreams for a given project (with project abbreviation).
@@ -50,10 +35,13 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Long> 
 
   /**
    * Projection method to return a datastream details views. Excludes the actual datastream content.
-   * @param digitalObject Digital object to be found
-   * @param dsid Datastream identifier
+   * @param digitalObjectId Digital object to be found
+   * @param dsid datastream identifier
    * @return datastream projection.
    */
-  Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+  Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObject_IdAndDsid(String digitalObjectId, String dsid);
+
+
+  void deleteAllByDigitalObject(DigitalObject digitalObject);
 
 }
