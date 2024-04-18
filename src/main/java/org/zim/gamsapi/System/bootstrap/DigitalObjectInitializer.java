@@ -3,6 +3,7 @@ package org.zim.gamsapi.System.bootstrap;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import java.util.*;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Profile("!test")
 public class DigitalObjectInitializer implements CommandLineRunner {
 
   private final IDigitalObjectRepository digitalObjectRepository;
