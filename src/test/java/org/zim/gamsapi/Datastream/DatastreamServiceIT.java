@@ -212,5 +212,42 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class FindDatastreamDetailsById {
+
+    @Test
+    public void returnsExpectedDatastreamDetailsView(){
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(testObject)
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      org.assertj.core.api.Assertions.assertThat(datastreamService.findDatastreamDetailsById(datastream.deriveDatastreamId()))
+          .isNotNull()
+          .extracting("dsid")
+          .isEqualTo(datastream.getDsid());
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+
+    }
+
+    @Test
+    public void throwsIfDatastreamDetailsViewNotFound(){
+
+      DatastreamId randomId = new DatastreamId("SOME_RANDOM_PID", "SOME_RANDOM_DSID");
+
+      Assertions.assertThrows(
+          DatastreamNotFoundException.class,
+          () -> datastreamService.findDatastreamDetailsById(randomId)
+      );
+
+    }
+
+  }
+
 
 }
