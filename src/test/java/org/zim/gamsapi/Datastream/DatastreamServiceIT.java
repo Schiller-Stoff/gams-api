@@ -174,5 +174,32 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class FindById {
+
+    @Test
+    public void returnsExpectedDatastream(){
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(testObject)
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      org.assertj.core.api.Assertions.assertThat(datastreamService.findById(datastream.deriveDatastreamId()))
+          .isNotNull()
+          .isEqualTo(datastream);
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+
+    }
+
+
+
+
+  }
+
 
 }
