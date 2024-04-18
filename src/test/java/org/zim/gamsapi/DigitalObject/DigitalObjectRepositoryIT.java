@@ -8,13 +8,9 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestProject;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DigitalObjectRepositoryIT extends IntegrationTest {
 
@@ -112,7 +108,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    @Order(2)
     public void testFindByProjectAbbr() {
 
         final String RANDOM_PID = "RANDOM_PID";
