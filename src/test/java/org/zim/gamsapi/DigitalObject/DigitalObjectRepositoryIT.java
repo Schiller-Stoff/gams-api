@@ -154,4 +154,28 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             .isEmpty();
 
     }
+
+    @Test
+    public void testDeleteAll() {
+
+        final String RANDOM_PID = "RANDOM_PID";
+
+        digitalObjectRepository.save(
+            new DigitalObjectBuilder()
+                .id(RANDOM_PID)
+                .project(testProject)
+                .build()
+        );
+
+        digitalObjectRepository.deleteAll();
+
+        Assertions.assertThat(
+            digitalObjectRepository.findById(RANDOM_PID)
+        ).isNotNull().isEmpty();
+    }
+
+
+
+
+
 }
