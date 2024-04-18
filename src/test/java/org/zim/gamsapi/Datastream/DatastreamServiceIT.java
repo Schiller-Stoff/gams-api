@@ -51,6 +51,20 @@ public class DatastreamServiceIT extends IntegrationTest {
   public void tearDown(){
     digitalObjectRepository.delete(testObject);
     projectRepository.delete(testProject);
+
+    // check that nothing exists after cleanup
+    org.assertj.core.api.Assertions.assertThat(digitalObjectRepository.findAll())
+        .isNotNull()
+        .isEmpty();
+
+    org.assertj.core.api.Assertions.assertThat(datastreamRepository.findAll())
+        .isNotNull()
+        .isEmpty();
+
+    org.assertj.core.api.Assertions.assertThat(projectRepository.findAll())
+        .isNotNull()
+        .isEmpty();
+
   }
 
   @Nested
@@ -99,6 +113,29 @@ public class DatastreamServiceIT extends IntegrationTest {
           datastreamRepository.findById(datastream.deriveDatastreamId())
       ).isNotNull().isEmpty();
 
+
+    }
+
+
+  }
+
+  @Nested
+  public class DeleteDatastream {
+    @Test
+    public void successfullyDeletesDatastream(){
+
+      Datastream toBeDeleted = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(testObject)
+          .build();
+      datastreamRepository.save(toBeDeleted);
+      // actual deletion
+      datastreamService.delete(toBeDeleted);
+
+      // check if datastream is deleted
+      org.assertj.core.api.Assertions.assertThat(datastreamRepository.findById(toBeDeleted.deriveDatastreamId()))
+          .isNotNull()
+          .isEmpty();
 
     }
 
