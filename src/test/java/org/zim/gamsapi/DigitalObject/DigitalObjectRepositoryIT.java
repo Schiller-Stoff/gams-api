@@ -7,18 +7,16 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
 import org.zim.gamsapi.enums.TestProject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class IDigitalObjectRepositoryIT extends IntegrationTest {
+class DigitalObjectRepositoryIT extends IntegrationTest {
 
     private final static String PID = "testPid";
 
