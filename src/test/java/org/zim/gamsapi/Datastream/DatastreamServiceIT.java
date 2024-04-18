@@ -3,6 +3,7 @@ package org.zim.gamsapi.Datastream;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
@@ -196,7 +197,17 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void throwsIfDatastreamNotFound(){
 
+      DatastreamId randomId = new DatastreamId("SOME_RANDOM_PID", "SOME_RANDOM_DSID");
+
+      Assertions.assertThrows(
+          DatastreamNotFoundException.class,
+          () -> datastreamService.findById(randomId)
+      );
+
+    }
 
 
   }
