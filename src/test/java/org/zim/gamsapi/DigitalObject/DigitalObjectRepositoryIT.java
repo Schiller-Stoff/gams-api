@@ -18,7 +18,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
 
     @Autowired
-    IDigitalObjectRepository repository;
+    IDigitalObjectRepository digitalObjectRepository;
 
     @Autowired
     IProjectRepository projectRepository;
@@ -42,10 +42,10 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     @AfterAll
     public void tearDown(){
 
-        repository.deleteAll();
+        digitalObjectRepository.deleteAll();
         projectRepository.deleteAll();
 
-        Assertions.assertThat(repository.findAll())
+        Assertions.assertThat(digitalObjectRepository.findAll())
             .isNotNull()
             .isEmpty();
 
@@ -64,19 +64,19 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
             final String RANDOM_PID = "RANDOM_PID";
 
-            repository.save(
+            digitalObjectRepository.save(
                 new DigitalObjectBuilder()
                     .id(RANDOM_PID)
                     .project(testProject)
                     .build()
             );
 
-            Assertions.assertThat(repository.findById(RANDOM_PID))
+            Assertions.assertThat(digitalObjectRepository.findById(RANDOM_PID))
                 .isNotNull()
                 .isPresent();
 
             // cleanup
-            repository.deleteById(RANDOM_PID);
+            digitalObjectRepository.deleteById(RANDOM_PID);
 
 
         }
@@ -89,21 +89,21 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
         final String RANDOM_PID = "RANDOM_PID";
 
-        repository.save(
+        digitalObjectRepository.save(
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
                 .build()
         );
 
-        repository.findById(RANDOM_PID);
+        digitalObjectRepository.findById(RANDOM_PID);
 
-        Assertions.assertThat(repository.findById(RANDOM_PID))
+        Assertions.assertThat(digitalObjectRepository.findById(RANDOM_PID))
             .isNotNull()
             .isPresent();
 
         // cleanup
-        repository.deleteById(RANDOM_PID);
+        digitalObjectRepository.deleteById(RANDOM_PID);
 
     }
 
@@ -112,14 +112,14 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
         final String RANDOM_PID = "RANDOM_PID";
 
-        repository.save(
+        digitalObjectRepository.save(
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
                 .build()
         );
 
-        List<DigitalObject> digitalObjects = repository.findDigitalObjectsByProject_ProjectAbbr(testProject.getProjectAbbr());
+        List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(testProject.getProjectAbbr());
 
         Assertions.assertThat(digitalObjects)
             .isNotNull()
@@ -129,7 +129,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             .isEqualTo(RANDOM_PID);
 
         // cleanup
-        repository.deleteById(RANDOM_PID);
+        digitalObjectRepository.deleteById(RANDOM_PID);
     }
 
     @Test
@@ -138,16 +138,16 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
         final String RANDOM_PID = "RANDOM_PID";
 
-        repository.save(
+        digitalObjectRepository.save(
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
                 .build()
         );
 
-        repository.deleteAllByProject_ProjectAbbr(testProject.getProjectAbbr());
+        digitalObjectRepository.deleteAllByProject_ProjectAbbr(testProject.getProjectAbbr());
 
-        List<DigitalObject> digitalObjects = repository.findDigitalObjectsByProject_ProjectAbbr(testProject.getProjectAbbr());
+        List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(testProject.getProjectAbbr());
 
         Assertions.assertThat(digitalObjects)
             .isNotNull()
