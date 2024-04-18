@@ -142,5 +142,37 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class FindAll {
+
+    @Test
+    public void returnsExpectedCountOfDatastreams(){
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(testObject)
+          .build();
+
+      Datastream datastream2 = new DatastreamBuilder()
+          .dsid("DSID2")
+          .digitalObject(testObject)
+          .build();
+
+      datastreamRepository.save(datastream);
+      datastreamRepository.save(datastream2);
+
+      org.assertj.core.api.Assertions.assertThat(datastreamService.findAll(testObject))
+          .isNotNull()
+          .isNotEmpty()
+          .hasSize(2);
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+      datastreamRepository.delete(datastream2);
+
+    }
+
+  }
+
 
 }
