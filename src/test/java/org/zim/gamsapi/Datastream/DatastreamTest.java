@@ -33,7 +33,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").build()
+          new DigitalObjectBuilder().id("FOO_BAR").project("foo").build()
       );
 
       Datastream datastream2 = new Datastream();
@@ -55,7 +55,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").build()
+          new DigitalObjectBuilder().id("FOO_BAR").project("12345").build()
       );
 
       DatastreamId datastreamId = datastream.deriveDatastreamId();
@@ -77,7 +77,7 @@ public class DatastreamTest extends UnitTest {
     public void throwsExceptionWhenDsidIsNull(){
       Datastream datastream = new Datastream();
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").build()
+          new DigitalObjectBuilder().id("FOO_BAR").project("foo").build()
       );
       Assertions.assertThrows(
           IllegalStateException.class,

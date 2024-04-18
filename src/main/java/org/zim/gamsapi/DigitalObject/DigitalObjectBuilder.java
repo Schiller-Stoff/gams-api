@@ -35,6 +35,11 @@ public class DigitalObjectBuilder {
     return this;
   }
 
+  public DigitalObjectBuilder project(String project) {
+    digitalObject.setProject(Project.builder().projectAbbr(project).build());
+    return this;
+  }
+
   public DigitalObjectBuilder baseMetadata(org.zim.gamsapi.MetadataBaseEntity baseMetadata) {
     digitalObject.setBaseMetadata(baseMetadata);
     return this;
@@ -51,6 +56,13 @@ public class DigitalObjectBuilder {
       log.error(msg);
       throw new IllegalStateException(msg);
     }
+
+    if((digitalObject.getProject() == null) || digitalObject.getProject().getProjectAbbr().isEmpty()){
+      String msg = String.format("DigitalObject's project must not be null or it's abbreviation empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
     return digitalObject;
   }
 

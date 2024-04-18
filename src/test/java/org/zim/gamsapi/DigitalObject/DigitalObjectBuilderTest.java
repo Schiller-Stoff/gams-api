@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
-
 import java.util.Set;
 
 public class DigitalObjectBuilderTest extends UnitTest {
@@ -24,11 +23,26 @@ public class DigitalObjectBuilderTest extends UnitTest {
   }
 
   @Test
+  public void throwsIfProjectIsNotSet() {
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      new DigitalObjectBuilder().id("12345").build();
+    });
+  }
+
+  @Test
+  public void throwsIfProjectIsEmpty(){
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      new DigitalObjectBuilder().id("12345").project("").build();
+    });
+  }
+
+  @Test
   public void mayBuildADigitalObjectWithExpectedValues(){
     DigitalObject digitalObject = new DigitalObjectBuilder()
         .id("1")
         .objectType("type")
         .types(Set.of("type"))
+        .project("projectAbbr")
         .baseMetadata(MetadataBaseEntity.builder().title("test-title").build())
         .build();
 

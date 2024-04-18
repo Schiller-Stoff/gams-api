@@ -377,7 +377,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             Datastream datastream = new Datastream();
             datastream.setDigitalObject(
-                new DigitalObjectBuilder().id("123456").build()
+                new DigitalObjectBuilder().id("123456").project("foo").build()
             );
 
             org.junit.jupiter.api.Assertions.assertThrows(
@@ -392,6 +392,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Nested
     public class Constraints {
 
+        // TODO add tests against jakarta validation constraints
 
 
 
