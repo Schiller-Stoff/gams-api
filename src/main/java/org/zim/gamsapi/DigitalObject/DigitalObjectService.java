@@ -40,19 +40,22 @@ public class DigitalObjectService implements IDigitalObjectService {
             }
     );
 
-    // throw if child objects contain a self reference
-    if(digitalObject.getParent().equals(digitalObject)){
-      String msg = String.format("Detected self reference in digital object's parent object. At digital object with pid: %s", digitalObject.getId());
-      log.error(msg);
-      throw new DigitalObjectChildSelfReferenceException(msg);
+    if(digitalObject.getParent() != null){
+      // throw if parent contains a self reference
+      if(digitalObject.getParent().equals(digitalObject)){
+        String msg = String.format("Detected self reference in digital object's parent object. At digital object with pid: %s", digitalObject.getId());
+        log.error(msg);
+        throw new DigitalObjectChildSelfReferenceException(msg);
+      }
+
+      // referenced parent object must exist
+      if(!digitalObjectRepository.existsById(digitalObject.getParent().getId())){
+        String msg = String.format("Cannot find contained parent object %s in digital object %s", digitalObject.getParent().getId(), digitalObject.getId());
+        log.error(msg);
+        throw new DigitalObjectNotFoundException(msg);
+      }
     }
 
-    // referenced parent object must exist
-    if(!digitalObjectRepository.existsById(digitalObject.getParent().getId())){
-      String msg = String.format("Cannot find contained parent object %s in digital object %s", digitalObject.getParent().getId(), digitalObject.getId());
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
-    }
 
     return digitalObjectRepository.save(digitalObject);
   }
