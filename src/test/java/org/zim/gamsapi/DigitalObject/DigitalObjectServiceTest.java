@@ -3,6 +3,7 @@ package org.zim.gamsapi.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
@@ -111,6 +112,25 @@ public class DigitalObjectServiceTest extends IntegrationTest {
       // cleanup
       digitalObjectRepository.delete(digitalObject);
       digitalObjectRepository.delete(parent);
+    }
+
+
+    @Test
+    public void throwsExceptionWhenParentDoesNotExist() {
+      // given
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("testPid")
+        .project(testProject)
+        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").build())
+        .build();
+
+      // when
+      // then
+      Assertions.assertThatThrownBy(() -> digitalObjectService.save(digitalObject))
+        .isInstanceOf(DigitalObjectNotFoundException.class)
+        .hasMessageContaining("Cannot find contained parent object nonExistentParentPid in digital object testPid");
+
     }
 
 
