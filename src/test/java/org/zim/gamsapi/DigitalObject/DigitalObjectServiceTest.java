@@ -80,6 +80,39 @@ public class DigitalObjectServiceTest extends IntegrationTest {
       digitalObjectRepository.delete(digitalObject);
     }
 
+    @Test
+    public void successFullySavesDigitalObjectWithParent() {
+      // given
+
+      DigitalObject parent = new DigitalObjectBuilder()
+        .id("parentPid")
+        .project(testProject)
+        .build();
+
+      digitalObjectRepository.save(parent);
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("testPid")
+        .project(testProject)
+        .parent(parent)
+        .build();
+
+      // when
+      DigitalObject savedDigitalObject = digitalObjectService.save(digitalObject);
+
+      // then
+      Assertions.assertThat(savedDigitalObject).isNotNull();
+      Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
+      Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
+      Assertions.assertThat(savedDigitalObject.getParent()).isEqualTo(parent);
+      // considered equal because of same id
+      Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
+
+      // cleanup
+      digitalObjectRepository.delete(digitalObject);
+      digitalObjectRepository.delete(parent);
+    }
+
 
 
 
