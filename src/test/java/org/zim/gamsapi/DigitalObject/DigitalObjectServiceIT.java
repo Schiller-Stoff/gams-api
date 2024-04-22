@@ -14,6 +14,10 @@ import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestProject;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DigitalObjectServiceIT extends IntegrationTest {
@@ -325,6 +329,86 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
   }
 
+
+  @Nested
+  public class FindAllByProjectAbbrWithOptionalParameters {
+
+    @Test
+    public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
+      String projectAbbr = "nonExistentProject";
+      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      projectRepository.save(project);
+
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.empty(), Pageable.unpaged());
+
+      Assertions.assertThat(result).isEmpty();
+
+      projectRepository.delete(project);
+    }
+
+    @Test
+    public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
+      String projectAbbr = "existingProject";
+      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      projectRepository.save(project);
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(project)
+          .objectType("testType")
+          .build();
+      digitalObjectRepository.save(digitalObject);
+
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Optional.empty(), Pageable.unpaged());
+
+      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
+
+      digitalObjectRepository.delete(digitalObject);
+      projectRepository.delete(project);
+    }
+
+    @Test
+    public void returnsPageOfDigitalObjectsWhenTheyExistForProjectAndMatchTypes() {
+      String projectAbbr = "existingProject";
+      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      projectRepository.save(project);
+
+      DigitalObject digitalObject1 = new DigitalObjectBuilder()
+          .id("testPid1")
+          .project(project)
+          .types(Set.of("testType1"))
+          .build();
+      digitalObjectRepository.save(digitalObject1);
+
+      DigitalObject digitalObject2 = new DigitalObjectBuilder()
+          .id("testPid2")
+          .project(project)
+          .types(Set.of("testType2"))
+          .build();
+      digitalObjectRepository.save(digitalObject2);
+
+      Set<String> types = new HashSet<>();
+      types.add("testType1");
+
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.of(types), Pageable.unpaged());
+
+      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject1.getId());
+
+      digitalObjectRepository.delete(digitalObject1);
+      digitalObjectRepository.delete(digitalObject2);
+      projectRepository.delete(project);
+    }
+
+    @Test
+    public void throwsExceptionWhenProjectDoesNotExist() {
+      String projectAbbr = "nonExistentProject";
+
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.empty(), Pageable.unpaged()))
+          .isInstanceOf(ProjectNotFoundException.class);
+    }
+  }
 
 
 
