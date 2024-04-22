@@ -135,87 +135,85 @@ public class DigitalObjectServiceIT extends IntegrationTest {
         .isInstanceOf(DigitalObjectNotFoundException.class);
 
     }
+  }
 
-    @Nested
-    public class FindAllByProjectAbbr {
+  @Nested
+  public class FindAllByProjectAbbr {
 
-      @Test
-      public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-        String projectAbbr = "nonExistentProject";
-        Project project = Project.builder().projectAbbr(projectAbbr).build();
-        projectRepository.save(project);
+    @Test
+    public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
+      String projectAbbr = "nonExistentProject";
+      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      projectRepository.save(project);
 
-        Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
 
-        Assertions.assertThat(result).isEmpty();
+      Assertions.assertThat(result).isEmpty();
 
-        projectRepository.delete(project);
-      }
-
-      @Test
-      public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-        String projectAbbr = "existingProject";
-        Project project = Project.builder().projectAbbr(projectAbbr).build();
-        projectRepository.save(project);
-
-        DigitalObject digitalObject = new DigitalObjectBuilder()
-            .id("testPid")
-            .project(project)
-            .build();
-        digitalObjectRepository.save(digitalObject);
-
-        Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
-
-        Assertions.assertThat(result).isNotEmpty();
-        Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
-
-        digitalObjectRepository.delete(digitalObject);
-        projectRepository.delete(project);
-      }
-
-      @Test
-      public void throwsExceptionWhenProjectDoesNotExist() {
-        String projectAbbr = "nonExistentProject";
-
-        Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged()))
-            .isInstanceOf(ProjectNotFoundException.class);
-      }
+      projectRepository.delete(project);
     }
 
+    @Test
+    public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
+      String projectAbbr = "existingProject";
+      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      projectRepository.save(project);
 
-    @Nested
-    public class FindById {
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(project)
+          .build();
+      digitalObjectRepository.save(digitalObject);
 
-      @Test
-      public void returnsDigitalObjectWhenItExists() {
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
 
-        Project project = Project.builder().projectAbbr("random").build();
-        projectRepository.save(project);
+      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
-        DigitalObject digitalObject = new DigitalObjectBuilder()
-            .id("testPid")
-            .project(project)
-            .build();
-
-        digitalObjectRepository.save(digitalObject);
-
-        DigitalObject result = digitalObjectService.findById(digitalObject.getId());
-
-        Assertions.assertThat(result).isEqualTo(digitalObject);
-
-        digitalObjectRepository.delete(digitalObject);
-        projectRepository.delete(project);
-      }
-
-      @Test
-      public void throwsExceptionWhenDigitalObjectDoesNotExist() {
-        String id = "nonExistentId";
-        org.junit.jupiter.api.Assertions.assertThrows(DigitalObjectNotFoundException.class, () -> {
-          digitalObjectService.findById(id);
-        });
-      }
+      digitalObjectRepository.delete(digitalObject);
+      projectRepository.delete(project);
     }
 
+    @Test
+    public void throwsExceptionWhenProjectDoesNotExist() {
+      String projectAbbr = "nonExistentProject";
+
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged()))
+          .isInstanceOf(ProjectNotFoundException.class);
+    }
+  }
+
+  @Nested
+  public class FindById {
+
+    @Test
+    public void returnsDigitalObjectWhenItExists() {
+
+      Project project = Project.builder().projectAbbr("random").build();
+      projectRepository.save(project);
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(project)
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      DigitalObject result = digitalObjectService.findById(digitalObject.getId());
+
+      Assertions.assertThat(result).isEqualTo(digitalObject);
+
+      digitalObjectRepository.delete(digitalObject);
+      projectRepository.delete(project);
+    }
+
+    @Test
+    public void throwsExceptionWhenDigitalObjectDoesNotExist() {
+      String id = "nonExistentId";
+      org.junit.jupiter.api.Assertions.assertThrows(DigitalObjectNotFoundException.class, () -> {
+        digitalObjectService.findById(id);
+      });
+    }
   }
 
 
