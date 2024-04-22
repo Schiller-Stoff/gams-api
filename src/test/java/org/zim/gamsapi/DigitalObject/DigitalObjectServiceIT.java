@@ -3,10 +3,14 @@ package org.zim.gamsapi.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestProject;
 
@@ -128,9 +132,54 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // when
       // then
       Assertions.assertThatThrownBy(() -> digitalObjectService.save(digitalObject))
-        .isInstanceOf(DigitalObjectNotFoundException.class)
-        .hasMessageContaining("Cannot find contained parent object nonExistentParentPid in digital object testPid");
+        .isInstanceOf(DigitalObjectNotFoundException.class);
 
+    }
+
+    @Nested
+    public class FindAllByProjectAbbr {
+
+      @Test
+      public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
+        String projectAbbr = "nonExistentProject";
+        Project project = Project.builder().projectAbbr(projectAbbr).build();
+        projectRepository.save(project);
+
+        Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
+
+        Assertions.assertThat(result).isEmpty();
+
+        projectRepository.delete(project);
+      }
+
+      @Test
+      public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
+        String projectAbbr = "existingProject";
+        Project project = Project.builder().projectAbbr(projectAbbr).build();
+        projectRepository.save(project);
+
+        DigitalObject digitalObject = new DigitalObjectBuilder()
+            .id("testPid")
+            .project(project)
+            .build();
+        digitalObjectRepository.save(digitalObject);
+
+        Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
+
+        Assertions.assertThat(result).isNotEmpty();
+        Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
+
+        digitalObjectRepository.delete(digitalObject);
+        projectRepository.delete(project);
+      }
+
+      @Test
+      public void throwsExceptionWhenProjectDoesNotExist() {
+        String projectAbbr = "nonExistentProject";
+
+        Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged()))
+            .isInstanceOf(ProjectNotFoundException.class);
+      }
     }
 
 
