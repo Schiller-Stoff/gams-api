@@ -277,6 +277,56 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
   }
 
+  @Nested
+  public class AssignParentObject {
+
+    @Test
+    public void assignsParentObjectSuccessfully() {
+      DigitalObject parent = new DigitalObjectBuilder()
+          .id("parentPid")
+          .project(testProject)
+          .build();
+      digitalObjectRepository.save(parent);
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(testProject)
+          .build();
+      digitalObjectRepository.save(digitalObject);
+
+      digitalObjectService.assignParentObject(digitalObject, parent);
+
+      DigitalObject result = digitalObjectService.findById(digitalObject.getId());
+
+      Assertions.assertThat(result.getParent()).isEqualTo(parent);
+
+      digitalObjectRepository.delete(digitalObject);
+      digitalObjectRepository.delete(parent);
+    }
+
+    @Test
+    public void throwsExceptionWhenParentObjectDoesNotExist() {
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(testProject)
+          .build();
+      digitalObjectRepository.save(digitalObject);
+
+      DigitalObject nonExistentParent = new DigitalObjectBuilder()
+          .id("nonExistentParentPid")
+          .project(testProject)
+          .build();
+
+      org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+        digitalObjectService.assignParentObject(digitalObject, nonExistentParent);
+      });
+
+      digitalObjectRepository.delete(digitalObject);
+    }
+  }
+
+
+
 
 
 }
