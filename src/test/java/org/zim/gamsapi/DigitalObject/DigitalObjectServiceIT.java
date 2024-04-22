@@ -12,7 +12,7 @@ import org.zim.gamsapi.enums.TestProject;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DigitalObjectServiceTest extends IntegrationTest {
+public class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IProjectRepository projectRepository;
@@ -138,5 +138,7 @@ public class DigitalObjectServiceTest extends IntegrationTest {
 
 
   }
+
+
 
 }
