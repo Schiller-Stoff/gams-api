@@ -138,7 +138,7 @@ public class DigitalObjectService implements IDigitalObjectService {
 
    DigitalObject foundObject = digitalObjectRepository.findById(digitalObject.getId()).orElseThrow(
         () -> {
-          String msg = String.format("Aborting assign child objects. Cannot find parent object %s", digitalObject);
+          String msg = String.format("Aborting assign parent object. Cannot find object %s", digitalObject);
           log.error(msg);
           return new DigitalObjectNotFoundException(msg);
         }
