@@ -183,8 +183,38 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
 
+    @Nested
+    public class FindById {
 
+      @Test
+      public void returnsDigitalObjectWhenItExists() {
 
+        Project project = Project.builder().projectAbbr("random").build();
+        projectRepository.save(project);
+
+        DigitalObject digitalObject = new DigitalObjectBuilder()
+            .id("testPid")
+            .project(project)
+            .build();
+
+        digitalObjectRepository.save(digitalObject);
+
+        DigitalObject result = digitalObjectService.findById(digitalObject.getId());
+
+        Assertions.assertThat(result).isEqualTo(digitalObject);
+
+        digitalObjectRepository.delete(digitalObject);
+        projectRepository.delete(project);
+      }
+
+      @Test
+      public void throwsExceptionWhenDigitalObjectDoesNotExist() {
+        String id = "nonExistentId";
+        org.junit.jupiter.api.Assertions.assertThrows(DigitalObjectNotFoundException.class, () -> {
+          digitalObjectService.findById(id);
+        });
+      }
+    }
 
   }
 
