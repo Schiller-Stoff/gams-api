@@ -13,6 +13,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -88,6 +89,53 @@ public class DatastreamControllerIT extends IntegrationTest {
               datastream.getDsid(),
               testDigitalObject.getId(),
               testProject.getProjectAbbr()
+          );
+
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+
+
+    }
+
+
+    @Test
+    public void datastreamViewDisplaysExpectedMetadata() throws Exception {
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("testDsid")
+          .digitalObject(testDigitalObject)
+          .mimeType(MediaType.APPLICATION_CBOR.toString())
+          .fileName("testFileName")
+          .baseMetadata(MetadataBaseEntity.builder()
+              .title("testTitle")
+              .description("testDescription")
+              .creator("testCreator")
+              .build())
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.TEXT_HTML)
+                  .accept(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.view().name("Datastream/show"))
+          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+          .andReturn();
+
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              datastream.getDsid(),
+              datastream.getMimeType(),
+              datastream.getFileName(),
+              datastream.getBaseMetadata().getTitle(),
+              datastream.getBaseMetadata().getDescription(),
+              datastream.getBaseMetadata().getCreator()
           );
 
 
