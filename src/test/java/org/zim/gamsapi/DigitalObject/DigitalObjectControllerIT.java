@@ -8,7 +8,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.util.MimeTypeUtils;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamBuilder;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
@@ -28,6 +30,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
+  @Autowired
+  private IDatastreamRepository datastreamRepository;
+
   private Project testProject;
 
   @BeforeAll
@@ -46,6 +51,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Nested
   public class WebclientTests {
+
+
 
     @Test
     public void getDigitalObjectRendersExpectedViewValues() throws Exception {
@@ -82,6 +89,59 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
 
     }
+
+
+    @Test
+    public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(testProject)
+          .objectType("TEI")
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("testDsId")
+          .digitalObject(digitalObject)
+          .build();
+
+      Datastream datastream2 = new DatastreamBuilder()
+          .dsid("testDsId2")
+          .digitalObject(digitalObject)
+          .build();
+
+      datastreamRepository.save(datastream);
+      datastreamRepository.save(datastream2);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+
+      MvcResult mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.get(url)
+                .accept(MediaType.TEXT_HTML)
+                .contentType(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+          .andReturn();
+
+      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              datastream.getDsid(),
+              datastream2.getDsid()
+          );
+
+
+
+      // cleanup
+      datastreamRepository.delete(datastream);
+      datastreamRepository.delete(datastream2);
+      digitalObjectRepository.delete(digitalObject);
+
+    }
+
 
   }
 
