@@ -115,11 +115,9 @@
                   <small>types</small>
                   <p th:text="${do.types}"></p>
                 </li>
-                <li class="list-group-item bg-light">
-                  <small>child objects</small>
-                  <div>
-                    <span th:each="child : ${do.childObjects}" th:text="${child.id} + ', '"></span>
-                  </div>
+                <li th:if="${do.parent}" class="list-group-item bg-light">
+                  <small>Parent object</small>
+                    <p th:text="${do.parent.id}"></p>
                 </li>
               </ul>
               <p>Auxiliary metadata as dublin core</p>
