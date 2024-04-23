@@ -12,9 +12,9 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -139,6 +139,53 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       datastreamRepository.delete(datastream);
       datastreamRepository.delete(datastream2);
       digitalObjectRepository.delete(digitalObject);
+
+    }
+
+    @Test
+    public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testPid")
+          .project(testProject)
+          .objectType("TEI")
+          .baseMetadata(MetadataBaseEntity.builder()
+              .title("Test Title")
+              .description("Test Description")
+              .creator("Test Creator")
+              .publisher("Test Publisher")
+              .rights("Test Rights")
+              .build())
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+
+      MvcResult mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.get(url)
+                .accept(MediaType.TEXT_HTML)
+                .contentType(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+          .andReturn();
+
+      // all values of the metadata base entity should be present in the view
+      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              digitalObject.getId(),
+              digitalObject.getBaseMetadata().getTitle(),
+              digitalObject.getBaseMetadata().getDescription(),
+              digitalObject.getBaseMetadata().getCreator(),
+              digitalObject.getBaseMetadata().getPublisher(),
+              digitalObject.getBaseMetadata().getRights()
+          );
+
+      // cleanup
+      digitalObjectRepository.delete(digitalObject);
+
 
     }
 
