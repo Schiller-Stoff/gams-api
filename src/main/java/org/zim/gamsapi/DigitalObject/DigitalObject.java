@@ -13,12 +13,9 @@ import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Domain object representing a digital object in sense of OAIS.
@@ -70,7 +67,7 @@ public class DigitalObject {
   private Date created;
 
   /**
-   * Last modified date of the digital object / datatream
+   * Last modified date of the digital object / datastream
    */
   @Temporal(TemporalType.TIMESTAMP)
   @UpdateTimestamp
