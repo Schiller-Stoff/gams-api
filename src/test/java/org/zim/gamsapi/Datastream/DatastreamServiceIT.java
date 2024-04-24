@@ -15,6 +15,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,15 +41,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     testObject = new DigitalObjectBuilder()
         .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
         .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-        .baseMetadata(
-          new MetadataBaseEntityBuilder()
-            .title("test-title")
-            .rights("test-rights")
-            .publisher("test-publisher")
-            .creator("test-creator")
-            .description("test-description")
-            .build()
-        )
+        .baseMetadata(TestMetadataBaseEntity.generate())
         .build();
 
     testProject = testObject.getProject();
@@ -92,15 +85,7 @@ public class DatastreamServiceIT extends IntegrationTest {
               new DigitalObjectBuilder()
                   .id(RANDOM_PID)
                   .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-                  .baseMetadata(
-                      new MetadataBaseEntityBuilder()
-                          .title("test-title")
-                          .rights("test-rights")
-                          .publisher("test-publisher")
-                          .creator("test-creator")
-                          .description("test-description")
-                          .build()
-                  )
+                  .baseMetadata(TestMetadataBaseEntity.generate())
                   .build()
           )
           .build();
@@ -119,6 +104,7 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid(RANDOM_DSID)
           .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       datastreamService.save(datastream);
@@ -147,6 +133,7 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream toBeDeleted = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
       datastreamRepository.save(toBeDeleted);
       // actual deletion
@@ -171,11 +158,13 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       Datastream datastream2 = new DatastreamBuilder()
           .dsid("DSID2")
           .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       datastreamRepository.save(datastream);
@@ -203,6 +192,7 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       datastreamRepository.save(datastream);
@@ -240,6 +230,7 @@ public class DatastreamServiceIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       datastreamRepository.save(datastream);

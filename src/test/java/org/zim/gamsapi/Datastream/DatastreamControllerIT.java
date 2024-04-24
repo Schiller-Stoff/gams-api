@@ -16,6 +16,8 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -77,6 +79,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid("testDsid")
           .digitalObject(testDigitalObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       datastreamRepository.save(datastream);

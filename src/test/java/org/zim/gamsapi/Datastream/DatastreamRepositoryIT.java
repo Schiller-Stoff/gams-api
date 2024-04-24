@@ -19,6 +19,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
 /**
@@ -42,6 +43,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     DigitalObject testDigitalObject;
     Datastream testDatastream;
 
+    MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
+
 
     /**
      * Creates a test project, digital object and datastream before each test.
@@ -55,14 +58,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         testDigitalObject = new DigitalObjectBuilder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
             .project(
                 Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-            .baseMetadata(new MetadataBaseEntityBuilder().
-                title("test-title")
-                .rights("test-rights")
-                .publisher("test-publisher")
-                .creator("test-creator")
-                .description("test-description")
-                .build()
-            )
+            .baseMetadata(testMetadataBaseEntity)
             .build();
 
         testProject = testDigitalObject.getProject();
@@ -70,6 +66,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         testDatastream = new DatastreamBuilder()
             .dsid(TestDatastream.DSID.getValue())
             .digitalObject(testDigitalObject)
+            .baseMetadata(testMetadataBaseEntity)
             .build();
 
         projectRepository.save(testProject);
@@ -103,6 +100,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             new DatastreamBuilder()
                 .digitalObject(testDigitalObject)
                 .dsid("SOME_RANDOM_DSID")
+                .baseMetadata(testMetadataBaseEntity)
                 .build()
         );
 
@@ -131,6 +129,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         Datastream datastream = datastreamRepository.save(new DatastreamBuilder()
             .digitalObject(testDigitalObject)
             .dsid("SOME_RANDOM_DSID_45123")
+            .baseMetadata(testMetadataBaseEntity)
             .build());
         Assertions.assertThat(
                         datastreamRepository.findById(datastream.deriveDatastreamId()))
@@ -178,21 +177,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             DigitalObject toBeDeleted = new DigitalObjectBuilder()
                 .id("SOME_PID_12345")
                 .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-                .baseMetadata(
-                    new MetadataBaseEntityBuilder()
-                        .title("test-title")
-                        .rights("test-rights")
-                        .publisher("test-publisher")
-                        .creator("test-creator")
-                        .description("test-description")
-                        .build()
-                )
+                .baseMetadata(testMetadataBaseEntity)
                 .build();
 
 
             digitalObjectRepository.save(toBeDeleted);
             Datastream savedDatastream = datastreamRepository.save(new DatastreamBuilder()
                 .digitalObject(toBeDeleted)
+                .baseMetadata(testMetadataBaseEntity)
                 .dsid(TEST_DSID)
                 .build());
 
@@ -231,6 +223,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             Datastream datastreamToBeDeleted = new DatastreamBuilder()
                 .dsid("DSID_TO_BE_DELETED")
                 .digitalObject(testDigitalObject)
+                .baseMetadata(testMetadataBaseEntity)
                 .build();
 
             datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
@@ -432,18 +425,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         DigitalObject unsavedObject = new DigitalObjectBuilder()
             .id("UNSAVED_OBJECT")
             .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-            .baseMetadata(new MetadataBaseEntityBuilder()
-                .title("test-title")
-                .rights("test-rights")
-                .publisher("test-publisher")
-                .creator("test-creator")
-                .description("test-description")
-                .build())
+            .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
         Datastream aDatastream = new DatastreamBuilder()
             .dsid("RANDOM_DSID_123456")
             .digitalObject(unsavedObject)
+            .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
 
