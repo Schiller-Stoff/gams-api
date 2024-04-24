@@ -90,6 +90,7 @@ public class Datastream {
   @Embedded
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
+  @NotNull
   private MetadataBaseEntity baseMetadata;
 
 
