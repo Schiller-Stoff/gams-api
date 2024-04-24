@@ -46,15 +46,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     testDigitalObject = new DigitalObjectBuilder()
         .id("testId")
         .project(testProject)
-        .baseMetadata(
-            new MetadataBaseEntityBuilder()
-                .title("test-title")
-                .rights("test-rights")
-                .publisher("test-publisher")
-                .creator("test-creator")
-                .description("test-description")
-                .build()
-        )
+        .baseMetadata(TestMetadataBaseEntity.generate())
         .build();
     projectRepository.save(testProject);
     digitalObjectRepository.save(testDigitalObject);
@@ -119,15 +111,7 @@ public class DatastreamControllerIT extends IntegrationTest {
           .digitalObject(testDigitalObject)
           .mimeType(MediaType.APPLICATION_CBOR.toString())
           .fileName("testFileName")
-          .baseMetadata(
-              new MetadataBaseEntityBuilder()
-                .title("testTitle")
-                .description("testDescription")
-                .creator("testCreator")
-                .rights("testRights")
-                .publisher("testPublisher")
-                .build()
-          )
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       datastreamRepository.save(datastream);

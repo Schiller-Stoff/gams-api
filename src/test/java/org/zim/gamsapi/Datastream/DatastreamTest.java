@@ -10,16 +10,11 @@ import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
 public class DatastreamTest extends UnitTest {
 
-  MetadataBaseEntity testMetadataBaseEntity = new MetadataBaseEntityBuilder()
-    .title("test-title")
-    .rights("test-rights")
-    .publisher("test-publisher")
-    .creator("test-creator")
-    .description("test-description")
-    .build();
+  MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
 
   @Nested
   public class IdentityTests {

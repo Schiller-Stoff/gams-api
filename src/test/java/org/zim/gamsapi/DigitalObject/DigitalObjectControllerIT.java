@@ -64,15 +64,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .objectType("TEI")
-          .baseMetadata(
-              new MetadataBaseEntityBuilder()
-                .title("test-title")
-                .rights("test-rights")
-                .publisher("test-publisher")
-                .creator("test-creator")
-                .description("test-description")
-                .build()
-          )
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       digitalObjectRepository.save(digitalObject);
@@ -110,15 +102,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .objectType("TEI")
-          .baseMetadata(
-              new MetadataBaseEntityBuilder()
-                  .title("test-title")
-                  .rights("test-rights")
-                  .publisher("test-publisher")
-                  .creator("test-creator")
-                  .description("test-description")
-                  .build()
-          )
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       digitalObjectRepository.save(digitalObject);
@@ -172,15 +156,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .objectType("TEI")
-          .baseMetadata(
-              new MetadataBaseEntityBuilder()
-                .title("Test Title")
-                .description("Test Description")
-                .creator("Test Creator")
-                .publisher("Test Publisher")
-                .rights("Test Rights")
-                .build()
-          )
+          .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
       digitalObjectRepository.save(digitalObject);
@@ -222,15 +198,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     final String OBJECT_TEST_ID = "testPid";
     digitalObjectRepository.save(
-        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(
-            new MetadataBaseEntityBuilder()
-                .creator("test-creator")
-                .description("test-description")
-                .publisher("test-publisher")
-                .rights("test-rights")
-                .title("test-title")
-                .build()
-            )
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate())
           .build()
         );
 
@@ -267,15 +235,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     final String OBJECT_TEST_ID = "testPid";
     digitalObjectRepository.save(
         new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject)
-            .baseMetadata(
-                new MetadataBaseEntityBuilder()
-                    .creator("test-creator")
-                    .description("test-description")
-                    .publisher("test-publisher")
-                    .rights("test-rights")
-                    .title("test-title")
-                    .build()
-              )
+            .baseMetadata(TestMetadataBaseEntity.generate())
             .build()
 
     );

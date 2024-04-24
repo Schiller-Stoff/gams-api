@@ -5,18 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.UnitTest;
+import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+
 import java.util.Set;
 
 public class DigitalObjectBuilderTest extends UnitTest {
 
 
-  MetadataBaseEntity testMetadataBaseEntity = new MetadataBaseEntityBuilder()
-      .title("test-title")
-      .rights("test-rights")
-      .publisher("test-publisher")
-      .creator("test-creator")
-      .description("test-description")
-      .build();
+  MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
 
   @Test
   public void throwsIfIdIsNotSet(){
