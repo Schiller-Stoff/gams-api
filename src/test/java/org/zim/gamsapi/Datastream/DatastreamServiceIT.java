@@ -10,6 +10,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
@@ -39,6 +40,15 @@ public class DatastreamServiceIT extends IntegrationTest {
     testObject = new DigitalObjectBuilder()
         .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
         .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+        .baseMetadata(
+          new MetadataBaseEntityBuilder()
+            .title("test-title")
+            .rights("test-rights")
+            .publisher("test-publisher")
+            .creator("test-creator")
+            .description("test-description")
+            .build()
+        )
         .build();
 
     testProject = testObject.getProject();
@@ -82,6 +92,15 @@ public class DatastreamServiceIT extends IntegrationTest {
               new DigitalObjectBuilder()
                   .id(RANDOM_PID)
                   .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+                  .baseMetadata(
+                      new MetadataBaseEntityBuilder()
+                          .title("test-title")
+                          .rights("test-rights")
+                          .publisher("test-publisher")
+                          .creator("test-creator")
+                          .description("test-description")
+                          .build()
+                  )
                   .build()
           )
           .build();

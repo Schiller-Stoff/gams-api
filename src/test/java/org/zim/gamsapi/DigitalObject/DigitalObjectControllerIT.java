@@ -13,6 +13,7 @@ import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -61,6 +62,15 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .objectType("TEI")
+          .baseMetadata(
+              new MetadataBaseEntityBuilder()
+                .title("test-title")
+                .rights("test-rights")
+                .publisher("test-publisher")
+                .creator("test-creator")
+                .description("test-description")
+                .build()
+          )
           .build();
 
       digitalObjectRepository.save(digitalObject);
@@ -98,6 +108,15 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .objectType("TEI")
+          .baseMetadata(
+              new MetadataBaseEntityBuilder()
+                  .title("test-title")
+                  .rights("test-rights")
+                  .publisher("test-publisher")
+                  .creator("test-creator")
+                  .description("test-description")
+                  .build()
+          )
           .build();
 
       digitalObjectRepository.save(digitalObject);
@@ -196,7 +215,18 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   public void getObjectJsonReturnsDigitalObjectWhenItExists() throws Exception {
 
     final String OBJECT_TEST_ID = "testPid";
-    digitalObjectRepository.save(new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).build());
+    digitalObjectRepository.save(
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(
+            new MetadataBaseEntityBuilder()
+                .creator("test-creator")
+                .description("test-description")
+                .publisher("test-publisher")
+                .rights("test-rights")
+                .title("test-title")
+                .build()
+            )
+          .build()
+        );
 
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), OBJECT_TEST_ID)
             .contentType(MediaType.APPLICATION_JSON))
@@ -229,7 +259,20 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getProjectObjectsJsonReturnsDigitalObjectsWhenTheyExistForProject() throws Exception {
     final String OBJECT_TEST_ID = "testPid";
-    digitalObjectRepository.save(new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).build());
+    digitalObjectRepository.save(
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject)
+            .baseMetadata(
+                new MetadataBaseEntityBuilder()
+                    .creator("test-creator")
+                    .description("test-description")
+                    .publisher("test-publisher")
+                    .rights("test-rights")
+                    .title("test-title")
+                    .build()
+              )
+            .build()
+
+    );
 
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testProject.getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))

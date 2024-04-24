@@ -13,6 +13,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
@@ -53,6 +55,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         testDigitalObject = new DigitalObjectBuilder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
             .project(
                 Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+            .baseMetadata(new MetadataBaseEntityBuilder().
+                title("test-title")
+                .rights("test-rights")
+                .publisher("test-publisher")
+                .creator("test-creator")
+                .description("test-description")
+                .build()
+            )
             .build();
 
         testProject = testDigitalObject.getProject();
@@ -168,6 +178,15 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             DigitalObject toBeDeleted = new DigitalObjectBuilder()
                 .id("SOME_PID_12345")
                 .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+                .baseMetadata(
+                    new MetadataBaseEntityBuilder()
+                        .title("test-title")
+                        .rights("test-rights")
+                        .publisher("test-publisher")
+                        .creator("test-creator")
+                        .description("test-description")
+                        .build()
+                )
                 .build();
 
 
@@ -377,7 +396,15 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             Datastream datastream = new Datastream();
             datastream.setDigitalObject(
-                new DigitalObjectBuilder().id("123456").project("foo").build()
+                new DigitalObjectBuilder().id("123456").project("foo").baseMetadata(
+                    new MetadataBaseEntityBuilder()
+                        .title("test-title")
+                        .rights("test-rights")
+                        .publisher("test-publisher")
+                        .creator("test-creator")
+                        .description("test-description")
+                        .build()
+                ).build()
             );
 
             org.junit.jupiter.api.Assertions.assertThrows(
@@ -405,6 +432,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         DigitalObject unsavedObject = new DigitalObjectBuilder()
             .id("UNSAVED_OBJECT")
             .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+            .baseMetadata(new MetadataBaseEntityBuilder()
+                .title("test-title")
+                .rights("test-rights")
+                .publisher("test-publisher")
+                .creator("test-creator")
+                .description("test-description")
+                .build())
             .build();
 
         Datastream aDatastream = new DatastreamBuilder()

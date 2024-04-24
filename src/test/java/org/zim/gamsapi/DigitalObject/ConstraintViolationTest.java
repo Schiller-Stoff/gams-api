@@ -7,6 +7,7 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.UnitTest;
 import java.util.Set;
@@ -29,8 +30,17 @@ public class ConstraintViolationTest extends UnitTest {
     @Test
     public void shouldRaiseNoConstraintViolation() {
         DigitalObject digitalObject = new DigitalObjectBuilder()
-            .project(Project.builder().projectAbbr("Foo").build())
+            .project(Project.builder().projectAbbr("foo").build())
             .id("foo")
+            .baseMetadata(
+                new MetadataBaseEntityBuilder()
+                    .title("foo")
+                    .rights("foo")
+                    .publisher("foo")
+                    .creator("foo")
+                    .description("foo-bar")
+                    .build()
+            )
             .build();
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
@@ -42,6 +52,16 @@ public class ConstraintViolationTest extends UnitTest {
         DigitalObject digitalObject = new DigitalObject();
         digitalObject.setId(null);
         digitalObject.setProject(Project.builder().projectAbbr("Foo").build());
+
+        digitalObject.setBaseMetadata(
+            new MetadataBaseEntityBuilder()
+                .title("foo")
+                .rights("foo")
+                .publisher("foo")
+                .creator("foo")
+                .description("foo-bar")
+                .build()
+        );
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));

@@ -44,6 +44,15 @@ public class DatastreamControllerIT extends IntegrationTest {
     testDigitalObject = new DigitalObjectBuilder()
         .id("testId")
         .project(testProject)
+        .baseMetadata(
+            MetadataBaseEntity.builder()
+                .title("test-title")
+                .rights("test-rights")
+                .publisher("test-publisher")
+                .creator("test-creator")
+                .description("test-description")
+                .build()
+        )
         .build();
     projectRepository.save(testProject);
     digitalObjectRepository.save(testDigitalObject);

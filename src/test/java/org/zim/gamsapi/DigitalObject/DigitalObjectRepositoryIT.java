@@ -5,6 +5,8 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestProject;
@@ -24,6 +26,14 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     IProjectRepository projectRepository;
 
     Project testProject;
+
+    MetadataBaseEntity testMetadataBaseEntity = new MetadataBaseEntityBuilder()
+        .title("test-title")
+        .rights("test-rights")
+        .publisher("test-publisher")
+        .creator("test-creator")
+        .description("test-description")
+        .build();
 
     @BeforeAll
     public void setup(){
@@ -68,6 +78,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
                 new DigitalObjectBuilder()
                     .id(RANDOM_PID)
                     .project(testProject)
+                    .baseMetadata(testMetadataBaseEntity)
                     .build()
             );
 
@@ -93,6 +104,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
+                .baseMetadata(testMetadataBaseEntity)
                 .build()
         );
 
@@ -116,6 +128,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
+                .baseMetadata(testMetadataBaseEntity)
                 .build()
         );
 
@@ -142,6 +155,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
+                .baseMetadata(testMetadataBaseEntity)
                 .build()
         );
 
@@ -164,6 +178,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             new DigitalObjectBuilder()
                 .id(RANDOM_PID)
                 .project(testProject)
+                .baseMetadata(testMetadataBaseEntity)
                 .build()
         );
 

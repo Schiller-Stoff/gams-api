@@ -5,12 +5,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
+import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 
 public class DatastreamTest extends UnitTest {
 
+  MetadataBaseEntity testMetadataBaseEntity = new MetadataBaseEntityBuilder()
+    .title("test-title")
+    .rights("test-rights")
+    .publisher("test-publisher")
+    .creator("test-creator")
+    .description("test-description")
+    .build();
 
   @Nested
   public class IdentityTests {
@@ -33,7 +42,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").project("foo").build()
+          new DigitalObjectBuilder().id("FOO_BAR").project("foo").baseMetadata(testMetadataBaseEntity).build()
       );
 
       Datastream datastream2 = new Datastream();
@@ -55,7 +64,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").project("12345").build()
+          new DigitalObjectBuilder().id("FOO_BAR").project("12345").baseMetadata(testMetadataBaseEntity).build()
       );
 
       DatastreamId datastreamId = datastream.deriveDatastreamId();
@@ -77,7 +86,7 @@ public class DatastreamTest extends UnitTest {
     public void throwsExceptionWhenDsidIsNull(){
       Datastream datastream = new Datastream();
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").project("foo").build()
+          new DigitalObjectBuilder().id("FOO_BAR").project("foo").baseMetadata(testMetadataBaseEntity).build()
       );
       Assertions.assertThrows(
           IllegalStateException.class,
