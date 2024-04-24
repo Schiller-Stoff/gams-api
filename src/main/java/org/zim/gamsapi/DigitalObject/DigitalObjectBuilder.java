@@ -2,7 +2,6 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Project.Project;
-
 import java.util.Set;
 
 @Slf4j
