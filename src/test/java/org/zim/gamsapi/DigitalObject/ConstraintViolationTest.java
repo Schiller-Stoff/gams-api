@@ -7,9 +7,9 @@ import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.UnitTest;
+import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -32,15 +32,7 @@ public class ConstraintViolationTest extends UnitTest {
         DigitalObject digitalObject = new DigitalObjectBuilder()
             .project(Project.builder().projectAbbr("foo").build())
             .id("foo")
-            .baseMetadata(
-                new MetadataBaseEntityBuilder()
-                    .title("foo")
-                    .rights("foo")
-                    .publisher("foo")
-                    .creator("foo")
-                    .description("foo-bar")
-                    .build()
-            )
+            .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
@@ -53,15 +45,7 @@ public class ConstraintViolationTest extends UnitTest {
         digitalObject.setId(null);
         digitalObject.setProject(Project.builder().projectAbbr("Foo").build());
 
-        digitalObject.setBaseMetadata(
-            new MetadataBaseEntityBuilder()
-                .title("foo")
-                .rights("foo")
-                .publisher("foo")
-                .creator("foo")
-                .description("foo-bar")
-                .build()
-        );
+        digitalObject.setBaseMetadata(TestMetadataBaseEntity.generate());
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));
@@ -75,4 +59,32 @@ public class ConstraintViolationTest extends UnitTest {
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
         assertThat(violationSet.size(), is(5));
     }
+
+    @Test
+    public void shouldRaiseConstraintViolationIfMetadataDescriptionIsTooShort() {
+        MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
+        // set a description that is too short
+        metadataBaseEntity.setDescription("123");
+        Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
+        assertThat(violationSet.size(), is(1));
+    }
+
+    @Test
+    public void shouldRaiseConstraintViolationIfMetadataPublisherIsEmpty() {
+        MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
+        // set publisher to empty string
+        metadataBaseEntity.setPublisher("");
+        Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
+        assertThat(violationSet.size(), is(1));
+    }
+
+    @Test
+    public void shouldRaiseConstraintViolationIfMetadataCreatorIsNull() {
+        MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
+        // set creator to null
+        metadataBaseEntity.setCreator(null);
+        Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
+        assertThat(violationSet.size(), is(1));
+    }
+
 }

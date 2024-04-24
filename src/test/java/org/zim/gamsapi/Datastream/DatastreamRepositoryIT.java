@@ -7,6 +7,8 @@ import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -370,53 +372,105 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
     @Nested
-    public class IdGenerationTest {
-
-        @Test
-        public void saveThrowsIfDigitalObjectIsNull(){
-            Datastream datastream = new Datastream();
-            datastream.setDsid("DSID");
-
-
-            org.junit.jupiter.api.Assertions.assertThrows(
-                Exception.class,
-                () -> datastreamRepository.save(datastream)
-            );
-        }
-
-        @Test
-        public void saveThrowsIfDsidIsNull(){
-
-            Datastream datastream = new Datastream();
-            datastream.setDigitalObject(
-                new DigitalObjectBuilder().id("123456").project("foo").baseMetadata(
-                    new MetadataBaseEntityBuilder()
-                        .title("test-title")
-                        .rights("test-rights")
-                        .publisher("test-publisher")
-                        .creator("test-creator")
-                        .description("test-description")
-                        .build()
-                ).build()
-            );
-
-            org.junit.jupiter.api.Assertions.assertThrows(
-                Exception.class,
-                () -> datastreamRepository.save(datastream)
-            );
-        }
-
-    }
-
-
-    @Nested
     public class Constraints {
 
-        // TODO add tests against jakarta validation constraints
+        @Nested
+        public class IDGeneration {
+            @Test
+            public void throwsIfDsidIsNull(){
 
+                Datastream datastream = new DatastreamBuilder()
+                    .dsid("RANDOM_DSID_123456")
+                    .digitalObject(testDigitalObject)
+                    .baseMetadata(testMetadataBaseEntity)
+                    .build();
 
+                datastream.setDsid(null);
 
+                org.junit.jupiter.api.Assertions.assertThrows(
+                    // exception is being thrown by ConstraintViolationException beneath
+                    TransactionSystemException.class,
+                    () -> datastreamRepository.save(datastream)
+                );
+            }
 
+            @Test
+            public void throwsIfDigitalObjectIsNull(){
+
+                Datastream datastream = new DatastreamBuilder()
+                    .dsid("RANDOM_DSID_123456")
+                    .digitalObject(testDigitalObject)
+                    .baseMetadata(testMetadataBaseEntity)
+                    .build();
+
+                datastream.setDigitalObject(null);
+
+                org.junit.jupiter.api.Assertions.assertThrows(
+                    // exception is being thrown because composite primary key fails to be set
+                    JpaSystemException.class,
+                    () -> datastreamRepository.save(datastream)
+                );
+            }
+
+        }
+
+        @Nested
+        public class MetadataBaseEntityValidation {
+
+            @Test
+            public void throwsIfBaseMetadataIsNull(){
+
+                Datastream datastream = new DatastreamBuilder()
+                    .dsid("RANDOM_DSID_123456")
+                    .digitalObject(testDigitalObject)
+                    .baseMetadata(testMetadataBaseEntity)
+                    .build();
+
+                datastream.setBaseMetadata(null);
+
+                org.junit.jupiter.api.Assertions.assertThrows(
+                    TransactionSystemException.class,
+                    () -> datastreamRepository.save(datastream)
+                );
+            }
+
+            @Test
+            public void throwsIfMetadataDescriptionIsTooShort(){
+
+                MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
+                metadataBaseEntity.setDescription("1");
+
+                Datastream datastream = new DatastreamBuilder()
+                    .dsid("RANDOM_DSID_123456")
+                    .digitalObject(testDigitalObject)
+                    .baseMetadata(metadataBaseEntity)
+                    .build();
+
+                org.junit.jupiter.api.Assertions.assertThrows(
+                    TransactionSystemException.class,
+                    () -> datastreamRepository.save(datastream)
+                );
+            }
+
+            @Test
+            public void throwsIfMetadataRightsIsNull(){
+
+                  MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
+                  metadataBaseEntity.setRights(null);
+
+                  Datastream datastream = new DatastreamBuilder()
+                      .dsid("RANDOM_DSID_123456")
+                      .digitalObject(testDigitalObject)
+                      .baseMetadata(metadataBaseEntity)
+                      .build();
+
+                  org.junit.jupiter.api.Assertions.assertThrows(
+                      TransactionSystemException.class,
+                      () -> datastreamRepository.save(datastream)
+                  );
+            }
+
+        }
     }
 
     @Test
