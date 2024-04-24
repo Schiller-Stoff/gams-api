@@ -3,6 +3,7 @@ package org.zim.gamsapi.Datastream;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -91,6 +92,7 @@ public class Datastream {
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
   @NotNull
+  @Valid // Add Bean validation to embedded tables
   private MetadataBaseEntity baseMetadata;
 
 
