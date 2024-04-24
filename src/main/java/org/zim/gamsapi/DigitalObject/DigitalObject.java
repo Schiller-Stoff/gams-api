@@ -85,6 +85,7 @@ public class DigitalObject {
   // increases allowed length of description based on the EmbeddedEntity
   @AttributeOverride(name = "description", column = @Column(length = 2000))
   @Valid  // Add Bean validation to embedded tables
+  @NotNull
   private MetadataBaseEntity baseMetadata;
 
   @Column(name = "created_by")
