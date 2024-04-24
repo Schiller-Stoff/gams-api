@@ -2,9 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 
 public class DigitalObjectTest extends UnitTest {
