@@ -168,13 +168,15 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .objectType("TEI")
-          .baseMetadata(MetadataBaseEntity.builder()
-              .title("Test Title")
-              .description("Test Description")
-              .creator("Test Creator")
-              .publisher("Test Publisher")
-              .rights("Test Rights")
-              .build())
+          .baseMetadata(
+              new MetadataBaseEntityBuilder()
+                .title("Test Title")
+                .description("Test Description")
+                .creator("Test Creator")
+                .publisher("Test Publisher")
+                .rights("Test Rights")
+                .build()
+          )
           .build();
 
       digitalObjectRepository.save(digitalObject);

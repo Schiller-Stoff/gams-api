@@ -13,7 +13,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,7 +45,7 @@ public class DatastreamControllerIT extends IntegrationTest {
         .id("testId")
         .project(testProject)
         .baseMetadata(
-            MetadataBaseEntity.builder()
+            new MetadataBaseEntityBuilder()
                 .title("test-title")
                 .rights("test-rights")
                 .publisher("test-publisher")
@@ -116,11 +116,15 @@ public class DatastreamControllerIT extends IntegrationTest {
           .digitalObject(testDigitalObject)
           .mimeType(MediaType.APPLICATION_CBOR.toString())
           .fileName("testFileName")
-          .baseMetadata(MetadataBaseEntity.builder()
-              .title("testTitle")
-              .description("testDescription")
-              .creator("testCreator")
-              .build())
+          .baseMetadata(
+              new MetadataBaseEntityBuilder()
+                .title("testTitle")
+                .description("testDescription")
+                .creator("testCreator")
+                .rights("testRights")
+                .publisher("testPublisher")
+                .build()
+          )
           .build();
 
       datastreamRepository.save(datastream);

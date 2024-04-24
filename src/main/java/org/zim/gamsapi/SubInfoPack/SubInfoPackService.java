@@ -12,6 +12,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
@@ -53,7 +54,7 @@ public class SubInfoPackService implements ISubInfoPackService {
           .objectType(bagitSipJson.getObjectType())
           .parent(new DigitalObjectBuilder().id(parentId).build())
           .types(bagitSipJson.getTypes())
-          .baseMetadata(MetadataBaseEntity.builder()
+          .baseMetadata(new MetadataBaseEntityBuilder()
               .title(bagitSipJson.getTitle())
               .creator(bagitSipJson.getCreator())
               .description(bagitSipJson.getDescription())
@@ -84,7 +85,7 @@ public class SubInfoPackService implements ISubInfoPackService {
                       .mimeType(contentFile.getMimetype())
                       .size(contentFile.getSize())
                       .fileName(contentFilePath.getFileName().toString())
-                      .baseMetadata(MetadataBaseEntity.builder()
+                      .baseMetadata(new MetadataBaseEntityBuilder()
                               .title(contentFile.getTitle())
                               .creator(contentFile.getCreator())
                               .description(contentFile.getDescription())

@@ -15,6 +15,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
@@ -81,7 +82,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     DigitalObject lidoObject = new DigitalObjectBuilder()
         .objectType("testlido")
         .baseMetadata(
-            MetadataBaseEntity.builder()
+            new MetadataBaseEntityBuilder()
                 .title("Digital object representing a Chair of the king")
                 .creator("Ada Lovelace")
                 .description("This source datastream contains some information about...")
@@ -98,8 +99,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
-                    MetadataBaseEntity
-                            .builder()
+                  new MetadataBaseEntityBuilder()
                             .title("Digital object representing a Chair of the king")
                             .creator("Ada Lovelace")
                             //.subject(new ArrayList<>(List.of("Chemistry", "Physics", "Architecture")))
@@ -118,8 +118,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
-                    MetadataBaseEntity
-                            .builder()
+                    new MetadataBaseEntityBuilder()
                             .title("An Image of something")
                             .creator("Ada Lovelace")
                             //.subject(new ArrayList<>(List.of("Chemistry", "Physics", "Architecture")))

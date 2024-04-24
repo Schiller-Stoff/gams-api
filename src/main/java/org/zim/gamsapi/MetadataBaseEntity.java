@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
  * https://www.dublincore.org/
  */
 @Embeddable
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
