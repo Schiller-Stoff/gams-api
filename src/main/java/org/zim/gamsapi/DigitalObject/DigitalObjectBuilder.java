@@ -63,6 +63,43 @@ public class DigitalObjectBuilder {
       throw new IllegalStateException(msg);
     }
 
+    if(digitalObject.getBaseMetadata() == null){
+      String msg = String.format("DigitalObject's baseMetadata must not be null! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getBaseMetadata().getCreator() == null) || digitalObject.getBaseMetadata().getCreator().isEmpty()){
+      String msg = String.format("DigitalObject's baseMetadata creator must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    // validate required fields in metadata base entity
+    if((digitalObject.getBaseMetadata().getDescription() == null) || digitalObject.getBaseMetadata().getDescription().isEmpty()){
+      String msg = String.format("DigitalObject's baseMetadata description must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getBaseMetadata().getPublisher() == null) || digitalObject.getBaseMetadata().getPublisher().isEmpty()){
+      String msg = String.format("DigitalObject's baseMetadata publisher must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getBaseMetadata().getRights() == null) || digitalObject.getBaseMetadata().getRights().isEmpty()){
+      String msg = String.format("DigitalObject's baseMetadata rights must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getBaseMetadata().getTitle() == null) || digitalObject.getBaseMetadata().getTitle().isEmpty()){
+      String msg = String.format("DigitalObject's baseMetadata title must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
     return digitalObject;
   }
 

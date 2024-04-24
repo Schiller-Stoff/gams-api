@@ -3,10 +3,20 @@ package org.zim.gamsapi.DigitalObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.UnitTest;
 import java.util.Set;
 
 public class DigitalObjectBuilderTest extends UnitTest {
+
+
+  MetadataBaseEntity testMetadataBaseEntity = new MetadataBaseEntityBuilder()
+      .title("test-title")
+      .rights("test-rights")
+      .publisher("test-publisher")
+      .creator("test-creator")
+      .description("test-description")
+      .build();
 
   @Test
   public void throwsIfIdIsNotSet(){
@@ -32,7 +42,11 @@ public class DigitalObjectBuilderTest extends UnitTest {
   @Test
   public void throwsIfProjectIsEmpty(){
     Assertions.assertThrows(IllegalStateException.class, () -> {
-      new DigitalObjectBuilder().id("12345").project("").build();
+      new DigitalObjectBuilder()
+          .id("12345")
+          .project("")
+          .baseMetadata(testMetadataBaseEntity)
+          .build();
     });
   }
 
@@ -43,7 +57,7 @@ public class DigitalObjectBuilderTest extends UnitTest {
         .objectType("type")
         .types(Set.of("type"))
         .project("projectAbbr")
-        .baseMetadata(MetadataBaseEntity.builder().title("test-title").build())
+        .baseMetadata(testMetadataBaseEntity)
         .build();
 
     Assertions.assertEquals("1", digitalObject.getId());
