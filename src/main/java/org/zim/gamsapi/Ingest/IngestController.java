@@ -42,7 +42,7 @@ public class IngestController {
     ingest.setZippedBagItFolder(bagAsZip);
     ingestService.ingest(ingest);
 
-    // TODO need to return meaningful information about the ingest.
+    // TODO need to return meaningful information about the ingest (e.g. like a status or a reference to the created object?)
     // return ingest;
   }
 

@@ -56,6 +56,7 @@ public class IngestService implements IIngestService {
 
       // 02. build and save digital object from bag-info.txt
       // TODO build object in seperate method - save can stay here?
+      // TODO think about: looks like a conversion method?
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
           .project(Project.builder().projectAbbr(ingest.getProjectAbbr()).build())
@@ -122,6 +123,7 @@ public class IngestService implements IIngestService {
    * @return created list with added item.
    */
   private List<String> addToNullableList(@Nullable List<String> nullableList, String itemToAdd){
+    // TODO remove outdated method?
     if((nullableList == null) || (nullableList.isEmpty())) {
       return new ArrayList<>(List.of(itemToAdd));
     } else {
