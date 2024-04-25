@@ -133,6 +133,7 @@ public class SubInfoPackService implements ISubInfoPackService {
   private Path unzipBagToTempDir(SubInfoPack subInfoPack) throws SubInfoPackProcessingException {
 
     // TODO should I move this logic to ZpiUtils? (and test there?) - because: 1. it is a utility method 2. would be easier to test
+    // TODO think about a meaningful exception to be thrown so that the caller might provide a meaningful error message
 
     // first create random named temp directory
     Path tempBagDirPath;
