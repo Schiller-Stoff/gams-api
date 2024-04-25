@@ -26,8 +26,11 @@ public class Ingest {
    */
   private String ingestProfile;
 
+  /**
+   * The zipped bag.
+   */
   @ToString.Exclude
-  private byte[] zippedFolder;
+  private byte[] zippedBagItFolder;
 
 
   //TODO add foldername for easier logging?

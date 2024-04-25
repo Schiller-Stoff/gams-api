@@ -38,7 +38,7 @@ public class IngestController {
       throw new IngestProcessingException(msg);
 
     }
-    subInfoPack.setZippedFolder(sipAsZIP);
+    subInfoPack.setZippedBagItFolder(sipAsZIP);
     subInfoPackService.ingest(subInfoPack);
 
     // TODO need to return meaningful information about the submission info-package.

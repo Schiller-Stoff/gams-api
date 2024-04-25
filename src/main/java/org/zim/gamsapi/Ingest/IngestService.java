@@ -148,7 +148,7 @@ public class IngestService implements IIngestService {
     }
 
     // walk through zipped directory and create directories and files in temp directory
-    ZipUtils.walkZippedDir(ingest.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
+    ZipUtils.walkZippedDir(ingest.getZippedBagItFolder(), (zipEntry, byteArrayOutputStream) -> {
       Path tempFilePath = tempBagDirPath.resolve(zipEntry.getName());
       if(zipEntry.isDirectory()){
         try {
