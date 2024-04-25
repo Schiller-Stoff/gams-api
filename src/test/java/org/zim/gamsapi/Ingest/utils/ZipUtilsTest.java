@@ -9,6 +9,8 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.UnitTest;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +52,14 @@ public class ZipUtilsTest extends UnitTest {
       });
     }
 
+    @Test
+    public void throwsExceptionIfNoZipGiven() {
+      byte[] invalidZip = new byte[0];
+      org.junit.jupiter.api.Assertions.assertThrows(IngestProcessingException.class, () -> {
+        ZipUtils.walkZippedDir(invalidZip, (zipEntry, __) -> {});
+      });
+    }
+
   }
 
   @Nested
@@ -69,4 +79,27 @@ public class ZipUtilsTest extends UnitTest {
       });
     }
   }
+
+    @Nested
+  public class UnzipDirToTempDir {
+
+    @Test
+    public void returnsPathToTempDirWhenZippedDirIsGiven() {
+      byte[] zippedDir = ZipUtils.zipDir(teiIngestDir);
+      Path tempDirPath = ZipUtils.unzipToTempDir(zippedDir);
+      org.junit.jupiter.api.Assertions.assertTrue(Files.exists(tempDirPath));
+      org.junit.jupiter.api.Assertions.assertTrue(Files.isDirectory(tempDirPath));
+    }
+
+    @Test
+    public void throwsExceptionWhenZippedDirIsInvalid() {
+      byte[] invalidZippedDir = new byte[0];
+      org.junit.jupiter.api.Assertions.assertThrows(IngestProcessingException.class, () -> {
+        ZipUtils.unzipToTempDir(invalidZippedDir);
+      });
+    }
+
+  }
+
+
 }
