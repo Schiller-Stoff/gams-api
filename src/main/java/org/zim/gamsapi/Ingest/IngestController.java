@@ -17,19 +17,20 @@ import java.io.IOException;
 @Slf4j
 public class IngestController {
 
-  private final IIngestService subInfoPackService;
+  private final IIngestService ingestService;
 
   @PostMapping(produces = "application/json", path = {"/api/v1/projects/{projectAbbr}/objects/", "/api/v1/projects/{projectAbbr}/objects"})
   @ResponseBody
-  public void ingestSubInfoPack(@ModelAttribute Ingest subInfoPack, HttpServletRequest request) {
+  public void ingest(@ModelAttribute Ingest ingest, HttpServletRequest request) {
 
-    byte[] sipAsZIP;
+    byte[] bagAsZip;
+    // TODO this form part name needs to be updated!
     final String ZIP_FORM_PART_NAME = "subInfoPackZIP";
     try {
-      Part subInfoPackZIPPart = request.getPart(ZIP_FORM_PART_NAME);
-      sipAsZIP = subInfoPackZIPPart.getInputStream().readAllBytes();
+      Part zipPart = request.getPart(ZIP_FORM_PART_NAME);
+      bagAsZip = zipPart.getInputStream().readAllBytes();
     } catch (IOException e){
-      String msg = String.format("Failed to read given zip-file via multipart form-data request for subInfoPack: %s", subInfoPack);
+      String msg = String.format("Failed to read given zip-file via multipart form-data request for ingest: %s", ingest);
       log.error(msg);
       throw new IngestProcessingException(msg);
     } catch (ServletException e){
@@ -38,11 +39,11 @@ public class IngestController {
       throw new IngestProcessingException(msg);
 
     }
-    subInfoPack.setZippedBagItFolder(sipAsZIP);
-    subInfoPackService.ingest(subInfoPack);
+    ingest.setZippedBagItFolder(bagAsZip);
+    ingestService.ingest(ingest);
 
-    // TODO need to return meaningful information about the submission info-package.
-    // return subInfoPack;
+    // TODO need to return meaningful information about the ingest.
+    // return ingest;
   }
 
 
