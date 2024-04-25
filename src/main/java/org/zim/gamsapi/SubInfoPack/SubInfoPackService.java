@@ -42,12 +42,13 @@ public class SubInfoPackService implements ISubInfoPackService {
 
     try {
       BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
-      log.error("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
+      log.info("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
       String parentId = bagitSipJson.getParent();
       // if there are child objects -> save a reference
 
       // 02. build and save digital object from bag-info.txt
+      // TODO build object in seperate method - save can stay here?
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
           .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
@@ -67,6 +68,7 @@ public class SubInfoPackService implements ISubInfoPackService {
       log.info("****** Successfully saved digital object: {}", digitalObject);
 
       // 03. build and save datastreams from sip.json in the bagit payload
+      // TODO build datastream in sepearate method - save can stay here?
       bagitSipJson.getContentFiles().stream()
             .map(contentFile -> {
               byte[] datastreamContent;
