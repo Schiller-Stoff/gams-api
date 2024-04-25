@@ -37,7 +37,15 @@ public class IngestService implements IIngestService {
   public void ingest(Ingest ingest) {
 
     // 01. unzip bagitinfo to temp
-    Path bagDirPath = unzipBagToTempDir(ingest);
+    Path bagDirPath;
+    try {
+      bagDirPath = ZipUtils.unzipDirToTempDir(ingest.getZippedBagItFolder());
+    } catch (IngestProcessingException e){
+      // provide more context information for the logging and user.
+      String msg = String.format("Failed to ingest given ingest %s. Original error: %s", ingest, e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
 
     try {
       BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
@@ -124,86 +132,10 @@ public class IngestService implements IIngestService {
   }
 
   /**
-   * Unzips given submission information package to temporary directory.
-   * @param ingest submission information package to be processed.
-   * @return path to temporary directory containing unzipped submission information package as bagit.
-   * @throws IngestProcessingException if unzipping fails.
-   */
-  private Path unzipBagToTempDir(Ingest ingest) throws IngestProcessingException {
-
-    // TODO should I move this logic to ZpiUtils? (and test there?) - because: 1. it is a utility method 2. would be easier to test
-    // TODO think about a meaningful exception to be thrown so that the caller might provide a meaningful error message
-
-    // first create random named temp directory
-    Path tempBagDirPath;
-    try {
-      // TODO think about this
-      //tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr() + "_" + UUID.randomUUID().toString());
-       tempBagDirPath = Files.createTempDirectory(ingest.getProjectAbbr());
-    } catch (IOException e){
-      String msg = String.format("Failed to create root temporary directory for given subinfopack %s. Original error %s", ingest, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
-    }
-
-    // walk through zipped directory and create directories and files in temp directory
-    ZipUtils.walkZippedDir(ingest.getZippedBagItFolder(), (zipEntry, byteArrayOutputStream) -> {
-      Path tempFilePath = tempBagDirPath.resolve(zipEntry.getName());
-      if(zipEntry.isDirectory()){
-        try {
-          Files.createDirectories(tempFilePath);
-          log.info("Created temporary bag directory: {}", tempFilePath);
-        } catch (IOException e) {
-          String msg = String.format("Failed to create directory %s for given subinfopack %s. Original error %s", tempFilePath, ingest, e);
-          log.error(msg);
-          throw new IngestProcessingException(msg);
-        }
-      } else {
-        try {
-          // zip might contain entries like /datastreams/derla.sty1 --> need to create /datastreams/ directory first
-          ensureParentDir(tempFilePath);
-          Files.createFile(tempFilePath);
-          Files.write(tempFilePath, byteArrayOutputStream.toByteArray());
-          log.info("Successfully wrote file {} to temporary bag directory: {}", zipEntry.getName(), tempFilePath);
-        } catch (IOException e) {
-          String msg = String.format("Failed to create file %s for given subinfopack %s. Original error %s", tempFilePath, ingest, e);
-          log.error(msg);
-          throw new IngestProcessingException(msg);
-        }
-      }
-    });
-
-    return tempBagDirPath;
-  }
-
-
-  /**
-   * Makes sure that all parent directories of the given path exist.
-   * @param path path to check
-   * @throws IngestProcessingException if missing parent directories cannot be created
-   */
-  private void ensureParentDir(Path path) throws IngestProcessingException {
-    if(Files.exists(path.getParent())){
-      return;
-    } else {
-      try {
-        // recursively call itself until parent directory exists
-        ensureParentDir(path.getParent());
-        Files.createDirectory(path.getParent());
-      } catch (IOException e){
-        String msg = String.format("Failed to verify existence of parent directories of path: %s. Original error: %s", path, e);
-        log.error(msg);
-        throw new IngestProcessingException(msg);
-      }
-
-    }
-  }
-
-
-  /**
    * Deletes given directory and all its subdirectories and files.
    * @param dirPath path to directory to be deleted.
    * @throws IngestProcessingException if deletion fails.
+   * TODO move to somewhere else?
    */
   private void deleteDir(Path dirPath) throws IngestProcessingException {
     // delete temp directory last

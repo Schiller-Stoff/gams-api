@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -111,5 +113,81 @@ public class ZipUtils {
     fis.close();
   }
 
+
+  /**
+   * Unzips a zipped directory to a temporary directory.
+   * @param zippedDir TODO
+   * @return path to temporary directory containing the now unzipped directory.
+   * @throws IngestProcessingException if unzipping fails.
+   */
+  public static Path unzipDirToTempDir(byte[] zippedDir) throws IngestProcessingException {
+
+    // TODO test + meaningful exception to be thrown from the caller
+
+    // TODO make sure that in any case the temp directory is deleted / removed!
+
+    // first create random named temporary directory
+    Path tempBagDirPath;
+
+    try {
+      //TODO think about this
+      tempBagDirPath = Files.createTempDirectory(UUID.randomUUID().toString());
+    } catch (IOException e){
+      String msg = String.format("Failed to create root temporary directory during unzipping. Original error %s", e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+
+    // walk through zipped directory and create directories and files in temp directory
+    ZipUtils.walkZippedDir(zippedDir, (zipEntry, byteArrayOutputStream) -> {
+      Path tempFilePath = tempBagDirPath.resolve(zipEntry.getName());
+      if(zipEntry.isDirectory()){
+        try {
+          Files.createDirectories(tempFilePath);
+          log.info("Created temporary bag directory: {}", tempFilePath);
+        } catch (IOException e) {
+          String msg = String.format("Failed to create directory %s during unzipping. Original error %s", tempFilePath, e);
+          log.error(msg);
+          throw new IngestProcessingException(msg);
+        }
+      } else {
+        try {
+          // zip might contain entries like /datastreams/derla.sty1 --> need to create /datastreams/ directory first
+          ensureParentDir(tempFilePath);
+          Files.createFile(tempFilePath);
+          Files.write(tempFilePath, byteArrayOutputStream.toByteArray());
+          log.info("Successfully wrote file {} to temporary bag directory: {}", zipEntry.getName(), tempFilePath);
+        } catch (IOException e) {
+          String msg = String.format("Failed to create file %s during unzipping. Original error %s", tempFilePath, e);
+          log.error(msg);
+          throw new IngestProcessingException(msg);
+        }
+      }
+    });
+
+    return tempBagDirPath;
+  }
+
+  /**
+   * Makes sure that all parent directories of the given path exist.
+   * @param path path to check
+   * @throws IngestProcessingException if missing parent directories cannot be created
+   */
+  public static void ensureParentDir(Path path) throws IngestProcessingException {
+    if(Files.exists(path.getParent())){
+      return;
+    } else {
+      try {
+        // recursively call itself until parent directory exists
+        ensureParentDir(path.getParent());
+        Files.createDirectory(path.getParent());
+      } catch (IOException e){
+        String msg = String.format("Failed to verify existence of parent directories of path: %s. Original error: %s", path, e);
+        log.error(msg);
+        throw new IngestProcessingException(msg);
+      }
+
+    }
+  }
 
 }
