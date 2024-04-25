@@ -114,23 +114,4 @@ public class IngestService implements IIngestService {
 
   }
 
-  /**
-   * Adds element to
-   * If given list is null creates a List and add the item -> returns list.
-   * If given list exists -> copies list and adds given element -> returns list
-   * @param nullableList given list that might be null
-   * @param itemToAdd item to add to list.
-   * @return created list with added item.
-   */
-  private List<String> addToNullableList(@Nullable List<String> nullableList, String itemToAdd){
-    // TODO remove outdated method?
-    if((nullableList == null) || (nullableList.isEmpty())) {
-      return new ArrayList<>(List.of(itemToAdd));
-    } else {
-      List<String> copiedList = new ArrayList<>(nullableList);
-      copiedList.add(itemToAdd);
-      return copiedList;
-    }
-  }
-
 }
