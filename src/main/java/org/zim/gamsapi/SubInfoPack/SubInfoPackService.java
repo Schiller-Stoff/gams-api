@@ -38,10 +38,10 @@ public class SubInfoPackService implements ISubInfoPackService {
   public void ingest(SubInfoPack subInfoPack) {
 
     // 01. unzip bagitinfo to temp
-    Path unzippedBag = unzipBagToTempDir(subInfoPack);
+    Path bagDirPath = unzipBagToTempDir(subInfoPack);
 
     try {
-      BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(unzippedBag);
+      BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
       log.error("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
       String parentId = bagitSipJson.getParent();
@@ -70,7 +70,7 @@ public class SubInfoPackService implements ISubInfoPackService {
       bagitSipJson.getContentFiles().stream()
             .map(contentFile -> {
               byte[] datastreamContent;
-              Path contentFilePath = Path.of(unzippedBag + File.separator + contentFile.getBagpath());
+              Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
               try {
                 datastreamContent = Files.readAllBytes(contentFilePath);
               } catch (IOException e) {
@@ -98,7 +98,7 @@ public class SubInfoPackService implements ISubInfoPackService {
 
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
-      deleteDir(unzippedBag);
+      deleteDir(bagDirPath);
       throw e;
     }
 
