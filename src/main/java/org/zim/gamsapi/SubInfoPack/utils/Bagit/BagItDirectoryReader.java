@@ -21,8 +21,11 @@ import java.util.stream.Stream;
  * Utility class for BagIt related operations.
  */
 @Slf4j
-public class BagitUtils {
+public class BagItDirectoryReader {
 
+  // TODO maybe better to solve this with a constructor - bagitPath as parameter?
+  // TODO want to test methods that get the extracted bagit as argument and not the path to the bagit?
+  // (would be easier to test)
 
   /**
    * Maps the key value pairs in the bag-info.txt file to a BagItInfo object.
@@ -30,7 +33,7 @@ public class BagitUtils {
    * @return A BagItInfo object.
    * @throws SubInfoPackProcessingException If the bag-info.txt file is missing or if a required key is missing.
    */
-  public static BagItInfo mapBagItInfo(Path bagItDirPath) throws SubInfoPackProcessingException {
+  public static BagItInfo extractBagItInfo(Path bagItDirPath) throws SubInfoPackProcessingException {
 
     String pathToBagInfoFile = bagItDirPath.resolve(BagItFilePaths.BAG_INFO_FILE_PATH.name).toString();
     Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
@@ -84,7 +87,7 @@ public class BagitUtils {
    * Maps the sip.json file to a BagitSipJson object.
    * @param bagitDirPath The path to the bagit directory.
    */
-  public static BagitSipJson mapSipJson(Path bagitDirPath){
+  public static BagitSipJson extractSipJson(Path bagitDirPath){
 
     Path pathToBagInfoFile = bagitDirPath.resolve(BagItFilePaths.BAG_SIP_JSON.name);
 
