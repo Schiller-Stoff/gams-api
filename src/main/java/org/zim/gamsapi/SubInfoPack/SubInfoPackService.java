@@ -16,7 +16,7 @@ import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.*;
 import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagitSipJson;
-import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagitUtils;
+import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagItDirectoryReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class SubInfoPackService implements ISubInfoPackService {
     Path unzippedBag = unzipBagToTempDir(subInfoPack);
 
     try {
-      BagitSipJson bagitSipJson = BagitUtils.mapSipJson(unzippedBag);
+      BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(unzippedBag);
       log.error("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
       String parentId = bagitSipJson.getParent();
@@ -130,9 +130,12 @@ public class SubInfoPackService implements ISubInfoPackService {
    */
   private Path unzipBagToTempDir(SubInfoPack subInfoPack) throws SubInfoPackProcessingException {
 
+    // TODO should I move this logic to ZpiUtils? (and test there?) - because: 1. it is a utility method 2. would be easier to test
+
     // first create random named temp directory
     Path tempBagDirPath;
     try {
+      // TODO think about this
       //tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr() + "_" + UUID.randomUUID().toString());
        tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr());
     } catch (IOException e){
