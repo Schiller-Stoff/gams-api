@@ -17,7 +17,6 @@ import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.*;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
