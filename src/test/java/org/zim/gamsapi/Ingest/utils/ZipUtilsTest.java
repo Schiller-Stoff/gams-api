@@ -80,7 +80,7 @@ public class ZipUtilsTest extends UnitTest {
     }
   }
 
-    @Nested
+  @Nested
   public class UnzipToTempDir {
 
     @Test
