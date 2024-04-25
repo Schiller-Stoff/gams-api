@@ -76,7 +76,7 @@ public class IngestService implements IIngestService {
               try {
                 datastreamContent = Files.readAllBytes(contentFilePath);
               } catch (IOException e) {
-                String msg = String.format("Failed to read file %s for given subinfopack %s for object %s. Original error %s", contentFilePath, ingest, digitalObject, e);
+                String msg = String.format("Failed to read file %s for given ingest %s for object %s. Original error %s", contentFilePath, ingest, digitalObject, e);
                 log.error(msg);
                 throw new IngestProcessingException(msg);
               }
