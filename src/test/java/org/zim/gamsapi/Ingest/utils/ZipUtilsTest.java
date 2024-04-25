@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,6 +107,54 @@ public class ZipUtilsTest extends UnitTest {
         ZipUtils.unzipToTempDir(invalidZippedDir);
       });
     }
+
+  }
+
+  @Nested
+  public class DeleteDir {
+
+    @Test
+    public void deletesDirectoryAndAllItsContents() throws IOException, IngestProcessingException {
+      Path dirPath = Files.createTempDirectory("testDir");
+      Files.createTempFile(dirPath, "testFile", ".txt");
+
+      ZipUtils.deleteDir(dirPath);
+
+      org.junit.jupiter.api.Assertions.assertFalse(Files.exists(dirPath));
+    }
+
+    @Test
+    public void deletesNestedDirectoriesAndTheirContents() throws IOException, IngestProcessingException {
+      Path dirPath = Files.createTempDirectory("testDir");
+      Path nestedDirPath = Files.createDirectories(dirPath.resolve("nestedDir"));
+      Files.createTempFile(nestedDirPath, "testFile", ".txt");
+
+      ZipUtils.deleteDir(dirPath);
+
+      org.junit.jupiter.api.Assertions.assertFalse(Files.exists(dirPath));
+      org.junit.jupiter.api.Assertions.assertFalse(Files.exists(nestedDirPath));
+    }
+
+    @Test
+    public void throwsExceptionWhenDirectoryDoesNotExist() {
+      Path dirPath = Paths.get("nonExistentDir");
+
+      org.junit.jupiter.api.Assertions.assertThrows(IngestProcessingException.class, () -> {
+        ZipUtils.deleteDir(dirPath);
+      });
+    }
+
+    @Test
+    public void doesNotThrowExceptionWhenDirectoryIsEmpty() throws IOException, IngestProcessingException {
+      Path dirPath = Files.createTempDirectory("testDir");
+
+      ZipUtils.deleteDir(dirPath);
+
+      org.junit.jupiter.api.Assertions.assertFalse(Files.exists(dirPath));
+    }
+
+
+
 
   }
 
