@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -25,11 +26,19 @@ public class ZipUtils {
    * zip entries as input.
    * @param zippedDir zipped directory as byte[]
    * @param consumer Function to be called on looped directory contents
+   * @throws IngestProcessingException if zippedDir is not a valid zip (contains no entries) or if an IOException has been thrown during processing.
    */
   public static void walkZippedDir(byte[] zippedDir, BiConsumer<ZipEntry, ByteArrayOutputStream> consumer) throws IngestProcessingException {
     try {
       try(ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(zippedDir))){
         ZipEntry zipEntry = zipInputStream.getNextEntry();
+        // check if first entry is null - migt be an invalid zip
+        if(zipEntry == null) {
+          String msg = "First zip entry in given ZIP bytes is null. Given byte[] is not a valid zipped directory.";
+          log.error(msg);
+          throw new IOException(msg);
+        }
+        // go through all entries
         while (zipEntry != null) {
           // https://stackoverflow.com/questions/65322025/how-to-extract-zip-file-in-memory
           ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -120,11 +129,7 @@ public class ZipUtils {
    * @return path to temporary directory containing the now unzipped directory.
    * @throws IngestProcessingException if unzipping fails.
    */
-  public static Path unzipDirToTempDir(byte[] zippedDir) throws IngestProcessingException {
-
-    // TODO test + meaningful exception to be thrown from the caller
-
-    // TODO make sure that in any case the temp directory is deleted / removed!
+  public static Path unzipToTempDir(byte[] zippedDir) throws IngestProcessingException {
 
     // first create random named temporary directory
     Path tempBagDirPath;
