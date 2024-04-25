@@ -4,35 +4,24 @@ import lombok.Data;
 import lombok.ToString;
 
 /**
- * Domain class representing a Submission Information Package
+ * Domain class representing an ingest operation
  *
  */
 @Data
 public class Ingest {
 
-  // contained in metadata
-  //private String id;
-
-  // TODO use for validation?
-  private String projectAbbr;
-
-  // should be contained in metadata
-  // private String type;
-
   /**
-   * Represents the profile of the ingest process.
-   * Like "simple" - "basic"
-   * TODO use enum here / look up how to combine with database / JPA / hibernate
+   * Abbreviation of the project the ingest operation belongs to
+   * (usually provided by path variable)
+   * TODO add validation?
    */
-  private String ingestProfile;
+  private String projectAbbr;
 
   /**
    * The zipped bag.
+   * TODO add validation?
    */
   @ToString.Exclude
   private byte[] zippedBagItFolder;
-
-
-  //TODO add foldername for easier logging?
 
 }
