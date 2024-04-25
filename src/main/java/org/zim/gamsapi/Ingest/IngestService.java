@@ -54,6 +54,7 @@ public class IngestService implements IIngestService {
       // TODO think about: looks like a conversion method?
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
+          // TODO everything should be defined in the sipjson also the project! BUT: Validate if sip.json entry is same as ingest endpoint!
           .project(ingest.getProjectAbbr())
           .objectType(bagitSipJson.getObjectType())
           .parent(new DigitalObjectBuilder().project(ingest.getProjectAbbr()).id(bagitSipJson.getParent()).build())
