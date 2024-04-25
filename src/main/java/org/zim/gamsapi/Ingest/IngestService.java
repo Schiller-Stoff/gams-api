@@ -49,17 +49,14 @@ public class IngestService implements IIngestService {
       BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
       log.info("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
 
-      String parentId = bagitSipJson.getParent();
-      // if there are child objects -> save a reference
-
       // 02. build and save digital object from bag-info.txt
       // TODO build object in seperate method - save can stay here?
       // TODO think about: looks like a conversion method?
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
-          .project(Project.builder().projectAbbr(ingest.getProjectAbbr()).build())
+          .project(ingest.getProjectAbbr())
           .objectType(bagitSipJson.getObjectType())
-          .parent(new DigitalObjectBuilder().id(parentId).build())
+          .parent(new DigitalObjectBuilder().project(ingest.getProjectAbbr()).id(bagitSipJson.getParent()).build())
           .types(bagitSipJson.getTypes())
           .baseMetadata(new MetadataBaseEntityBuilder()
               .title(bagitSipJson.getTitle())
