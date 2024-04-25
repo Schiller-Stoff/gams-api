@@ -27,6 +27,9 @@ public class BagItDirectoryReader {
   // TODO want to test methods that get the extracted bagit as argument and not the path to the bagit?
   // (would be easier to test)
 
+  // TODO atm e.g. bagSipJson is being validated BUT not the bagit as a whole -- would need to check certain file conventions etc.?
+  // (if checksums are available etc)
+
   /**
    * Maps the key value pairs in the bag-info.txt file to a BagItInfo object.
    * @param bagItDirPath The path to the bagit directory.
@@ -35,10 +38,13 @@ public class BagItDirectoryReader {
    */
   public static BagItInfo extractBagItInfo(Path bagItDirPath) throws IngestProcessingException {
 
+    // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
+
     String pathToBagInfoFile = bagItDirPath.resolve(BagItFilePaths.BAG_INFO_FILE_PATH.name).toString();
     Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
 
     try {
+      //TODO validation of baginfo is missing!
       return  BagItInfo.builder()
               .id(fileValues.get("Id"))
               .title(fileValues.get("Title"))
