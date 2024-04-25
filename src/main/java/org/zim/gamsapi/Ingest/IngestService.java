@@ -107,7 +107,7 @@ public class IngestService implements IIngestService {
 
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
-      deleteDir(bagDirPath);
+      ZipUtils.deleteDir(bagDirPath);
       throw e;
     }
 
@@ -122,33 +122,12 @@ public class IngestService implements IIngestService {
    * @return created list with added item.
    */
   private List<String> addToNullableList(@Nullable List<String> nullableList, String itemToAdd){
-    if((nullableList == null) || (nullableList.size() == 0)) {
+    if((nullableList == null) || (nullableList.isEmpty())) {
       return new ArrayList<>(List.of(itemToAdd));
     } else {
       List<String> copiedList = new ArrayList<>(nullableList);
       copiedList.add(itemToAdd);
       return copiedList;
-    }
-  }
-
-  /**
-   * Deletes given directory and all its subdirectories and files.
-   * @param dirPath path to directory to be deleted.
-   * @throws IngestProcessingException if deletion fails.
-   * TODO move to somewhere else?
-   */
-  private void deleteDir(Path dirPath) throws IngestProcessingException {
-    // delete temp directory last
-    try (Stream<Path> entries = Files.walk(dirPath)){
-      entries
-              .sorted(Comparator.reverseOrder())
-              .map(Path::toFile)
-              .forEach(File::delete);
-      log.info("DELETED TEMP DIR: {}", dirPath);
-    } catch (IOException e){
-      String msg = String.format("Failed to delete temporary directory %s. Original error %s", dirPath, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
     }
   }
 

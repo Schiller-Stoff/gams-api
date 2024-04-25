@@ -5,8 +5,10 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -192,6 +194,26 @@ public class ZipUtils {
         throw new IngestProcessingException(msg);
       }
 
+    }
+  }
+
+  /**
+   * Deletes given directory and all its subdirectories and files.
+   * @param dirPath path to directory to be deleted.
+   * @throws IngestProcessingException if deletion fails through IOException.
+   */
+  public static void deleteDir(Path dirPath) throws IngestProcessingException {
+    // delete temp directory last
+    try (Stream<Path> entries = Files.walk(dirPath)){
+      entries
+          .sorted(Comparator.reverseOrder())
+          .map(Path::toFile)
+          .forEach(File::delete);
+      log.info("DELETED TEMP DIR: {}", dirPath);
+    } catch (IOException e){
+      String msg = String.format("Failed to delete temporary directory %s. Original error %s", dirPath, e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
     }
   }
 
