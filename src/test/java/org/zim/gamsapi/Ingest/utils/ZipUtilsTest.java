@@ -81,14 +81,22 @@ public class ZipUtilsTest extends UnitTest {
   }
 
     @Nested
-  public class UnzipDirToTempDir {
+  public class UnzipToTempDir {
 
     @Test
-    public void returnsPathToTempDirWhenZippedDirIsGiven() {
+    public void createsValidFileFromZip(){
       byte[] zippedDir = ZipUtils.zipDir(teiIngestDir);
       Path tempDirPath = ZipUtils.unzipToTempDir(zippedDir);
       org.junit.jupiter.api.Assertions.assertTrue(Files.exists(tempDirPath));
       org.junit.jupiter.api.Assertions.assertTrue(Files.isDirectory(tempDirPath));
+    }
+
+    @Test
+    public void returnsNotNullPathToTempDirWhenZippedDirIsGiven() {
+      byte[] zippedDir = ZipUtils.zipDir(teiIngestDir);
+      Path tempDirPath = ZipUtils.unzipToTempDir(zippedDir);
+      Assertions.assertThat(tempDirPath)
+          .isNotNull();
     }
 
     @Test
