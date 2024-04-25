@@ -6,8 +6,8 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Error states concerning SubmissionInformationPackages
  */
-public class SubInfoPackException extends ResponseStatusException {
-  public SubInfoPackException(HttpStatusCode status, String reason) {
+public class IngestException extends ResponseStatusException {
+  public IngestException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
 }

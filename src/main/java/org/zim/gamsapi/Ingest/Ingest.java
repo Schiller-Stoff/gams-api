@@ -8,7 +8,7 @@ import lombok.ToString;
  *
  */
 @Data
-public class SubInfoPack {
+public class Ingest {
 
   // contained in metadata
   //private String id;

@@ -1,7 +1,7 @@
 package org.zim.gamsapi.Ingest.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.function.BiConsumer;
@@ -24,7 +24,7 @@ public class ZipUtils {
    * @param zippedDir zipped directory as byte[]
    * @param consumer Function to be called on looped directory contents
    */
-  public static void walkZippedDir(byte[] zippedDir, BiConsumer<ZipEntry, ByteArrayOutputStream> consumer) throws SubInfoPackProcessingException {
+  public static void walkZippedDir(byte[] zippedDir, BiConsumer<ZipEntry, ByteArrayOutputStream> consumer) throws IngestProcessingException {
     try {
       try(ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(zippedDir))){
         ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -43,7 +43,7 @@ public class ZipUtils {
     } catch (IOException e){
       String msg = String.format("IOException at walking through the byte[] representation of given zipped directory. Make sure that given byte[] is a zipped directory! Got error: %s", e);
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
     }
 
   }
@@ -55,12 +55,12 @@ public class ZipUtils {
    * @param sourceFile directory to zip.
    * @return zipped directory as byte[]
    */
-  public static byte[] zipDir(File sourceFile) throws SubInfoPackProcessingException {
+  public static byte[] zipDir(File sourceFile) throws IngestProcessingException {
 
     if(!sourceFile.isDirectory()){
       String msg = String.format("Given file for zipping is not a directory! Got path %s represented via file %s", sourceFile.getAbsolutePath(), sourceFile);
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
     }
 
     try {
@@ -75,7 +75,7 @@ public class ZipUtils {
     } catch (IOException e){
       String msg = String.format("Failed to zip directory with path %s to temp-file. With reason: %s", sourceFile.getAbsolutePath(), e);
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
     }
 
   }

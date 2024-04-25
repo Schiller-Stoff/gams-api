@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
-import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.UnitTest;
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class ZipUtilsTest extends UnitTest {
     @Test
     public void throwsExceptionIfNoDirGiven() throws IOException {
       File teiIngestDir = new ClassPathResource(TESTFILE_LOCATION).getFile();
-      org.junit.jupiter.api.Assertions.assertThrows(SubInfoPackProcessingException.class, () -> {
+      org.junit.jupiter.api.Assertions.assertThrows(IngestProcessingException.class, () -> {
         ZipUtils.zipDir(teiIngestDir);
       });
     }

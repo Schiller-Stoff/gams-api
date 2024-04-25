@@ -7,21 +7,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
-import org.zim.gamsapi.Ingest.interfaces.ISubInfoPackService;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping
 @Slf4j
-public class SubInfoPackController {
+public class IngestController {
 
-  private final ISubInfoPackService subInfoPackService;
+  private final IIngestService subInfoPackService;
 
   @PostMapping(produces = "application/json", path = {"/api/v1/projects/{projectAbbr}/objects/", "/api/v1/projects/{projectAbbr}/objects"})
   @ResponseBody
-  public void ingestSubInfoPack(@ModelAttribute SubInfoPack subInfoPack, HttpServletRequest request) {
+  public void ingestSubInfoPack(@ModelAttribute Ingest subInfoPack, HttpServletRequest request) {
 
     byte[] sipAsZIP;
     final String ZIP_FORM_PART_NAME = "subInfoPackZIP";
@@ -31,11 +31,11 @@ public class SubInfoPackController {
     } catch (IOException e){
       String msg = String.format("Failed to read given zip-file via multipart form-data request for subInfoPack: %s", subInfoPack);
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
     } catch (ServletException e){
       String msg = String.format("Failed to extract form part: %s from multipart request against %s. There might be ", ZIP_FORM_PART_NAME, request.getRequestURI());
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
 
     }
     subInfoPack.setZippedFolder(sipAsZIP);

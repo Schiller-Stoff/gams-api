@@ -12,8 +12,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
-import org.zim.gamsapi.Ingest.interfaces.ISubInfoPackService;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.*;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
@@ -28,17 +28,17 @@ import java.util.stream.Stream;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class SubInfoPackService implements ISubInfoPackService {
+public class IngestService implements IIngestService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
 
   @Override
   @Transactional
-  public void ingest(SubInfoPack subInfoPack) {
+  public void ingest(Ingest ingest) {
 
     // 01. unzip bagitinfo to temp
-    Path bagDirPath = unzipBagToTempDir(subInfoPack);
+    Path bagDirPath = unzipBagToTempDir(ingest);
 
     try {
       BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
@@ -51,7 +51,7 @@ public class SubInfoPackService implements ISubInfoPackService {
       // TODO build object in seperate method - save can stay here?
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id(bagitSipJson.getId())
-          .project(Project.builder().projectAbbr(subInfoPack.getProjectAbbr()).build())
+          .project(Project.builder().projectAbbr(ingest.getProjectAbbr()).build())
           .objectType(bagitSipJson.getObjectType())
           .parent(new DigitalObjectBuilder().id(parentId).build())
           .types(bagitSipJson.getTypes())
@@ -76,9 +76,9 @@ public class SubInfoPackService implements ISubInfoPackService {
               try {
                 datastreamContent = Files.readAllBytes(contentFilePath);
               } catch (IOException e) {
-                String msg = String.format("Failed to read file %s for given subinfopack %s for object %s. Original error %s", contentFilePath, subInfoPack, digitalObject, e);
+                String msg = String.format("Failed to read file %s for given subinfopack %s for object %s. Original error %s", contentFilePath, ingest, digitalObject, e);
                 log.error(msg);
-                throw new SubInfoPackProcessingException(msg);
+                throw new IngestProcessingException(msg);
               }
               return new DatastreamBuilder()
                       .dsid(contentFile.getDsid())
@@ -126,11 +126,11 @@ public class SubInfoPackService implements ISubInfoPackService {
 
   /**
    * Unzips given submission information package to temporary directory.
-   * @param subInfoPack submission information package to be processed.
+   * @param ingest submission information package to be processed.
    * @return path to temporary directory containing unzipped submission information package as bagit.
-   * @throws SubInfoPackProcessingException if unzipping fails.
+   * @throws IngestProcessingException if unzipping fails.
    */
-  private Path unzipBagToTempDir(SubInfoPack subInfoPack) throws SubInfoPackProcessingException {
+  private Path unzipBagToTempDir(Ingest ingest) throws IngestProcessingException {
 
     // TODO should I move this logic to ZpiUtils? (and test there?) - because: 1. it is a utility method 2. would be easier to test
     // TODO think about a meaningful exception to be thrown so that the caller might provide a meaningful error message
@@ -140,24 +140,24 @@ public class SubInfoPackService implements ISubInfoPackService {
     try {
       // TODO think about this
       //tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr() + "_" + UUID.randomUUID().toString());
-       tempBagDirPath = Files.createTempDirectory(subInfoPack.getProjectAbbr());
+       tempBagDirPath = Files.createTempDirectory(ingest.getProjectAbbr());
     } catch (IOException e){
-      String msg = String.format("Failed to create root temporary directory for given subinfopack %s. Original error %s", subInfoPack, e);
+      String msg = String.format("Failed to create root temporary directory for given subinfopack %s. Original error %s", ingest, e);
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
     }
 
     // walk through zipped directory and create directories and files in temp directory
-    ZipUtils.walkZippedDir(subInfoPack.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
+    ZipUtils.walkZippedDir(ingest.getZippedFolder(), (zipEntry, byteArrayOutputStream) -> {
       Path tempFilePath = tempBagDirPath.resolve(zipEntry.getName());
       if(zipEntry.isDirectory()){
         try {
           Files.createDirectories(tempFilePath);
           log.info("Created temporary bag directory: {}", tempFilePath);
         } catch (IOException e) {
-          String msg = String.format("Failed to create directory %s for given subinfopack %s. Original error %s", tempFilePath, subInfoPack, e);
+          String msg = String.format("Failed to create directory %s for given subinfopack %s. Original error %s", tempFilePath, ingest, e);
           log.error(msg);
-          throw new SubInfoPackProcessingException(msg);
+          throw new IngestProcessingException(msg);
         }
       } else {
         try {
@@ -167,9 +167,9 @@ public class SubInfoPackService implements ISubInfoPackService {
           Files.write(tempFilePath, byteArrayOutputStream.toByteArray());
           log.info("Successfully wrote file {} to temporary bag directory: {}", zipEntry.getName(), tempFilePath);
         } catch (IOException e) {
-          String msg = String.format("Failed to create file %s for given subinfopack %s. Original error %s", tempFilePath, subInfoPack, e);
+          String msg = String.format("Failed to create file %s for given subinfopack %s. Original error %s", tempFilePath, ingest, e);
           log.error(msg);
-          throw new SubInfoPackProcessingException(msg);
+          throw new IngestProcessingException(msg);
         }
       }
     });
@@ -181,9 +181,9 @@ public class SubInfoPackService implements ISubInfoPackService {
   /**
    * Makes sure that all parent directories of the given path exist.
    * @param path path to check
-   * @throws SubInfoPackProcessingException if missing parent directories cannot be created
+   * @throws IngestProcessingException if missing parent directories cannot be created
    */
-  private void ensureParentDir(Path path) throws SubInfoPackProcessingException {
+  private void ensureParentDir(Path path) throws IngestProcessingException {
     if(Files.exists(path.getParent())){
       return;
     } else {
@@ -194,7 +194,7 @@ public class SubInfoPackService implements ISubInfoPackService {
       } catch (IOException e){
         String msg = String.format("Failed to verify existence of parent directories of path: %s. Original error: %s", path, e);
         log.error(msg);
-        throw new SubInfoPackProcessingException(msg);
+        throw new IngestProcessingException(msg);
       }
 
     }
@@ -204,9 +204,9 @@ public class SubInfoPackService implements ISubInfoPackService {
   /**
    * Deletes given directory and all its subdirectories and files.
    * @param dirPath path to directory to be deleted.
-   * @throws SubInfoPackProcessingException if deletion fails.
+   * @throws IngestProcessingException if deletion fails.
    */
-  private void deleteDir(Path dirPath) throws SubInfoPackProcessingException {
+  private void deleteDir(Path dirPath) throws IngestProcessingException {
     // delete temp directory last
     try (Stream<Path> entries = Files.walk(dirPath)){
       entries
@@ -217,7 +217,7 @@ public class SubInfoPackService implements ISubInfoPackService {
     } catch (IOException e){
       String msg = String.format("Failed to delete temporary directory %s. Original error %s", dirPath, e);
       log.error(msg);
-      throw new SubInfoPackProcessingException(msg);
+      throw new IngestProcessingException(msg);
     }
   }
 

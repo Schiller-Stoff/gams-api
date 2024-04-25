@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.UnitTest;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,7 +108,7 @@ public class XMLUtilsTest extends UnitTest {
     public void throwsIfMAlformedXpathWasGiven(String xpath) throws IOException {
       InputStream teiIngestXML = new ClassPathResource(TESTFILE_LOCATION).getInputStream();
       Document teiDocument = XMLUtils.parseXml(teiIngestXML.readAllBytes());
-      org.junit.jupiter.api.Assertions.assertThrows(SubInfoPackProcessingException.class, () -> {
+      org.junit.jupiter.api.Assertions.assertThrows(IngestProcessingException.class, () -> {
         XMLUtils.getAllXpath(xpath, teiDocument);
       });
     }
@@ -129,7 +129,7 @@ public class XMLUtilsTest extends UnitTest {
       NodeList idnoList = teiDocument.getElementsByTagName("idno");
       Node pidIdno = idnoList.item(0);
 
-      org.junit.jupiter.api.Assertions.assertThrows(SubInfoPackProcessingException.class, () -> {
+      org.junit.jupiter.api.Assertions.assertThrows(IngestProcessingException.class, () -> {
         XMLUtils.extractAttributeValue(attributeName, pidIdno);
       });
 
