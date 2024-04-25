@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils.Bagit;
+package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

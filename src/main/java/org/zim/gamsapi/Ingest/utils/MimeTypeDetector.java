@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils;
+package org.zim.gamsapi.Ingest.utils;
 
 import java.io.IOException;
 import java.io.InputStream;

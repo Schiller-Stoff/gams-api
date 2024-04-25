@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack;
+package org.zim.gamsapi.Ingest;
 
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +12,11 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
-import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
-import org.zim.gamsapi.SubInfoPack.utils.*;
-import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagitSipJson;
-import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagItDirectoryReader;
+import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.interfaces.ISubInfoPackService;
+import org.zim.gamsapi.Ingest.utils.*;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,8 +1,7 @@
-package org.zim.gamsapi.SubInfoPack.utils;
+package org.zim.gamsapi.Ingest.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.function.BiConsumer;

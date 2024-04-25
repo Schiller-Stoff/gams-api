@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils.Bagit;
+package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,7 +7,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

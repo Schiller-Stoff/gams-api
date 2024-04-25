@@ -1,11 +1,11 @@
-package org.zim.gamsapi.SubInfoPack.utils;
+package org.zim.gamsapi.Ingest.utils;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
-import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.UnitTest;
 import java.io.File;
 import java.io.IOException;

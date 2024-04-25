@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils.Bagit;
+package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import lombok.Builder;
 import lombok.Data;

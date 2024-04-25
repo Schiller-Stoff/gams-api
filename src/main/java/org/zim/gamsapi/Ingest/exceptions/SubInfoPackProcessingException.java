@@ -1,7 +1,6 @@
-package org.zim.gamsapi.SubInfoPack.exceptions;
+package org.zim.gamsapi.Ingest.exceptions;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 
 /**

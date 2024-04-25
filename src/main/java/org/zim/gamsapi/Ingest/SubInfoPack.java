@@ -1,7 +1,6 @@
-package org.zim.gamsapi.SubInfoPack;
+package org.zim.gamsapi.Ingest;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**

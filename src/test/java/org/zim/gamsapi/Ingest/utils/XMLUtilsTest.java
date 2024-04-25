@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils;
+package org.zim.gamsapi.Ingest.utils;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Percentage;
@@ -10,7 +10,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.UnitTest;
 import java.io.IOException;
 import java.io.InputStream;

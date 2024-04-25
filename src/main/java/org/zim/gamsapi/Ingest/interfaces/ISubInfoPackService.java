@@ -1,6 +1,6 @@
-package org.zim.gamsapi.SubInfoPack.interfaces;
+package org.zim.gamsapi.Ingest.interfaces;
 
-import org.zim.gamsapi.SubInfoPack.SubInfoPack;
+import org.zim.gamsapi.Ingest.SubInfoPack;
 
 public interface ISubInfoPackService {
 

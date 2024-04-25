@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack;
+package org.zim.gamsapi.Ingest;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,8 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
-import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
+import org.zim.gamsapi.Ingest.exceptions.SubInfoPackProcessingException;
+import org.zim.gamsapi.Ingest.interfaces.ISubInfoPackService;
 import java.io.IOException;
 
 @Controller
