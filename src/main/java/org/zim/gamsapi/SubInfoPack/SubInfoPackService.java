@@ -5,24 +5,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.SubInfoPack.exceptions.SubInfoPackProcessingException;
 import org.zim.gamsapi.SubInfoPack.interfaces.ISubInfoPackService;
 import org.zim.gamsapi.SubInfoPack.utils.*;
+import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagitSipJson;
+import org.zim.gamsapi.SubInfoPack.utils.Bagit.BagitUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service

@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils;
+package org.zim.gamsapi.SubInfoPack.utils.Bagit;
 
 /**
  * Represents the different files that are required to be present in a valid BagIt archive.

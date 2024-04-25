@@ -1,4 +1,4 @@
-package org.zim.gamsapi.SubInfoPack.utils;
+package org.zim.gamsapi.SubInfoPack.utils.Bagit;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
