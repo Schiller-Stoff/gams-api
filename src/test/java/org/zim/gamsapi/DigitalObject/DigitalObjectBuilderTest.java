@@ -3,7 +3,6 @@ package org.zim.gamsapi.DigitalObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
@@ -60,6 +59,24 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertEquals("type", digitalObject.getObjectType());
     Assertions.assertEquals(Set.of("type"), digitalObject.getTypes());
     Assertions.assertEquals("test-title", digitalObject.getBaseMetadata().getTitle());
+  }
+
+  @Test
+  public void parentObjectHasSameProjectAssigned(){
+
+    final String TEST_PROJECT_ABBR = "testProjectAbbr";
+
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("1")
+        .project(TEST_PROJECT_ABBR)
+        .parent("2")
+        .baseMetadata(testMetadataBaseEntity)
+        .build();
+
+    Assertions.assertEquals(
+        digitalObject.getParent().getProject().getProjectAbbr(), TEST_PROJECT_ABBR
+    );
+
   }
 
 
