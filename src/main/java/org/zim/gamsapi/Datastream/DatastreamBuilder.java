@@ -60,23 +60,13 @@ public class DatastreamBuilder {
   }
 
   public Datastream build() {
-    if(datastream.getDigitalObject() == null) {
-      String msg = String.format("Encountered null digital object at %s Digital object must be set during builder process.", this.getClass().getName());
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-
-    if((datastream.getDigitalObject().getId()) == null || datastream.getDigitalObject().getId().isEmpty()){
-      String msg = String.format("Encountered null or empty digital object id at %s. Digital object identifier must be set during builder process.", this.getClass().getName());
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-
     if((datastream.getDsid() == null) || datastream.getDsid().isEmpty()) {
       String msg = String.format("Encountered null or empty dsid at %s. Datastream identifier must be set during builder process.", this.getClass().getName());
       log.error(msg);
       throw new IllegalStateException(msg);
     }
+
+    // digital object is not mandatory here but in database layer!
 
     return datastream;
   }
