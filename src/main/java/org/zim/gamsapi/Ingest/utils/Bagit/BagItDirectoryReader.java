@@ -93,7 +93,7 @@ public class BagItDirectoryReader {
    * Maps the sip.json file to a BagitSipJson object.
    * @param bagitDirPath The path to the bagit directory.
    */
-  public static BagitSipJson extractSipJson(Path bagitDirPath){
+  public static BagitSipJson extractAndValidateSipJson(Path bagitDirPath){
 
     Path pathToBagInfoFile = bagitDirPath.resolve(BagItFilePaths.BAG_SIP_JSON.name);
 

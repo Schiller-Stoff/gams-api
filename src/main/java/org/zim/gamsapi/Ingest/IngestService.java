@@ -45,7 +45,7 @@ public class IngestService implements IIngestService {
     }
 
     try {
-      BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
+      BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(bagDirPath);
       log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
 
       // 02. build and save digital object from bag-info.txt
