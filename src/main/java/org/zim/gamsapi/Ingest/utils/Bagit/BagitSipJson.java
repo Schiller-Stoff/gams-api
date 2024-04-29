@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.util.HashSet;
@@ -19,7 +18,7 @@ import java.util.Set;
 public class BagitSipJson {
 
     @JsonProperty("recid")
-    @NotNull
+    @NotEmpty
     private String id;
 
     /**
@@ -30,22 +29,22 @@ public class BagitSipJson {
     @Size(min = 1, max = 10)
     private String project;
 
-    @NotNull
+    @NotEmpty
     private String title;
 
-    @NotNull
+    @NotEmpty
     private String objectType;
 
-    @NotNull
+    @NotEmpty
     private String description;
 
-    @NotNull
+    @NotEmpty
     private String creator;
 
-    @NotNull
+    @NotEmpty
     private String rights;
 
-    @NotNull
+    @NotEmpty
     private String publisher;
 
     private String parent;
