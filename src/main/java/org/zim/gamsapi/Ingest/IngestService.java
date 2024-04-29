@@ -1,19 +1,15 @@
 package org.zim.gamsapi.Ingest;
 
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.Datastream.DatastreamBuilder;
+import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
-import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.*;
@@ -59,38 +55,34 @@ public class IngestService implements IIngestService {
         log.error(msg);
         throw new IngestTypeConversionException(msg);
       }
-
       digitalObjectRepository.save(digitalObject);
-      log.info("****** Successfully saved digital object: {}", digitalObject);
+      log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
       // 03. build and save datastreams from sip.json in the bagit payload
-      // TODO build datastream in sepearate method - save can stay here?
       bagitSipJson.getContentFiles().stream()
             .map(contentFile -> {
+              Datastream datastream = conversionService.convert(contentFile, Datastream.class);
+              if(datastream == null){
+                String msg = String.format("Datastream is unexpectedly null. Failed to convert contentFile %s to datastream for given ingest %s for object %s", contentFile, ingest, digitalObject);
+                log.error(msg);
+                throw new IngestTypeConversionException(msg);
+              }
+
+              // things need to be set aside from conversion.
               byte[] datastreamContent;
               Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
               try {
                 datastreamContent = Files.readAllBytes(contentFilePath);
               } catch (IOException e) {
-                String msg = String.format("Failed to read file %s for given ingest %s for object %s. Original error %s", contentFilePath, ingest, digitalObject, e);
+                String msg = String.format("Failed to read file %s for given ingest %s for object %s for datastream %s. Original error %s", contentFilePath, ingest, digitalObject, datastream, e);
                 log.error(msg);
                 throw new IngestProcessingException(msg);
               }
-              return new DatastreamBuilder()
-                      .dsid(contentFile.getDsid())
-                      .digitalObject(digitalObject)
-                      .data(datastreamContent)
-                      .mimeType(contentFile.getMimetype())
-                      .size(contentFile.getSize())
-                      .fileName(contentFilePath.getFileName().toString())
-                      .baseMetadata(new MetadataBaseEntityBuilder()
-                              .title(contentFile.getTitle())
-                              .creator(contentFile.getCreator())
-                              .description(contentFile.getDescription())
-                              .publisher(contentFile.getPublisher())
-                              .rights(contentFile.getRights())
-                              .build())
-                      .build();
+
+              datastream.setDigitalObject(digitalObject);
+              datastream.setData(datastreamContent);
+              datastream.setFileName(contentFilePath.getFileName().toString());
+              return datastream;
             })
             .forEach(datastreamRepository::save);
 
