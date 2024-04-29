@@ -14,15 +14,13 @@ import org.zim.gamsapi.MetadataBaseEntityBuilder;
 @Component
 public class BagitSipJsonDigitalObjectConverter implements Converter<BagitSipJson, DigitalObject> {
 
-  // TODO needs tests!
-
     @Override
     public DigitalObject convert(BagitSipJson source) {
         return new DigitalObjectBuilder()
             .id(source.getId())
             .project(source.getProject())
             .objectType(source.getObjectType())
-            .parent(new DigitalObjectBuilder().project(source.getProject()).id(source.getParent()).build())
+            .parent(source.getParent())
             .types(source.getTypes())
             .baseMetadata(new MetadataBaseEntityBuilder()
                 .title(source.getTitle())
