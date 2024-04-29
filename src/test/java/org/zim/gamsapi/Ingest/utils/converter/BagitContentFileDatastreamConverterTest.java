@@ -26,6 +26,7 @@ public class BagitContentFileDatastreamConverterTest extends UnitTest {
     BagitContentFileDatastreamConverter converter = new BagitContentFileDatastreamConverter();
     Datastream datastream = converter.convert(bagitContentFile);
 
+    Assertions.assertNotNull(datastream);
     Assertions.assertEquals(bagitContentFile.getDsid(), datastream.getDsid());
     Assertions.assertEquals(bagitContentFile.getMimetype(), datastream.getMimeType());
     Assertions.assertEquals(bagitContentFile.getSize(), datastream.getSize());
