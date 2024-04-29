@@ -7,8 +7,8 @@ import org.zim.gamsapi.UnitTest;
 public class DatastreamBuilderTest extends UnitTest {
 
   @Test
-  public void throwsIfDigitalObjectIsNull(){
-    Assertions.assertThrows(IllegalStateException.class, () -> {
+  public void doesNotThrowIfDigitalObjectIsNull(){
+    Assertions.assertDoesNotThrow(() -> {
       new DatastreamBuilder()
           .dsid("dsid")
           .build();
@@ -16,8 +16,8 @@ public class DatastreamBuilderTest extends UnitTest {
   }
 
   @Test
-  public void throwsIfDigitalObjectIdIsEmpty(){
-    Assertions.assertThrows(IllegalStateException.class, () -> {
+  public void doesNotthrowIfDigitalObjectIdIsEmpty(){
+    Assertions.assertDoesNotThrow(() -> {
       new DatastreamBuilder()
           .digitalObject("")
           .dsid("dsid")
