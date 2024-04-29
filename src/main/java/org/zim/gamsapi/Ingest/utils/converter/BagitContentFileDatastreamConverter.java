@@ -18,13 +18,15 @@ public class BagitContentFileDatastreamConverter implements Converter<BagitConte
 
   @Override
   public Datastream convert(BagitContentFile source) {
-
-    // TODO test
-
     return new DatastreamBuilder()
         .dsid(source.getDsid())
         .mimeType(source.getMimetype())
         .size(source.getSize())
+        // omitted fields - because not available in a BagitContentFile
+        //.fileName()
+        //.data()
+        //.type()
+        //.digitalObject()
         .baseMetadata(new MetadataBaseEntityBuilder()
             .title(source.getTitle())
             .creator(source.getCreator())
