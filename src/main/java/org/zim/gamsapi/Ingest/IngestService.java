@@ -3,6 +3,7 @@ package org.zim.gamsapi.Ingest;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
@@ -10,6 +11,7 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
@@ -29,6 +31,7 @@ public class IngestService implements IIngestService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final ConversionService conversionService;
 
   @Override
   @Transactional
@@ -40,33 +43,22 @@ public class IngestService implements IIngestService {
       bagDirPath = ZipUtils.unzipToTempDir(ingest.getZippedBagItFolder());
     } catch (IngestProcessingException e){
       // provide more context information for the logging and user.
-      String msg = String.format("Failed to ingest given ingest %s. Original error: %s", ingest, e);
+      String msg = String.format("Failed to ingest given ingest operation %s. Original error: %s", ingest, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
 
     try {
       BagitSipJson bagitSipJson = BagItDirectoryReader.extractSipJson(bagDirPath);
-      log.info("****** Successfully extracted bagit sip.json: {}", bagitSipJson);
+      log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
 
       // 02. build and save digital object from bag-info.txt
-      // TODO build object in seperate method - save can stay here?
-      // TODO think about: looks like a conversion method?
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id(bagitSipJson.getId())
-          // TODO everything should be defined in the sipjson also the project! BUT: Validate if sip.json entry is same as ingest endpoint!
-          .project(ingest.getProjectAbbr())
-          .objectType(bagitSipJson.getObjectType())
-          .parent(new DigitalObjectBuilder().project(ingest.getProjectAbbr()).id(bagitSipJson.getParent()).build())
-          .types(bagitSipJson.getTypes())
-          .baseMetadata(new MetadataBaseEntityBuilder()
-              .title(bagitSipJson.getTitle())
-              .creator(bagitSipJson.getCreator())
-              .description(bagitSipJson.getDescription())
-              .publisher(bagitSipJson.getPublisher())
-              .rights(bagitSipJson.getRights())
-              .build())
-          .build();
+      DigitalObject digitalObject = conversionService.convert(bagitSipJson, DigitalObject.class);
+      if(digitalObject == null){
+        String msg = String.format("Digital object is unexpectedly null. Failed to convert bagitSipJson %s to digital object for given ingest %s", bagitSipJson, ingest);
+        log.error(msg);
+        throw new IngestTypeConversionException(msg);
+      }
 
       digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {}", digitalObject);
