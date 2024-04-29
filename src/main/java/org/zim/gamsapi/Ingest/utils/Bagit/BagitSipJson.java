@@ -2,6 +2,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -49,7 +50,10 @@ public class BagitSipJson {
 
     private String parent;
 
-    private Set<BagitContentFile> contentFiles = new HashSet<>();
+    /**
+     * TODO write tests if validation of bagit-content file works as expected!
+     */
+    private Set<@Valid BagitContentFile> contentFiles = new HashSet<>();
 
     private Set<String> types = new HashSet<>();
 
