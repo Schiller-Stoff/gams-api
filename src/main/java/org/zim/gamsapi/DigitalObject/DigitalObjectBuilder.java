@@ -15,11 +15,23 @@ public class DigitalObjectBuilder {
   }
 
   public DigitalObjectBuilder parent(DigitalObject parent) {
+    if(parent.getProject() == null || parent.getProject().getProjectAbbr().isEmpty()){
+      String msg = String.format("Parent object's project must not be null or it's abbreviation empty! Happened at class %s and object %s", this.getClass().getName(), parent);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
     digitalObject.setParent(parent);
     return this;
   }
 
   public DigitalObjectBuilder parent(String parentId) {
+    if(parentId == null || parentId.isEmpty()){
+      String msg = String.format("Parent object's ID must not be null or empty! Happened at class %s", this.getClass().getName());
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+
     // TODO test this!
     DigitalObject parent = new DigitalObject();
     parent.setId(parentId);
