@@ -134,7 +134,7 @@ public class DigitalObject {
   public String toString() {
     return "DigitalObject{" +
             "id='" + id + '\'' +
-            ", parent=[" + parent + "]" +
+            ", parent='" + parent + "'" +
             ", objectType='" + objectType + '\'' +
             ", published=" + published +
             ", created=" + created +
