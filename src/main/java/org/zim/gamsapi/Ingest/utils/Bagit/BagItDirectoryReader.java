@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Ingest.utils.Bagit;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
@@ -112,6 +113,7 @@ public class BagItDirectoryReader {
       // TODO instantiation of own object mapper might be just a waste of resources. (inject object mapper instead)
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       bagitSipJson = new ObjectMapper().readValue(jsonContent, BagitSipJson.class);
     } catch (IOException e){
       String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, e);
