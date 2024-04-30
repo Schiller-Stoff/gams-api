@@ -1,6 +1,7 @@
 package org.zim.gamsapi.Ingest.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import java.io.*;
 import java.nio.file.Files;
@@ -114,7 +115,10 @@ public class ZipUtils {
       }
     }
     FileInputStream fis = new FileInputStream(fileToZip);
-    ZipEntry zipEntry = new ZipEntry(fileName);
+    // removes the folder name as root from the individual zip entry
+    // otherwise the fileToZip would be the root of the zip (and not it's content!)
+    String removedRoot = fileName.substring(fileName.indexOf("/") + 1);
+    ZipEntry zipEntry = new ZipEntry(removedRoot);
     zipOut.putNextEntry(zipEntry);
     byte[] bytes = new byte[1024];
     int length;

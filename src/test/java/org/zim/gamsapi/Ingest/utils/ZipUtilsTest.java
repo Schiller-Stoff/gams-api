@@ -39,7 +39,7 @@ public class ZipUtilsTest extends UnitTest {
         fileNames.add(zipEntry.getName());
       });
 
-      Assertions.assertThat(fileNames).contains("tei/TEI_SOURCE.xml");
+      Assertions.assertThat(fileNames).contains("TEI_SOURCE.xml");
       Assertions.assertThat(fileNames).allMatch(fileName -> fileName.contains("."));
 
     }
