@@ -2,6 +2,7 @@ package org.zim.gamsapi.Ingest.utils.converter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitContentFile;
@@ -13,6 +14,7 @@ import org.zim.gamsapi.MetadataBaseEntityBuilder;
  * Cannot set all properties, like reading the content from the file or filename etc for a datastream instance
  */
 @Slf4j
+@Component
 public class BagitContentFileDatastreamConverter implements Converter<BagitContentFile, Datastream>{
 
 
