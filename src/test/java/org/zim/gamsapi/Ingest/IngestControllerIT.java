@@ -30,8 +30,10 @@ public class IngestControllerIT extends IntegrationTest {
   @Autowired
   IProjectRepository projectRepository;
 
+  @Autowired
   IDatastreamRepository datastreamRepository;
 
+  @Autowired
   IDigitalObjectRepository digitalObjectRepository;
 
   private final String TEST_BAG_LOCATION = "testfiles/ingest/test-bag";
