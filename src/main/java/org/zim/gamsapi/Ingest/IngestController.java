@@ -25,9 +25,19 @@ public class IngestController {
 
     byte[] bagAsZip;
     // TODO this form part name needs to be updated!
+    // TODO contain form part name as a constant in a class / enum
     final String ZIP_FORM_PART_NAME = "subInfoPackZIP";
+
+    // TODO null check needs a test!
     try {
       Part zipPart = request.getPart(ZIP_FORM_PART_NAME);
+      // null check for the case that the form part is not found
+      if(zipPart == null){
+        String msg = String.format("No form part with name %s found in multipart request against %s. Got parts: %s", ZIP_FORM_PART_NAME, request.getRequestURI(), request.getParts());
+        log.error(msg);
+        throw new IngestProcessingException(msg);
+      }
+
       bagAsZip = zipPart.getInputStream().readAllBytes();
     } catch (IOException e){
       String msg = String.format("Failed to read given zip-file via multipart form-data request for ingest: %s", ingest);
