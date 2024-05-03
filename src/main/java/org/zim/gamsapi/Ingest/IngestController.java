@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
+import org.zim.gamsapi.Ingest.utils.IngestStatics;
+
 import java.io.IOException;
 
 @Controller
@@ -24,16 +26,11 @@ public class IngestController {
   public void ingest(@ModelAttribute Ingest ingest, HttpServletRequest request) {
 
     byte[] bagAsZip;
-    // TODO this form part name needs to be updated!
-    // TODO contain form part name as a constant in a class / enum
-    final String ZIP_FORM_PART_NAME = "subInfoPackZIP";
-
-    // TODO null check needs a test!
     try {
-      Part zipPart = request.getPart(ZIP_FORM_PART_NAME);
+      Part zipPart = request.getPart(IngestStatics.FORM_PART_NAME.name);
       // null check for the case that the form part is not found
       if(zipPart == null){
-        String msg = String.format("No form part with name %s found in multipart request against %s. Got parts: %s", ZIP_FORM_PART_NAME, request.getRequestURI(), request.getParts());
+        String msg = String.format("No form part with name %s found in multipart request against %s. Got parts: %s", IngestStatics.FORM_PART_NAME.name, request.getRequestURI(), request.getParts());
         log.error(msg);
         throw new IngestProcessingException(msg);
       }
@@ -44,7 +41,7 @@ public class IngestController {
       log.error(msg);
       throw new IngestProcessingException(msg);
     } catch (ServletException e){
-      String msg = String.format("Failed to extract form part: %s from multipart request against %s. There might be ", ZIP_FORM_PART_NAME, request.getRequestURI());
+      String msg = String.format("Failed to extract form part: %s from multipart request against %s. There might be ", IngestStatics.FORM_PART_NAME.name, request.getRequestURI());
       log.error(msg);
       throw new IngestProcessingException(msg);
 

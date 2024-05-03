@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
@@ -61,8 +62,7 @@ public class IngestControllerIT extends IntegrationTest {
   @Test
   public void ingestCreatesAtLeastOneObjectAndOneDatastream() throws Exception {
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    // TODO use enum for subInfoPackZIP
-    MockPart mockPart = new MockPart("subInfoPackZIP", "test.zip", zippedBag);
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
     mockMvc
         .perform(
             multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
