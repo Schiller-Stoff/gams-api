@@ -1,5 +1,6 @@
 package org.zim.gamsapi.DigitalObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,16 +12,16 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DigitalObjectControllerIT extends IntegrationTest {
 
@@ -50,6 +51,51 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     org.assertj.core.api.Assertions.assertThat(projectRepository.findAll())
         .isNotNull()
         .isEmpty();
+  }
+
+  @Nested
+  public class PUTRequests {
+
+
+    @Test
+    public void createsExpectedDigitalObject() throws Exception {
+      // Arrange
+      DigitalObject expectedDigitalObject = new DigitalObjectBuilder()
+          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .project(testProject)
+          .objectType("TEI")
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
+
+      // Act
+      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), expectedDigitalObject.getId())
+          .contentType(MediaType.APPLICATION_JSON)
+          .content(expectedDigitalObjectJson))
+          // PUT request will redirect to GET
+          .andExpect(status().is3xxRedirection());
+
+      // Assert - PUT digital object can be found via repository class
+      org.assertj.core.api.Assertions.assertThat(
+          digitalObjectRepository.findDigitalObjectById(expectedDigitalObject.getId()))
+            .isPresent()
+            .get()
+            .isNotNull()
+            .extracting(DigitalObjectDetailsView::getId)
+            .isEqualTo(expectedDigitalObject.getId()
+      );
+
+      // clean up
+      digitalObjectRepository.deleteAll();
+
+    }
+
+
+
+
+
   }
 
   @Nested
