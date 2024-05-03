@@ -1,13 +1,17 @@
 package org.zim.gamsapi.Ingest;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -20,7 +24,7 @@ import java.io.IOException;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // deactivates security filters
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IngestControllerIT extends IntegrationTest {
 
@@ -55,14 +59,23 @@ public class IngestControllerIT extends IntegrationTest {
   }
 
   @Test
-  @Disabled("Test is disabled because it is not working as expected. Fails at authentication! Authentication needs to be set up for testing!")
-  public void testIngest() throws Exception {
+  public void ingestCreatesAtLeastOneObjectAndOneDatastream() throws Exception {
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    MockMultipartFile file = new MockMultipartFile("subInfoPackZIP", "test.zip", "application/zip", zippedBag);
-
+    MockPart mockPart = new MockPart("subInfoPackZIP", "test.zip", zippedBag);
     mockMvc
-        .perform(multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
-        .file(file))
+        .perform(
+            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+            .part(mockPart)
+        )
         .andExpect(status().isOk());
+
+
+    Assertions.assertThat(datastreamRepository.findAll()).isNotEmpty();
+    Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
+
+    // cleanup
+    datastreamRepository.deleteAll();
+    digitalObjectRepository.deleteAll();
+
   }
 }
