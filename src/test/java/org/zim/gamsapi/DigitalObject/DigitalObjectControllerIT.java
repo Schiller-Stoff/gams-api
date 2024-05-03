@@ -98,6 +98,39 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   }
 
+
+  @Nested
+  public class DELETERequests {
+
+    @Test
+    public void deleteDigitalObjectWhenItExists() throws Exception {
+      // Arrange
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .project(testProject)
+          .objectType("TEI")
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      // Act
+      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
+          .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().is3xxRedirection());
+
+      // Assert
+      org.assertj.core.api.Assertions.assertThat(
+          digitalObjectRepository.findDigitalObjectById(digitalObject.getId()))
+            .isNotPresent();
+
+      // clean up
+      digitalObjectRepository.deleteAll();
+
+    }
+
+  }
+
   @Nested
   public class WebclientTests {
 
