@@ -181,7 +181,8 @@ public class DigitalObjectController {
 
   @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
-          DigitalObject digitalObject,
+          // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
+          @RequestBody DigitalObject digitalObject,
           @RequestParam Optional<String> parent,
           Project project,
           Model model,
@@ -190,10 +191,13 @@ public class DigitalObjectController {
     // project membership is not automatically bound by spring.
     digitalObject.setProject(project);
     // assign child objects if available
+
     parent
       .ifPresent(
         strings -> digitalObject.setParent(new DigitalObjectBuilder().id(parent.get()).build())
       );
+
+    System.out.println("***********" + digitalObject);
 
     DigitalObject savedObject = digitalObjectService.save(digitalObject);
     model.addAttribute("do", savedObject);
