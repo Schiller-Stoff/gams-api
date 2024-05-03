@@ -51,7 +51,6 @@ public class DigitalObjectController {
         datastreamDetailsViews
             .stream()
             .map(
-                // TODO this call is weird!
                 IDatastreamDetailsView::getDsid
             )
             .collect(Collectors.toList())
