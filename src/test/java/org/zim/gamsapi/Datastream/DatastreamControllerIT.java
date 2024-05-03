@@ -13,7 +13,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
@@ -152,5 +151,9 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   }
 
+
+  public class DELETEDatastream {
+
+  }
 
 }
