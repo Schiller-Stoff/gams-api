@@ -61,6 +61,7 @@ public class IngestControllerIT extends IntegrationTest {
   @Test
   public void ingestCreatesAtLeastOneObjectAndOneDatastream() throws Exception {
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
+    // TODO use enum for subInfoPackZIP
     MockPart mockPart = new MockPart("subInfoPackZIP", "test.zip", zippedBag);
     mockMvc
         .perform(
