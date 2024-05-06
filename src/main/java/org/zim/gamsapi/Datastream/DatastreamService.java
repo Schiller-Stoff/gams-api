@@ -30,6 +30,7 @@ public class DatastreamService implements IDatastreamService {
 
 
   @Override
+  @Transactional
   public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
     return datastreamRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream with id %s", id);
@@ -59,6 +60,7 @@ public class DatastreamService implements IDatastreamService {
    * @return list of datastream projections
    */
   @Override
+  @Transactional
   public List<IDatastreamDetailsView> findAll(DigitalObject digitalObject) {
     return datastreamRepository.findAllByDigitalObjectId(digitalObject.getId());
   }
@@ -72,6 +74,7 @@ public class DatastreamService implements IDatastreamService {
    * @throws DatastreamNotFoundException if no datastream is found
    */
   @Override
+  @Transactional
   public IDatastreamDetailsView findDatastreamDetailsById(DatastreamId datastreamId) throws DatastreamNotFoundException {
     return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid()).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream-details-view via pid %s and dsid %s", datastreamId.getDigitalObject(), datastreamId.getDsid());
