@@ -4,11 +4,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -19,6 +21,8 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -231,6 +235,43 @@ public class DatastreamControllerIT extends IntegrationTest {
       datastreamRepository.delete(datastream);
     }
 
+
+  }
+
+
+  @Nested
+  public class GETDatastreamContent {
+
+
+    @Test
+    public void getDatastreamContentReturnsExpectedDatastreamContent() throws Exception {
+      // Arrange
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("testDsid")
+          .digitalObject(testDigitalObject)
+          .data(TestDatastream.CONTENT.getValue().getBytes())
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .mimeType(MediaType.TEXT_PLAIN_VALUE)
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s/content", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+          MockMvcRequestBuilders.get(url)
+      )
+        .andExpect(status().isOk())
+        .andReturn();
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse()).isNotNull();
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString()).isEqualTo(TestDatastream.CONTENT.getValue());
+
+      // Cleanup
+      datastreamRepository.delete(datastream);
+    }
 
   }
 
