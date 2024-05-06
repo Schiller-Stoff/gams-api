@@ -61,6 +61,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
+  @Transactional
   public List<DigitalObject> findAll() {
     List<DigitalObject> digitalObjects = new ArrayList<>();
     digitalObjectRepository.findAll().forEach(digitalObjects::add);
@@ -68,6 +69,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
+  @Transactional
   public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Pageable pageable) {
 
     projectRepository.findById(projectAbbr).orElseThrow(
@@ -82,6 +84,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
+  @Transactional
   public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
     projectRepository.findById(projectAbbr).orElseThrow(
             () -> {
@@ -95,6 +98,7 @@ public class DigitalObjectService implements IDigitalObjectService {
 
 
   @Override
+  @Transactional
   public List<DigitalObject> findAllByProjectAbbr(String projectAbbr) {
     projectRepository.findById(projectAbbr).orElseThrow(
             () -> {
@@ -107,6 +111,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
+  @Transactional
   public DigitalObject findById(String id) throws DigitalObjectNotFoundException {
     DigitalObject foundObject =  digitalObjectRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find digital object via id: %s", id);
@@ -118,6 +123,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
+  @Transactional
   public void delete(DigitalObject digitalObject) {
     digitalObjectRepository.delete(digitalObject);
   }
@@ -157,6 +163,7 @@ public class DigitalObjectService implements IDigitalObjectService {
 
 
     @Override
+    @Transactional
     public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Optional<Set<String>> types, Pageable pageable) {
         projectRepository.findById(projectAbbr).orElseThrow(
                 () -> {
@@ -187,6 +194,7 @@ public class DigitalObjectService implements IDigitalObjectService {
     }
 
     @Override
+    @Transactional
     public DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id) {
         return digitalObjectRepository.findDigitalObjectById(id).orElseThrow(
                 () -> {
