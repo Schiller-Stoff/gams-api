@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
@@ -167,22 +168,23 @@ public class DatastreamControllerIT extends IntegrationTest {
 
       datastreamService.save(testDatastream);
 
+      // DELETE request
       String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), testDatastream.getDsid());
-
       mockMvc.perform(
           MockMvcRequestBuilders.delete(url))
           .andExpect(status().is3xxRedirection());
 
-      Assertions.assertThat(datastreamService.findById(testDatastream.deriveDatastreamId()))
-          .isNotNull();
+      // assertions
+      org.junit.jupiter.api.Assertions.assertThrows(DatastreamNotFoundException.class, () -> {
+        datastreamService.findById(testDatastream.deriveDatastreamId());
+      });
 
-      // TODO why does this fail?
-//      Assertions.assertThat(datastreamService.findAll(testDigitalObject))
-//          .isNotNull()
-//          .isEmpty();
+      Assertions.assertThat(datastreamService.findAll(testDigitalObject))
+          .isNotNull()
+          .isEmpty();
 
       // cleanup
-      datastreamService.delete(testDatastream);
+      datastreamRepository.deleteAll();
 
     }
 
