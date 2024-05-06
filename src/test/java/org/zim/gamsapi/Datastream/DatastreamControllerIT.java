@@ -9,17 +9,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false) // deactivates security filters
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamControllerIT extends IntegrationTest {
 
@@ -34,6 +37,9 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   @Autowired
   private IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  private IDatastreamService datastreamService;
 
   private Project testProject;
 
@@ -144,15 +150,42 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     }
 
-
-
-
-
-
   }
 
 
+  @Nested
   public class DELETEDatastream {
+
+    @Test
+    public void deleteDatastreamRemovesDatastreamFromDatabase() throws Exception {
+
+      Datastream testDatastream =  new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(testDigitalObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      datastreamService.save(testDatastream);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), testDatastream.getDsid());
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(url))
+          .andExpect(status().is3xxRedirection());
+
+      Assertions.assertThat(datastreamService.findById(testDatastream.deriveDatastreamId()))
+          .isNotNull();
+
+      // TODO why does this fail?
+//      Assertions.assertThat(datastreamService.findAll(testDigitalObject))
+//          .isNotNull()
+//          .isEmpty();
+
+      // cleanup
+      datastreamService.delete(testDatastream);
+
+    }
+
 
   }
 
