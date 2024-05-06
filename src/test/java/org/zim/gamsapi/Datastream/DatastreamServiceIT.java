@@ -146,6 +146,33 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void deleteThrowsWhenDigitalObjectIsNull() {
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("SOME_RANDOM_DSID")
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      Assertions.assertThrows(
+          DigitalObjectNotFoundException.class,
+          () -> datastreamService.delete(datastream)
+      );
+    }
+
+    @Test
+    public void deleteThrowsWhenDatastreamDoesNotExist() {
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("SOME_RANDOM_DSID")
+          .digitalObject(testObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      Assertions.assertThrows(
+          DatastreamNotFoundException.class,
+          () -> datastreamService.delete(datastream)
+      );
+    }
+
 
   }
 

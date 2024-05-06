@@ -24,6 +24,19 @@ public class DatastreamService implements IDatastreamService {
   @Override
   @Transactional
   public void delete(Datastream datastream) {
+
+    if(datastream.getDigitalObject() == null){
+      String msg = String.format("Datastream's digital object is unexpectedly null %s . Cannot delete datastream.", datastream);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+
+    if(!datastreamRepository.existsById(datastream.deriveDatastreamId())){
+      String msg = String.format("Datastream with id %s not found. Cannot delete datastream", datastream);
+      log.error(msg);
+      throw new DatastreamNotFoundException(msg);
+    }
+
     datastreamRepository.delete(datastream);
   }
 
