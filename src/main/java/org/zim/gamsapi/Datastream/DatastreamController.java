@@ -102,17 +102,18 @@ public class DatastreamController {
   /**
    * Dynamically (according to mimetype) returns stored datastream content
    * https://www.baeldung.com/spring-controller-return-image-file
-   * @param datastream incoming datastream dto
+   * @param id digital-object-id
+   * @param dsid datastream-id
    * @return binary-data of the datastream
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
-  public ResponseEntity<InputStreamResource> getDatastreamContent(Datastream datastream) {
-    // TODO add test
-    Datastream foundDatastream = datastreamService.findById(datastream.deriveDatastreamId());
-    InputStream in = new ByteArrayInputStream(foundDatastream.getData());
+  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) {
+    Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
+    datastream = datastreamService.findById(datastream.deriveDatastreamId());
+    InputStream in = new ByteArrayInputStream(datastream.getData());
     return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))
+        .contentType(MediaType.parseMediaType(datastream.getMimeType()))
         .body(new InputStreamResource(in));
 
   }
