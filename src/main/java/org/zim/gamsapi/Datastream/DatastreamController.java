@@ -79,15 +79,21 @@ public class DatastreamController {
 
   @DeleteMapping
   public String deleteDatastream(
-          DigitalObject digitalObject,
-          Datastream datastream,
+          @PathVariable String id,
+          @PathVariable String dsid,
           Project project,
           @RequestHeader Map<String, String> requestHeader
   ) {
+
+    Datastream datastream = new DatastreamBuilder()
+        .dsid(dsid)
+        .digitalObject(id)
+        .build();
+
     datastreamService.delete(datastream);
     log.info("Successfully deleted datastream: {}", datastream);
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
+    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + datastream.getDigitalObject().getId();
   }
 
 
