@@ -43,6 +43,7 @@ public class DatastreamController {
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public IDatastreamDetailsView getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
+    datastream.setDigitalObject(digitalObject);
     IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
         DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
     model.addAttribute(foundDatastream);
@@ -62,7 +63,7 @@ public class DatastreamController {
 
     log.debug("Got datastream-entity: {}. Applying file {} from request-params", datastream, file);
 
-    //TODO refactor - might be encapsulated in business layer?
+    // TODO remove outdated method? datastream can only be created via ingest`?
 
     DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
 
@@ -97,22 +98,22 @@ public class DatastreamController {
   }
 
 
+
   /**
    * Dynamically (according to mimetype) returns stored datastream content
    * https://www.baeldung.com/spring-controller-return-image-file
-   * @param digitalObject incoming digital object dto
    * @param datastream incoming datastream dto
    * @return binary-data of the datastream
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
-  public ResponseEntity<InputStreamResource> getDatastreamContent(DigitalObject digitalObject, Datastream datastream) {
+  public ResponseEntity<InputStreamResource> getDatastreamContent(Datastream datastream) {
+    // TODO add test
     Datastream foundDatastream = datastreamService.findById(datastream.deriveDatastreamId());
     InputStream in = new ByteArrayInputStream(foundDatastream.getData());
     return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))
-            .body(new InputStreamResource(in));
+        .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))
+        .body(new InputStreamResource(in));
 
   }
-
 }
