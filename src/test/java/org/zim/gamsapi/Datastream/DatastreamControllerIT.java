@@ -9,7 +9,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -186,6 +185,50 @@ public class DatastreamControllerIT extends IntegrationTest {
       // cleanup
       datastreamRepository.deleteAll();
 
+    }
+
+
+  }
+
+
+  @Nested
+  public class GETDatastreamJSON {
+
+    @Test
+    public void getDatastreamJsonContainsExpectedValues() throws Exception {
+      // Arrange
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("testDsid")
+          .digitalObject(testDigitalObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+          .andReturn();
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              datastream.getDsid(),
+              testDigitalObject.getId(),
+              datastream.getBaseMetadata().getTitle(),
+              datastream.getBaseMetadata().getDescription(),
+              datastream.getBaseMetadata().getCreator()
+          );
+
+      // Cleanup
+      datastreamRepository.delete(datastream);
     }
 
 
