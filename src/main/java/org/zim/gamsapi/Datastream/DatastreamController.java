@@ -85,6 +85,7 @@ public class DatastreamController {
           @RequestHeader Map<String, String> requestHeader
   ) {
     datastreamService.delete(datastream);
+    log.info("Successfully deleted datastream: {}", datastream);
     String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
   }
