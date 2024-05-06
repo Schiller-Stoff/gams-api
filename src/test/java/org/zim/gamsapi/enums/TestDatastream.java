@@ -6,7 +6,9 @@ package org.zim.gamsapi.enums;
 public enum TestDatastream {
 
     DSID("test"),
-    DATASTREAM_NAME("test-datastream");
+    DATASTREAM_NAME("test-datastream"),
+
+    CONTENT("test-content");
 
     private final String value;
 
