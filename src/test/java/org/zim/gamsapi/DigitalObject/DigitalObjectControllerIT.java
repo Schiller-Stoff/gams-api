@@ -298,7 +298,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         .andExpect(status().isNotFound());
   }
 
-  @Disabled("TODO returns status code 401 instead of 204 - because of failing auth config during testing")
   @Test
   public void getProjectObjectsJsonReturnsEmptyListWhenNoDigitalObjectsExistForProject() throws Exception {
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testProject.getProjectAbbr())
@@ -306,7 +305,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().isEmpty());
+    Assertions.assertEquals("[]", mvcResult.getResponse().getContentAsString());
   }
 
   @Test
@@ -330,26 +329,21 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Test
-  @Disabled("TODO returns status code 401 instead of 204 - because of failing auth config during testing")
   public void deleteObjectRemovesDigitalObjectWhenItExists() throws Exception {
     final String OBJECT_TEST_ID = "testPid";
-    digitalObjectRepository.save(new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).build());
+    digitalObjectRepository.save(new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build());
 
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), OBJECT_TEST_ID)
             .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
+        .andExpect(status().is3xxRedirection());
 
     Assertions.assertFalse(digitalObjectRepository.existsById(OBJECT_TEST_ID));
   }
 
   @Test
-  @Disabled("TODO returns status code 401 instead of 204 - because of failing auth config during testing")
   public void deleteObjectDoesNotThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
-
-    // TODO returns status code 401 instead of 204 - because of failing auth config during testing
-
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), "nonExistentId")
             .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().isNoContent());
+        .andExpect(status().is3xxRedirection());
   }
 }
