@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -272,6 +274,62 @@ public class DatastreamControllerIT extends IntegrationTest {
       // Cleanup
       datastreamRepository.delete(datastream);
     }
+
+  }
+
+  @Nested
+  public class PUTDatastream {
+
+    @Test
+    @Disabled("Outdated PUT method of singular datastream. Does not require baseMetadata via controller - but is required in repository.")
+    public void createDatastreamReturnsExpectedDatastreamDetails() throws Exception {
+      // Arrange
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("testId")
+          .project(testProject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid("testDsid")
+          .digitalObject(digitalObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "test data".getBytes());
+
+      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), digitalObject.getId(), datastream.getDsid());
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders
+                  .multipart(url)
+                  .part(new MockPart("file", "test.zip", file.getBytes()))
+                  //.param("datastream", objectMapper.writeValueAsString(datastream))
+                  .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+                  //.accept(MediaType.APPLICATION_JSON)
+                  .param("metadataBaseEntity", new ObjectMapper().writeValueAsString(datastream.getBaseMetadata()))
+                  .with(request -> {
+                    // configure to PUT request
+                    request.setMethod("PUT");
+                    return request;
+                  })
+          )
+          .andExpect(status().is3xxRedirection())
+          .andReturn();
+
+      // Assert
+      Assertions.assertThat(datastreamService.findAll(digitalObject))
+          .isNotNull()
+          .isNotEmpty();
+
+      // Cleanup
+      datastreamRepository.delete(datastream);
+      digitalObjectRepository.delete(digitalObject);
+    }
+
 
   }
 

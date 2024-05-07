@@ -14,6 +14,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
+import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
@@ -51,25 +52,29 @@ public class DatastreamController {
     return foundDatastream;
   }
 
-  @PutMapping
+  @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public String createDatastream(
           DigitalObject digitalObject,
           Datastream datastream,
+          @RequestParam MetadataBaseEntity metadataBaseEntity,
           @RequestParam MultipartFile file,
           Model model,
           Project project,
           @RequestHeader Map<String, String> requestHeader
   ) throws IOException {
 
-    log.debug("Got datastream-entity: {}. Applying file {} from request-params", datastream, file);
+    // TODO: is this method outdated? - datastreams need baseMetadata assigned.
 
-    // TODO remove outdated method? datastream can only be created via ingest`?
+    log.debug("Got datastream-entity: {}. Applying file {} from request-params", datastream, file);
 
     DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
 
     datastream.setData(file.getBytes());
     datastream.setMimeType(file.getContentType());
     datastream.setDigitalObject(foundObject);
+
+    // TODO test if setting of baseMetadata works as expected!
+    datastream.setBaseMetadata(metadataBaseEntity);
     Datastream savedDatastream = datastreamService.save(datastream);
 
     model.addAttribute("datastream", savedDatastream);
