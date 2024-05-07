@@ -4,24 +4,44 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
+import org.zim.gamsapi.User.User;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/v1/projects/{projectAbbr}", "/api/v1/projects/{projectAbbr}/"})
+@RequestMapping({"/api/v1/projects", "/api/v1/projects/"})
 public class ProjectController {
 
   private final IProjectService projectService;
 
+  @PutMapping(path = "/{projectAbbr}")
+  public String createProject(Project project, User user, Model model){
+    User updatedUser = projectService.createNewProject(project, user);
+    model.addAttribute(updatedUser);
+    return "User/userprojects";
+  }
+
+  @DeleteMapping(path = "/{projectAbbr}")
+  @ResponseBody
+  public void deleteProject(Project project){
+    projectService.deleteProject(project);
+  }
+
   @GetMapping
-  public String showProjectDigitalObjects(Model model, @ModelAttribute Project project) {
-    Project curProject = projectService.findPlain(project);
-    model.addAttribute(curProject);
-    return "Project/show";
+  @ResponseBody
+  public List<Project> showProjects(){
+    return projectService.findAll();
+  }
+
+  @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String showProjectsViaWebClient(Model model){
+    List<Project> projects = projectService.findAll();
+    model.addAttribute("projects", projects);
+    return "Project/show_all";
   }
 
 }

@@ -1,0 +1,49 @@
+{
+  "title": "Gedenktafel Seekapelle Bregenz",
+  "description": "Born digital TEI Dokument zur Beschreibung eines Erinnerungsortes bzw. Erinnerungszeichens.",
+  "creator": "demo (GAMS-project)",
+  "rights": "TODO",
+  "publisher": "TODO",
+  "types": [],
+  "contentFiles": [
+    {
+      "size": 498,
+      "bagpath": "/data/content/manifest.json",
+      "dsid": "manifest",
+      "mimetype": "application/json",
+      "title": "Datastream containing the manifest.json file",
+      "description": "Datastream for GAMS project demo.",
+      "creator": "demo",
+      "rights": "CC BY 4.0",
+      "publisher": "demo GAMS project"
+    },
+    {
+      "size": 193,
+      "bagpath": "/data/content/search.json",
+      "dsid": "search",
+      "mimetype": "application/json",
+      "title": "Datastream containing the search.json file",
+      "description": "Datastream for GAMS project demo.",
+      "creator": "demo",
+      "rights": "CC BY 4.0",
+      "publisher": "demo GAMS project"
+    },
+    {
+      "size": 22226,
+      "bagpath": "/data/content/SOURCE.xml",
+      "dsid": "SOURCE",
+      "mimetype": "application/xml",
+      "title": "Datastream containing the SOURCE.xml file",
+      "description": "Datastream for GAMS project demo.",
+      "creator": "demo",
+      "rights": "CC BY 4.0",
+      "publisher": "demo GAMS project"
+    }
+  ],
+  "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",
+  "created_by": "Pyrilo",
+  "source": "local",
+  "recid": "test",
+  "project": "test",
+  "objectType": "TEI"
+}

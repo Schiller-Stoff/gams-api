@@ -1,25 +1,47 @@
 package org.zim.gamsapi.Datastream;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-
 import java.util.List;
 import java.util.Optional;
 
-public interface IDatastreamRepository extends CrudRepository<Datastream, Long> {
+public interface IDatastreamRepository extends CrudRepository<Datastream, DatastreamId> {
 
   /**
+   * Deletes all datastreams for a given project (with project abbreviation).
+   * @param projectAbbr identifier of the project to be deleted
+   */
+  @Query(nativeQuery = true, value = "DELETE FROM datastream\n" +
+          "WHERE digital_object_id IN (\n" +
+          "    SELECT dig_obj.id\n" +
+          "    FROM digital_object dig_obj\n" +
+          "             JOIN project cur_proj ON cur_proj.project_abbr = dig_obj.project_project_abbr\n" +
+          "    WHERE cur_proj.project_abbr = :projectAbbr\n" +
+          ")")
+  @Modifying(flushAutomatically = true)
+  void deleteAll(String projectAbbr);
+
+
+  /**
+   * Projection method to return a list of datastream details views. Excludes the actual datastream content.
    * Searches a datastream based on the parent digital object and it's datastream-identifier.
-   * @param digitalObject Digital object to be found
-   * @param dsid Datastream identifier
-   * @return found Datastream
+   * @param digitalObjectId Digital object to be found
+   * @return list of datastream projections.
    */
-  Optional<Datastream> findByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+  List<IDatastreamDetailsView> findAllByDigitalObjectId(String digitalObjectId);
 
   /**
-   * Deletes a datastream defined by it's parent digital object and it's user specified datastream-id.
-   * @param digitalObject Parent digital object
-   * @param dsid datastream-id like TEI_SOURCE
+   * Projection method to return a datastream details views. Excludes the actual datastream content.
+   * @param digitalObjectId Digital object to be found
+   * @param dsid datastream identifier
+   * @return datastream projection.
    */
-  void deleteByDigitalObjectAndDsid(DigitalObject digitalObject, String dsid);
+  Optional<IDatastreamDetailsView> findDatastreamDetailsViewByDigitalObject_IdAndDsid(String digitalObjectId, String dsid);
+
+
+  void deleteAllByDigitalObject(DigitalObject digitalObject);
+
 }

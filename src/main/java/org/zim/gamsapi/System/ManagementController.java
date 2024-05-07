@@ -24,18 +24,5 @@ public class ManagementController {
     return "index";
   }
 
-  @GetMapping({"projects", "projects/"})
-  public String showAllProjects(HttpServletRequest httpServletRequest, Model model){
-    User user = userService.getCurrentUser(httpServletRequest);
-    model.addAttribute(user);
-    return "Project/show_all";
-  }
-
-  @GetMapping(value = {"projects", "projects/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-  @ResponseBody
-  public User showAllProjectsJson(HttpServletRequest request){
-    User user = userService.getCurrentUser(request);
-    return user;
-  }
 
 }

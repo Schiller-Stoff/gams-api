@@ -1,0 +1,3 @@
+Bag-Software-Agent: Pyrilo
+Bagging-Date: 2024-01-26
+Payload Oxum: [SOME HASH]

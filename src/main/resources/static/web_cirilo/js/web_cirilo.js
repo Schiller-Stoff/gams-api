@@ -61,12 +61,7 @@ const webCirilo = (() => {
     // makes sure that post url is correct
     // more robust to use pathname --> excludes url parameters like ?page=3
     let url = window.location.pathname
-        .replace("objects", "")
         .replace("ingest", "");
-
-    // remove last trailing /
-    url = url.substring(0, url.length -1);
-
 
     const form = document.getElementById(formId);
 

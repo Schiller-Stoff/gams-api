@@ -79,6 +79,23 @@ see deployment section
 
 2. Run make command (take a look at Makefile on root) - either native or default profile.
 
+
+```shell
+
+# 01. increment version in .release
+nano .release
+
+# 02. build new image
+make
+
+# 03. push new version 
+make push
+
+
+
+```
+
+
 ### Manual workflow (via Docker Hub )
 
 ```sh

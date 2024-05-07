@@ -1,32 +1,48 @@
 package org.zim.gamsapi.System.bootstrap;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.MetadataBaseEntity;
-
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
+import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
+import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
+import org.zim.gamsapi.User.User;
+import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Profile("!test")
 public class DigitalObjectInitializer implements CommandLineRunner {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final IProjectRepository projectRepository;
+  private final IUserRepository userRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
     logAvailableSystemResources();
+    initializeAdmin();
     // saveTestData();
   }
 
@@ -48,14 +64,13 @@ public class DigitalObjectInitializer implements CommandLineRunner {
    */
   private void saveTestData(){
 
-    DigitalObject teiObject = DigitalObject.builder()
-            .pid("testtei")
-            .objectType("TEI")
-            .projectAbbr("derla")
-            .build();
+    DigitalObject teiObject = new DigitalObjectBuilder()
+        .id("testtei")
+        .objectType("TEI")
+        .build();
     digitalObjectRepository.save(teiObject);
 
-    Datastream teiSource = Datastream.builder()
+    Datastream teiSource = new DatastreamBuilder()
             .dsid("TEI_SOURCE")
             .data("test".getBytes())
             .digitalObject(teiObject)
@@ -63,77 +78,68 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
 
     datastreamRepository.save(teiSource);
-    //teiObject.setDatastreams(List.of(teiSource));
 
-    DigitalObject lidoObject = DigitalObject.builder()
-            .pid("testlido")
-            .objectType("LIDO")
-            .baseMetadata(
-                    MetadataBaseEntity
-                            .builder()
-                            .title(List.of("A LIDO object title"))
-                            .creator(List.of("Sebastian David Schiller-Stoff"))
-                            .contributor(List.of("Sebastian David Schiller-Stoff", "Moria"))
-                            .description("This is a very beautiful LIDO object ... containing many descriptions of stuff ...")
-                            .publisher(List.of("ZIM Graz", "Universität Graz"))
-                            .subject(List.of("History", "Art History"))
-                            .language(List.of("DE"))
-                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
-                            .build()
-            )
-            .projectAbbr("derla")
-            .build();
+    DigitalObject lidoObject = new DigitalObjectBuilder()
+        .objectType("testlido")
+        .baseMetadata(
+            new MetadataBaseEntityBuilder()
+                .title("Digital object representing a Chair of the king")
+                .creator("Ada Lovelace")
+                .description("This source datastream contains some information about...")
+                .publisher("Universität Graz")
+                .rights("Creative Commons BY-NC 4.0")
+                .build())
+        .build();
+
     digitalObjectRepository.save(lidoObject);
 
-    Datastream lidoSource = Datastream.builder()
+    Datastream lidoSource = new DatastreamBuilder()
             .dsid("LIDO_SOURCE")
             .data("test".getBytes())
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
-                    MetadataBaseEntity
-                            .builder()
-                            .title(List.of("Chair of the king"))
-                            .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
-                            .subject(List.of("Chemistry", "Physics", "Architecture"))
+                  new MetadataBaseEntityBuilder()
+                            .title("Digital object representing a Chair of the king")
+                            .creator("Ada Lovelace")
+                            //.subject(new ArrayList<>(List.of("Chemistry", "Physics", "Architecture")))
                             .description("This source datastream contains some information about...")
-                            .language(List.of("de"))
-                            .type(List.of("Building"))
-                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            //.language(new ArrayList<>(List.of("de")))
+                            //.type(new ArrayList<>(List.of("Building")))
+                            .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
             .build();
     datastreamRepository.save(lidoSource);
 
-    Datastream image = Datastream.builder()
+    Datastream image = new DatastreamBuilder()
             .dsid("IMAGE_1")
             .data("test".getBytes())
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
-                    MetadataBaseEntity
-                            .builder()
-                            .title(List.of("An Image of something"))
-                            .creator(List.of("Eva Musterfrau", "Ada Lovelace"))
-                            .subject(List.of("Chemistry", "Physics", "Architecture"))
+                    new MetadataBaseEntityBuilder()
+                            .title("An Image of something")
+                            .creator("Ada Lovelace")
+                            //.subject(new ArrayList<>(List.of("Chemistry", "Physics", "Architecture")))
                             .description("This source datastream contains some information about...")
-                            .language(List.of("de"))
-                            .type(List.of("Building"))
-                            .rights(List.of("Creative Commons BY-NC 4.0", "https://creativecommons.org/licenses/by-nc/4.0"))
+                            //.language(new ArrayList<>(List.of("de")))
+                            //.type(new ArrayList<>(List.of("Building")))
+                            .rights("Creative Commons BY-NC 4.0")
                             .build()
             )
             .build();
 
     datastreamRepository.save(image);
 
-    DigitalObject gmlObject = DigitalObject.builder()
-            .pid("testgml")
-            .objectType("GML")
-            .projectAbbr("derla")
-            .build();
+    DigitalObject gmlObject = new DigitalObjectBuilder()
+        .id("testgml")
+        .objectType("GML")
+        .build();
+
     digitalObjectRepository.save(gmlObject);
 
-    Datastream gmlImage = Datastream.builder()
+    Datastream gmlImage = new DatastreamBuilder()
             .dsid("IMAGE_1")
             .data("test".getBytes())
             .digitalObject(gmlObject)
@@ -141,10 +147,55 @@ public class DigitalObjectInitializer implements CommandLineRunner {
             .build();
     datastreamRepository.save(gmlImage);
 
-    //lidoObject.setDatastreams(List.of(lidoSource, image));
+    //lidoObject.setDatastreams(new ArrayList<>(List.of(lidoSource, image)));
     //digitalObjectRepository.save(teiObject);
     //digitalObjectRepository.save(lidoObject);
 
   }
+
+
+  public void initializeAdmin(){
+
+    // added hardcoded admin user here
+    Optional<User> adminOptional = userRepository.findByUsername(GAMSAPIProperties.ADMIN_USER_NAME.name);
+    User admin;
+
+    if(adminOptional.isEmpty()){
+
+      String generatedPassword = RandomStringUtils.random(20, true, true);
+
+      admin = User.builder()
+              .username(GAMSAPIProperties.ADMIN_USER_NAME.name)
+              .password(
+                //passwordEncoder.encode(generatedPassword)
+                passwordEncoder.encode("admin")
+              )
+              .roles(new HashSet<>(Set.of(GAMSAPISecurityRoles.ADMINISTRATOR.name)))
+              .build();
+
+      userRepository.save(admin);
+
+      Project project = new Project();
+      project.setProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);
+      project.setDescription("Demo admin project");
+      project.setUsers(new HashSet<>(Set.of(admin)));
+
+      Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
+      if(projectOptional.isEmpty()){
+        project = projectRepository.save(project);
+      }
+
+      admin.setProjects(new HashSet<>(Set.of(project)));
+      admin = userRepository.save(admin);
+
+      System.out.println("*** Generated admin password : " + generatedPassword);
+      log.info("*** Successfully initialized admin user {} for project {}. Assigned project user: {} ***",admin, project.getProjectAbbr(), project.getUsers());
+
+    } else {
+      log.info("*** Admin user and project already initialized. Skipping process... ***");
+    }
+  }
+
+
 
 }

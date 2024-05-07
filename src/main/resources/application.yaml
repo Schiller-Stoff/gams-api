@@ -26,11 +26,18 @@ spring:
     hiddenmethod:
       filter.enabled: "true"
 
+  # solves a bug where the thymeleaf template is not created correctly
+  # https://stackoverflow.com/questions/52982246/spring-thymeleaf-throws-cannot-create-a-session-after-the-response-has-been-com
+  thymeleaf:
+    servlet:
+      produce-partial-output-while-processing: "false"
+
   # sets the limit for multi-part files send via requests
   servlet:
     multipart:
       max-file-size: 10GB
       max-request-size: 10GB
+
 
 ########
 # Logging
@@ -40,7 +47,7 @@ logging:
     name: ${LOG_FILE:log/app.log}
   level:
     org.zim.gamsapi: ${LOG_LEVEL:TRACE}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:
   error:
@@ -49,6 +56,12 @@ server:
   # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
   # Needed to consider reverse-proxy / api-gateway in front
   forward-headers-strategy: framework
+  # sets application port https://www.baeldung.com/spring-boot-change-port
+  port: 18085
+  # sets the max size of a http form post for tomcat (additional to other config that sets the limit for spring)
+  # https://stackoverflow.com/questions/33232849/increase-http-post-maxpostsize-in-spring-boot
+  tomcat:
+    max-http-form-post-size: 10000000000
 
 
 #####
@@ -58,16 +71,8 @@ gams:
   docker:
     # postgres
     relational-db: "relationalDB:5432"
-    # fedora6
-    repository-dns: "fcrepo:8080"
-    #
-    gateway-dns: "gateway:8080"
-    #
-    solr: "solr:8983"
-    # fileserver
-    apache: "apache:8080"
-    # system triplestoree
-    systemTriplestore: "localhost:3030"
+    baseSearchUrl: ${BASE_SEARCH_URL:http://baseSearch:8983/solr/gams}
+    triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
 
 # swagger ui base path
 springdoc:

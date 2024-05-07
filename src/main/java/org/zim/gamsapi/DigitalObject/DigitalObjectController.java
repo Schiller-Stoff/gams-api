@@ -2,6 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -9,11 +10,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.Datastream.DatastreamService;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = {"/api/v1/projects/{projectAbbr}/objects", "/api/v1/projects/{projectAbbr}/objects/"})
@@ -22,24 +29,57 @@ import java.util.Map;
 public class DigitalObjectController {
 
   private final DigitalObjectService digitalObjectService;
+  private final DatastreamService datastreamService;
   private final IProjectService projectService;
+  private final ConversionService conversionService;
 
-  @GetMapping(value = {"/{pid}", "/{pid}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public DigitalObject getObjectJson(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObject foundObject = digitalObjectService.findByPid(digitalObject.getPid());
-    model.addAttribute(foundObject);
+  public DigitalObjectCompactDTO getObjectJson(DigitalObject digitalObject, Project project, Model model) {
+    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
+    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
+    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject, DigitalObjectCompactDTO.class);
+
+    if(digitalObjectCompactDTO == null){
+      String msg = String.format("Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s", digitalObject, project);
+      log.error(msg);
+      throw new DigitalObjectConversionException(msg);
+    }
+
+    // TODO exception if converson fails?
+    digitalObjectCompactDTO.setDatastreams(
+        datastreamDetailsViews
+            .stream()
+            .map(
+                IDatastreamDetailsView::getDsid
+            )
+            .collect(Collectors.toList())
+    );
+
+
+    model.addAttribute(digitalObjectCompactDTO);
     log.info("Found digital object {} for project {}", digitalObject, project);
-    return foundObject;
+    return digitalObjectCompactDTO;
   }
 
-  @GetMapping(value = {"/{pid}", "/{pid}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  @GetMapping(value = {"/{id}", "/{id}/"}, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObject foundDigitalObject = digitalObjectService.findByPid(digitalObject.getPid());
-    Project curProject = projectService.findPlain(project);
-    model.addAttribute("do", foundDigitalObject);
-    model.addAttribute(curProject);
-    log.info("Found digital object {} for project {}", foundDigitalObject, project.getProjectAbbr());
+    // first query digital object projection dto
+    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
+    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject, DigitalObjectCompactDTO.class);
+    if(digitalObjectCompactDTO == null){
+      String msg = String.format("Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s", digitalObject, project);
+      log.error(msg);
+      throw new DigitalObjectConversionException(msg);
+    }
+
+    // then query datastreams projections and assign to dto
+    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
+    digitalObjectCompactDTO.setDatastreams(datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
+
+    model.addAttribute("do", digitalObjectCompactDTO);
+    model.addAttribute(project);
+    log.info("Found digital object {} for project {}", digitalObjectCompactDTO, project.getProjectAbbr());
     return "DigitalObject/show";
   }
 
@@ -50,26 +90,30 @@ public class DigitalObjectController {
           Project project,
           // for pagination
           @RequestParam(defaultValue = "0") int pageIndex,
-          @RequestParam(defaultValue = "10") int pageSize,
-          @RequestParam(defaultValue = "") String pid,
-          @RequestParam(defaultValue = "pid") String sortBy
+          @RequestParam(defaultValue = "100") int pageSize,
+          @RequestParam(defaultValue = "") String id,
+          @RequestParam(defaultValue = "id") String sortBy
 
   ) {
-    //Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("pid")));
-    Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    //Page<DigitalObject> digitalObjects = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("id")));
+    Page<DigitalObjectListItemView> digitalObjects = digitalObjectService.findAllByProjectAbbr(
             project.getProjectAbbr(),
-            pid,
+            id,
             PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
 
-    Project curProject = this.projectService.getUserProjectByEntity(project);
     model.addAttribute("digitalObjects", digitalObjects.toList());
-    model.addAttribute(curProject);
+    model.addAttribute(project);
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("totalItems", digitalObjects.getTotalElements());
     model.addAttribute("totalPages", digitalObjects.getTotalPages());
-    model.addAttribute("searchPid", pid);
+    model.addAttribute("searchId", id);
     model.addAttribute("sortBy", sortBy);
 
     //log.info("Found objects {} for project {}", digitalObjects, project);
@@ -78,26 +122,81 @@ public class DigitalObjectController {
 
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public List<DigitalObject> getProjectObjectsJson(
+  public List<DigitalObjectListItemView> getProjectObjectsJson(
           Model model,
           Project project,
-          // for pagenination
+          // for pagination
           @RequestParam(defaultValue = "0") int pageIndex,
-          @RequestParam(defaultValue = "15") int pageSize
+          @RequestParam(defaultValue = "15") int pageSize,
+          // optional parameters searching for explicit types?
+          @RequestParam Optional<String> objectType,
+          @RequestParam Optional<Set<String>> types
   ) {
-    Project curProject = this.projectService.getUserProjectByEntity(project);
-    model.addAttribute(curProject);
-    log.info("Found objects for project {}", project.getProjectAbbr());
-    return digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), PageRequest.of(pageIndex, pageSize, Sort.by("pid"))).toList();
+    // limit page size
+    if (pageSize >= 20) {
+      pageSize = 20;
+    }
+
+    model.addAttribute(project);
+
+    return digitalObjectService.findAllByProjectAbbr(
+            project.getProjectAbbr(),
+            objectType,
+            types,
+            PageRequest.of(pageIndex, pageSize, Sort.by("id"))
+    ).toList();
+
   }
 
-  @PutMapping(value = {"/{pid}", "/{pid}/"})
+  /**
+   * Allows to assign child objects to given parent object
+   * @param id the id of the object
+   * @param parentId id of the parent object
+   * @param project the project
+   * @return the parent object with the assigned child objects
+   */
+  @PatchMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/{id}/collect", "/{id}/collect/"})
+  @ResponseBody
+  public DigitalObject collectObjects(
+          @PathVariable String id,
+          @RequestParam String parentId,
+          Project project
+  ) {
+
+    // TODO this method is completely outdated -> core API now only supports assignment of one parent object!
+    DigitalObject foundObject = digitalObjectService.assignParentObject(
+        new DigitalObjectBuilder()
+            .id(id)
+            .project(project)
+            .build(),
+        new DigitalObjectBuilder()
+            .id(parentId)
+            .project(project)
+            .build()
+    );
+
+    return foundObject;
+  }
+
+  @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
-          DigitalObject digitalObject,
+          // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
+          @RequestBody DigitalObject digitalObject,
+          @RequestParam Optional<String> parent,
           Project project,
           Model model,
           @RequestHeader Map<String, String> requestHeader
   ) {
+    // project membership is not automatically bound by spring.
+    digitalObject.setProject(project);
+    // assign child objects if available
+
+    parent
+      .ifPresent(
+        strings -> digitalObject.setParent(new DigitalObjectBuilder().id(parent.get()).build())
+      );
+
+    System.out.println("***********" + digitalObject);
 
     DigitalObject savedObject = digitalObjectService.save(digitalObject);
     model.addAttribute("do", savedObject);
@@ -105,10 +204,10 @@ public class DigitalObjectController {
 
     // needed to consider proxy forwarding
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getPid();
+    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getId();
   }
 
-  @DeleteMapping(value = {"/{pid}", "/{pid}/"})
+  @DeleteMapping(value = {"/{id}", "/{id}/"})
   public String deleteObject(
           DigitalObject digitalObject,
           Project project,
@@ -126,5 +225,7 @@ public class DigitalObjectController {
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
+
+
 
 }

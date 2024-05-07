@@ -1,63 +1,179 @@
-<!DOCTYPE html>
-<!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
-<html lang="en" xmlns:th="http://thymeleaf.org">
-  <head th:replace="fragments/general.html :: head" />
-  <body class="bg-light">
+<!doctype html>
+<html lang="en">
+
+<head th:replace="fragments/general.html :: headtemplate" />
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+  <!-- Sidebar Start -->
+  <aside th:replace="fragments/general.html :: aside"></aside>
+  <!--  Sidebar End -->
+  <!--  Main wrapper -->
+  <div class="body-wrapper">
     <header th:replace="fragments/general.html :: header"></header>
-    <nav th:replace="fragments/general.html :: nav"></nav>
-    <main class="container min-vh-100 mt-4">
-      <div class="webcirilo-box shadow-sm mb-4">
-        <h1>GAMS5 - Portal</h1>
-        <p>Functionalities provided by GAMS5 and surrounding systems.</p>
-      </div>
-      <div class="row">
-        <div class="col-md-4">
-          <a class="card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm webcirilo-card" href="/api/v1/projects">
-            <p><b>Manage project data (RDM)</b></p>
-            <p><small>Provides CRUD for digital <i>objects and datastreams</i> based on <i>projects and users</i>.</small></p>
-          </a>
-          <br/>
-          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" target="_blank">
-            <p><b>Documentation</b></p>
-            <p><small>Documentation and additional material for GAMS usage and development.</small></p>
-          </a>
-          <br />
-          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5/production/issue-backlog/-/issues" target="_blank">
-            <p><b>Report an issue</b></p>
-            <p><small>Report bugs, feature-requests or refactoring suggestions here.</small></p>
-          </a>
-          <br />
-          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="/api/v1/openapi" target="_blank">
-            <p><b>REST-API Documentation</b></p>
-            <p><small>Overview for the REST endpoints provided by GAMS5.</small></p>
-          </a>
-          <br />
-        </div>
-        <div class="col-md-4">
-          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5" target="_blank">
-            <p><b>Contribute to development (via VCS)</b></p>
-            <p><small>GAMS development structure in the version control system. Code repositories and gitlab grtoups.</small></p>
-          </a>
-          <br/>
-          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/gams5/gams-dissemination/gams-web/gams-projecttemplate" target="_blank">
-            <p><b>Initialize a project dissemination template</b></p>
-            <p><small>Frontend template for a GAMS project. Develop a custom <i>frontend</i> for your research project based on forking.</small></p>
-          </a>
-          <br/>
-          <a class="card webcirilo-card p-3 text-dark text-decoration-none border-0 rounded-0 shadow-sm" style="border: 1px solid #538056" href="https://zimlab.uni-graz.at/groups/gams5/-/milestones/" target="_blank">
-            <p><b>Sprints and Milestones</b></p>
-            <p><small>Check ongoing development efforts for GAMS5</small></p>
-          </a>
-          <br />
-        </div>
-      </div>
+    <div style="min-height: 100vh" class="container-fluid">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/v1/"></a></li>
+        </ol>
+      </nav>
+      <h2>GAMS5</h2>
+      <p>Overview of base functionalities</p>
+<!--      <p>GAMS is an OAIS-compliant asset management system for the administration, publication and long-term archiving of digital resources from all humanities subjects. It offers research and teaching staff as well as students in projects the opportunity to manage and publish these resources in a citable manner and with metadata.</p>-->
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card border">
+              <a href="/api/v1/projects" class="card-body">
+                <h5 class="card-title">
+                  <span class="pe-1">
+                    <i class="ti ti-list-search"></i>
+                  </span>
+                  Project overview
+                </h5>
+                <br/>
+                <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                <p class="card-text">Overview of GAMS-projects and their digital objects with assigned datastreams.</p>
+                <!-- <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a> -->
+              </a>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border">
+              <a href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" target="_blank" class="card-body">
+                <h5 class="card-title">
+                  <span class="pe-1">
+                    <i class="ti ti-book"></i>
+                  </span>
+                  Documentation
+                </h5>
+                <br/>
+                <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                <p class="card-text">Provides CRUD for digital objects and datastreams based on projects and users.</p>
+                <!-- <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a> -->
+              </a>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border">
+              <a href="/api/v1/openapi" target="_blank" class="card-body">
+                <h5 class="card-title">
+                  <span class="pe-1">
+                    <i class="ti ti-api"></i>
+                  </span>
+                  REST-API Documentation
+                </h5>
+                <br/>
+                <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                <p class="card-text">Overview for the REST endpoints provided by GAMS5.</p>
+                <!-- <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a> -->
+              </a>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card border">
+              <a href="https://zimlab.uni-graz.at/gams5/production/issue-backlog/-/issues" target="_blank" class="card-body">
+                <h5 class="card-title">
+                  <span class="pe-1">
+                    <i class="ti ti-file-broken"></i>
+                  </span>
+                  Report an issue
+                </h5>
+                <br/>
+                <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                <p class="card-text">Report bugs, feature-requests or refactoring suggestions here.</p>
+                <!-- <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a> -->
+              </a>
+            </div>
+          </div>
 
 
-      <!-- <p><b>Pid:</b> <span th:text="${do.pid}"></span></p> -->
-      <!-- <p><b>Linked resource path: </b><span th:text="${do.resource.path}"></span></p> -->
-      <!-- <p><b>Resource RDF metadata: </b><pre><span th:text="${do.resource.rdfXml}"></span></pre></p> -->
-    </main>
+          <div class="col-md-4">
+            <div class="card border">
+              <a href="https://zimlab.uni-graz.at/gams5" target="_blank" class="card-body">
+                <h5 class="card-title">
+                  <span class="pe-1">
+                    <i class="ti ti-aperture"></i>
+                  </span>
+                  Contribute to development
+                </h5>
+                <br/>
+                <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                <p class="card-text">GAMS development structure in the version control system.</p>
+                <!-- <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a> -->
+              </a>
+            </div>
+          </div>
+
+
+          <!-- <div class="col-md-4">
+            <div class="card">
+              <a href="https://zimlab.uni-graz.at/gams5/gams-dissemination/gams-web/gams-projecttemplate" target="_blank" class="card-body">
+                <h5 class="card-title">Initialize a project dissemination template</h5>
+                <br/>
+                <p class="card-text">Frontend template for a GAMS project. Develop a custom frontend for your research project based on forking.</p>
+              </a>
+            </div>
+          </div> -->
+
+
+          <!-- <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of
+                  the
+                  card's content.</p>
+                <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of
+                  the
+                  card's content.</p>
+                <a href="#" class="card-link">Card link</a>
+                <a href="#" class="card-link">Another link</a>
+              </div>
+            </div>
+          </div> -->
+
+        </div>
+    </div>
+
+
+    <br/>
+    <br/>
+    <br/>
+    <br/>
 
     <footer th:replace="fragments/general.html :: footer"></footer>
-  </body>
+  </div>
+</div>
+<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/sidebarmenu.js"></script>
+<script src="/assets/js/app.min.js"></script>
+<script src="/assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+<script src="/assets/js/dashboard.js"></script>
+</body>
+
 </html>

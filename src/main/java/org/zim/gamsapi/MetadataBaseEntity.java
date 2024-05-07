@@ -2,65 +2,87 @@ package org.zim.gamsapi;
 
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
- * Adds missing DC metadata to the entities of gams-api BUT:
- * dc:identifier AND dc:title are managed by the parent entities
+ * Handles shared metadata fields between DigitalObject and Datastream
  *
  * https://www.dublincore.org/
  */
 @Embeddable
-@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class MetadataBaseEntity {
 
-  // Note: expected to be managed by parent entity
-  //private String dcIdentifier;
-
-  // system controlled
-  private List<String> identifier;
-
-  // system controlled
-  private List<String> format;
-
+  /**
+   * Title of digital object / datastream
+   */
   @NotEmpty
-  private List<String> title;
+  private String title;
 
+  /**
+   * Rights statement of digital object / datastream
+   */
   @NotEmpty
-  private List<String> rights;
+  private String rights;
 
+  /**
+   * Publisher of the digital object or datastream
+   */
   @NotEmpty
-  private List<String> publisher;
+  private String publisher;
 
-  private List<String> creator;
+  /**
+   * Creator of digital object or datastream
+   */
+  @NotEmpty
+  private String creator;
 
-  @Size(min = 0, max = 2000)
+  /**
+   * Description if the digital object or datastream
+   */
+  @Size(min = 5, max = 2000)
+  @NotEmpty
   private String description;
 
-  private List<String> subject;
 
-  private List<String> contributor;
+  /**
+   * Arbitrarily associated format with the digital object / datastream
+   * e.g. datastream --> book-page
+   * e.g. digital object --> book
+   */
+  //private String format;
 
-  private List<String> date;
 
-  private List<String> type;
+  /**
+   * Arbitrarily associated subjects with the digital object / datastreams
+   */
+  //private Set<String> subject;
 
-  private List<String> source;
+  /**
+   * Arbitrarily associated contributor
+   */
+  //private String contributor;
 
-  private List<String> language;
+  /**
+   * Arbitrarily associated date with the digital object / datastream.
+   */
+  //private String date;
 
-  private List<String> relation;
+  //private String type;
 
-  private List<String> coverage;
+  //private String source;
+
+  // system controlled - always english?
+  //private String language;
+
+  //private String relation;
+
+  //private String coverage;
 
 }
