@@ -4,13 +4,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.util.MimeTypeUtils;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spring security configuration
@@ -20,7 +28,7 @@ import org.springframework.util.MimeTypeUtils;
 @RequiredArgsConstructor
 public class SpringSecurityConfiguration {
 
-  private final UserProjectAuthorizationManager userProjectAuthorizationManager;
+  private final Oauth2AuthorizationManager userProjectAuthorizationManager;
 
   /**
    * Combined spring security matchers.
@@ -31,70 +39,34 @@ public class SpringSecurityConfiguration {
 
   private final String[] PUBLIC_GET_PATHS = {"/api/v1**", "/api/v1/**"};
 
+
+  private static final String GROUPS = "groups";
+  private static final String REALM_ACCESS_CLAIM = "realm_access";
+  private static final String ROLES_CLAIM = "roles";
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     log.info("*** Initializing spring security config ***");
 
-    http.authorizeHttpRequests(authorize -> {
-      try {
-        authorize
-                // allow all GET requests
-                .requestMatchers(HttpMethod.GET, "/**")
-                .permitAll()
-                // allow all HEAD requests
-                .requestMatchers(HttpMethod.HEAD, "/**")
-                .permitAll()
-                // allow post requests against specific integration api endpoints (because: might get queries via POST)
-                .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
-                .permitAll()
-                // setup which endpoints need authentication
-                // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
-                .requestMatchers(request -> {
-                    String requestMethod = request.getMethod();
-                    return switch (requestMethod) {
-                        case "POST", "PUT", "PATCH", "DELETE" -> true;
-                        default -> false;
-                    };
-                })
-                .authenticated()
-                // authorization: protect state changes against projects + users except if admin.
-                .requestMatchers( HttpMethod.POST, ADMIN_ONLY_PATHS)
-                .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.DELETE, ADMIN_ONLY_PATHS)
-                .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.PATCH, ADMIN_ONLY_PATHS)
-                .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
-                .requestMatchers( HttpMethod.PUT, ADMIN_ONLY_PATHS)
-                .hasAnyAuthority(GAMSAPISecurityRoles.ADMINISTRATOR.name)
-                // configures: user must be assigned to project + have required roles (admin, editor,....) to change state of objects or datastreams (including ingest)
-                .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
-                .access(userProjectAuthorizationManager)
-                //.anyRequest()
-                //.authenticated()
-                .and()
-                .httpBasic()
-                .and()
-                .csrf()
-                .ignoringRequestMatchers(request -> {
-                  String acceptHeaderValue = request.getHeader(HttpHeaders.ACCEPT);
-                  if(acceptHeaderValue == null) return true;
-                  boolean containsTextHtml = acceptHeaderValue.contains(MimeTypeUtils.TEXT_HTML_VALUE);
-                  // disable csrf for all requests that don't demand html = only html pages are csrf protected
-                  return !containsTextHtml;
-                })
-                // allows to load e.g. datastream content directly via an embed / iframe tag.
-                // https://stackoverflow.com/questions/28647136/how-to-disable-x-frame-options-response-header-in-spring-security
-                .and()
-                .headers()
-                .frameOptions()
-                .sameOrigin();
-      } catch (Exception e) {
-        String msg = String.format("Failed to correctly configure spring security - Might be an issue with CSRF protection settings %s", e);
-        log.error(msg);
-        throw new RuntimeException(e);
-      }
+
+    // configure oauth2 login
+    http.oauth2Login(httpSecurityOAuth2LoginConfigurer -> {
+      httpSecurityOAuth2LoginConfigurer
+          //.loginPage("/login")
+          //.defaultSuccessUrl("/home", true)
+          .failureUrl("/login?error=true");
     });
+
+
+    http.authorizeHttpRequests(auth ->
+      auth
+          .requestMatchers("/**")
+          .access(userProjectAuthorizationManager)
+          // TODO means that every request needs ouath2 login - not suitable for public endpoints
+          .anyRequest()
+          .authenticated()
+    );
 
     return http.build();
 
@@ -103,6 +75,69 @@ public class SpringSecurityConfiguration {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+
+  /**
+   * Maps the authorities from the token to the authorities in the application.
+   * https://www.baeldung.com/spring-boot-keycloak
+   * @return GrantedAuthoritiesMapper
+   */
+  @Bean
+  public GrantedAuthoritiesMapper userAuthoritiesMapperForKeycloak() {
+
+    return authorities -> {
+      //TODO remove demo logging
+      log.error("******** CALLING GRANTED AUTHORITIES MAPPER ********");
+      Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
+      var authority = authorities.iterator().next();
+      boolean isOidc = authority instanceof OidcUserAuthority;
+
+
+      if (isOidc) {
+        var oidcUserAuthority = (OidcUserAuthority) authority;
+        var userInfo = oidcUserAuthority.getUserInfo();
+
+        log.error("********** USER INFO (in mapper)" + userInfo.getClaims());
+        log.error("************ USER AUTHORITY: " + oidcUserAuthority.getAuthority());
+
+        // TODO needs suitable keycloak configuration (include roles in token!)
+
+        // Tokens can be configured to return roles under
+        // Groups or REALM ACCESS hence have to check both
+        if (userInfo.hasClaim(REALM_ACCESS_CLAIM)) {
+          var realmAccess = userInfo.getClaimAsMap(REALM_ACCESS_CLAIM);
+          var roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
+          mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
+        } else if (userInfo.hasClaim(GROUPS)) {
+
+          // TODO remove mapping of groups! (raise an error if REALM_ACCESS_CLAIM is not present in token!)
+          // (so that admins could propperly configure keycloak)
+
+          Collection<String> roles = (Collection<String>) userInfo.getClaim(
+              GROUPS);
+          mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
+        }
+      } else {
+        var oauth2UserAuthority = (OAuth2UserAuthority) authority;
+        Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
+
+        log.error("********** USER ATTRIBUTES (in mapper)" + userAttributes);
+
+        if (userAttributes.containsKey(REALM_ACCESS_CLAIM)) {
+          Map<String, Object> realmAccess = (Map<String, Object>) userAttributes.get(
+              REALM_ACCESS_CLAIM);
+          Collection<String> roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
+          mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
+        }
+      }
+      return mappedAuthorities;
+    };
+  }
+
+  Collection<GrantedAuthority> generateAuthoritiesFromClaim(Collection<String> roles) {
+    return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(
+        Collectors.toList());
   }
 
 }
