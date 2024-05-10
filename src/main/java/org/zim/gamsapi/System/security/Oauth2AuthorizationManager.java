@@ -35,10 +35,10 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
 
     // all GET requests are being authorized
     // TODO not all GET requests should be authorized (e.g. according to rights defined in metadata of a datastream? Means only the content should be blocked?)
-    if(requestMethod.equals(HttpMethod.GET.name())){
-      log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
-      return new AuthorizationDecision(true);
-    }
+//    if(requestMethod.equals(HttpMethod.GET.name())){
+//      log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
+//      return new AuthorizationDecision(true);
+//    }
 
     // all HEAD requests are being authorized
     if(requestMethod.equals(HttpMethod.HEAD.name())){
@@ -50,8 +50,8 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
     if(!authentication.get().isAuthenticated()){
       String msg = String.format("User authentication is required for state changing operations on GAMS. Against url %s for method: %s", requestUri, requestMethod);
       log.trace(msg);
-      return new AuthorizationDecision(false);
-      //throw new UserAuthenticationRequiredException(msg);
+      //return new AuthorizationDecision(false);
+      throw new UserAuthenticationRequiredException(msg);
     }
 
     String username = authorizationContext.getRequest().getRemoteUser();
@@ -79,7 +79,7 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
     if(filteredRoles.isEmpty()) {
       String msg = String.format("User %s is not assigned to project %s. Url: %s Method: %s. Has authorities: %s", username, projectAbbr, requestUri, requestMethod, userAuthorities);
       log.trace(msg);
-      return new AuthorizationDecision(false);
+      throw new UserNotAssignedToProjectException(msg);
     }
 
     // if project admin - allow everything
@@ -107,6 +107,7 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
 
     String msg = String.format("No authorization rule applies the current user. User %s is assigned to project %s but has no required role. Url: %s Method: %s.", username, projectAbbr, requestUri, requestMethod);
     log.trace(msg);
+    // TODO exception instead?
     return new AuthorizationDecision(false);
   }
 
