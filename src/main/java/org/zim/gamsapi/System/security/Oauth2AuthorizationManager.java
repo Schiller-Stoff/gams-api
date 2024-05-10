@@ -73,6 +73,8 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
 
 
     // first filter for all project relevant roles
+    // TODO this is errorprone - if a role is named like a project abbreviation but is not a project role
+    // TODO refactor: use GAMSAPISecurityRoles delimiter to split -> and then add a check if the role is a project role
     var filteredRoles = userAuthorities.stream().filter(role -> role.toLowerCase().contains(projectAbbr.toLowerCase())).toList();
     if(filteredRoles.isEmpty()) {
       String msg = String.format("User %s is not assigned to project %s. Url: %s Method: %s. Has authorities: %s", username, projectAbbr, requestUri, requestMethod, userAuthorities);
