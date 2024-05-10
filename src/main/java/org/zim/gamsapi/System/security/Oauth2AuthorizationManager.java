@@ -73,7 +73,7 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
 
 
     // first filter for all project relevant roles
-    var filteredRoles = userAuthorities.stream().filter(role -> role.contains(projectAbbr)).toList();
+    var filteredRoles = userAuthorities.stream().filter(role -> role.toLowerCase().contains(projectAbbr.toLowerCase())).toList();
     if(filteredRoles.isEmpty()) {
       String msg = String.format("User %s is not assigned to project %s. Url: %s Method: %s. Has authorities: %s", username, projectAbbr, requestUri, requestMethod, userAuthorities);
       log.trace(msg);
