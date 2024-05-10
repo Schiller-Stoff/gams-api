@@ -60,7 +60,7 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
     // TODO: later add error check if a user has no roles assigned -> therefore no authorities here! (if anynonymous can be checked before)
 
     // global administrator is allowed to do everything
-    if(userAuthorities.contains(GAMSAPISecurityRoles.ADMINISTRATOR.name)) {
+    if(userAuthorities.contains(GAMSAPISecurityRoles.getAdmin())) {
       log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
       return new AuthorizationDecision(true);
     }
