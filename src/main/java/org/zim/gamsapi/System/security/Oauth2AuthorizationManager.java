@@ -29,20 +29,11 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
   @Override
   public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 
-    // TODO remove demo logging
-    System.out.println("*********AUTH PROCESS");
-    log.error("*** AUTHENTICATION PROCESS: ");
-
+    log.trace("*** Checking custom authorization process...");
     String requestMethod = authorizationContext.getRequest().getMethod();
     String requestUri = authorizationContext.getRequest().getRequestURI();
 
-    log.trace("Checking custom authorization process...");
-
-    // TODO remove demo logging
-    log.error("*** AUTHENTICATION: " + authentication);
-    log.error("*** AUTH CONTEXT " + authorizationContext);
-
-    // all GET requests are being authorized
+    // all GET requests are being authorized?
     // TODO not all GET requests should be authorized
 //    if(requestMethod.equals(HttpMethod.GET.name())){
 //      log.trace("ACCESS GRANTED - GET requests are not protected for url {}", requestUri);
@@ -64,66 +55,57 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
     }
 
     String username = authorizationContext.getRequest().getRemoteUser();
+    // access authorities from authentication workflow
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+    // TODO: later add error check if a user has no roles assigned -> therefore no authorities here! (if anynonymous can be checked before)
 
-    log.error("USERNAME: " + username);
-
-    log.error("USER AUTHORITIES: " + userAuthorities);
-
-    log.error("AUTH CONTEXT VARIABLES: " +  authorizationContext.getVariables());
-    //log.error("AUTH CONTEXT VARIABLES: " +  );
-
-
-//    OAuth2UserAuthority oauth2UserAuthority;
-//    try {
-//      oauth2UserAuthority = (OAuth2UserAuthority) authentication.get().getAuthorities().toArray()[0];
-//    } catch (ClassCastException e){
-//      // TODO improve?
-//      log.error("CANNOT CAST TO OAUTH2USERAUTHORITY");
-//      return new AuthorizationDecision(false);
-//    }
-//
-//    log.error("OAUTH2 AUTHORITY ATTRIBUTES: " + oauth2UserAuthority.getAttributes());
-//    log.error("OAUTH2 USER AUTHORITY: " + oauth2UserAuthority.getAuthority());
+    // global administrator is allowed to do everything
+    if(userAuthorities.contains(GAMSAPISecurityRoles.ADMINISTRATOR.name)) {
+      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
+      return new AuthorizationDecision(true);
+    }
 
 
-
-    // TODO check from here!
-    return new AuthorizationDecision(false);
-
-
-
+    // check if user is assigned to project
+    // TODO add nullpointer check?
+    // defined in request matcher in SpringSecurityConfiguration.java
+    String projectAbbr = authorizationContext.getVariables().get("projectAbbr");
 
 
-    // TODO from here old code
+    // first filter for all project relevant roles
+    var filteredRoles = userAuthorities.stream().filter(role -> role.contains(projectAbbr)).toList();
+    if(filteredRoles.isEmpty()) {
+      String msg = String.format("User %s is not assigned to project %s. Url: %s Method: %s. Has authorities: %s", username, projectAbbr, requestUri, requestMethod, userAuthorities);
+      log.trace(msg);
+      return new AuthorizationDecision(false);
+    }
 
-//
-//    String username = authorizationContext.getRequest().getRemoteUser();
-//    // access authorities from authentication workflow
-//    List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-//    // administrator is allowed to do everything
-//    if(userAuthorities.contains(GAMSAPISecurityRoles.ADMINISTRATOR.name)) {
-//      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
+    // if project admin - allow everything
+    String projectAdminRole = GAMSAPISecurityRoles.getProjectAdmin(projectAbbr);
+    if(userAuthorities.contains(projectAdminRole)){
+      log.trace("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_ADMINISTRATOR.name, requestUri, requestMethod, userAuthorities);
+      return new AuthorizationDecision(true);
+    }
+
+    // if project editor (what to allow here?)
+    String projectEditorRole = GAMSAPISecurityRoles.getProjectEditor(projectAbbr);
+    if(userAuthorities.contains(projectEditorRole)){
+      log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_EDITOR.name, requestUri, requestMethod, userAuthorities);
+      return new AuthorizationDecision(true);
+    }
+
+    // if project viewer
+    // TODO what to allow here - need to think about authorization process
+//    String projectViewerRole = GAMSAPISecurityRoles.getProjectViewer(projectAbbr);
+//    if(userAuthorities.contains(projectViewerRole)){
+//      log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_VIEWER.name, requestUri, requestMethod);
 //      return new AuthorizationDecision(true);
 //    }
-//
-//    // check if user is assigned to project
-//    String projectAbbr = authorizationContext.getVariables().get("projectAbbr"); //defined in request matcher in SpringSecurityConfiguration.java
-//    if(userAuthorities.contains(projectAbbr)){
-//      // grant access only if assigned project AND editor role.
-//      if(userAuthorities.contains(GAMSAPISecurityRoles.EDITOR.name)){
-//        log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}", username, projectAbbr, GAMSAPISecurityRoles.EDITOR.name, requestUri, requestMethod);
-//        return new AuthorizationDecision(true);
-//      } else {
-//        String msg = String.format("ACCESS DENIED - User %s has access to project %s BUT is missing the required %s role. Url: %s, Method: %s", username, projectAbbr, GAMSAPISecurityRoles.EDITOR.name, requestUri, requestMethod);
-//        log.debug(msg);
-//        throw new UserAssignedToProjectButMissingEditorRoleException(msg);
-//      }
-//    } else {
-//      String msg = String.format("ACCESS DENIED - User %s is not authorized for project %s. Url: %s, Method: %s", username, projectAbbr, requestUri, requestMethod);
-//      log.debug(msg);
-//      throw new UserNotAssignedToProjectException(msg);
-//    }
+
+
+    String msg = String.format("No authorization rule applies the current user. User %s is assigned to project %s but has no required role. Url: %s Method: %s.", username, projectAbbr, requestUri, requestMethod);
+    log.trace(msg);
+    return new AuthorizationDecision(false);
   }
 
 }
