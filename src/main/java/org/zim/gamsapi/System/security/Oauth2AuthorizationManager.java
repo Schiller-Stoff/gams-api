@@ -33,12 +33,12 @@ public class Oauth2AuthorizationManager implements AuthorizationManager<RequestA
     String requestMethod = authorizationContext.getRequest().getMethod();
     String requestUri = authorizationContext.getRequest().getRequestURI();
 
-    // all GET requests are being authorized?
-    // TODO not all GET requests should be authorized
-//    if(requestMethod.equals(HttpMethod.GET.name())){
-//      log.trace("ACCESS GRANTED - GET requests are not protected for url {}", requestUri);
-//      return new AuthorizationDecision(true);
-//    }
+    // all GET requests are being authorized
+    // TODO not all GET requests should be authorized (e.g. according to rights defined in metadata of a datastream? Means only the content should be blocked?)
+    if(requestMethod.equals(HttpMethod.GET.name())){
+      log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
+      return new AuthorizationDecision(true);
+    }
 
     // all HEAD requests are being authorized
     if(requestMethod.equals(HttpMethod.HEAD.name())){
