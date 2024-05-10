@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
-import org.zim.gamsapi.User.UserPrincipal;
 import java.util.Optional;
 
 /**
@@ -34,8 +33,13 @@ public class UserPrincipalAuditorMapping implements IUserPrincipalAuditorMapping
     }
 
     try {
-      UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-      return Optional.of(userPrincipal.getUsername());
+
+      // TODO needs to be updated to work with oauth2 principal!
+
+      //UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+      //return Optional.of(userPrincipal.getUsername());
+      // TODO refactor
+      return Optional.of("test");
     } catch (ClassCastException e){
       String msg = String.format("Failed to extract user principal from given authentication. Mapping from UserPrincipal to Auditor aborted. Original error %s", e);
       log.error(msg);
