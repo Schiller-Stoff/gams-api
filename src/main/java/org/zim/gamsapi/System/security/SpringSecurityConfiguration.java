@@ -53,6 +53,7 @@ public class SpringSecurityConfiguration {
 
 
     // configure oauth2 login
+    // TODO elaborate oauth2login settings (e.g. login page, success url, failure url)
     http.oauth2Login(httpSecurityOAuth2LoginConfigurer -> {
       httpSecurityOAuth2LoginConfigurer
           //.loginPage("/login")
