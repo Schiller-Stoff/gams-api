@@ -16,6 +16,24 @@ spring:
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
         hibernate.jdbc.lob.non_contextual_creation: true
+  # oauth2 integration with keycloak
+  # TODO needs to deactivated in dev profile!
+  # TODO redo config parameters - let them be controlled via the docker-compose file?
+  security:
+    oauth2:
+      client:
+        registration:
+          gams-realm:
+            client-id: gams-client
+            client-secret: MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT
+            scope: openid,profile,email
+            authorization-grant-type: authorization_code
+            redirect-uri: "http://localhost:18085/login/oauth2/code/gams-client"
+            # provider: keycloak
+            # client-name: GAMS
+        provider:
+          gams-realm:
+            issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8182/realms/gams-realm}
 
 
   #####
