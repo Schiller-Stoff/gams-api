@@ -64,7 +64,8 @@ public class SpringSecurityConfiguration {
 
     http.authorizeHttpRequests(auth ->
       auth
-          .requestMatchers("/**")
+          // request matchers specifiy authorization for specific endpoints
+          .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
           .access(userProjectAuthorizationManager)
           // TODO means that every request needs ouath2 login - not suitable for public endpoints
           .anyRequest()
