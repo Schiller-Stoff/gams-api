@@ -29,6 +29,8 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
   @Override
   public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 
+    // TODO remove outdated class
+
     String requestMethod = authorizationContext.getRequest().getMethod();
     String requestUri = authorizationContext.getRequest().getRequestURI();
 
