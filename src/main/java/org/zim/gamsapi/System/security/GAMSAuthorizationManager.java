@@ -7,11 +7,8 @@ import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
-import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
-import org.zim.gamsapi.System.security.exceptions.UserAssignedToProjectButMissingEditorRoleException;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 
@@ -25,7 +22,7 @@ import java.util.function.Supplier;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class Oauth2AuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+public class GAMSAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
   @Override
   public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 

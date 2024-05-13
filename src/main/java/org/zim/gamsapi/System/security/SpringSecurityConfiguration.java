@@ -14,7 +14,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
-import org.zim.gamsapi.User.exceptions.UserException;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SpringSecurityConfiguration {
 
-  private final Oauth2AuthorizationManager userProjectAuthorizationManager;
+  private final GAMSAuthorizationManager userProjectAuthorizationManager;
 
   /**
    * Combined spring security matchers.
