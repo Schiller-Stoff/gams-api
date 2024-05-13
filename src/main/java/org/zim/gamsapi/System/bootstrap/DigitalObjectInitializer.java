@@ -158,6 +158,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     // TODO this whole method is outdated? initializing uers is now done in the Keycloak configuration
     // TODO remove complete method?
+    // BUT: careful needs base setup linking users with projects?
 
     // added hardcoded admin user here
     Optional<User> adminOptional = userRepository.findByUsername(GAMSAPIProperties.ADMIN_USER_NAME.name);
@@ -166,7 +167,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
     if(adminOptional.isEmpty()){
 
       admin = User.builder()
-              .userid(1L)
+              .userid("ADMIN_ID")
               .username(GAMSAPIProperties.ADMIN_USER_NAME.name)
               .build();
 

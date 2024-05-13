@@ -27,7 +27,7 @@ public class User {
    */
   @Id
   @NotNull
-  private Long userid;
+  private String userid;
 
   /**
    * The user name.
