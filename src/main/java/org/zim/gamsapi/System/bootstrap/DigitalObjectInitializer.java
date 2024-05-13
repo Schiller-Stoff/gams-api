@@ -156,21 +156,18 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
   public void initializeAdmin(){
 
+    // TODO this whole method is outdated? initializing uers is now done in the Keycloak configuration
+    // TODO remove complete method?
+
     // added hardcoded admin user here
     Optional<User> adminOptional = userRepository.findByUsername(GAMSAPIProperties.ADMIN_USER_NAME.name);
     User admin;
 
     if(adminOptional.isEmpty()){
 
-      String generatedPassword = RandomStringUtils.random(20, true, true);
-
       admin = User.builder()
+              .userid(1L)
               .username(GAMSAPIProperties.ADMIN_USER_NAME.name)
-              .password(
-                //passwordEncoder.encode(generatedPassword)
-                passwordEncoder.encode("admin")
-              )
-              .roles(new HashSet<>(Set.of(GAMSAPISecurityRoles.ADMINISTRATOR.name)))
               .build();
 
       userRepository.save(admin);
@@ -188,7 +185,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
       admin.setProjects(new HashSet<>(Set.of(project)));
       admin = userRepository.save(admin);
 
-      System.out.println("*** Generated admin password : " + generatedPassword);
       log.info("*** Successfully initialized admin user {} for project {}. Assigned project user: {} ***",admin, project.getProjectAbbr(), project.getUsers());
 
     } else {

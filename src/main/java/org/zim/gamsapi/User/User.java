@@ -22,26 +22,26 @@ import java.util.Set;
 @ToString
 public class User {
 
+  /**
+   * The user id.
+   */
   @Id
   @NotNull
-  @GeneratedValue(strategy = GenerationType.AUTO)
   private Long userid;
 
+  /**
+   * The user name.
+   */
   @Column(nullable = false, unique = true)
   @NotBlank
   private String username;
 
-  @ToString.Exclude
-  @JsonIgnore
-  private String password;
-
+  /**
+   * GAMS projects assigned to the user
+   */
   // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
   @ManyToMany(fetch = FetchType.EAGER)
   @ToString.Exclude
   private Set<Project> projects;
 
-  // // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
-  @ElementCollection(fetch = FetchType.EAGER)
-  @NotNull
-  private Set<String> roles;
 }
