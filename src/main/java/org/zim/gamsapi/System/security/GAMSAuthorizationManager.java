@@ -62,11 +62,20 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
       return new AuthorizationDecision(true);
     }
 
-
-    // check if user is assigned to project
-    // TODO add nullpointer check?
     // defined in request matcher in SpringSecurityConfiguration.java
-    String projectAbbr = authorizationContext.getVariables().get("projectAbbr");
+    // fail safe nullpointer check (should not happen if request matcher is correctly configured)
+    // TODO test this
+    String projectAbbr;
+    try {
+      projectAbbr = authorizationContext.getVariables().get("projectAbbr");
+      if(projectAbbr == null) {
+        throw new NullPointerException();
+      }
+    } catch (NullPointerException e) {
+      String msg = String.format("Somehow no project abbreviation found in request. The %s class should be only activated at endpoints containing the project-abbreviation. Url: %s Method: %s", this.getClass().getName(), requestUri, requestMethod);
+      log.error(msg);
+      throw new UserAuthenticationRequiredException(msg);
+    }
 
 
     // first filter for all project relevant roles
