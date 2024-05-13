@@ -26,7 +26,6 @@ public enum GAMSAPISecurityRoles {
 
   /**
    * Returns the full admin role
-   * TODO test
    * @return the full admin role
    */
   public static String getAdmin() {
@@ -35,7 +34,6 @@ public enum GAMSAPISecurityRoles {
 
   /**
    * Returns the full project admin role
-   * TODO test
    * @param projectAbbr the project abbreviation
    * @return the full project admin role
    */
@@ -44,7 +42,6 @@ public enum GAMSAPISecurityRoles {
   }
 
   /**
-   * TODO test
    * Returns the full project editor role
    * @param projectAbbr the project abbreviation
    * @return the full project editor role
@@ -54,7 +51,6 @@ public enum GAMSAPISecurityRoles {
   }
 
   /**
-   * TODO test
    * Returns the full project viewer role
    * @param projectAbbr the project abbreviation
    * @return the full project viewer role
