@@ -5,12 +5,7 @@ package org.zim.gamsapi.System.security;
  */
 public enum GAMSAPISecurityRoles {
 
-  //  TODO remove public access to properties -> let things be built via getters.
-
   ADMINISTRATOR("admin"),
-
-  // TODO remove this role?
-  EDITOR("editor"),
 
   PROJECT_ADMINISTRATOR("admin"),
 
@@ -31,18 +26,11 @@ public enum GAMSAPISecurityRoles {
 
   /**
    * Returns the full admin role
+   * TODO test
    * @return the full admin role
    */
   public static String getAdmin() {
     return GAMSAPISecurityRoles.ROLE_PREFIX.name + GAMSAPISecurityRoles.ADMINISTRATOR.name;
-  }
-
-  /**
-   * Returns the full editor role
-   * @return the full editor role
-   */
-  public static String getEditor() {
-    return GAMSAPISecurityRoles.ROLE_PREFIX.name + GAMSAPISecurityRoles.EDITOR.name;
   }
 
   /**
