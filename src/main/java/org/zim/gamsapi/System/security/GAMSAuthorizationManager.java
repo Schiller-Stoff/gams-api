@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 
@@ -84,11 +85,14 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
       throw new UserAuthenticationRequiredException(msg);
     }
 
-
     // first filter for all project relevant roles
-    // TODO this is errorprone - if a role is named like a project abbreviation but is not a project role
-    // TODO refactor: use GAMSAPISecurityRoles delimiter to split -> and then add a check if the role is a project role
-    var filteredRoles = userAuthorities.stream().filter(role -> role.toLowerCase().contains(projectAbbr.toLowerCase())).toList();
+    // TODO test this
+    var filteredRoles = userAuthorities.stream()
+        .filter(role -> GAMSAPISecurityRoles.authorityMatchesProjectAbbr(role, projectAbbr))
+        .toList();
+
+    // there is no role that contains the project-abbreviation ()
+    // TODO  test
     if(filteredRoles.isEmpty()) {
       String msg = String.format("User %s is not assigned to project %s. Url: %s Method: %s. Has authorities: %s", username, projectAbbr, requestUri, requestMethod, userAuthorities);
       log.trace(msg);
