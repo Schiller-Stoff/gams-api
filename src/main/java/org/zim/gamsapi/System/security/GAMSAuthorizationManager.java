@@ -56,6 +56,13 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
     // TODO: later add error check if a user has no roles assigned -> therefore no authorities here! (if anynonymous can be checked before)
 
+    // TODO test this
+    if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
+      String msg = String.format("User %s is not authorized for the GAMS-API because having anonymous role: %s. Url: %s Method: %s", GAMSAPISecurityRoles.getAnonymous(), username, requestUri, requestMethod);
+      log.trace(msg);
+      return new AuthorizationDecision(false);
+    }
+
     // global administrator is allowed to do everything
     if(userAuthorities.contains(GAMSAPISecurityRoles.getAdmin())) {
       log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
