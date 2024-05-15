@@ -7,6 +7,8 @@ public enum GAMSAPISecurityRoles {
 
   ADMINISTRATOR("admin"),
 
+  ANONYMOUS("anonymous"),
+
   PROJECT_ADMINISTRATOR("admin"),
 
   PROJECT_EDITOR("editor"),
@@ -30,6 +32,14 @@ public enum GAMSAPISecurityRoles {
    */
   public static String getAdmin() {
     return GAMSAPISecurityRoles.ROLE_PREFIX.name + GAMSAPISecurityRoles.ADMINISTRATOR.name;
+  }
+
+  /**
+   * Returns the full anonymous role
+   * @return the full anonymous role
+   */
+  public static String getAnonymous() {
+    return GAMSAPISecurityRoles.ROLE_PREFIX.name + GAMSAPISecurityRoles.ANONYMOUS.name;
   }
 
   /**
