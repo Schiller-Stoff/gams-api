@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 
-public class GAMSAuthorizationManagerTest extends UnitTest {
+public class UserProjectAuthorizationManagerTest extends UnitTest {
 
   @Mock
   Authentication authentication;
@@ -51,7 +51,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
 
       when(request.getMethod()).thenReturn(HttpMethod.HEAD.name());
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
@@ -65,7 +65,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
 
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
@@ -80,7 +80,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       when(authentication.isAuthenticated()).thenReturn(false);
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertThrows(UserAuthenticationRequiredException.class, () -> {
         manager.check(() -> authentication, authorizationContext);
@@ -93,7 +93,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
       when(request.getRequestURI()).thenReturn("/noProjectAbbr");
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
         manager.check(() -> authentication, authorizationContext);
@@ -105,7 +105,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
       when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertDoesNotThrow(() -> {
         manager.check(() -> authentication, authorizationContext);
@@ -132,7 +132,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Assert
       Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
@@ -151,7 +151,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
       AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
 
       // make sure that this was actually called
@@ -165,7 +165,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       // return empty map for variables (projectAbbr)
       when(authorizationContext.getVariables()).thenReturn(Map.of());
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
@@ -188,7 +188,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
@@ -212,7 +212,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
@@ -234,7 +234,7 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);

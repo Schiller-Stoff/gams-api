@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SpringSecurityConfiguration {
 
-  private final GAMSAuthorizationManager userProjectAuthorizationManager;
+  private final UserProjectAuthorizationManager userProjectAuthorizationManager;
 
   /**
    * Combined spring security matchers.

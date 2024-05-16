@@ -19,12 +19,14 @@ import java.util.function.Supplier;
 
 /**
  * Custom authorization manager for GAMS API.
- * This class is responsible for checking if a user is authorized to access a specific endpoint.
+ * This class is responsible for checking if a user is authorized to access a specific endpoint according to
+ * his project roles (and if super admin)
+ * In sum: state changing operations are only allowed for users that are assigned to the project and have the required role.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class GAMSAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+public class UserProjectAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
   @Override
   public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 
