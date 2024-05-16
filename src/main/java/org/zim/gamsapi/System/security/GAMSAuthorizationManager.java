@@ -32,8 +32,12 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     String requestMethod = authorizationContext.getRequest().getMethod();
     String requestUri = authorizationContext.getRequest().getRequestURI();
 
-    // TODO add check of projects is in uri - if not throw AuthorizationConfigurationException
-    // TODO test this also
+    // small fail check - should not happen if request matcher is correctly configured (in spring configuration)
+    if(!requestUri.contains("/projects/")){
+      String msg = String.format("No '/projects/' found in request url. The %s class should be only activated at endpoints containing the project-abbreviation in the url, like '/api/v1/projects/demo/objects/demo'. Url: %s Method: %s", this.getClass().getName(), requestUri, requestMethod);
+      log.error(msg);
+      throw new AuthorizationConfigurationException(msg);
+    }
 
     // all GET requests are being authorized
     // TODO not all GET requests should be authorized (e.g. according to rights defined in metadata of a datastream? Means only the content should be blocked?)
