@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
-@AutoConfigureMockMvc(addFilters = false) // disable security for class
+@AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProjectControllerIT extends IntegrationTest {
 
