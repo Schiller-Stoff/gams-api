@@ -98,7 +98,6 @@ public enum GAMSAPISecurityRoles {
 
   /**
    * Checks if the given authority matches the given project abbreviation (after the second delimiter
-   * TODO test
    * @param authority the authority
    * @param projectAbbr the project abbreviation
    * @return true if the authority matches the project abbreviation
