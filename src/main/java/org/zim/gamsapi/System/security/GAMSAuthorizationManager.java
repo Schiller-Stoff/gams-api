@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
+import org.zim.gamsapi.System.security.exceptions.UserNotAuthorizedException;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -63,13 +64,11 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     String username = authorizationContext.getRequest().getRemoteUser();
     // access authorities from authentication workflow
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-    // TODO: later add error check if a user has no roles assigned -> therefore no authorities here! (if anynonymous can be checked before)
 
     if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
-      String msg = String.format("User %s is not authorized for the GAMS-API because having anonymous role: %s. Url: %s Method: %s", GAMSAPISecurityRoles.getAnonymous(), username, requestUri, requestMethod);
+      String msg = String.format("User with name %s is not authorized for state changin operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPISecurityRoles.getAnonymous(), requestUri, requestMethod);
       log.trace(msg);
-      // TODO throw exception instead of returning false?
-      return new AuthorizationDecision(false);
+      throw new UserNotAuthorizedException(msg);
     }
 
     // global administrator is allowed to do everything
@@ -127,7 +126,7 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
 //    }
 
 
-    String msg = String.format("No authorization rule applies the current user. User %s is assigned to project %s but has no required role. Url: %s Method: %s.", username, projectAbbr, requestUri, requestMethod);
+    String msg = String.format("No authorization rule unexpectedly applies the current user. User %s is assigned to project %s but has no required role. Url: %s Method: %s.", username, projectAbbr, requestUri, requestMethod);
     log.trace(msg);
     // TODO exception instead?
     return new AuthorizationDecision(false);

@@ -13,6 +13,7 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
+import org.zim.gamsapi.System.security.exceptions.UserNotAuthorizedException;
 import org.zim.gamsapi.UnitTest;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -132,12 +133,13 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
       GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
-      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
 
       // Assert
-      // verifies that the method was called
+      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
+        manager.check(() -> authentication, authorizationContext);
+      });
+
       Mockito.verify(authentication).getAuthorities();
-      assertTrue(!decision.isGranted());
     }
 
     @Test
