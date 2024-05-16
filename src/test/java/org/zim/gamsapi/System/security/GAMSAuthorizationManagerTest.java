@@ -220,45 +220,26 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
 
     }
 
+    @Test
+    public void projectEditorIsAuthorizedForPOST() {
+      final String PROJECT_ABBR = "test";
 
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
 
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-    // TODO add test access granted for project editor
+      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
 
+      // Act
+      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
 
+      // Assert
+      assertTrue(decision.isGranted());
+
+    }
   }
-
-
-  @Test
-  public void checkTest() {
-
-    // mock user is authenticated
-    //when(authentication.isAuthenticated()).thenReturn(true);
-
-    // TODO externally applied project variable in request?
-    // TODO is this a good idea or should it be done in a different way?
-    when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", "test"));
-
-    // mock user roles
-    List<GrantedAuthority> testAuthorities = List.of(
-        // TODO this role just doesn't exist!
-        new SimpleGrantedAuthority("ROLE_USER")
-    );
-
-    // TODO
-    when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
-
-    // mock the request
-    when(authorizationContext.getRequest()).thenReturn(request);
-    when(request.getMethod()).thenReturn("POST");
-
-    GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
-
-    // Act
-    AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
-
-    // Assert
-    assertTrue(decision.isGranted());
-  }
-
 }

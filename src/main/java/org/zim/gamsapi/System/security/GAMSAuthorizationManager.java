@@ -69,6 +69,7 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
       String msg = String.format("User %s is not authorized for the GAMS-API because having anonymous role: %s. Url: %s Method: %s", GAMSAPISecurityRoles.getAnonymous(), username, requestUri, requestMethod);
       log.trace(msg);
+      // TODO throw exception instead of returning false?
       return new AuthorizationDecision(false);
     }
 
@@ -112,7 +113,6 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     }
 
     // if project editor (what to allow here?)
-    // TODO test
     String projectEditorRole = GAMSAPISecurityRoles.getProjectEditor(projectAbbr);
     if(userAuthorities.contains(projectEditorRole)){
       log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_EDITOR.name, requestUri, requestMethod, userAuthorities);
