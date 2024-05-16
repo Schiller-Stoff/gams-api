@@ -35,6 +35,8 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
   public void setUp() {
     // makes sure that mock request is returned
     when(authorizationContext.getRequest()).thenReturn(request);
+    // mockig a valid request uri
+    when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
   }
 
   /**
@@ -83,6 +85,30 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
         manager.check(() -> authentication, authorizationContext);
       });
 
+    }
+
+    @Test
+    public void throwsAuthorizationConfigurationExceptionWhenNoProjectAbbrInRequest() {
+      when(request.getMethod()).thenReturn(HttpMethod.GET.name());
+      when(request.getRequestURI()).thenReturn("/noProjectAbbr");
+
+      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+
+      Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
+        manager.check(() -> authentication, authorizationContext);
+      });
+    }
+
+    @Test
+    public void doesNotThrowWhenProjectAbbrInRequest() {
+      when(request.getMethod()).thenReturn(HttpMethod.GET.name());
+      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+
+      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+
+      Assertions.assertDoesNotThrow(() -> {
+        manager.check(() -> authentication, authorizationContext);
+      });
     }
 
   }
@@ -193,6 +219,8 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
       assertTrue(decision.isGranted());
 
     }
+
+
 
 
     // TODO add test access granted for project editor
