@@ -171,6 +171,32 @@ public class GAMSAuthorizationManagerTest extends UnitTest {
 
     }
 
+    @Test
+    public void projectAdminIsAuthorizedForPOST() {
+
+      final String PROJECT_ABBR = "test";
+
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getProjectAdmin(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      GAMSAuthorizationManager manager = new GAMSAuthorizationManager();
+
+      // Act
+      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
+
+      // Assert
+      assertTrue(decision.isGranted());
+
+    }
+
+
+    // TODO add test access granted for project editor
+
 
   }
 
