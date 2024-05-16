@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
@@ -60,16 +62,46 @@ public class SpringSecurityConfiguration {
           .failureUrl("/login?error=true");
     });
 
+    // TODO test this security configuration
 
     http.authorizeHttpRequests(auth ->
       auth
           // request matchers specifiy authorization for specific endpoints
           .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
           .access(userProjectAuthorizationManager)
-          // TODO means that every request needs ouath2 login - not suitable for public endpoints
+          // allow post requests against specific integration api endpoints (because: might get queries via POST)
+          // TODO test this
+          .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
+          .permitAll()
+          // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
+          // HEAD and GET should be allowed
+          // TODO test this
+          .requestMatchers(request -> {
+              String requestMethod = request.getMethod();
+              return switch (requestMethod) {
+                case "GET", "HEAD" -> true;
+                default -> false;
+              };
+            })
+          .permitAll()
+          // all requests require auth by default
           .anyRequest()
           .authenticated()
+
     );
+
+    // TODO configure csrf protection?
+    http.csrf(httpSecurityCsrfConfigurer -> {
+
+
+    });
+
+    // TODO check if this works
+    http.headers(httpSecurityHeadersConfigurer -> {
+      httpSecurityHeadersConfigurer.frameOptions(frameOptionsConfig -> {
+        frameOptionsConfig.sameOrigin();
+      });
+    });
 
     return http.build();
 
