@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 
@@ -33,10 +34,11 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
 
     // all GET requests are being authorized
     // TODO not all GET requests should be authorized (e.g. according to rights defined in metadata of a datastream? Means only the content should be blocked?)
-//    if(requestMethod.equals(HttpMethod.GET.name())){
-//      log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
-//      return new AuthorizationDecision(true);
-//    }
+    // TODO maybe handle described requirement in own auth class?
+    if(requestMethod.equals(HttpMethod.GET.name())){
+      log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
+      return new AuthorizationDecision(true);
+    }
 
     // all HEAD requests are being authorized
     if(requestMethod.equals(HttpMethod.HEAD.name())){
@@ -57,7 +59,6 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
     // TODO: later add error check if a user has no roles assigned -> therefore no authorities here! (if anynonymous can be checked before)
 
-    // TODO test this
     if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
       String msg = String.format("User %s is not authorized for the GAMS-API because having anonymous role: %s. Url: %s Method: %s", GAMSAPISecurityRoles.getAnonymous(), username, requestUri, requestMethod);
       log.trace(msg);
@@ -72,7 +73,6 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
 
     // defined in request matcher in SpringSecurityConfiguration.java
     // fail safe nullpointer check (should not happen if request matcher is correctly configured)
-    // TODO test this
     String projectAbbr;
     try {
       projectAbbr = authorizationContext.getVariables().get("projectAbbr");
@@ -82,7 +82,7 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     } catch (NullPointerException e) {
       String msg = String.format("Somehow no project abbreviation found in request. The %s class should be only activated at endpoints containing the project-abbreviation. Url: %s Method: %s", this.getClass().getName(), requestUri, requestMethod);
       log.error(msg);
-      throw new UserAuthenticationRequiredException(msg);
+      throw new AuthorizationConfigurationException(msg);
     }
 
     // first filter for all project relevant roles
