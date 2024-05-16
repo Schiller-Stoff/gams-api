@@ -32,9 +32,12 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     String requestMethod = authorizationContext.getRequest().getMethod();
     String requestUri = authorizationContext.getRequest().getRequestURI();
 
+    // TODO add check of projects is in uri - if not throw AuthorizationConfigurationException
+    // TODO test this also
+
     // all GET requests are being authorized
     // TODO not all GET requests should be authorized (e.g. according to rights defined in metadata of a datastream? Means only the content should be blocked?)
-    // TODO maybe handle described requirement in own auth class?
+    // TODO maybe handle described requirement in own auth class? -> create own class with setup that applies only for the datastream content!
     if(requestMethod.equals(HttpMethod.GET.name())){
       log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
       return new AuthorizationDecision(true);
@@ -98,7 +101,6 @@ public class GAMSAuthorizationManager implements AuthorizationManager<RequestAut
     }
 
     // if project admin - allow everything
-    // TODO test
     String projectAdminRole = GAMSAPISecurityRoles.getProjectAdmin(projectAbbr);
     if(userAuthorities.contains(projectAdminRole)){
       log.trace("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_ADMINISTRATOR.name, requestUri, requestMethod, userAuthorities);
