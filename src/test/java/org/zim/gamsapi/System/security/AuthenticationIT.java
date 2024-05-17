@@ -35,7 +35,10 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   public void projectCreationRequiresAuthentication() throws Exception {
     final String PROJECT_CREATION_URL = "/api/v1/projects/";
-    mockMvc.perform(MockMvcRequestBuilders.post(PROJECT_CREATION_URL)).andExpect(
+    // TODO update! would not return unauthorized but the redirect to the login page (of keycloak)
+    // TODO why status 403? and not redirect?
+    // TODO post request is not defined in the controller
+    mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)).andExpect(
             MockMvcResultMatchers.status().isUnauthorized()
     );;
   }
@@ -43,6 +46,9 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   public void userCreationRequiresAuthentication() throws Exception {
     final String USER_CREATION_URL = "/api/v1/user/";
+    // TODO update! would not return unauthorized but the redirect to the login page (of keycloak)
+    // TODO why status 403? and not redirect?
+    // TODO post request is not defined in the controller
     mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)).andExpect(
             MockMvcResultMatchers.status().isUnauthorized()
     );;
@@ -51,6 +57,9 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   public void objectCreationRequiresAuthentication() throws Exception {
     final String USER_CREATION_URL = "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/demo";
+    // TODO update! would not return unauthorized but the redirect to the login page (of keycloak)
+    // TODO why status 403? and not redirect?
+    // TODO post request is not defined in the controller
     mockMvc.perform(MockMvcRequestBuilders.put(USER_CREATION_URL)).andExpect(
             MockMvcResultMatchers.status().isUnauthorized()
     );
