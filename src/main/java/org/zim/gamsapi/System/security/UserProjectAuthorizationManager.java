@@ -64,6 +64,15 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     }
 
     String username = authorizationContext.getRequest().getRemoteUser();
+    // failsafe if username is unexpectedly null
+    // TODO test
+    if(username == null){
+      String msg = String.format("Remote user is unexpectedly null. This should not happen. Url: %s Method: %s", requestUri, requestMethod);
+      log.error(msg);
+      throw new UserAuthenticationRequiredException(msg);
+    }
+
+
     // access authorities from authentication workflow
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
