@@ -3,11 +3,15 @@ package org.zim.gamsapi.System.security;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
+import org.zim.gamsapi.enums.TestProject;
 
 
 /**
@@ -33,35 +37,40 @@ public class AuthenticationIT extends IntegrationTest {
   }
 
   @Test
-  public void projectCreationRequiresAuthentication() throws Exception {
-    final String PROJECT_CREATION_URL = "/api/v1/projects/";
-    // TODO update! would not return unauthorized but the redirect to the login page (of keycloak)
-    // TODO why status 403? and not redirect?
-    // TODO post request is not defined in the controller
-    mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)).andExpect(
-            MockMvcResultMatchers.status().isUnauthorized()
-    );;
+  public void projectCreationRequiresAuthentication_redirects() throws Exception {
+    final String PROJECT_CREATION_URL = "/api/v1/projects/" + TestProject.PROJECT_ABBR.getValue();
+    // TODO remove outdated comments
+//    mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)
+//        .with(SecurityMockMvcRequestPostProcessors.csrf())
+//        .with(SecurityMockMvcRequestPostProcessors.oauth2Login()))
+//        .andExpect(MockMvcResultMatchers.status().isUnauthorized()
+//    );
+
+    // test works if redirected to oauth2 login page!
+    mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)
+        // csrf would be needed if turned on.
+        //.with(SecurityMockMvcRequestPostProcessors.csrf())
+        .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        // redirects to the oauth2 login page
+        .andExpect(MockMvcResultMatchers.status().is3xxRedirection()
+    );
+
   }
 
   @Test
-  public void userCreationRequiresAuthentication() throws Exception {
+  public void userCreationRequiresAuthentication_redirects() throws Exception {
     final String USER_CREATION_URL = "/api/v1/user/";
-    // TODO update! would not return unauthorized but the redirect to the login page (of keycloak)
-    // TODO why status 403? and not redirect?
-    // TODO post request is not defined in the controller
-    mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)).andExpect(
-            MockMvcResultMatchers.status().isUnauthorized()
+    mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)
+        .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(MockMvcResultMatchers.status().is3xxRedirection()
     );;
   }
 
   @Test
-  public void objectCreationRequiresAuthentication() throws Exception {
+  public void objectCreationRequiresAuthentication_redirects() throws Exception {
     final String USER_CREATION_URL = "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/demo";
-    // TODO update! would not return unauthorized but the redirect to the login page (of keycloak)
-    // TODO why status 403? and not redirect?
-    // TODO post request is not defined in the controller
     mockMvc.perform(MockMvcRequestBuilders.put(USER_CREATION_URL)).andExpect(
-            MockMvcResultMatchers.status().isUnauthorized()
+            MockMvcResultMatchers.status().is3xxRedirection()
     );
   }
 
