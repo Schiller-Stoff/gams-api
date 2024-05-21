@@ -24,7 +24,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @Import(IntegrationTestAuditingConfiguration.class)
 public abstract class IntegrationTest {
 
-  // required for the client registration for the oazth2 process
+  // required for the client registration for the oauth2 process
   // otherwise the application context won't start (will try to load the oauth2 config json file)
   // https://stackoverflow.com/questions/60778556/testing-spring-security-oauth2login-enabled-applications-throws-illegalargumente
   @MockBean
