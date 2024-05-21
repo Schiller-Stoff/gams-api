@@ -2,7 +2,9 @@ package org.zim.gamsapi;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -21,6 +23,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @ActiveProfiles("test")
 @Import(IntegrationTestAuditingConfiguration.class)
 public abstract class IntegrationTest {
+
+  // required for the client registration for the oazth2 process
+  // otherwise the application context won't start (will try to load the oauth2 config json file)
+  // https://stackoverflow.com/questions/60778556/testing-spring-security-oauth2login-enabled-applications-throws-illegalargumente
+  @MockBean
+  ClientRegistrationRepository clientRegistrationRepository;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
