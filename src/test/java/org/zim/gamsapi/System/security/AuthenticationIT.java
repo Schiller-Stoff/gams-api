@@ -74,4 +74,12 @@ public class AuthenticationIT extends IntegrationTest {
     );
   }
 
+  @Test
+  public void ingestRequiresAuthentication_redirects() throws Exception {
+    final String INGEST_ENDPOINT =  "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/";
+    mockMvc.perform(MockMvcRequestBuilders.post(INGEST_ENDPOINT).content(new byte[0])
+            .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+        .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
+  }
+
 }
