@@ -63,14 +63,11 @@ public class SpringSecurityConfiguration {
     });
 
     // TODO test this security configuration
-
     http.authorizeHttpRequests(auth ->
       auth
-          // request matchers specifiy authorization for specific endpoints
-          .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
-          .access(userProjectAuthorizationManager)
           // allow post requests against specific integration api endpoints (because: might get queries via POST)
           // TODO test this
+          // TODO think about strictre security check (must be query for solr / sparql / deny if to big content etc.)
           .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
           .permitAll()
           // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
@@ -84,7 +81,10 @@ public class SpringSecurityConfiguration {
               };
             })
           .permitAll()
-          // all requests require auth by default
+          // authorization only applies for these endpoints
+          .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
+          .access(userProjectAuthorizationManager)
+          // any not matched requests require authentication
           .anyRequest()
           .authenticated()
 
@@ -92,8 +92,7 @@ public class SpringSecurityConfiguration {
 
     // TODO configure csrf protection?
     http.csrf(httpSecurityCsrfConfigurer -> {
-
-
+      httpSecurityCsrfConfigurer.disable();
     });
 
     // TODO check if this works
