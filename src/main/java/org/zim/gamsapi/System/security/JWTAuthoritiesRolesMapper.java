@@ -62,13 +62,11 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
       } else if (userInfo.hasClaim(GROUPS)) {
         String msg = "User has no realm access claim but groups claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
         log.error(msg);
-        // TODO use different exception
-        throw new UserAuthenticationRequiredException(msg);
+        throw new AuthorizationConfigurationException(msg);
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
         log.error(msg);
-        // TODO use different exception
-        throw new UserAuthenticationRequiredException(msg);
+        throw new AuthorizationConfigurationException(msg);
       }
     } else {
       log.trace("Mapping authorities for OAuth2 user");
@@ -86,8 +84,7 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token!";
         log.error(msg);
-        // TODO use different exception
-        throw new UserAuthenticationRequiredException(msg);
+        throw new AuthorizationConfigurationException(msg);
       }
     }
     return mappedAuthorities;
