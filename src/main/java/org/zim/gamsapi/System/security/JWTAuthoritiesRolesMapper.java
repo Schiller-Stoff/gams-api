@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
-import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
