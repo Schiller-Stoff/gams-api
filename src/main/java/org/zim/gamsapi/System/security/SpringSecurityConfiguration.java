@@ -43,10 +43,6 @@ public class SpringSecurityConfiguration {
   private final String[] PUBLIC_GET_PATHS = {"/api/v1**", "/api/v1/**"};
 
 
-  private static final String GROUPS = "groups";
-  private static final String REALM_ACCESS_CLAIM = "realm_access";
-  private static final String ROLES_CLAIM = "roles";
-
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -106,77 +102,6 @@ public class SpringSecurityConfiguration {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
-  }
-
-
-  /**
-   * Maps the authorities from the oauth2 token (JWT) to the authorities in the application.
-   * https://www.baeldung.com/spring-boot-keycloak
-   * TODO write tests for this (maybe transform to own class?)
-   * @return GrantedAuthoritiesMapper
-   */
-  @Bean
-  public GrantedAuthoritiesMapper userAuthoritiesMapperForKeycloak() {
-
-    return authorities -> {
-      //TODO remove demo logging
-      log.error("******** CALLING GRANTED AUTHORITIES MAPPER ********");
-      Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
-      var authority = authorities.iterator().next();
-      boolean isOidc = authority instanceof OidcUserAuthority;
-
-
-      if (isOidc) {
-        var oidcUserAuthority = (OidcUserAuthority) authority;
-        var userInfo = oidcUserAuthority.getUserInfo();
-
-        // TODO remove test logging
-        log.error("********** USER INFO (in mapper)" + userInfo.getClaims());
-        log.error("************ USER AUTHORITY: " + oidcUserAuthority.getAuthority());
-
-        // Tokens can be configured to return roles under
-        // Groups or REALM ACCESS hence have to check both
-        // at GAMS only realm_access is used
-        if (userInfo.hasClaim(REALM_ACCESS_CLAIM)) {
-          var realmAccess = userInfo.getClaimAsMap(REALM_ACCESS_CLAIM);
-          // TODO unchecked cast
-          var roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
-          mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
-        } else if (userInfo.hasClaim(GROUPS)) {
-          String msg = "User has no realm access claim but groups claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
-          log.error(msg);
-          throw new UserAuthenticationRequiredException(msg);
-        } else {
-          String msg = "User has no realm access claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
-          log.error(msg);
-          throw new UserAuthenticationRequiredException(msg);
-        }
-      } else {
-        var oauth2UserAuthority = (OAuth2UserAuthority) authority;
-        Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
-
-        // TODO remove test logging
-        log.error("********** USER ATTRIBUTES (in mapper)" + userAttributes);
-
-        if (userAttributes.containsKey(REALM_ACCESS_CLAIM)) {
-          // TODO unchecked cast
-          Map<String, Object> realmAccess = (Map<String, Object>) userAttributes.get(
-              REALM_ACCESS_CLAIM);
-          Collection<String> roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
-          mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
-        } else {
-          String msg = "User has no realm access claim. Please configure keycloak to include roles in the token!";
-          log.error(msg);
-          throw new UserAuthenticationRequiredException(msg);
-        }
-      }
-      return mappedAuthorities;
-    };
-  }
-
-  Collection<GrantedAuthority> generateAuthoritiesFromClaim(Collection<String> roles) {
-    return roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(
-        Collectors.toList());
   }
 
 }
