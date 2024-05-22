@@ -112,6 +112,7 @@ public class SpringSecurityConfiguration {
   /**
    * Maps the authorities from the oauth2 token (JWT) to the authorities in the application.
    * https://www.baeldung.com/spring-boot-keycloak
+   * TODO write tests for this (maybe transform to own class?)
    * @return GrantedAuthoritiesMapper
    */
   @Bean
