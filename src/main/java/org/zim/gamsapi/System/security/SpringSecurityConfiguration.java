@@ -72,7 +72,6 @@ public class SpringSecurityConfiguration {
           .permitAll()
           // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
           // HEAD and GET should be allowed
-          // TODO test this
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();
               return switch (requestMethod) {
