@@ -33,20 +33,14 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
 
     //TODO add some validation?
 
-    //TODO remove demo logging
-    log.error("******** CALLING GRANTED AUTHORITIES MAPPER ********");
     Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
     var authority = authorities.iterator().next();
     boolean isOidc = authority instanceof OidcUserAuthority;
 
-
     if (isOidc) {
+      log.trace("Mapping authorities for OIDC user");
       var oidcUserAuthority = (OidcUserAuthority) authority;
       var userInfo = oidcUserAuthority.getUserInfo();
-
-      // TODO remove test logging
-      log.error("********** USER INFO (in mapper)" + userInfo.getClaims());
-      log.error("************ USER AUTHORITY: " + oidcUserAuthority.getAuthority());
 
       // Tokens can be configured to return roles under
       // Groups or REALM ACCESS hence have to check both
@@ -56,6 +50,7 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
         // TODO unchecked cast
         var roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
+        log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
       } else if (userInfo.hasClaim(GROUPS)) {
         String msg = "User has no realm access claim but groups claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
         log.error(msg);
@@ -68,11 +63,9 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
         throw new UserAuthenticationRequiredException(msg);
       }
     } else {
+      log.trace("Mapping authorities for OAuth2 user");
       var oauth2UserAuthority = (OAuth2UserAuthority) authority;
       Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
-
-      // TODO remove test logging
-      log.error("********** USER ATTRIBUTES (in mapper)" + userAttributes);
 
       if (userAttributes.containsKey(REALM_ACCESS_CLAIM)) {
         // TODO unchecked cast
@@ -80,6 +73,7 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
             REALM_ACCESS_CLAIM);
         Collection<String> roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
+        log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token!";
         log.error(msg);
