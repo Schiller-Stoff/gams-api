@@ -32,8 +32,6 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
   @Override
   public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
 
-    //TODO add some validation?
-
     Set<GrantedAuthority> mappedAuthorities = new HashSet<>();
     var authority = authorities.iterator().next();
     boolean isOidc = authority instanceof OidcUserAuthority;
@@ -74,11 +72,25 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
       Map<String, Object> userAttributes = oauth2UserAuthority.getAttributes();
 
       if (userAttributes.containsKey(REALM_ACCESS_CLAIM)) {
-        // TODO unchecked cast
-        Map<String, Object> realmAccess = (Map<String, Object>) userAttributes.get(
-            REALM_ACCESS_CLAIM);
-        // TODO unchecked cast
-        Collection<String> roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
+        // extract realm access claim
+        Map<String, Object> realmAccess;
+        try {
+          realmAccess = (Map<String, Object>) userAttributes.get(REALM_ACCESS_CLAIM);
+        } catch (ClassCastException e) {
+          String msg = "Realm access claim is not a map. Please configure keycloak to include roles in the token!";
+          log.error(msg);
+          throw new AuthorizationConfigurationException(msg);
+        }
+        // extract roles from realm access claim
+        Collection<String> roles;
+        try {
+          roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
+        } catch (ClassCastException e) {
+          String msg = "Roles claim is not a collection of strings. Please configure keycloak to include roles in the token!";
+          log.error(msg);
+          throw new AuthorizationConfigurationException(msg);
+        }
+
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
         log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
       } else {
