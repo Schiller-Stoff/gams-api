@@ -68,6 +68,4 @@ public class JWTAuthoritiesRolesMapperTest extends UnitTest {
   }
 
 
-  // TODO test GROUPS poperty condition
-
 }
