@@ -95,7 +95,30 @@ public class AuthorizationIT extends IntegrationTest {
         );
   }
 
-  // TODO test: ingest denied if only project-viewer?
-  // TODO add more tests? ...
+  @Test
+  public void projectAdminAuthorizedForDifferentProjectIngest_throwsUserNotAssignedToProjectException() {
+
+    byte[] zippedBag = new byte[0];
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+
+    // mock method needs role prefix excluded.
+    String differentProjectAdminRole = GAMSAPISecurityRoles.getProjectAdmin("differentproject")
+        .replace(GAMSAPISecurityRoles.ROLE_PREFIX.name, "");
+
+    Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                  .part(mockPart)
+                  .with(SecurityMockMvcRequestPostProcessors
+                      .user("SOME_USER")
+                      .roles(differentProjectAdminRole)
+                  )
+          ).andExpect(status().is4xxClientError());
+    });
+
+  }
+
+
 
 }
