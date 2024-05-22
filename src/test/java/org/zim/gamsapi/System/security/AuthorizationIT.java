@@ -26,7 +26,7 @@ public class AuthorizationIT extends IntegrationTest {
 
 
   @Test
-  public void demoUserNotAuthorizedForProjectIngest_throwsUserNotAssignedToProjectException() {
+  public void authenticatedDemoUserNotAuthorizedForProjectIngest_throwsUserNotAssignedToProjectException() {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
