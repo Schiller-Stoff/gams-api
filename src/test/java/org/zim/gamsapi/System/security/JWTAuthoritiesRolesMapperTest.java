@@ -1,9 +1,11 @@
 package org.zim.gamsapi.System.security;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
 import org.zim.gamsapi.UnitTest;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +48,28 @@ public class JWTAuthoritiesRolesMapperTest extends UnitTest {
 
   // TODO add test if realm access claim not available
 
-  // TODO add class cast test: simple granted authority is not castable?
+  @Test
+  public void throwsIfRealmAccessClaimNotAvailable() {
+    Map<String, Object> claims = new HashMap<>();
+    // roles are set
+    claims.put("roles", List.of(TEST_KEYCLOAK_ROLE_ADMIN, TEST_KEYCLOAK_ROLE_CANTUS));
+    OAuth2UserAuthority authority = new OAuth2UserAuthority("foo", claims);
+    Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
+      mapper.mapAuthorities(List.of(authority));
+    });
+  }
+
+  @Test
+  public void throwsIfRolesClaimNotAvailable() {
+    Map<String, Object> claims = new HashMap<>();
+    // roles are set
+    claims.put("realm_access", "bar");
+    OAuth2UserAuthority authority = new OAuth2UserAuthority("foo", claims);
+    Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
+      mapper.mapAuthorities(List.of(authority));
+    });
+  }
+
 
   // TODO test GROUPS poperty condition
 
