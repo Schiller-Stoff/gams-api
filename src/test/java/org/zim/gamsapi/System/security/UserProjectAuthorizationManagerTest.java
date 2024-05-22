@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -75,14 +76,14 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     }
 
     @Test
-    public void throwsUserAuthenticationRequiredExceptionIfNotAuthenticatedForPOST() {
+    public void throwsAccessDeniedExceptionIfNotAuthenticatedForPOST() {
       // Arrange
       when(authentication.isAuthenticated()).thenReturn(false);
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
 
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
-      Assertions.assertThrows(UserAuthenticationRequiredException.class, () -> {
+      Assertions.assertThrows(AccessDeniedException.class, () -> {
         manager.check(() -> authentication, authorizationContext);
       });
 

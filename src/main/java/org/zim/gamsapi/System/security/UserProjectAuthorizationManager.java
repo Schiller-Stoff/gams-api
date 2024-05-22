@@ -3,6 +3,7 @@ package org.zim.gamsapi.System.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.core.Authentication;
@@ -55,21 +56,20 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       return new AuthorizationDecision(true);
     }
 
-    // (if user is actually available is already done via authentication workflow (UserDetailsService)
     if(!authentication.get().isAuthenticated()){
       String msg = String.format("User authentication is required for state changing operations on GAMS. Against url %s for method: %s", requestUri, requestMethod);
       log.trace(msg);
-      //return new AuthorizationDecision(false);
-      throw new UserAuthenticationRequiredException(msg);
+      throw new AccessDeniedException(msg);
     }
 
     String username = authorizationContext.getRequest().getRemoteUser();
     // failsafe if username is unexpectedly null
     // TODO test
     if(username == null){
+      // TODO improve error message
       String msg = String.format("Remote user is unexpectedly null. This should not happen. Url: %s Method: %s", requestUri, requestMethod);
       log.error(msg);
-      throw new UserAuthenticationRequiredException(msg);
+      throw new AccessDeniedException(msg);
     }
 
 
@@ -77,7 +77,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
     if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
-      String msg = String.format("User with name %s is not authorized for state changin operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPISecurityRoles.getAnonymous(), requestUri, requestMethod);
+      String msg = String.format("User with name %s is not authorized for state changing operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPISecurityRoles.getAnonymous(), requestUri, requestMethod);
       log.trace(msg);
       throw new UserNotAuthorizedException(msg);
     }
