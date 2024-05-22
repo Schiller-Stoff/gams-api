@@ -45,9 +45,6 @@ public class JWTAuthoritiesRolesMapperTest extends UnitTest {
 
   }
 
-
-  // TODO add test if realm access claim not available
-
   @Test
   public void throwsIfRealmAccessClaimNotAvailable() {
     Map<String, Object> claims = new HashMap<>();
