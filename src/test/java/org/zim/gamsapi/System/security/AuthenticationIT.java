@@ -82,4 +82,16 @@ public class AuthenticationIT extends IntegrationTest {
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
   }
 
+  @Test
+  public void integrationApiPostDontRequireAuthentication_returns500() throws Exception {
+    final String INTEGRATION_ENDPOINT =  "/api/v1/integration/rdf";
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post(INTEGRATION_ENDPOINT).content(new byte[0])
+        )
+        .andExpect(MockMvcResultMatchers.status().is5xxServerError());
+
+  }
+
 }
