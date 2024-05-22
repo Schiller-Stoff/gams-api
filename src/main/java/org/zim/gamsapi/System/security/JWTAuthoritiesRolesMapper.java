@@ -32,6 +32,7 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
   @Override
   public Collection<? extends GrantedAuthority> mapAuthorities(Collection<? extends GrantedAuthority> authorities) {
 
+    //TODO add some validation?
 
     //TODO remove demo logging
     log.error("******** CALLING GRANTED AUTHORITIES MAPPER ********");
@@ -59,10 +60,12 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
       } else if (userInfo.hasClaim(GROUPS)) {
         String msg = "User has no realm access claim but groups claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
         log.error(msg);
+        // TODO use different exception
         throw new UserAuthenticationRequiredException(msg);
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
         log.error(msg);
+        // TODO use different exception
         throw new UserAuthenticationRequiredException(msg);
       }
     } else {
@@ -81,6 +84,7 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token!";
         log.error(msg);
+        // TODO use different exception
         throw new UserAuthenticationRequiredException(msg);
       }
     }
