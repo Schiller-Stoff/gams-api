@@ -39,13 +39,6 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   public void projectCreationRequiresAuthentication_redirects() throws Exception {
     final String PROJECT_CREATION_URL = "/api/v1/projects/" + TestProject.PROJECT_ABBR.getValue();
-    // TODO remove outdated comments
-//    mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)
-//        .with(SecurityMockMvcRequestPostProcessors.csrf())
-//        .with(SecurityMockMvcRequestPostProcessors.oauth2Login()))
-//        .andExpect(MockMvcResultMatchers.status().isUnauthorized()
-//    );
-
     // test works if redirected to oauth2 login page!
     mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)
         // csrf would be needed if turned on.
