@@ -62,11 +62,9 @@ public class SpringSecurityConfiguration {
           .failureUrl("/login?error=true");
     });
 
-    // TODO test this security configuration
     http.authorizeHttpRequests(auth ->
       auth
           // allow post requests against specific integration api endpoints (because: might get queries via POST)
-          // TODO test this
           // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
           .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
           .permitAll()
