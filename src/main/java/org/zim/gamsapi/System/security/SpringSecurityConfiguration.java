@@ -66,6 +66,8 @@ public class SpringSecurityConfiguration {
           .permitAll()
           // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
           // HEAD and GET should be allowed
+          .requestMatchers(HttpMethod.GET, "/api/v1/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}/content")
+          .access(userProjectAuthorizationManager)
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();
               return switch (requestMethod) {
@@ -75,6 +77,7 @@ public class SpringSecurityConfiguration {
             })
           .permitAll()
           // authorization only applies for these endpoints
+          // TODO this endpoint is to broad - should be more specific / because atm only ingest is allowed.
           .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
           .access(userProjectAuthorizationManager)
           // any not matched requests require authentication
