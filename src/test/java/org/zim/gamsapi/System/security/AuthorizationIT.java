@@ -71,10 +71,31 @@ public class AuthorizationIT extends IntegrationTest {
 
   }
 
+  @Test
+  public void globalAdminMayIngest_throwsServerErrorAtProcessingAfterBeingAuthorized() throws Exception {
+
+    byte[] zippedBag = new byte[0];
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+
+    String globalAdminRole = GAMSAPISecurityRoles.getAdmin();
+    // mock method needs role prefix excluded.
+    globalAdminRole = globalAdminRole.replace(GAMSAPISecurityRoles.ROLE_PREFIX.name, "");
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                .part(mockPart)
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("SOME_USER")
+                    .roles(globalAdminRole)
+                )
+        )
+        .andExpect(
+            status().is5xxServerError()
+        );
+  }
+
   // TODO test: ingest denied if only project-viewer?
-
-  // TODO ingest allowed for global admin?
-
   // TODO add more tests? ...
 
 }
