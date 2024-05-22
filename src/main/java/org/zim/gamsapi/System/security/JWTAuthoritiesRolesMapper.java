@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.stereotype.Component;
+import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
 import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -47,8 +48,15 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
       // at GAMS only realm_access is used
       if (userInfo.hasClaim(REALM_ACCESS_CLAIM)) {
         var realmAccess = userInfo.getClaimAsMap(REALM_ACCESS_CLAIM);
-        // TODO unchecked cast
-        var roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
+        Collection<String> roles;
+        try {
+          roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
+        } catch (ClassCastException e) {
+          String msg = "Roles claim is not a collection of strings. Please configure keycloak to include roles in the token!";
+          log.error(msg);
+          throw new AuthorizationConfigurationException(msg);
+        }
+
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
         log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
       } else if (userInfo.hasClaim(GROUPS)) {
@@ -71,6 +79,7 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
         // TODO unchecked cast
         Map<String, Object> realmAccess = (Map<String, Object>) userAttributes.get(
             REALM_ACCESS_CLAIM);
+        // TODO unchecked cast
         Collection<String> roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
         log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
