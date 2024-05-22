@@ -54,7 +54,7 @@ public class AuthenticationIT extends IntegrationTest {
     mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)
         .with(SecurityMockMvcRequestPostProcessors.anonymous()))
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection()
-    );;
+    );
   }
 
   @Test
