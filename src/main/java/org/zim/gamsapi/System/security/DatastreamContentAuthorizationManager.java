@@ -17,6 +17,11 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
   @Override
   public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
 
+    // TODO throw error if not a GET request (should be configured outside of this class)
+
+    
+    log.trace("Checking custom authorization process for datastream content");
+
     // TODO think about implementation
     // check in metadata if someone is allowed to access the content!
     // e.g. could restrict a project?

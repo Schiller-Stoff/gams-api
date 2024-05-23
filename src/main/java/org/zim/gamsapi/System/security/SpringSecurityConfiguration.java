@@ -33,6 +33,8 @@ public class SpringSecurityConfiguration {
 
   private final UserProjectAuthorizationManager userProjectAuthorizationManager;
 
+  private final DatastreamContentAuthorizationManager datastreamContentAuthorizationManager;
+
   /**
    * Combined spring security matchers.
    * Matches all endpoints that require an admin authorization
@@ -64,10 +66,9 @@ public class SpringSecurityConfiguration {
           // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
           .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
           .permitAll()
-          // every state changing request needs authentication (POST / PUT / PATCH / DELETE)
-          // HEAD and GET should be allowed
           .requestMatchers(HttpMethod.GET, "/api/v1/projects/{projectAbbr}/objects/{pid}/datastreams/{dsid}/content")
-          .access(userProjectAuthorizationManager)
+          .access(datastreamContentAuthorizationManager)
+          // All HEAD and GET after above rules are allowed
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();
               return switch (requestMethod) {
@@ -77,7 +78,7 @@ public class SpringSecurityConfiguration {
             })
           .permitAll()
           // authorization only applies for these endpoints
-          // TODO this endpoint is to broad - should be more specific / because atm only ingest is allowed.
+          // TODO this endpoint is too broad - should be more specific / because atm only ingest is allowed.
           .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
           .access(userProjectAuthorizationManager)
           // any not matched requests require authentication
