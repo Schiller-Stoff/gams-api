@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
 
+import java.util.Set;
+
 @Slf4j
 @NoArgsConstructor
 public class DatastreamBuilder {
@@ -56,6 +58,14 @@ public class DatastreamBuilder {
 
   public DatastreamBuilder baseMetadata(MetadataBaseEntity metadataBaseEntity){
     datastream.setBaseMetadata(metadataBaseEntity);
+    return this;
+  }
+
+  /**
+   * TODO add test
+   */
+  public DatastreamBuilder contentRestrictions(Set<String> contentRestrictions){
+    datastream.setContentRestrictions(contentRestrictions);
     return this;
   }
 

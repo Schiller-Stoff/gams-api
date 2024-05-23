@@ -16,7 +16,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Domain class for datastream domain objects.
@@ -104,6 +106,13 @@ public class Datastream {
   @Column(name = "modified_by")
   @LastModifiedBy
   private String modifiedBy;
+
+  /**
+   * Allows to restrict the content of the datastream to specific users.
+   */
+  @ElementCollection
+  @NotNull
+  private Set<String> contentRestrictions = new HashSet<>();
 
 
   /**
