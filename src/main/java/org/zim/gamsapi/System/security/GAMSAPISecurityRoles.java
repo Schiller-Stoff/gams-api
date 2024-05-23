@@ -110,4 +110,16 @@ public enum GAMSAPISecurityRoles {
     return authorityProjectAbbr.equals(projectAbbr);
   }
 
+
+  /**
+   * Builds a project viewer restricted role
+   * TODO test
+   * @param projectAbbr the project abbreviation
+   * @param contentRestriction the content restriction
+   * @return the project viewer restricted role
+   */
+  public static String buildProjectViewerContentRestricted(String projectAbbr, String contentRestriction) {
+    return GAMSAPISecurityRoles.getProjectViewer(projectAbbr) + GAMSAPISecurityRoles.ROLE_DELIMITER.name + contentRestriction;
+  }
+
 }
