@@ -23,8 +23,7 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class DatastreamContentAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
-
-  IDatastreamRepository datastreamRepository;
+  final IDatastreamRepository datastreamRepository;
 
 
   @Override
