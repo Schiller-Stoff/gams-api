@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
@@ -123,6 +124,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       when(authentication.isAuthenticated()).thenReturn(true);
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
       when(request.getRemoteUser()).thenReturn("test");
+      when(request.getSession()).thenReturn(new MockHttpSession());
     }
 
     @Test
