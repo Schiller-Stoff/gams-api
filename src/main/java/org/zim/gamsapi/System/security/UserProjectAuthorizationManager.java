@@ -62,6 +62,13 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       throw new AccessDeniedException(msg);
     }
 
+    //TODO test
+    if(authorizationContext.getRequest().getSession() == null){
+      String msg = String.format("User session is required for state changing operations on GAMS. Against url %s for method: %s", requestUri, requestMethod);
+      log.trace(msg);
+      throw new UserAuthenticationRequiredException(msg);
+    }
+
     String username = authorizationContext.getRequest().getRemoteUser();
     // failsafe if username is unexpectedly null
     // TODO test
