@@ -6,7 +6,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,9 @@ import org.zim.gamsapi.enums.TestProject;
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamRepositoryIT extends IntegrationTest {
+
+    @MockBean
+    private AuditingHandler auditingHandler;
 
     @Autowired
     IDatastreamRepository datastreamRepository;

@@ -3,6 +3,8 @@ package org.zim.gamsapi.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
@@ -29,6 +31,9 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     Project testProject;
 
     MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
+
+    @MockBean
+    private AuditingHandler auditingHandler;
 
     @BeforeAll
     public void setup(){

@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -26,6 +28,10 @@ public class ProjectRepositoryIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectRepository digitalObjectRepository;
+
+  // disables auditing
+  @MockBean
+  private AuditingHandler auditingHandler;
 
 
   @Test

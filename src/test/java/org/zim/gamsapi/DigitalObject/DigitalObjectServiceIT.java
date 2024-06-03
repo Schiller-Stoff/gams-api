@@ -3,6 +3,8 @@ package org.zim.gamsapi.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
@@ -37,6 +39,11 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   Project testProject;
 
   MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
+
+
+  // Deactivates the auditing process.
+  @MockBean
+  private AuditingHandler auditingHandler;
 
   @BeforeAll
   public void setup(){
