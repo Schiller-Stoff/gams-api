@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockPart;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
@@ -67,10 +68,6 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
     String testProjectAdminRole = GAMSAPISecurityRoles.getProjectAdmin(TestProject.PROJECT_ABBR.getValue());
-    // mock method needs role prefix excluded.
-    testProjectAdminRole = testProjectAdminRole.replace(GAMSAPISecurityRoles.ROLE_PREFIX.name, "");
-
-    final String TEST_USERNAME = TestUser.USERNAME.getValue();
 
     mockMvc
         .perform(
@@ -78,11 +75,14 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
                 .part(mockPart)
                 // there is no need to mock the user as oauth2 user.
                 .with(SecurityMockMvcRequestPostProcessors
-                    .user(TEST_USERNAME)
-                    .roles(testProjectAdminRole)
+                    .oidcLogin()
+                    .authorities(new SimpleGrantedAuthority(testProjectAdminRole))
                 )
         )
         .andExpect(status().isOk());
+
+    // provided by the oidcLogin() method
+    final String TEST_USERNAME = "user";
 
     DigitalObject digitalObject =
         digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).orElseThrow();
