@@ -52,9 +52,9 @@ public class GAMSAPISecurityRolesTest extends UnitTest {
     }
 
     @Test
-    public void extractProjectAbbrFromAuthorityThrowsExceptionWhenNoRolePrefix() {
+    public void extractProjectAbbrFromAuthorityReturnsNullIfNoRolePrefix() {
       String authority = "testProject_admin";
-      Assertions.assertThrows(AuthorizationConfigurationException.class, () -> GAMSAPISecurityRoles.extractProjectAbbrFromAuthority(authority));
+      Assertions.assertNull(GAMSAPISecurityRoles.extractProjectAbbrFromAuthority(authority));
     }
 
   }

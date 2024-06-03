@@ -81,8 +81,8 @@ public enum GAMSAPISecurityRoles {
   public static String extractProjectAbbrFromAuthority(String authority) throws AuthorizationConfigurationException {
     if(!authority.contains(GAMSAPISecurityRoles.ROLE_PREFIX.name)) {
       String msg = String.format("Authority %s does not contain the role prefix %s. Every authority should have ben mapped to the role prefix handled by this app. Cannot extract project abbreviation.", authority, GAMSAPISecurityRoles.ROLE_PREFIX.name);
-      log.error(msg);
-      throw new AuthorizationConfigurationException(msg);
+      log.trace(msg);
+      return null;
     }
     // remove the ROLE_ prefix
     authority = authority.replace(GAMSAPISecurityRoles.ROLE_PREFIX.name, "");
