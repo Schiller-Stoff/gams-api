@@ -2,27 +2,49 @@
 <!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
 <html lang="en" xmlns:th="http://thymeleaf.org">
 <head th:replace="fragments/general.html :: head" />
-<body class="bg-light">
-<header th:replace="fragments/general.html :: header"></header>
-<nav th:replace="fragments/general.html :: nav"></nav>
 
-<main class="container min-vh-100 mt-4">
-    <div class="webcirilo-box shadow-sm mb-1">
-        <h1>GAMS projects</h1>
-        <p>
-            Hi <b th:text="${user.username}"></b>! Overview over your authorized GAMS projects.
-        </p>
-        <p>Your assigned roles: <span th:text="${user.roles}"></span></p>
-    </div>
-    <div class="webcirilo-box shadow-sm mb-1">
-        <ul class="list-group list-group-flush" style="list-style: none;">
-            <li th:each="project : ${user.projects}" class="list-group-item">
-                <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>
-            </li>
-        </ul>
-    </div>
 
-</main>
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+    <aside th:replace="fragments/general.html :: aside"></aside>
+
+    <div class="body-wrapper">
+        <header th:replace="fragments/general.html :: header"></header>
+        <div class="container-fluid" style="min-height: 100vh">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/api/v1/user">User</a></li>
+                </ol>
+            </nav>
+            <h2 th:text="${user.username}" class="mb-3"></h2>
+            <p>
+                Overview over roles and rights for the user.
+            </p>
+            <div class="webcirilo-box shadow-sm mb-1">
+                <ul class="list-group list-group-flush" style="list-style: none;">
+                    <li th:each="project : ${user.projects}" class="list-group-item">
+                        <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <footer th:replace="fragments/general.html :: footer"></footer>
+    </div>
+</div>
+</div>
+</div>
+<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/sidebarmenu.js"></script>
+<script src="/assets/js/app.min.js"></script>
+<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+
 
 <footer th:replace="fragments/general.html :: footer"></footer>
 </body>
