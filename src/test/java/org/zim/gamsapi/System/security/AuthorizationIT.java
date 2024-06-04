@@ -52,9 +52,9 @@ public class AuthorizationIT extends IntegrationTest {
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    String testProjectAdminRole = GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue());
-    // mock method needs role prefix excluded.
-    testProjectAdminRole = testProjectAdminRole.replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
+    String testProjectAdminRole = GAMSAPIAuthorities.convertToRole(
+        GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue())
+    );
 
     mockMvc
         .perform(
@@ -77,9 +77,7 @@ public class AuthorizationIT extends IntegrationTest {
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    String globalAdminRole = GAMSAPIAuthorities.getAdmin();
-    // mock method needs role prefix excluded.
-    globalAdminRole = globalAdminRole.replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
+    String globalAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getAdmin());
 
     mockMvc
         .perform(
@@ -102,8 +100,7 @@ public class AuthorizationIT extends IntegrationTest {
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
     // mock method needs role prefix excluded.
-    String differentProjectAdminRole = GAMSAPIAuthorities.getProjectAdmin("differentproject")
-        .replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
+    String differentProjectAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getProjectAdmin("differentproject"));
 
     Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
       mockMvc

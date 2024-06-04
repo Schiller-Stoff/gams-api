@@ -67,7 +67,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    String testProjectAdminRole = GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue());
+    String testProjectAdminAuthority = GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue());
 
     mockMvc
         .perform(
@@ -76,7 +76,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
                 // there is no need to mock the user as oauth2 user.
                 .with(SecurityMockMvcRequestPostProcessors
                     .oidcLogin()
-                    .authorities(new SimpleGrantedAuthority(testProjectAdminRole))
+                    .authorities(new SimpleGrantedAuthority(testProjectAdminAuthority))
                 )
         )
         .andExpect(status().isOk());
