@@ -11,9 +11,6 @@ import java.util.Set;
 /**
  * Model representing an user in terms of user management.
  */
-// 'user' is a reserverd keyowrd in PSQL (therefore users table)
-@Table(name = "users")
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -35,13 +32,5 @@ public class User {
   @Column(nullable = false, unique = true)
   @NotBlank
   private String username;
-
-  /**
-   * GAMS projects assigned to the user
-   */
-  // fetch-type is necessary for authorization https://stackoverflow.com/questions/11746499/how-to-solve-the-failed-to-lazily-initialize-a-collection-of-role-hibernate-ex
-  @ManyToMany(fetch = FetchType.EAGER)
-  @ToString.Exclude
-  private Set<Project> projects;
 
 }
