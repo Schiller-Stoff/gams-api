@@ -1,16 +1,10 @@
 package org.zim.gamsapi.Project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.User.User;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * Class representing a GAMS project.
