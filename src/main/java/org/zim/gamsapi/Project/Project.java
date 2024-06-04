@@ -33,11 +33,6 @@ public class Project {
   @Column(name = "description")
   private String description;
 
-  @ManyToMany(mappedBy = "projects")
-  @JsonIgnore
-  // manages bidirectional reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  private Set<User> users;
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
