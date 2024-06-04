@@ -81,6 +81,11 @@ public class SpringSecurityConfiguration {
           // TODO this endpoint is too broad - should be more specific / because atm only ingest is allowed.
           .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
           .access(userProjectAuthorizationManager)
+          // projects may only be created / deleted by global admin role
+          .requestMatchers(HttpMethod.PUT,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
+          .hasAuthority(GAMSAPISecurityRoles.getAdmin())
+          .requestMatchers(HttpMethod.DELETE,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
+          .hasAuthority(GAMSAPISecurityRoles.getAdmin())
           // any not matched requests require authentication
           .anyRequest()
           .authenticated()
