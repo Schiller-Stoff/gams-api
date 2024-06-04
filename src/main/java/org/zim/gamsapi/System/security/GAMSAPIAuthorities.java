@@ -7,7 +7,7 @@ import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationExce
  * Represents the different roles available in GAMS5 context.
  */
 @Slf4j
-public enum GAMSAPISecurityRoles {
+public enum GAMSAPIAuthorities {
 
   ADMINISTRATOR("admin"),
 
@@ -25,7 +25,7 @@ public enum GAMSAPISecurityRoles {
 
   public final String name;
 
-  GAMSAPISecurityRoles(String name){
+  GAMSAPIAuthorities(String name){
     this.name = name;
   }
 
@@ -35,7 +35,7 @@ public enum GAMSAPISecurityRoles {
    * @return the full admin role
    */
   public static String getAdmin() {
-    return GAMSAPISecurityRoles.ROLE_PREFIX.name + GAMSAPISecurityRoles.ADMINISTRATOR.name;
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + GAMSAPIAuthorities.ADMINISTRATOR.name;
   }
 
   /**
@@ -43,7 +43,7 @@ public enum GAMSAPISecurityRoles {
    * @return the full anonymous role
    */
   public static String getAnonymous() {
-    return GAMSAPISecurityRoles.ROLE_PREFIX.name + GAMSAPISecurityRoles.ANONYMOUS.name;
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + GAMSAPIAuthorities.ANONYMOUS.name;
   }
 
   /**
@@ -52,7 +52,7 @@ public enum GAMSAPISecurityRoles {
    * @return the full project admin role
    */
   public static String getProjectAdmin(String projectAbbr) {
-    return GAMSAPISecurityRoles.ROLE_PREFIX.name + projectAbbr + GAMSAPISecurityRoles.ROLE_DELIMITER.name + GAMSAPISecurityRoles.PROJECT_ADMINISTRATOR.name;
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + projectAbbr + GAMSAPIAuthorities.ROLE_DELIMITER.name + GAMSAPIAuthorities.PROJECT_ADMINISTRATOR.name;
   }
 
   /**
@@ -61,7 +61,7 @@ public enum GAMSAPISecurityRoles {
    * @return the full project editor role
    */
   public static String getProjectEditor(String projectAbbr) {
-    return GAMSAPISecurityRoles.ROLE_PREFIX.name + projectAbbr + GAMSAPISecurityRoles.ROLE_DELIMITER.name + GAMSAPISecurityRoles.PROJECT_EDITOR.name;
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + projectAbbr + GAMSAPIAuthorities.ROLE_DELIMITER.name + GAMSAPIAuthorities.PROJECT_EDITOR.name;
   }
 
   /**
@@ -70,7 +70,7 @@ public enum GAMSAPISecurityRoles {
    * @return the full project viewer role
    */
   public static String getProjectViewer(String projectAbbr) {
-    return GAMSAPISecurityRoles.ROLE_PREFIX.name + projectAbbr + GAMSAPISecurityRoles.ROLE_DELIMITER.name + GAMSAPISecurityRoles.PROJECT_VIEWER.name;
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + projectAbbr + GAMSAPIAuthorities.ROLE_DELIMITER.name + GAMSAPIAuthorities.PROJECT_VIEWER.name;
   }
 
   /**
@@ -79,15 +79,15 @@ public enum GAMSAPISecurityRoles {
    * @return the project abbreviation or null if not found
    */
   public static String extractProjectAbbrFromAuthority(String authority) throws AuthorizationConfigurationException {
-    if(!authority.contains(GAMSAPISecurityRoles.ROLE_PREFIX.name)) {
-      String msg = String.format("Authority %s does not contain the role prefix %s. Every authority should have ben mapped to the role prefix handled by this app. Cannot extract project abbreviation.", authority, GAMSAPISecurityRoles.ROLE_PREFIX.name);
+    if(!authority.contains(GAMSAPIAuthorities.ROLE_PREFIX.name)) {
+      String msg = String.format("Authority %s does not contain the role prefix %s. Every authority should have ben mapped to the role prefix handled by this app. Cannot extract project abbreviation.", authority, GAMSAPIAuthorities.ROLE_PREFIX.name);
       log.trace(msg);
       return null;
     }
     // remove the ROLE_ prefix
-    authority = authority.replace(GAMSAPISecurityRoles.ROLE_PREFIX.name, "");
+    authority = authority.replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
 
-    int delimiterIndex = authority.indexOf(GAMSAPISecurityRoles.ROLE_DELIMITER.name);
+    int delimiterIndex = authority.indexOf(GAMSAPIAuthorities.ROLE_DELIMITER.name);
     if(delimiterIndex == -1) {
       return null;
     } else {
@@ -103,7 +103,7 @@ public enum GAMSAPISecurityRoles {
    * @return true if the authority matches the project abbreviation
    */
   public static boolean authorityMatchesProjectAbbr(String authority, String projectAbbr) {
-    String authorityProjectAbbr = GAMSAPISecurityRoles.extractProjectAbbrFromAuthority(authority);
+    String authorityProjectAbbr = GAMSAPIAuthorities.extractProjectAbbrFromAuthority(authority);
     if(authorityProjectAbbr == null) {
       return false;
     }
@@ -119,7 +119,7 @@ public enum GAMSAPISecurityRoles {
    * @return the project viewer restricted role
    */
   public static String buildProjectViewerContentRestricted(String projectAbbr, String contentRestriction) {
-    return GAMSAPISecurityRoles.getProjectViewer(projectAbbr) + GAMSAPISecurityRoles.ROLE_DELIMITER.name + contentRestriction;
+    return GAMSAPIAuthorities.getProjectViewer(projectAbbr) + GAMSAPIAuthorities.ROLE_DELIMITER.name + contentRestriction;
   }
 
 }

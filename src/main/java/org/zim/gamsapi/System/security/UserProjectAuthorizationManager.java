@@ -83,15 +83,15 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     // access authorities from authentication workflow
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
-    if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
-      String msg = String.format("User with name %s is not authorized for state changing operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPISecurityRoles.getAnonymous(), requestUri, requestMethod);
+    if(userAuthorities.contains(GAMSAPIAuthorities.getAnonymous())){
+      String msg = String.format("User with name %s is not authorized for state changing operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPIAuthorities.getAnonymous(), requestUri, requestMethod);
       log.trace(msg);
       throw new UserNotAuthorizedException(msg);
     }
 
     // global administrator is allowed to do everything
-    if(userAuthorities.contains(GAMSAPISecurityRoles.getAdmin())) {
-      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPISecurityRoles.ADMINISTRATOR.name, requestUri, requestMethod);
+    if(userAuthorities.contains(GAMSAPIAuthorities.getAdmin())) {
+      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPIAuthorities.ADMINISTRATOR.name, requestUri, requestMethod);
       return new AuthorizationDecision(true);
     }
 
@@ -111,7 +111,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
 
     // first filter for all project relevant roles
     var filteredRoles = userAuthorities.stream()
-        .filter(role -> GAMSAPISecurityRoles.authorityMatchesProjectAbbr(role, projectAbbr))
+        .filter(role -> GAMSAPIAuthorities.authorityMatchesProjectAbbr(role, projectAbbr))
         .toList();
 
     // there is no role that contains the project-abbreviation ()
@@ -122,16 +122,16 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     }
 
     // if project admin - allow everything
-    String projectAdminRole = GAMSAPISecurityRoles.getProjectAdmin(projectAbbr);
+    String projectAdminRole = GAMSAPIAuthorities.getProjectAdmin(projectAbbr);
     if(userAuthorities.contains(projectAdminRole)){
-      log.trace("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_ADMINISTRATOR.name, requestUri, requestMethod, userAuthorities);
+      log.trace("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPIAuthorities.PROJECT_ADMINISTRATOR.name, requestUri, requestMethod, userAuthorities);
       return new AuthorizationDecision(true);
     }
 
     // if project editor (what to allow here?)
-    String projectEditorRole = GAMSAPISecurityRoles.getProjectEditor(projectAbbr);
+    String projectEditorRole = GAMSAPIAuthorities.getProjectEditor(projectAbbr);
     if(userAuthorities.contains(projectEditorRole)){
-      log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPISecurityRoles.PROJECT_EDITOR.name, requestUri, requestMethod, userAuthorities);
+      log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPIAuthorities.PROJECT_EDITOR.name, requestUri, requestMethod, userAuthorities);
       return new AuthorizationDecision(true);
     }
 

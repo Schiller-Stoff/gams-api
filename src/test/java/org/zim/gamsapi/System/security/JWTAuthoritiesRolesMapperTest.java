@@ -14,10 +14,10 @@ public class JWTAuthoritiesRolesMapperTest extends UnitTest {
 
   private JWTAuthoritiesRolesMapper mapper;
 
-  final String TEST_KEYCLOAK_ROLE_CANTUS = "cantus" + GAMSAPISecurityRoles.ROLE_DELIMITER.name + GAMSAPISecurityRoles.ADMINISTRATOR.name;
-  final String TEST_KEYCLOAK_ROLE_ADMIN = GAMSAPISecurityRoles.ADMINISTRATOR.name;
-  final String EXPECTED_ROLE_ADMIN = GAMSAPISecurityRoles.ROLE_PREFIX.name + TEST_KEYCLOAK_ROLE_ADMIN;
-  final String EXPECTED_ROLE_CANTUS = GAMSAPISecurityRoles.ROLE_PREFIX.name + TEST_KEYCLOAK_ROLE_CANTUS;
+  final String TEST_KEYCLOAK_ROLE_CANTUS = "cantus" + GAMSAPIAuthorities.ROLE_DELIMITER.name + GAMSAPIAuthorities.ADMINISTRATOR.name;
+  final String TEST_KEYCLOAK_ROLE_ADMIN = GAMSAPIAuthorities.ADMINISTRATOR.name;
+  final String EXPECTED_ROLE_ADMIN = GAMSAPIAuthorities.ROLE_PREFIX.name + TEST_KEYCLOAK_ROLE_ADMIN;
+  final String EXPECTED_ROLE_CANTUS = GAMSAPIAuthorities.ROLE_PREFIX.name + TEST_KEYCLOAK_ROLE_CANTUS;
 
   @BeforeEach
   public void setUp() {

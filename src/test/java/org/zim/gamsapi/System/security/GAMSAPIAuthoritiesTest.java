@@ -3,36 +3,35 @@ package org.zim.gamsapi.System.security;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
 import org.zim.gamsapi.UnitTest;
 
-public class GAMSAPISecurityRolesTest extends UnitTest {
+public class GAMSAPIAuthoritiesTest extends UnitTest {
 
   @Test
   public void testGetAdmin() {
     String expectedRole = "ROLE_admin";
-    Assertions.assertEquals(expectedRole, GAMSAPISecurityRoles.getAdmin());
+    Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getAdmin());
   }
 
   @Test
   public void testGetProjectAdmin() {
     String projectAbbr = "testProject";
     String expectedRole = "ROLE_testProject_admin";
-    Assertions.assertEquals(expectedRole, GAMSAPISecurityRoles.getProjectAdmin(projectAbbr));
+    Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectAdmin(projectAbbr));
   }
 
   @Test
   public void testGetProjectEditor() {
     String projectAbbr = "testProject";
     String expectedRole = "ROLE_testProject_editor";
-    Assertions.assertEquals(expectedRole, GAMSAPISecurityRoles.getProjectEditor(projectAbbr));
+    Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectEditor(projectAbbr));
   }
 
   @Test
   public void testGetProjectViewer() {
     String projectAbbr = "testProject";
     String expectedRole = "ROLE_testProject_viewer";
-    Assertions.assertEquals(expectedRole, GAMSAPISecurityRoles.getProjectViewer(projectAbbr));
+    Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectViewer(projectAbbr));
   }
 
   @Nested
@@ -42,19 +41,19 @@ public class GAMSAPISecurityRolesTest extends UnitTest {
     public void extractProjectAbbrFromAuthorityReturnsCorrectAbbr() {
       String authority = "ROLE_testProject_admin";
       String expectedAbbr = "testProject";
-      Assertions.assertEquals(expectedAbbr, GAMSAPISecurityRoles.extractProjectAbbrFromAuthority(authority));
+      Assertions.assertEquals(expectedAbbr, GAMSAPIAuthorities.extractProjectAbbrFromAuthority(authority));
     }
 
     @Test
     public void extractProjectAbbrFromAuthorityReturnsNullWhenNoDelimiter() {
       String authority = "ROLE_admin";
-      Assertions.assertNull(GAMSAPISecurityRoles.extractProjectAbbrFromAuthority(authority));
+      Assertions.assertNull(GAMSAPIAuthorities.extractProjectAbbrFromAuthority(authority));
     }
 
     @Test
     public void extractProjectAbbrFromAuthorityReturnsNullIfNoRolePrefix() {
       String authority = "testProject_admin";
-      Assertions.assertNull(GAMSAPISecurityRoles.extractProjectAbbrFromAuthority(authority));
+      Assertions.assertNull(GAMSAPIAuthorities.extractProjectAbbrFromAuthority(authority));
     }
 
   }
@@ -66,21 +65,21 @@ public class GAMSAPISecurityRolesTest extends UnitTest {
     public void authorityMatchesProjectAbbrReturnsTrueWhenMatch() {
       String authority = "ROLE_testProject_admin";
       String projectAbbr = "testProject";
-      Assertions.assertTrue(GAMSAPISecurityRoles.authorityMatchesProjectAbbr(authority, projectAbbr));
+      Assertions.assertTrue(GAMSAPIAuthorities.authorityMatchesProjectAbbr(authority, projectAbbr));
     }
 
     @Test
     public void authorityMatchesProjectAbbrReturnsFalseWhenNoMatch() {
       String authority = "ROLE_testProject_admin";
       String projectAbbr = "otherProject";
-      Assertions.assertFalse(GAMSAPISecurityRoles.authorityMatchesProjectAbbr(authority, projectAbbr));
+      Assertions.assertFalse(GAMSAPIAuthorities.authorityMatchesProjectAbbr(authority, projectAbbr));
     }
 
     @Test
     public void authorityMatchesProjectAbbrReturnsFalseWhenNoDelimiter() {
       String authority = "ROLE_admin";
       String projectAbbr = "testProject";
-      Assertions.assertFalse(GAMSAPISecurityRoles.authorityMatchesProjectAbbr(authority, projectAbbr));
+      Assertions.assertFalse(GAMSAPIAuthorities.authorityMatchesProjectAbbr(authority, projectAbbr));
     }
 
 

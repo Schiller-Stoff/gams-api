@@ -6,22 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.web.SecurityFilterChain;
-import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Spring security configuration
@@ -83,9 +70,9 @@ public class SpringSecurityConfiguration {
           .access(userProjectAuthorizationManager)
           // projects may only be created / deleted by global admin role
           .requestMatchers(HttpMethod.PUT,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
-          .hasAuthority(GAMSAPISecurityRoles.getAdmin())
+          .hasAuthority(GAMSAPIAuthorities.getAdmin())
           .requestMatchers(HttpMethod.DELETE,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
-          .hasAuthority(GAMSAPISecurityRoles.getAdmin())
+          .hasAuthority(GAMSAPIAuthorities.getAdmin())
           // any not matched requests require authentication
           .anyRequest()
           .authenticated()

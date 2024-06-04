@@ -22,7 +22,7 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestBag;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
-import org.zim.gamsapi.enums.TestUser;
+
 import java.io.File;
 import java.io.IOException;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -67,7 +67,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    String testProjectAdminRole = GAMSAPISecurityRoles.getProjectAdmin(TestProject.PROJECT_ABBR.getValue());
+    String testProjectAdminRole = GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue());
 
     mockMvc
         .perform(

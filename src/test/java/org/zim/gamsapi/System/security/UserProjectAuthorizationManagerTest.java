@@ -13,7 +13,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.zim.gamsapi.System.security.exceptions.AuthorizationConfigurationException;
-import org.zim.gamsapi.System.security.exceptions.UserAuthenticationRequiredException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAuthorizedException;
 import org.zim.gamsapi.UnitTest;
@@ -132,7 +131,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
-          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getAnonymous())
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getAnonymous())
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
@@ -151,7 +150,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
-          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getAdmin())
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getAdmin())
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
@@ -188,7 +187,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
-          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getProjectAdmin("otherProject"))
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin("otherProject"))
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
@@ -212,7 +211,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
-          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getProjectAdmin(PROJECT_ABBR))
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin(PROJECT_ABBR))
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
@@ -234,7 +233,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
-          new SimpleGrantedAuthority(GAMSAPISecurityRoles.getProjectEditor(PROJECT_ABBR))
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 

@@ -72,9 +72,9 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     }
 
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-    if(userAuthorities.contains(GAMSAPISecurityRoles.getAnonymous())){
+    if(userAuthorities.contains(GAMSAPIAuthorities.getAnonymous())){
       // TODO improve log mewsage
-      String msg = String.format("User with name %s is not authorized for state changing operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPISecurityRoles.getAnonymous(), authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
+      String msg = String.format("User with name %s is not authorized for state changing operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPIAuthorities.getAnonymous(), authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
       log.trace(msg);
       throw new UserNotAuthorizedException(msg);
     }
@@ -84,7 +84,7 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
 
     // first filter for all project relevant roles
     var filteredRoles = userAuthorities.stream()
-        .filter(role -> GAMSAPISecurityRoles.authorityMatchesProjectAbbr(role, projectAbbr))
+        .filter(role -> GAMSAPIAuthorities.authorityMatchesProjectAbbr(role, projectAbbr))
         .toList();
 
     if(filteredRoles.isEmpty()) {
@@ -95,7 +95,7 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     }
 
     // project editor can ALWAYS see project contents
-    String projectEditorRole = GAMSAPISecurityRoles.getProjectEditor(projectAbbr);
+    String projectEditorRole = GAMSAPIAuthorities.getProjectEditor(projectAbbr);
     if(userAuthorities.contains(projectEditorRole)){
       //TODO better message
       log.trace("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, projectEditorRole, authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
@@ -103,7 +103,7 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     }
 
     // general project viewer can always see every datastream content
-    String projectViewerRole = GAMSAPISecurityRoles.getProjectViewer(projectAbbr);
+    String projectViewerRole = GAMSAPIAuthorities.getProjectViewer(projectAbbr);
     if(userAuthorities.contains(projectViewerRole)){
       //TODO better message
       log.trace("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, projectViewerRole, authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
@@ -113,7 +113,7 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     // fine grained control
     for (String contentRestriction : datastream.getContentRestrictions()) {
       // TODO validate somehow?
-      String contentRestrictionRole = GAMSAPISecurityRoles.buildProjectViewerContentRestricted(projectAbbr, contentRestriction);
+      String contentRestrictionRole = GAMSAPIAuthorities.buildProjectViewerContentRestricted(projectAbbr, contentRestriction);
       if(userAuthorities.contains(contentRestrictionRole)){
         log.trace("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, contentRestriction, authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
         return new AuthorizationDecision(true);
