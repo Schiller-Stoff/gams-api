@@ -20,7 +20,7 @@ public class ProjectService implements IProjectService {
 
   @Override
   @Transactional
-  public User createNewProject(Project project, User user) {
+  public Project save(Project project) {
 
     Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
     if(projectOptional.isPresent()){
@@ -29,10 +29,10 @@ public class ProjectService implements IProjectService {
       throw new ProjectAlreadyExistsException(msg);
     }
 
-    projectRepository.save(project);
+    Project savedProject = projectRepository.save(project);
     log.trace("Saved project {}", project);
 
-    return user;
+    return savedProject;
   }
 
 
