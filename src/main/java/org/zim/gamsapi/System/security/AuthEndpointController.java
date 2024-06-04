@@ -14,6 +14,7 @@ public class AuthEndpointController {
    */
   @GetMapping("/api/v1/auth")
   public String login() {
+    // TODO careful! - this redirect is not that simple (what if proxy before)?
     return "redirect:/oauth2/authorization/gams-realm";
   }
 
