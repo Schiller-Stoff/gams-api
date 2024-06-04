@@ -23,12 +23,13 @@
             </nav>
             <h2 th:text="${user.username}" class="mb-3"></h2>
             <p>
-                Overview over roles and rights for the user.
+                Overview over your authorities for GAMS5.
             </p>
             <div class="webcirilo-box shadow-sm mb-1">
                 <ul class="list-group list-group-flush" style="list-style: none;">
-                    <li th:each="project : ${user.projects}" class="list-group-item">
-                        <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>
+                    <li th:each="authority : ${user.authorities}" class="list-group-item">
+                        <p th:text="${authority}"></p>
+<!--                        <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>-->
                     </li>
                 </ul>
             </div>

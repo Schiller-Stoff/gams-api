@@ -2,6 +2,8 @@ package org.zim.gamsapi.User;
 
 import lombok.*;
 
+import java.util.Set;
+
 /**
  * Model representing an user in terms of user management.
  */
@@ -22,5 +24,10 @@ public class User {
    * The user name.
    */
   private String username;
+
+  /**
+   * List of user authorities.
+   */
+  private Set<String> authorities;
 
 }
