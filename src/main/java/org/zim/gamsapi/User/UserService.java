@@ -2,15 +2,11 @@ package org.zim.gamsapi.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.User.exceptions.UserNotFoundException;
-import org.zim.gamsapi.User.interfaces.IUserRepository;
 import org.zim.gamsapi.User.interfaces.IUserService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Demo userservice. Returns a static testuser.
@@ -22,56 +18,28 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService implements IUserService {
 
-  private final IUserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
-
   @Override
   public User findByUsername(String username) {
-
-    Optional<User> foundUser = userRepository.findByUsername(username);
-    if(foundUser.isEmpty()){
-      String msg = String.format("Cannot find user with name %s.", username);
-      log.error(msg);
-      throw new UserNotFoundException(msg);
-    }
-
-    log.info("Found user {}", foundUser);
-    return foundUser.get();
+    // TODO refactor outdated!
+    return new User("", "");
   }
 
   @Transactional
   public User saveUser(User user){
-
-    Optional<User> foundUserOptional = userRepository.findByUsername(user.getUsername());
-
-    if(foundUserOptional.isEmpty()) {
-      return userRepository.save(user);
-    } else {
-      log.info("Found existing user with name {}. Updating now... {}", user.getUsername(), user);
-    }
-
-    User foundUser = foundUserOptional.get();
-    user.setUserid(foundUser.getUserid());
-
-    return userRepository.save(user);
+    // TODO outdated refactor!
+    return new User("", "");
   }
 
   @Override
   public List<User> findAll() {
-    List<User> users = new ArrayList<>();
-    userRepository.findAll().forEach(users::add);
-    return users;
+    // TODO refactor outdated
+    return new ArrayList<>();
   }
 
   @Override
   @Transactional
   public void deleteByUsername(String username) {
-    userRepository.findByUsername(username).orElseThrow(() -> {
-      String msg = String.format("Cannot delete a user that doesn't exist. Failed to find user with name %s", username);
-      log.error(msg);
-      return new UserNotFoundException(msg);
-    });
-    userRepository.deleteUserByUsername(username);
+    // TODO refactor outdated
   }
 
 }
