@@ -110,7 +110,7 @@ public class Datastream {
   /**
    * Allows to restrict the content of the datastream to specific users.
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   private Set<String> contentRestrictions = new HashSet<>();
 
