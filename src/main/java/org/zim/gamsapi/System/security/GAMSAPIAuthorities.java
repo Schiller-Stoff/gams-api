@@ -124,22 +124,24 @@ public enum GAMSAPIAuthorities {
 
   /**
    * Converts a given authority to a role by removing the ROLE_ prefix
-   * TODO test
+   *
    * @param authority the authority
    * @return the role (authority WITHOUT ROLE_ prefix)
    */
   public static String convertToRole(String authority){
-    if(!authority.startsWith(GAMSAPIAuthorities.ROLE_PREFIX.name)){
-      String msg = String.format("Authority %s has no role prefix %s. Cannot convert to role (because it is already a role?).", authority, GAMSAPIAuthorities.ROLE_PREFIX.name);
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
     // throw if null or empty
-    if(authority.isEmpty()){
+    if((authority == null) || authority.isEmpty()){
       String msg = "Authority is unexpectedly null. Cannot convert to role.";
       log.error(msg);
       throw new IllegalStateException(msg);
     }
+
+    if(!authority.startsWith(GAMSAPIAuthorities.ROLE_PREFIX.name)){
+      String msg = String.format("Authority string is invalid. Authority string %s has no role prefix %s. Cannot convert to role (because it is already a role?).", authority, GAMSAPIAuthorities.ROLE_PREFIX.name);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
 
     return authority.replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
   }
