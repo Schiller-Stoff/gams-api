@@ -42,9 +42,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       throw new AuthorizationConfigurationException(msg);
     }
 
-    // all GET requests are being authorized
-    // TODO not all GET requests should be authorized (e.g. according to rights defined in metadata of a datastream? Means only the content should be blocked?)
-    // TODO maybe handle described requirement in own auth class? -> create own class with setup that applies only for the datastream content!
+    // all GET requests are being authorized (when urls pattern matches)
     if(requestMethod.equals(HttpMethod.GET.name())){
       log.trace("ACCESS GRANTED - GET requests are not protected via the authorization process for url {}", requestUri);
       return new AuthorizationDecision(true);
@@ -69,6 +67,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       throw new UserAuthenticationRequiredException(msg);
     }
 
+    // TODO I think this remote user is quite unreliable? - check
     String username = authorizationContext.getRequest().getRemoteUser();
     // failsafe if username is unexpectedly null
     // TODO test
