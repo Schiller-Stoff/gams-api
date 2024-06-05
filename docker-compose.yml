@@ -31,6 +31,8 @@ services:
     container_name: baseSearch
     hostname: baseSearch
     image: solr:9.2.1
+    volumes:
+      - ${PWD}/docker/apps/solr/solr/:/var/solr
     ports:
       - "8983"
       - "8983:8983"
