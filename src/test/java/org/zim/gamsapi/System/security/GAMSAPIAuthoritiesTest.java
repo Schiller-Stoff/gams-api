@@ -85,4 +85,44 @@ public class GAMSAPIAuthoritiesTest extends UnitTest {
 
   }
 
+  @Nested
+  public class ConvertToRole {
+
+    @Test
+    public void convertsExpectedAuthorityString(){
+
+      final String AUTHORITY_TO_CONVERT = GAMSAPIAuthorities.getAdmin();
+      final String EXPECTED = AUTHORITY_TO_CONVERT.replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
+
+      GAMSAPIAuthorities.convertToRole(AUTHORITY_TO_CONVERT);
+
+      org.assertj.core.api.Assertions.assertThat(GAMSAPIAuthorities.convertToRole(AUTHORITY_TO_CONVERT))
+          .isEqualTo(EXPECTED);
+
+    }
+
+    @Test
+    public void throwsIfGivenAuthorityIsNotStartingWithRolePrefix(){
+      Assertions.assertThrows(IllegalStateException.class, () -> {
+        GAMSAPIAuthorities.convertToRole("admin");
+      });
+    }
+
+    @Test
+    public void throwsIfGivenAuthorityIsEmpty(){
+      Assertions.assertThrows(IllegalStateException.class, () -> {
+        GAMSAPIAuthorities.convertToRole("");
+      });
+    }
+
+    @Test
+    public void throwsIfGivenAuthorityIsNull(){
+      Assertions.assertThrows(IllegalStateException.class, () -> {
+        GAMSAPIAuthorities.convertToRole(null);
+      });
+    }
+
+
+  }
+
 }
