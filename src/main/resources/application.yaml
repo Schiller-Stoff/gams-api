@@ -17,7 +17,6 @@ spring:
         hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
         hibernate.jdbc.lob.non_contextual_creation: true
   # oauth2 integration with keycloak
-  # TODO needs to be deactivated in dev profile!
   security:
     oauth2:
       client:
@@ -63,7 +62,7 @@ logging:
   file:
     name: ${LOG_FILE:log/app.log}
   level:
-    org.zim.gamsapi: ${LOG_LEVEL:TRACE}
+    org.zim.gamsapi: ${LOG_LEVEL:ERROR}
     org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:
