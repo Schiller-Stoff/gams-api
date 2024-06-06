@@ -391,4 +391,32 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is3xxRedirection());
   }
+
+  @Test
+  public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
+
+    final String OBJECT_TEST_ID = "testPid";
+    digitalObjectRepository.save(
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build()
+    );
+
+    final String OBJECT_TEST_ID2 = "testPid2";
+    digitalObjectRepository.save(
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID2).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build()
+    );
+
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testProject.getProjectAbbr())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+        .contains(OBJECT_TEST_ID, OBJECT_TEST_ID2);
+
+    digitalObjectRepository.deleteById(OBJECT_TEST_ID);
+    digitalObjectRepository.deleteById(OBJECT_TEST_ID2);
+
+
+  }
+
 }
