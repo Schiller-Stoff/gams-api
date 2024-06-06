@@ -18,6 +18,7 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
@@ -132,6 +133,45 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       // clean up
       digitalObjectRepository.deleteAll();
 
+    }
+
+    @Test
+    public void deleteDigitalObjectWhenItContainsDatastreams() throws Exception {
+      // Arrange
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .project(testProject)
+          .objectType("TEI")
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(digitalObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      // Act
+      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
+              .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().is3xxRedirection());
+
+      // Assert
+      org.assertj.core.api.Assertions.assertThat(
+              digitalObjectRepository.findDigitalObjectById(digitalObject.getId()))
+          .isNotPresent();
+
+      org.assertj.core.api.Assertions.assertThat(
+              datastreamRepository.findById(datastream.deriveDatastreamId()))
+          .isNotPresent();
+
+      // clean up
+      digitalObjectRepository.deleteAll();
+      datastreamRepository.deleteAll();
     }
 
   }

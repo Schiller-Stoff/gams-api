@@ -125,7 +125,9 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
+    datastreamRepository.deleteAllByDigitalObject(digitalObject);
     digitalObjectRepository.delete(digitalObject);
+    log.info("Successfully deleted digital object {}", digitalObject);
   }
 
   @Override
