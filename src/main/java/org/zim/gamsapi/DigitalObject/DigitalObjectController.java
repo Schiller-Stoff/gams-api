@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Datastream.DatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
@@ -226,6 +227,16 @@ public class DigitalObjectController {
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
 
+  @GetMapping(params = {"style"}, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  public List<String> findAllIdsByProjectAbbr(Project project, @RequestParam String style) {
+    if(!style.equalsIgnoreCase("idlist")){
+      String msg = String.format("Unsupported view style %s", style);
+      log.error(msg);
+      throw new DigitalObjectConversionException(msg);
+    }
+    return digitalObjectService.findAllIdsByProjectAbbr(project.getProjectAbbr());
+  }
 
 
 }

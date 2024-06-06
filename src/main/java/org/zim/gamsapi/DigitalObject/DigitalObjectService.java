@@ -10,6 +10,7 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.Project;
@@ -108,6 +109,15 @@ public class DigitalObjectService implements IDigitalObjectService {
             }
     );
     return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
+  }
+
+  @Override
+  public List<String> findAllIdsByProjectAbbr(String projectAbbr) {
+    return digitalObjectRepository
+        .findAllByProject_ProjectAbbr(projectAbbr)
+        .stream()
+        .map(DigitalObjectIdView::getId)
+        .toList();
   }
 
   @Override
