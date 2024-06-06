@@ -131,7 +131,7 @@ public class ZipUtils {
 
   /**
    * Unzips a zipped directory to a temporary directory.
-   * @param zippedDir TODO
+   * @param zippedDir zipped directory as byte[]
    * @return path to temporary directory containing the now unzipped directory.
    * @throws IngestProcessingException if unzipping fails.
    */
