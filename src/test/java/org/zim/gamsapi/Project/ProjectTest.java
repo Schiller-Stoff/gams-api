@@ -3,9 +3,7 @@ package org.zim.gamsapi.Project;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestProject;
 
 public class ProjectTest extends UnitTest {
 
@@ -13,7 +11,19 @@ public class ProjectTest extends UnitTest {
   @Nested
   public class IdentityTest {
 
-    // TODO add tests for identity --- two projects with the same projectAbbr should be considered same!
+    @Test
+    public void twoProjectsWithSameProjectAbbr_aresConsideredEqual() {
+
+      // given
+      final String PROJECT_ABBR = "projectAbbr";
+
+      Project project1 = Project.builder().projectAbbr(PROJECT_ABBR).build();
+      Project project2 = Project.builder().projectAbbr(PROJECT_ABBR).build();
+
+      // then
+      Assertions.assertEquals(project1, project2);
+
+    }
 
 
   }
