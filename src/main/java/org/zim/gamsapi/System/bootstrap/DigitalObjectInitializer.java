@@ -34,7 +34,7 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
     logAvailableSystemResources();
-    initializeDemoProject();
+    // initializeDemoProject();
     // saveTestData();
   }
 
