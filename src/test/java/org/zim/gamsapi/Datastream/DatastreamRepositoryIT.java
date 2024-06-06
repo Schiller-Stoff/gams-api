@@ -1,9 +1,7 @@
 package org.zim.gamsapi.Datastream;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,7 +16,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
@@ -28,12 +25,15 @@ import org.zim.gamsapi.enums.TestProject;
 
 /**
  * Integration test for the DatastreamRepository.
- * TODO make sure that tests don't cause any side effects -> seems possible atm!
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamRepositoryIT extends IntegrationTest {
 
+    /**
+     * Mocks the auditing behavior of the app.
+     * Without mocking the auditing handler, the tests would fail because of the missing oauth2 user info
+     */
     @MockBean
     private AuditingHandler auditingHandler;
 
@@ -87,14 +87,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @AfterAll
     public void tearDown(){
-        //  TODO why does this throw?
-        //datastreamRepository.deleteAllByDigitalObject(testDigitalObject);
-        datastreamRepository.delete(testDatastream);
-        digitalObjectRepository.delete(testDigitalObject);
-        projectRepository.delete(testDigitalObject.getProject());
-
-        // TODO assert that everything was deleted
-
+        datastreamRepository.deleteAll();
+        digitalObjectRepository.deleteAll();
+        projectRepository.deleteAll();
     }
 
 
@@ -322,7 +317,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         }
 
         @Test
-        @Ignore
         public void deleteAllRemovesTestDatastream(){
 
             // first test datastream is available
