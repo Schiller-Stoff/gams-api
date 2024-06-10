@@ -4,14 +4,18 @@
 # spring.datasource.hikari.maximumPoolSize=5
 
 spring:
+  config:
+    # allows to use environment variables in the config (here: docker secrets)
+    import: "optional:configtree:/run/secrets/"
   datasource:
-    url: jdbc:postgresql://relationalDB:5432/gams
-    username: admin
-    password: admin
+    url: ${POSTGRES_JDBC_URL:jdbc:postgresql://relationalDB:5432/gams}
+    username: ${postgres_username:admin}
+    # postgres password is set via docker secrets
+    password: ${postgres_pw:admin}
   jpa:
     hibernate:
       # set to create if you want to drop existing data on app startup
-      # value "none" would require to initialize a schema via SQL va extra file
+      # value "none" would require to initialize a schema via SQL via extra file
       ddl-auto: update
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -22,16 +26,15 @@ spring:
       client:
         registration:
           gams-realm:
-            client-id: ${OAUTH2_CLIENT_ID:gams-client}
-            client-secret: ${OAUTH2_CLIENT_SECRET:MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
+            # will be set by docker secrets - and if not applied for local dev
+            client-id: ${gamsapi_client_id:gams-client}
+            client-secret: ${gamsapi_client_secret:MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
             scope: ${OAUTH2_SCOPE:openid,profile,email}
             authorization-grant-type: authorization_code
-            redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:18085/login/oauth2/code/gams-client}
-            # provider: keycloak
-            # client-name: GAMS
+            redirect-uri: ${gamsapi_redirect_uri:http://localhost:18085/login/oauth2/code/gams-client}
         provider:
           gams-realm:
-            issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8182/realms/gams-realm}
+            issuer-uri: ${gamsapi_issuer_uri:http://localhost:8182/realms/gams-realm}
 
 
   #####
