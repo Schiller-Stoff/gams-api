@@ -15,6 +15,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.zim.gamsapi.Datastream.DatastreamId;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -40,6 +43,7 @@ import java.util.stream.Collectors;
 public class BaseSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IDatastreamRepository datastreamRepository;
   private final GAMSDockerDNS configProperties;
 
   private final String GAMS_CORE = "gams";
@@ -223,77 +227,90 @@ public class BaseSearchService implements IIntegrationService {
   private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
     // TODO use project abbreviation of digital object to determine the core
 
-    // TODO reimplement
+    // TODO check if solr core exist?
 
-//    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)).findFirst();
-//    Datastream datastream;
-//    if(datastreamOptional.isEmpty()) {
-//      // if no search.json - skip processing
-//      String msg = String.format("Skipped indexing custom search datastream because none found at digital object %s", digitalObject.getId());
-//      log.debug(msg);
-//      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
-//    } else {
-//      datastream = datastreamOptional.get();
-//    }
-//
-//    BaseSearch[] facets;
-//    ObjectMapper objectMapper = new ObjectMapper();
-//
-//    try {
-//      facets = objectMapper.readValue(datastream.getData(), BaseSearch[].class);
-//    } catch (IOException e){
-//      String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    }
-//
-//    // ensures that each solr entity = document has gams-controlled properties assigned
-//    Arrays.stream(facets).forEach(facet -> {
-//      facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-//      facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-//      // id must be defined outside
-//    });
-//
-//    String builtJson = "";
-//    try {
-//      builtJson = objectMapper.writeValueAsString(facets);
-//    } catch (JsonProcessingException e){
-//      String msg = String.format("Failed to marshal Facet objects to json array. Skipping solr indexing. Digital object %s . Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    }
-//
-//    log.info("Built json: {}", builtJson);
-//
-//    // TODO need to block sending of json if a add document operation.
-//    // TODO this json needs some kind of validation e.g. every doc must have a projectAbbreviation assigned etc.
-//
-//    HttpHeaders httpHeaders = new HttpHeaders();
-//    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-//    HttpEntity<String> request = new HttpEntity<>(builtJson, httpHeaders);
-//
-//    //TODO improve handling of RestClientException?
-//    ResponseEntity<String> response;
-//    try {
-//      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl());
-//      response = restTemplate.postForEntity(postUrl, request, String.class);
-//    } catch (RestClientException e){
-//      String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    }
-//
-//    if(response.getStatusCode().isError()){
-//      String msg = String.format("Failed to post custom solr datastream to solr instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    } else {
-//      String msg = String.format("Successfully posted custom search xml datastream for object %s to solr instance. Response status code: %s", digitalObject.getId(), response.getStatusCode());
-//      log.trace(msg);
-//      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
-//    }
 
-    return null;
+    var objectDatastreams =  datastreamRepository.findAllByDigitalObjectId(digitalObject.getId());
+    if(objectDatastreams.isEmpty()){
+      String msg = String.format("No datastreams found for digital object %s", digitalObject.getId());
+      log.debug(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
+    }
+
+    Optional<IDatastreamDetailsView> searchDatastreamOptional = objectDatastreams.stream()
+        .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
+        .findFirst();
+
+    if(searchDatastreamOptional.isEmpty()){
+      String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
+      log.debug(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
+    }
+
+    var searchDatastream = searchDatastreamOptional.get();
+    Datastream datastream = datastreamRepository.findById(DatastreamId.builder().dsid(searchDatastream.getDsid()).digitalObject(searchDatastream.getDigitalObject().getId()).build())
+        .orElseThrow(() -> {
+          String msg = String.format("Datastream with dsid %s not found", searchDatastream.getDsid());
+          log.error(msg);
+          return new ProcessingException(msg);
+        });
+
+    BaseSearch[] facets;
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    try {
+      facets = objectMapper.readValue(datastream.getData(), BaseSearch[].class);
+    } catch (IOException e) {
+      String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    // ensures that each solr entity = document has gams-controlled properties assigned
+    Arrays.stream(facets).forEach(facet -> {
+      facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+      facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+      // id must be defined outside
+    });
+
+    String builtJson = "";
+    try {
+      builtJson = objectMapper.writeValueAsString(facets);
+    } catch (JsonProcessingException e) {
+      String msg = String.format("Failed to marshal Facet objects to json array. Skipping solr indexing. Digital object %s . Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    log.info("Built json: {}", builtJson);
+
+    // TODO need to block sending of json if a add document operation.
+    // TODO this json needs some kind of validation e.g. every doc must have a projectAbbreviation assigned etc.
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(builtJson, httpHeaders);
+
+    //TODO improve handling of RestClientException?
+    ResponseEntity<String> response;
+    try {
+      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl() + "/" + digitalObject.getProject().getProjectAbbr());
+      response = restTemplate.postForEntity(postUrl, request, String.class);
+    } catch (RestClientException e) {
+      String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    if (response.getStatusCode().isError()) {
+      String msg = String.format("Failed to post custom solr datastream to solr instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
+      log.error(msg);
+      throw new ProcessingException(msg);
+    } else {
+      String msg = String.format("Successfully posted custom search xml datastream for object %s to solr instance. Response status code: %s", digitalObject.getId(), response.getStatusCode());
+      log.trace(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+    }
 
   }
 
