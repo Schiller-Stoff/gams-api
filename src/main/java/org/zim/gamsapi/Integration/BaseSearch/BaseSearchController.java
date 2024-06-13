@@ -2,10 +2,18 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationController;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
+import org.zim.gamsapi.Project.exceptions.ProjectAlreadyExistsException;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -40,6 +48,12 @@ public class BaseSearchController implements IIntegrationController {
   public List<IntegrationActionReport> deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
     return baseSearchService.deleteIndexedObject(projectAbbr, pid);
+  }
+
+  @GetMapping
+  public void setupIntegrationService(@PathVariable String projectAbbr){
+    log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
+    baseSearchService.setupIntegrationService(projectAbbr);
   }
 
 }

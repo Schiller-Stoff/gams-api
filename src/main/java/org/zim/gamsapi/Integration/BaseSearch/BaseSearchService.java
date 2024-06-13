@@ -9,13 +9,12 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -214,6 +213,7 @@ public class BaseSearchService implements IIntegrationService {
   /**
    * Posts a custom solr datastream to the solr instance via a post request if available
    * and valid.
+   * TODO redo implementation?
    * @param digitalObject digital object to be indexed
    */
   private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
@@ -288,5 +288,90 @@ public class BaseSearchService implements IIntegrationService {
     return null;
 
   }
+
+  /**
+   * Sets up the solr integration service for the given project.
+   * @param projectAbbr project abbreviation
+   */
+  public void setupIntegrationService(String projectAbbr){
+    log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
+
+    // TODO refactor using webclient
+    RestTemplate restTemplate = new RestTemplate();
+    // TODO refactor - connection consideartions (retry / timeout / etc. )
+
+    // TODO don'T use hardcoded localhost!
+
+    configProperties.getBaseSearchUrl();
+
+    String coreStatusUrl = "http://localhost:8983/solr/" + projectAbbr + "/select";
+
+    // proceed only if the core doesn't exist
+    try {
+      var responseEntity = restTemplate.exchange(coreStatusUrl, HttpMethod.GET, null, String.class);
+      // abort if core already exists
+      if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
+        String msg = String.format("A solr core already exists for the project %s", projectAbbr);
+        log.error(msg);
+        throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
+      }
+    } catch (HttpClientErrorException e){
+      // proceed only if the error indicates not found in the status code
+      if(e.getStatusCode() != HttpStatus.NOT_FOUND){
+        String msg = String.format("Something went wrong requesting status of the solr core for project %s", projectAbbr);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, msg);
+      }
+    }
+
+
+    // request against SOLR to create the project core
+
+    String body = String.format("""
+          {
+              "create": {
+                "name": "%s",
+                "configSet": "base"
+              }
+            }
+        """, projectAbbr);
+
+
+    // TODO replace localhost - must be dynamic (controlled by config)
+    String url = "http://localhost:8983/api/cores";
+
+    try {
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+      HttpEntity<String> httpEntity = new HttpEntity<>(body, httpHeaders);
+      restTemplate.postForEntity(url, httpEntity, String.class);
+      //restTemplate.exchange(coreStatusUrl, HttpMethod.POST, httpEntity, String.class);
+    } catch (HttpClientErrorException e){
+      String msg = String.format("Something went wrong creating the solr core for project %s", projectAbbr);
+      log.error(msg);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, msg);
+    }
+
+
+
+    // TODO efficient this way?
+//    WebClient webClient = WebClient.create();
+//
+//
+//    String response = webClient
+//        .post()
+//        .uri(url)
+//        .contentType(MediaType.APPLICATION_JSON)
+//        // important to use body inserters here
+//        .body(BodyInserters.fromValue(body))
+//        .retrieve()
+//        .toEntity(String.class)
+//        .doOnError(throwable -> log.error("Error while setting up integration service", throwable.getCause()))
+//        // TODO use subscribe instead?
+//        .block()
+//        .getBody();
+
+
+  }
+
 
 }
