@@ -42,13 +42,15 @@ public class BaseSearchService implements IIntegrationService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final GAMSDockerDNS configProperties;
 
+  private final String GAMS_CORE = "gams";
+
   // TODO elaborate usage of resttemplate
   private final RestTemplate restTemplate = new RestTemplate();
 
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
 
-    SolrClient client = getSolrClient();
+    SolrClient client = getSolrClient(GAMS_CORE);
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
@@ -98,7 +100,8 @@ public class BaseSearchService implements IIntegrationService {
   public List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr) {
     log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
 
-    SolrClient client = getSolrClient();
+    // TODO think
+    SolrClient client = getSolrClient(GAMS_CORE);
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
     try {
       client.deleteByQuery(solrDeletionQuery);
@@ -115,7 +118,8 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public List<IntegrationActionReport> indexObject(String projectAbbr, String id) {
-    SolrClient client = getSolrClient();
+    //TODO think about
+    SolrClient client = getSolrClient("gams");
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with id %s not found", id)));
 
@@ -159,7 +163,7 @@ public class BaseSearchService implements IIntegrationService {
     // (otherwise a SOLRException would be thrown)
     id = id.replaceAll(":", "\\\\:");
 
-    SolrClient client = getSolrClient();
+    SolrClient client = getSolrClient(GAMS_CORE);
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
     try {
       client.deleteByQuery(solrDeletionQuery);
@@ -175,9 +179,9 @@ public class BaseSearchService implements IIntegrationService {
   }
 
 
-  public SolrClient getSolrClient(){
-    //final String solrUrl = "http://localhost:8983/solr/gams";
-    final String solrUrl = configProperties.getBaseSearchUrl();
+  // TODO needs url as argument?
+  public SolrClient getSolrClient(String coreName){
+    final String solrUrl = configProperties.getBaseSearchUrl() + "/" + coreName;
     return new HttpSolrClient.Builder(solrUrl)
             .build();
   }
@@ -217,6 +221,10 @@ public class BaseSearchService implements IIntegrationService {
    * @param digitalObject digital object to be indexed
    */
   private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
+    // TODO use project abbreviation of digital object to determine the core
+
+    // TODO reimplement
+
 //    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)).findFirst();
 //    Datastream datastream;
 //    if(datastreamOptional.isEmpty()) {
@@ -300,11 +308,8 @@ public class BaseSearchService implements IIntegrationService {
     RestTemplate restTemplate = new RestTemplate();
     // TODO refactor - connection consideartions (retry / timeout / etc. )
 
-    // TODO don'T use hardcoded localhost!
 
-    configProperties.getBaseSearchUrl();
-
-    String coreStatusUrl = "http://localhost:8983/solr/" + projectAbbr + "/select";
+    String coreStatusUrl = configProperties.getBaseSearchUrl() + "/" + projectAbbr + "/select";
 
     // proceed only if the core doesn't exist
     try {
