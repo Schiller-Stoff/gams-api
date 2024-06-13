@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -31,6 +32,7 @@ import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -228,7 +230,13 @@ public class BaseSearchService implements IIntegrationService {
     // TODO use project abbreviation of digital object to determine the core
 
     // TODO check if solr core exist?
-
+    if(!verifyProjectSetup(digitalObject.getProject().getProjectAbbr())){
+      // TODO better error message?
+      String msg = String.format("No solr core found for project %s", digitalObject.getProject().getProjectAbbr());
+      log.error(msg);
+      // TODO better exception?
+      throw new ProcessingException(msg);
+    }
 
     var objectDatastreams =  datastreamRepository.findAllByDigitalObjectId(digitalObject.getId());
     if(objectDatastreams.isEmpty()){
@@ -315,6 +323,29 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   /**
+   * Verifies if the project setup is correct for the integration service.
+   */
+  private boolean verifyProjectSetup(String projectAbbr) {
+
+    String coreStatusUrl = configProperties.getBaseSearchUrl() + "/" + projectAbbr + "/select";
+
+    // proceed only if the core doesn't exist
+    try {
+      var responseEntity = restTemplate.exchange(coreStatusUrl, HttpMethod.GET, null, String.class);
+      // abort if core already exists
+      if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
+        String msg = String.format("A solr core already exists for the project %s", projectAbbr);
+        log.debug(msg);
+        return true;
+      }
+    } catch (HttpClientErrorException e){
+      return false;
+    }
+
+    return false;
+  }
+
+  /**
    * Sets up the solr integration service for the given project.
    * @param projectAbbr project abbreviation
    */
@@ -325,26 +356,12 @@ public class BaseSearchService implements IIntegrationService {
     RestTemplate restTemplate = new RestTemplate();
     // TODO refactor - connection consideartions (retry / timeout / etc. )
 
-
-    String coreStatusUrl = configProperties.getBaseSearchUrl() + "/" + projectAbbr + "/select";
-
-    // proceed only if the core doesn't exist
-    try {
-      var responseEntity = restTemplate.exchange(coreStatusUrl, HttpMethod.GET, null, String.class);
-      // abort if core already exists
-      if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
-        String msg = String.format("A solr core already exists for the project %s", projectAbbr);
-        log.error(msg);
-        throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
-      }
-    } catch (HttpClientErrorException e){
-      // proceed only if the error indicates not found in the status code
-      if(e.getStatusCode() != HttpStatus.NOT_FOUND){
-        String msg = String.format("Something went wrong requesting status of the solr core for project %s", projectAbbr);
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, msg);
-      }
+    // check if the project setup is correct
+    if(verifyProjectSetup(projectAbbr)){
+      String msg = String.format("A solr core already exists for the project %s", projectAbbr);
+      log.error(msg);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
     }
-
 
     // request against SOLR to create the project core
 
