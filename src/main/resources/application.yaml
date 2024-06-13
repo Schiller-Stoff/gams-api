@@ -87,7 +87,8 @@ gams:
   docker:
     # postgres
     relational-db: "relationalDB:5432"
-    baseSearchUrl: ${BASE_SEARCH_URL:http://baseSearch:8983/solr/gams}
+    # TODO redo hardcoded gams core?
+    baseSearchUrl: ${BASE_SEARCH_URL:http://baseSearch:8983/solr}
     triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
 
 # swagger ui base path

@@ -15,5 +15,6 @@ gams:
     # postgres
     relational-db: "localhost:5432"
     # from integration-api
-    baseSearchUrl: ${BASE_SEARCH_URL:http://localhost:8983/solr/gams}
+    # TODO: problem - there is the gams core hardcoded
+    baseSearchUrl: ${BASE_SEARCH_URL:http://localhost:8983/solr}
     triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}
