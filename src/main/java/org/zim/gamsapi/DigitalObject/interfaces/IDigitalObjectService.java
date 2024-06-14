@@ -82,4 +82,12 @@ public interface IDigitalObjectService {
    */
   DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id);
 
+
+  /**
+   * Find all digital objects for a given project (with project abbreviation) and just return their ids.
+   * @param projectAbbr identifier of the project
+   * @return a list of digital object ids
+   */
+  List<String> findAllIdsByProjectAbbr(String projectAbbr);
+
 }

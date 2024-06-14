@@ -11,9 +11,12 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplateHandler;
+import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -21,6 +24,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 
+/**
+ * Service for proxying requests to other services
+ * TODO class needs tests
+ */
 @Service
 @Slf4j
 public class ProxyService implements IProxyService {
@@ -75,7 +82,6 @@ public class ProxyService implements IProxyService {
     // to actual proxy request and assign result to proxied response
     HttpEntity<String> httpEntity = new HttpEntity<>(body, headers);
     try {
-
       ResponseEntity<String> serverResponse = restTemplate.exchange(targetUrl, HttpMethod.valueOf(request.getMethod()), httpEntity, String.class);
       HttpHeaders responseHeaders = new HttpHeaders();
       responseHeaders.put(HttpHeaders.CONTENT_TYPE, serverResponse.getHeaders().get(HttpHeaders.CONTENT_TYPE));
@@ -86,6 +92,16 @@ public class ProxyService implements IProxyService {
       return ResponseEntity.status(e.getRawStatusCode())
               .headers(e.getResponseHeaders())
               .body(e.getResponseBodyAsString());
+    } catch (ResourceAccessException e) {
+      String msg = String.format("Failed to proxy to integrated service via %s. The service might not have been available at request time. Original error message: %s", targetUrl, e);
+      log.error(msg);
+      // TODO use better exception? (like IntegrationServiceUnavailableException?)
+      throw new ProcessingException(msg);
+    } catch (RestClientException e) {
+      String msg = String.format("Failed to proxy to integrated service via %s. Original error message: %s", targetUrl, e);
+      log.error(msg);
+      // TODO use better exception? (like IntegrationServiceUnavailableException?)
+      throw new ProcessingException(msg);
     }
 
   }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IProjectService {
 
-  User createNewProject(Project project, User user);
+  Project save(Project project);
 
   void deleteProject(Project project);
 

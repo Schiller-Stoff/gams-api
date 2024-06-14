@@ -31,6 +31,10 @@ public interface DigitalObjectDetailsView {
 
     String getParent();
 
+    String getCreatedBy();
+
+    String getModifiedBy();
+
     interface ProjectView {
         String getProjectAbbr();
     }

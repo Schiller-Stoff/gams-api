@@ -4,18 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
+import org.zim.gamsapi.Datastream.DatastreamId;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -29,6 +32,7 @@ import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +45,10 @@ import java.util.stream.Collectors;
 public class BaseSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IDatastreamRepository datastreamRepository;
   private final GAMSDockerDNS configProperties;
+
+  private final String GAMS_CORE = "gams";
 
   // TODO elaborate usage of resttemplate
   private final RestTemplate restTemplate = new RestTemplate();
@@ -49,7 +56,7 @@ public class BaseSearchService implements IIntegrationService {
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
 
-    SolrClient client = getSolrClient();
+    SolrClient client = getSolrClient(GAMS_CORE);
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
@@ -99,7 +106,8 @@ public class BaseSearchService implements IIntegrationService {
   public List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr) {
     log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
 
-    SolrClient client = getSolrClient();
+    // TODO think
+    SolrClient client = getSolrClient(GAMS_CORE);
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
     try {
       client.deleteByQuery(solrDeletionQuery);
@@ -116,7 +124,8 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public List<IntegrationActionReport> indexObject(String projectAbbr, String id) {
-    SolrClient client = getSolrClient();
+    //TODO think about
+    SolrClient client = getSolrClient("gams");
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with id %s not found", id)));
 
@@ -160,7 +169,7 @@ public class BaseSearchService implements IIntegrationService {
     // (otherwise a SOLRException would be thrown)
     id = id.replaceAll(":", "\\\\:");
 
-    SolrClient client = getSolrClient();
+    SolrClient client = getSolrClient(GAMS_CORE);
     String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
     try {
       client.deleteByQuery(solrDeletionQuery);
@@ -176,9 +185,9 @@ public class BaseSearchService implements IIntegrationService {
   }
 
 
-  public SolrClient getSolrClient(){
-    //final String solrUrl = "http://localhost:8983/solr/gams";
-    final String solrUrl = configProperties.getBaseSearchUrl();
+  // TODO needs url as argument?
+  public SolrClient getSolrClient(String coreName){
+    final String solrUrl = configProperties.getBaseSearchUrl() + "/" + coreName;
     return new HttpSolrClient.Builder(solrUrl)
             .build();
   }
@@ -214,79 +223,194 @@ public class BaseSearchService implements IIntegrationService {
   /**
    * Posts a custom solr datastream to the solr instance via a post request if available
    * and valid.
+   * TODO redo implementation?
    * @param digitalObject digital object to be indexed
    */
   private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
-//    Optional<Datastream> datastreamOptional = digitalObject.getDatastreams().stream().filter(dstream -> dstream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)).findFirst();
-//    Datastream datastream;
-//    if(datastreamOptional.isEmpty()) {
-//      // if no search.json - skip processing
-//      String msg = String.format("Skipped indexing custom search datastream because none found at digital object %s", digitalObject.getId());
-//      log.debug(msg);
-//      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
-//    } else {
-//      datastream = datastreamOptional.get();
-//    }
-//
-//    BaseSearch[] facets;
-//    ObjectMapper objectMapper = new ObjectMapper();
-//
-//    try {
-//      facets = objectMapper.readValue(datastream.getData(), BaseSearch[].class);
-//    } catch (IOException e){
-//      String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    }
-//
-//    // ensures that each solr entity = document has gams-controlled properties assigned
-//    Arrays.stream(facets).forEach(facet -> {
-//      facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-//      facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-//      // id must be defined outside
-//    });
-//
-//    String builtJson = "";
-//    try {
-//      builtJson = objectMapper.writeValueAsString(facets);
-//    } catch (JsonProcessingException e){
-//      String msg = String.format("Failed to marshal Facet objects to json array. Skipping solr indexing. Digital object %s . Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    }
-//
-//    log.info("Built json: {}", builtJson);
-//
-//    // TODO need to block sending of json if a add document operation.
-//    // TODO this json needs some kind of validation e.g. every doc must have a projectAbbreviation assigned etc.
-//
-//    HttpHeaders httpHeaders = new HttpHeaders();
-//    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-//    HttpEntity<String> request = new HttpEntity<>(builtJson, httpHeaders);
-//
-//    //TODO improve handling of RestClientException?
-//    ResponseEntity<String> response;
-//    try {
-//      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl());
-//      response = restTemplate.postForEntity(postUrl, request, String.class);
-//    } catch (RestClientException e){
-//      String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    }
-//
-//    if(response.getStatusCode().isError()){
-//      String msg = String.format("Failed to post custom solr datastream to solr instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
-//      log.error(msg);
-//      throw new ProcessingException(msg);
-//    } else {
-//      String msg = String.format("Successfully posted custom search xml datastream for object %s to solr instance. Response status code: %s", digitalObject.getId(), response.getStatusCode());
-//      log.trace(msg);
-//      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
-//    }
+    // TODO use project abbreviation of digital object to determine the core
 
-    return null;
+    // TODO check if solr core exist?
+    if(!verifyProjectSetup(digitalObject.getProject().getProjectAbbr())){
+      // TODO better error message?
+      String msg = String.format("No solr core found for project %s", digitalObject.getProject().getProjectAbbr());
+      log.error(msg);
+      // TODO better exception?
+      throw new ProcessingException(msg);
+    }
+
+    var objectDatastreams =  datastreamRepository.findAllByDigitalObjectId(digitalObject.getId());
+    if(objectDatastreams.isEmpty()){
+      String msg = String.format("No datastreams found for digital object %s", digitalObject.getId());
+      log.debug(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
+    }
+
+    Optional<IDatastreamDetailsView> searchDatastreamOptional = objectDatastreams.stream()
+        .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
+        .findFirst();
+
+    if(searchDatastreamOptional.isEmpty()){
+      String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
+      log.debug(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
+    }
+
+    var searchDatastream = searchDatastreamOptional.get();
+    Datastream datastream = datastreamRepository.findById(DatastreamId.builder().dsid(searchDatastream.getDsid()).digitalObject(searchDatastream.getDigitalObject().getId()).build())
+        .orElseThrow(() -> {
+          String msg = String.format("Datastream with dsid %s not found", searchDatastream.getDsid());
+          log.error(msg);
+          return new ProcessingException(msg);
+        });
+
+    BaseSearch[] facets;
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    try {
+      facets = objectMapper.readValue(datastream.getData(), BaseSearch[].class);
+    } catch (IOException e) {
+      String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    // ensures that each solr entity = document has gams-controlled properties assigned
+    Arrays.stream(facets).forEach(facet -> {
+      facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+      facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+      // id must be defined outside
+    });
+
+    String builtJson = "";
+    try {
+      builtJson = objectMapper.writeValueAsString(facets);
+    } catch (JsonProcessingException e) {
+      String msg = String.format("Failed to marshal Facet objects to json array. Skipping solr indexing. Digital object %s . Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    log.info("Built json: {}", builtJson);
+
+    // TODO need to block sending of json if a add document operation.
+    // TODO this json needs some kind of validation e.g. every doc must have a projectAbbreviation assigned etc.
+
+    HttpHeaders httpHeaders = new HttpHeaders();
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<String> request = new HttpEntity<>(builtJson, httpHeaders);
+
+    //TODO improve handling of RestClientException?
+    ResponseEntity<String> response;
+    try {
+      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl() + "/" + digitalObject.getProject().getProjectAbbr());
+      response = restTemplate.postForEntity(postUrl, request, String.class);
+    } catch (RestClientException e) {
+      String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+    if (response.getStatusCode().isError()) {
+      String msg = String.format("Failed to post custom solr datastream to solr instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
+      log.error(msg);
+      throw new ProcessingException(msg);
+    } else {
+      String msg = String.format("Successfully posted custom search xml datastream for object %s to solr instance. Response status code: %s", digitalObject.getId(), response.getStatusCode());
+      log.trace(msg);
+      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+    }
 
   }
+
+  /**
+   * Verifies if the project setup is correct for the integration service.
+   */
+  private boolean verifyProjectSetup(String projectAbbr) {
+
+    String coreStatusUrl = configProperties.getBaseSearchUrl() + "/" + projectAbbr + "/select";
+
+    // proceed only if the core doesn't exist
+    try {
+      var responseEntity = restTemplate.exchange(coreStatusUrl, HttpMethod.GET, null, String.class);
+      // abort if core already exists
+      if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
+        String msg = String.format("A solr core already exists for the project %s", projectAbbr);
+        log.debug(msg);
+        return true;
+      }
+    } catch (HttpClientErrorException e){
+      return false;
+    }
+
+    return false;
+  }
+
+  /**
+   * Sets up the solr integration service for the given project.
+   * @param projectAbbr project abbreviation
+   */
+  public void setupIntegrationService(String projectAbbr){
+    log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
+
+    // TODO refactor using webclient
+    RestTemplate restTemplate = new RestTemplate();
+    // TODO refactor - connection consideartions (retry / timeout / etc. )
+
+    // check if the project setup is correct
+    if(verifyProjectSetup(projectAbbr)){
+      String msg = String.format("A solr core already exists for the project %s", projectAbbr);
+      log.error(msg);
+      throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
+    }
+
+    // request against SOLR to create the project core
+
+    String body = String.format("""
+          {
+              "create": {
+                "name": "%s",
+                "configSet": "base"
+              }
+            }
+        """, projectAbbr);
+
+
+    // TODO replace localhost - must be dynamic (controlled by config)
+    String url = "http://localhost:8983/api/cores";
+
+    try {
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+      HttpEntity<String> httpEntity = new HttpEntity<>(body, httpHeaders);
+      restTemplate.postForEntity(url, httpEntity, String.class);
+      //restTemplate.exchange(coreStatusUrl, HttpMethod.POST, httpEntity, String.class);
+    } catch (HttpClientErrorException e){
+      String msg = String.format("Something went wrong creating the solr core for project %s", projectAbbr);
+      log.error(msg);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, msg);
+    }
+
+
+
+    // TODO efficient this way?
+//    WebClient webClient = WebClient.create();
+//
+//
+//    String response = webClient
+//        .post()
+//        .uri(url)
+//        .contentType(MediaType.APPLICATION_JSON)
+//        // important to use body inserters here
+//        .body(BodyInserters.fromValue(body))
+//        .retrieve()
+//        .toEntity(String.class)
+//        .doOnError(throwable -> log.error("Error while setting up integration service", throwable.getCause()))
+//        // TODO use subscribe instead?
+//        .block()
+//        .getBody();
+
+
+  }
+
 
 }

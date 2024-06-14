@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -16,6 +18,7 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
@@ -36,6 +39,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDatastreamRepository datastreamRepository;
+
+  @MockBean
+  private AuditingHandler auditingHandler;
 
   private Project testProject;
 
@@ -127,6 +133,45 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       // clean up
       digitalObjectRepository.deleteAll();
 
+    }
+
+    @Test
+    public void deleteDigitalObjectWhenItContainsDatastreams() throws Exception {
+      // Arrange
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .project(testProject)
+          .objectType("TEI")
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      Datastream datastream = new DatastreamBuilder()
+          .dsid(TestDatastream.DSID.getValue())
+          .digitalObject(digitalObject)
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build();
+
+      datastreamRepository.save(datastream);
+
+      // Act
+      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
+              .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().is3xxRedirection());
+
+      // Assert
+      org.assertj.core.api.Assertions.assertThat(
+              digitalObjectRepository.findDigitalObjectById(digitalObject.getId()))
+          .isNotPresent();
+
+      org.assertj.core.api.Assertions.assertThat(
+              datastreamRepository.findById(datastream.deriveDatastreamId()))
+          .isNotPresent();
+
+      // clean up
+      digitalObjectRepository.deleteAll();
+      datastreamRepository.deleteAll();
     }
 
   }
@@ -346,4 +391,32 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is3xxRedirection());
   }
+
+  @Test
+  public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
+
+    final String OBJECT_TEST_ID = "testPid";
+    digitalObjectRepository.save(
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build()
+    );
+
+    final String OBJECT_TEST_ID2 = "testPid2";
+    digitalObjectRepository.save(
+        new DigitalObjectBuilder().id(OBJECT_TEST_ID2).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build()
+    );
+
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testProject.getProjectAbbr())
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+        .contains(OBJECT_TEST_ID, OBJECT_TEST_ID2);
+
+    digitalObjectRepository.deleteById(OBJECT_TEST_ID);
+    digitalObjectRepository.deleteById(OBJECT_TEST_ID2);
+
+
+  }
+
 }

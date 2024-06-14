@@ -19,10 +19,11 @@ public class ProjectController {
   private final IProjectService projectService;
 
   @PutMapping(path = "/{projectAbbr}")
-  public String createProject(Project project, User user, Model model){
-    User updatedUser = projectService.createNewProject(project, user);
-    model.addAttribute(updatedUser);
-    return "User/userprojects";
+  public String createProject(Project project, Model model){
+    projectService.save(project);;
+    List<Project> projects = projectService.findAll();
+    model.addAttribute("projects", projects);
+    return "Project/show_all";
   }
 
   @DeleteMapping(path = "/{projectAbbr}")

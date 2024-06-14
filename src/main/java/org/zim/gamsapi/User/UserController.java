@@ -1,68 +1,52 @@
 package org.zim.gamsapi.User;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
-import org.zim.gamsapi.User.interfaces.IUserService;
-
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/api/v1")
 @Slf4j
 public class UserController {
 
-  public IUserService userService;
+  @GetMapping(path = {"/userinfo", "/userinfo/"})
+  public String showUserProjectsViaCredentials(Model model){
 
-  public UserController(IUserService userService) {
-    this.userService = userService;
-  }
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    if(!authentication.isAuthenticated()){
+      log.trace("User is not authenticated to see user info - redirecting to login page");
+      return "redirect:/api/v1/auth";
+    }
 
+    DefaultOidcUser oidcUser;
+    try {
+      oidcUser = (DefaultOidcUser) authentication.getPrincipal();
+    } catch (ClassCastException e){
+      log.trace("Failed to cast the authentication principal to DefaultOidcUser. User is not authenticated to see user info - redirecting to login page");
+      return "redirect:/api/v1/auth";
+    }
 
-  @GetMapping(path = "/user/{username}")
-  public String showUserProjects(User user, Model model){
-    user = userService.findByUsername(user.getUsername());
+    String userName = oidcUser.getSubject();
+    if(userName == null){
+      log.trace("Failed to get the user name from the authentication principal. User is not authenticated to see user info - redirecting to login page");
+      return "redirect:/api/v1/auth";
+    }
+
+    User user = User.builder()
+        .username(userName)
+        .userid(userName)
+        .authorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()))
+        .build();
+
     model.addAttribute(user);
     return "User/userprojects";
   }
 
-  @GetMapping(path = "/user")
-  public String showUserProjectsViaCredentials(HttpServletRequest request,User user, Model model){
-    String authUsername = request.getRemoteUser();
-    // TODO error handling here
-    user = userService.findByUsername(authUsername);
-    model.addAttribute(user);
-    return "User/userprojects";
-  }
-
-  @PostMapping(path = "/user")
-  public String createUser(User user, Model model){
-    user = userService.saveUser(user);
-    model.addAttribute(user);
-    return "User/userprojects";
-  }
-
-  @DeleteMapping(path = "/user")
-  @ResponseBody
-  public User deleteUser(User user){
-    userService.deleteByUsername(user.getUsername());
-    return user;
-  }
-
-  @GetMapping(path = "/users")
-  @ResponseBody
-  public List<User> showAllUsers(){
-    return userService.findAll();
-  }
-
-  @GetMapping(path = "/users", produces = MimeTypeUtils.TEXT_HTML_VALUE)
-  public String showAllUsersViaWebclient(Model model){
-    List<User> users = userService.findAll();
-    model.addAttribute("users",users);
-    return "User/show_all";
-  }
 
 }

@@ -117,7 +117,7 @@ public class XMLUtils {
    * @throws IngestProcessingException when attribute extraction fails.
    */
   public static String extractAttributeValue(String attributeName, Node sourceNode) throws IngestProcessingException {
-    // TODO how to build a propper error message?
+    // for a propper error message the error must be caught from the caller
     if((attributeName == null) || (attributeName.isEmpty())){
       String msg = "Given attributename is null or empty";
       log.error(msg);

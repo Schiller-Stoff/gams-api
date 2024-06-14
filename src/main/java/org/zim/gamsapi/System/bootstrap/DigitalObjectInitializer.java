@@ -1,10 +1,8 @@
 package org.zim.gamsapi.System.bootstrap;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MimeTypeUtils;
@@ -14,14 +12,10 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
-import org.zim.gamsapi.System.security.GAMSAPISecurityRoles;
-import org.zim.gamsapi.User.User;
-import org.zim.gamsapi.User.interfaces.IUserRepository;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.util.*;
@@ -35,14 +29,12 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
-  private final IUserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
 
   @Override
   public void run(String... args) {
     log.info("*** Start bootstrapping gams-api ...");
     logAvailableSystemResources();
-    initializeAdmin();
+    // initializeDemoProject();
     // saveTestData();
   }
 
@@ -154,46 +146,21 @@ public class DigitalObjectInitializer implements CommandLineRunner {
   }
 
 
-  public void initializeAdmin(){
+  /**
+   * Saves the demo project to the database.
+   */
+  public void initializeDemoProject(){
 
-    // added hardcoded admin user here
-    Optional<User> adminOptional = userRepository.findByUsername(GAMSAPIProperties.ADMIN_USER_NAME.name);
-    User admin;
+    Project project = new Project();
+    project.setProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);
+    project.setDescription("Demo admin project");
 
-    if(adminOptional.isEmpty()){
-
-      String generatedPassword = RandomStringUtils.random(20, true, true);
-
-      admin = User.builder()
-              .username(GAMSAPIProperties.ADMIN_USER_NAME.name)
-              .password(
-                //passwordEncoder.encode(generatedPassword)
-                passwordEncoder.encode("admin")
-              )
-              .roles(new HashSet<>(Set.of(GAMSAPISecurityRoles.ADMINISTRATOR.name)))
-              .build();
-
-      userRepository.save(admin);
-
-      Project project = new Project();
-      project.setProjectAbbr(GAMSAPIProperties.DEMO_PROJECT_ABBR.name);
-      project.setDescription("Demo admin project");
-      project.setUsers(new HashSet<>(Set.of(admin)));
-
-      Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
-      if(projectOptional.isEmpty()){
-        project = projectRepository.save(project);
-      }
-
-      admin.setProjects(new HashSet<>(Set.of(project)));
-      admin = userRepository.save(admin);
-
-      System.out.println("*** Generated admin password : " + generatedPassword);
-      log.info("*** Successfully initialized admin user {} for project {}. Assigned project user: {} ***",admin, project.getProjectAbbr(), project.getUsers());
-
-    } else {
-      log.info("*** Admin user and project already initialized. Skipping process... ***");
+    Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
+    if(projectOptional.isEmpty()){
+      project = projectRepository.save(project);
     }
+
+    log.info("*** Successfully initialized demo project {}***", project.getProjectAbbr());
   }
 
 

@@ -3,13 +3,16 @@ package org.zim.gamsapi.Ingest;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestBag;
 import org.zim.gamsapi.enums.TestProject;
 
 import java.io.File;
@@ -17,8 +20,6 @@ import java.io.IOException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IngestServiceIT extends IntegrationTest {
-
-  private final String TEST_BAG_LOCATION = "testfiles/ingest/test-bag";
 
   @Autowired
   IProjectRepository projectRepository;
@@ -34,9 +35,13 @@ public class IngestServiceIT extends IntegrationTest {
 
   File bagFile;
 
+  // disables auditing
+  @MockBean
+  private AuditingHandler auditingHandler;
+
   @BeforeAll
   public void setup() throws IOException {
-    bagFile = new ClassPathResource(TEST_BAG_LOCATION).getFile();
+    bagFile = TestBag.loadFile();
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 

@@ -1,25 +1,24 @@
 package org.zim.gamsapi.System.security;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.mock.web.MockPart;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
+import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import org.zim.gamsapi.enums.TestProject;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests Authorization settings in the application
@@ -31,16 +30,155 @@ public class AuthorizationIT extends IntegrationTest {
   @Autowired
   private MockMvc mockMvc;
 
+  @Autowired
+  private IProjectRepository projectRepository;
+
+
   @Test
-  @Disabled
-  public void ingestRequiresAuthorization() throws Exception {
+  public void authenticatedDemoUserNotAuthorizedForProjectIngest_throwsUserNotAssignedToProjectException() {
 
-    // currently disabled because --> need to think about
+    byte[] zippedBag = new byte[0];
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    final String INGEST_ENDPOINT =  "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/test";
-    mockMvc.perform(MockMvcRequestBuilders.post(INGEST_ENDPOINT).content(new byte[0])
-            .with(user(GAMSAPIProperties.ADMIN_USER_NAME.name).roles(GAMSAPIProperties.DEMO_PROJECT_ABBR.name)))
-            .andExpect(MockMvcResultMatchers.status().isOk());
+    Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                  .part(mockPart)
+                  .with(SecurityMockMvcRequestPostProcessors
+                      .user("UNKNOWN_USER")
+                      .roles("UNKNOWN_ROLE")
+                  )
+          )
+          .andExpect(status().is4xxClientError());
+    });
+
+  }
+
+  @Test
+  public void projectAdminAuthorizedForProjectIngest_throwsServerErrorAtProcessingAfterBeingAuthorized() throws Exception {
+
+    byte[] zippedBag = new byte[0];
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+
+    String testProjectAdminRole = GAMSAPIAuthorities.convertToRole(
+        GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue())
+    );
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                .part(mockPart)
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("SOME_USER")
+                    .roles(testProjectAdminRole)
+                )
+        )
+        .andExpect(
+            status().is5xxServerError()
+        );
+
+  }
+
+  @Test
+  public void globalAdminMayIngest_throwsServerErrorAtProcessingAfterBeingAuthorized() throws Exception {
+
+    byte[] zippedBag = new byte[0];
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+
+    String globalAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getAdmin());
+
+    mockMvc
+        .perform(
+            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                .part(mockPart)
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("SOME_USER")
+                    .roles(globalAdminRole)
+                )
+        )
+        .andExpect(
+            status().is5xxServerError()
+        );
+  }
+
+  @Test
+  public void projectAdminAuthorizedForDifferentProjectIngest_throwsUserNotAssignedToProjectException() {
+
+    byte[] zippedBag = new byte[0];
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+
+    // mock method needs role prefix excluded.
+    String differentProjectAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getProjectAdmin("differentproject"));
+
+    Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                  .part(mockPart)
+                  .with(SecurityMockMvcRequestPostProcessors
+                      .user("SOME_USER")
+                      .roles(differentProjectAdminRole)
+                  )
+          ).andExpect(status().is4xxClientError());
+    });
+
+  }
+
+  @Nested
+  public class ProjectAuthorization {
+
+    @Test
+    public void anonymousUserNotAuthorizedForProjectCreation_redirects() throws Exception {
+
+      final String TEST_PROJECT_ABBR = "FOO";
+      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.post(TEST_URL)
+                  .with(SecurityMockMvcRequestPostProcessors.anonymous())
+          )
+          .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    public void adminMayCreateAProject() throws Exception {
+
+      final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
+      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.put(TEST_URL)
+                  .with(
+                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(new SimpleGrantedAuthority(GAMSAPIAuthorities.getAdmin()))
+                  )
+          ).andExpect(status().is2xxSuccessful());
+
+      org.assertj.core.api.Assertions.assertThat(projectRepository.findById(TEST_PROJECT_ABBR))
+          .isPresent();
+
+      // cleanup
+      projectRepository.deleteAll();
+
+    }
+
+    @Test
+    public void anonymousUserNotAuthorizedForProjectDeletion_redirects() throws Exception {
+
+      final String TEST_PROJECT_ABBR = "FOO";
+      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.delete(TEST_URL)
+                  .with(SecurityMockMvcRequestPostProcessors.anonymous())
+          )
+          .andExpect(status().is3xxRedirection());
+    }
+
+
   }
 
 }
