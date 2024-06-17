@@ -189,7 +189,7 @@ public class BaseSearchService implements IIntegrationService {
 
   // TODO needs url as argument?
   public SolrClient getSolrClient(String coreName){
-    final String solrUrl = configProperties.getBaseSearchUrl() + "/" + coreName;
+    final String solrUrl = configProperties.getBaseSearchUrl() + "/solr/" + coreName;
     return new HttpSolrClient.Builder(solrUrl)
             .build();
   }
@@ -303,7 +303,7 @@ public class BaseSearchService implements IIntegrationService {
     //TODO improve handling of RestClientException?
     ResponseEntity<String> response;
     try {
-      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl() + "/" + digitalObject.getProject().getProjectAbbr());
+      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl() + "/solr/" + digitalObject.getProject().getProjectAbbr());
       response = restTemplate.postForEntity(postUrl, request, String.class);
     } catch (RestClientException e) {
       String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
@@ -330,10 +330,6 @@ public class BaseSearchService implements IIntegrationService {
   public void setupIntegrationService(String projectAbbr){
     log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
 
-    // TODO refactor using webclient
-    RestTemplate restTemplate = new RestTemplate();
-    // TODO refactor - connection consideartions (retry / timeout / etc. )
-
     // check if the project setup is correct
     if (solrClient.coreExists(projectAbbr)){
       String msg = String.format("A solr core already exists for the project %s", projectAbbr);
@@ -341,53 +337,7 @@ public class BaseSearchService implements IIntegrationService {
       throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
     }
 
-
-    // request against SOLR to create the project core
-
-    String body = String.format("""
-          {
-              "create": {
-                "name": "%s",
-                "configSet": "base"
-              }
-            }
-        """, projectAbbr);
-
-
-    // TODO replace localhost - must be dynamic (controlled by config)
-    String url = "http://localhost:8983/api/cores";
-
-    try {
-      HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-      HttpEntity<String> httpEntity = new HttpEntity<>(body, httpHeaders);
-      restTemplate.postForEntity(url, httpEntity, String.class);
-      //restTemplate.exchange(coreStatusUrl, HttpMethod.POST, httpEntity, String.class);
-    } catch (HttpClientErrorException e){
-      String msg = String.format("Something went wrong creating the solr core for project %s", projectAbbr);
-      log.error(msg);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, msg);
-    }
-
-
-
-    // TODO efficient this way?
-//    WebClient webClient = WebClient.create();
-//
-//
-//    String response = webClient
-//        .post()
-//        .uri(url)
-//        .contentType(MediaType.APPLICATION_JSON)
-//        // important to use body inserters here
-//        .body(BodyInserters.fromValue(body))
-//        .retrieve()
-//        .toEntity(String.class)
-//        .doOnError(throwable -> log.error("Error while setting up integration service", throwable.getCause()))
-//        // TODO use subscribe instead?
-//        .block()
-//        .getBody();
-
+   solrClient.createCore(projectAbbr);
 
   }
 

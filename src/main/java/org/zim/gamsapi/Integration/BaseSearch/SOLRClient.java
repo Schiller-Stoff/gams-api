@@ -2,8 +2,10 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
@@ -11,25 +13,53 @@ import reactor.core.publisher.Mono;
 
 /**
  * Client for interacting with the SOLR server.
- *
+ * TODO think about exceptions thrown by this client (and by the webclient underneath)
  */
 @Slf4j
 @Component
 public class SOLRClient {
-
-  private final GAMSDockerDNS configProperties;
   private final WebClient webClient;
 
-  public SOLRClient(GAMSDockerDNS configProperties) {
-    this.configProperties = configProperties;
+  private final String SOLR_CORE_API_ENDPOINT = "/api/cores";
 
+  private final String SOLR_SINGLE_CORE_API_ENDPOINT = "/solr";
+
+  public SOLRClient(GAMSDockerDNS configProperties) {
+    // TODO consider timeouts / retries / error handling / etc. against SOLR.
     this.webClient = WebClient.builder()
         .baseUrl(configProperties.getBaseSearchUrl())
         .build();
-
   }
 
-  // TODO add create core method
+
+  /**
+   * Create a new core in the SOLR server.
+   * @param coreName the name of the core to create
+   * @return the response body from the server
+   */
+  public String createCore(String coreName) {
+    String body = String.format("""
+                {
+                    "create": {
+                      "name": "%s",
+                      "configSet": "base"
+                    }
+                  }
+              """, coreName);
+
+    try {
+      return webClient.post()
+          .uri(SOLR_CORE_API_ENDPOINT)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(BodyInserters.fromValue(body))
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientException e) {
+      log.error("Error while creating the solr core for project {}", coreName, e);
+      throw e;
+    }
+  }
 
 
   /**
@@ -40,7 +70,7 @@ public class SOLRClient {
    */
   public boolean coreExists(String coreName){
     log.debug("Checking if core {} exists", coreName);
-    String coreStatusUrl = configProperties.getBaseSearchUrl() + "/" + coreName + "/select";
+    String coreStatusUrl = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/select";
 
     try {
       return Boolean.TRUE.equals(
@@ -58,25 +88,5 @@ public class SOLRClient {
       throw e;
     }
 
-
-
-
-
-//    // proceed only if the core doesn't exist
-//    try {
-//      var responseEntity = restTemplate.exchange(coreStatusUrl, HttpMethod.GET, null, String.class);
-//      // abort if core already exists
-//      if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
-//        String msg = String.format("A solr core already exists for the project %s", projectAbbr);
-//        log.debug(msg);
-//        return true;
-//      }
-//    } catch (HttpClientErrorException e){
-//      return false;
-//    }
-//
-//    return false;
   }
-
-
 }
