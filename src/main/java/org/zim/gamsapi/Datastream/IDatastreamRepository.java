@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import java.util.List;
 import java.util.Optional;
@@ -43,5 +44,12 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
 
 
   void deleteAllByDigitalObject(DigitalObject digitalObject);
+
+  /**
+   * Find all datastreams by digital object id and dsid.
+   * @param digitalObject digital object
+   * @return list of datastream ids
+   */
+  List<IDatastreamIdView> findAllDatastreamIdViewsByDigitalObject(DigitalObject digitalObject);
 
 }
