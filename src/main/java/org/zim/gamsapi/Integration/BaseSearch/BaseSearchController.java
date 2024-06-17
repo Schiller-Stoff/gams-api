@@ -50,8 +50,7 @@ public class BaseSearchController implements IIntegrationController {
     return baseSearchService.deleteIndexedObject(projectAbbr, pid);
   }
 
-  // TODO replace through post in the end
-  @GetMapping("/setup")
+  @PostMapping("/setup")
   public void setupIntegrationService(@PathVariable String projectAbbr){
     log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
     baseSearchService.setupIntegrationService(projectAbbr);
