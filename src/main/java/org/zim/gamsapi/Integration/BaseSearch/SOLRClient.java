@@ -1,6 +1,8 @@
 package org.zim.gamsapi.Integration.BaseSearch;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -8,6 +10,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.server.ResponseStatusException;
+import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
 
@@ -29,6 +33,49 @@ public class SOLRClient {
     this.webClient = WebClient.builder()
         .baseUrl(configProperties.getBaseSearchUrl())
         .build();
+  }
+
+  /**
+   * Post a base search entity to the solr server.
+   * @param baseSearchEntities the base search entities to post
+   * @param coreName
+   */
+  public void postBaseSearchEntities(BaseSearch[] baseSearchEntities, String coreName){
+    log.debug("Posting base search entity to solr");
+
+    // TODO method has various issues
+
+    String json = "";
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      json = objectMapper.writeValueAsString(baseSearchEntities);
+      log.debug("JSON: {}", json);
+    } catch (Exception e) {
+      log.error("Error while converting base search entity to json string", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while converting base search entity to json");
+    }
+
+    String postUrl = String.format("%s/%s/update/json/docs?commit=true", SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
+
+    Mono<String> responseMono = webClient.post()
+        .uri(postUrl)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(json)
+        .retrieve()
+        .bodyToMono(String.class);
+
+    try {
+      String response = responseMono.block();
+      String msg = String.format("Successfully posted custom search xml datastream for object to solr instance.");
+      log.trace(msg);
+      //return new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+    } catch (WebClientException e) {
+      String msg = String.format("Failed to post custom solr datastream to solr instance. Cause: %s Original error message: %s", e.getMessage(), e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+
   }
 
 
