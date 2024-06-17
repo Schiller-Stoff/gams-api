@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -12,32 +11,28 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
+import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionType;
-import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
