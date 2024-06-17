@@ -53,6 +53,8 @@ public class BaseSearchService implements IIntegrationService {
   // TODO elaborate usage of resttemplate
   private final RestTemplate restTemplate = new RestTemplate();
 
+  private final SOLRClient solrClient;
+
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
 
@@ -229,12 +231,11 @@ public class BaseSearchService implements IIntegrationService {
   private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
     // TODO use project abbreviation of digital object to determine the core
 
-    // TODO check if solr core exist?
-    if(!verifyProjectSetup(digitalObject.getProject().getProjectAbbr())){
-      // TODO better error message?
+    // if no core exists for the project, abort
+    if(!solrClient.coreExists(digitalObject.getProject().getProjectAbbr())){
       String msg = String.format("No solr core found for project %s", digitalObject.getProject().getProjectAbbr());
       log.error(msg);
-      // TODO better exception?
+      // TODO better exception here
       throw new ProcessingException(msg);
     }
 
@@ -323,29 +324,6 @@ public class BaseSearchService implements IIntegrationService {
   }
 
   /**
-   * Verifies if the project setup is correct for the integration service.
-   */
-  private boolean verifyProjectSetup(String projectAbbr) {
-
-    String coreStatusUrl = configProperties.getBaseSearchUrl() + "/" + projectAbbr + "/select";
-
-    // proceed only if the core doesn't exist
-    try {
-      var responseEntity = restTemplate.exchange(coreStatusUrl, HttpMethod.GET, null, String.class);
-      // abort if core already exists
-      if(responseEntity.getStatusCode().equals(HttpStatus.OK)){
-        String msg = String.format("A solr core already exists for the project %s", projectAbbr);
-        log.debug(msg);
-        return true;
-      }
-    } catch (HttpClientErrorException e){
-      return false;
-    }
-
-    return false;
-  }
-
-  /**
    * Sets up the solr integration service for the given project.
    * @param projectAbbr project abbreviation
    */
@@ -357,11 +335,12 @@ public class BaseSearchService implements IIntegrationService {
     // TODO refactor - connection consideartions (retry / timeout / etc. )
 
     // check if the project setup is correct
-    if(verifyProjectSetup(projectAbbr)){
+    if (solrClient.coreExists(projectAbbr)){
       String msg = String.format("A solr core already exists for the project %s", projectAbbr);
       log.error(msg);
       throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
     }
+
 
     // request against SOLR to create the project core
 
