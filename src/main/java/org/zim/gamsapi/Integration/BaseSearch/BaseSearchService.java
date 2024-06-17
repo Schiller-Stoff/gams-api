@@ -18,6 +18,7 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
@@ -52,51 +53,67 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
-
-    SolrClient client = getSolrClient(GAMS_CORE);
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
       log.trace("*** SOLR Indexing now object: {}", digitalObject);
-      SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
-      try {
-        final UpdateResponse updateResponse = client.add(solrInputDocument);
-        String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getId());
-        log.info(msg);
-        integrationActionReports.add(
-                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
-        );
-      } catch (SolrServerException | IOException e) {
-        String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
-        log.error(msg);
-        // abort complete operation if digital object document cannot be created.
-        throw new ProcessingException(msg);
+
+      BaseSearch baseSearch = new BaseSearch();
+
+      var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
+
+      // id needs to stay the same -- otherwise multiple entries with same ids will be created.
+      baseSearch.addProperty(BaseSearchProperties.ID.name, digitalObject.getId());
+      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+      baseSearch.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+      baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
+      // index datastream ids
+      if(!foundDatastreams.isEmpty()){
+        // TODO if this is built incorrectly - webclient error messages are just cryptic
+        baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
       }
 
-      try {
-        IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
-        integrationActionReports.add(integrationActionReport);
-      } catch (ProcessingException e){
-        // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
-        String msg = String.format("Failed indexing base search datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
-        integrationActionReports.add(
-                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
-        );
-      }
+      BaseSearch[] baseSearches = new BaseSearch[]{baseSearch};
+
+      // TODO propper error handling?
+      solrClient.postBaseSearchEntities(baseSearches, GAMS_CORE);
+      log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
+
+      // TODO integration action reports missing
+
+      // TODO posting of custom datastream is completely missing!
+
+
+//      SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
+//      try {
+//        final UpdateResponse updateResponse = client.add(solrInputDocument);
+//        String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getId());
+//        log.info(msg);
+//        integrationActionReports.add(
+//                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
+//        );
+//      } catch (SolrServerException | IOException e) {
+//        String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
+//        log.error(msg);
+//        // abort complete operation if digital object document cannot be created.
+//        throw new ProcessingException(msg);
+//      }
+//
+//      try {
+//        IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
+//        integrationActionReports.add(integrationActionReport);
+//      } catch (ProcessingException e){
+//        // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
+//        String msg = String.format("Failed indexing base search datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
+//        integrationActionReports.add(
+//                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
+//        );
+//      }
 
     });
 
-    try {
-      client.commit();
-      String msg = String.format("Successfully committed SOLR indexing operation for project %s", projectAbbr);
-      log.info(msg);
-      return integrationActionReports;
-    } catch (SolrServerException | IOException e) {
-      String msg = String.format("Failed to commit SOLR indexing operation for project %s . Original error message: %s", projectAbbr, e);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
+    return integrationActionReports;
   }
 
   @Override
