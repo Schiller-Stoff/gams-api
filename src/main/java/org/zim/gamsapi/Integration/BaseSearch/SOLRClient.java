@@ -64,7 +64,7 @@ public class SOLRClient {
 
   /**
    * Check if a core exists for a given project.
-   * Requests against the select endpoint of the core. (If an http error is sent back -> core doesn't exist)
+   * Requests against the select endpoint of the core. (If a http error is sent back -> core doesn't exist)
    * @param coreName the name of the core to check
    * @return true if the core exists, false otherwise
    */
