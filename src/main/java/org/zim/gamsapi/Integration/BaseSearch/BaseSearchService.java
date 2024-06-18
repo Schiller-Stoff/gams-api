@@ -72,11 +72,8 @@ public class BaseSearchService implements IIntegrationService {
         baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
       }
 
-      // TODO rename variable
-      BaseSearch[] baseSearches = new BaseSearch[]{baseSearch};
-
       // TODO propper error handling?
-      solrClient.post(GAMS_CORE, baseSearches);
+      solrClient.post(GAMS_CORE, baseSearch);
       log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
       // TODO integration action reports missing

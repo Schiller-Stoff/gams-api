@@ -91,6 +91,15 @@ public class SOLRClient {
 
 
   /**
+   * Post a single base search entity to the solr server.
+   * @param coreName name of the core to post to
+   * @param baseSearchEntity the base search entity to post
+   */
+  public void post(String coreName, BaseSearch baseSearchEntity){
+    post(coreName, new BaseSearch[]{baseSearchEntity});
+  }
+
+  /**
    * Create a new core in the SOLR server.
    * @param coreName the name of the core to create
    * @return the response body from the server
