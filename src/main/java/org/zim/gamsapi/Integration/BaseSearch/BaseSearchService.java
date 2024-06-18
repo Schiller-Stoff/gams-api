@@ -55,6 +55,7 @@ public class BaseSearchService implements IIntegrationService {
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
 
+    // TODO use simpler query (just digital object ids?)
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
       log.trace("*** SOLR Indexing now object: {}", digitalObject);
@@ -74,6 +75,7 @@ public class BaseSearchService implements IIntegrationService {
         baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
       }
 
+      // TODO rename variable
       BaseSearch[] baseSearches = new BaseSearch[]{baseSearch};
 
       // TODO propper error handling?
@@ -82,34 +84,16 @@ public class BaseSearchService implements IIntegrationService {
 
       // TODO integration action reports missing
 
-      // TODO posting of custom datastream is completely missing!
-
-
-//      SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
-//      try {
-//        final UpdateResponse updateResponse = client.add(solrInputDocument);
-//        String msg = String.format("Successfully created SOLR document representing digital object %s", digitalObject.getId());
-//        log.info(msg);
-//        integrationActionReports.add(
-//                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
-//        );
-//      } catch (SolrServerException | IOException e) {
-//        String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
-//        log.error(msg);
-//        // abort complete operation if digital object document cannot be created.
-//        throw new ProcessingException(msg);
-//      }
-//
-//      try {
-//        IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
-//        integrationActionReports.add(integrationActionReport);
-//      } catch (ProcessingException e){
-//        // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
-//        String msg = String.format("Failed indexing base search datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
-//        integrationActionReports.add(
-//                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
-//        );
-//      }
+      try {
+        IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
+        integrationActionReports.add(integrationActionReport);
+      } catch (ProcessingException e){
+        // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
+        String msg = String.format("Failed indexing base search datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
+        integrationActionReports.add(
+                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
+        );
+      }
 
     });
 
@@ -276,6 +260,7 @@ public class BaseSearchService implements IIntegrationService {
           return new ProcessingException(msg);
         });
 
+    // TODO do i really need to parse the datastream? (not enough to just send along the data?)
     BaseSearch[] facets;
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -287,52 +272,10 @@ public class BaseSearchService implements IIntegrationService {
       throw new ProcessingException(msg);
     }
 
-    // ensures that each solr entity = document has gams-controlled properties assigned
-    Arrays.stream(facets).forEach(facet -> {
-      facet.properties.put(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-      facet.properties.put(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-      // id must be defined outside
-    });
+    solrClient.postBaseSearchEntities(facets, digitalObject.getProject().getProjectAbbr());
 
-    String builtJson = "";
-    try {
-      builtJson = objectMapper.writeValueAsString(facets);
-    } catch (JsonProcessingException e) {
-      String msg = String.format("Failed to marshal Facet objects to json array. Skipping solr indexing. Digital object %s . Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
-
-    log.info("Built json: {}", builtJson);
-
-    // TODO need to block sending of json if a add document operation.
-    // TODO this json needs some kind of validation e.g. every doc must have a projectAbbreviation assigned etc.
-
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<String> request = new HttpEntity<>(builtJson, httpHeaders);
-
-    //TODO improve handling of RestClientException?
-    ResponseEntity<String> response;
-    try {
-      String postUrl = String.format("%s/update/json/docs?commit=true", configProperties.getBaseSearchUrl() + "/solr/" + digitalObject.getProject().getProjectAbbr());
-      response = restTemplate.postForEntity(postUrl, request, String.class);
-    } catch (RestClientException e) {
-      String msg = String.format("Failed to post custom solr datastream to solr instance. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
-
-    if (response.getStatusCode().isError()) {
-      String msg = String.format("Failed to post custom solr datastream to solr instance for object %s Response status code: %s", digitalObject.getId(), response.getStatusCode());
-      log.error(msg);
-      throw new ProcessingException(msg);
-    } else {
-      String msg = String.format("Successfully posted custom search xml datastream for object %s to solr instance. Response status code: %s", digitalObject.getId(), response.getStatusCode());
-      log.trace(msg);
-      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
-    }
-
+    // TODO refactor building of the integration action report
+    return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "Successfully posted custom search xml datastream for object to solr instance.");
   }
 
   /**
