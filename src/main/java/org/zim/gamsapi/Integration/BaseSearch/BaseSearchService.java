@@ -76,7 +76,7 @@ public class BaseSearchService implements IIntegrationService {
       BaseSearch[] baseSearches = new BaseSearch[]{baseSearch};
 
       // TODO propper error handling?
-      solrClient.post(baseSearches, GAMS_CORE);
+      solrClient.post(GAMS_CORE, baseSearches);
       log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
       // TODO integration action reports missing
@@ -269,7 +269,7 @@ public class BaseSearchService implements IIntegrationService {
       throw new ProcessingException(msg);
     }
 
-    solrClient.post(facets, digitalObject.getProject().getProjectAbbr());
+    solrClient.post(digitalObject.getProject().getProjectAbbr(), facets);
 
     // TODO refactor building of the integration action report
     return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "Successfully posted custom search xml datastream for object to solr instance.");

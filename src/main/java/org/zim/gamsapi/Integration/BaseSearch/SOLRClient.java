@@ -37,10 +37,10 @@ public class SOLRClient {
 
   /**
    * Post a base search entity to the solr server.
+   * @param coreName name of the core to post to
    * @param baseSearchEntities the base search entities to post
-   * @param coreName
    */
-  public void post(BaseSearch[] baseSearchEntities, String coreName){
+  public void post(String coreName, BaseSearch[] baseSearchEntities){
     log.debug("Posting base search entity to solr");
 
     // TODO method has various issues
@@ -49,7 +49,7 @@ public class SOLRClient {
     ObjectMapper objectMapper = new ObjectMapper();
     try {
       json = objectMapper.writeValueAsString(baseSearchEntities);
-      log.debug("JSON: {}", json);
+      log.trace("Mapped base search entities to json: {}", json);
     } catch (Exception e) {
       log.error("Error while converting base search entity to json string", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error while converting base search entity to json");
@@ -57,23 +57,34 @@ public class SOLRClient {
 
     String postUrl = String.format("%s/%s/update/json/docs?commit=true", SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
 
-    Mono<String> responseMono = webClient.post()
+    webClient.post()
         .uri(postUrl)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(json)
         .retrieve()
-        .bodyToMono(String.class);
+        .toBodilessEntity()
+        .toFuture();
 
-    try {
-      String response = responseMono.block();
-      String msg = String.format("Successfully posted custom search xml datastream for object to solr instance.");
-      log.trace(msg);
-      //return new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
-    } catch (WebClientException e) {
-      String msg = String.format("Failed to post custom solr datastream to solr instance. Cause: %s Original error message: %s", e.getMessage(), e);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
+    // alternative way to do the same thing (but not async)
+
+//    var response = webClient.post()
+//        .uri(postUrl)
+//        .contentType(MediaType.APPLICATION_JSON)
+//        .bodyValue(json)
+//        .retrieve()
+//        .bodyToMono(String.class);
+
+
+//    try {
+//      String response = responseMono.block();
+//      String msg = String.format("Successfully posted custom search xml datastream for object to solr instance.");
+//      log.trace(msg);
+//      //return new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg);
+//    } catch (WebClientException e) {
+//      String msg = String.format("Failed to post custom solr datastream to solr instance. Cause: %s Original error message: %s", e.getMessage(), e);
+//      log.error(msg);
+//      throw new ProcessingException(msg);
+//    }
 
 
   }
