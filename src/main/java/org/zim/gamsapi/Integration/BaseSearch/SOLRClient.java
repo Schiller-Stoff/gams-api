@@ -40,7 +40,7 @@ public class SOLRClient {
    * @param baseSearchEntities the base search entities to post
    * @param coreName
    */
-  public void postBaseSearchEntities(BaseSearch[] baseSearchEntities, String coreName){
+  public void post(BaseSearch[] baseSearchEntities, String coreName){
     log.debug("Posting base search entity to solr");
 
     // TODO method has various issues

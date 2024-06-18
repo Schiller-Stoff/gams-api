@@ -1,6 +1,5 @@
 package org.zim.gamsapi.Integration.BaseSearch;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.Datastream.Datastream;
@@ -31,7 +29,6 @@ import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +76,7 @@ public class BaseSearchService implements IIntegrationService {
       BaseSearch[] baseSearches = new BaseSearch[]{baseSearch};
 
       // TODO propper error handling?
-      solrClient.postBaseSearchEntities(baseSearches, GAMS_CORE);
+      solrClient.post(baseSearches, GAMS_CORE);
       log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
       // TODO integration action reports missing
@@ -272,7 +269,7 @@ public class BaseSearchService implements IIntegrationService {
       throw new ProcessingException(msg);
     }
 
-    solrClient.postBaseSearchEntities(facets, digitalObject.getProject().getProjectAbbr());
+    solrClient.post(facets, digitalObject.getProject().getProjectAbbr());
 
     // TODO refactor building of the integration action report
     return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "Successfully posted custom search xml datastream for object to solr instance.");
