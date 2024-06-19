@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -43,14 +44,15 @@ public class BaseSearchService implements IIntegrationService {
 
   private final String GAMS_CORE = "gams";
 
-  // TODO elaborate usage of resttemplate
-  private final RestTemplate restTemplate = new RestTemplate();
 
   private final SOLRClient solrClient;
 
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
+
+    boolean coreExists = solrClient.coreExists(projectAbbr);
+
 
     // TODO use simpler query (just digital object ids?)
     List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
@@ -78,17 +80,24 @@ public class BaseSearchService implements IIntegrationService {
 
       // TODO integration action reports missing
 
-      try {
-        IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
-        integrationActionReports.add(integrationActionReport);
-      } catch (ProcessingException e){
-        // make sure that the indexing of the object is not interrupted by a failed post of the solr xml
-        String msg = String.format("Failed indexing base search datastream for digital object %s. Root cause: %s", digitalObject.getId(), e);
-        integrationActionReports.add(
-                new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg)
-        );
+      //***** from here post the custom solr datastream
+
+      // throw if project core doesn't exist?
+      if(!coreExists){
+        String msg = String.format("No solr core found for project %s", digitalObject.getProject().getProjectAbbr());
+        log.error(msg);
+        // TODO better exception here
+        throw new ProcessingException(msg);
       }
 
+      // posts custom search datastream
+      try {
+        Datastream searchDatastream = loadSearchDatastream(foundDatastreams, digitalObject.getId());
+        solrClient.post(projectAbbr, searchDatastream.getData());
+      } catch (DatastreamNotFoundException e){
+        String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
+        log.trace(msg);;
+      }
     });
 
     return integrationActionReports;
@@ -142,12 +151,13 @@ public class BaseSearchService implements IIntegrationService {
 
     // posts custom search datastream
     try {
-      IntegrationActionReport integrationActionReport = postSolrDatastream(digitalObject);
-      indexingReports.add(integrationActionReport);
-    } catch (ProcessingException e){
-      String msg = String.format("Failed to index base search datastream of digital object %s. Root cause: %s", digitalObject.getId(), e);
-      log.error(msg);
-      indexingReports.add(new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.ERROR, msg));
+      var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
+      Datastream searchDatastream = loadSearchDatastream(foundDatastreams, digitalObject.getId());
+      solrClient.post(projectAbbr, searchDatastream.getData());
+      // TODO should i really use this exception here?
+    } catch (DatastreamNotFoundException e){
+      String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
+      log.trace(msg);;
     }
 
     return indexingReports;
@@ -211,67 +221,6 @@ public class BaseSearchService implements IIntegrationService {
     return solrInputDocument;
   }
 
-
-  /**
-   * Posts a custom solr datastream to the solr instance via a post request if available
-   * and valid.
-   * TODO redo implementation?
-   * @param digitalObject digital object to be indexed
-   */
-  private IntegrationActionReport postSolrDatastream(DigitalObject digitalObject) throws ProcessingException {
-    // TODO use project abbreviation of digital object to determine the core
-
-    // if no core exists for the project, abort
-    if(!solrClient.coreExists(digitalObject.getProject().getProjectAbbr())){
-      String msg = String.format("No solr core found for project %s", digitalObject.getProject().getProjectAbbr());
-      log.error(msg);
-      // TODO better exception here
-      throw new ProcessingException(msg);
-    }
-
-    var objectDatastreams =  datastreamRepository.findAllByDigitalObjectId(digitalObject.getId());
-    if(objectDatastreams.isEmpty()){
-      String msg = String.format("No datastreams found for digital object %s", digitalObject.getId());
-      log.debug(msg);
-      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
-    }
-
-    Optional<IDatastreamDetailsView> searchDatastreamOptional = objectDatastreams.stream()
-        .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
-        .findFirst();
-
-    if(searchDatastreamOptional.isEmpty()){
-      String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
-      log.debug(msg);
-      return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SKIPPED, msg);
-    }
-
-    var searchDatastream = searchDatastreamOptional.get();
-    Datastream datastream = datastreamRepository.findById(DatastreamId.builder().dsid(searchDatastream.getDsid()).digitalObject(searchDatastream.getDigitalObject().getId()).build())
-        .orElseThrow(() -> {
-          String msg = String.format("Datastream with dsid %s not found", searchDatastream.getDsid());
-          log.error(msg);
-          return new ProcessingException(msg);
-        });
-
-    // TODO do i really need to parse the datastream? (not enough to just send along the data?)
-    BaseSearch[] facets;
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    try {
-      facets = objectMapper.readValue(datastream.getData(), BaseSearch[].class);
-    } catch (IOException e) {
-      String msg = String.format("Failed to parse custom solr datastream to solr. Digital object: %s Cause: %s Original error message: %s", digitalObject.getId(), e.getMessage(), e);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
-
-    solrClient.post(digitalObject.getProject().getProjectAbbr(), facets);
-
-    // TODO refactor building of the integration action report
-    return new IntegrationActionReport(digitalObject.getProject().getProjectAbbr(), IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, "Successfully posted custom search xml datastream for object to solr instance.");
-  }
-
   /**
    * Sets up the solr integration service for the given project.
    * @param projectAbbr project abbreviation
@@ -287,6 +236,28 @@ public class BaseSearchService implements IIntegrationService {
     }
 
    solrClient.createCore(projectAbbr);
+
+  }
+
+  /**
+   * Loads the search datastream for a given digital object.
+   * @param datastreamIdViews list of datastream id views
+   * @param objectId id of the digital object
+   * @return search datastream
+   * @throws DatastreamNotFoundException if no search datastream was found
+   */
+  private Datastream loadSearchDatastream(List<IDatastreamIdView> datastreamIdViews, String objectId){
+
+    IDatastreamIdView datastreamIdView = datastreamIdViews.stream()
+        .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
+        .findFirst()
+        .orElseThrow(() -> new DatastreamNotFoundException("No search datastream found for digital object with id " + objectId));
+
+    return datastreamRepository.findById(DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(objectId).build())
+        .orElseThrow(() -> {
+          // TODO better message + logging
+          return new ProcessingException("Datastream with dsid " + datastreamIdView.getDsid() + " not found at object with id " + objectId + ".");
+        });
 
   }
 
