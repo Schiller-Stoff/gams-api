@@ -20,6 +20,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
@@ -50,54 +51,9 @@ public class BaseSearchService implements IIntegrationService {
   @Override
   public List<IntegrationActionReport> indexObjects(String projectAbbr) {
     List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
-
-    boolean coreExists = solrClient.coreExists(projectAbbr);
-
-
-    // TODO use simpler query (just digital object ids?)
-    List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
+    List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
-      log.trace("*** SOLR Indexing now object: {}", digitalObject);
-
-      BaseSearch baseSearch = new BaseSearch();
-
-      var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
-
-      // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-      baseSearch.addProperty(BaseSearchProperties.ID.name, digitalObject.getId());
-      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-      baseSearch.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-      baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
-      // index datastream ids
-      if(!foundDatastreams.isEmpty()){
-        // TODO if this is built incorrectly - webclient error messages are just cryptic
-        baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
-      }
-
-      // TODO propper error handling?
-      solrClient.post(GAMS_CORE, baseSearch);
-      log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
-
-      // TODO integration action reports missing
-
-      //***** from here post the custom solr datastream
-
-      // throw if project core doesn't exist?
-      if(!coreExists){
-        String msg = String.format("No solr core found for project %s", digitalObject.getProject().getProjectAbbr());
-        log.error(msg);
-        // TODO better exception here
-        throw new ProcessingException(msg);
-      }
-
-      // posts custom search datastream
-      try {
-        Datastream searchDatastream = loadSearchDatastream(foundDatastreams, digitalObject.getId());
-        solrClient.post(projectAbbr, searchDatastream.getData());
-      } catch (DatastreamNotFoundException e){
-        String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
-        log.trace(msg);;
-      }
+      indexObject(projectAbbr, digitalObject.getId());
     });
 
     return integrationActionReports;
@@ -125,42 +81,44 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public List<IntegrationActionReport> indexObject(String projectAbbr, String id) {
-    //TODO think about
-    SolrClient client = getSolrClient("gams");
+
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with id %s not found", id)));
 
-    log.trace("*** SOLR Indexing now object: {}", digitalObject.getId());
-    SolrInputDocument solrInputDocument = createSolrInputDocument(digitalObject);
+    BaseSearch baseSearch = new BaseSearch();
 
-    List<IntegrationActionReport> indexingReports = new ArrayList<>();
+    var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
 
-    try {
-      final UpdateResponse updateResponse = client.add(solrInputDocument);
-      client.commit();
-      String msg = String.format("Successfully SOLR indexed digital object representing document %s", digitalObject.getId());
-      log.info(msg);
-      indexingReports.add(
-              new IntegrationActionReport(projectAbbr, IntegrationActionType.INDEX_OBJECT, IntegrationActionStatus.SUCCESS, msg)
-      );
-    } catch (SolrServerException | IOException e) {
-      String msg = String.format("Failed indexation to SOLR of digital object %s . Original err msg: %s", digitalObject.getId(), e);
-      log.error(msg);
-      throw new ProcessingException(msg);
+    // id needs to stay the same -- otherwise multiple entries with same ids will be created.
+    baseSearch.addProperty(BaseSearchProperties.ID.name, digitalObject.getId());
+    baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+    baseSearch.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+    baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
+    // index datastream ids
+    if(!foundDatastreams.isEmpty()){
+      // TODO if this is built incorrectly - webclient error messages are just cryptic
+      baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
     }
+
+    // TODO propper error handling?
+    solrClient.post(GAMS_CORE, baseSearch);
+    log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
+
+    // TODO integration action reports missing
+
+    //***** from here post the custom solr datastream
+
 
     // posts custom search datastream
     try {
-      var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
       Datastream searchDatastream = loadSearchDatastream(foundDatastreams, digitalObject.getId());
       solrClient.post(projectAbbr, searchDatastream.getData());
-      // TODO should i really use this exception here?
     } catch (DatastreamNotFoundException e){
       String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
       log.trace(msg);;
     }
 
-    return indexingReports;
+    return new ArrayList<>();
 
   }
 
