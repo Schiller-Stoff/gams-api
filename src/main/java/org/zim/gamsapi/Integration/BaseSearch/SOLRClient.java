@@ -99,6 +99,20 @@ public class SOLRClient {
     post(coreName, new BaseSearch[]{baseSearchEntity});
   }
 
+  public void post(String coreName, byte[] data){
+    log.trace("Posting now byte array data to solr core {}", coreName);
+
+    String postUrl = String.format("%s/%s/update/json/docs?commit=true", SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
+
+    webClient.post()
+        .uri(postUrl)
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(data)
+        .retrieve()
+        .toBodilessEntity()
+        .toFuture();
+  }
+
   /**
    * Create a new core in the SOLR server.
    * @param coreName the name of the core to create
