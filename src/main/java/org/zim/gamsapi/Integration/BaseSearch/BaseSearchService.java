@@ -1,38 +1,25 @@
 package org.zim.gamsapi.Integration.BaseSearch;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrInputDocument;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
-import org.zim.gamsapi.Integration.Common.enums.IntegrationActionStatus;
-import org.zim.gamsapi.Integration.Common.enums.IntegrationActionType;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -61,22 +48,16 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr) {
-    log.trace("*** Trying to delete solr indexed project objects for : {}", projectAbbr);
+    log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
-    // TODO think
-    SolrClient client = getSolrClient(GAMS_CORE);
-    String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
-    try {
-      client.deleteByQuery(solrDeletionQuery);
-      client.commit();
-      String msg = String.format("Committed SOLR delete all indexing operation for project %s via built solr-query %s", projectAbbr, solrDeletionQuery);
-      log.info(msg);
-      return List.of(new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg));
-    } catch (SolrServerException | IOException e){
-      String msg = String.format("Failed to delete all solr documents for project %s", projectAbbr);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
+    // delete selected from GAMS core
+    solrClient.delete(GAMS_CORE, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
+
+    // delete all from project core
+    solrClient.delete(projectAbbr, "*:*");
+
+    // TODO construct proper return value
+    return new ArrayList<>();
   }
 
   @Override
@@ -119,65 +100,23 @@ public class BaseSearchService implements IIntegrationService {
     }
 
     return new ArrayList<>();
-
   }
 
   @Override
   public List<IntegrationActionReport> deleteIndexedObject(String projectAbbr, String id) {
 
-    // id might contain values that need to be escaped for solr
-    // (otherwise a SOLRException would be thrown)
-    id = id.replaceAll(":", "\\\\:");
+    // escape colons in id (goes through the webclient and solr)
+    id = id.replaceAll(":", "\\\\\\\\:");
 
-    SolrClient client = getSolrClient(GAMS_CORE);
-    String solrDeletionQuery = String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id);
-    try {
-      client.deleteByQuery(solrDeletionQuery);
-      client.commit();
-      String msg = String.format("Committed SOLR delete object %s operation for project %s via built solr-query %s", id, projectAbbr, solrDeletionQuery);
-      log.info(msg);
-      return List.of(new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.SUCCESS, msg));
-    } catch (SolrServerException | IOException e){
-      String msg = String.format("Failed to delete all solr documents for digital object with id %s project %s", id, projectAbbr);
-      log.error(msg);
-      return List.of(new IntegrationActionReport(projectAbbr, IntegrationActionType.DELETE_OBJECT, IntegrationActionStatus.ERROR, msg));
-    }
+    // delete object from GAMS core
+    solrClient.delete(GAMS_CORE, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
+    // delete complete project core (all objects) - why? there might be other solr documents indexed.
+    solrClient.delete(projectAbbr, "*:*");
+
+    // TODO propper return value?
+    return new ArrayList<>();
   }
 
-
-  // TODO needs url as argument?
-  public SolrClient getSolrClient(String coreName){
-    final String solrUrl = configProperties.getBaseSearchUrl() + "/solr/" + coreName;
-    return new HttpSolrClient.Builder(solrUrl)
-            .build();
-  }
-
-
-  /**
-   * Creates a solr input document from a digital object (does not include the solr datastream)
-   * @param digitalObject digital object to be indexed
-   * @return SolrInputDocument
-   */
-  private SolrInputDocument createSolrInputDocument(DigitalObject digitalObject){
-    SolrInputDocument solrInputDocument = new SolrInputDocument();
-    // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-    solrInputDocument.addField(BaseSearchProperties.ID.name, digitalObject.getId());
-    solrInputDocument.addField(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-    solrInputDocument.addField(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-    // index datastream ids
-    // TODO refactor
-    //solrInputDocument.addField(BaseSearchProperties.DATASTREAMS.name, digitalObject.getDatastreams().stream().map(Datastream::getDsid).collect(Collectors.toList()));
-    solrInputDocument.addField(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
-
-    // index full text
-    // TODO add missing validation (there must be a source_xml?)
-    // TODO refactor
-//    digitalObject.getDatastreams().stream().filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SOURCE_DATASTREAM_ID.name)).forEach(datastream -> {
-//      String fulltext = XMLUtils.extractText(XMLUtils.parseXml(datastream.getData()));
-//      solrInputDocument.addField(BaseSearchProperties.FULLTEXT.name, fulltext);
-//    });
-    return solrInputDocument;
-  }
 
   /**
    * Sets up the solr integration service for the given project.
