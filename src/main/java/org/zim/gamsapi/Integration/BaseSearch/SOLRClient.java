@@ -63,7 +63,20 @@ public class SOLRClient {
         .bodyValue(json)
         .retrieve()
         .toBodilessEntity()
-        .toFuture();
+        .toFuture()
+        .whenCompleteAsync((response, throwable) -> {
+          log.trace("Got solr response");
+          if (response != null){
+            log.debug("Response-status from solr: {}", response.getStatusCode());
+            log.trace("Response from solr: {}", response);
+          }
+          if (throwable != null){
+            String msg = String.format("Failed to post base search entities to solr core %s. Cause: %s. Got SOLR response> %s", coreName, throwable.getMessage(), response);
+            log.error(msg);
+            throw new ProcessingException(msg);
+          }
+        })
+    ;
 
     // alternative way to do the same thing (but not async)
 
@@ -110,7 +123,20 @@ public class SOLRClient {
         .bodyValue(data)
         .retrieve()
         .toBodilessEntity()
-        .toFuture();
+        .toFuture()
+        .whenCompleteAsync((response, throwable) -> {
+          log.trace("Got solr response");
+          if (response != null){
+            log.debug("Response-status from solr: {}", response.getStatusCode());
+            log.trace("Response from solr: {}", response);
+          }
+          if (throwable != null){
+            String msg = String.format("Failed to post byte array to solr core %s. Cause: %s. Got SOLR response> %s", coreName, throwable.getMessage(), response);
+            log.error(msg);
+            throw new ProcessingException(msg);
+          }
+        })
+    ;
   }
 
   /**
@@ -161,20 +187,25 @@ public class SOLRClient {
 
     log.trace("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, url, body);
 
-    try {
-      webClient.post()
-          .uri(SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true")
-          .contentType(MediaType.APPLICATION_JSON)
-          .body(BodyInserters.fromValue(body))
-          .retrieve()
-          .toBodilessEntity()
-          .toFuture()
-          .get();
-    } catch (Exception e) {
-      String msg =  String.format("Error while deleting the content of the solr core for project %s. Original error: %s", coreName, e);
-      log.error(msg);
-      throw new ProcessingException(msg);
-    }
+    webClient.post()
+        .uri(SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true")
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(BodyInserters.fromValue(body))
+        .retrieve()
+        .toBodilessEntity()
+        .toFuture()
+        .whenCompleteAsync((response, throwable) -> {
+          log.trace("Got solr response");
+          if (response != null){
+            log.debug("Response-status from solr: {}", response.getStatusCode());
+            log.trace("Response from solr: {}", response);
+          }
+          if (throwable != null){
+            String msg = String.format("Failed to delete via query %s from solr core %s. Cause: %s. Got SOLR response> %s. Original error: %s",query, coreName, throwable.getMessage(), response, throwable);
+            log.error(msg);
+            throw new ProcessingException(msg);
+          }
+      });
 
   }
 
