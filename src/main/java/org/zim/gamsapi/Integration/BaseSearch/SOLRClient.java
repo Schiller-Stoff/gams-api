@@ -159,7 +159,7 @@ public class SOLRClient {
                   }
             """.formatted(query);
 
-    log.error("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, url, body);
+    log.trace("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, url, body);
 
     try {
       webClient.post()
@@ -171,7 +171,7 @@ public class SOLRClient {
           .toFuture()
           .get();
     } catch (Exception e) {
-      String msg =  String.format("Error while deleting the solr core for project %s. Original error: %s", coreName, e);
+      String msg =  String.format("Error while deleting the content of the solr core for project %s. Original error: %s", coreName, e);
       log.error(msg);
       throw new ProcessingException(msg);
     }
