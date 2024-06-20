@@ -17,7 +17,6 @@ import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,6 @@ public class BaseSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
-  private final GAMSDockerDNS configProperties;
 
   private final String GAMS_CORE = "gams";
 
@@ -96,7 +94,7 @@ public class BaseSearchService implements IIntegrationService {
       solrClient.post(projectAbbr, searchDatastream.getData());
     } catch (DatastreamNotFoundException e){
       String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
-      log.trace(msg);;
+      log.trace(msg);
     }
 
     return new ArrayList<>();
