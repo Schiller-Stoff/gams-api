@@ -142,6 +142,42 @@ public class SOLRClient {
     }
   }
 
+  /**
+   * Deletes all documents in a core that match a query.
+   * @param coreName the name of the core to delete documents from
+   * @param query the query to match documents to delete
+   */
+  public void delete(String coreName, String query){
+
+    String url = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update";
+
+    String body = """
+                {
+                    "delete": {
+                      "query": "%s"
+                    }
+                  }
+            """.formatted(query);
+
+    log.error("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, url, body);
+
+    try {
+      webClient.post()
+          .uri(SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true")
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(BodyInserters.fromValue(body))
+          .retrieve()
+          .toBodilessEntity()
+          .toFuture()
+          .get();
+    } catch (Exception e) {
+      String msg =  String.format("Error while deleting the solr core for project %s. Original error: %s", coreName, e);
+      log.error(msg);
+      throw new ProcessingException(msg);
+    }
+
+  }
+
 
   /**
    * Check if a core exists for a given project.
