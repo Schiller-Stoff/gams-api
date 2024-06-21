@@ -108,8 +108,8 @@ public class BaseSearchService implements IIntegrationService {
 
     // delete object from GAMS core
     solrClient.delete(GAMS_CORE, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
-    // delete complete project core (all objects) - why? there might be other solr documents indexed.
-    solrClient.delete(projectAbbr, "*:*");
+    // this requires solr documents to have the projectAbbr field
+    solrClient.delete(projectAbbr, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
 
     // TODO propper return value?
     return new ArrayList<>();
