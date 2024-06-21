@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.server.ResponseStatusException;
+import org.zim.gamsapi.Integration.Common.exceptions.IntegrationServiceException;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
@@ -73,7 +74,7 @@ public class SOLRClient {
           if (throwable != null){
             String msg = String.format("Failed to post base search entities to solr core %s. Cause: %s. Got SOLR response> %s", coreName, throwable.getMessage(), response);
             log.error(msg);
-            throw new ProcessingException(msg);
+            throw new IntegrationServiceException(msg);
           }
         })
     ;
@@ -133,18 +134,19 @@ public class SOLRClient {
           if (throwable != null){
             String msg = String.format("Failed to post byte array to solr core %s. Cause: %s. Got SOLR response> %s", coreName, throwable.getMessage(), response);
             log.error(msg);
-            throw new ProcessingException(msg);
+            throw new IntegrationServiceException(msg);
           }
         })
     ;
   }
 
   /**
-   * Create a new core in the SOLR server.
+   * Creates a new core on the SOLR server.
    * @param coreName the name of the core to create
    * @return the response body from the server
    */
   public String createCore(String coreName) {
+    final String URL = SOLR_CORE_API_ENDPOINT;
     String body = String.format("""
                 {
                     "create": {
@@ -156,15 +158,16 @@ public class SOLRClient {
 
     try {
       return webClient.post()
-          .uri(SOLR_CORE_API_ENDPOINT)
+          .uri(URL)
           .contentType(MediaType.APPLICATION_JSON)
           .body(BodyInserters.fromValue(body))
           .retrieve()
           .bodyToMono(String.class)
           .block();
     } catch (WebClientException e) {
-      log.error("Error while creating the solr core for project {}", coreName, e);
-      throw e;
+      String msg = String.format("Failed to create solr core for project %s. With url %s and body %s Cause: %s. Original error: %s", coreName, URL, body, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
     }
   }
 
@@ -175,7 +178,7 @@ public class SOLRClient {
    */
   public void delete(String coreName, String query){
 
-    String url = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update";
+    final String URL = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true";
 
     String body = """
                 {
@@ -185,10 +188,10 @@ public class SOLRClient {
                   }
             """.formatted(query);
 
-    log.trace("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, url, body);
+    log.trace("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, URL, body);
 
     webClient.post()
-        .uri(SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true")
+        .uri(URL)
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(body))
         .retrieve()
@@ -201,9 +204,9 @@ public class SOLRClient {
             log.trace("Response from solr: {}", response);
           }
           if (throwable != null){
-            String msg = String.format("Failed to delete via query %s from solr core %s. Cause: %s. Got SOLR response> %s. Original error: %s",query, coreName, throwable.getMessage(), response, throwable);
+            String msg = String.format("Failed to delete via query %s from solr core %s. With url: %s Cause: %s. Got SOLR response> %s. Original error: %s",query, coreName, URL, throwable.getMessage(), response, throwable);
             log.error(msg);
-            throw new ProcessingException(msg);
+            throw new IntegrationServiceException(msg);
           }
       });
 
@@ -217,13 +220,13 @@ public class SOLRClient {
    * @return true if the core exists, false otherwise
    */
   public boolean coreExists(String coreName){
-    log.debug("Checking if core {} exists", coreName);
-    String coreStatusUrl = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/select";
+    log.trace("Checking if core {} exists", coreName);
+    final String CORE_STATUS_URL = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/select";
 
     try {
       return Boolean.TRUE.equals(
           webClient.get()
-            .uri(coreStatusUrl)
+            .uri(CORE_STATUS_URL)
             .retrieve()
             .onStatus(HttpStatusCode::isError, clientResponse -> Mono.error(new HttpClientErrorException(clientResponse.statusCode())))
             .bodyToMono(String.class)
@@ -232,8 +235,9 @@ public class SOLRClient {
             .block()
       );
     } catch (WebClientException e){
-      log.error("Error while checking if the solr core exists for project {}", coreName, e);
-      throw e;
+      String msg = String.format("Failed to check if solr core exists for project %s. Via url: %s Cause: %s Original error: %s", coreName, CORE_STATUS_URL, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
     }
 
   }
