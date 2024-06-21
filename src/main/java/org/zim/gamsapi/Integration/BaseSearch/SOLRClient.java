@@ -76,22 +76,7 @@ public class SOLRClient {
         .uri(postUrl)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(data)
-        .retrieve()
-        .toBodilessEntity()
-        .toFuture()
-        .whenCompleteAsync((response, throwable) -> {
-          log.trace("Got solr response");
-          if (response != null){
-            log.debug("Response-status from solr: {}", response.getStatusCode());
-            log.trace("Response from solr: {}", response);
-          }
-          if (throwable != null){
-            String msg = String.format("Failed to post byte array to solr core %s. Cause: %s. Got SOLR response> %s", coreName, throwable.getMessage(), response);
-            log.error(msg);
-            throw new IntegrationServiceException(msg);
-          }
-        })
-    ;
+        .retrieve();
   }
 
   /**
@@ -148,22 +133,7 @@ public class SOLRClient {
         .uri(URL)
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(body))
-        .retrieve()
-        .toBodilessEntity()
-        .toFuture()
-        .whenCompleteAsync((response, throwable) -> {
-          log.trace("Got solr response");
-          if (response != null){
-            log.debug("Response-status from solr: {}", response.getStatusCode());
-            log.trace("Response from solr: {}", response);
-          }
-          if (throwable != null){
-            String msg = String.format("Failed to delete via query %s from solr core %s. With url: %s Cause: %s. Got SOLR response> %s. Original error: %s",query, coreName, URL, throwable.getMessage(), response, throwable);
-            log.error(msg);
-            throw new IntegrationServiceException(msg);
-          }
-      });
-
+        .retrieve();
   }
 
 
