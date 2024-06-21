@@ -81,9 +81,7 @@ public class SOLRClient {
         .onErrorComplete()
         .toFuture()
         .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-        .thenAccept(response -> {
-          log.trace("Successfully posted data to solr core {}", coreName);
-        });
+        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
   }
 
   /**
@@ -145,9 +143,7 @@ public class SOLRClient {
         .onErrorComplete()
         .toFuture()
         .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-        .thenAccept(response -> {
-          log.trace("Successfully posted data to solr core {}", coreName);
-        });
+        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
 
   }
 
