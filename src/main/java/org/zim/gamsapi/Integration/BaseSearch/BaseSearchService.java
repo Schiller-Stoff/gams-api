@@ -5,10 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -16,8 +14,8 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -35,9 +33,7 @@ public class BaseSearchService implements IIntegrationService {
   @Override
   public void indexObjects(String projectAbbr) {
     List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
-    digitalObjects.forEach(digitalObject -> {
-      indexObject(projectAbbr, digitalObject.getId());
-    });
+    digitalObjects.forEach(digitalObject -> indexObject(projectAbbr, digitalObject.getId()));
   }
 
   @Override
@@ -78,16 +74,21 @@ public class BaseSearchService implements IIntegrationService {
 
     //***** from here post the custom solr datastream
 
+    Optional<IDatastreamIdView> datastreamIdViewOptional = foundDatastreams.stream()
+        .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
+        .findFirst();
+    // if no search datastream was found, do nothing
+    if(datastreamIdViewOptional.isEmpty())return;
 
-    // posts custom search datastream
-    // TODO think about
-    try {
-      Datastream searchDatastream = loadSearchDatastream(foundDatastreams, digitalObject.getId());
-      solrClient.post(projectAbbr, searchDatastream.getData());
-    } catch (DatastreamNotFoundException e){
-      String msg = String.format("No search datastream found for digital object %s", digitalObject.getId());
-      log.trace(msg);
-    }
+    IDatastreamIdView datastreamIdView = datastreamIdViewOptional.get();
+
+    datastreamRepository
+        .findById(DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(id).build())
+        .ifPresentOrElse(datastream -> solrClient.post(projectAbbr, datastream.getData()), () -> {
+          String msg = String.format("Unexpectedly failed to retrieve search datastream with dsid %s for digital object with id %s", datastreamIdView.getDsid(), id);
+          log.error(msg);
+          throw new ProcessingException("Datastream with dsid " + datastreamIdView.getDsid() + " not found at object with id " + id + ".");
+        });
 
   }
 
@@ -122,28 +123,5 @@ public class BaseSearchService implements IIntegrationService {
    solrClient.createCore(projectAbbr);
 
   }
-
-  /**
-   * Loads the search datastream for a given digital object.
-   * @param datastreamIdViews list of datastream id views
-   * @param objectId id of the digital object
-   * @return search datastream
-   * @throws DatastreamNotFoundException if no search datastream was found
-   */
-  private Datastream loadSearchDatastream(List<IDatastreamIdView> datastreamIdViews, String objectId){
-
-    IDatastreamIdView datastreamIdView = datastreamIdViews.stream()
-        .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
-        .findFirst()
-        .orElseThrow(() -> new DatastreamNotFoundException("No search datastream found for digital object with id " + objectId));
-
-    return datastreamRepository.findById(DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(objectId).build())
-        .orElseThrow(() -> {
-          // TODO better message + logging
-          return new ProcessingException("Datastream with dsid " + datastreamIdView.getDsid() + " not found at object with id " + objectId + ".");
-        });
-
-  }
-
 
 }
