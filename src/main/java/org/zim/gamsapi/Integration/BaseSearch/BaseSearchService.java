@@ -69,20 +69,18 @@ public class BaseSearchService implements IIntegrationService {
     baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
     // index datastream ids
     if(!foundDatastreams.isEmpty()){
-      // TODO if this is built incorrectly - webclient error messages are just cryptic
       baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
     }
 
-    // TODO propper error handling?
     solrClient.post(GAMS_CORE, baseSearch);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
-    // TODO integration action reports missing
 
     //***** from here post the custom solr datastream
 
 
     // posts custom search datastream
+    // TODO think about
     try {
       Datastream searchDatastream = loadSearchDatastream(foundDatastreams, digitalObject.getId());
       solrClient.post(projectAbbr, searchDatastream.getData());
