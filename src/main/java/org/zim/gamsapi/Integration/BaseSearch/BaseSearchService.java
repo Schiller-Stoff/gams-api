@@ -2,7 +2,7 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.Datastream.Datastream;
@@ -13,11 +13,10 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
-import org.zim.gamsapi.Integration.Common.IntegrationActionReport;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-import java.util.ArrayList;
+
 import java.util.List;
 
 @Service
@@ -34,18 +33,15 @@ public class BaseSearchService implements IIntegrationService {
   private final SOLRClient solrClient;
 
   @Override
-  public List<IntegrationActionReport> indexObjects(String projectAbbr) {
-    List<IntegrationActionReport> integrationActionReports = new ArrayList<>();
+  public void indexObjects(String projectAbbr) {
     List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> {
       indexObject(projectAbbr, digitalObject.getId());
     });
-
-    return integrationActionReports;
   }
 
   @Override
-  public List<IntegrationActionReport> deleteIndexedObjects(String projectAbbr) {
+  public void deleteIndexedObjects(String projectAbbr) {
     log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
     // delete selected from GAMS core
@@ -54,12 +50,10 @@ public class BaseSearchService implements IIntegrationService {
     // delete all from project core
     solrClient.delete(projectAbbr, "*:*");
 
-    // TODO construct proper return value
-    return new ArrayList<>();
   }
 
   @Override
-  public List<IntegrationActionReport> indexObject(String projectAbbr, String id) {
+  public void indexObject(String projectAbbr, String id) {
 
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new ProcessingException(String.format("Digital object with id %s not found", id)));
@@ -97,11 +91,10 @@ public class BaseSearchService implements IIntegrationService {
       log.trace(msg);
     }
 
-    return new ArrayList<>();
   }
 
   @Override
-  public List<IntegrationActionReport> deleteIndexedObject(String projectAbbr, String id) {
+  public void deleteIndexedObject(String projectAbbr, String id) {
 
     // escape colons in id (goes through the webclient and solr)
     id = id.replaceAll(":", "\\\\\\\\:");
@@ -111,8 +104,6 @@ public class BaseSearchService implements IIntegrationService {
     // this requires solr documents to have the projectAbbr field
     solrClient.delete(projectAbbr, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
 
-    // TODO propper return value?
-    return new ArrayList<>();
   }
 
 

@@ -21,43 +21,36 @@ public class IntegrationActionController {
   private final List<IIntegrationService> integrationServices;
 
   @PostMapping("/{id}")
-  public List<IntegrationActionReport> indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
+  public void indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default index object {} for project {}", id, projectAbbr);
-    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.addAll(integrationService.indexObject(projectAbbr, id));
+      integrationService.indexObject(projectAbbr, id);
     });
-    return indexingReports;
+
   }
 
   @DeleteMapping("/{id}")
-  public List<IntegrationActionReport> deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
+  public void deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default delete object {} for project {}", id, projectAbbr);
-    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.addAll(integrationService.deleteIndexedObject(projectAbbr, id));
+      integrationService.deleteIndexedObject(projectAbbr, id);
     });
-    return indexingReports;
   }
 
   @PostMapping
-  public List<IntegrationActionReport> indexProjectObjects(@PathVariable String projectAbbr){
+  public void indexProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying now to default index all objects for project {}", projectAbbr);
-    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.addAll(integrationService.indexObjects(projectAbbr));
+      integrationService.indexObjects(projectAbbr);
     });
-    return indexingReports;
   }
 
   @DeleteMapping
-  public List<IntegrationActionReport> deleteProjectIndices(@PathVariable String projectAbbr){
+  public void deleteProjectIndices(@PathVariable String projectAbbr){
     log.trace("*** Trying now to default delete all indices of objects for project {}", projectAbbr);
-    ArrayList<IntegrationActionReport> indexingReports = new ArrayList<>();
     integrationServices.forEach(integrationService -> {
-      indexingReports.addAll(integrationService.deleteIndexedObjects(projectAbbr));
+      integrationService.deleteIndexedObjects(projectAbbr);
     });
-    return indexingReports;
   }
 
 }
