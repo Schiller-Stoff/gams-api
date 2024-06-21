@@ -76,7 +76,14 @@ public class SOLRClient {
         .uri(postUrl)
         .contentType(MediaType.APPLICATION_JSON)
         .bodyValue(data)
-        .retrieve();
+        .retrieve()
+        .toBodilessEntity()
+        .onErrorComplete()
+        .toFuture()
+        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .thenAccept(response -> {
+          log.trace("Successfully posted data to solr core {}", coreName);
+        });
   }
 
   /**
@@ -133,7 +140,15 @@ public class SOLRClient {
         .uri(URL)
         .contentType(MediaType.APPLICATION_JSON)
         .body(BodyInserters.fromValue(body))
-        .retrieve();
+        .retrieve()
+        .toBodilessEntity()
+        .onErrorComplete()
+        .toFuture()
+        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .thenAccept(response -> {
+          log.trace("Successfully posted data to solr core {}", coreName);
+        });
+
   }
 
 
