@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
+import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
 import org.zim.gamsapi.Integration.RDF.utils.RDFSearchProperties;
@@ -48,7 +48,7 @@ public class RDFService implements IIntegrationService {
   public void indexObject(String projectAbbr, String id){
 
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
-            .orElseThrow(() -> new ProcessingException(String.format("Digital object with pid %s not found", id)));
+            .orElseThrow(() -> new IntegrationDataProcessingException(String.format("Digital object with pid %s not found", id)));
     log.trace("*** FUSEKI Indexing now object: {}", digitalObject.getId());
 
     // list of reports for follow-up operations

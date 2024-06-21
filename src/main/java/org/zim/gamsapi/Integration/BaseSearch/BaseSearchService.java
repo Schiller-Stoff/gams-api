@@ -12,7 +12,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
-import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
+import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +52,7 @@ public class BaseSearchService implements IIntegrationService {
   public void indexObject(String projectAbbr, String id) {
 
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
-            .orElseThrow(() -> new ProcessingException(String.format("Digital object with id %s not found", id)));
+            .orElseThrow(() -> new IntegrationDataProcessingException(String.format("Digital object with id %s not found", id)));
 
     BaseSearch baseSearch = new BaseSearch();
 
@@ -87,7 +87,7 @@ public class BaseSearchService implements IIntegrationService {
         .ifPresentOrElse(datastream -> solrClient.post(projectAbbr, datastream.getData()), () -> {
           String msg = String.format("Unexpectedly failed to retrieve search datastream with dsid %s for digital object with id %s", datastreamIdView.getDsid(), id);
           log.error(msg);
-          throw new ProcessingException("Datastream with dsid " + datastreamIdView.getDsid() + " not found at object with id " + id + ".");
+          throw new IntegrationDataProcessingException("Datastream with dsid " + datastreamIdView.getDsid() + " not found at object with id " + id + ".");
         });
 
   }

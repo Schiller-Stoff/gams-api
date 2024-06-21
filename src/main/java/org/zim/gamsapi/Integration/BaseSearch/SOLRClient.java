@@ -10,7 +10,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationServiceException;
-import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
+import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
 
@@ -50,7 +50,7 @@ public class SOLRClient {
     } catch (Exception e) {
       String msg = String.format("Failed to convert base search entity to json. Cause: %s. Original error: %s", e.getMessage(), e);
       log.error(msg);
-      throw new ProcessingException(msg);
+      throw new IntegrationDataProcessingException(msg);
     }
 
     this.post(coreName, json);

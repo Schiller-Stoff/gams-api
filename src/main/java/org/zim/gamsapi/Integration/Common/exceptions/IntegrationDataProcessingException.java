@@ -6,9 +6,9 @@ import org.springframework.web.server.ResponseStatusException;
 /**
  * Represents error states related to data processing, e.g. if a file could not be parsed.
  */
-public class ProcessingException extends ResponseStatusException {
+public class IntegrationDataProcessingException extends IntegrationException {
 
-  public ProcessingException(String reason) {
+  public IntegrationDataProcessingException(String reason) {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
 
