@@ -9,7 +9,18 @@ public enum BaseSearchProperties {
 
   TYPE("_type"),
 
-  FULLTEXT("_fulltext");
+  FULLTEXT("_fulltext"),
+
+  TITLE("_title"),
+
+  DESCRIPTION("_description"),
+
+  CREATOR("_creator"),
+
+  PUBLISHER("_publisher"),
+
+  RIGHTS("_rights");
+
 
   public final String name;
 
