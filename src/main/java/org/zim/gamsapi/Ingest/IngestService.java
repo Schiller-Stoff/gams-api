@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
@@ -28,6 +29,7 @@ public class IngestService implements IIngestService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
+  private final IFileSystemRepository fileSystemRepository;
 
   @Override
   @Transactional
@@ -84,8 +86,25 @@ public class IngestService implements IIngestService {
               datastream.setFileName(contentFilePath.getFileName().toString());
               return datastream;
             })
-            .forEach(datastreamRepository::save);
-
+            .forEach( datastream -> {
+              // TODO test this procedure?
+              // calculating sha3-256 hash from datastream -id
+              String fileNameHashed = datastream.deriveDatastreamId().calcSha256Hex();
+              fileSystemRepository.save(datastream.getData(), fileNameHashed);
+              // save datastream to database
+              // make sure that the files are being deleted in any case (if database error occurs).
+              try {
+                datastreamRepository.save(datastream);
+              } catch (Exception e){
+                // make sure that in any case the file on the filesystem is being deleted
+                if(fileSystemRepository.exists(fileNameHashed)){
+                  String msg = String.format("Failed to save datastream %s. Deleting correspondent file from filesystem %s", datastream, fileNameHashed);
+                  log.error(msg);
+                  fileSystemRepository.delete(fileNameHashed);
+                };
+                throw e;
+              }
+            });
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
       ZipUtils.deleteDir(bagDirPath);

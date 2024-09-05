@@ -2,14 +2,19 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
+import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -21,9 +26,13 @@ public class DatastreamService implements IDatastreamService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
 
+  private final IFileSystemRepository fileSystemRepository;
+
   @Override
   @Transactional
   public void delete(Datastream datastream) {
+
+    //TODO update test?
 
     if(datastream.getDigitalObject() == null){
       String msg = String.format("Datastream's digital object is unexpectedly null %s . Cannot delete datastream.", datastream);
@@ -38,6 +47,10 @@ public class DatastreamService implements IDatastreamService {
     }
 
     datastreamRepository.delete(datastream);
+    // TODO second delete file (orphaned files are not that serious )
+    fileSystemRepository.delete(
+      datastream.deriveDatastreamId().calcSha256Hex()
+    );
   }
 
 
@@ -45,11 +58,25 @@ public class DatastreamService implements IDatastreamService {
   @Override
   @Transactional
   public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
-    return datastreamRepository.findById(id).orElseThrow(() -> {
+
+    // TODO update test?
+
+    FileSystemResource fileSystemResource = fileSystemRepository.load(id.calcSha256Hex());
+
+    Datastream datastream = datastreamRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream with id %s", id);
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
+
+    try {
+      datastream.setData(fileSystemResource.getContentAsByteArray());
+      return datastream;
+    } catch (IOException e) {
+      String msg = String.format("Could not load file for datastream %s. Original error: %s", datastream, e);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    }
   }
 
   @Override
@@ -58,6 +85,7 @@ public class DatastreamService implements IDatastreamService {
     if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
       String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
       log.info(msg);
+      fileSystemRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
       return datastreamRepository.save(datastream);
     } else {
       String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);
