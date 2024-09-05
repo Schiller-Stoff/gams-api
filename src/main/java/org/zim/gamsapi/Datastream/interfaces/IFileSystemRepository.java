@@ -15,4 +15,10 @@ public interface IFileSystemRepository {
 
   void delete(String fileName);
 
+  /**
+   * Check if the file exists.
+   * @param fileName the name of the file to check.
+   */
+  boolean exists(String fileName);
+
 }

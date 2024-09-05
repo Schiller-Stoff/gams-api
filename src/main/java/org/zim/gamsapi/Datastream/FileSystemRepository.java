@@ -133,6 +133,11 @@ public class FileSystemRepository implements IFileSystemRepository {
     }
   }
 
+  @Override
+  public boolean exists(String fileName) {
+    //TODO test
+    Path fileToCheck = GAMS_FILES_ROOT.resolve(fileName);
+    return Files.exists(fileToCheck);
 
-
+  }
 }
