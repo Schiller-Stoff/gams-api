@@ -2,15 +2,20 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Repository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamIdHashingException;
 import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 @Repository
 @Slf4j
@@ -42,6 +47,8 @@ public class FileSystemRepository implements IFileSystemRepository {
    * @return the path to the saved file
    */
   public Path save(byte[] data, String fileName) {
+
+    fileName = calcSha256Hex(fileName);
 
     // TODO build a folder hierarchy of the file!
 
@@ -82,6 +89,8 @@ public class FileSystemRepository implements IFileSystemRepository {
    */
   public FileSystemResource load(String fileName) {
 
+    fileName = calcSha256Hex(fileName);
+
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
 
     // error if the root location does not exist
@@ -119,6 +128,8 @@ public class FileSystemRepository implements IFileSystemRepository {
    */
   public void delete(String fileName) {
 
+    fileName = calcSha256Hex(fileName);
+
     // TODO should not delete root directory!
     Path fileToDelete = GAMS_FILES_ROOT.resolve(fileName);
 
@@ -135,9 +146,35 @@ public class FileSystemRepository implements IFileSystemRepository {
 
   @Override
   public boolean exists(String fileName) {
+    fileName = calcSha256Hex(fileName);
     //TODO test
     Path fileToCheck = GAMS_FILES_ROOT.resolve(fileName);
     return Files.exists(fileToCheck);
 
   }
+
+
+  /**
+   * Transforms given string to a sha256 hash --> and returns that as hex string
+   * https://www.baeldung.com/sha-256-hashing-java
+   * TODO write tests for this (must create expected value!)
+   * @return sha256 hash of given string as hex value
+   */
+  public String calcSha256Hex(String toHash){
+    final MessageDigest digest;
+    try {
+      digest = MessageDigest.getInstance("SHA3-256");
+    } catch (NoSuchAlgorithmException e) {
+      String msg = String.format("Could not create SHA3-256 digest for datastream-id: %s Original error: %s", this, e);
+      log.error(msg);
+      throw new DatastreamIdHashingException(msg);
+    }
+
+    final byte[] hashbytes = digest.digest(
+        toHash.getBytes(StandardCharsets.UTF_8));
+
+    char[] hex = Hex.encode(hashbytes);
+    return String.valueOf(hex);
+  }
+
 }

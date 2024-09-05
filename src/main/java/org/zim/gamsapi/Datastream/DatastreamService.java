@@ -49,7 +49,7 @@ public class DatastreamService implements IDatastreamService {
     datastreamRepository.delete(datastream);
     // TODO second delete file (orphaned files are not that serious )
     fileSystemRepository.delete(
-      datastream.deriveDatastreamId().calcSha256Hex()
+      datastream.deriveDatastreamId().toString()
     );
   }
 
@@ -61,7 +61,7 @@ public class DatastreamService implements IDatastreamService {
 
     // TODO update test?
 
-    FileSystemResource fileSystemResource = fileSystemRepository.load(id.calcSha256Hex());
+    FileSystemResource fileSystemResource = fileSystemRepository.load(id.toString());
 
     Datastream datastream = datastreamRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream with id %s", id);

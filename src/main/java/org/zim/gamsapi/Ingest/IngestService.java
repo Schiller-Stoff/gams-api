@@ -89,7 +89,7 @@ public class IngestService implements IIngestService {
             .forEach( datastream -> {
               // TODO test this procedure?
               // calculating sha3-256 hash from datastream -id
-              String fileNameHashed = datastream.deriveDatastreamId().calcSha256Hex();
+              String fileNameHashed = datastream.deriveDatastreamId().toString();
               fileSystemRepository.save(datastream.getData(), fileNameHashed);
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
