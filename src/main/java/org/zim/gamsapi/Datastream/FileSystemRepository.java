@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 public class FileSystemRepository implements IFileSystemRepository {
 
 
+  // TODO make configurable
    public final String GAMS_ROOT_FOLDERNAME = "gams";
 
    public final Path GAMS_FILES_ROOT = accessGamsRootPath();
@@ -24,6 +25,7 @@ public class FileSystemRepository implements IFileSystemRepository {
 
   /**
    * Returns the root of the GAMS files with exception handling
+   * TODO test
    * @return the root of the GAMS files
    */
    private Path accessGamsRootPath(){
@@ -34,7 +36,7 @@ public class FileSystemRepository implements IFileSystemRepository {
 
   /**
    * Save the given data to the given location.
-   *
+   * TODO test
    * @param data the data to save
    * @param fileName the relative location to save the data to
    * @return the path to the saved file
@@ -73,6 +75,11 @@ public class FileSystemRepository implements IFileSystemRepository {
     }
   }
 
+  /**
+   * TODO test
+   * @param fileName the name of the file to load
+   * @return the file system resource
+   */
   public FileSystemResource load(String fileName) {
 
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
