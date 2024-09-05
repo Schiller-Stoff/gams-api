@@ -43,3 +43,4 @@ docker/apps/solr/solr/
 docker/apps/fedora/fcrepo-home/data
 docker/apps/pgadmin/*
 docker/apps/postgres/postgres-data
+gams/*
