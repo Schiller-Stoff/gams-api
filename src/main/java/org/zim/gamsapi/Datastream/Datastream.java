@@ -55,7 +55,6 @@ public class Datastream {
   /**
    * Actual contained binary data
    */
-  @Column(name = "data")
   @ToString.Exclude
   @JsonIgnore
   private byte[] data;
