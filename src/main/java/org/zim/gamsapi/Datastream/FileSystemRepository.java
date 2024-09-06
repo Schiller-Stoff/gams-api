@@ -9,6 +9,9 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamIdHashingException;
 import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
+import org.zim.gamsapi.Ingest.utils.ZipUtils;
+import org.zim.gamsapi.System.utils.FileUtils;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,6 +29,8 @@ public class FileSystemRepository implements IFileSystemRepository {
    public final String GAMS_ROOT_FOLDERNAME = "gams";
 
    public final Path GAMS_FILES_ROOT = accessGamsRootPath();
+
+   private final int GAMS_FILE_BALANCE_FACTOR = 8;
 
 
   /**
@@ -48,17 +53,6 @@ public class FileSystemRepository implements IFileSystemRepository {
    */
   public Path save(byte[] data, String fileName) {
 
-    fileName = calcSha256Hex(fileName);
-
-    // TODO build a folder hierarchy of the file!
-
-    // https://stackoverflow.com/questions/1576272/storing-large-number-of-files-in-file-system
-    // https://www.reddit.com/r/zfs/comments/uwabzd/best_method_to_store_40_million_files/
-
-    // TODO think about storing a lot of files
-    // https://stackoverflow.com/questions/1576272/storing-large-number-of-files-in-file-system
-
-
     // error if root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
       String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file at location: %s", GAMS_FILES_ROOT, fileName);
@@ -67,7 +61,10 @@ public class FileSystemRepository implements IFileSystemRepository {
     }
 
 
-    Path newFile = GAMS_FILES_ROOT.resolve(fileName);
+    Path newFile = calcBalancedFilepath(fileName);
+
+    // TODO refactor class to use FileUtils.ensureParentDir?
+    ZipUtils.ensureParentDir(newFile);
 
     // TODO what happens if the file already exists? - and what should happen? (overwrite, error, ...)
 
@@ -89,7 +86,6 @@ public class FileSystemRepository implements IFileSystemRepository {
    */
   public FileSystemResource load(String fileName) {
 
-    fileName = calcSha256Hex(fileName);
 
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
 
@@ -102,7 +98,7 @@ public class FileSystemRepository implements IFileSystemRepository {
     }
 
     // error if the file does not exist
-    Path expectedPath = GAMS_FILES_ROOT.resolve(fileName);
+    Path expectedPath = calcBalancedFilepath(fileName);
     if(!Files.exists(expectedPath)){
       String msg = String.format("Cannot load file. The file  %s does not exist at path %s", fileName, expectedPath);
       log.error(msg);
@@ -128,10 +124,7 @@ public class FileSystemRepository implements IFileSystemRepository {
    */
   public void delete(String fileName) {
 
-    fileName = calcSha256Hex(fileName);
-
-    // TODO should not delete root directory!
-    Path fileToDelete = GAMS_FILES_ROOT.resolve(fileName);
+    Path fileToDelete = calcBalancedFilepath(fileName);
 
     try {
       Files.delete(fileToDelete);
@@ -146,9 +139,8 @@ public class FileSystemRepository implements IFileSystemRepository {
 
   @Override
   public boolean exists(String fileName) {
-    fileName = calcSha256Hex(fileName);
     //TODO test
-    Path fileToCheck = GAMS_FILES_ROOT.resolve(fileName);
+    Path fileToCheck = calcBalancedFilepath(fileName);
     return Files.exists(fileToCheck);
 
   }
@@ -157,6 +149,7 @@ public class FileSystemRepository implements IFileSystemRepository {
   /**
    * Transforms given string to a sha256 hash --> and returns that as hex string
    * https://www.baeldung.com/sha-256-hashing-java
+   * TODO think about good location? maybe move to other class!
    * TODO write tests for this (must create expected value!)
    * @return sha256 hash of given string as hex value
    */
@@ -175,6 +168,18 @@ public class FileSystemRepository implements IFileSystemRepository {
 
     char[] hex = Hex.encode(hashbytes);
     return String.valueOf(hex);
+  }
+
+  /**
+   * Calculates the balanced filepath for the given filename for GAMS.
+   * TODO doc + test
+   * @param fileName
+   * @return
+   */
+  public Path calcBalancedFilepath(String fileName){
+    fileName = calcSha256Hex(fileName);
+    fileName = FileUtils.balanceFilenameToFolderHierarchy(fileName, GAMS_FILE_BALANCE_FACTOR);
+    return GAMS_FILES_ROOT.resolve(fileName);
   }
 
 }
