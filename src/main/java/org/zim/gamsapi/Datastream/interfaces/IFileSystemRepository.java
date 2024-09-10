@@ -1,8 +1,10 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
 import org.springframework.core.io.FileSystemResource;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
 
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Handles storing files on the filesystem.
@@ -13,7 +15,7 @@ public interface IFileSystemRepository {
 
   FileSystemResource load(String fileName);
 
-  void delete(String fileName);
+  void delete(String fileName) throws DatastreamCannotDeleteFileException;
 
   /**
    * Check if the file exists.
