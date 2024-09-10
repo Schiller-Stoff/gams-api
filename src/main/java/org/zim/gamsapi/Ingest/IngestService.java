@@ -89,18 +89,18 @@ public class IngestService implements IIngestService {
             .forEach( datastream -> {
               // TODO test this procedure?
               // calculating sha3-256 hash from datastream -id
-              String fileNameHashed = datastream.deriveDatastreamId().toString();
-              fileSystemRepository.save(datastream.getData(), fileNameHashed);
+              String fileName = datastream.deriveDatastreamId().toString();
+              fileSystemRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
                 datastreamRepository.save(datastream);
               } catch (Exception e){
                 // make sure that in any case the file on the filesystem is being deleted
-                if(fileSystemRepository.exists(fileNameHashed)){
-                  String msg = String.format("Failed to save datastream %s. Deleting correspondent file from filesystem %s", datastream, fileNameHashed);
+                if(fileSystemRepository.exists(fileName)){
+                  String msg = String.format("Failed to save datastream %s. Deleting correspondent file from filesystem %s", datastream, fileName);
                   log.error(msg);
-                  fileSystemRepository.delete(fileNameHashed);
+                  fileSystemRepository.delete(fileName);
                 };
                 throw e;
               }
