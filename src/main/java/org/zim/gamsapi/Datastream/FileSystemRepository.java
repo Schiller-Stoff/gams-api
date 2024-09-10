@@ -129,7 +129,7 @@ public class FileSystemRepository implements IFileSystemRepository {
     if(!Files.exists(fileToDelete)){
       String msg = String.format("Could not delete file at balanced filepath %s. Original filename: %s It doesn't exist", fileToDelete, fileName);
       log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      throw new DatastreamCannotDeleteFileException(msg);
     }
 
     try {
