@@ -8,6 +8,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IDatastreamRepository extends CrudRepository<Datastream, DatastreamId> {
 
@@ -33,6 +34,8 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    * @return list of datastream projections.
    */
   List<IDatastreamDetailsView> findAllByDigitalObjectId(String digitalObjectId);
+
+  Set<Datastream> findAllByDigitalObject(DigitalObject digitalObject);
 
   /**
    * Projection method to return a datastream details views. Excludes the actual datastream content.
