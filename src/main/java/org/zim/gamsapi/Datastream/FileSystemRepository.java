@@ -1,6 +1,7 @@
 package org.zim.gamsapi.Datastream;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,6 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamIdHashingException;
 import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.System.utils.FileUtils;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -30,7 +30,7 @@ public class FileSystemRepository implements IFileSystemRepository {
 
    public final Path GAMS_FILES_ROOT = accessGamsRootPath();
 
-   private final int GAMS_FILE_BALANCE_FACTOR = 8;
+   private final int GAMS_FILE_BALANCE_FACTOR = 16;
 
 
   /**
@@ -70,10 +70,10 @@ public class FileSystemRepository implements IFileSystemRepository {
 
     try {
       Files.write(newFile, data);
-      log.info("Successfully wrote file {}", newFile);
+      log.info("Successfully wrote file {} with balanced path: {}", fileName, newFile);
       return newFile;
     } catch (Exception e) {
-      String msg = String.format("Could not write file %s", newFile);
+      String msg = String.format("Could not write file %s with balanced path: %s", fileName, newFile);
       log.error(msg, e);
       throw new DatastreamCannotWriteFileException(msg);
     }
@@ -90,8 +90,8 @@ public class FileSystemRepository implements IFileSystemRepository {
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
 
     // error if the root location does not exist
+    // TODO I think this cannot happen (because gams is precreated)
     if(!Files.exists(GAMS_FILES_ROOT)){
-      // TODO improve err msg
       String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file: %s", GAMS_FILES_ROOT, fileName);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
@@ -118,19 +118,25 @@ public class FileSystemRepository implements IFileSystemRepository {
 
 
   /**
-   * Deletes the file with the given name.
-   * TODO implement / think about
+   * Hashes and balances given filename to a new location and deletes the result location.
+   * @param fileName the name of the file to load
    * TODO test
    */
   public void delete(String fileName) {
-
     Path fileToDelete = calcBalancedFilepath(fileName);
+
+    // extra assertion for debug reason
+    if(!Files.exists(fileToDelete)){
+      String msg = String.format("Could not delete file at balanced filepath %s. Original filename: %s It doesn't exist", fileToDelete, fileName);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    }
 
     try {
       Files.delete(fileToDelete);
-      log.trace("Successfully deleted file {}", fileToDelete);
+      log.trace("Successfully deleted file with name {} at balanced location {}", fileName, fileToDelete);
     } catch (IOException e) {
-      String msg = String.format("Could not delete file %s. Original error: %s", fileToDelete, e);
+      String msg = String.format("Could not delete file at balanced filepath %s. Original filename: %s Original error: %s", fileToDelete, fileName, e);
       // TODO handle exception
       log.error(msg);
       throw new DatastreamCannotDeleteFileException(msg);
@@ -142,7 +148,6 @@ public class FileSystemRepository implements IFileSystemRepository {
     //TODO test
     Path fileToCheck = calcBalancedFilepath(fileName);
     return Files.exists(fileToCheck);
-
   }
 
 
