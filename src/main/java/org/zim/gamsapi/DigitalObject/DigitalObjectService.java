@@ -6,14 +6,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
-import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
+  private final IFileSystemRepository fileSystemRepository;
 
   @Override
   @Transactional
@@ -135,20 +137,19 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
+    // TODO TEST if related file was also deleted
+    Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
+
+    // TODO missing transaction exception to be thrown?
+    datastreams.forEach(datastream -> {
+      fileSystemRepository.delete(datastream.deriveDatastreamId().toString());
+    });
+
     digitalObjectRepository.delete(digitalObject);
     log.info("Successfully deleted digital object {}", digitalObject);
   }
 
-  @Override
-  @Transactional
-  public void deleteAllForProject(Project project) {
-    // need to delete all the datastreams first --> otherwise constraint violation.
-    // using custom performant query for large batch operations
-    datastreamRepository.deleteAll(project.getProjectAbbr());
-    digitalObjectRepository.deleteAll(project.getProjectAbbr());
-    log.info("Successfully deleted all digital objects for project {}", project);
-  }
 
   @Transactional
   @Override
