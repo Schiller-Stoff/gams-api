@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Datastream;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.core.io.FileSystemResource;
@@ -11,6 +12,7 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException
 import org.zim.gamsapi.Datastream.exceptions.DatastreamIdHashingException;
 import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
+import org.zim.gamsapi.System.configproperties.GAMSStorageProperties;
 import org.zim.gamsapi.System.utils.FileUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,22 +27,12 @@ import java.security.NoSuchAlgorithmException;
 public class FileSystemRepository implements IFileSystemRepository {
 
 
-  // TODO make configurable
-   public final String GAMS_ROOT_FOLDERNAME = "gams";
-
-   public final Path GAMS_FILES_ROOT = accessGamsRootPath();
-
    private final int GAMS_FILE_BALANCE_FACTOR = 16;
 
+   public final Path GAMS_FILES_ROOT;
 
-  /**
-   * Returns the root of the GAMS files with exception handling
-   * TODO test
-   * @return the root of the GAMS files
-   */
-   private Path accessGamsRootPath(){
-     // TODO use configured path if available!
-     return Paths.get(GAMS_ROOT_FOLDERNAME).toAbsolutePath();
+   public FileSystemRepository(GAMSStorageProperties gamsStorageProperties){
+     GAMS_FILES_ROOT = Paths.get(gamsStorageProperties.getRootPath()).toAbsolutePath();
    }
 
 
