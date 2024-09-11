@@ -63,21 +63,22 @@ public class DatastreamController {
           Model model,
           Project project,
           @RequestHeader Map<String, String> requestHeader
-  ) throws IOException {
+  ) {
 
     // TODO: is this method outdated? - datastreams need baseMetadata assigned.
+    // TODO: could move this to service method
 
     log.debug("Got datastream-entity: {}. Applying file {} from request-params", datastream, file);
 
     DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
 
-    datastream.setData(file.getBytes());
+
     datastream.setMimeType(file.getContentType());
     datastream.setDigitalObject(foundObject);
 
     // TODO test if setting of baseMetadata works as expected!
     datastream.setBaseMetadata(metadataBaseEntity);
-    Datastream savedDatastream = datastreamService.save(datastream);
+    Datastream savedDatastream = datastreamService.save(datastream, file);
 
     model.addAttribute("datastream", savedDatastream);
     model.addAttribute(foundObject);
