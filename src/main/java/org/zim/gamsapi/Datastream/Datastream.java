@@ -57,6 +57,9 @@ public class Datastream {
    */
   @ToString.Exclude
   @JsonIgnore
+  // TODO REFACTOR this is bad practice - because all fields should go the database inside an JPA entity.
+  // (only a temporary solution)
+  @Transient
   private byte[] data;
 
   /**
