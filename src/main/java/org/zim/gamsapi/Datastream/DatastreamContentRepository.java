@@ -143,7 +143,6 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
   /**
    * Transforms given string to a sha256 hash --> and returns that as hex string
    * https://www.baeldung.com/sha-256-hashing-java
-   * TODO think about good location? maybe move to other class!
    * TODO write tests for this (must create expected value!)
    * @return sha256 hash of given string as hex value
    */
@@ -152,7 +151,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     try {
       digest = MessageDigest.getInstance("SHA3-256");
     } catch (NoSuchAlgorithmException e) {
-      String msg = String.format("Could not create SHA3-256 digest for datastream-id: %s Original error: %s", this, e);
+      String msg = String.format("Could not create SHA3-256 digest for string: %s Original error: %s", toHash, e);
       log.error(msg);
       throw new DatastreamIdHashingException(msg);
     }
