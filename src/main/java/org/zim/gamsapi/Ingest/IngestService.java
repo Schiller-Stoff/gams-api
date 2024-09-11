@@ -86,18 +86,17 @@ public class IngestService implements IIngestService {
               datastream.setFileName(contentFilePath.getFileName().toString());
 
               // saving the datastream content to the filesystem
-              String fileName = datastream.deriveDatastreamId().toString();
-              datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId().toString());
+              datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
                 datastreamRepository.save(datastream);
               } catch (Exception e){
                 // make sure that in any case the file on the filesystem is being deleted
-                if(datastreamContentRepository.exists(fileName)){
-                  String msg = String.format("Failed to save datastream %s. Deleting correspondent file from filesystem %s", datastream, fileName);
+                if(datastreamContentRepository.exists(datastream.deriveDatastreamId())){
+                  String msg = String.format("Failed to save datastream %s. For datastream file with name %s", datastream, datastream.deriveDatastreamId());
                   log.error(msg);
-                  datastreamContentRepository.delete(fileName);
+                  datastreamContentRepository.delete(datastream.deriveDatastreamId());
                 };
                 throw e;
               }

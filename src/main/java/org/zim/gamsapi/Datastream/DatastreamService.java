@@ -51,7 +51,7 @@ public class DatastreamService implements IDatastreamService {
     datastreamRepository.delete(datastream);
     // TODO second delete file (orphaned files are not that serious )
     datastreamContentRepository.delete(
-      datastream.deriveDatastreamId().toString()
+      datastream.deriveDatastreamId()
     );
   }
 
@@ -85,7 +85,7 @@ public class DatastreamService implements IDatastreamService {
     if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
       String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
       log.info(msg);
-      datastreamContentRepository.save(data, datastream.deriveDatastreamId().toString());
+      datastreamContentRepository.save(data, datastream.deriveDatastreamId());
       return datastreamRepository.save(datastream);
     } else {
       String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);

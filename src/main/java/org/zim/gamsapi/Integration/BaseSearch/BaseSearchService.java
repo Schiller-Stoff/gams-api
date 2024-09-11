@@ -95,11 +95,12 @@ public class BaseSearchService implements IIntegrationService {
     if(datastreamIdViewOptional.isEmpty())return;
 
     IDatastreamIdView datastreamIdView = datastreamIdViewOptional.get();
+    DatastreamId datastreamId = DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(id).build();
 
     datastreamRepository
-        .findById(DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(id).build())
+        .findById(datastreamId)
         .ifPresentOrElse(datastream -> {
-          FileSystemResource fileSystemResource =  datastreamContentRepository.load(datastreamIdView.getDsid().toString());
+          FileSystemResource fileSystemResource =  datastreamContentRepository.load(datastreamId);
           byte[] content;
           try {
             content = fileSystemResource.getContentAsByteArray();

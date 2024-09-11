@@ -120,7 +120,7 @@ public class DatastreamController {
   public ResponseEntity<Resource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) {
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
-    FileSystemResource fileSystemResource = datastreamContentService.loadFile(datastream.deriveDatastreamId().toString());
+    FileSystemResource fileSystemResource = datastreamContentService.loadFile(datastream.deriveDatastreamId());
     // TODO check if file streaming works this way! (maybe not using FileSystemResource but InputStreamResource etc.)?
     return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))

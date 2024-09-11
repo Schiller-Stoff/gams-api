@@ -143,7 +143,7 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     // TODO missing transaction exception to be thrown?
     datastreams.forEach(datastream -> {
-      fileSystemRepository.delete(datastream.deriveDatastreamId().toString());
+      fileSystemRepository.delete(datastream.deriveDatastreamId());
     });
 
     digitalObjectRepository.delete(digitalObject);

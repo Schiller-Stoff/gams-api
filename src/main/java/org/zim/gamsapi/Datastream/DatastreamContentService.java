@@ -12,8 +12,8 @@ public class DatastreamContentService implements IDatastreamContentService {
   private final DatastreamContentRepository datastreamContentRepository;
 
 
-  public FileSystemResource loadFile(String fileName) {
-    return datastreamContentRepository.load(fileName);
+  public FileSystemResource loadFile(DatastreamId datastreamId) {
+    return datastreamContentRepository.load(datastreamId);
   }
 
 

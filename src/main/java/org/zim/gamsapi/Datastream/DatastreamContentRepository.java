@@ -40,20 +40,20 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
    * Save the given data to the given location.
    * TODO test
    * @param data the data to save
-   * @param fileName the relative location to save the data to
+   * @param datastreamId the datastream id to save the data to
    * @return the path to the saved file
    */
-  public Path save(byte[] data, String fileName) {
+  public Path save(byte[] data, DatastreamId datastreamId) {
 
     // error if root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
-      String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file at location: %s", GAMS_FILES_ROOT, fileName);
+      String msg = String.format("No files stored in GAMS. The root location %s does not exist. For datastream with id %s", GAMS_FILES_ROOT, datastreamId);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
 
 
-    Path newFile = calcBalancedFilepath(fileName);
+    Path newFile = calcBalancedFilepath(datastreamId.toString());
 
     // TODO refactor class to use FileUtils.ensureParentDir?
     ZipUtils.ensureParentDir(newFile);
@@ -62,10 +62,10 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     try {
       Files.write(newFile, data);
-      log.info("Successfully wrote file {} with balanced path: {}", fileName, newFile);
+      log.info("Successfully wrote datastream {} with balanced path: {}", datastreamId, newFile);
       return newFile;
     } catch (Exception e) {
-      String msg = String.format("Could not write file %s with balanced path: %s", fileName, newFile);
+      String msg = String.format("Could not write datastream %s with balanced path: %s", datastreamId, newFile);
       log.error(msg, e);
       throw new DatastreamCannotWriteFileException(msg);
     }
@@ -73,10 +73,10 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
   /**
    * TODO test
-   * @param fileName the name of the file to load
+   * @param datastreamId the datastream id to load the file for
    * @return the file system resource
    */
-  public FileSystemResource load(String fileName) {
+  public FileSystemResource load(DatastreamId datastreamId) {
 
 
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
@@ -84,15 +84,15 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     // error if the root location does not exist
     // TODO I think this cannot happen (because gams is precreated)
     if(!Files.exists(GAMS_FILES_ROOT)){
-      String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file: %s", GAMS_FILES_ROOT, fileName);
+      String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file for datastream: %s", GAMS_FILES_ROOT, datastreamId);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
 
     // error if the file does not exist
-    Path expectedPath = calcBalancedFilepath(fileName);
+    Path expectedPath = calcBalancedFilepath(datastreamId.toString());
     if(!Files.exists(expectedPath)){
-      String msg = String.format("Cannot load file. The file  %s does not exist at path %s", fileName, expectedPath);
+      String msg = String.format("Cannot load datastream file. The file for datastream %s does not exist at path %s", datastreamId, expectedPath);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
@@ -101,7 +101,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       // TODO check if this is correct
       return new FileSystemResource(expectedPath);
     } catch (Exception e) {
-      String msg = String.format("Could not load file %s from expected path %s. Original error: %s", fileName, expectedPath, e);
+      String msg = String.format("Could not load file for datastream %s from expected path %s. Original error: %s", datastreamId, expectedPath, e);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
@@ -111,24 +111,24 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
   /**
    * Hashes and balances given filename to a new location and deletes the result location.
-   * @param fileName the name of the file to load
+   * @param datastreamId the datastream id to delete the file for
    * TODO test
    */
-  public void delete(String fileName) {
-    Path fileToDelete = calcBalancedFilepath(fileName);
+  public void delete(DatastreamId datastreamId) {
+    Path fileToDelete = calcBalancedFilepath(datastreamId.toString());
 
     // extra assertion for debug reason
     if(!Files.exists(fileToDelete)){
-      String msg = String.format("Could not delete file at balanced filepath %s. Original filename: %s It doesn't exist", fileToDelete, fileName);
+      String msg = String.format("Could not delete file at balanced filepath %s. For datastream: %s File doesn't exist", fileToDelete, datastreamId);
       log.error(msg);
       throw new DatastreamCannotDeleteFileException(msg);
     }
 
     try {
       Files.delete(fileToDelete);
-      log.trace("Successfully deleted file with name {} at balanced location {}", fileName, fileToDelete);
+      log.trace("Successfully deleted file for datastream {} at balanced location {}", datastreamId, fileToDelete);
     } catch (IOException e) {
-      String msg = String.format("Could not delete file at balanced filepath %s. Original filename: %s Original error: %s", fileToDelete, fileName, e);
+      String msg = String.format("Could not delete file at balanced filepath %s. Original file/, datastream /name: %s Original error: %s", fileToDelete, datastreamId, e);
       // TODO handle exception
       log.error(msg);
       throw new DatastreamCannotDeleteFileException(msg);
@@ -136,9 +136,9 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
   }
 
   @Override
-  public boolean exists(String fileName) {
+  public boolean exists(DatastreamId datastreamId) {
     //TODO test
-    Path fileToCheck = calcBalancedFilepath(fileName);
+    Path fileToCheck = calcBalancedFilepath(datastreamId.toString());
     return Files.exists(fileToCheck);
   }
 
