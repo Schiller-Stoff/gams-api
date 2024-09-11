@@ -2,10 +2,8 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
@@ -13,8 +11,6 @@ import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
-
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -58,25 +54,12 @@ public class DatastreamService implements IDatastreamService {
   @Override
   @Transactional
   public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
-
-    // TODO update test?
-
-    FileSystemResource fileSystemResource = fileSystemRepository.load(id.toString());
-
-    Datastream datastream = datastreamRepository.findById(id).orElseThrow(() -> {
+    return datastreamRepository.findById(id).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream with id %s", id);
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
 
-    try {
-      datastream.setData(fileSystemResource.getContentAsByteArray());
-      return datastream;
-    } catch (IOException e) {
-      String msg = String.format("Could not load file for datastream %s. Original error: %s", datastream, e);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
-    }
   }
 
   @Override
