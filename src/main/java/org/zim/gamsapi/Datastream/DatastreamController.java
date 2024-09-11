@@ -2,7 +2,8 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-import java.io.ByteArrayInputStream;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 @Slf4j
@@ -32,6 +33,7 @@ public class DatastreamController {
   private final IDatastreamService datastreamService;
   private final IProjectService projectService;
   private final IDigitalObjectService digitalObjectService;
+  private final IDatastreamContentService datastreamContentService;
 
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
@@ -110,16 +112,18 @@ public class DatastreamController {
    * @param id digital-object-id
    * @param dsid datastream-id
    * @return binary-data of the datastream
+   * // TODO write test
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
-  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) {
+  public ResponseEntity<Resource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) {
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
-    InputStream in = new ByteArrayInputStream(datastream.getData());
+    FileSystemResource fileSystemResource = datastreamContentService.loadFile(datastream.deriveDatastreamId().toString());
+    // TODO check if file streaming works this way! (maybe not using FileSystemResource but InputStreamResource etc.)?
     return ResponseEntity.ok()
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body(new InputStreamResource(in));
+        .body(fileSystemResource);
 
   }
 }
