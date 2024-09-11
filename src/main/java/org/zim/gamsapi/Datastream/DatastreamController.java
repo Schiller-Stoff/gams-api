@@ -3,7 +3,7 @@ package org.zim.gamsapi.Datastream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,7 +20,6 @@ import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -117,14 +116,14 @@ public class DatastreamController {
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
-  public ResponseEntity<Resource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) {
+  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) throws IOException {
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
     FileSystemResource fileSystemResource = datastreamContentService.loadFile(datastream.deriveDatastreamId());
-    // TODO check if file streaming works this way! (maybe not using FileSystemResource but InputStreamResource etc.)?
     return ResponseEntity.ok()
+        .contentLength(fileSystemResource.contentLength())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body(fileSystemResource);
+        .body( new InputStreamResource(fileSystemResource.getInputStream()));
 
   }
 }
