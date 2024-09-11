@@ -4,12 +4,11 @@ import org.springframework.core.io.FileSystemResource;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
 
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * Handles storing files on the filesystem.
  */
-public interface IFileSystemRepository {
+public interface IDatastreamContentRepository {
 
   Path save(byte[] data, String fileName);
 

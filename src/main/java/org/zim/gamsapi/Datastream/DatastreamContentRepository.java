@@ -1,8 +1,6 @@
 package org.zim.gamsapi.Datastream;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Repository;
@@ -10,7 +8,7 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamIdHashingException;
-import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.System.configproperties.GAMSStorageProperties;
 import org.zim.gamsapi.System.utils.FileUtils;
@@ -24,7 +22,7 @@ import java.security.NoSuchAlgorithmException;
 
 @Repository
 @Slf4j
-public class FileSystemRepository implements IFileSystemRepository {
+public class DatastreamContentRepository implements IDatastreamContentRepository {
 
 
   // TODO rename class to FileRepository? or DatsreamContentRepository?
@@ -33,7 +31,7 @@ public class FileSystemRepository implements IFileSystemRepository {
 
    public final Path GAMS_FILES_ROOT;
 
-   public FileSystemRepository(GAMSStorageProperties gamsStorageProperties){
+   public DatastreamContentRepository(GAMSStorageProperties gamsStorageProperties){
      GAMS_FILES_ROOT = Paths.get(gamsStorageProperties.getRootPath()).toAbsolutePath();
    }
 

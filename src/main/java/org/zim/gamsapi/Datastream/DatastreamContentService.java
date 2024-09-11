@@ -9,11 +9,11 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 @RequiredArgsConstructor
 public class DatastreamContentService implements IDatastreamContentService {
 
-  private final FileSystemRepository fileSystemRepository;
+  private final DatastreamContentRepository datastreamContentRepository;
 
 
   public FileSystemResource loadFile(String fileName) {
-    return fileSystemRepository.load(fileName);
+    return datastreamContentRepository.load(fileName);
   }
 
 

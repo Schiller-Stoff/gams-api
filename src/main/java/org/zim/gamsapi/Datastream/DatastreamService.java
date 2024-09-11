@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
-import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
@@ -22,7 +22,7 @@ public class DatastreamService implements IDatastreamService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
 
-  private final IFileSystemRepository fileSystemRepository;
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
   @Transactional
@@ -44,7 +44,7 @@ public class DatastreamService implements IDatastreamService {
 
     datastreamRepository.delete(datastream);
     // TODO second delete file (orphaned files are not that serious )
-    fileSystemRepository.delete(
+    datastreamContentRepository.delete(
       datastream.deriveDatastreamId().toString()
     );
   }
@@ -68,7 +68,7 @@ public class DatastreamService implements IDatastreamService {
     if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
       String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
       log.info(msg);
-      fileSystemRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
+      datastreamContentRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
       return datastreamRepository.save(datastream);
     } else {
       String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);

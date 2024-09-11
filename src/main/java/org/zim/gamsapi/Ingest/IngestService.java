@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
@@ -29,7 +29,7 @@ public class IngestService implements IIngestService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
-  private final IFileSystemRepository fileSystemRepository;
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
   @Transactional
@@ -90,17 +90,17 @@ public class IngestService implements IIngestService {
               // TODO test this procedure?
               // calculating sha3-256 hash from datastream -id
               String fileName = datastream.deriveDatastreamId().toString();
-              fileSystemRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
+              datastreamContentRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
                 datastreamRepository.save(datastream);
               } catch (Exception e){
                 // make sure that in any case the file on the filesystem is being deleted
-                if(fileSystemRepository.exists(fileName)){
+                if(datastreamContentRepository.exists(fileName)){
                   String msg = String.format("Failed to save datastream %s. Deleting correspondent file from filesystem %s", datastream, fileName);
                   log.error(msg);
-                  fileSystemRepository.delete(fileName);
+                  datastreamContentRepository.delete(fileName);
                 };
                 throw e;
               }

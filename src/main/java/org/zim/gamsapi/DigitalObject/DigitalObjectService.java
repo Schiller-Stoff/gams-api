@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IFileSystemRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
@@ -30,7 +30,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
-  private final IFileSystemRepository fileSystemRepository;
+  private final IDatastreamContentRepository fileSystemRepository;
 
   @Override
   @Transactional
