@@ -31,11 +31,6 @@ public class DatastreamBuilder {
     return this;
   }
 
-  public DatastreamBuilder data(byte[] data) {
-    datastream.setData(data);
-    return this;
-  }
-
   public DatastreamBuilder mimeType(String mimeType) {
     datastream.setMimeType(mimeType);
     return this;

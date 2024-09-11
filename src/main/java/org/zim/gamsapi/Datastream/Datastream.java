@@ -52,15 +52,6 @@ public class Datastream {
   @Id
   private String dsid;
 
-  /**
-   * Actual contained binary data
-   */
-  @ToString.Exclude
-  @JsonIgnore
-  // TODO REFACTOR this is bad practice - because all fields should go the database inside an JPA entity.
-  // (only a temporary solution)
-  @Transient
-  private byte[] data;
 
   /**
    * Mimetype of the contained data.
