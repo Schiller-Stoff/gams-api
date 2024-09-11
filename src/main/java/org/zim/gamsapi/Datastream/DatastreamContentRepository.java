@@ -24,9 +24,6 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 public class DatastreamContentRepository implements IDatastreamContentRepository {
 
-
-  // TODO rename class to FileRepository? or DatsreamContentRepository?
-
    private final int GAMS_FILE_BALANCE_FACTOR = 16;
 
    public final Path GAMS_FILES_ROOT;
