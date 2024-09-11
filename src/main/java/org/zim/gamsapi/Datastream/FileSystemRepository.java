@@ -27,6 +27,8 @@ import java.security.NoSuchAlgorithmException;
 public class FileSystemRepository implements IFileSystemRepository {
 
 
+  // TODO rename class to FileRepository? or DatsreamContentRepository?
+
    private final int GAMS_FILE_BALANCE_FACTOR = 16;
 
    public final Path GAMS_FILES_ROOT;
