@@ -61,8 +61,8 @@ public class IngestService implements IIngestService {
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
       // 03. build and save datastreams from sip.json in the bagit payload
-      bagitSipJson.getContentFiles().stream()
-            .map(contentFile -> {
+      bagitSipJson.getContentFiles()
+            .forEach(contentFile -> {
               Datastream datastream = conversionService.convert(contentFile, Datastream.class);
               if(datastream == null){
                 String msg = String.format("Datastream is unexpectedly null. Failed to convert contentFile %s to datastream for given ingest %s for object %s", contentFile, ingest, digitalObject);
@@ -71,6 +71,7 @@ public class IngestService implements IIngestService {
               }
 
               // things need to be set aside from conversion.
+              // TODO usage of byte[] looks weird - because of streaming - maybe use inputstream?
               byte[] datastreamContent;
               Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
               try {
@@ -82,15 +83,11 @@ public class IngestService implements IIngestService {
               }
 
               datastream.setDigitalObject(digitalObject);
-              datastream.setData(datastreamContent);
               datastream.setFileName(contentFilePath.getFileName().toString());
-              return datastream;
-            })
-            .forEach( datastream -> {
-              // TODO test this procedure?
-              // calculating sha3-256 hash from datastream -id
+
+              // saving the datastream content to the filesystem
               String fileName = datastream.deriveDatastreamId().toString();
-              datastreamContentRepository.save(datastream.getData(), datastream.deriveDatastreamId().toString());
+              datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId().toString());
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
