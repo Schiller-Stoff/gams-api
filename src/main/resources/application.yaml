@@ -62,7 +62,7 @@ logging:
   file:
     name: ${LOG_FILE:log/app.log}
   level:
-    org.zim.gamsapi: ${LOG_LEVEL:ERROR}
+    org.zim.gamsapi: ${LOG_LEVEL:TRACE}
     org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:
@@ -91,6 +91,9 @@ gams:
     baseSearchUrl: ${BASE_SEARCH_URL:http://baseSearch:8983}
     # TODO remove hardcoded gams core
     triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
+  storage:
+    # root of GAMS files (datastreams) to be stored.
+    rootPath: ${GAMS_FILES_ROOT_PATH:gams}
 
 # swagger ui base path
 springdoc:
