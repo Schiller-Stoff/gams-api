@@ -2,11 +2,14 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -14,6 +17,8 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +29,7 @@ public class BaseSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   private final String GAMS_CORE = "gams";
 
@@ -92,7 +98,18 @@ public class BaseSearchService implements IIntegrationService {
 
     datastreamRepository
         .findById(DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(id).build())
-        .ifPresentOrElse(datastream -> solrClient.post(projectAbbr, datastream.getData()), () -> {
+        .ifPresentOrElse(datastream -> {
+          FileSystemResource fileSystemResource =  datastreamContentRepository.load(datastreamIdView.getDsid().toString());
+          byte[] content;
+          try {
+            content = fileSystemResource.getContentAsByteArray();
+          } catch (IOException e) {
+            String msg = String.format("Failed to read file %s for datastream %s. Original error: %s", fileSystemResource.getFile().getAbsolutePath(), datastream, e);
+            log.error(msg);
+            throw new DatastreamCannotLoadFileException(msg);
+          }
+          solrClient.post(projectAbbr, content);
+        }, () -> {
           String msg = String.format("Unexpectedly failed to retrieve search datastream with dsid %s for digital object with id %s", datastreamIdView.getDsid(), id);
           log.error(msg);
           throw new IntegrationDataProcessingException("Datastream with dsid " + datastreamIdView.getDsid() + " not found at object with id " + id + ".");
