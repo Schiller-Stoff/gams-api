@@ -94,6 +94,21 @@ public class DatastreamService implements IDatastreamService {
     }
   }
 
+  @Override
+  @Transactional
+  public Datastream save(Datastream datastream) {
+    // TODO make sure that this is tested (aside from overloaded method)
+    if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
+      String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
+      log.info(msg);
+      return datastreamRepository.save(datastream);
+    } else {
+      String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+  }
+
   /**
    * Returns a list of datastream projections based on the parent digital object.
    * The projection excludes the actual datastream content. (to improve performance)

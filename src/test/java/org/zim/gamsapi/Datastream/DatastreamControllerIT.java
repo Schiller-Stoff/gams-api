@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
@@ -48,6 +49,9 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   @Autowired
   private IDatastreamService datastreamService;
+
+  @Autowired
+  private IDatastreamContentRepository datastreamContentRepository;
 
   private Project testProject;
 
@@ -256,12 +260,13 @@ public class DatastreamControllerIT extends IntegrationTest {
       Datastream datastream = new DatastreamBuilder()
           .dsid("testDsid")
           .digitalObject(testDigitalObject)
-          .data(TestDatastream.CONTENT.getValue().getBytes())
           .baseMetadata(TestMetadataBaseEntity.generate())
           .mimeType(MediaType.TEXT_PLAIN_VALUE)
           .build();
 
+      datastreamContentRepository.save(TestDatastream.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
       datastreamRepository.save(datastream);
+
 
       String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s/content", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
 
