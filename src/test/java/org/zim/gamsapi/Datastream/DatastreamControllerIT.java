@@ -180,7 +180,8 @@ public class DatastreamControllerIT extends IntegrationTest {
           .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
-      datastreamService.save(testDatastream);
+      MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", MediaType.TEXT_PLAIN_VALUE, TestDatastream.CONTENT.getValue().getBytes(StandardCharsets.UTF_8));
+      datastreamService.save(testDatastream, multipartFile);
 
       // DELETE request
       String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), testDatastream.getDsid());

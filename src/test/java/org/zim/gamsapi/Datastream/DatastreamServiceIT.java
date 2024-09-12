@@ -1,10 +1,10 @@
 package org.zim.gamsapi.Datastream;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.mock.web.MockMultipartFile;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
@@ -12,7 +12,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
@@ -40,6 +39,8 @@ public class DatastreamServiceIT extends IntegrationTest {
   private DigitalObject testObject;
 
   private Project testProject;
+
+  final private MockMultipartFile TEST_MULTIPART_FILE = new MockMultipartFile("file", "test.txt", "text/plain", "test data".getBytes());
 
   @BeforeAll
   public void setup(){
@@ -83,7 +84,6 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void throwsIfReferencedDigitalObjectNotFound(){
 
       final String RANDOM_PID = "SOME_RANDOM_PID";
-
       Datastream datastream = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
           .digitalObject(
@@ -97,7 +97,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
       Assertions.assertThrows(
           DigitalObjectNotFoundException.class,
-          () -> datastreamService.save(datastream)
+          () -> datastreamService.save(datastream, TEST_MULTIPART_FILE)
       );
 
     }
@@ -112,7 +112,7 @@ public class DatastreamServiceIT extends IntegrationTest {
           .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
-      datastreamService.save(datastream);
+      datastreamService.save(datastream, TEST_MULTIPART_FILE);
 
       org.assertj.core.api.Assertions.assertThat(
           datastreamRepository.findById(datastream.deriveDatastreamId())
