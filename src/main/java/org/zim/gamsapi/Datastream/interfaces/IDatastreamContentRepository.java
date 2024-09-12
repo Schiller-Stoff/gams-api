@@ -19,8 +19,16 @@ public interface IDatastreamContentRepository {
 
   /**
    * Check if the file exists.
-   * @param fileName the name of the file to check.
+   * @param datastreamId the datastream id to check
    */
   boolean exists(DatastreamId datastreamId);
+
+  /**
+   * Calculates the balanced filepath for the given filename for GAMS.
+   * The filename is hashed and then balanced to a folder hierarchy.
+   * @param datastreamId datastreamId to calculate the balanced filepath for
+   * @return the balanced filepath
+   */
+  Path calcBalancedFilepath(DatastreamId datastreamId);
 
 }

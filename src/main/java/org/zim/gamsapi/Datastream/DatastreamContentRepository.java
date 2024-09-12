@@ -136,13 +136,6 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     return Files.exists(fileToCheck);
   }
 
-  /**
-   * Calculates the balanced filepath for the given filename for GAMS.
-   * The filename is hashed and then balanced to a folder hierarchy.
-   * TODO test
-   * @param datastreamId datastreamId to calculate the balanced filepath for
-   * @return the balanced filepath
-   */
   public Path calcBalancedFilepath(DatastreamId datastreamId){
     String hashedFileName;
     try {
