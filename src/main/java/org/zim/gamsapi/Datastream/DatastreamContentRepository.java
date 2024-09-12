@@ -2,7 +2,6 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Repository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
@@ -13,11 +12,9 @@ import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.System.configproperties.GAMSStorageProperties;
 import org.zim.gamsapi.System.utils.FileUtils;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @Repository
@@ -50,7 +47,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     }
 
 
-    Path newFile = calcBalancedFilepath(datastreamId.toString());
+    Path newFile = calcBalancedFilepath(datastreamId);
 
     // TODO refactor class to use FileUtils.ensureParentDir?
     ZipUtils.ensureParentDir(newFile);
@@ -87,7 +84,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     }
 
     // error if the file does not exist
-    Path expectedPath = calcBalancedFilepath(datastreamId.toString());
+    Path expectedPath = calcBalancedFilepath(datastreamId);
     if(!Files.exists(expectedPath)){
       String msg = String.format("Cannot load datastream file. The file for datastream %s does not exist at path %s", datastreamId, expectedPath);
       log.error(msg);
@@ -112,7 +109,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
    * TODO test
    */
   public void delete(DatastreamId datastreamId) {
-    Path fileToDelete = calcBalancedFilepath(datastreamId.toString());
+    Path fileToDelete = calcBalancedFilepath(datastreamId);
 
     // extra assertion for debug reason
     if(!Files.exists(fileToDelete)){
@@ -135,44 +132,29 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
   @Override
   public boolean exists(DatastreamId datastreamId) {
     //TODO test
-    Path fileToCheck = calcBalancedFilepath(datastreamId.toString());
+    Path fileToCheck = calcBalancedFilepath(datastreamId);
     return Files.exists(fileToCheck);
-  }
-
-
-  /**
-   * Transforms given string to a sha256 hash --> and returns that as hex string
-   * https://www.baeldung.com/sha-256-hashing-java
-   * TODO write tests for this (must create expected value!)
-   * @return sha256 hash of given string as hex value
-   */
-  public String calcSha256Hex(String toHash){
-    final MessageDigest digest;
-    try {
-      digest = MessageDigest.getInstance("SHA3-256");
-    } catch (NoSuchAlgorithmException e) {
-      String msg = String.format("Could not create SHA3-256 digest for string: %s Original error: %s", toHash, e);
-      log.error(msg);
-      throw new DatastreamIdHashingException(msg);
-    }
-
-    final byte[] hashbytes = digest.digest(
-        toHash.getBytes(StandardCharsets.UTF_8));
-
-    char[] hex = Hex.encode(hashbytes);
-    return String.valueOf(hex);
   }
 
   /**
    * Calculates the balanced filepath for the given filename for GAMS.
-   * TODO doc + test
-   * @param fileName
-   * @return
+   * The filename is hashed and then balanced to a folder hierarchy.
+   * TODO test
+   * @param datastreamId datastreamId to calculate the balanced filepath for
+   * @return the balanced filepath
    */
-  public Path calcBalancedFilepath(String fileName){
-    fileName = calcSha256Hex(fileName);
-    fileName = FileUtils.balanceFilenameToFolderHierarchy(fileName, GAMS_FILE_BALANCE_FACTOR);
-    return GAMS_FILES_ROOT.resolve(fileName);
+  public Path calcBalancedFilepath(DatastreamId datastreamId){
+    String hashedFileName;
+    try {
+      hashedFileName = FileUtils.calcSha256Hex(datastreamId.toString());
+    } catch (NoSuchAlgorithmException e) {
+      String msg = String.format("Could not hash file for datastream-id %s. Original error: %s", datastreamId, e);
+      log.error(msg);
+      throw new DatastreamIdHashingException(msg);
+    }
+
+    String balamcedFileName = FileUtils.balanceFilenameToFolderHierarchy(hashedFileName, GAMS_FILE_BALANCE_FACTOR);
+    return GAMS_FILES_ROOT.resolve(balamcedFileName);
   }
 
 }
