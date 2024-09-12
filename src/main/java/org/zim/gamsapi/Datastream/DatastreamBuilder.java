@@ -56,9 +56,6 @@ public class DatastreamBuilder {
     return this;
   }
 
-  /**
-   * TODO add test
-   */
   public DatastreamBuilder contentRestrictions(Set<String> contentRestrictions){
     datastream.setContentRestrictions(contentRestrictions);
     return this;
