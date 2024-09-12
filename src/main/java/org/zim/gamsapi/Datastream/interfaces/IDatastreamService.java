@@ -14,8 +14,6 @@ public interface IDatastreamService {
   Datastream findById(DatastreamId id) throws DatastreamNotFoundException;
 
 
-  Datastream save(Datastream datastream);
-
   Datastream save(Datastream datastream, MultipartFile file);
 
 
