@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
@@ -39,6 +40,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  private IDatastreamContentRepository datastreamContentRepository;
 
   @MockBean
   private AuditingHandler auditingHandler;
@@ -154,6 +158,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .build();
 
       datastreamRepository.save(datastream);
+      datastreamContentRepository.save(TestDatastream.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
+
 
       // Act
       mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
@@ -168,6 +174,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       org.assertj.core.api.Assertions.assertThat(
               datastreamRepository.findById(datastream.deriveDatastreamId()))
           .isNotPresent();
+
+      // assert that the datastream content has been deleted
+      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(datastream.deriveDatastreamId())).isFalse();
 
       // clean up
       digitalObjectRepository.deleteAll();
