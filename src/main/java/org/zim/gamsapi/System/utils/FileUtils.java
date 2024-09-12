@@ -55,7 +55,6 @@ public class FileUtils {
   /**
    * Transforms given string to a sha256 hash --> and returns that as hex string
    * https://www.baeldung.com/sha-256-hashing-java
-   * TODO write tests for this (must create expected value!)
    * @return sha256 hash of given string as hex value
    * @throws NoSuchAlgorithmException if the algorithm is not found
    */

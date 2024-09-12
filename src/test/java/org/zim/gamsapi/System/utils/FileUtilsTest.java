@@ -1,10 +1,12 @@
 package org.zim.gamsapi.System.utils;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.UnitTest;
 
 import java.io.File;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,6 +70,19 @@ public class FileUtilsTest extends UnitTest {
       String result = FileUtils.balanceFilenameToFolderHierarchy("abc", 5);
       assertEquals("abc", result);
     }
+  }
+
+
+  @Nested
+  public class CalcSha256Hex {
+
+    @Test
+    public void generatesExpectedValue() throws NoSuchAlgorithmException {
+      String toHash = "test";
+      String expected = "36f028580bb02cc8272a9a020f4200e346e276ae664e45ee80745574e2f5ab80";
+      Assertions.assertEquals(expected, FileUtils.calcSha256Hex(toHash));
+    }
+
   }
 
 
