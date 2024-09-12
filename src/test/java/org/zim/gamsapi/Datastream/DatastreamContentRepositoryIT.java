@@ -9,7 +9,7 @@ import org.zim.gamsapi.IntegrationTest;
 
 import java.nio.file.Path;
 
-public class DatastreamContentRepositoryTest extends IntegrationTest {
+public class DatastreamContentRepositoryIT extends IntegrationTest {
 
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;
