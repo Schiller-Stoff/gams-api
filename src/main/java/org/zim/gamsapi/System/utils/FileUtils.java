@@ -1,6 +1,10 @@
 package org.zim.gamsapi.System.utils;
 
+import org.springframework.security.crypto.codec.Hex;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +52,20 @@ public class FileUtils {
   }
 
 
+  /**
+   * Transforms given string to a sha256 hash --> and returns that as hex string
+   * https://www.baeldung.com/sha-256-hashing-java
+   * TODO write tests for this (must create expected value!)
+   * @return sha256 hash of given string as hex value
+   * @throws NoSuchAlgorithmException if the algorithm is not found
+   */
+  public static String calcSha256Hex(String toHash) throws NoSuchAlgorithmException{
+    final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
+    final byte[] hashbytes = digest.digest(
+        toHash.getBytes(StandardCharsets.UTF_8));
+    char[] hex = Hex.encode(hashbytes);
+    return String.valueOf(hex);
+  }
 
 
 }
