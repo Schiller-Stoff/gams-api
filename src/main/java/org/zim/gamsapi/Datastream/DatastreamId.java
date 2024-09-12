@@ -32,7 +32,6 @@ public class DatastreamId implements Serializable {
   private String digitalObject;
 
   public String toString(){
-    // TODO test should construct expected toString value!
     return String.format("%s_%s", digitalObject, dsid);
   }
 
