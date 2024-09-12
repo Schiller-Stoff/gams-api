@@ -6,6 +6,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.mock.web.MockMultipartFile;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
@@ -18,6 +19,7 @@ import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
+import java.io.IOException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {
@@ -32,6 +34,9 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   @Autowired
   IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDatastreamContentRepository datastreamContentRepository;
 
   @MockBean
   private AuditingHandler auditingHandler;
@@ -133,7 +138,7 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Nested
   public class DeleteDatastream {
     @Test
-    public void successfullyDeletesDatastream(){
+    public void successfullyDeletesDatastream() throws IOException {
 
       Datastream toBeDeleted = new DatastreamBuilder()
           .dsid(TestDatastream.DSID.getValue())
@@ -141,6 +146,8 @@ public class DatastreamServiceIT extends IntegrationTest {
           .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
       datastreamRepository.save(toBeDeleted);
+      datastreamContentRepository.save(TEST_MULTIPART_FILE.getBytes(), toBeDeleted.deriveDatastreamId());
+
       // actual deletion
       datastreamService.delete(toBeDeleted);
 
@@ -148,6 +155,10 @@ public class DatastreamServiceIT extends IntegrationTest {
       org.assertj.core.api.Assertions.assertThat(datastreamRepository.findById(toBeDeleted.deriveDatastreamId()))
           .isNotNull()
           .isEmpty();
+
+      // check if datastream content is deleted
+      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(toBeDeleted.deriveDatastreamId()))
+          .isFalse();
 
     }
 
