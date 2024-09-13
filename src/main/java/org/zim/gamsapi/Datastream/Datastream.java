@@ -63,7 +63,7 @@ public class Datastream {
   private String fileName;
 
   @Column
-  // TODO MUST BE SET!
+  // TODO MUST BE SET! validate!
   private Long size;
 
   @Column
