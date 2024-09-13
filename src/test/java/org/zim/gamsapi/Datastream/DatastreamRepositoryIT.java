@@ -174,11 +174,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
 
             digitalObjectRepository.save(toBeDeleted);
-            Datastream savedDatastream = datastreamRepository.save(new DatastreamBuilder()
-                .digitalObject(toBeDeleted)
-                .baseMetadata(testMetadataBaseEntity)
-                .dsid(TEST_DSID)
-                .build());
+            Datastream savedDatastream = datastreamRepository.save(
+                TestDatastream.generate(toBeDeleted, TEST_DSID)
+            );
 
             // try to delete the object if datastream is still available
             org.junit.jupiter.api.Assertions.assertThrows(
@@ -212,11 +210,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            Datastream datastreamToBeDeleted = new DatastreamBuilder()
-                .dsid("DSID_TO_BE_DELETED")
-                .digitalObject(testDigitalObject)
-                .baseMetadata(testMetadataBaseEntity)
-                .build();
+            Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject, "DSID_TO_BE_DELETED");
 
             datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
 
