@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.IntegrationTest;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -89,6 +91,31 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
     }
 
   }
+
+
+  @Nested
+  public class FindById {
+
+    @Test
+    public void returnsExpectedFileContent() throws IOException {
+
+      final byte[] TEST_DATA = "test data".getBytes();
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
+
+      datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+
+      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.findById(TEST_DATASTREAM_ID).getContentAsString(StandardCharsets.UTF_8))
+              .contains("test data");
+
+      // cleanup
+      datastreamContentRepository.delete(TEST_DATASTREAM_ID);
+
+    }
+
+
+
+  }
+
 
   @Nested
   public class CalcBalancedFilePath {

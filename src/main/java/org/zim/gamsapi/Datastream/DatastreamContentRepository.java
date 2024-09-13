@@ -66,10 +66,6 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
   public InputStreamResource findById(DatastreamId datastreamId) {
 
-    // TODO write test
-
-    // TODO read: https://www.baeldung.com/java-read-lines-large-file
-
     // error if the root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
       String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file for datastream: %s", GAMS_FILES_ROOT, datastreamId);
