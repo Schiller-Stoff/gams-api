@@ -58,7 +58,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       Files.write(newFile, data);
       log.info("Successfully wrote datastream {} with balanced path: {}", datastreamId, newFile);
       return newFile;
-    } catch (Exception e) {
+    } catch (IOException e) {
       String msg = String.format("Could not write datastream %s with balanced path: %s", datastreamId, newFile);
       log.error(msg, e);
       throw new DatastreamCannotWriteFileException(msg);
