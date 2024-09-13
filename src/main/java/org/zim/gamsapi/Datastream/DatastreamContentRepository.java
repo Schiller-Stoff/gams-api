@@ -2,6 +2,7 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Repository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
@@ -63,13 +64,10 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     }
   }
 
-  /**
-   * TODO test
-   * @param datastreamId the datastream id to load the file for
-   * @return the file system resource
-   */
-  public FileSystemResource load(DatastreamId datastreamId) {
+  public InputStreamResource load(DatastreamId datastreamId) {
 
+    // TODO rename to findById?
+    // TODO write test
 
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
 
@@ -91,7 +89,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     try {
       // TODO check if this is correct
-      return new FileSystemResource(expectedPath);
+      return new InputStreamResource(new FileSystemResource(expectedPath).getInputStream());
     } catch (Exception e) {
       String msg = String.format("Could not load file for datastream %s from expected path %s. Original error: %s", datastreamId, expectedPath, e);
       log.error(msg);

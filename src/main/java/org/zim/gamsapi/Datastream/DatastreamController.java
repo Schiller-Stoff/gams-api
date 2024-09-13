@@ -119,11 +119,11 @@ public class DatastreamController {
   public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) throws IOException {
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
-    FileSystemResource fileSystemResource = datastreamContentService.loadFile(datastream.deriveDatastreamId());
+    InputStreamResource inputStreamResource = datastreamContentService.loadFile(datastream.deriveDatastreamId());
     return ResponseEntity.ok()
-        .contentLength(fileSystemResource.contentLength())
+        .contentLength(inputStreamResource.contentLength())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body( new InputStreamResource(fileSystemResource.getInputStream()));
+        .body( inputStreamResource);
 
   }
 }

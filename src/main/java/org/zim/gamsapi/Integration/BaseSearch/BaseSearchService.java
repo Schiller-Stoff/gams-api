@@ -2,7 +2,7 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -100,12 +100,12 @@ public class BaseSearchService implements IIntegrationService {
     datastreamRepository
         .findById(datastreamId)
         .ifPresentOrElse(datastream -> {
-          FileSystemResource fileSystemResource =  datastreamContentRepository.load(datastreamId);
+          InputStreamResource inputStreamResource =  datastreamContentRepository.load(datastreamId);
           byte[] content;
           try {
-            content = fileSystemResource.getContentAsByteArray();
+            content = inputStreamResource.getContentAsByteArray();
           } catch (IOException e) {
-            String msg = String.format("Failed to read file %s for datastream %s. Original error: %s", fileSystemResource.getFile().getAbsolutePath(), datastream, e);
+            String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", inputStreamResource.getDescription(), datastream, e);
             log.error(msg);
             throw new DatastreamCannotLoadFileException(msg);
           }

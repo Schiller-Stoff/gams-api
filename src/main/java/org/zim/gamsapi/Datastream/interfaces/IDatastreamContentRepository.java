@@ -1,9 +1,8 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
-
 import java.nio.file.Path;
 
 /**
@@ -13,7 +12,12 @@ public interface IDatastreamContentRepository {
 
   DatastreamId save(byte[] data, DatastreamId datastreamId);
 
-  FileSystemResource load(DatastreamId datastreamId);
+  /**
+   * Loads the datastream content.
+   * @param datastreamId the datastream id to load
+   * @return the datastream content
+   */
+  InputStreamResource load(DatastreamId datastreamId);
 
   void delete(DatastreamId datastreamId) throws DatastreamCannotDeleteFileException;
 
