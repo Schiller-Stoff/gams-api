@@ -99,7 +99,6 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
   /**
    * Hashes and balances given filename to a new location and deletes the result location.
    * @param datastreamId the datastream id to delete the file for
-   * TODO test
    */
   public void delete(DatastreamId datastreamId) {
     Path fileToDelete = calcBalancedFilepath(datastreamId);
@@ -115,8 +114,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       Files.delete(fileToDelete);
       log.trace("Successfully deleted file for datastream {} at balanced location {}", datastreamId, fileToDelete);
     } catch (IOException e) {
-      String msg = String.format("Could not delete file at balanced filepath %s. Original file/, datastream /name: %s Original error: %s", fileToDelete, datastreamId, e);
-      // TODO handle exception
+      String msg = String.format("Could not delete file at balanced filepath %s. For datastream-id: %s Original error: %s", fileToDelete, datastreamId, e);
       log.error(msg);
       throw new DatastreamCannotDeleteFileException(msg);
     }
