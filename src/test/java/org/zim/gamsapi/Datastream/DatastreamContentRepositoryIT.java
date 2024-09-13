@@ -37,6 +37,27 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
   }
 
   @Nested
+  public class Delete {
+
+    @Test
+    public void deletesExpectedFileFromFilesSystem() {
+
+      final byte[] TEST_DATA = "test data".getBytes();
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
+
+      datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+
+      datastreamContentRepository.delete(TEST_DATASTREAM_ID);
+
+      Assertions.assertFalse(
+          Files.exists(datastreamContentRepository.calcBalancedFilepath(TEST_DATASTREAM_ID))
+      );
+
+    }
+
+  }
+
+  @Nested
   public class CalcBalancedFilePath {
 
     @Test
