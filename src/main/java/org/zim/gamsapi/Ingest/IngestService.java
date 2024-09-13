@@ -76,7 +76,6 @@ public class IngestService implements IIngestService {
               Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
               try {
                 datastreamContent = Files.readAllBytes(contentFilePath);
-                datastream.setSize((long) datastreamContent.length);
               } catch (IOException e) {
                 String msg = String.format("Failed to read file %s for given ingest %s for object %s for datastream %s. Original error %s", contentFilePath, ingest, digitalObject, datastream, e);
                 log.error(msg);
@@ -85,6 +84,8 @@ public class IngestService implements IIngestService {
 
               datastream.setDigitalObject(digitalObject);
               datastream.setFileName(contentFilePath.getFileName().toString());
+              datastream.setSize((long) datastreamContent.length);
+              datastream.setMimeType(contentFile.getMimetype());
 
               // saving the datastream content to the filesystem
               datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());
