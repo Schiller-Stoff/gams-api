@@ -2,7 +2,6 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +19,7 @@ import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-import java.io.IOException;
+
 import java.util.Map;
 
 @Slf4j
@@ -120,7 +119,7 @@ public class DatastreamController {
   public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid){
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
-    InputStreamResource inputStreamResource = datastreamContentService.loadFile(datastream.deriveDatastreamId());
+    InputStreamResource inputStreamResource = datastreamContentService.load(datastream.deriveDatastreamId());
     return ResponseEntity.ok()
         .contentLength(datastream.getSize())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))

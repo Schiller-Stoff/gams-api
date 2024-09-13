@@ -1,6 +1,5 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.zim.gamsapi.Datastream.DatastreamId;
 
@@ -9,6 +8,6 @@ import org.zim.gamsapi.Datastream.DatastreamId;
  */
 public interface IDatastreamContentService {
 
-  InputStreamResource loadFile(DatastreamId datastreamId);
+  InputStreamResource load(DatastreamId datastreamId);
 
 }
