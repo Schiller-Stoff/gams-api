@@ -15,6 +15,26 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
   IDatastreamContentRepository datastreamContentRepository;
 
   @Nested
+  public class Save {
+
+    @Test
+    public void savesExpectedFileToFilesSystem() {
+
+      final byte[] TEST_DATA = "test data".getBytes();
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
+
+      Path result = datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+
+      Assertions.assertTrue(result.toFile().exists());
+
+      // cleanup
+      datastreamContentRepository.delete(TEST_DATASTREAM_ID);
+
+    }
+
+  }
+
+  @Nested
   public class CalcBalancedFilePath {
 
     @Test
