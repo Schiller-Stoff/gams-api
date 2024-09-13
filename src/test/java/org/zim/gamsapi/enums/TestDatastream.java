@@ -27,7 +27,6 @@ public enum TestDatastream {
 
     /**
      * Generates a test datastream using the values defined in the enum.
-     * TODO test
      * @param digitalObject The digital object to which the datastream belongs.
      * @return The generated datastream.
      */
@@ -37,7 +36,6 @@ public enum TestDatastream {
 
     /**
      * Generates a test datastream using the values defined in the enum.
-     * TODO test
      * @param digitalObject The digital object to which the datastream belongs.
      * @param dsid The dsid of the datastream.
      * @return The generated datastream.
