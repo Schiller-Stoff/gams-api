@@ -64,7 +64,6 @@ public class Datastream {
 
   @Column
   @NotNull
-  // TODO test validation
   private Long size;
 
   @Column
