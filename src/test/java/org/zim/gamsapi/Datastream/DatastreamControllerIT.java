@@ -88,11 +88,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void getDatastreamRendersExpectedDsidInView() throws Exception {
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid("testDsid")
-          .digitalObject(testDigitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid");
 
       datastreamRepository.save(datastream);
 
@@ -126,13 +122,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void datastreamViewDisplaysExpectedMetadata() throws Exception {
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid("testDsid")
-          .digitalObject(testDigitalObject)
-          .mimeType(MediaType.APPLICATION_CBOR.toString())
-          .fileName("testFileName")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testDigitalObject);
 
       datastreamRepository.save(datastream);
 
@@ -174,11 +164,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void deleteDatastreamRemovesDatastreamFromDatabase() throws Exception {
 
-      Datastream testDatastream =  new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(testDigitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream testDatastream = TestDatastream.generate(testDigitalObject);
 
       MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", MediaType.TEXT_PLAIN_VALUE, TestDatastream.CONTENT.getValue().getBytes(StandardCharsets.UTF_8));
       datastreamService.save(testDatastream, multipartFile);
@@ -213,11 +199,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void getDatastreamJsonContainsExpectedValues() throws Exception {
       // Arrange
-      Datastream datastream = new DatastreamBuilder()
-          .dsid("testDsid")
-          .digitalObject(testDigitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid");
 
       datastreamRepository.save(datastream);
 
@@ -258,13 +240,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void getDatastreamContentReturnsExpectedDatastreamContent() throws Exception {
       // Arrange
-      Datastream datastream = new DatastreamBuilder()
-          .dsid("testDsid")
-          .digitalObject(testDigitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .mimeType(MediaType.TEXT_PLAIN_VALUE)
-          .size((long) TestDatastream.CONTENT.getValue().getBytes().length)
-          .build();
+      Datastream datastream = TestDatastream.generate(testDigitalObject);
 
       datastreamContentRepository.save(TestDatastream.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
       datastreamRepository.save(datastream);
