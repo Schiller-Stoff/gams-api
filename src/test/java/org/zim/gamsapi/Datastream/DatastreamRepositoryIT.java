@@ -120,11 +120,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void deleteDatastreamRemovesDatastream() {
-        Datastream datastream = datastreamRepository.save(new DatastreamBuilder()
-            .digitalObject(testDigitalObject)
-            .dsid("SOME_RANDOM_DSID_45123")
-            .baseMetadata(testMetadataBaseEntity)
-            .build());
+        Datastream datastream = datastreamRepository.save(
+            TestDatastream.generate(testDigitalObject, "SOME_RANDOM_DSID_45123")
+        );
         Assertions.assertThat(
                         datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
