@@ -473,11 +473,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
-        Datastream aDatastream = new DatastreamBuilder()
-            .dsid("RANDOM_DSID_123456")
-            .digitalObject(unsavedObject)
-            .baseMetadata(TestMetadataBaseEntity.generate())
-            .build();
+        Datastream aDatastream = TestDatastream.generate(unsavedObject, "RANDOM_DSID_123456");
 
 
         org.junit.jupiter.api.Assertions.assertThrows(
