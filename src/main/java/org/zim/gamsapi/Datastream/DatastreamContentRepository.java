@@ -31,7 +31,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
 
   /**
-   * Save the given data to the given location.
+   * Saves given data.
    * @param data the data to save
    * @param datastreamId the datastream id to save the data to
    * @return the path to the saved file
