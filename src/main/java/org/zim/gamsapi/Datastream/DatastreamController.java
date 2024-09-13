@@ -74,6 +74,7 @@ public class DatastreamController {
 
     datastream.setMimeType(file.getContentType());
     datastream.setDigitalObject(foundObject);
+    datastream.setSize(file.getSize());
 
     // TODO test if setting of baseMetadata works as expected!
     datastream.setBaseMetadata(metadataBaseEntity);
@@ -116,12 +117,12 @@ public class DatastreamController {
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
-  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) throws IOException {
+  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid){
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
     InputStreamResource inputStreamResource = datastreamContentService.loadFile(datastream.deriveDatastreamId());
     return ResponseEntity.ok()
-        .contentLength(inputStreamResource.contentLength())
+        .contentLength(datastream.getSize())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
         .body( inputStreamResource);
 
