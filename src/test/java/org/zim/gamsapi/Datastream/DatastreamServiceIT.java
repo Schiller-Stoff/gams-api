@@ -89,16 +89,12 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void throwsIfReferencedDigitalObjectNotFound(){
 
       final String RANDOM_PID = "SOME_RANDOM_PID";
-      Datastream datastream = new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(
-              new DigitalObjectBuilder()
-                  .id(RANDOM_PID)
-                  .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-                  .baseMetadata(TestMetadataBaseEntity.generate())
-                  .build()
-          )
-          .build();
+      Datastream datastream = TestDatastream.generate(new DigitalObjectBuilder()
+          .id(RANDOM_PID)
+          .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
+          .baseMetadata(TestMetadataBaseEntity.generate())
+          .build()
+      );
 
       Assertions.assertThrows(
           DigitalObjectNotFoundException.class,
@@ -110,12 +106,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void datastreamExistsAfterSaving(){
 
-      final String RANDOM_DSID = "SOME_RANDOM_DSID";
-      Datastream datastream = new DatastreamBuilder()
-          .dsid(RANDOM_DSID)
-          .digitalObject(testObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testObject);
 
       datastreamService.save(datastream, TEST_MULTIPART_FILE);
 
@@ -140,11 +131,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void successfullyDeletesDatastream() throws IOException {
 
-      Datastream toBeDeleted = new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(testObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream toBeDeleted = TestDatastream.generate(testObject);
       datastreamRepository.save(toBeDeleted);
       datastreamContentRepository.save(TEST_MULTIPART_FILE.getBytes(), toBeDeleted.deriveDatastreamId());
 
@@ -198,17 +185,8 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void returnsExpectedCountOfDatastreams(){
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(testObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
-
-      Datastream datastream2 = new DatastreamBuilder()
-          .dsid("DSID2")
-          .digitalObject(testObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testObject);
+      Datastream datastream2 = TestDatastream.generate(testObject, "DSID2");
 
       datastreamRepository.save(datastream);
       datastreamRepository.save(datastream2);
@@ -232,11 +210,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void returnsExpectedDatastream(){
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(testObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testObject);
 
       datastreamRepository.save(datastream);
 
@@ -270,11 +244,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void returnsExpectedDatastreamDetailsView(){
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(testObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(testObject);
 
       datastreamRepository.save(datastream);
 
