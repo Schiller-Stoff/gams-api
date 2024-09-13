@@ -48,6 +48,8 @@ public enum TestDatastream {
             .digitalObject(digitalObject)
             .baseMetadata(TestMetadataBaseEntity.generate())
             .size((long) CONTENT.getValue().getBytes().length)
+            .mimeType("text/plain")
+            .fileName("test.txt")
             .build();
     }
 }
