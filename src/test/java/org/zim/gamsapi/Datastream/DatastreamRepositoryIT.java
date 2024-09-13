@@ -70,11 +70,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         testProject = testDigitalObject.getProject();
 
-        testDatastream = new DatastreamBuilder()
-            .dsid(TestDatastream.DSID.getValue())
-            .digitalObject(testDigitalObject)
-            .baseMetadata(testMetadataBaseEntity)
-            .build();
+        testDatastream = TestDatastream.generate(testDigitalObject);
 
         projectRepository.save(testProject);
         digitalObjectRepository.save(testDigitalObject);
@@ -98,13 +94,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void saveDatastreamExistsWithExpectedID() {
-        Datastream datastream = datastreamRepository.save(
-            new DatastreamBuilder()
-                .digitalObject(testDigitalObject)
-                .dsid("SOME_RANDOM_DSID")
-                .baseMetadata(testMetadataBaseEntity)
-                .build()
-        );
+        // using the DatastreamId from the test datastream
+        Datastream datastream = TestDatastream.generate(testDigitalObject, "SOME_RANDOM_DSID");
+        datastreamRepository.save(datastream);
 
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.deriveDatastreamId()))
@@ -114,7 +106,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::deriveDatastreamId)
                 .isEqualTo(datastream.deriveDatastreamId()
         );
-//        // clean up and check if successfully deleted
+        // clean up and check if successfully deleted
         datastreamRepository.delete(datastream);
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.deriveDatastreamId()))
