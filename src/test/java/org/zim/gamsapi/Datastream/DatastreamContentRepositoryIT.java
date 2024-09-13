@@ -58,6 +58,39 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
   }
 
   @Nested
+  public class Exists {
+
+    @Test
+    public void returnsTrueIfFileExists() {
+
+      final byte[] TEST_DATA = "test data".getBytes();
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
+
+      datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+
+      Assertions.assertTrue(
+          datastreamContentRepository.exists(TEST_DATASTREAM_ID)
+      );
+
+      // cleanup
+      datastreamContentRepository.delete(TEST_DATASTREAM_ID);
+
+    }
+
+    @Test
+    public void returnsFalseIfFileDoesNotExist() {
+
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
+
+      Assertions.assertFalse(
+          datastreamContentRepository.exists(TEST_DATASTREAM_ID)
+      );
+
+    }
+
+  }
+
+  @Nested
   public class CalcBalancedFilePath {
 
     @Test

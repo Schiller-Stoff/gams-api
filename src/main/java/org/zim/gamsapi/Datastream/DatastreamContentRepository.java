@@ -122,7 +122,6 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
   @Override
   public boolean exists(DatastreamId datastreamId) {
-    //TODO test
     Path fileToCheck = calcBalancedFilepath(datastreamId);
     return Files.exists(fileToCheck);
   }
