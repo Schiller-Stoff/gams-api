@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 
 @Repository
@@ -48,12 +49,10 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     Path newFile = calcBalancedFilepath(datastreamId);
 
-    // TODO refactor class to use FileUtils.ensureParentDir?
     ZipUtils.ensureParentDir(newFile);
 
-    // TODO what happens if the file already exists? - and what should happen? (overwrite, error, ...)
-
     try {
+      // without any options the file will be overwritten. (https://stackoverflow.com/questions/19794101/how-to-overwrite-file-via-java-nio-writer)
       Files.write(newFile, data);
       log.info("Successfully wrote datastream {} with balanced path: {}", datastreamId, newFile);
       return datastreamId;
