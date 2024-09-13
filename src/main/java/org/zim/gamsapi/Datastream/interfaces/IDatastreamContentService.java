@@ -8,6 +8,11 @@ import org.zim.gamsapi.Datastream.DatastreamId;
  */
 public interface IDatastreamContentService {
 
+  /**
+   * Retrieves the datastream content as streamable resource.
+   * @param datastreamId the datastream id
+   * @return the datastream content as streamable resource
+   */
   InputStreamResource load(DatastreamId datastreamId);
 
 }
