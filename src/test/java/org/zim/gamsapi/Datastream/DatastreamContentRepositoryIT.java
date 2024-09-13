@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.IntegrationTest;
-
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DatastreamContentRepositoryIT extends IntegrationTest {
@@ -23,9 +23,11 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
       final byte[] TEST_DATA = "test data".getBytes();
       final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
 
-      Path result = datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+      datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
 
-      Assertions.assertTrue(result.toFile().exists());
+      Assertions.assertTrue(
+          Files.exists(datastreamContentRepository.calcBalancedFilepath(TEST_DATASTREAM_ID))
+      );
 
       // cleanup
       datastreamContentRepository.delete(TEST_DATASTREAM_ID);
