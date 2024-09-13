@@ -263,11 +263,11 @@ public class DatastreamControllerIT extends IntegrationTest {
           .digitalObject(testDigitalObject)
           .baseMetadata(TestMetadataBaseEntity.generate())
           .mimeType(MediaType.TEXT_PLAIN_VALUE)
+          .size((long) TestDatastream.CONTENT.getValue().getBytes().length)
           .build();
 
       datastreamContentRepository.save(TestDatastream.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
       datastreamRepository.save(datastream);
-
 
       String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s/content", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
 
