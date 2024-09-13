@@ -34,8 +34,6 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public void delete(Datastream datastream) {
 
-    //TODO update test?
-
     if(datastream.getDigitalObject() == null){
       String msg = String.format("Datastream's digital object is unexpectedly null %s . Cannot delete datastream.", datastream);
       log.error(msg);
@@ -49,7 +47,6 @@ public class DatastreamService implements IDatastreamService {
     }
 
     datastreamRepository.delete(datastream);
-    // TODO second delete file (orphaned files are not that serious )
     datastreamContentRepository.delete(
       datastream.deriveDatastreamId()
     );
