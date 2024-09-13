@@ -151,11 +151,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       digitalObjectRepository.save(digitalObject);
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid(TestDatastream.DSID.getValue())
-          .digitalObject(digitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(digitalObject);
 
       datastreamRepository.save(datastream);
       datastreamContentRepository.save(TestDatastream.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
@@ -240,17 +236,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       digitalObjectRepository.save(digitalObject);
 
-      Datastream datastream = new DatastreamBuilder()
-          .dsid("testDsId")
-          .digitalObject(digitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
-
-      Datastream datastream2 = new DatastreamBuilder()
-          .dsid("testDsId2")
-          .digitalObject(digitalObject)
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      Datastream datastream = TestDatastream.generate(digitalObject, "testDsId");
+      Datastream datastream2 = TestDatastream.generate(digitalObject, "testDsId2");
 
       datastreamRepository.save(datastream);
       datastreamRepository.save(datastream2);
