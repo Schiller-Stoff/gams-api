@@ -34,9 +34,9 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
    * Saves given data.
    * @param data the data to save
    * @param datastreamId the datastream id to save the data to
-   * @return the path to the saved file
+   * @return given datastream id
    */
-  public Path save(byte[] data, DatastreamId datastreamId) {
+  public DatastreamId save(byte[] data, DatastreamId datastreamId) {
 
     // error if root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
@@ -56,7 +56,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     try {
       Files.write(newFile, data);
       log.info("Successfully wrote datastream {} with balanced path: {}", datastreamId, newFile);
-      return newFile;
+      return datastreamId;
     } catch (IOException e) {
       String msg = String.format("Could not write datastream %s with balanced path: %s", datastreamId, newFile);
       log.error(msg, e);

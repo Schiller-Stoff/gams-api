@@ -11,7 +11,7 @@ import java.nio.file.Path;
  */
 public interface IDatastreamContentRepository {
 
-  Path save(byte[] data, DatastreamId datastreamId);
+  DatastreamId save(byte[] data, DatastreamId datastreamId);
 
   FileSystemResource load(DatastreamId datastreamId);
 
