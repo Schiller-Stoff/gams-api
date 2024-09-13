@@ -66,13 +66,11 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
   public InputStreamResource findById(DatastreamId datastreamId) {
 
-    // TODO rename to findById?
     // TODO write test
 
     // TODO read: https://www.baeldung.com/java-read-lines-large-file
 
     // error if the root location does not exist
-    // TODO I think this cannot happen (because gams is precreated)
     if(!Files.exists(GAMS_FILES_ROOT)){
       String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file for datastream: %s", GAMS_FILES_ROOT, datastreamId);
       log.error(msg);
@@ -88,7 +86,6 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     }
 
     try {
-      // TODO check if this is correct
       return new InputStreamResource(new FileSystemResource(expectedPath).getInputStream());
     } catch (Exception e) {
       String msg = String.format("Could not load file for datastream %s from expected path %s. Original error: %s", datastreamId, expectedPath, e);
