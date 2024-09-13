@@ -13,7 +13,7 @@ public class DatastreamContentService implements IDatastreamContentService {
 
 
   public InputStreamResource loadFile(DatastreamId datastreamId) {
-    return datastreamContentRepository.load(datastreamId);
+    return datastreamContentRepository.findById(datastreamId);
   }
 
 

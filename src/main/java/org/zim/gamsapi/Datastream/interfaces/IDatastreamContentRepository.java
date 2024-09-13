@@ -17,7 +17,7 @@ public interface IDatastreamContentRepository {
    * @param datastreamId the datastream id to load
    * @return the datastream content
    */
-  InputStreamResource load(DatastreamId datastreamId);
+  InputStreamResource findById(DatastreamId datastreamId);
 
   void delete(DatastreamId datastreamId) throws DatastreamCannotDeleteFileException;
 

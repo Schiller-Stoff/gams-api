@@ -100,7 +100,7 @@ public class BaseSearchService implements IIntegrationService {
     datastreamRepository
         .findById(datastreamId)
         .ifPresentOrElse(datastream -> {
-          InputStreamResource inputStreamResource =  datastreamContentRepository.load(datastreamId);
+          InputStreamResource inputStreamResource =  datastreamContentRepository.findById(datastreamId);
           byte[] content;
           try {
             content = inputStreamResource.getContentAsByteArray();

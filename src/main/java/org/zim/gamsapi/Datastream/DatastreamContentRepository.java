@@ -64,7 +64,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     }
   }
 
-  public InputStreamResource load(DatastreamId datastreamId) {
+  public InputStreamResource findById(DatastreamId datastreamId) {
 
     // TODO rename to findById?
     // TODO write test
