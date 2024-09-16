@@ -10,6 +10,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -39,6 +40,9 @@ public class IngestControllerIT extends IntegrationTest {
   @Autowired
   IDigitalObjectRepository digitalObjectRepository;
 
+  @Autowired
+  IDatastreamContentRepository datastreamContentRepository;
+
   // disables auditing
   @MockBean
   private AuditingHandler auditingHandler;
@@ -55,6 +59,7 @@ public class IngestControllerIT extends IntegrationTest {
   @AfterAll
   public void tearDown(){
     datastreamRepository.deleteAll();
+    datastreamContentRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
   }

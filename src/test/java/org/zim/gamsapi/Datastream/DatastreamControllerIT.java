@@ -79,6 +79,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     org.assertj.core.api.Assertions.assertThat(projectRepository.findAll())
         .isNotNull()
         .isEmpty();
+    datastreamContentRepository.deleteAll();
   }
 
   @Nested

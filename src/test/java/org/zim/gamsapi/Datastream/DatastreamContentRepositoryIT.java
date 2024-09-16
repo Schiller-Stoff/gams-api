@@ -1,8 +1,6 @@
 package org.zim.gamsapi.Datastream;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -13,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamContentRepositoryIT extends IntegrationTest {
 
   @Autowired
@@ -20,6 +19,11 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
 
   @Autowired
   GAMSStorageProperties gamsStorageProperties;
+
+  @AfterAll
+  public void tearDown(){
+    datastreamContentRepository.deleteAll();
+  }
 
   @Nested
   public class Save {

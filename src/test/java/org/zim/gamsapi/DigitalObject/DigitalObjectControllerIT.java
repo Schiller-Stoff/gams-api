@@ -58,6 +58,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @AfterAll
   public void tearDown() {
     projectRepository.delete(testProject);
+    datastreamContentRepository.deleteAll();
     org.assertj.core.api.Assertions.assertThat(projectRepository.findAll())
         .isNotNull()
         .isEmpty();

@@ -72,6 +72,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     projectRepository.deleteAll();
     digitalObjectRepository.deleteAll();
+    datastreamContentRepository.deleteAll();
 
     Assertions.assertThat(digitalObjectRepository.findAll())
       .isNotNull()

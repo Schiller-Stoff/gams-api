@@ -7,6 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
@@ -31,6 +32,9 @@ public class IngestServiceIT extends IntegrationTest {
   IDatastreamRepository datastreamRepository;
 
   @Autowired
+  IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
   IngestService ingestService;
 
   File bagFile;
@@ -48,6 +52,7 @@ public class IngestServiceIT extends IntegrationTest {
   @AfterAll
   public void tearDown(){
     datastreamRepository.deleteAll();
+    datastreamContentRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
     // everything should be removed
