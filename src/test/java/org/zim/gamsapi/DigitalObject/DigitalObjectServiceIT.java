@@ -7,6 +7,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
@@ -16,6 +19,7 @@ import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
@@ -32,6 +36,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectRepository digitalObjectRepository;
+
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDatastreamContentRepository datastreamContentRepository;
 
   @Autowired
   IDigitalObjectService digitalObjectService;
@@ -375,6 +385,51 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
 
+
+  @Nested
+  public class Delete {
+
+    @Test
+    public void deletesDigitalObject() {
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("SOME_RANDOM_ID")
+          .project(testProject)
+          .baseMetadata(testMetadataBaseEntity)
+          .build();
+      digitalObjectRepository.save(digitalObject);
+
+      digitalObjectService.delete(digitalObject);
+
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findById(digitalObject.getId()))
+          .isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
+    public void deletesChildDatastreamsWithFileContent() {
+
+      DigitalObject digitalObject = new DigitalObjectBuilder()
+          .id("SOME_RANDOM_ID")
+          .project(testProject)
+          .baseMetadata(testMetadataBaseEntity)
+          .build();
+
+      digitalObjectRepository.save(digitalObject);
+
+      final Datastream TEST_DATASTREAM = TestDatastream.generate(digitalObject);
+
+      datastreamRepository.save(TEST_DATASTREAM);
+      datastreamContentRepository.save(new byte[0], TEST_DATASTREAM.deriveDatastreamId());
+
+      digitalObjectService.delete(digitalObject);
+
+      Assertions.assertThat(datastreamRepository.existsById(TEST_DATASTREAM.deriveDatastreamId())).isFalse();
+      Assertions.assertThat(datastreamContentRepository.exists(TEST_DATASTREAM.deriveDatastreamId())).isFalse();
+
+
+    }
+
+
+  }
 
 
 }

@@ -137,7 +137,6 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
-    // TODO TEST if related file was also deleted
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
 
