@@ -30,9 +30,6 @@ public class DigitalObjectBuilder {
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-
-
-    // TODO test this!
     DigitalObject parent = new DigitalObject();
     parent.setId(parentId);
     // parent project is being set in build method

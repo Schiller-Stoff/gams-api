@@ -79,5 +79,17 @@ public class DigitalObjectBuilderTest extends UnitTest {
 
   }
 
+  @Test
+  public void allowsTosetParentObjectViaPidAsString_hasSameId(){
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("1")
+        .project("projectAbbr")
+        .parent("2")
+        .baseMetadata(testMetadataBaseEntity)
+        .build();
+
+    Assertions.assertEquals("2", digitalObject.getParent().getId());
+  }
+
 
 }
