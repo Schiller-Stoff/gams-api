@@ -3,6 +3,9 @@ package org.zim.gamsapi.Integration.RDF;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamId;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
@@ -11,12 +14,16 @@ import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
 import org.zim.gamsapi.Integration.RDF.utils.RDFSearchProperties;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RDFService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IDatastreamRepository datastreamRepository;
   private final JenaFusekiClient tripleStoreClient;
 
   @Override
@@ -80,7 +87,8 @@ public class RDFService implements IIntegrationService {
    * @param digitalObject object to be indexed.
    */
   private void indexObjectDefaultRdf(DigitalObject digitalObject){
-    String turtle = tripleStoreClient.buildDefaultIndexingTriple(digitalObject);
+    Set<Datastream> datastreams =  datastreamRepository.findAllByDigitalObject(digitalObject);
+    String turtle = tripleStoreClient.buildDefaultIndexingTriple(digitalObject, datastreams);
     try {
       tripleStoreClient.postNQuads(digitalObject, turtle);
       String msg = String.format("Successfully created default indices for digital object %s for project %s", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
@@ -101,6 +109,7 @@ public class RDFService implements IIntegrationService {
     // some values are being set later --> by default operation is being skipped
     String defaultMsg = String.format("Skipped indexing custom RDF of object %s for project %s because no custom rdf datastream was found.", digitalObject.getId(), digitalObject.getProject().getProjectAbbr());
 
+    // TODO repair indexing of custom RDF!
     // Load datastream "RDF_TTL" and send to jena-fuseki
 //    digitalObject.getDatastreams()
 //            .stream()
