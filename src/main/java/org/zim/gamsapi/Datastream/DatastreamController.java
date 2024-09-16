@@ -52,39 +52,6 @@ public class DatastreamController {
     return foundDatastream;
   }
 
-  @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public String createDatastream(
-          DigitalObject digitalObject,
-          Datastream datastream,
-          @RequestParam MetadataBaseEntity metadataBaseEntity,
-          @RequestParam MultipartFile file,
-          Model model,
-          Project project,
-          @RequestHeader Map<String, String> requestHeader
-  ) {
-
-    // TODO: is this method outdated? - datastreams need baseMetadata assigned.
-    // TODO: could move this to service method
-
-    log.debug("Got datastream-entity: {}. Applying file {} from request-params", datastream, file);
-
-    DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
-
-
-    datastream.setMimeType(file.getContentType());
-    datastream.setDigitalObject(foundObject);
-    datastream.setSize(file.getSize());
-
-    // TODO test if setting of baseMetadata works as expected!
-    datastream.setBaseMetadata(metadataBaseEntity);
-    Datastream savedDatastream = datastreamService.save(datastream, file);
-
-    model.addAttribute("datastream", savedDatastream);
-    model.addAttribute(foundObject);
-    String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
-  }
-
   @DeleteMapping
   public String deleteDatastream(
           @PathVariable String id,
