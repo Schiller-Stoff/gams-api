@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
@@ -60,7 +59,7 @@ public class IngestServiceIT extends IntegrationTest {
   }
 
   @Test
-  public void createsExpectedDigitalObject(){
+  public void createsExpectedDigitalObject_withDatastreamsAndContent(){
 
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
 
@@ -72,14 +71,20 @@ public class IngestServiceIT extends IntegrationTest {
 
     // assert that the digital object was created
     Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
-    Assertions.assertThat(datastreamRepository.findAll())
+    var datastreams = datastreamRepository.findAll();
+    Assertions.assertThat(datastreams)
         .isNotEmpty()
         .hasSize(3);
+
+    // assert that expected datastream content exists on the fileystem
+    datastreams.forEach(datastream -> {
+      Assertions.assertThat(datastreamContentRepository.exists(datastream.deriveDatastreamId())).isTrue();
+    });
 
     // cleanup
     datastreamRepository.deleteAll();
     digitalObjectRepository.deleteAll();
-
+    datastreamContentRepository.deleteAll();
   }
 
 
