@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.System.configproperties.GAMSStorageProperties;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,6 +17,9 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
 
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
+  GAMSStorageProperties gamsStorageProperties;
 
   @Nested
   public class Save {
@@ -124,7 +129,7 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
     public void calculatesExpectedFilePath() {
 
       final String EXPECTED_FILE_PATH = Path
-          .of("gams","cf28f07e7385e123", "a42aa9df5e1683ba", "06f349eb9c070c80", "b3a6644bb046db81")
+          .of(gamsStorageProperties.getRootPath(),"cf28f07e7385e123", "a42aa9df5e1683ba", "06f349eb9c070c80", "b3a6644bb046db81")
           .toAbsolutePath()
           .toString();
 
