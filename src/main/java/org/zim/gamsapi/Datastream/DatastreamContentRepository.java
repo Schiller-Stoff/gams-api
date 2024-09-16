@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.FileSystemUtils;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
@@ -18,6 +19,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 @Repository
 @Slf4j
@@ -134,6 +137,29 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     String balamcedFileName = FileUtils.balanceFilenameToFolderHierarchy(hashedFileName, GAMS_FILE_BALANCE_FACTOR);
     return GAMS_FILES_ROOT.resolve(balamcedFileName);
+  }
+
+  public void deleteAll(){
+    Path pathToBeDeleted = GAMS_FILES_ROOT.toAbsolutePath();
+    try (Stream<Path> paths = Files.walk(pathToBeDeleted)) {
+      paths.sorted(Comparator.reverseOrder()).forEach(path -> {
+        if(path.getFileName().endsWith("README.md"))return;
+        if(path.toAbsolutePath().equals(pathToBeDeleted))return;
+        try {
+          Files.delete(path);
+        } catch (IOException e) {
+          String msg = String.format("Could not delete file %s in GAMS. Original error: %s", path, e);
+          log.error(msg);
+          throw new DatastreamCannotDeleteFileException(msg);
+        }
+      });
+    } catch (IOException e) {
+      String msg = String.format("Could not delete all files in GAMS. Original error: %s", e);
+      log.error(msg);
+      throw new DatastreamCannotDeleteFileException(msg);
+    }
+
+
   }
 
 }

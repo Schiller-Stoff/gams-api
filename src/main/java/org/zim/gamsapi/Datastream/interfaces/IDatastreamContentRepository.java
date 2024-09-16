@@ -35,4 +35,9 @@ public interface IDatastreamContentRepository {
    */
   Path calcBalancedFilepath(DatastreamId datastreamId);
 
+  /**
+   * Deletes all datastream content.
+   */
+  void deleteAll();
+
 }

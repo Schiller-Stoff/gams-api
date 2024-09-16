@@ -140,4 +140,34 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
 
   }
 
+
+  @Nested
+  public class DeleteAll {
+
+    @Test
+    public void deletesExpectedFiles() {
+
+      final byte[] TEST_DATA = "test data".getBytes();
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
+      final DatastreamId  TEST_DATASTREAM_ID2 = DatastreamId.builder().digitalObject("testId2").dsid("TEST").build();
+
+      datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+      datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID2);
+
+
+      datastreamContentRepository.deleteAll();
+
+      Assertions.assertFalse(
+          Files.exists(datastreamContentRepository.calcBalancedFilepath(TEST_DATASTREAM_ID))
+      );
+
+      Assertions.assertFalse(
+          Files.exists(datastreamContentRepository.calcBalancedFilepath(TEST_DATASTREAM_ID2))
+      );
+
+    }
+
+  }
+
+
 }
