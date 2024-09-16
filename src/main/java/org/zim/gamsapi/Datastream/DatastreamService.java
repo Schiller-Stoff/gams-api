@@ -69,7 +69,7 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public Datastream save(Datastream datastream, MultipartFile file) {
 
-    // TODO maybe should use input stream instead of byte array?
+    // THINK ABOUT: maybe should use input stream instead of byte array?
     byte[] data;
     try {
       data = file.getBytes();
