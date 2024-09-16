@@ -79,7 +79,6 @@ public class DatastreamController {
    * @param id digital-object-id
    * @param dsid datastream-id
    * @return binary-data of the datastream
-   * // TODO write test
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
