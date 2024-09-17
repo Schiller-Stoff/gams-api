@@ -55,18 +55,26 @@ public class ConstraintViolationTest extends UnitTest {
     @Test
     public void shouldRaiseConstraintViolationIfMetadataIsEmpty() {
         MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
-
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(5));
+        assertThat(violationSet.size(), is(4));
     }
 
     @Test
-    public void shouldRaiseConstraintViolationIfMetadataDescriptionIsTooShort() {
+    public void shouldNotRaiseConstraintViolationIfMetadataDescriptionIsAnEmptyString() {
         MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
         // set a description that is too short
-        metadataBaseEntity.setDescription("123");
+        metadataBaseEntity.setDescription("");
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(1));
+        assertThat(violationSet.size(), is(0));
+    }
+
+    @Test
+    public void shouldNotRaiseConstraintViolationIfMetadataDescriptionIsNull() {
+        MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
+        // set a description that is too short
+        metadataBaseEntity.setDescription(null);
+        Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
+        assertThat(violationSet.size(), is(0));
     }
 
     @Test
