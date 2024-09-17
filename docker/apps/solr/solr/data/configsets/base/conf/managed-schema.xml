@@ -450,7 +450,6 @@
   </fieldType>
   <field name="_datastreams" type="text_general" multiValued="true"/>
   <field name="_fulltext" type="text_general" multiValued="false"/>
-  <field name="_creator" type="text_general"/>
   <field name="_nest_path_" type="_nest_path_"/>
   <field name="_id" type="text_general" multiValued="false"/>
   <field name="_projectAbbr" type="text_general" multiValued="false"/>
@@ -553,7 +552,6 @@
   <copyField source="_datastreams" dest="_datastreams_str" maxChars="256"/>
   <copyField source="_projectAbbr" dest="_projectAbbr_str" maxChars="256"/>
   <copyField source="_fulltext" dest="_fulltext_str" maxChars="256"/>
-  <copyField source="_creator" dest="_creator_str" maxChars="256"/>
   <copyField source="birthdate" dest="_birthdate_str" maxChars="256"/>
   <copyField source="deathdate" dest="_deathdate_str" maxChars="256"/>
   <copyField source="location" dest="_location_str" maxChars="256"/>
