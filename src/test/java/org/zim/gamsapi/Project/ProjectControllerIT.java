@@ -1,7 +1,10 @@
 package org.zim.gamsapi.Project;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -11,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestProject;
 
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -23,15 +27,9 @@ public class ProjectControllerIT extends IntegrationTest {
   private IProjectRepository projectRepository;
 
 
-  @BeforeAll
-  public void setup(){
-    // TODO tests should be independent
-
-  }
-
-  @AfterAll
+  @AfterEach
   public void tearDown(){
-    Assertions.assertThat(projectRepository.count()).isEqualTo(0L);
+    projectRepository.deleteAll();
   }
 
 
@@ -41,7 +39,7 @@ public class ProjectControllerIT extends IntegrationTest {
     @Test
     public void projectAbbrContainedInWebclientProjectsOverview() throws Exception {
 
-      Project project = Project.builder().projectAbbr("testProject").build();
+      Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
 
       projectRepository.save(project);
 
@@ -53,10 +51,6 @@ public class ProjectControllerIT extends IntegrationTest {
 
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(project.getProjectAbbr());
-
-
-      // cleanup
-      projectRepository.delete(project);
 
     }
 
