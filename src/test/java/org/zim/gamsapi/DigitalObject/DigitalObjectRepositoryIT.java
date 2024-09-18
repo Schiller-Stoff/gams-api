@@ -7,13 +7,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,12 +29,10 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
     Project testProject;
 
-    MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
-
     @MockBean
     private AuditingHandler auditingHandler;
 
-    @BeforeAll
+    @BeforeEach
     public void setup(){
         // TODO tests should be independent
         testProject = Project
@@ -50,9 +46,8 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     }
 
 
-    @AfterAll
+    @AfterEach
     public void tearDown(){
-
         digitalObjectRepository.deleteAll();
         projectRepository.deleteAll();
 
@@ -81,9 +76,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
                 .isNotNull()
                 .isPresent();
 
-            // cleanup
-            digitalObjectRepository.deleteById(digitalObject.getId());
-
 
         }
 
@@ -100,9 +92,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
         Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
             .isNotNull()
             .isPresent();
-
-        // cleanup
-        digitalObjectRepository.deleteById(digitalObject.getId());
 
     }
 
@@ -122,8 +111,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             .extracting(DigitalObject::getId)
             .isEqualTo(digitalObject.getId());
 
-        // cleanup
-        digitalObjectRepository.deleteById(digitalObject.getId());
     }
 
     @Test
