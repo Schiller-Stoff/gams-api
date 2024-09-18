@@ -68,7 +68,6 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  // TODO test
   public DigitalObjectBuilder publisher(String publisher) {
     digitalObject.setPublisher(publisher);
     return this;

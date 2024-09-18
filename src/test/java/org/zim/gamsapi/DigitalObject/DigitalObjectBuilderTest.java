@@ -39,7 +39,19 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new DigitalObjectBuilder()
           .id("12345")
+          .publisher("test-publisher")
           .project("")
+          .baseMetadata(testMetadataBaseEntity)
+          .build();
+    });
+  }
+
+  @Test
+  public void throwsIfPublisherIsNotSet(){
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      new DigitalObjectBuilder()
+          .id("12345")
+          .project("projectAbbr")
           .baseMetadata(testMetadataBaseEntity)
           .build();
     });
