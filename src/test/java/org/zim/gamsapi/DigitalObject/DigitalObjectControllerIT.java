@@ -49,20 +49,18 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   private Project testProject;
 
-  @BeforeAll
+  @BeforeEach
   public void setup() {
-    // TODO tests should be independent
     testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
     projectRepository.save(testProject);
   }
 
-  @AfterAll
+  @AfterEach
   public void tearDown() {
-    projectRepository.delete(testProject);
     datastreamContentRepository.deleteAll();
-    org.assertj.core.api.Assertions.assertThat(projectRepository.findAll())
-        .isNotNull()
-        .isEmpty();
+    datastreamRepository.deleteAll();
+    digitalObjectRepository.deleteAll();
+    projectRepository.deleteAll();
   }
 
   @Nested
@@ -94,9 +92,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .isEqualTo(expectedDigitalObject.getId()
       );
 
-      // clean up
-      digitalObjectRepository.deleteAll();
-
     }
 
 
@@ -125,9 +120,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       org.assertj.core.api.Assertions.assertThat(
           digitalObjectRepository.findDigitalObjectById(digitalObject.getId()))
             .isNotPresent();
-
-      // clean up
-      digitalObjectRepository.deleteAll();
 
     }
 
@@ -161,9 +153,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       // assert that the datastream content has been deleted
       org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(datastream.deriveDatastreamId())).isFalse();
 
-      // clean up
-      digitalObjectRepository.deleteAll();
-      datastreamRepository.deleteAll();
     }
 
   }
@@ -200,9 +189,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getObjectType()
           );
 
-      // cleanup
-      digitalObjectRepository.delete(digitalObject);
-
 
     }
 
@@ -238,13 +224,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               datastream2.getDsid()
           );
 
-
-
-      // cleanup
-      datastreamRepository.delete(datastream);
-      datastreamRepository.delete(datastream2);
-      digitalObjectRepository.delete(digitalObject);
-
     }
 
     @Test
@@ -276,9 +255,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getBaseMetadata().getRights()
           );
 
-      // cleanup
-      digitalObjectRepository.delete(digitalObject);
-
 
     }
 
@@ -298,7 +274,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(digitalObject.getId()));
 
-    digitalObjectRepository.deleteById(digitalObject.getId());
   }
 
   @Test
@@ -330,7 +305,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(digitalObject.getId()));
 
-    digitalObjectRepository.deleteById(digitalObject.getId());
   }
 
   @Test
@@ -372,9 +346,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
         .contains(digitalObject1.getId(), digitalObject2.getId());
-
-    digitalObjectRepository.deleteById(digitalObject1.getId());
-    digitalObjectRepository.deleteById(digitalObject2.getId());
 
 
   }
