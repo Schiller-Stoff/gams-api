@@ -9,7 +9,6 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
@@ -18,7 +17,6 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
-import org.zim.gamsapi.enums.TestProject;
 import java.io.IOException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,14 +43,14 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   private Project testProject;
 
+  //TODO think about moving this to a shared class (TestDatastreamContent e.g.?)
   final private MockMultipartFile TEST_MULTIPART_FILE = new MockMultipartFile("file", "test.txt", "text/plain", "test data".getBytes());
 
-  @BeforeAll
+  @BeforeEach
   public void setup(){
     // TODO tests should be independent
 
     testObject = TestDigitalObject.generate();
-
     testProject = testObject.getProject();
 
     projectRepository.save(testObject.getProject());
@@ -60,7 +58,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   }
 
-  @AfterAll
+  @AfterEach
   public void tearDown(){
     digitalObjectRepository.delete(testObject);
     projectRepository.delete(testProject);
