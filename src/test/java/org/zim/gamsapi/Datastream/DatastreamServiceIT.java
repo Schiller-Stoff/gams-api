@@ -15,6 +15,7 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDatastreamContent;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import java.io.IOException;
@@ -43,16 +44,12 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   private Project testProject;
 
-  //TODO think about moving this to a shared class (TestDatastreamContent e.g.?)
-  final private MockMultipartFile TEST_MULTIPART_FILE = new MockMultipartFile("file", "test.txt", "text/plain", "test data".getBytes());
+  final private MockMultipartFile TEST_MULTIPART_FILE = TestDatastreamContent.generate();
 
   @BeforeEach
   public void setup(){
-    // TODO tests should be independent
-
     testObject = TestDigitalObject.generate();
     testProject = testObject.getProject();
-
     projectRepository.save(testObject.getProject());
     digitalObjectRepository.save(testObject);
 
