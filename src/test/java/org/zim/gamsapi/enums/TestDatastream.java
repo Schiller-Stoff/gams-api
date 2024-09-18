@@ -11,9 +11,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 public enum TestDatastream {
 
     DSID("test"),
-    DATASTREAM_NAME("test-datastream"),
-
-    CONTENT("test-content");
+    DATASTREAM_NAME("test-datastream");
 
     private final String value;
 
@@ -45,9 +43,9 @@ public enum TestDatastream {
             .dsid(dsid)
             .digitalObject(digitalObject)
             .baseMetadata(TestMetadataBaseEntity.generate())
-            .size((long) CONTENT.getValue().getBytes().length)
-            .mimeType("text/plain")
-            .fileName("test.txt")
+            .size( (long) TestDatastreamContent.CONTENT.getValue().length())
+            .mimeType(TestDatastreamContent.CONTENT_TYPE.getValue())
+            .fileName(TestDatastreamContent.ORIGINAL_FILENAME.getValue())
             .build();
     }
 }

@@ -21,6 +21,7 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDatastreamContent;
 import org.zim.gamsapi.enums.TestDigitalObject;
 
 import java.nio.charset.StandardCharsets;
@@ -156,7 +157,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
       Datastream testDatastream = TestDatastream.generate(testDigitalObject);
 
-      MockMultipartFile multipartFile = new MockMultipartFile("file", "test.txt", MediaType.TEXT_PLAIN_VALUE, TestDatastream.CONTENT.getValue().getBytes(StandardCharsets.UTF_8));
+      MockMultipartFile multipartFile = TestDatastreamContent.generate();
       datastreamService.save(testDatastream, multipartFile);
 
       // DELETE request
@@ -232,7 +233,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       // Arrange
       Datastream datastream = TestDatastream.generate(testDigitalObject);
 
-      datastreamContentRepository.save(TestDatastream.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
+      datastreamContentRepository.save(TestDatastreamContent.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
       datastreamRepository.save(datastream);
 
       String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s/content", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
@@ -246,7 +247,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
       // Assert
       Assertions.assertThat(mvcResult.getResponse()).isNotNull();
-      Assertions.assertThat(mvcResult.getResponse().getContentAsString()).isEqualTo(TestDatastream.CONTENT.getValue());
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString()).isEqualTo(TestDatastreamContent.CONTENT.getValue());
 
       // Cleanup
       datastreamRepository.delete(datastream);
