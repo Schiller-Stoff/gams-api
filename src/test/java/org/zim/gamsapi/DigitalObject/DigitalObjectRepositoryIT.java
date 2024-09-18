@@ -34,7 +34,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
     @BeforeEach
     public void setup(){
-        // TODO tests should be independent
         testProject = Project
             .builder()
             .projectAbbr(TestProject.PROJECT_ABBR.getValue())
