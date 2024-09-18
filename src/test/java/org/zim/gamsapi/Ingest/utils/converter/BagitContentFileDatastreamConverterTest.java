@@ -20,7 +20,6 @@ public class BagitContentFileDatastreamConverterTest extends UnitTest {
     bagitContentFile.setTitle("title");
     bagitContentFile.setCreator("creator");
     bagitContentFile.setDescription("description");
-    bagitContentFile.setPublisher("publisher");
     bagitContentFile.setRights("rights");
 
     BagitContentFileDatastreamConverter converter = new BagitContentFileDatastreamConverter();
@@ -33,7 +32,6 @@ public class BagitContentFileDatastreamConverterTest extends UnitTest {
     Assertions.assertEquals(bagitContentFile.getTitle(), datastream.getBaseMetadata().getTitle());
     Assertions.assertEquals(bagitContentFile.getCreator(), datastream.getBaseMetadata().getCreator());
     Assertions.assertEquals(bagitContentFile.getDescription(), datastream.getBaseMetadata().getDescription());
-    Assertions.assertEquals(bagitContentFile.getPublisher(), datastream.getBaseMetadata().getPublisher());
     Assertions.assertEquals(bagitContentFile.getRights(), datastream.getBaseMetadata().getRights());
 
 

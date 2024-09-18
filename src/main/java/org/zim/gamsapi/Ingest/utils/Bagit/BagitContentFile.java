@@ -63,10 +63,4 @@ public class BagitContentFile {
     private String rights;
 
 
-    /**
-     * Publisher of the datastream
-     */
-    @NotEmpty
-    private String publisher;
-
 }

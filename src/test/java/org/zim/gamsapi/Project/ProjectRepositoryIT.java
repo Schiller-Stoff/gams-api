@@ -34,6 +34,8 @@ public class ProjectRepositoryIT extends IntegrationTest {
   private AuditingHandler auditingHandler;
 
 
+  // TODO tests should be independent
+
   @Test
   public void projectDeletionFailIfDigitalObjectStillReferencesTheProject(){
 
@@ -43,18 +45,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
 
     projectRepository.save(project);
 
-    DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .project(project)
-        .baseMetadata(new MetadataBaseEntityBuilder()
-            .title("test-title")
-            .rights("test-rights")
-            .publisher("test-publisher")
-            .creator("test-creator")
-            .description("test-description")
-            .build()
-        )
-        .build() ;
+    DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
 
     digitalObjectRepository.save(digitalObject);
 

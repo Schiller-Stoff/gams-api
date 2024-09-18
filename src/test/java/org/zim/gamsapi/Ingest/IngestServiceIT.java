@@ -44,6 +44,7 @@ public class IngestServiceIT extends IntegrationTest {
 
   @BeforeAll
   public void setup() throws IOException {
+    // TODO tests should be independent
     bagFile = TestBag.loadFile();
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }

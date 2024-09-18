@@ -25,7 +25,9 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+import org.zim.gamsapi.enums.TestProject;
 
 import java.nio.charset.StandardCharsets;
 
@@ -62,12 +64,10 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   @BeforeAll
   public void setup() {
-    testProject = Project.builder().projectAbbr("testProject").build();
-    testDigitalObject = new DigitalObjectBuilder()
-        .id("testId")
-        .project(testProject)
-        .baseMetadata(TestMetadataBaseEntity.generate())
-        .build();
+    // TODO make sure that tests are actually independet
+
+    testDigitalObject = TestDigitalObject.generate();
+    testProject = testDigitalObject.getProject();
     projectRepository.save(testProject);
     digitalObjectRepository.save(testDigitalObject);
   }

@@ -20,6 +20,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
@@ -57,7 +58,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @BeforeAll
   public void setup(){
-
+    // TODO tests should be independent
     testProject = Project
       .builder()
       .projectAbbr(TestProject.PROJECT_ABBR.getValue())
@@ -91,11 +92,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     public void successFullySavesSimpleDigitalObject() {
       // given
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("testPid")
-        .project(testProject)
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       // when
       DigitalObject savedDigitalObject = digitalObjectService.save(digitalObject);
@@ -117,11 +114,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     public void successFullySavesDigitalObjectWithParent() {
       // given
 
-      DigitalObject parent = new DigitalObjectBuilder()
-        .id("parentPid")
-        .project(testProject)
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
+      DigitalObject parent = TestDigitalObject.generate();
 
       digitalObjectRepository.save(parent);
 
@@ -129,6 +122,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
         .id("testPid")
         .project(testProject)
         .parent(parent)
+        .publisher("testPublisher")
         .baseMetadata(testMetadataBaseEntity)
         .build();
 
@@ -156,8 +150,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
         .id("testPid")
         .project(testProject)
+        .publisher("testPublisher")
         .baseMetadata(testMetadataBaseEntity)
-        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").baseMetadata(testMetadataBaseEntity).build())
+        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").publisher("foo").baseMetadata(testMetadataBaseEntity).build())
         .build();
 
       // when
@@ -190,11 +185,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(project)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
       digitalObjectRepository.save(digitalObject);
 
       Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
@@ -224,11 +215,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = Project.builder().projectAbbr("random").build();
       projectRepository.save(project);
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(project)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
 
       digitalObjectRepository.save(digitalObject);
 
@@ -257,6 +244,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject parent = new DigitalObjectBuilder()
           .id("parentPid")
           .project(testProject)
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(parent);
@@ -264,6 +252,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id("testPid")
           .project(testProject)
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(digitalObject);
@@ -284,12 +273,14 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .baseMetadata(testMetadataBaseEntity)
+          .publisher("testPublisher")
           .build();
       digitalObjectRepository.save(digitalObject);
 
       DigitalObject nonExistentParent = new DigitalObjectBuilder()
           .id("nonExistentParentPid")
           .project(testProject)
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
 
@@ -327,6 +318,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id("testPid")
           .project(project)
+          .publisher("testPublisher")
           .objectType("testType")
           .baseMetadata(testMetadataBaseEntity)
           .build();
@@ -351,6 +343,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .id("testPid1")
           .project(project)
           .types(Set.of("testType1"))
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(digitalObject1);
@@ -359,6 +352,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .id("testPid2")
           .project(project)
           .types(Set.of("testType2"))
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(digitalObject2);
@@ -392,11 +386,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void deletesDigitalObject() {
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("SOME_RANDOM_ID")
-          .project(testProject)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
       digitalObjectRepository.save(digitalObject);
 
       digitalObjectService.delete(digitalObject);
@@ -408,11 +398,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void deletesChildDatastreamsWithFileContent() {
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("SOME_RANDOM_ID")
-          .project(testProject)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       digitalObjectRepository.save(digitalObject);
 

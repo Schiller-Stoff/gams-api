@@ -49,11 +49,9 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   @BeforeAll
   public void setup(){
-    testObject = new DigitalObjectBuilder()
-        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-        .baseMetadata(TestMetadataBaseEntity.generate())
-        .build();
+    // TODO tests should be independent
+
+    testObject = TestDigitalObject.generate();
 
     testProject = testObject.getProject();
 
@@ -89,13 +87,10 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void throwsIfReferencedDigitalObjectNotFound(){
 
-      final String RANDOM_PID = "SOME_RANDOM_PID";
-      Datastream datastream = TestDatastream.generate(new DigitalObjectBuilder()
-          .id(RANDOM_PID)
-          .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build()
-      );
+      final DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObject.setId("SOME_RANDOM_PID");
+
+      Datastream datastream = TestDatastream.generate(digitalObject);
 
       Assertions.assertThrows(
           DigitalObjectNotFoundException.class,

@@ -17,7 +17,6 @@ public class TestMetadataBaseEntity {
     return new MetadataBaseEntityBuilder()
         .title("test-title")
         .rights("test-rights")
-        .publisher("test-publisher")
         .creator("test-creator")
         .description("test-description")
         .build();

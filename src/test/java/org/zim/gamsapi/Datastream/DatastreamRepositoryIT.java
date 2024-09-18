@@ -10,6 +10,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
@@ -62,15 +63,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @BeforeAll
     public void setup(){
 
-        testDigitalObject = new DigitalObjectBuilder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-            .project(
-                Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-            .baseMetadata(testMetadataBaseEntity)
-            .build();
-
+        testDigitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue());
         testProject = testDigitalObject.getProject();
-
         testDatastream = TestDatastream.generate(testDigitalObject);
+
+        // TODO think about: every test should be independent!
 
         projectRepository.save(testProject);
         digitalObjectRepository.save(testDigitalObject);
@@ -165,17 +162,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
 
-            final String TEST_DSID = "DSID_12345";
-            DigitalObject toBeDeleted = new DigitalObjectBuilder()
-                .id("SOME_PID_12345")
-                .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-                .baseMetadata(testMetadataBaseEntity)
-                .build();
-
+            DigitalObject toBeDeleted = TestDigitalObject.generate();
 
             digitalObjectRepository.save(toBeDeleted);
             Datastream savedDatastream = datastreamRepository.save(
-                TestDatastream.generate(toBeDeleted, TEST_DSID)
+                TestDatastream.generate(toBeDeleted)
             );
 
             // try to delete the object if datastream is still available
@@ -210,7 +201,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject, "DSID_TO_BE_DELETED");
+            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), "DIGITAL_OBJECT_TO_BE_DELETED");
+
+            digitalObjectRepository.save(digitalObject);
+
+            Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "DSID_TO_BE_DELETED");
 
             datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
 
@@ -223,6 +218,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // delete datastream
             datastreamRepository.delete(datastreamToBeDeleted);
+            digitalObjectRepository.delete(digitalObject);
 
             // datastream deleted
             Assertions.assertThat(
@@ -459,11 +455,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void throwsIfObjectIsNotSaved(){
 
-        DigitalObject unsavedObject = new DigitalObjectBuilder()
-            .id("UNSAVED_OBJECT")
-            .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-            .baseMetadata(TestMetadataBaseEntity.generate())
-            .build();
+        DigitalObject unsavedObject = TestDigitalObject.generate();
+        unsavedObject.setId("NOT_SAVED_OBJECT_923");
 
         Datastream aDatastream = TestDatastream.generate(unsavedObject, "RANDOM_DSID_123456");
 

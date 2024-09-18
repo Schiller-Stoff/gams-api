@@ -22,6 +22,9 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+import org.zim.gamsapi.enums.TestProject;
+
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,7 +54,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @BeforeAll
   public void setup() {
-    testProject = Project.builder().projectAbbr("testProject").build();
+    // TODO tests should be independent
+    testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
     projectRepository.save(testProject);
   }
 
@@ -71,12 +75,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void createsExpectedDigitalObject() throws Exception {
       // Arrange
-      DigitalObject expectedDigitalObject = new DigitalObjectBuilder()
-          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-          .project(testProject)
-          .objectType("TEI")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      DigitalObject expectedDigitalObject = TestDigitalObject.generate();
 
       ObjectMapper objectMapper = new ObjectMapper();
       String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
@@ -116,12 +115,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void deleteDigitalObjectWhenItExists() throws Exception {
       // Arrange
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-          .project(testProject)
-          .objectType("TEI")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       digitalObjectRepository.save(digitalObject);
 
@@ -143,12 +137,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void deleteDigitalObjectWhenItContainsDatastreams() throws Exception {
       // Arrange
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-          .project(testProject)
-          .objectType("TEI")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       digitalObjectRepository.save(digitalObject);
 
@@ -190,12 +179,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void getDigitalObjectRendersExpectedViewValues() throws Exception {
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .objectType("TEI")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObject.setObjectType("testObjectType");
 
       digitalObjectRepository.save(digitalObject);
 
@@ -228,12 +213,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .objectType("TEI")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       digitalObjectRepository.save(digitalObject);
 
@@ -273,12 +253,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .objectType("TEI")
-          .baseMetadata(TestMetadataBaseEntity.generate())
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       digitalObjectRepository.save(digitalObject);
 
@@ -301,7 +276,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getBaseMetadata().getTitle(),
               digitalObject.getBaseMetadata().getDescription(),
               digitalObject.getBaseMetadata().getCreator(),
-              digitalObject.getBaseMetadata().getPublisher(),
               digitalObject.getBaseMetadata().getRights()
           );
 
@@ -317,20 +291,17 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getObjectJsonReturnsDigitalObjectWhenItExists() throws Exception {
 
-    final String OBJECT_TEST_ID = "testPid";
-    digitalObjectRepository.save(
-        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate())
-          .build()
-        );
+    DigitalObject digitalObject = TestDigitalObject.generate();
+    digitalObjectRepository.save(digitalObject);
 
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), OBJECT_TEST_ID)
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(OBJECT_TEST_ID));
+    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(digitalObject.getId()));
 
-    digitalObjectRepository.deleteById(OBJECT_TEST_ID);
+    digitalObjectRepository.deleteById(digitalObject.getId());
   }
 
   @Test
@@ -352,34 +323,29 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Test
   public void getProjectObjectsJsonReturnsDigitalObjectsWhenTheyExistForProject() throws Exception {
-    final String OBJECT_TEST_ID = "testPid";
-    digitalObjectRepository.save(
-        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject)
-            .baseMetadata(TestMetadataBaseEntity.generate())
-            .build()
-
-    );
+    final DigitalObject digitalObject = TestDigitalObject.generate();
+    digitalObjectRepository.save(digitalObject);
 
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testProject.getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(OBJECT_TEST_ID));
+    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(digitalObject.getId()));
 
-    digitalObjectRepository.deleteById(OBJECT_TEST_ID);
+    digitalObjectRepository.deleteById(digitalObject.getId());
   }
 
   @Test
   public void deleteObjectRemovesDigitalObjectWhenItExists() throws Exception {
-    final String OBJECT_TEST_ID = "testPid";
-    digitalObjectRepository.save(new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build());
+    final DigitalObject digitalObject = TestDigitalObject.generate();
+    digitalObjectRepository.save(digitalObject);
 
-    mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), OBJECT_TEST_ID)
+    mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().is3xxRedirection());
 
-    Assertions.assertFalse(digitalObjectRepository.existsById(OBJECT_TEST_ID));
+    Assertions.assertFalse(digitalObjectRepository.existsById(digitalObject.getId()));
   }
 
   @Test
@@ -392,14 +358,14 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
 
-    final String OBJECT_TEST_ID = "testPid";
+    final DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), "RANDOM_PID_8d7");
     digitalObjectRepository.save(
-        new DigitalObjectBuilder().id(OBJECT_TEST_ID).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build()
+        digitalObject1
     );
 
-    final String OBJECT_TEST_ID2 = "testPid2";
+    final DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), "RANDOM_PID_8d8123");
     digitalObjectRepository.save(
-        new DigitalObjectBuilder().id(OBJECT_TEST_ID2).project(testProject).baseMetadata(TestMetadataBaseEntity.generate()).build()
+        digitalObject2
     );
 
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testProject.getProjectAbbr())
@@ -408,10 +374,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         .andReturn();
 
     org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-        .contains(OBJECT_TEST_ID, OBJECT_TEST_ID2);
+        .contains(digitalObject1.getId(), digitalObject2.getId());
 
-    digitalObjectRepository.deleteById(OBJECT_TEST_ID);
-    digitalObjectRepository.deleteById(OBJECT_TEST_ID2);
+    digitalObjectRepository.deleteById(digitalObject1.getId());
+    digitalObjectRepository.deleteById(digitalObject2.getId());
 
 
   }

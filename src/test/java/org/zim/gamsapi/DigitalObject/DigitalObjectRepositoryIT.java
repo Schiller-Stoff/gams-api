@@ -11,6 +11,7 @@ import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
     @BeforeAll
     public void setup(){
-
+        // TODO tests should be independent
         testProject = Project
             .builder()
             .projectAbbr(TestProject.PROJECT_ABBR.getValue())
@@ -72,22 +73,16 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
         @Test
         public void successfullySavesObject(){
 
-            final String RANDOM_PID = "RANDOM_PID";
+            DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
 
-            digitalObjectRepository.save(
-                new DigitalObjectBuilder()
-                    .id(RANDOM_PID)
-                    .project(testProject)
-                    .baseMetadata(testMetadataBaseEntity)
-                    .build()
-            );
+            digitalObjectRepository.save(digitalObject);
 
-            Assertions.assertThat(digitalObjectRepository.findById(RANDOM_PID))
+            Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
                 .isNotNull()
                 .isPresent();
 
             // cleanup
-            digitalObjectRepository.deleteById(RANDOM_PID);
+            digitalObjectRepository.deleteById(digitalObject.getId());
 
 
         }
@@ -98,39 +93,25 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     @Test
     public void testFindByPid() {
 
-        final String RANDOM_PID = "RANDOM_PID";
+        final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
 
-        digitalObjectRepository.save(
-            new DigitalObjectBuilder()
-                .id(RANDOM_PID)
-                .project(testProject)
-                .baseMetadata(testMetadataBaseEntity)
-                .build()
-        );
+        digitalObjectRepository.save(digitalObject);
 
-        digitalObjectRepository.findById(RANDOM_PID);
-
-        Assertions.assertThat(digitalObjectRepository.findById(RANDOM_PID))
+        Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
             .isNotNull()
             .isPresent();
 
         // cleanup
-        digitalObjectRepository.deleteById(RANDOM_PID);
+        digitalObjectRepository.deleteById(digitalObject.getId());
 
     }
 
     @Test
     public void testFindByProjectAbbr() {
 
-        final String RANDOM_PID = "RANDOM_PID";
+        final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
 
-        digitalObjectRepository.save(
-            new DigitalObjectBuilder()
-                .id(RANDOM_PID)
-                .project(testProject)
-                .baseMetadata(testMetadataBaseEntity)
-                .build()
-        );
+        digitalObjectRepository.save(digitalObject);
 
         List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(testProject.getProjectAbbr());
 
@@ -139,25 +120,19 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             .isExactlyInstanceOf(ArrayList.class)
             .first()
             .extracting(DigitalObject::getId)
-            .isEqualTo(RANDOM_PID);
+            .isEqualTo(digitalObject.getId());
 
         // cleanup
-        digitalObjectRepository.deleteById(RANDOM_PID);
+        digitalObjectRepository.deleteById(digitalObject.getId());
     }
 
     @Test
     @Transactional
     public void testDeleteAllByProjectAbbr() {
 
-        final String RANDOM_PID = "RANDOM_PID";
+        final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
 
-        digitalObjectRepository.save(
-            new DigitalObjectBuilder()
-                .id(RANDOM_PID)
-                .project(testProject)
-                .baseMetadata(testMetadataBaseEntity)
-                .build()
-        );
+        digitalObjectRepository.save(digitalObject);
 
         digitalObjectRepository.deleteAllByProject_ProjectAbbr(testProject.getProjectAbbr());
 
@@ -172,20 +147,14 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     @Test
     public void testDeleteAll() {
 
-        final String RANDOM_PID = "RANDOM_PID";
+        final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
 
-        digitalObjectRepository.save(
-            new DigitalObjectBuilder()
-                .id(RANDOM_PID)
-                .project(testProject)
-                .baseMetadata(testMetadataBaseEntity)
-                .build()
-        );
+        digitalObjectRepository.save(digitalObject);
 
         digitalObjectRepository.deleteAll();
 
         Assertions.assertThat(
-            digitalObjectRepository.findById(RANDOM_PID)
+            digitalObjectRepository.findById(digitalObject.getId())
         ).isNotNull().isEmpty();
     }
 

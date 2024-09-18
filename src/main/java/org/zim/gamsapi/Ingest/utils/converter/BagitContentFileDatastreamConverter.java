@@ -33,7 +33,6 @@ public class BagitContentFileDatastreamConverter implements Converter<BagitConte
             .title(source.getTitle())
             .creator(source.getCreator())
             .description(source.getDescription())
-            .publisher(source.getPublisher())
             .rights(source.getRights())
             .build())
         .build();

@@ -44,6 +44,8 @@ public class DigitalObjectCompactDTO {
 
     private String modifiedBy;
 
+    private String publisher;
+
     @Builder.Default
     private Set<String> types = new HashSet<>();
 
@@ -75,6 +77,7 @@ public class DigitalObjectCompactDTO {
                 ", baseMetadata=" + baseMetadata +
                 ", createdBy='" + createdBy + '\'' +
                 ", modifiedBy='" + modifiedBy + '\'' +
+                ", publisher='" + publisher + '\'' +
                 ", types=" + types +
                 '}';
     }

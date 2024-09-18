@@ -17,11 +17,6 @@ public class MetadataBaseEntityBuilder {
     return this;
   }
 
-  public MetadataBaseEntityBuilder publisher(String publisher) {
-    metadataBaseEntity.setPublisher(publisher);
-    return this;
-  }
-
   public MetadataBaseEntityBuilder creator(String creator) {
     metadataBaseEntity.setCreator(creator);
     return this;
@@ -41,12 +36,6 @@ public class MetadataBaseEntityBuilder {
 
     if((metadataBaseEntity.getRights() == null) || metadataBaseEntity.getRights().isEmpty()){
       String msg = String.format("MetadataBaseEntity's rights must not be null or empty! Happened at class %s", this.getClass().getName());
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-
-    if((metadataBaseEntity.getPublisher() == null) || metadataBaseEntity.getPublisher().isEmpty()){
-      String msg = String.format("MetadataBaseEntity's publisher must not be null or empty! Happened at class %s", this.getClass().getName());
       log.error(msg);
       throw new IllegalStateException(msg);
     }

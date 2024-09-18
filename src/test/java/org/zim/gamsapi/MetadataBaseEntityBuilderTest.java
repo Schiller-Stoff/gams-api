@@ -41,37 +41,30 @@ public class MetadataBaseEntityBuilderTest extends UnitTest {
   }
 
   @Test
-  public void throwsIfPublisherIsEmpty(){
-    Assertions.assertThrows(IllegalStateException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").publisher("").build();
-    });
-  }
-
-  @Test
   public void throwsIfCreatorIsNotSet(){
     Assertions.assertThrows(IllegalStateException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").publisher("test-publisher").build();
+      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").build();
     });
   }
 
   @Test
   public void throwsIfCreatorIsEmpty(){
     Assertions.assertThrows(IllegalStateException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").publisher("test-publisher").creator("").build();
+      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("").build();
     });
   }
 
   @Test
   public void throwsIfDescriptionIsNotSet(){
     Assertions.assertThrows(IllegalStateException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").publisher("test-publisher").creator("test-creator").build();
+      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("test-creator").build();
     });
   }
 
   @Test
   public void throwsIfDescriptionIsEmpty(){
     Assertions.assertThrows(IllegalStateException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").publisher("test-publisher").creator("test-creator").description("").build();
+      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("test-creator").description("").build();
     });
   }
 
@@ -80,14 +73,12 @@ public class MetadataBaseEntityBuilderTest extends UnitTest {
     MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntityBuilder()
         .title("test-title")
         .rights("test-rights")
-        .publisher("test-publisher")
         .creator("test-creator")
         .description("test-description")
         .build();
 
     Assertions.assertEquals("test-title", metadataBaseEntity.getTitle());
     Assertions.assertEquals("test-rights", metadataBaseEntity.getRights());
-    Assertions.assertEquals("test-publisher", metadataBaseEntity.getPublisher());
     Assertions.assertEquals("test-creator", metadataBaseEntity.getCreator());
     Assertions.assertEquals("test-description", metadataBaseEntity.getDescription());
   }

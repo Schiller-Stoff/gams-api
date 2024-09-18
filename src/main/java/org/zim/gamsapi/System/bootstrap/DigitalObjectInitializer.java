@@ -72,12 +72,12 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     DigitalObject lidoObject = new DigitalObjectBuilder()
         .objectType("testlido")
+        .publisher("Universität Graz")
         .baseMetadata(
             new MetadataBaseEntityBuilder()
                 .title("Digital object representing a Chair of the king")
                 .creator("Ada Lovelace")
                 .description("This source datastream contains some information about...")
-                .publisher("Universität Graz")
                 .rights("Creative Commons BY-NC 4.0")
                 .build())
         .build();

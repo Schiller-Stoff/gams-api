@@ -78,7 +78,7 @@ public class BaseSearchService implements IIntegrationService {
     baseSearch.addProperty(BaseSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
     baseSearch.addProperty(BaseSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
     baseSearch.addProperty(BaseSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
-    baseSearch.addProperty(BaseSearchProperties.PUBLISHER.name, digitalObject.getBaseMetadata().getPublisher());
+    baseSearch.addProperty(BaseSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
     baseSearch.addProperty(BaseSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
 
 

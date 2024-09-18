@@ -25,6 +25,7 @@ public class ProjectControllerIT extends IntegrationTest {
 
   @BeforeAll
   public void setup(){
+    // TODO tests should be independent
 
   }
 

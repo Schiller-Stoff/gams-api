@@ -13,6 +13,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 
 import java.util.Set;
@@ -42,7 +43,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").project("foo").baseMetadata(testMetadataBaseEntity).build()
+          TestDigitalObject.generate("foo")
       );
 
       Datastream datastream2 = new Datastream();
@@ -64,7 +65,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").project("12345").baseMetadata(testMetadataBaseEntity).build()
+          TestDigitalObject.generate("foo")
       );
 
       DatastreamId datastreamId = datastream.deriveDatastreamId();
@@ -86,7 +87,7 @@ public class DatastreamTest extends UnitTest {
     public void throwsExceptionWhenDsidIsNull(){
       Datastream datastream = new Datastream();
       datastream.setDigitalObject(
-          new DigitalObjectBuilder().id("FOO_BAR").project("foo").baseMetadata(testMetadataBaseEntity).build()
+          TestDigitalObject.generate("foo")
       );
       Assertions.assertThrows(
           IllegalStateException.class,
@@ -102,11 +103,7 @@ public class DatastreamTest extends UnitTest {
     private static ValidatorFactory validatorFactory;
     private static Validator validator;
 
-    private final DigitalObject TEST_DIGITAL_OBJECT = new DigitalObjectBuilder()
-        .id("FOO_BAR")
-        .project("12345")
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
+    private final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate("foo");
 
     @BeforeAll
     static void init() {
