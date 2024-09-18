@@ -1,7 +1,10 @@
 package org.zim.gamsapi.Ingest;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
@@ -42,14 +45,13 @@ public class IngestServiceIT extends IntegrationTest {
   @MockBean
   private AuditingHandler auditingHandler;
 
-  @BeforeAll
+  @BeforeEach
   public void setup() throws IOException {
-    // TODO tests should be independent
     bagFile = TestBag.loadFile();
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
-  @AfterAll
+  @AfterEach
   public void tearDown(){
     datastreamRepository.deleteAll();
     datastreamContentRepository.deleteAll();
