@@ -10,10 +10,8 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
@@ -60,14 +58,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      * All are in child relationship between project -> digital object -> datastream
      * no additional data is provided.
      */
-    @BeforeAll
+    @BeforeEach
     public void setup(){
 
-        testDigitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue());
+        testDigitalObject = TestDigitalObject.generate();
         testProject = testDigitalObject.getProject();
         testDatastream = TestDatastream.generate(testDigitalObject);
-
-        // TODO think about: every test should be independent!
 
         projectRepository.save(testProject);
         digitalObjectRepository.save(testDigitalObject);
@@ -78,13 +74,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     /**
      * Deletes the test data after each test.
      */
-    @AfterAll
+    @AfterEach
     public void tearDown(){
         datastreamRepository.deleteAll();
         digitalObjectRepository.deleteAll();
         projectRepository.deleteAll();
     }
-
 
     /**
      * Tests if a saved datastream exists with the expected globalID.
@@ -181,10 +176,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 datastreamRepository.findById(savedDatastream.deriveDatastreamId())
             ).isPresent();
 
-            // clean up
-            datastreamRepository.delete(savedDatastream);
-            digitalObjectRepository.delete(toBeDeleted);
-
 
         }
 
@@ -275,13 +266,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         @Transactional
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
-            String TEST_DSID = "DSID_FOR_DATASTREAM";
 
-            Datastream datastreamToBeDeleted = datastreamRepository.save(
-                new DatastreamBuilder()
-                    .dsid(TEST_DSID)
-                    .digitalObject(testDigitalObject)
-                    .build());
+            Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject);
 
             Assertions.assertThat(
                 datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
@@ -313,8 +299,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     .isNotNull()
                     .isNotPresent();
 
-            // cleanup restore test datastream
-            datastreamRepository.save(testDatastream);
         }
 
         @Test
