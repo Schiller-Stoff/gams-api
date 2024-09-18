@@ -15,7 +15,6 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
@@ -58,7 +57,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @BeforeEach
   public void setup(){
-    // TODO tests should be independent
     testProject = Project
       .builder()
       .projectAbbr(TestProject.PROJECT_ABBR.getValue())
