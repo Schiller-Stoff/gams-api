@@ -5,29 +5,23 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
-import org.zim.gamsapi.enums.TestProject;
 
 import java.nio.charset.StandardCharsets;
 
@@ -62,29 +56,24 @@ public class DatastreamControllerIT extends IntegrationTest {
   @MockBean
   private AuditingHandler auditingHandler;
 
-  @BeforeAll
-  public void setup() {
-    // TODO make sure that tests are actually independet
 
+  @BeforeEach
+  public void setup() {
     testDigitalObject = TestDigitalObject.generate();
     testProject = testDigitalObject.getProject();
     projectRepository.save(testProject);
     digitalObjectRepository.save(testDigitalObject);
   }
 
-  @AfterAll
+  @AfterEach
   public void tearDown() {
-    digitalObjectRepository.delete(testDigitalObject);
-    projectRepository.delete(testProject);
-    org.assertj.core.api.Assertions.assertThat(projectRepository.findAll())
-        .isNotNull()
-        .isEmpty();
+    digitalObjectRepository.deleteAll();
+    projectRepository.deleteAll();
     datastreamContentRepository.deleteAll();
   }
 
   @Nested
   public class WebClientTests {
-
 
     @Test
     public void getDatastreamRendersExpectedDsidInView() throws Exception {
