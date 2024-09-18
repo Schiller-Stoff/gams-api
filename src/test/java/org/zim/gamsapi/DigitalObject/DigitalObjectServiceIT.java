@@ -56,7 +56,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @MockBean
   private AuditingHandler auditingHandler;
 
-  @BeforeAll
+  @BeforeEach
   public void setup(){
     // TODO tests should be independent
     testProject = Project
@@ -68,20 +68,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
-  @AfterAll
+  @AfterEach
   public void tearDown(){
-
-    projectRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
+    datastreamRepository.deleteAll();
     datastreamContentRepository.deleteAll();
-
-    Assertions.assertThat(digitalObjectRepository.findAll())
-      .isNotNull()
-      .isEmpty();
-
-    Assertions.assertThat(projectRepository.findAll())
-        .isNotNull()
-        .isEmpty();
+    digitalObjectRepository.deleteAll();
+    projectRepository.deleteAll();
   }
 
   @Nested
@@ -106,8 +98,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
-      // cleanup
-      digitalObjectRepository.delete(digitalObject);
     }
 
     @Test
@@ -137,9 +127,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
-      // cleanup
-      digitalObjectRepository.delete(digitalObject);
-      digitalObjectRepository.delete(parent);
     }
 
 
@@ -176,7 +163,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(result).isEmpty();
 
-      projectRepository.delete(project);
     }
 
     @Test
@@ -193,8 +179,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
-      digitalObjectRepository.delete(digitalObject);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -223,8 +207,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(result).isEqualTo(digitalObject);
 
-      digitalObjectRepository.delete(digitalObject);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -262,9 +244,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject result = digitalObjectService.findById(digitalObject.getId());
 
       Assertions.assertThat(result.getParent()).isEqualTo(parent);
-
-      digitalObjectRepository.delete(digitalObject);
-      digitalObjectRepository.delete(parent);
     }
 
     @Test
@@ -287,8 +266,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
         digitalObjectService.assignParentObject(digitalObject, nonExistentParent);
       });
-
-      digitalObjectRepository.delete(digitalObject);
     }
   }
 
@@ -306,7 +283,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(result).isEmpty();
 
-      projectRepository.delete(project);
     }
 
     @Test
@@ -329,8 +305,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
-      digitalObjectRepository.delete(digitalObject);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -365,9 +339,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject1.getId());
 
-      digitalObjectRepository.delete(digitalObject1);
-      digitalObjectRepository.delete(digitalObject2);
-      projectRepository.delete(project);
     }
 
     @Test
