@@ -1,11 +1,13 @@
 package org.zim.gamsapi.Ingest;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,8 +21,10 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestBag;
 import org.zim.gamsapi.enums.TestProject;
+
 import java.io.File;
 import java.io.IOException;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,14 +54,13 @@ public class IngestControllerIT extends IntegrationTest {
 
   File bagFile;
 
-  @BeforeAll
+  @BeforeEach
   public void setup() throws IOException {
-    // TODO tests should be independent
     bagFile = TestBag.loadFile();
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
-  @AfterAll
+  @AfterEach
   public void tearDown(){
     datastreamRepository.deleteAll();
     datastreamContentRepository.deleteAll();
@@ -79,10 +82,6 @@ public class IngestControllerIT extends IntegrationTest {
 
     Assertions.assertThat(datastreamRepository.findAll()).isNotEmpty();
     Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
-
-    // cleanup
-    datastreamRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
 
   }
 }
