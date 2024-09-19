@@ -30,9 +30,6 @@ public class DigitalObjectBuilder {
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-
-
-    // TODO test this!
     DigitalObject parent = new DigitalObject();
     parent.setId(parentId);
     // parent project is being set in build method
@@ -71,6 +68,11 @@ public class DigitalObjectBuilder {
     return this;
   }
 
+  public DigitalObjectBuilder publisher(String publisher) {
+    digitalObject.setPublisher(publisher);
+    return this;
+  }
+
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
       String msg = String.format("Digital object ID must not be null or empty! Happened at class %s", this.getClass().getName());
@@ -80,6 +82,12 @@ public class DigitalObjectBuilder {
 
     if((digitalObject.getProject() == null) || digitalObject.getProject().getProjectAbbr().isEmpty()){
       String msg = String.format("DigitalObject's project must not be null or it's abbreviation empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getPublisher() == null) || digitalObject.getPublisher().isEmpty()){
+      String msg = String.format("DigitalObject's publisher must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
       log.error(msg);
       throw new IllegalStateException(msg);
     }

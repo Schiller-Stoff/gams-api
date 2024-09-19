@@ -32,6 +32,7 @@ public class ConstraintViolationTest extends UnitTest {
         DigitalObject digitalObject = new DigitalObjectBuilder()
             .project(Project.builder().projectAbbr("foo").build())
             .id("foo")
+            .publisher("foo")
             .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
@@ -44,7 +45,7 @@ public class ConstraintViolationTest extends UnitTest {
         DigitalObject digitalObject = new DigitalObject();
         digitalObject.setId(null);
         digitalObject.setProject(Project.builder().projectAbbr("Foo").build());
-
+        digitalObject.setPublisher("Foo");
         digitalObject.setBaseMetadata(TestMetadataBaseEntity.generate());
 
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
@@ -55,27 +56,26 @@ public class ConstraintViolationTest extends UnitTest {
     @Test
     public void shouldRaiseConstraintViolationIfMetadataIsEmpty() {
         MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
-
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(5));
+        assertThat(violationSet.size(), is(3));
     }
 
     @Test
-    public void shouldRaiseConstraintViolationIfMetadataDescriptionIsTooShort() {
+    public void shouldNotRaiseConstraintViolationIfMetadataDescriptionIsAnEmptyString() {
         MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
         // set a description that is too short
-        metadataBaseEntity.setDescription("123");
+        metadataBaseEntity.setDescription("");
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(1));
+        assertThat(violationSet.size(), is(0));
     }
 
     @Test
-    public void shouldRaiseConstraintViolationIfMetadataPublisherIsEmpty() {
+    public void shouldNotRaiseConstraintViolationIfMetadataDescriptionIsNull() {
         MetadataBaseEntity metadataBaseEntity = TestMetadataBaseEntity.generate();
-        // set publisher to empty string
-        metadataBaseEntity.setPublisher("");
+        // set a description that is too short
+        metadataBaseEntity.setDescription(null);
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(1));
+        assertThat(violationSet.size(), is(0));
     }
 
     @Test

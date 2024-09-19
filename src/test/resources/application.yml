@@ -17,3 +17,8 @@ spring:
 testcontainers:
   reuse:
     enable: true
+
+
+gams:
+  storage:
+    rootPath: ${GAMS_FILES_ROOT_PATH:gams-test}

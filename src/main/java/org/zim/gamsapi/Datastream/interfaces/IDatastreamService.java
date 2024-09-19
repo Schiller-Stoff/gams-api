@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
@@ -13,7 +14,7 @@ public interface IDatastreamService {
   Datastream findById(DatastreamId id) throws DatastreamNotFoundException;
 
 
-  Datastream save(Datastream datastream);
+  Datastream save(Datastream datastream, MultipartFile file);
 
 
   List<IDatastreamDetailsView> findAll(DigitalObject digitalObject);

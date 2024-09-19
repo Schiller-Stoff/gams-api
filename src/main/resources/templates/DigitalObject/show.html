@@ -72,34 +72,6 @@
                 </li>
               </ul>
               <br/>
-              <form
-                      onsubmit="return webCirilo.appendFormSubmitPath('add_datastream_form', 'datastream_id_input')"
-                      id="add_datastream_form"
-                      action="#"
-                      th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/'}"
-                      th:object="${do}"
-                      method="put"
-                      th:method="PUT"
-                      enctype="multipart/form-data"
-                      class="w-25"
-              >
-                <div class="form-group">
-                  <!-- <input class="form-control" id="id" type="hidden" th:field="*{id}"/> -->
-                  <p><b>New datastream</b> (via datastream-id) <input required class="form-control" type="text" id="datastream_id_input"/></p>
-                  <input class="form-control" type="file" id="file" name="file" value="Upload file" required/>
-                </div>
-                <script>
-                  webCirilo.addChecksumRequestParam("file","add_datastream_form");
-                </script>
-                <!-- <label for="fname">First name:</label> -->
-                <!-- <input type="text" id="lname" name="lname"><br><br> -->
-                <br/>
-                <p>
-                  <input class="btn btn-light" type="submit" value="Submit"/>
-                  <input class="btn btn-light" type="reset" value="Reset" />
-                </p>
-              </form>
-              <br/>
               <h2 class="h4">Metadata</h2>
               <p>Primary metadata derived from the GAMS-API</p>
               <ul class="list-group-flush p-0">
@@ -140,7 +112,7 @@
                 <!--          </li>-->
                 <li class="list-group-item bg-light">
                   <small>publisher</small>
-                  <p th:text="${do.baseMetadata.publisher}"></p>
+                  <p th:text="${do.publisher}"></p>
                 </li>
                 <!--          <li class="list-group-item bg-light">-->
                 <!--            <small>dc:contributor</small>-->

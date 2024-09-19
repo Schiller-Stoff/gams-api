@@ -64,7 +64,6 @@ public interface IDigitalObjectService {
 
   void delete(DigitalObject digitalObject);
 
-  void deleteAllForProject(Project project);
 
   /**
    * Allows to assign child objects to a parent object.

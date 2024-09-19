@@ -149,36 +149,6 @@ public class DigitalObjectController {
 
   }
 
-  /**
-   * Allows to assign child objects to given parent object
-   * @param id the id of the object
-   * @param parentId id of the parent object
-   * @param project the project
-   * @return the parent object with the assigned child objects
-   */
-  @PatchMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/{id}/collect", "/{id}/collect/"})
-  @ResponseBody
-  public DigitalObject collectObjects(
-          @PathVariable String id,
-          @RequestParam String parentId,
-          Project project
-  ) {
-
-    // TODO this method is completely outdated -> core API now only supports assignment of one parent object!
-    DigitalObject foundObject = digitalObjectService.assignParentObject(
-        new DigitalObjectBuilder()
-            .id(id)
-            .project(project)
-            .build(),
-        new DigitalObjectBuilder()
-            .id(parentId)
-            .project(project)
-            .build()
-    );
-
-    return foundObject;
-  }
-
   @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
           // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
@@ -221,7 +191,7 @@ public class DigitalObjectController {
 
   @DeleteMapping
   public String deleteAllForProject(Project project, @RequestHeader Map<String, String> requestHeader){
-    digitalObjectService.deleteAllForProject(project);
+    projectService.deleteProject(project);
     log.info("Deleted all objects for project {}", project);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";

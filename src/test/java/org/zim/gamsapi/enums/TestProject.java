@@ -1,5 +1,7 @@
 package org.zim.gamsapi.enums;
 
+import org.zim.gamsapi.Project.Project;
+
 /**
  * Enum for test project credentials.
  */
@@ -17,4 +19,12 @@ public enum TestProject {
     public String getValue() {
         return value;
     }
+
+
+    public static Project generate(){
+        return Project.builder()
+            .projectAbbr(PROJECT_ABBR.getValue())
+            .build();
+    }
+
 }

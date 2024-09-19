@@ -35,7 +35,6 @@ public class BagitSipJson {
     @NotEmpty
     private String objectType;
 
-    @NotEmpty
     private String description;
 
     @NotEmpty

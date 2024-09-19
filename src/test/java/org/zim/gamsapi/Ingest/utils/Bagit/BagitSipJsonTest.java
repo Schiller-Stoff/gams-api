@@ -88,7 +88,6 @@ public class BagitSipJsonTest extends UnitTest {
       bagitContentFile.setBagpath("path");
       bagitContentFile.setRights("rights");
       bagitContentFile.setSize(0L);
-      bagitContentFile.setPublisher("publisher");
       bagitContentFile.setCreator("creator");
 
       bagitSipJson.getContentFiles().add(bagitContentFile);

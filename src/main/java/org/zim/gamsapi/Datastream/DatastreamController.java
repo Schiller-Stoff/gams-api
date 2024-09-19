@@ -12,15 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
 import java.util.Map;
 
 @Slf4j
@@ -32,6 +31,7 @@ public class DatastreamController {
   private final IDatastreamService datastreamService;
   private final IProjectService projectService;
   private final IDigitalObjectService digitalObjectService;
+  private final IDatastreamContentService datastreamContentService;
 
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
@@ -50,37 +50,6 @@ public class DatastreamController {
     model.addAttribute(foundDatastream);
     model.addAttribute(project);
     return foundDatastream;
-  }
-
-  @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public String createDatastream(
-          DigitalObject digitalObject,
-          Datastream datastream,
-          @RequestParam MetadataBaseEntity metadataBaseEntity,
-          @RequestParam MultipartFile file,
-          Model model,
-          Project project,
-          @RequestHeader Map<String, String> requestHeader
-  ) throws IOException {
-
-    // TODO: is this method outdated? - datastreams need baseMetadata assigned.
-
-    log.debug("Got datastream-entity: {}. Applying file {} from request-params", datastream, file);
-
-    DigitalObject foundObject = digitalObjectService.findById(digitalObject.getId());
-
-    datastream.setData(file.getBytes());
-    datastream.setMimeType(file.getContentType());
-    datastream.setDigitalObject(foundObject);
-
-    // TODO test if setting of baseMetadata works as expected!
-    datastream.setBaseMetadata(metadataBaseEntity);
-    Datastream savedDatastream = datastreamService.save(datastream);
-
-    model.addAttribute("datastream", savedDatastream);
-    model.addAttribute(foundObject);
-    String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + digitalObject.getId();
   }
 
   @DeleteMapping
@@ -113,13 +82,14 @@ public class DatastreamController {
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
-  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid) {
+  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid){
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());
-    InputStream in = new ByteArrayInputStream(datastream.getData());
+    InputStreamResource inputStreamResource = datastreamContentService.load(datastream.deriveDatastreamId());
     return ResponseEntity.ok()
+        .contentLength(datastream.getSize())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body(new InputStreamResource(in));
+        .body( inputStreamResource);
 
   }
 }

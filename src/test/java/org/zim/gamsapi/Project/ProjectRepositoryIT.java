@@ -2,6 +2,7 @@ package org.zim.gamsapi.Project;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -10,10 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
@@ -43,18 +42,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
 
     projectRepository.save(project);
 
-    DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .project(project)
-        .baseMetadata(new MetadataBaseEntityBuilder()
-            .title("test-title")
-            .rights("test-rights")
-            .publisher("test-publisher")
-            .creator("test-creator")
-            .description("test-description")
-            .build()
-        )
-        .build() ;
+    DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
 
     digitalObjectRepository.save(digitalObject);
 
@@ -62,11 +50,6 @@ public class ProjectRepositoryIT extends IntegrationTest {
         DataIntegrityViolationException.class,
         () -> projectRepository.delete(project)
     );
-
-    // cleanup
-    digitalObjectRepository.delete(digitalObject);
-    projectRepository.delete(project);
-
 
   }
 

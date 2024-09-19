@@ -1,6 +1,9 @@
 package org.zim.gamsapi;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -11,6 +14,10 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -29,6 +36,18 @@ public abstract class IntegrationTest {
   // https://stackoverflow.com/questions/60778556/testing-spring-security-oauth2login-enabled-applications-throws-illegalargumente
   @MockBean
   ClientRegistrationRepository clientRegistrationRepository;
+
+  @Autowired
+  IProjectRepository projectRepository;
+
+  @Autowired
+  IDigitalObjectRepository digitalObjectRepository;
+
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDatastreamContentRepository datastreamContentRepository;;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
@@ -76,5 +95,17 @@ public abstract class IntegrationTest {
 
 
   }
+
+  /**
+   * After each test, performs a system wipe so that the next test can start with a clean slate.
+   */
+  @AfterEach
+  public void tearDown(){
+    datastreamContentRepository.deleteAll();
+    datastreamRepository.deleteAll();
+    digitalObjectRepository.deleteAll();
+    projectRepository.deleteAll();
+  }
+
 
 }

@@ -64,7 +64,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     Datastream teiSource = new DatastreamBuilder()
             .dsid("TEI_SOURCE")
-            .data("test".getBytes())
             .digitalObject(teiObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .build();
@@ -73,12 +72,12 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     DigitalObject lidoObject = new DigitalObjectBuilder()
         .objectType("testlido")
+        .publisher("Universität Graz")
         .baseMetadata(
             new MetadataBaseEntityBuilder()
                 .title("Digital object representing a Chair of the king")
                 .creator("Ada Lovelace")
                 .description("This source datastream contains some information about...")
-                .publisher("Universität Graz")
                 .rights("Creative Commons BY-NC 4.0")
                 .build())
         .build();
@@ -87,7 +86,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     Datastream lidoSource = new DatastreamBuilder()
             .dsid("LIDO_SOURCE")
-            .data("test".getBytes())
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
@@ -106,7 +104,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     Datastream image = new DatastreamBuilder()
             .dsid("IMAGE_1")
-            .data("test".getBytes())
             .digitalObject(lidoObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .baseMetadata(
@@ -133,7 +130,6 @@ public class DigitalObjectInitializer implements CommandLineRunner {
 
     Datastream gmlImage = new DatastreamBuilder()
             .dsid("IMAGE_1")
-            .data("test".getBytes())
             .digitalObject(gmlObject)
             .mimeType(MimeTypeUtils.TEXT_PLAIN_VALUE)
             .build();

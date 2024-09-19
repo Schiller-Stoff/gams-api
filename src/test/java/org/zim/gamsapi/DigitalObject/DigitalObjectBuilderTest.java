@@ -39,7 +39,19 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertThrows(IllegalStateException.class, () -> {
       new DigitalObjectBuilder()
           .id("12345")
+          .publisher("test-publisher")
           .project("")
+          .baseMetadata(testMetadataBaseEntity)
+          .build();
+    });
+  }
+
+  @Test
+  public void throwsIfPublisherIsNotSet(){
+    Assertions.assertThrows(IllegalStateException.class, () -> {
+      new DigitalObjectBuilder()
+          .id("12345")
+          .project("projectAbbr")
           .baseMetadata(testMetadataBaseEntity)
           .build();
     });
@@ -52,6 +64,7 @@ public class DigitalObjectBuilderTest extends UnitTest {
         .objectType("type")
         .types(Set.of("type"))
         .project("projectAbbr")
+        .publisher("test-publisher")
         .baseMetadata(testMetadataBaseEntity)
         .build();
 
@@ -70,6 +83,7 @@ public class DigitalObjectBuilderTest extends UnitTest {
         .id("1")
         .project(TEST_PROJECT_ABBR)
         .parent("2")
+        .publisher("test-publisher")
         .baseMetadata(testMetadataBaseEntity)
         .build();
 
@@ -77,6 +91,19 @@ public class DigitalObjectBuilderTest extends UnitTest {
         digitalObject.getParent().getProject().getProjectAbbr(), TEST_PROJECT_ABBR
     );
 
+  }
+
+  @Test
+  public void allowsToSetParentObjectViaPidAsString_hasSameId(){
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("1")
+        .project("projectAbbr")
+        .parent("2")
+        .publisher("test-publisher")
+        .baseMetadata(testMetadataBaseEntity)
+        .build();
+
+    Assertions.assertEquals("2", digitalObject.getParent().getId());
   }
 
 

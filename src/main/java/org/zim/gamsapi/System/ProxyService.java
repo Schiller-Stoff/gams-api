@@ -16,7 +16,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriTemplateHandler;
-import org.zim.gamsapi.Integration.Common.exceptions.ProcessingException;
+import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.net.URI;
 import java.net.URLDecoder;
@@ -96,12 +96,12 @@ public class ProxyService implements IProxyService {
       String msg = String.format("Failed to proxy to integrated service via %s. The service might not have been available at request time. Original error message: %s", targetUrl, e);
       log.error(msg);
       // TODO use better exception? (like IntegrationServiceUnavailableException?)
-      throw new ProcessingException(msg);
+      throw new IntegrationDataProcessingException(msg);
     } catch (RestClientException e) {
       String msg = String.format("Failed to proxy to integrated service via %s. Original error message: %s", targetUrl, e);
       log.error(msg);
       // TODO use better exception? (like IntegrationServiceUnavailableException?)
-      throw new ProcessingException(msg);
+      throw new IntegrationDataProcessingException(msg);
     }
 
   }

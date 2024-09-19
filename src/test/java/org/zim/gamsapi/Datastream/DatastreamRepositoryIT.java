@@ -12,7 +12,6 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
@@ -59,22 +58,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      * All are in child relationship between project -> digital object -> datastream
      * no additional data is provided.
      */
-    @BeforeAll
+    @BeforeEach
     public void setup(){
 
-        testDigitalObject = new DigitalObjectBuilder().id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-            .project(
-                Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-            .baseMetadata(testMetadataBaseEntity)
-            .build();
-
+        testDigitalObject = TestDigitalObject.generate();
         testProject = testDigitalObject.getProject();
-
-        testDatastream = new DatastreamBuilder()
-            .dsid(TestDatastream.DSID.getValue())
-            .digitalObject(testDigitalObject)
-            .baseMetadata(testMetadataBaseEntity)
-            .build();
+        testDatastream = TestDatastream.generate(testDigitalObject);
 
         projectRepository.save(testProject);
         digitalObjectRepository.save(testDigitalObject);
@@ -83,28 +72,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     }
 
     /**
-     * Deletes the test data after each test.
-     */
-    @AfterAll
-    public void tearDown(){
-        datastreamRepository.deleteAll();
-        digitalObjectRepository.deleteAll();
-        projectRepository.deleteAll();
-    }
-
-
-    /**
      * Tests if a saved datastream exists with the expected globalID.
      */
     @Test
     public void saveDatastreamExistsWithExpectedID() {
-        Datastream datastream = datastreamRepository.save(
-            new DatastreamBuilder()
-                .digitalObject(testDigitalObject)
-                .dsid("SOME_RANDOM_DSID")
-                .baseMetadata(testMetadataBaseEntity)
-                .build()
-        );
+        // using the DatastreamId from the test datastream
+        Datastream datastream = TestDatastream.generate(testDigitalObject, "SOME_RANDOM_DSID");
+        datastreamRepository.save(datastream);
 
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.deriveDatastreamId()))
@@ -114,7 +88,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::deriveDatastreamId)
                 .isEqualTo(datastream.deriveDatastreamId()
         );
-//        // clean up and check if successfully deleted
+        // clean up and check if successfully deleted
         datastreamRepository.delete(datastream);
         Assertions.assertThat(
                 datastreamRepository.findById(datastream.deriveDatastreamId()))
@@ -128,11 +102,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @Test
     public void deleteDatastreamRemovesDatastream() {
-        Datastream datastream = datastreamRepository.save(new DatastreamBuilder()
-            .digitalObject(testDigitalObject)
-            .dsid("SOME_RANDOM_DSID_45123")
-            .baseMetadata(testMetadataBaseEntity)
-            .build());
+        Datastream datastream = datastreamRepository.save(
+            TestDatastream.generate(testDigitalObject, "SOME_RANDOM_DSID_45123")
+        );
         Assertions.assertThat(
                         datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
@@ -175,20 +147,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
 
-            final String TEST_DSID = "DSID_12345";
-            DigitalObject toBeDeleted = new DigitalObjectBuilder()
-                .id("SOME_PID_12345")
-                .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-                .baseMetadata(testMetadataBaseEntity)
-                .build();
-
+            DigitalObject toBeDeleted = TestDigitalObject.generate();
 
             digitalObjectRepository.save(toBeDeleted);
-            Datastream savedDatastream = datastreamRepository.save(new DatastreamBuilder()
-                .digitalObject(toBeDeleted)
-                .baseMetadata(testMetadataBaseEntity)
-                .dsid(TEST_DSID)
-                .build());
+            Datastream savedDatastream = datastreamRepository.save(
+                TestDatastream.generate(toBeDeleted)
+            );
 
             // try to delete the object if datastream is still available
             org.junit.jupiter.api.Assertions.assertThrows(
@@ -201,10 +165,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             Assertions.assertThat(
                 datastreamRepository.findById(savedDatastream.deriveDatastreamId())
             ).isPresent();
-
-            // clean up
-            datastreamRepository.delete(savedDatastream);
-            digitalObjectRepository.delete(toBeDeleted);
 
 
         }
@@ -222,11 +182,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            Datastream datastreamToBeDeleted = new DatastreamBuilder()
-                .dsid("DSID_TO_BE_DELETED")
-                .digitalObject(testDigitalObject)
-                .baseMetadata(testMetadataBaseEntity)
-                .build();
+            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), "DIGITAL_OBJECT_TO_BE_DELETED");
+
+            digitalObjectRepository.save(digitalObject);
+
+            Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "DSID_TO_BE_DELETED");
 
             datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
 
@@ -239,6 +199,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // delete datastream
             datastreamRepository.delete(datastreamToBeDeleted);
+            digitalObjectRepository.delete(digitalObject);
 
             // datastream deleted
             Assertions.assertThat(
@@ -295,13 +256,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         @Transactional
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
-            String TEST_DSID = "DSID_FOR_DATASTREAM";
 
-            Datastream datastreamToBeDeleted = datastreamRepository.save(
-                new DatastreamBuilder()
-                    .dsid(TEST_DSID)
-                    .digitalObject(testDigitalObject)
-                    .build());
+            Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject);
+            datastreamRepository.save(datastreamToBeDeleted);
 
             Assertions.assertThat(
                 datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
@@ -333,8 +290,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     .isNotNull()
                     .isNotPresent();
 
-            // cleanup restore test datastream
-            datastreamRepository.save(testDatastream);
         }
 
         @Test
@@ -475,17 +430,10 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void throwsIfObjectIsNotSaved(){
 
-        DigitalObject unsavedObject = new DigitalObjectBuilder()
-            .id("UNSAVED_OBJECT")
-            .project(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build())
-            .baseMetadata(TestMetadataBaseEntity.generate())
-            .build();
+        DigitalObject unsavedObject = TestDigitalObject.generate();
+        unsavedObject.setId("NOT_SAVED_OBJECT_923");
 
-        Datastream aDatastream = new DatastreamBuilder()
-            .dsid("RANDOM_DSID_123456")
-            .digitalObject(unsavedObject)
-            .baseMetadata(TestMetadataBaseEntity.generate())
-            .build();
+        Datastream aDatastream = TestDatastream.generate(unsavedObject, "RANDOM_DSID_123456");
 
 
         org.junit.jupiter.api.Assertions.assertThrows(

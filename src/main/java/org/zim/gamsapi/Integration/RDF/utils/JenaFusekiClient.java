@@ -11,10 +11,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -99,7 +102,8 @@ public class JenaFusekiClient {
    * @param digitalObject Digital object to represent.
    * @return Turtle of digital object.
    */
-  public String buildDefaultIndexingTriple(DigitalObject digitalObject){
+  public String buildDefaultIndexingTriple(DigitalObject digitalObject, Set<Datastream> datastreams){
+
     StringBuilder turtle = new StringBuilder();
     turtle.append(
             String.format("<SERVER_REPLACEMENT/%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <SERVER_REPLACEMENT/ontology#digitalObject> <SERVER_REPLACEMENT/%s>.", digitalObject.getId(), digitalObject.getId())
@@ -108,10 +112,9 @@ public class JenaFusekiClient {
 
     turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_PROJECT_ABBR.name, digitalObject.getProject().getProjectAbbr(), digitalObject.getId()));
 
-    // TODO must be done via datastream repository now
-//    digitalObject.getDatastreams().forEach(datastream -> {
-//      turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
-//    });
+    datastreams.forEach(datastream -> {
+      turtle.append(String.format("<SERVER_REPLACEMENT/%s> %s \"%s\" <SERVER_REPLACEMENT/%s>.",digitalObject.getId(), RDFSearchProperties.HAS_DATASTREAM.name, datastream.getDsid(), digitalObject.getId()));
+    });
 
     // replace server names to the defined via enums.
     return turtle.toString().replaceAll("SERVER_REPLACEMENT", RDFSearchProperties.GAMS_BASE_URL.name);

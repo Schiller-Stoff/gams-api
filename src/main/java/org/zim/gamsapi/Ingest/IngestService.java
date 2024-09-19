@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
@@ -28,6 +29,7 @@ public class IngestService implements IIngestService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
   @Transactional
@@ -59,8 +61,8 @@ public class IngestService implements IIngestService {
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
       // 03. build and save datastreams from sip.json in the bagit payload
-      bagitSipJson.getContentFiles().stream()
-            .map(contentFile -> {
+      bagitSipJson.getContentFiles()
+            .forEach(contentFile -> {
               Datastream datastream = conversionService.convert(contentFile, Datastream.class);
               if(datastream == null){
                 String msg = String.format("Datastream is unexpectedly null. Failed to convert contentFile %s to datastream for given ingest %s for object %s", contentFile, ingest, digitalObject);
@@ -69,6 +71,7 @@ public class IngestService implements IIngestService {
               }
 
               // things need to be set aside from conversion.
+              // TODO usage of byte[] looks weird - because of streaming - maybe use inputstream?
               byte[] datastreamContent;
               Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
               try {
@@ -80,12 +83,26 @@ public class IngestService implements IIngestService {
               }
 
               datastream.setDigitalObject(digitalObject);
-              datastream.setData(datastreamContent);
               datastream.setFileName(contentFilePath.getFileName().toString());
-              return datastream;
-            })
-            .forEach(datastreamRepository::save);
+              datastream.setSize((long) datastreamContent.length);
+              datastream.setMimeType(contentFile.getMimetype());
 
+              // saving the datastream content to the filesystem
+              datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());
+              // save datastream to database
+              // make sure that the files are being deleted in any case (if database error occurs).
+              try {
+                datastreamRepository.save(datastream);
+              } catch (Exception e){
+                // make sure that in any case the file on the filesystem is being deleted
+                if(datastreamContentRepository.exists(datastream.deriveDatastreamId())){
+                  String msg = String.format("Failed to save datastream %s. For datastream file with name %s", datastream, datastream.deriveDatastreamId());
+                  log.error(msg);
+                  datastreamContentRepository.delete(datastream.deriveDatastreamId());
+                };
+                throw e;
+              }
+            });
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
       ZipUtils.deleteDir(bagDirPath);

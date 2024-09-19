@@ -35,9 +35,13 @@ build/
 
 .mvn/wrapper/maven-wrapper.jar
 log
-docker/apps/solr/solr
+
+docker/apps/solr/solr/
+
 
 # ignore mounted data from fedora / but not config
 docker/apps/fedora/fcrepo-home/data
 docker/apps/pgadmin/*
 docker/apps/postgres/postgres-data
+gams/*
+gams-test/*

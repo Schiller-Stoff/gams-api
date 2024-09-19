@@ -1,12 +1,15 @@
 package org.zim.gamsapi.Ingest;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
@@ -31,6 +34,9 @@ public class IngestServiceIT extends IntegrationTest {
   IDatastreamRepository datastreamRepository;
 
   @Autowired
+  IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
   IngestService ingestService;
 
   File bagFile;
@@ -39,23 +45,14 @@ public class IngestServiceIT extends IntegrationTest {
   @MockBean
   private AuditingHandler auditingHandler;
 
-  @BeforeAll
+  @BeforeEach
   public void setup() throws IOException {
     bagFile = TestBag.loadFile();
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
-  @AfterAll
-  public void tearDown(){
-    datastreamRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-    // everything should be removed
-    Assertions.assertThat(projectRepository.findAll()).isEmpty();
-  }
-
   @Test
-  public void createsExpectedDigitalObject(){
+  public void createsExpectedDigitalObject_withDatastreamsAndContent(){
 
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
 
@@ -67,14 +64,20 @@ public class IngestServiceIT extends IntegrationTest {
 
     // assert that the digital object was created
     Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
-    Assertions.assertThat(datastreamRepository.findAll())
+    var datastreams = datastreamRepository.findAll();
+    Assertions.assertThat(datastreams)
         .isNotEmpty()
         .hasSize(3);
+
+    // assert that expected datastream content exists on the fileystem
+    datastreams.forEach(datastream -> {
+      Assertions.assertThat(datastreamContentRepository.exists(datastream.deriveDatastreamId())).isTrue();
+    });
 
     // cleanup
     datastreamRepository.deleteAll();
     digitalObjectRepository.deleteAll();
-
+    datastreamContentRepository.deleteAll();
   }
 
 

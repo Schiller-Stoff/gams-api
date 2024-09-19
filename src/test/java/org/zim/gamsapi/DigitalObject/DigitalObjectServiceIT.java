@@ -7,15 +7,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
@@ -34,6 +38,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   IDigitalObjectRepository digitalObjectRepository;
 
   @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
   IDigitalObjectService digitalObjectService;
 
   Project testProject;
@@ -45,9 +55,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @MockBean
   private AuditingHandler auditingHandler;
 
-  @BeforeAll
+  @BeforeEach
   public void setup(){
-
     testProject = Project
       .builder()
       .projectAbbr(TestProject.PROJECT_ABBR.getValue())
@@ -55,21 +64,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     projectRepository.save(testProject);
 
-  }
-
-  @AfterAll
-  public void tearDown(){
-
-    projectRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-
-    Assertions.assertThat(digitalObjectRepository.findAll())
-      .isNotNull()
-      .isEmpty();
-
-    Assertions.assertThat(projectRepository.findAll())
-        .isNotNull()
-        .isEmpty();
   }
 
   @Nested
@@ -80,11 +74,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     public void successFullySavesSimpleDigitalObject() {
       // given
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("testPid")
-        .project(testProject)
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
+      DigitalObject digitalObject = TestDigitalObject.generate();
 
       // when
       DigitalObject savedDigitalObject = digitalObjectService.save(digitalObject);
@@ -98,19 +88,13 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
-      // cleanup
-      digitalObjectRepository.delete(digitalObject);
     }
 
     @Test
     public void successFullySavesDigitalObjectWithParent() {
       // given
 
-      DigitalObject parent = new DigitalObjectBuilder()
-        .id("parentPid")
-        .project(testProject)
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
+      DigitalObject parent = TestDigitalObject.generate();
 
       digitalObjectRepository.save(parent);
 
@@ -118,6 +102,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
         .id("testPid")
         .project(testProject)
         .parent(parent)
+        .publisher("testPublisher")
         .baseMetadata(testMetadataBaseEntity)
         .build();
 
@@ -132,9 +117,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
-      // cleanup
-      digitalObjectRepository.delete(digitalObject);
-      digitalObjectRepository.delete(parent);
     }
 
 
@@ -145,8 +127,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
         .id("testPid")
         .project(testProject)
+        .publisher("testPublisher")
         .baseMetadata(testMetadataBaseEntity)
-        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").baseMetadata(testMetadataBaseEntity).build())
+        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").publisher("foo").baseMetadata(testMetadataBaseEntity).build())
         .build();
 
       // when
@@ -170,7 +153,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(result).isEmpty();
 
-      projectRepository.delete(project);
     }
 
     @Test
@@ -179,11 +161,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(project)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
       digitalObjectRepository.save(digitalObject);
 
       Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
@@ -191,8 +169,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
-      digitalObjectRepository.delete(digitalObject);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -213,11 +189,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = Project.builder().projectAbbr("random").build();
       projectRepository.save(project);
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(project)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
+      DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
 
       digitalObjectRepository.save(digitalObject);
 
@@ -225,8 +197,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(result).isEqualTo(digitalObject);
 
-      digitalObjectRepository.delete(digitalObject);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -238,71 +208,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
   }
 
-
-  @Nested
-  public class DeleteAllForProject {
-
-    @Test
-    public void deletesAllDigitalObjectsForProject() {
-      String projectAbbr = "existingProject";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
-      projectRepository.save(project);
-
-      DigitalObject digitalObject1 = new DigitalObjectBuilder()
-          .id("testPid1")
-          .project(project)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject1);
-
-      DigitalObject digitalObject2 = new DigitalObjectBuilder()
-          .id("testPid2")
-          .project(project)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject2);
-
-      digitalObjectService.deleteAllForProject(project);
-
-      Assertions.assertThat(digitalObjectRepository.findAll()).isEmpty();
-
-      projectRepository.delete(project);
-    }
-
-    @Test
-    public void doesNotDeleteDigitalObjectsForOtherProjects() {
-      String projectAbbr1 = "existingProject1";
-      Project project1 = Project.builder().projectAbbr(projectAbbr1).build();
-      projectRepository.save(project1);
-
-      String projectAbbr2 = "existingProject2";
-      Project project2 = Project.builder().projectAbbr(projectAbbr2).build();
-      projectRepository.save(project2);
-
-      DigitalObject digitalObject1 = new DigitalObjectBuilder()
-          .id("testPid1")
-          .project(project1)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject1);
-
-      DigitalObject digitalObject2 = new DigitalObjectBuilder()
-          .id("testPid2")
-          .project(project2)
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject2);
-
-      digitalObjectService.deleteAllForProject(project1);
-
-      Assertions.assertThat(digitalObjectRepository.findAll()).containsOnly(digitalObject2);
-
-      digitalObjectRepository.delete(digitalObject2);
-      projectRepository.delete(project1);
-      projectRepository.delete(project2);
-    }
-  }
-
   @Nested
   public class AssignParentObject {
 
@@ -311,6 +216,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject parent = new DigitalObjectBuilder()
           .id("parentPid")
           .project(testProject)
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(parent);
@@ -318,6 +224,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id("testPid")
           .project(testProject)
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(digitalObject);
@@ -327,9 +234,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject result = digitalObjectService.findById(digitalObject.getId());
 
       Assertions.assertThat(result.getParent()).isEqualTo(parent);
-
-      digitalObjectRepository.delete(digitalObject);
-      digitalObjectRepository.delete(parent);
     }
 
     @Test
@@ -338,20 +242,20 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .id("testPid")
           .project(testProject)
           .baseMetadata(testMetadataBaseEntity)
+          .publisher("testPublisher")
           .build();
       digitalObjectRepository.save(digitalObject);
 
       DigitalObject nonExistentParent = new DigitalObjectBuilder()
           .id("nonExistentParentPid")
           .project(testProject)
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
 
       org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
         digitalObjectService.assignParentObject(digitalObject, nonExistentParent);
       });
-
-      digitalObjectRepository.delete(digitalObject);
     }
   }
 
@@ -369,7 +273,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(result).isEmpty();
 
-      projectRepository.delete(project);
     }
 
     @Test
@@ -381,6 +284,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
           .id("testPid")
           .project(project)
+          .publisher("testPublisher")
           .objectType("testType")
           .baseMetadata(testMetadataBaseEntity)
           .build();
@@ -391,8 +295,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
-      digitalObjectRepository.delete(digitalObject);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -405,6 +307,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .id("testPid1")
           .project(project)
           .types(Set.of("testType1"))
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(digitalObject1);
@@ -413,6 +316,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .id("testPid2")
           .project(project)
           .types(Set.of("testType2"))
+          .publisher("testPublisher")
           .baseMetadata(testMetadataBaseEntity)
           .build();
       digitalObjectRepository.save(digitalObject2);
@@ -425,9 +329,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject1.getId());
 
-      digitalObjectRepository.delete(digitalObject1);
-      digitalObjectRepository.delete(digitalObject2);
-      projectRepository.delete(project);
     }
 
     @Test
@@ -440,6 +341,43 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
 
+
+  @Nested
+  public class Delete {
+
+    @Test
+    public void deletesDigitalObject() {
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+
+      digitalObjectService.delete(digitalObject);
+
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findById(digitalObject.getId()))
+          .isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
+    public void deletesChildDatastreamsWithFileContent() {
+
+      DigitalObject digitalObject = TestDigitalObject.generate();
+
+      digitalObjectRepository.save(digitalObject);
+
+      final Datastream TEST_DATASTREAM = TestDatastream.generate(digitalObject);
+
+      datastreamRepository.save(TEST_DATASTREAM);
+      datastreamContentRepository.save(new byte[0], TEST_DATASTREAM.deriveDatastreamId());
+
+      digitalObjectService.delete(digitalObject);
+
+      Assertions.assertThat(datastreamRepository.existsById(TEST_DATASTREAM.deriveDatastreamId())).isFalse();
+      Assertions.assertThat(datastreamContentRepository.exists(TEST_DATASTREAM.deriveDatastreamId())).isFalse();
+
+
+    }
+
+
+  }
 
 
 }

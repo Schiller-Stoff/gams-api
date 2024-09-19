@@ -1,6 +1,5 @@
 package org.zim.gamsapi.Datastream;
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -52,24 +51,19 @@ public class Datastream {
   @Id
   private String dsid;
 
-  /**
-   * Actual contained binary data
-   */
-  @Column(name = "data")
-  @ToString.Exclude
-  @JsonIgnore
-  private byte[] data;
 
   /**
    * Mimetype of the contained data.
    */
   @Column(name = "mime_type")
+  @NotEmpty
   private String mimeType;
 
   @Column(name = "file_name")
   private String fileName;
 
   @Column
+  @NotNull
   private Long size;
 
   @Column

@@ -4,12 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -20,6 +27,8 @@ public class DatastreamService implements IDatastreamService {
   private final IDatastreamRepository datastreamRepository;
 
   private final IDigitalObjectRepository digitalObjectRepository;
+
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
   @Transactional
@@ -38,6 +47,9 @@ public class DatastreamService implements IDatastreamService {
     }
 
     datastreamRepository.delete(datastream);
+    datastreamContentRepository.delete(
+      datastream.deriveDatastreamId()
+    );
   }
 
 
@@ -50,14 +62,27 @@ public class DatastreamService implements IDatastreamService {
       log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
+
   }
 
   @Override
   @Transactional
-  public Datastream save(Datastream datastream) {
+  public Datastream save(Datastream datastream, MultipartFile file) {
+
+    // THINK ABOUT: maybe should use input stream instead of byte array?
+    byte[] data;
+    try {
+      data = file.getBytes();
+    } catch (IOException e) {
+      String msg = String.format("Failed to extract data from given multipart-file for datastream %s from given file %s",datastream, file);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    }
+
     if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
       String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
       log.info(msg);
+      datastreamContentRepository.save(data, datastream.deriveDatastreamId());
       return datastreamRepository.save(datastream);
     } else {
       String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);

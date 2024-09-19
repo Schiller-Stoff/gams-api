@@ -31,11 +31,6 @@ public class MetadataBaseEntity {
   @NotEmpty
   private String rights;
 
-  /**
-   * Publisher of the digital object or datastream
-   */
-  @NotEmpty
-  private String publisher;
 
   /**
    * Creator of digital object or datastream
@@ -46,8 +41,7 @@ public class MetadataBaseEntity {
   /**
    * Description if the digital object or datastream
    */
-  @Size(min = 5, max = 2000)
-  @NotEmpty
+  @Size(max = 2000)
   private String description;
 
 
