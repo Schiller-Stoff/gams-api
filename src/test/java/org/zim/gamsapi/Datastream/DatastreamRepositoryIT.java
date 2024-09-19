@@ -72,16 +72,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     }
 
     /**
-     * Deletes the test data after each test.
-     */
-    @AfterEach
-    public void tearDown(){
-        datastreamRepository.deleteAll();
-        digitalObjectRepository.deleteAll();
-        projectRepository.deleteAll();
-    }
-
-    /**
      * Tests if a saved datastream exists with the expected globalID.
      */
     @Test
@@ -268,6 +258,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void deleteByDigitalObjectAndDsidDeletesDatastream(){
 
             Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject);
+            datastreamRepository.save(datastreamToBeDeleted);
 
             Assertions.assertThat(
                 datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())

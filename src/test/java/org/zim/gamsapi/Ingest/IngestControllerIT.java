@@ -60,14 +60,6 @@ public class IngestControllerIT extends IntegrationTest {
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
-  @AfterEach
-  public void tearDown(){
-    datastreamRepository.deleteAll();
-    datastreamContentRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-  }
-
   @Test
   public void ingestCreatesAtLeastOneObjectAndOneDatastream() throws Exception {
     byte[] zippedBag = ZipUtils.zipDir(bagFile);

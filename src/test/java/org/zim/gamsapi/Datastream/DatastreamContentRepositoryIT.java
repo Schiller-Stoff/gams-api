@@ -20,11 +20,6 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
   @Autowired
   GAMSStorageProperties gamsStorageProperties;
 
-  @AfterAll
-  public void tearDown(){
-    datastreamContentRepository.deleteAll();
-  }
-
   @Nested
   public class Save {
 

@@ -45,22 +45,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     }
 
 
-    @AfterEach
-    public void tearDown(){
-        digitalObjectRepository.deleteAll();
-        projectRepository.deleteAll();
-
-        Assertions.assertThat(digitalObjectRepository.findAll())
-            .isNotNull()
-            .isEmpty();
-
-        Assertions.assertThat(projectRepository.findAll())
-            .isNotNull()
-            .isEmpty();
-
-    }
-
-
     @Nested
     public class Save {
 

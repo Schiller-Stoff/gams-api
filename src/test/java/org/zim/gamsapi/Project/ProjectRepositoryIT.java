@@ -33,12 +33,6 @@ public class ProjectRepositoryIT extends IntegrationTest {
   private AuditingHandler auditingHandler;
 
 
-  @AfterEach
-  public void tearDown(){
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-  }
-
   @Test
   public void projectDeletionFailIfDigitalObjectStillReferencesTheProject(){
 

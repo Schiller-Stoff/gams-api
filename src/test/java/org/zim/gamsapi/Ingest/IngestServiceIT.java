@@ -51,16 +51,6 @@ public class IngestServiceIT extends IntegrationTest {
     projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
-  @AfterEach
-  public void tearDown(){
-    datastreamRepository.deleteAll();
-    datastreamContentRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-    // everything should be removed
-    Assertions.assertThat(projectRepository.findAll()).isEmpty();
-  }
-
   @Test
   public void createsExpectedDigitalObject_withDatastreamsAndContent(){
 

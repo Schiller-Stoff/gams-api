@@ -27,12 +27,6 @@ public class ProjectControllerIT extends IntegrationTest {
   private IProjectRepository projectRepository;
 
 
-  @AfterEach
-  public void tearDown(){
-    projectRepository.deleteAll();
-  }
-
-
   @Nested
   public class WebclientTest {
 

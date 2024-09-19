@@ -36,9 +36,6 @@ public class DatastreamContentServiceIT extends IntegrationTest {
       Assertions.assertThat(inputStreamResource.getContentAsString(StandardCharsets.UTF_8)).contains("test data");
 
 
-      // cleanup
-      datastreamContentRepository.delete(TEST_DATASTREAM_ID);
-
     }
 
 

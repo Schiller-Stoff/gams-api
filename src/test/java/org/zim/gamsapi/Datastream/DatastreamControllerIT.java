@@ -66,13 +66,6 @@ public class DatastreamControllerIT extends IntegrationTest {
     digitalObjectRepository.save(testDigitalObject);
   }
 
-  @AfterEach
-  public void tearDown() {
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-    datastreamContentRepository.deleteAll();
-  }
-
   @Nested
   public class WebClientTests {
 

@@ -55,14 +55,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     projectRepository.save(testProject);
   }
 
-  @AfterEach
-  public void tearDown() {
-    datastreamContentRepository.deleteAll();
-    datastreamRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-  }
-
   @Nested
   public class PUTRequests {
 

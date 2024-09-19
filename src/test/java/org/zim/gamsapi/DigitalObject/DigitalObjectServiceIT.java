@@ -66,14 +66,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
-  @AfterEach
-  public void tearDown(){
-    datastreamRepository.deleteAll();
-    datastreamContentRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-  }
-
   @Nested
   public class Save {
 
