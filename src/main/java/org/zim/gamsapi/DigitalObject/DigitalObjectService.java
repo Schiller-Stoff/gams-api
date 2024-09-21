@@ -150,6 +150,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
 
+  // TODO remove outdated method
   @Transactional
   @Override
   public DigitalObject assignParentObject(DigitalObject digitalObject, DigitalObject parent) {
