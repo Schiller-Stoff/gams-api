@@ -29,7 +29,7 @@ public interface DigitalObjectDetailsView {
 
     Set<String> getTypes();
 
-    String getParent();
+    DigitalObjectIdView getParent();
 
     String getCreatedBy();
 
