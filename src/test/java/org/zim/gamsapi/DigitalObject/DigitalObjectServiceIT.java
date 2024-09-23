@@ -83,8 +83,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(savedDigitalObject).isNotNull();
       Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
       Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
-      // parent was not set
-      Assertions.assertThat(savedDigitalObject.getParent()).isNull();
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
@@ -101,7 +99,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = new DigitalObjectBuilder()
         .id("testPid")
         .project(testProject)
-        .parent(parent)
         .publisher("testPublisher")
         .baseMetadata(testMetadataBaseEntity)
         .build();
@@ -113,31 +110,11 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(savedDigitalObject).isNotNull();
       Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
       Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
-      Assertions.assertThat(savedDigitalObject.getParent()).isEqualTo(parent);
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
     }
 
-
-    @Test
-    public void throwsExceptionWhenParentDoesNotExist() {
-      // given
-
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("testPid")
-        .project(testProject)
-        .publisher("testPublisher")
-        .baseMetadata(testMetadataBaseEntity)
-        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").publisher("foo").baseMetadata(testMetadataBaseEntity).build())
-        .build();
-
-      // when
-      // then
-      Assertions.assertThatThrownBy(() -> digitalObjectService.save(digitalObject))
-        .isInstanceOf(DigitalObjectNotFoundException.class);
-
-    }
   }
 
   @Nested
@@ -207,58 +184,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       });
     }
   }
-
-  @Nested
-  public class AssignParentObject {
-
-    @Test
-    public void assignsParentObjectSuccessfully() {
-      DigitalObject parent = new DigitalObjectBuilder()
-          .id("parentPid")
-          .project(testProject)
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(parent);
-
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject);
-
-      digitalObjectService.assignParentObject(digitalObject, parent);
-
-      DigitalObject result = digitalObjectService.findById(digitalObject.getId());
-
-      Assertions.assertThat(result.getParent()).isEqualTo(parent);
-    }
-
-    @Test
-    public void throwsExceptionWhenParentObjectDoesNotExist() {
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .baseMetadata(testMetadataBaseEntity)
-          .publisher("testPublisher")
-          .build();
-      digitalObjectRepository.save(digitalObject);
-
-      DigitalObject nonExistentParent = new DigitalObjectBuilder()
-          .id("nonExistentParentPid")
-          .project(testProject)
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-
-      org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
-        digitalObjectService.assignParentObject(digitalObject, nonExistentParent);
-      });
-    }
-  }
-
 
   @Nested
   public class FindAllByProjectAbbrWithOptionalParameters {

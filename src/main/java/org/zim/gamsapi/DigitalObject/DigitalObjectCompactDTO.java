@@ -25,9 +25,6 @@ public class DigitalObjectCompactDTO {
     @Builder.Default
     private List<String> datastreams = new ArrayList<>();
 
-
-    private String parent;
-
     private String objectType;
 
     private Date published;
@@ -68,7 +65,6 @@ public class DigitalObjectCompactDTO {
         return "DigitalObjectCompactDTO{" +
                 "id='" + id + '\'' +
                 ", datastreams=" + datastreams +
-                ", parent=" + parent +
                 ", objectType='" + objectType + '\'' +
                 ", published=" + published +
                 ", created=" + created +

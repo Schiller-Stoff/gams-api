@@ -30,11 +30,6 @@ public class BagitSipJsonDigitalObjectConverter implements Converter<BagitSipJso
                 .rights(source.getRights())
                 .build());
 
-        // parent might be null
-        if(source.getParent() != null){
-            digitalObjectBuilder.parent(source.getParent());
-        }
-
         return digitalObjectBuilder.build();
     }
 }

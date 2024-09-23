@@ -46,8 +46,6 @@ public class BagitSipJson {
     @NotEmpty
     private String publisher;
 
-    private String parent;
-
     /**
      * TODO write tests if validation of bagit-content file works as expected!
      */

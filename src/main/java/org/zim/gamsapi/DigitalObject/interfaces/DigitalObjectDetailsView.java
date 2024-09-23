@@ -29,8 +29,6 @@ public interface DigitalObjectDetailsView {
 
     Set<String> getTypes();
 
-    DigitalObjectIdView getParent();
-
     String getCreatedBy();
 
     String getModifiedBy();

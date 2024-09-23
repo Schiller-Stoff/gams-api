@@ -74,37 +74,5 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertEquals("test-title", digitalObject.getBaseMetadata().getTitle());
   }
 
-  @Test
-  public void parentObjectHasSameProjectAssigned(){
-
-    final String TEST_PROJECT_ABBR = "testProjectAbbr";
-
-    DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("1")
-        .project(TEST_PROJECT_ABBR)
-        .parent("2")
-        .publisher("test-publisher")
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
-
-    Assertions.assertEquals(
-        digitalObject.getParent().getProject().getProjectAbbr(), TEST_PROJECT_ABBR
-    );
-
-  }
-
-  @Test
-  public void allowsToSetParentObjectViaPidAsString_hasSameId(){
-    DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("1")
-        .project("projectAbbr")
-        .parent("2")
-        .publisher("test-publisher")
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
-
-    Assertions.assertEquals("2", digitalObject.getParent().getId());
-  }
-
 
 }

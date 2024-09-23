@@ -14,29 +14,6 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder parent(DigitalObject parent) {
-    if(parent.getProject() == null || parent.getProject().getProjectAbbr().isEmpty()){
-      String msg = String.format("Parent object's project must not be null or it's abbreviation empty! Happened at class %s and object %s", this.getClass().getName(), parent);
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    digitalObject.setParent(parent);
-    return this;
-  }
-
-  public DigitalObjectBuilder parent(String parentId) {
-    if(parentId == null || parentId.isEmpty()){
-      String msg = String.format("Parent object's ID must not be null or empty! Happened at class %s", this.getClass().getName());
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    DigitalObject parent = new DigitalObject();
-    parent.setId(parentId);
-    // parent project is being set in build method
-    digitalObject.setParent(parent);
-    return this;
-  }
-
   public DigitalObjectBuilder objectType(String objectType) {
     digitalObject.setObjectType(objectType);
     return this;
@@ -90,11 +67,6 @@ public class DigitalObjectBuilder {
       String msg = String.format("DigitalObject's publisher must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
       log.error(msg);
       throw new IllegalStateException(msg);
-    }
-
-    // parent object has in any case same project as the current object
-    if(digitalObject.getParent() != null){
-      digitalObject.getParent().setProject(digitalObject.getProject());
     }
 
     return digitalObject;

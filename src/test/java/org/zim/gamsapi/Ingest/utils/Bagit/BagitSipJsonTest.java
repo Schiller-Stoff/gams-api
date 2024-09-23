@@ -24,7 +24,6 @@ public class BagitSipJsonTest extends UnitTest {
     bagitSipJson.setCreator("creator");
     bagitSipJson.setRights("rights");
     bagitSipJson.setPublisher("publisher");
-    bagitSipJson.setParent("parent");
 
     // instantiate validator per test
     validatorFactory = jakarta.validation.Validation.buildDefaultValidatorFactory();

@@ -39,15 +39,6 @@ public class DigitalObject {
   @NotBlank
   private String id;
 
-
-  /**
-   * A digital object can contain other digital objects.
-   */
-  @OneToOne(fetch = FetchType.LAZY)
-  // manages infinite reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  private DigitalObject parent;
-
   /**
    * Content Model representation
    */
@@ -141,7 +132,6 @@ public class DigitalObject {
   public String toString() {
     return "DigitalObject{" +
             "id='" + id + '\'' +
-            ", parent='" + parent + "'" +
             ", objectType='" + objectType + '\'' +
             ", published=" + published +
             ", created=" + created +

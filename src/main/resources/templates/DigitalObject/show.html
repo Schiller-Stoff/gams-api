@@ -87,10 +87,6 @@
                   <small>types</small>
                   <p th:text="${do.types}"></p>
                 </li>
-                <li th:if="${do.parent}" class="list-group-item bg-light">
-                  <small>Parent object</small>
-                    <p th:text="${do.parent}"></p>
-                </li>
               </ul>
               <p>Auxiliary metadata as dublin core</p>
               <ul class="list-group-flush p-0" th:if="${do.baseMetadata}">

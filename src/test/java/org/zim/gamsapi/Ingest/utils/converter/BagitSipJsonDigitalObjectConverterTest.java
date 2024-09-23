@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.UnitTest;
-
 import java.util.Set;
 
 public class BagitSipJsonDigitalObjectConverterTest extends UnitTest {
@@ -18,7 +17,6 @@ public class BagitSipJsonDigitalObjectConverterTest extends UnitTest {
     bagitSipJson.setId("testId");
     bagitSipJson.setProject("testProject");
     bagitSipJson.setObjectType("testObjectType");
-    bagitSipJson.setParent("testParent");
     bagitSipJson.setTypes(Set.of("testTypes"));
     bagitSipJson.setTitle("testTitle");
     bagitSipJson.setCreator("testCreator");
@@ -33,7 +31,6 @@ public class BagitSipJsonDigitalObjectConverterTest extends UnitTest {
     Assertions.assertThat(convertedDigitalObject.getId()).isEqualTo(bagitSipJson.getId());
     Assertions.assertThat(convertedDigitalObject.getProject().getProjectAbbr()).isEqualTo(bagitSipJson.getProject());
     Assertions.assertThat(convertedDigitalObject.getObjectType()).isEqualTo(bagitSipJson.getObjectType());
-    Assertions.assertThat(convertedDigitalObject.getParent().getId()).isEqualTo(bagitSipJson.getParent());
     Assertions.assertThat(convertedDigitalObject.getTypes()).isEqualTo(bagitSipJson.getTypes());
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getTitle()).isEqualTo(bagitSipJson.getTitle());
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getCreator()).isEqualTo(bagitSipJson.getCreator());

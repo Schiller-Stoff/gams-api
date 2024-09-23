@@ -22,7 +22,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .published(source.getPublished())
                 .types(source.getTypes())
                 .datastreams(new ArrayList<>())
-                .parent(source.getParent().getId())
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())
                 .build();
