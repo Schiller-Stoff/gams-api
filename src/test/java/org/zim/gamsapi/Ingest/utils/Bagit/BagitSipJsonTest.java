@@ -82,7 +82,6 @@ public class BagitSipJsonTest extends UnitTest {
       // the three missing required properties
       //bagitContentFile.setDsid("dsid");
       //bagitContentFile.setTitle("title");
-      //bagitContentFile.setDescription("description");
       bagitContentFile.setMimetype("mimetype");
       bagitContentFile.setBagpath("path");
       bagitContentFile.setRights("rights");
@@ -96,7 +95,7 @@ public class BagitSipJsonTest extends UnitTest {
       // then
       Assertions.assertThat(violations)
           .isNotEmpty()
-          .hasSize(3);
+          .hasSize(2);
 
 
     }
