@@ -55,15 +55,15 @@ public class MetadataBaseEntityBuilderTest extends UnitTest {
   }
 
   @Test
-  public void throwsIfDescriptionIsNotSet(){
-    Assertions.assertThrows(IllegalStateException.class, () -> {
+  public void doesNotThrowIfDescriptionIsNotSet(){
+    Assertions.assertDoesNotThrow(() -> {
       new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("test-creator").build();
     });
   }
 
   @Test
-  public void throwsIfDescriptionIsEmpty(){
-    Assertions.assertThrows(IllegalStateException.class, () -> {
+  public void doesNotThrowIfDescriptionIsEmpty(){
+    Assertions.assertDoesNotThrow(() -> {
       new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("test-creator").description("").build();
     });
   }
