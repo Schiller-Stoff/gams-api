@@ -127,13 +127,13 @@ public class BagItDirectoryReader {
     // check if dsids are unique
     Set<String> containedDsids = bagitSipJson.getContentFiles().stream().map(BagitContentFile::getDsid).collect(Collectors.toSet());
     if(containedDsids.size() != bagitSipJson.getContentFiles().size()){
-      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files", BagItFilePaths.BAG_SIP_JSON.name);
+      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagItFilePaths.BAG_SIP_JSON.name, bagitSipJson);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
     // check if DC dsid is present - or more in future
     if(!containedDsids.contains(GAMSDsid.DC.getValue())){
-      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json.",GAMSDsid.DC.getValue(),  BagItFilePaths.BAG_SIP_JSON.name);
+      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json. %s",  BagItFilePaths.BAG_SIP_JSON.name, GAMSDsid.DC.getValue(), bagitSipJson);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
