@@ -9,10 +9,8 @@ import org.springframework.data.repository.query.Param;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String> {
 
@@ -51,17 +49,6 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    */
   Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(String projectAbbr, String id, Pageable pageable);
 
-
-  /**
-   * Find all digital objects for a given project (with project abbreviation) and filter for objectType and types.
-   * @param projectAbbr identifier of the project
-   * @param objectType filter by object type
-   * @param types filter by types
-   * @param pageable pagination
-   * @return a page of digital objects as projection
-   */
-  Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndObjectTypeAndTypesIn(String projectAbbr, String objectType, Set<String> types, Pageable pageable);
-
   /**
    * Find all digital objects for a given project (with project abbreviation) and filter for objectType.
    * @param projectAbbr identifier of the project
@@ -70,16 +57,6 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return a page of digital objects as projection
    */
   Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndObjectType(String projectAbbr, String objectType, Pageable pageable);
-
-  /**
-   * Find all digital objects for a given project (with project abbreviation) and filter for types.
-   * @param projectAbbr identifier of the project
-   * @param types filter by types
-   * @param pageable pagination
-   * @return a page of digital objects as projection
-   */
-  Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndTypesIn(String projectAbbr, Set<String> types, Pageable pageable);
-
 
   /**
    * Find a digital object by its id.

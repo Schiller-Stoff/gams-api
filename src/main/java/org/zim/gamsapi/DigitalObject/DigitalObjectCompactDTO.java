@@ -43,9 +43,6 @@ public class DigitalObjectCompactDTO {
 
     private String publisher;
 
-    @Builder.Default
-    private Set<String> types = new HashSet<>();
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -74,7 +71,6 @@ public class DigitalObjectCompactDTO {
                 ", createdBy='" + createdBy + '\'' +
                 ", modifiedBy='" + modifiedBy + '\'' +
                 ", publisher='" + publisher + '\'' +
-                ", types=" + types +
                 '}';
     }
 

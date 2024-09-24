@@ -22,8 +22,6 @@ public interface DigitalObjectListItemView {
 
     String getCreated();
 
-    Set<String> getTypes();
-
     interface ProjectView {
         String getProjectAbbr();
     }

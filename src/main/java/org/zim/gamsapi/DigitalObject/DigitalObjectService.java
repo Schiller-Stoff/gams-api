@@ -135,7 +135,7 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     @Override
     @Transactional
-    public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Optional<Set<String>> types, Pageable pageable) {
+    public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable) {
         projectRepository.findById(projectAbbr).orElseThrow(
                 () -> {
                     String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
@@ -145,22 +145,12 @@ public class DigitalObjectService implements IDigitalObjectService {
         );
 
         // search for all objects
-        if(objectType.isEmpty() && types.isEmpty()){
+        if(objectType.isEmpty()){
             return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable);
         }
 
-        // search for all objects with given object type
-        if(objectType.isPresent() && types.isEmpty()){
-            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectType(projectAbbr, objectType.get(), pageable);
-        }
-
-        // search for all objects with given types
-        if(objectType.isEmpty() && types.isPresent()){
-            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndTypesIn(projectAbbr, types.get(), pageable);
-        }
-
         // search for all objects with given object type and types
-        return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectTypeAndTypesIn(projectAbbr, objectType.get(), types.get(), pageable);
+        return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectType(projectAbbr, objectType.get(), pageable);
 
     }
 

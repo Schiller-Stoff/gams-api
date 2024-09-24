@@ -194,7 +194,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.empty(), Pageable.unpaged());
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
 
       Assertions.assertThat(result).isEmpty();
 
@@ -215,7 +215,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .build();
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Optional.empty(), Pageable.unpaged());
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
 
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
@@ -223,44 +223,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsPageOfDigitalObjectsWhenTheyExistForProjectAndMatchTypes() {
-      String projectAbbr = "existingProject";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
-      projectRepository.save(project);
-
-      DigitalObject digitalObject1 = new DigitalObjectBuilder()
-          .id("testPid1")
-          .project(project)
-          .types(Set.of("testType1"))
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject1);
-
-      DigitalObject digitalObject2 = new DigitalObjectBuilder()
-          .id("testPid2")
-          .project(project)
-          .types(Set.of("testType2"))
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject2);
-
-      Set<String> types = new HashSet<>();
-      types.add("testType1");
-
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.of(types), Pageable.unpaged());
-
-      Assertions.assertThat(result).isNotEmpty();
-      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject1.getId());
-
-    }
-
-    @Test
     public void throwsExceptionWhenProjectDoesNotExist() {
       String projectAbbr = "nonExistentProject";
 
-      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.empty(), Pageable.unpaged()))
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
           .isInstanceOf(ProjectNotFoundException.class);
     }
   }

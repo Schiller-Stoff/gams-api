@@ -21,7 +21,6 @@ public class BagitSipJsonDigitalObjectConverter implements Converter<BagitSipJso
             .id(source.getId())
             .project(source.getProject())
             .objectType(source.getObjectType())
-            .types(source.getTypes())
             .publisher(source.getPublisher())
             .baseMetadata(new MetadataBaseEntityBuilder()
                 .title(source.getTitle())

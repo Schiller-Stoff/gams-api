@@ -130,8 +130,7 @@ public class DigitalObjectController {
           @RequestParam(defaultValue = "0") int pageIndex,
           @RequestParam(defaultValue = "15") int pageSize,
           // optional parameters searching for explicit types?
-          @RequestParam Optional<String> objectType,
-          @RequestParam Optional<Set<String>> types
+          @RequestParam Optional<String> objectType
   ) {
     // limit page size
     if (pageSize >= 20) {
@@ -143,7 +142,6 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(
             project.getProjectAbbr(),
             objectType,
-            types,
             PageRequest.of(pageIndex, pageSize, Sort.by("id"))
     ).toList();
 

@@ -20,7 +20,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .created(source.getCreated())
                 .modified(source.getModified())
                 .published(source.getPublished())
-                .types(source.getTypes())
                 .datastreams(new ArrayList<>())
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())

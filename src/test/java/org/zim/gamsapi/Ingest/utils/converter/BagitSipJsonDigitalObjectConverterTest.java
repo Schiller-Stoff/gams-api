@@ -31,7 +31,6 @@ public class BagitSipJsonDigitalObjectConverterTest extends UnitTest {
     Assertions.assertThat(convertedDigitalObject.getId()).isEqualTo(bagitSipJson.getId());
     Assertions.assertThat(convertedDigitalObject.getProject().getProjectAbbr()).isEqualTo(bagitSipJson.getProject());
     Assertions.assertThat(convertedDigitalObject.getObjectType()).isEqualTo(bagitSipJson.getObjectType());
-    Assertions.assertThat(convertedDigitalObject.getTypes()).isEqualTo(bagitSipJson.getTypes());
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getTitle()).isEqualTo(bagitSipJson.getTitle());
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getCreator()).isEqualTo(bagitSipJson.getCreator());
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getDescription()).isEqualTo(bagitSipJson.getDescription());

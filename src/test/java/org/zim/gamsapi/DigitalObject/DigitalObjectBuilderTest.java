@@ -62,7 +62,6 @@ public class DigitalObjectBuilderTest extends UnitTest {
     DigitalObject digitalObject = new DigitalObjectBuilder()
         .id("1")
         .objectType("type")
-        .types(Set.of("type"))
         .project("projectAbbr")
         .publisher("test-publisher")
         .baseMetadata(testMetadataBaseEntity)
@@ -70,7 +69,6 @@ public class DigitalObjectBuilderTest extends UnitTest {
 
     Assertions.assertEquals("1", digitalObject.getId());
     Assertions.assertEquals("type", digitalObject.getObjectType());
-    Assertions.assertEquals(Set.of("type"), digitalObject.getTypes());
     Assertions.assertEquals("test-title", digitalObject.getBaseMetadata().getTitle());
   }
 

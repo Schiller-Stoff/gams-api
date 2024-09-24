@@ -40,11 +40,6 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder types(Set<String> types) {
-    digitalObject.setTypes(types);
-    return this;
-  }
-
   public DigitalObjectBuilder publisher(String publisher) {
     digitalObject.setPublisher(publisher);
     return this;

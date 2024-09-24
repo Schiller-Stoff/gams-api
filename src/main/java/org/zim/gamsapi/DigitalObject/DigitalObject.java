@@ -89,13 +89,6 @@ public class DigitalObject {
   private String modifiedBy;
 
   /**
-   * Arbitrary types associated with the digital object.
-   */
-  @ElementCollection
-  @NotNull
-  private Set<String> types = new HashSet<>();
-
-  /**
    * Publisher of the digital object or datastream
    */
   @NotEmpty
@@ -140,7 +133,6 @@ public class DigitalObject {
             ", baseMetadata=" + baseMetadata +
             ", createdBy='" + createdBy + '\'' +
             ", modifiedBy='" + modifiedBy + '\'' +
-            ", types=" + types +
             '}';
   }
 

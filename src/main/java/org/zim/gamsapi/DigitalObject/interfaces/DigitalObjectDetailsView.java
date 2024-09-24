@@ -27,8 +27,6 @@ public interface DigitalObjectDetailsView {
 
     Date getModified();
 
-    Set<String> getTypes();
-
     String getCreatedBy();
 
     String getModifiedBy();
