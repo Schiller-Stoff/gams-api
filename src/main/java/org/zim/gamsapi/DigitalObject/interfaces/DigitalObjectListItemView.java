@@ -22,6 +22,8 @@ public interface DigitalObjectListItemView {
 
     String getCreated();
 
+    String getModified();
+
     interface ProjectView {
         String getProjectAbbr();
     }
