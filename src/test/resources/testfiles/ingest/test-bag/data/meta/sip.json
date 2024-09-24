@@ -4,7 +4,6 @@
   "creator": "demo (GAMS-project)",
   "rights": "TODO",
   "publisher": "TODO",
-  "types": [],
   "contentFiles": [
     {
       "size": 498,
@@ -16,6 +15,17 @@
       "creator": "demo",
       "rights": "CC BY 4.0",
       "publisher": "demo GAMS project"
+    },
+    {
+      "dsid": "DC.xml",
+      "mimetype": "text/xml",
+      "title": "Dublin Core Metadata",
+      "description": "DC Metadata describing the data stream",
+      "creator": "Gams HSA Project",
+      "rights": "Creative Commons Attribution-NonCommercial 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)",
+      "publisher": "Gams",
+      "size": 1107,
+      "bagpath": "/data/content/DC.xml"
     },
     {
       "size": 193,
