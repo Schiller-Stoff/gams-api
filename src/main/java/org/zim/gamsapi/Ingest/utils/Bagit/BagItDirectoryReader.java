@@ -8,7 +8,9 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -117,6 +120,20 @@ public class BagItDirectoryReader {
       bagitSipJson = new ObjectMapper().readValue(jsonContent, BagitSipJson.class);
     } catch (IOException e){
       String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+
+    // check if dsids are unique
+    Set<String> containedDsids = bagitSipJson.getContentFiles().stream().map(BagitContentFile::getDsid).collect(Collectors.toSet());
+    if(containedDsids.size() != bagitSipJson.getContentFiles().size()){
+      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files", BagItFilePaths.BAG_SIP_JSON.name);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+    // check if DC dsid is present - or more in future
+    if(!containedDsids.contains(GAMSDsid.DC.getValue())){
+      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json.",GAMSDsid.DC.getValue(),  BagItFilePaths.BAG_SIP_JSON.name);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
