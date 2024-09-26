@@ -13,6 +13,7 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamMimeView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
@@ -68,7 +69,7 @@ public class BaseSearchService implements IIntegrationService {
 
     BaseSearch baseSearch = new BaseSearch();
 
-    var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
+    var foundDatastreams = datastreamRepository.findAllDatastreamMimeViewsByDigitalObject(digitalObject);
 
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
     baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
@@ -76,7 +77,7 @@ public class BaseSearchService implements IIntegrationService {
     baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
     // index datastream ids
     if(!foundDatastreams.isEmpty()){
-      baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamIdView::getDsid).toList());
+      baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
     }
 
     baseSearch.addProperty(BaseSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
@@ -137,6 +138,33 @@ public class BaseSearchService implements IIntegrationService {
         }
       }
 
+      // decide based on mimetype which documents to index
+      if(datastream.getMimeType().contains("xml")){
+        var xmlContent =  datastreamContentRepository.findById(DatastreamId.builder().digitalObject(id).dsid(GAMSDsid.DC.getValue()).build());
+        byte[] content;
+        try {
+          content = xmlContent.getContentAsByteArray();
+        } catch (IOException e) {
+          String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", xmlContent.getDescription(), datastream, e);
+          log.error(msg);
+          throw new DatastreamCannotLoadFileException(msg);
+        }
+
+        Document dcXml = XMLUtils.parseXml(content);
+
+        String docText = XMLUtils.extractText(dcXml);
+
+
+        if(baseSearch.getProperty(BaseSearchProperties.FULLTEXT.name) == null){
+          baseSearch.addProperty(BaseSearchProperties.FULLTEXT.name, docText);
+        } else {
+          String existingText = (String) baseSearch.getProperty(BaseSearchProperties.FULLTEXT.name);
+          baseSearch.addProperty(BaseSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
+        }
+
+      }
+
+
     });
 
     // the end post base search entity to SOLR
@@ -149,11 +177,11 @@ public class BaseSearchService implements IIntegrationService {
     // TODO this check is outdated? (because: i have already a list of datastreams available)
     // TODO AND: querying against datastreamRepository is also not necessary?
     // if no search datastream was found, do nothing
-    Optional<IDatastreamIdView> datastreamIdViewOptional = foundDatastreams.stream()
+    var datastreamIdViewOptional = foundDatastreams.stream()
         .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
         .findFirst();
     if(datastreamIdViewOptional.isEmpty())return;
-    IDatastreamIdView datastreamIdView = datastreamIdViewOptional.get();
+    var datastreamIdView = datastreamIdViewOptional.get();
     DatastreamId datastreamId = DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(id).build();
 
 

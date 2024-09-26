@@ -3,7 +3,9 @@ package org.zim.gamsapi.Integration.BaseSearch;
 public enum BaseSearchProperties {
 
   PROJECT("_projectAbbr"),
-  OBJECT_ID("_id"),
+
+  //TODO fix configuration that this field is also prefixed with underline
+  OBJECT_ID("id"),
   DATASTREAMS("_datastreams"),
 
   TYPE("_type"),
