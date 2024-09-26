@@ -2,7 +2,6 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 public enum BaseSearchProperties {
 
-  ID("id"),
   PROJECT("_projectAbbr"),
   OBJECT_ID("_id"),
   DATASTREAMS("_datastreams"),
