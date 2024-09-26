@@ -450,10 +450,10 @@
   </fieldType>
   <field name="_datastreams" type="text_general" multiValued="true"/>
   <field name="_fulltext" type="text_general" multiValued="false"/>
-  <field name="_title" type="text_general"/>
-  <field name="_creator" type="text_general"/>
-  <field name="_rights" type="text_general"/>
-  <field name="_publisher" type="text_general"/>
+  <field name="_title" type="text_general" multiValued="false"/>
+  <field name="_creator" type="text_general" multiValued="false"/>
+  <field name="_rights" type="text_general" multiValued="false"/>
+  <field name="_publisher" type="text_general" multiValued="false"/>
   <field name="_description" type="text_general" multiValued="false"/>
   <field name="_nest_path_" type="_nest_path_"/>
   <field name="_id" type="text_general" multiValued="false"/>
