@@ -6,7 +6,9 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.w3c.dom.Document;
 import org.zim.gamsapi.Datastream.DatastreamId;
+import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
@@ -17,8 +19,9 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-
+import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +41,7 @@ public class BaseSearchService implements IIntegrationService {
 
   @Override
   public void indexObjects(String projectAbbr) {
+    log.trace("*** BaseSearchService: Indexing now project objects for: {}", projectAbbr);
     List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> indexObject(projectAbbr, digitalObject.getId()));
   }
@@ -57,6 +61,8 @@ public class BaseSearchService implements IIntegrationService {
   @Override
   public void indexObject(String projectAbbr, String id) {
 
+    log.trace("*** BaseSearchService: Indexing now object with id {} for project {}", id, projectAbbr);
+
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new IntegrationDataProcessingException(String.format("Digital object with id %s not found", id)));
 
@@ -65,7 +71,6 @@ public class BaseSearchService implements IIntegrationService {
     var foundDatastreams = datastreamRepository.findAllDatastreamIdViewsByDigitalObject(digitalObject);
 
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-    baseSearch.addProperty(BaseSearchProperties.ID.name, digitalObject.getId());
     baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
     baseSearch.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
     baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
@@ -81,20 +86,76 @@ public class BaseSearchService implements IIntegrationService {
     baseSearch.addProperty(BaseSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
 
 
+    // Translate dublin core to solr fields (BaseSearchEntity)
+    // TODO fix doubled GAMS-datastream id static-classes! (BaseSearchProperties and GamsDatastreamIds)
+    foundDatastreams.forEach(datastream -> {
+      if(datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)) return;
+
+      if(datastream.getDsid().equals(GAMSDsid.DC.getValue())){
+        var dcContent =  datastreamContentRepository.findById(DatastreamId.builder().digitalObject(id).dsid(GAMSDsid.DC.getValue()).build());
+        byte[] content;
+        try {
+          content = dcContent.getContentAsByteArray();
+        } catch (IOException e) {
+          String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", dcContent.getDescription(), datastream, e);
+          log.error(msg);
+          throw new DatastreamCannotLoadFileException(msg);
+        }
+
+        Document dcXml = XMLUtils.parseXml(content);
+
+        // retrieve all child elements of dublin core root element
+        var dcNodes = XMLUtils.getAllXpath("/*/*", dcXml);
+
+        // TODO think about attributes on dublin core e.g. for the language.
+
+        for (int i = 0; i < dcNodes.getLength(); i++) {
+          var node = dcNodes.item(i);
+          String nodeName = node.getNodeName().replace(":", "_"); // solr recommends not to use colons in field names
+          String nodeValue = node.getTextContent();
+
+          // assign dynamic field for every dc element
+          String solrPostfix = "_ss";
+          // map lang attribute to solr if available
+          try {
+            String langAttributeValue = XMLUtils.extractAttributeValue("xml:lang", node);
+            solrPostfix = "_lang_" + langAttributeValue + solrPostfix;
+          } catch (IntegrationDataProcessingException e){
+            // no lang attribute found
+          }
+
+          String propertyName = nodeName + solrPostfix;
+          // add possible multiple values for the same field
+          if(baseSearch.getProperty(propertyName) == null){
+            baseSearch.addProperty(propertyName, List.of(nodeValue));
+          } else {
+            List<String> values = (List<String>) baseSearch.getProperty(propertyName);
+            List<String> newValues = new ArrayList<>(values);
+            newValues.add(nodeValue);
+            baseSearch.addProperty(propertyName, newValues);
+          }
+        }
+      }
+
+    });
+
+    // the end post base search entity to SOLR
     solrClient.post(GAMS_CORE, baseSearch);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
 
     //***** from here post the custom solr datastream
 
+    // TODO this check is outdated? (because: i have already a list of datastreams available)
+    // TODO AND: querying against datastreamRepository is also not necessary?
+    // if no search datastream was found, do nothing
     Optional<IDatastreamIdView> datastreamIdViewOptional = foundDatastreams.stream()
         .filter(datastream -> datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name))
         .findFirst();
-    // if no search datastream was found, do nothing
     if(datastreamIdViewOptional.isEmpty())return;
-
     IDatastreamIdView datastreamIdView = datastreamIdViewOptional.get();
     DatastreamId datastreamId = DatastreamId.builder().dsid(datastreamIdView.getDsid()).digitalObject(id).build();
+
 
     datastreamRepository
         .findById(datastreamId)
