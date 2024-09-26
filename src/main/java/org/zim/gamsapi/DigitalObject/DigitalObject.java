@@ -35,7 +35,7 @@ public class DigitalObject {
    */
   @Id
   @Column(name = "id")
-  @Size(max = 20, min = 1)
+  @Size(max = 30, min = 1)
   @NotEmpty
   @Pattern(regexp = "^[a-z0-9.]*$")
   private String id;

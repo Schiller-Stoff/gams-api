@@ -321,12 +321,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
 
-    final DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), "RANDOM_PID_8d7");
+    final DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() +  ".8d7");
     digitalObjectRepository.save(
         digitalObject1
     );
 
-    final DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), "RANDOM_PID_8d8123");
+    final DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), digitalObject1.getId() +  ".123");
     digitalObjectRepository.save(
         digitalObject2
     );

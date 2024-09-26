@@ -182,7 +182,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), "DIGITAL_OBJECT_TO_BE_DELETED");
+            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), TestProject.PROJECT_ABBR.getValue() + ".an.object");
 
             digitalObjectRepository.save(digitalObject);
 

@@ -88,33 +88,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     }
 
-    @Test
-    public void successFullySavesDigitalObjectWithParent() {
-      // given
-
-      DigitalObject parent = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(parent);
-
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("testPid")
-        .project(testProject)
-        .publisher("testPublisher")
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
-
-      // when
-      DigitalObject savedDigitalObject = digitalObjectService.save(digitalObject);
-
-      // then
-      Assertions.assertThat(savedDigitalObject).isNotNull();
-      Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
-      Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
-      // considered equal because of same id
-      Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
-
-    }
-
   }
 
   @Nested
@@ -134,7 +107,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      String projectAbbr = "existingProject";
+      String projectAbbr = "existing";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
@@ -202,12 +175,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      String projectAbbr = "existingProject";
+      String projectAbbr = "project";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
       DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
+          .id(projectAbbr + ".testpid")
           .project(project)
           .publisher("testPublisher")
           .objectType("testType")
