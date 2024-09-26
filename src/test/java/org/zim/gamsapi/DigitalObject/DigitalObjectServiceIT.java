@@ -95,7 +95,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-      String projectAbbr = "nonExistentProject";
+      String projectAbbr = "nonexist";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
@@ -163,12 +163,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-      String projectAbbr = "nonExistentProject";
+      String projectAbbr = "nonexist";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
-
       Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
-
       Assertions.assertThat(result).isEmpty();
 
     }
