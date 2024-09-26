@@ -1,11 +1,8 @@
 package org.zim.gamsapi.DigitalObject;
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +11,8 @@ import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectException;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import java.util.*;
@@ -36,7 +35,9 @@ public class DigitalObject {
    */
   @Id
   @Column(name = "id")
-  @NotBlank
+  @Size(max = 20, min = 1)
+  @NotEmpty
+  @Pattern(regexp = "^[a-z0-9.]*$")
   private String id;
 
   /**
@@ -134,6 +135,16 @@ public class DigitalObject {
             ", createdBy='" + createdBy + '\'' +
             ", modifiedBy='" + modifiedBy + '\'' +
             '}';
+  }
+
+  @AssertTrue(message = "The id of a digital object must start with the project abbreviation followed by dot, like 'hsa.1234'")
+  public boolean isCorrectlyContainingProjectAbbrInIdWithDot() {
+    if(id == null || project == null) {
+      String msg = String.format("Digital object id or project is null. Digital object: %s", this);
+      log.error(msg);
+      throw new DigitalObjectException(HttpStatus.CONFLICT, msg);
+    }
+    return id.startsWith(project.getProjectAbbr() + ".");
   }
 
 }
