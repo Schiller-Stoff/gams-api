@@ -53,7 +53,7 @@
   "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",
   "created_by": "Pyrilo",
   "source": "local",
-  "recid": "test",
+  "recid": "test.test",
   "project": "test",
   "objectType": "TEI"
 }
