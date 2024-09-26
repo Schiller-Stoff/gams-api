@@ -8,7 +8,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
  */
 public enum TestDigitalObject {
 
-    DIGITAL_OBJECT_ID("test"),
+    DIGITAL_OBJECT_ID("test.test"),
     DIGITAL_OBJECT_NAME("test-digital-object");
 
     private final String value;
@@ -23,7 +23,7 @@ public enum TestDigitalObject {
 
     public static DigitalObject generate(String projectAbbr){
         return new DigitalObjectBuilder()
-            .id(DIGITAL_OBJECT_ID.getValue())
+            .id(projectAbbr + "." + DIGITAL_OBJECT_ID.getValue())
             .project(projectAbbr)
             .publisher("test-publisher")
             .baseMetadata(TestMetadataBaseEntity.generate())
@@ -41,7 +41,7 @@ public enum TestDigitalObject {
 
     public static DigitalObject generate(String projectAbbr, String id){
         return new DigitalObjectBuilder()
-            .id(id)
+            .id(projectAbbr + "." + id)
             .project(projectAbbr)
             .publisher("test-publisher")
             .baseMetadata(TestMetadataBaseEntity.generate())
