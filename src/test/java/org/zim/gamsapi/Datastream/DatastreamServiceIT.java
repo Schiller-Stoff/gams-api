@@ -156,7 +156,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void returnsExpectedCountOfDatastreams(){
 
       Datastream datastream = TestDatastream.generate(testObject);
-      Datastream datastream2 = TestDatastream.generate(testObject, "DSID2");
+      Datastream datastream2 = TestDatastream.generate(testObject, "DSID2.txt");
 
       datastreamRepository.save(datastream);
       datastreamRepository.save(datastream2);

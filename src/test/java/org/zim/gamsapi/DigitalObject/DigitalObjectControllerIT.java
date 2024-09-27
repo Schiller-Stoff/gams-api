@@ -192,8 +192,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       digitalObjectRepository.save(digitalObject);
 
-      Datastream datastream = TestDatastream.generate(digitalObject, "testDsId");
-      Datastream datastream2 = TestDatastream.generate(digitalObject, "testDsId2");
+      Datastream datastream = TestDatastream.generate(digitalObject, "testDsId.xml");
+      Datastream datastream2 = TestDatastream.generate(digitalObject, "testDsId2.xml");
 
       datastreamRepository.save(datastream);
       datastreamRepository.save(datastream2);

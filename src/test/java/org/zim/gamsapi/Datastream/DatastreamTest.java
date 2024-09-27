@@ -1,9 +1,6 @@
 package org.zim.gamsapi.Datastream;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import jakarta.validation.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -113,9 +110,7 @@ public class DatastreamTest extends UnitTest {
 
     @Test
     public void testDatastreamShouldNotRaiseAnyConstraintViolation() {
-      Datastream datastream = TestDatastream.generate(
-          TEST_DIGITAL_OBJECT
-      );
+      Datastream datastream = TestDatastream.generate();
 
       Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
       org.assertj.core.api.Assertions.assertThat(violationSet).isEmpty();
@@ -123,21 +118,16 @@ public class DatastreamTest extends UnitTest {
 
 
     @Test
-    public void testDatastreamShouldRaiseConstraintViolationIfDsidIsNull() {
-      Datastream datastream = TestDatastream.generate(
-          TEST_DIGITAL_OBJECT
-      );
+    public void testDatastreamShouldThrowIfDsidIsNull() {
+      Datastream datastream = TestDatastream.generate();
       datastream.setDsid(null);
 
-      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
-      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+      Assertions.assertThrows(ValidationException.class, () -> validator.validate(datastream));
     }
 
     @Test
     public void testDatastreamShouldRaiseConstraintViolationIfDigitalObjectIsNull() {
-      Datastream datastream = TestDatastream.generate(
-          TEST_DIGITAL_OBJECT
-      );
+      Datastream datastream = TestDatastream.generate();
       datastream.setDigitalObject(null);
 
       Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
@@ -146,9 +136,7 @@ public class DatastreamTest extends UnitTest {
 
     @Test
     public void testDatastreamShouldRaiseConstraintViolationIfSizeIsNull() {
-      Datastream datastream = TestDatastream.generate(
-          TEST_DIGITAL_OBJECT
-      );
+      Datastream datastream = TestDatastream.generate();
       datastream.setSize(null);
 
       Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
@@ -157,14 +145,55 @@ public class DatastreamTest extends UnitTest {
 
     @Test
     public void testDatastreamShouldRaiseConstraintViolationIfMimeTypeIsNull() {
-      Datastream datastream = TestDatastream.generate(
-          TEST_DIGITAL_OBJECT
-      );
+      Datastream datastream = TestDatastream.generate();
       datastream.setMimeType(null);
 
       Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
       org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
     }
+
+
+    @Test
+    public void raisesViolationIfDsidContainsUnderscore(){
+      Datastream datastream = TestDatastream.generate();
+      datastream.setDsid("_test.xml");
+      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void raisesViolationIfDsidContainsSpecialCharacter(){
+      Datastream datastream = TestDatastream.generate();
+      datastream.setDsid("test!.xml");
+      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void raisesViolationIfDsidContainsSpace(){
+      Datastream datastream = TestDatastream.generate();
+      datastream.setDsid("test test.xml");
+      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void raisesViolationIfDsidIsLongerThan20(){
+      Datastream datastream = TestDatastream.generate();
+      datastream.setDsid("testtesttesttesttesttest.xml");
+      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void raisesViolationIfDsidContainsNoDot(){
+      Datastream datastream = TestDatastream.generate();
+      datastream.setDsid("test");
+      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+    }
+
+
 
 
   }

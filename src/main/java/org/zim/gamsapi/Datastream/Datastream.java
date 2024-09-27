@@ -3,15 +3,17 @@ package org.zim.gamsapi.Datastream;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.jena.util.FileUtils;
 import org.hibernate.annotations.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.StringUtils;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.Date;
@@ -49,8 +51,9 @@ public class Datastream {
   @Column(name = "dsid")
   @NotEmpty
   @Id
+  @Pattern(regexp = "^[a-zA-Z0-9.]*$")
+  @Size(max = 20, min = 1)
   private String dsid;
-
 
   /**
    * Mimetype of the contained data.
@@ -167,4 +170,16 @@ public class Datastream {
   public int hashCode() {
     return Objects.hash(digitalObject, dsid);
   }
+
+  @AssertTrue(message = "The dsid must contain a valid file extension string, like 'DC.xml' or 'SOMETHING.pdf'")
+  public boolean isDsidContainingADot(){
+    if(dsid == null) {
+      String msg = String.format("Encountered unexpected null value when validating dsid: dsid is null. %s", this);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+    String fileExtension = StringUtils.getFilenameExtension(dsid);
+    return fileExtension != null;
+  }
+
 }

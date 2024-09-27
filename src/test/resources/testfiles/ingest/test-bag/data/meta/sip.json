@@ -8,7 +8,7 @@
     {
       "size": 498,
       "bagpath": "/data/content/manifest.json",
-      "dsid": "manifest",
+      "dsid": "manifest.json",
       "mimetype": "application/json",
       "title": "Datastream containing the manifest.json file",
       "description": "Datastream for GAMS project demo.",
@@ -30,7 +30,7 @@
     {
       "size": 193,
       "bagpath": "/data/content/search.json",
-      "dsid": "search",
+      "dsid": "search.json",
       "mimetype": "application/json",
       "title": "Datastream containing the search.json file",
       "description": "Datastream for GAMS project demo.",
@@ -41,7 +41,7 @@
     {
       "size": 22226,
       "bagpath": "/data/content/SOURCE.xml",
-      "dsid": "SOURCE",
+      "dsid": "SOURCE.xml",
       "mimetype": "application/xml",
       "title": "Datastream containing the SOURCE.xml file",
       "description": "Datastream for GAMS project demo.",

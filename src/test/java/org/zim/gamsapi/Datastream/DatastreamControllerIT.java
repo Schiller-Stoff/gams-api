@@ -72,7 +72,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void getDatastreamRendersExpectedDsidInView() throws Exception {
 
-      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid");
+      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.txt");
 
       datastreamRepository.save(datastream);
 
@@ -183,7 +183,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void getDatastreamJsonContainsExpectedValues() throws Exception {
       // Arrange
-      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid");
+      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.bla");
 
       datastreamRepository.save(datastream);
 
