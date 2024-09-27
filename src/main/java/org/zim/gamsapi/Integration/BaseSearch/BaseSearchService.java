@@ -88,7 +88,6 @@ public class BaseSearchService implements IIntegrationService {
 
 
     // Translate dublin core to solr fields (BaseSearchEntity)
-    // TODO fix doubled GAMS-datastream id static-classes! (BaseSearchProperties and GamsDatastreamIds)
     foundDatastreams.forEach(datastream -> {
       if(datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)) return;
 
