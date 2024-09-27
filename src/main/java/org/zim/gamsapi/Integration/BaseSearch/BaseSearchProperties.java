@@ -4,7 +4,6 @@ public enum BaseSearchProperties {
 
   PROJECT("_projectAbbr"),
 
-  //TODO fix configuration that this field is also prefixed with underline
   OBJECT_ID("id"),
   DATASTREAMS("_datastreams"),
 

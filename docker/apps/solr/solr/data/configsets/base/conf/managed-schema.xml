@@ -451,7 +451,6 @@
   <field name="_datastreams" type="text_general" multiValued="true"/>
   <field name="_fulltext" type="text_general" multiValued="false"/>
   <field name="_nest_path_" type="_nest_path_"/>
-  <field name="_id" type="text_general" multiValued="false"/>
   <field name="_projectAbbr" type="text_general" multiValued="false"/>
   <field name="_type" type="text_general" multiValued="false"/>
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
@@ -548,7 +547,6 @@
   <copyField source="desc" dest="desc_str" maxChars="256"/>
   <copyField source="title" dest="title_str" maxChars="256"/>
   <copyField source="properties" dest="properties_str" maxChars="256"/>
-  <copyField source="_id" dest="_id_str" maxChars="256"/>
   <copyField source="_datastreams" dest="_datastreams_str" maxChars="256"/>
   <copyField source="_projectAbbr" dest="_projectAbbr_str" maxChars="256"/>
   <copyField source="_fulltext" dest="_fulltext_str" maxChars="256"/>
