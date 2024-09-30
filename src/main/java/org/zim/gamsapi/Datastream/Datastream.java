@@ -51,7 +51,7 @@ public class Datastream {
   @Column(name = "dsid")
   @NotEmpty
   @Id
-  @Pattern(regexp = "^[a-zA-Z0-9.]*$")
+  @Pattern(regexp = "^[a-zA-Z0-9._]*$")
   @Size(max = 20, min = 1)
   private String dsid;
 

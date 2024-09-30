@@ -154,11 +154,11 @@ public class DatastreamTest extends UnitTest {
 
 
     @Test
-    public void raisesViolationIfDsidContainsUnderscore(){
+    public void raisesNoViolationsIfDsidContainsUnderscore(){
       Datastream datastream = TestDatastream.generate();
       datastream.setDsid("_test.xml");
       Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
-      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
+      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(0);
     }
 
     @Test
