@@ -173,35 +173,35 @@ public class XMLUtils {
     // TODO how to build a propper error message?
     if((attributeName == null) || (attributeName.isEmpty())){
       String msg = "Given attributename is null or empty";
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 
     String nodeName = sourceNode.getNodeName();
     if((nodeName == null) || (nodeName.isEmpty())){
         String msg = String.format("Cannot extract attribute %s from given node without tagname.", attributeName);
-        log.error(msg);
+        //log.error(msg);
         throw new IntegrationDataProcessingException(msg);
     }
 
     NamedNodeMap attributes = sourceNode.getAttributes();
     if((attributes == null) || (attributes.getLength() == 0)){
       String msg = String.format("Failed to extract attribute %s from given node with name %s", attributeName, nodeName);
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 
     Node attribute = attributes.getNamedItem(attributeName);
     if(attribute == null){
       String msg = String.format("Failed to extract attribute %s from node %s. Attribute is null (not available)", attributeName, nodeName);
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 
     String attributeValue = attribute.getTextContent();
     if((attributeValue == null) || (attributeValue.isEmpty())){
       String msg = String.format("Failed to extract attribute %s from node %s. Attribute is defined but it's value is null or empty.", attributeValue, attributeName);
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 

@@ -184,6 +184,7 @@ public class BaseSearchService implements IIntegrationService {
         solrPostfix = "_lang_" + langAttributeValue + solrPostfix;
       } catch (IntegrationDataProcessingException e){
         // no lang attribute found
+        log.trace("No lang attribute found for dublin core element {}", nodeName);
       }
 
       String propertyName = nodeName + solrPostfix;
