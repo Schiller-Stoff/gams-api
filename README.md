@@ -92,6 +92,18 @@ make
 make push
 
 
+## Alternative workflow (native) 
+
+# 01b. increment version in .release
+nano .release
+
+# 02b. native workflow
+make build-native
+
+# 03b. push new version
+make push-native
+
+ 
 
 ```
 
