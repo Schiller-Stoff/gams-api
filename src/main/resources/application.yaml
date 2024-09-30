@@ -62,7 +62,7 @@ logging:
   file:
     name: ${LOG_FILE:log/app.log}
   level:
-    org.zim.gamsapi: ${LOG_LEVEL:TRACE}
+    org.zim.gamsapi: ${LOG_LEVEL:WARNING}
     org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:
