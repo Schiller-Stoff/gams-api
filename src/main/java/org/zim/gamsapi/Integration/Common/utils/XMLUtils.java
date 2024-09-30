@@ -19,10 +19,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -55,6 +52,28 @@ public class XMLUtils {
       throw new IntegrationDataProcessingException(msg);
     }
   }
+
+  /**
+   * Parses given InputStream to Document.
+   * TODO test
+   * @param source InputStream to be parsed
+   * @return Parsed xml document
+   * @throws IntegrationDataProcessingException
+   */
+  public static Document parseXml(InputStream source) throws IntegrationDataProcessingException {
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder db = dbf.newDocumentBuilder();
+      return db.parse(
+          new InputSource(new InputStreamReader(source, StandardCharsets.UTF_8))
+      );
+    } catch (ParserConfigurationException | SAXException | IOException e){
+      String msg = "Failed to parse given source datastream as XML." + e + "\n";
+      log.error(msg);
+      throw new IntegrationDataProcessingException(msg);
+    }
+  }
+
 
   /**
    * Transforms given Document to a byte array
