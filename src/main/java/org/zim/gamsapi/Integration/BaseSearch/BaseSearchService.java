@@ -155,16 +155,14 @@ public class BaseSearchService implements IIntegrationService {
    */
   public void addDublinCore(BaseSearch baseSearch, DatastreamId datastreamId){
     var dcContent =  datastreamContentRepository.findById(datastreamId);
-    byte[] content;
+    Document dcXml;
     try {
-      content = dcContent.getContentAsByteArray();
+      dcXml = XMLUtils.parseXml(dcContent.getInputStream());
     } catch (IOException e) {
       String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", dcContent.getDescription(), datastreamId, e);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
-
-    Document dcXml = XMLUtils.parseXml(content);
 
     // retrieve all child elements of the root element
     // TODO validate if it's correct dublin core?
@@ -212,16 +210,15 @@ public class BaseSearchService implements IIntegrationService {
   public void addFulltext(BaseSearch baseSearch, DatastreamId datastreamId){
 
     var xmlContent =  datastreamContentRepository.findById(datastreamId);
-    byte[] content;
+    Document dcXml;
     try {
-      content = xmlContent.getContentAsByteArray();
+      dcXml = XMLUtils.parseXml(xmlContent.getInputStream());
     } catch (IOException e) {
       String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", xmlContent.getDescription(), datastreamId, e);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
 
-    Document dcXml = XMLUtils.parseXml(content);
     String docText = XMLUtils.extractText(dcXml);
 
     if(baseSearch.getProperty(BaseSearchProperties.FULLTEXT.name) == null){
@@ -241,15 +238,14 @@ public class BaseSearchService implements IIntegrationService {
    */
   public void sendCustomSolrDatastream(DatastreamId datastreamId, String projectAbbr){
     InputStreamResource inputStreamResource =  datastreamContentRepository.findById(datastreamId);
-    byte[] content;
     try {
-      content = inputStreamResource.getContentAsByteArray();
+      solrClient.post(projectAbbr, inputStreamResource.getContentAsByteArray());
     } catch (IOException e) {
       String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", inputStreamResource.getDescription(), datastreamId, e);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
-    solrClient.post(projectAbbr, content);
+
   }
 
 
