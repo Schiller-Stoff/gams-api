@@ -23,6 +23,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .datastreams(new ArrayList<>())
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())
+                .publisher(source.getPublisher())
                 .build();
     }
 }
