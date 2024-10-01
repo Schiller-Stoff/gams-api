@@ -90,8 +90,9 @@ public class DigitalObject {
   private String modifiedBy;
 
   /**
-   * Publisher of the digital object or datastream
+   * Publisher of the digital object
    */
+  @Column(name = "publisher")
   @NotEmpty
   private String publisher;
 
@@ -122,6 +123,7 @@ public class DigitalObject {
         : getClass().hashCode();
   }
 
+  //TODO remove tostring?
   @Override
   public String toString() {
     return "DigitalObject{" +
@@ -134,6 +136,7 @@ public class DigitalObject {
             ", baseMetadata=" + baseMetadata +
             ", createdBy='" + createdBy + '\'' +
             ", modifiedBy='" + modifiedBy + '\'' +
+            ", publisher='" + publisher + '\'' +
             '}';
   }
 
