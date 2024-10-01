@@ -14,6 +14,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class DigitalObjectCompactDTO {
 
     private String id;
@@ -54,24 +55,6 @@ public class DigitalObjectCompactDTO {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-
-        return "DigitalObjectCompactDTO{" +
-                "id='" + id + '\'' +
-                ", datastreams=" + datastreams +
-                ", objectType='" + objectType + '\'' +
-                ", published=" + published +
-                ", created=" + created +
-                ", modified=" + modified +
-                ", projectAbbr=" + projectAbbr +
-                ", baseMetadata=" + baseMetadata +
-                ", createdBy='" + createdBy + '\'' +
-                ", modifiedBy='" + modifiedBy + '\'' +
-                ", publisher='" + publisher + '\'' +
-                '}';
     }
 
 }

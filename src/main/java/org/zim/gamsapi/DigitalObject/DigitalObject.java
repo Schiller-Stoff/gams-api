@@ -28,6 +28,7 @@ import java.util.*;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
+@ToString
 public class DigitalObject {
 
   /**
@@ -121,23 +122,6 @@ public class DigitalObject {
     return this instanceof HibernateProxy
         ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode()
         : getClass().hashCode();
-  }
-
-  //TODO remove tostring?
-  @Override
-  public String toString() {
-    return "DigitalObject{" +
-            "id='" + id + '\'' +
-            ", objectType='" + objectType + '\'' +
-            ", published=" + published +
-            ", created=" + created +
-            ", modified=" + modified +
-            ", project=" + project +
-            ", baseMetadata=" + baseMetadata +
-            ", createdBy='" + createdBy + '\'' +
-            ", modifiedBy='" + modifiedBy + '\'' +
-            ", publisher='" + publisher + '\'' +
-            '}';
   }
 
   @AssertTrue(message = "The id of a digital object must start with the project abbreviation followed by dot, like 'hsa.1234'")
