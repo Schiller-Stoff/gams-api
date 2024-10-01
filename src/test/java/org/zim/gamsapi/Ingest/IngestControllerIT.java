@@ -76,4 +76,19 @@ public class IngestControllerIT extends IntegrationTest {
     Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
 
   }
+
+  @Test
+  public void ingestFailesIfProjectAbbrDiffersFromBagitSipJSONProject() throws Exception {
+
+    final String MISMATCHING_PROJECT_ABBR = "DIFFERENT";
+
+    byte[] zippedBag = ZipUtils.zipDir(bagFile);
+    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+    mockMvc
+        .perform(
+            multipart("/api/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
+            .part(mockPart)
+        )
+        .andExpect(status().isBadRequest());
+  }
 }

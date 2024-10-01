@@ -10,6 +10,7 @@ import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
@@ -49,6 +50,11 @@ public class IngestService implements IIngestService {
     try {
       BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(bagDirPath);
       log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
+      if(!bagitSipJson.getProject().equals(ingest.getProjectAbbr())){
+        String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bagit sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bagitSipJson.getProject(), ingest, bagitSipJson);
+        log.error(msg);
+        throw new IngestAgainstDifferentProjectException(msg);
+      }
 
       // 02. build and save digital object from bag-info.txt
       DigitalObject digitalObject = conversionService.convert(bagitSipJson, DigitalObject.class);
