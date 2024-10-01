@@ -1,8 +1,8 @@
 package org.zim.gamsapi.Ingest.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,7 +11,6 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
