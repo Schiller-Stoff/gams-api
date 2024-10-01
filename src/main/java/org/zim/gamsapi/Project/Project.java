@@ -19,6 +19,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Builder
 @Slf4j
+@ToString
 public class Project {
 
   @NotBlank
