@@ -244,7 +244,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getBaseMetadata().getTitle(),
               digitalObject.getBaseMetadata().getDescription(),
               digitalObject.getBaseMetadata().getCreator(),
-              digitalObject.getBaseMetadata().getRights()
+              digitalObject.getBaseMetadata().getRights(),
+              digitalObject.getPublisher()
           );
 
 
