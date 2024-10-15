@@ -22,7 +22,7 @@
             <p>List of all GAMS projects.</p>
             <ul class="list-group" style="list-style: none;">
                 <li th:each="project : ${projects}" class="list-group-item">
-                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>
+                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr}"></a>
                 </li>
             </ul>
 
