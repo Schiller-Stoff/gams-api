@@ -480,6 +480,7 @@
   <field name="sys_entityDescs" type="strings" multiValued="true" required="false"/>
   <field name="sys_entityKeywords" type="pints" multiValued="true" required="false"/>
   <field name="sys_entityTypes" type="strings" multiValued="true" required="false"/>
+  <field name="sys_entityTags" type="strings" multiValued="true" required="false"/>
   <field name="sys_entitySortField" type="text_gen_sort" multiValued="false" required="false"/>
 
   <!--  Value fields-->
