@@ -500,6 +500,9 @@
 
   <!--  Date fields-->
   <field name="sys_entityDates" type="pdates" multiValued="true" required="false"/>
+  <field name="sys_entityStartDate" type="pdate" multiValued="false" required="false"/>
+  <field name="sys_entityEndDate" type="pdate" multiValued="false" required="false"/>
+  <!-- Date range fields-->
   <field name="sys_entityStartDateRanges" type="date_range" multiValued="true" required="false" indexed="true" stored="true" />
   <field name="sys_entityEndDateRanges" type="date_range" multiValued="true" required="false" indexed="true" stored="true" />
 
