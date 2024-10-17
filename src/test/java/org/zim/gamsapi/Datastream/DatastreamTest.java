@@ -178,14 +178,6 @@ public class DatastreamTest extends UnitTest {
     }
 
     @Test
-    public void raisesViolationIfDsidIsLongerThan20(){
-      Datastream datastream = TestDatastream.generate();
-      datastream.setDsid("testtesttesttesttesttest.xml");
-      Set<ConstraintViolation<Datastream>> violationSet = validator.validate(datastream);
-      org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(1);
-    }
-
-    @Test
     public void raisesViolationIfDsidContainsNoDot(){
       Datastream datastream = TestDatastream.generate();
       datastream.setDsid("test");

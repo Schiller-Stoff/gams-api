@@ -52,7 +52,7 @@ public class Datastream {
   @NotEmpty
   @Id
   @Pattern(regexp = "^[a-zA-Z0-9._]*$")
-  @Size(max = 20, min = 1)
+  @Size(max = 256, min = 1)
   private String dsid;
 
   /**
