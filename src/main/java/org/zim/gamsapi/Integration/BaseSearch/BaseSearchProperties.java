@@ -2,24 +2,24 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 public enum BaseSearchProperties {
 
-  PROJECT("_projectAbbr"),
+  PROJECT("objectProjectAbbr"),
 
   OBJECT_ID("id"),
-  DATASTREAMS("_datastreams"),
+  DATASTREAMS("objectDatastreams"),
 
-  TYPE("_type"),
+  TYPE("objectType"),
 
-  FULLTEXT("_fulltext"),
+  FULLTEXT("objectFulltext"),
 
-  TITLE("_title"),
+  TITLE("objectTitle"),
 
-  DESCRIPTION("_description"),
+  DESCRIPTION("objectDesc"),
 
-  CREATOR("_creator"),
+  CREATOR("objectCreator"),
 
-  PUBLISHER("_publisher"),
+  PUBLISHER("objectPublisher"),
 
-  RIGHTS("_rights");
+  RIGHTS("objectRights");
 
 
   public final String name;
