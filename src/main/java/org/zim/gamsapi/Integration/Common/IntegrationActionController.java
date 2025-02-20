@@ -5,13 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
-import java.util.ArrayList;
+
+import io.swagger.v3.oas.annotations.Hidden;
+
 import java.util.List;
 
 @Controller
 @RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/", "/api/v1/integration/projects/{projectAbbr}/objects"})
 @Slf4j
 @RequiredArgsConstructor
+@Hidden
 @RestController
 public class IntegrationActionController {
 

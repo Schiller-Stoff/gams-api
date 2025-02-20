@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Integration.BaseSearch;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,7 @@ import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationController;
 @RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/search", "/api/v1/integration/projects/{projectAbbr}/objects/search/"})
 @Slf4j
 @RequiredArgsConstructor
+@Hidden
 @RestController
 public class BaseSearchController implements IIntegrationController {
 

@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
-import org.zim.gamsapi.Project.Project;
 
 import java.util.List;
 import java.util.Optional;
