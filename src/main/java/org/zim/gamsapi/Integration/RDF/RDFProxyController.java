@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.System.IProxyService;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 @Controller
 @RequestMapping(value = {"/api/v1/integration/rdf", "/api/v1/integration/rdf/"})
 @Slf4j
@@ -19,6 +21,7 @@ public class RDFProxyController {
   private final GAMSDockerDNS gamsConfigProperties;
   private final IProxyService proxyService;
 
+  @Hidden
   @RequestMapping(value = "/**", method = {RequestMethod.GET, RequestMethod.POST})
   public ResponseEntity<String> proxy(
           @RequestBody(required = false) String body,

@@ -65,4 +65,9 @@ public class ProjectService implements IProjectService {
     projectRepository.findAll().forEach(projects::add);
     return projects;
   }
+
+  @Override
+  public Project findByAbbr(String projectAbbr) {
+    return findProject(projectAbbr);
+  }
 }

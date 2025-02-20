@@ -45,3 +45,4 @@ docker/apps/pgadmin/*
 docker/apps/postgres/postgres-data
 gams/*
 gams-test/*
+data/
