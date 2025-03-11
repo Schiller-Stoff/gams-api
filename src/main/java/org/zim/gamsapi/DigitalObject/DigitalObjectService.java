@@ -43,23 +43,6 @@ public class DigitalObjectService implements IDigitalObjectService {
             }
     );
 
-    if(digitalObject.getParent() != null){
-      // throw if parent contains a self reference
-      if(digitalObject.getParent().equals(digitalObject)){
-        String msg = String.format("Detected self reference in digital object's parent object. At digital object with pid: %s", digitalObject.getId());
-        log.error(msg);
-        throw new DigitalObjectChildSelfReferenceException(msg);
-      }
-
-      // referenced parent object must exist
-      if(!digitalObjectRepository.existsById(digitalObject.getParent().getId())){
-        String msg = String.format("Cannot find contained parent object %s in digital object %s", digitalObject.getParent().getId(), digitalObject.getId());
-        log.error(msg);
-        throw new DigitalObjectNotFoundException(msg);
-      }
-    }
-
-
     return digitalObjectRepository.save(digitalObject);
   }
 
@@ -150,33 +133,9 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
 
-  @Transactional
-  @Override
-  public DigitalObject assignParentObject(DigitalObject digitalObject, DigitalObject parent) {
-
-   DigitalObject foundObject = digitalObjectRepository.findById(digitalObject.getId()).orElseThrow(
-        () -> {
-          String msg = String.format("Aborting assign parent object. Cannot find object %s", digitalObject);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
-        }
-    );
-
-   // assign child objects
-    foundObject.setParent(parent);
-  // DON'T NEED / MUST NOT EXTRA SAVE BECAUSE ALREADY PERSISTED BY CONTEXT e.g. digitalObjectRepository.save(foundParentObject);
-  // via findById() object is already managed by persistence context (if marked as @transactional)
-  // https://www.baeldung.com/hibernate-entity-lifecycle#managed-entity
-
-   log.info("Successfully assigned parent object {} to object {}", parent, foundObject);
-
-   return foundObject;
-  }
-
-
     @Override
     @Transactional
-    public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Optional<Set<String>> types, Pageable pageable) {
+    public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable) {
         projectRepository.findById(projectAbbr).orElseThrow(
                 () -> {
                     String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
@@ -186,22 +145,12 @@ public class DigitalObjectService implements IDigitalObjectService {
         );
 
         // search for all objects
-        if(objectType.isEmpty() && types.isEmpty()){
+        if(objectType.isEmpty()){
             return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable);
         }
 
-        // search for all objects with given object type
-        if(objectType.isPresent() && types.isEmpty()){
-            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectType(projectAbbr, objectType.get(), pageable);
-        }
-
-        // search for all objects with given types
-        if(objectType.isEmpty() && types.isPresent()){
-            return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndTypesIn(projectAbbr, types.get(), pageable);
-        }
-
         // search for all objects with given object type and types
-        return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectTypeAndTypesIn(projectAbbr, objectType.get(), types.get(), pageable);
+        return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectType(projectAbbr, objectType.get(), pageable);
 
     }
 

@@ -448,36 +448,28 @@
       <tokenizer name="whitespace"/>
     </analyzer>
   </fieldType>
-  <field name="_datastreams" type="text_general" multiValued="true"/>
-  <field name="_fulltext" type="text_general" multiValued="false"/>
-  <field name="_title" type="text_general"/>
-  <field name="_creator" type="text_general"/>
-  <field name="_rights" type="text_general"/>
-  <field name="_publisher" type="text_general"/>
-  <field name="_description" type="text_general" multiValued="false"/>
+
+  <!--  Internal solr fields -->
   <field name="_nest_path_" type="_nest_path_"/>
-  <field name="_id" type="text_general" multiValued="false"/>
-  <field name="_projectAbbr" type="text_general" multiValued="false"/>
-  <field name="_type" type="text_general" multiValued="false"/>
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
-  <field name="desc" type="text_gen_sort" multiValued="false" required="false"/>
-  <field name="types" type="strings"/>
-  <!-- Person data -->
-  <field name="firstname" type="text_general"/>
-  <field name="surname" type="text_general"/>
-  <field name="birthdate" type="pdate" multiValued="false"/>
-  <field name="deathdate" type="pdate" multiValued="false"/>
 
-  <!-- Geographical data -->
-  <field name="location" type="location"/>
-
+  <!--  Basic id field of every solr document-->
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="properties" type="text_general"/>
-  <field name="title" multiValued="false" type="text_gen_sort"/>
-  <field name="vector" type="knn_vector" multiValued="false" indexed="true" stored="true"/>
-  <field name="word" type="text_general"/>
+
+  <!--  Fields assigned from the internal, administrative metadata of the REST-API -->
+  <field name="objectTitle" type="string"/>
+  <field name="objectDesc" type="string"/>
+  <field name="objectDatastreams" type="strings" multiValued="true"/>
+  <field name="objectFulltext" type="text_general" multiValued="false"/>
+  <field name="objectProjectAbbr" type="string" multiValued="false"/>
+  <field name="objectType" type="string" multiValued="false"/>
+  <field name="objectCreator" type="string"/>
+  <field name="objectPublisher" type="string"/>
+  <field name="objectRights" type="string"/>
+
+
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
@@ -547,23 +539,4 @@
   <dynamicField name="*_d" type="pdouble" indexed="true" stored="true"/>
   <dynamicField name="*_t" type="text_general" multiValued="false" indexed="true" stored="true"/>
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
-  <copyField source="_type" dest="type_str" maxChars="256"/>
-  <copyField source="types" dest="types_str" maxChars="256"/>
-  <copyField source="word" dest="word_str" maxChars="256"/>
-  <copyField source="desc" dest="desc_str" maxChars="256"/>
-  <copyField source="title" dest="title_str" maxChars="256"/>
-  <copyField source="properties" dest="properties_str" maxChars="256"/>
-  <copyField source="_id" dest="_id_str" maxChars="256"/>
-  <copyField source="_datastreams" dest="_datastreams_str" maxChars="256"/>
-  <copyField source="_projectAbbr" dest="_projectAbbr_str" maxChars="256"/>
-  <copyField source="_fulltext" dest="_fulltext_str" maxChars="256"/>
-  <copyField source="_title" dest="_title_str" maxChars="256"/>
-  <copyField source="_creator" dest="_creator_str" maxChars="256"/>
-  <copyField source="_rights" dest="_rights_str" maxChars="256"/>
-  <copyField source="_publisher" dest="_publisher_str" maxChars="256"/>
-  <copyField source="_description" dest="_description_str" maxChars="2500"/>
-  <copyField source="birthdate" dest="_birthdate_str" maxChars="256"/>
-  <copyField source="deathdate" dest="_deathdate_str" maxChars="256"/>
-  <copyField source="location" dest="_location_str" maxChars="256"/>
-  <copyField source="surname" dest="_surname_str" maxChars="256"/>
 </schema>

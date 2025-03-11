@@ -4,12 +4,11 @@
   "creator": "demo (GAMS-project)",
   "rights": "TODO",
   "publisher": "TODO",
-  "types": [],
   "contentFiles": [
     {
       "size": 498,
       "bagpath": "/data/content/manifest.json",
-      "dsid": "manifest",
+      "dsid": "manifest.json",
       "mimetype": "application/json",
       "title": "Datastream containing the manifest.json file",
       "description": "Datastream for GAMS project demo.",
@@ -18,9 +17,20 @@
       "publisher": "demo GAMS project"
     },
     {
+      "dsid": "DC.xml",
+      "mimetype": "text/xml",
+      "title": "Dublin Core Metadata",
+      "description": "DC Metadata describing the data stream",
+      "creator": "Gams HSA Project",
+      "rights": "Creative Commons Attribution-NonCommercial 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)",
+      "publisher": "Gams",
+      "size": 1107,
+      "bagpath": "/data/content/DC.xml"
+    },
+    {
       "size": 193,
       "bagpath": "/data/content/search.json",
-      "dsid": "search",
+      "dsid": "search.json",
       "mimetype": "application/json",
       "title": "Datastream containing the search.json file",
       "description": "Datastream for GAMS project demo.",
@@ -31,7 +41,7 @@
     {
       "size": 22226,
       "bagpath": "/data/content/SOURCE.xml",
-      "dsid": "SOURCE",
+      "dsid": "SOURCE.xml",
       "mimetype": "application/xml",
       "title": "Datastream containing the SOURCE.xml file",
       "description": "Datastream for GAMS project demo.",
@@ -43,7 +53,7 @@
   "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",
   "created_by": "Pyrilo",
   "source": "local",
-  "recid": "test",
+  "recid": "test.test",
   "project": "test",
   "objectType": "TEI"
 }

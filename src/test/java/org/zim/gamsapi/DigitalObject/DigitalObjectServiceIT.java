@@ -83,61 +83,11 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(savedDigitalObject).isNotNull();
       Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
       Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
-      // parent was not set
-      Assertions.assertThat(savedDigitalObject.getParent()).isNull();
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
     }
 
-    @Test
-    public void successFullySavesDigitalObjectWithParent() {
-      // given
-
-      DigitalObject parent = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(parent);
-
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("testPid")
-        .project(testProject)
-        .parent(parent)
-        .publisher("testPublisher")
-        .baseMetadata(testMetadataBaseEntity)
-        .build();
-
-      // when
-      DigitalObject savedDigitalObject = digitalObjectService.save(digitalObject);
-
-      // then
-      Assertions.assertThat(savedDigitalObject).isNotNull();
-      Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
-      Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
-      Assertions.assertThat(savedDigitalObject.getParent()).isEqualTo(parent);
-      // considered equal because of same id
-      Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
-
-    }
-
-
-    @Test
-    public void throwsExceptionWhenParentDoesNotExist() {
-      // given
-
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-        .id("testPid")
-        .project(testProject)
-        .publisher("testPublisher")
-        .baseMetadata(testMetadataBaseEntity)
-        .parent(new DigitalObjectBuilder().id("nonExistentParentPid").project("12345").publisher("foo").baseMetadata(testMetadataBaseEntity).build())
-        .build();
-
-      // when
-      // then
-      Assertions.assertThatThrownBy(() -> digitalObjectService.save(digitalObject))
-        .isInstanceOf(DigitalObjectNotFoundException.class);
-
-    }
   }
 
   @Nested
@@ -145,7 +95,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-      String projectAbbr = "nonExistentProject";
+      String projectAbbr = "nonexist";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
@@ -157,7 +107,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      String projectAbbr = "existingProject";
+      String projectAbbr = "existing";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
@@ -209,80 +159,26 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class AssignParentObject {
-
-    @Test
-    public void assignsParentObjectSuccessfully() {
-      DigitalObject parent = new DigitalObjectBuilder()
-          .id("parentPid")
-          .project(testProject)
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(parent);
-
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject);
-
-      digitalObjectService.assignParentObject(digitalObject, parent);
-
-      DigitalObject result = digitalObjectService.findById(digitalObject.getId());
-
-      Assertions.assertThat(result.getParent()).isEqualTo(parent);
-    }
-
-    @Test
-    public void throwsExceptionWhenParentObjectDoesNotExist() {
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
-          .project(testProject)
-          .baseMetadata(testMetadataBaseEntity)
-          .publisher("testPublisher")
-          .build();
-      digitalObjectRepository.save(digitalObject);
-
-      DigitalObject nonExistentParent = new DigitalObjectBuilder()
-          .id("nonExistentParentPid")
-          .project(testProject)
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-
-      org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
-        digitalObjectService.assignParentObject(digitalObject, nonExistentParent);
-      });
-    }
-  }
-
-
-  @Nested
   public class FindAllByProjectAbbrWithOptionalParameters {
 
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-      String projectAbbr = "nonExistentProject";
+      String projectAbbr = "nonexist";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
-
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.empty(), Pageable.unpaged());
-
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
       Assertions.assertThat(result).isEmpty();
 
     }
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      String projectAbbr = "existingProject";
+      String projectAbbr = "project";
       Project project = Project.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
       DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id("testPid")
+          .id(projectAbbr + ".testpid")
           .project(project)
           .publisher("testPublisher")
           .objectType("testType")
@@ -290,7 +186,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .build();
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Optional.empty(), Pageable.unpaged());
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
 
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
@@ -298,44 +194,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsPageOfDigitalObjectsWhenTheyExistForProjectAndMatchTypes() {
-      String projectAbbr = "existingProject";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
-      projectRepository.save(project);
-
-      DigitalObject digitalObject1 = new DigitalObjectBuilder()
-          .id("testPid1")
-          .project(project)
-          .types(Set.of("testType1"))
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject1);
-
-      DigitalObject digitalObject2 = new DigitalObjectBuilder()
-          .id("testPid2")
-          .project(project)
-          .types(Set.of("testType2"))
-          .publisher("testPublisher")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject2);
-
-      Set<String> types = new HashSet<>();
-      types.add("testType1");
-
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.of(types), Pageable.unpaged());
-
-      Assertions.assertThat(result).isNotEmpty();
-      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject1.getId());
-
-    }
-
-    @Test
     public void throwsExceptionWhenProjectDoesNotExist() {
       String projectAbbr = "nonExistentProject";
 
-      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Optional.empty(), Pageable.unpaged()))
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
           .isInstanceOf(ProjectNotFoundException.class);
     }
   }

@@ -1,11 +1,8 @@
 package org.zim.gamsapi.DigitalObject;
 
-import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +11,8 @@ import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.http.HttpStatus;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectException;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import java.util.*;
@@ -29,6 +28,7 @@ import java.util.*;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
+@ToString
 public class DigitalObject {
 
   /**
@@ -36,17 +36,10 @@ public class DigitalObject {
    */
   @Id
   @Column(name = "id")
-  @NotBlank
+  @Size(max = 30, min = 1)
+  @NotEmpty
+  @Pattern(regexp = "^[a-z0-9.]*$")
   private String id;
-
-
-  /**
-   * A digital object can contain other digital objects.
-   */
-  @OneToOne(fetch = FetchType.LAZY)
-  // manages infinite reference in json https://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion
-  @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-  private DigitalObject parent;
 
   /**
    * Content Model representation
@@ -98,15 +91,9 @@ public class DigitalObject {
   private String modifiedBy;
 
   /**
-   * Arbitrary types associated with the digital object.
+   * Publisher of the digital object
    */
-  @ElementCollection
-  @NotNull
-  private Set<String> types = new HashSet<>();
-
-  /**
-   * Publisher of the digital object or datastream
-   */
+  @Column(name = "publisher")
   @NotEmpty
   private String publisher;
 
@@ -137,21 +124,14 @@ public class DigitalObject {
         : getClass().hashCode();
   }
 
-  @Override
-  public String toString() {
-    return "DigitalObject{" +
-            "id='" + id + '\'' +
-            ", parent='" + parent + "'" +
-            ", objectType='" + objectType + '\'' +
-            ", published=" + published +
-            ", created=" + created +
-            ", modified=" + modified +
-            ", project=" + project +
-            ", baseMetadata=" + baseMetadata +
-            ", createdBy='" + createdBy + '\'' +
-            ", modifiedBy='" + modifiedBy + '\'' +
-            ", types=" + types +
-            '}';
+  @AssertTrue(message = "The id of a digital object must start with the project abbreviation followed by dot, like 'hsa.1234'")
+  public boolean isCorrectlyContainingProjectAbbrInIdWithDot() {
+    if(id == null || project == null) {
+      String msg = String.format("Digital object id or project is null. Digital object: %s", this);
+      log.error(msg);
+      throw new DigitalObjectException(HttpStatus.CONFLICT, msg);
+    }
+    return id.startsWith(project.getProjectAbbr() + ".");
   }
 
 }

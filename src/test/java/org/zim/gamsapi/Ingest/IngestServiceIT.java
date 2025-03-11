@@ -67,7 +67,7 @@ public class IngestServiceIT extends IntegrationTest {
     var datastreams = datastreamRepository.findAll();
     Assertions.assertThat(datastreams)
         .isNotEmpty()
-        .hasSize(3);
+        .hasSize(4);
 
     // assert that expected datastream content exists on the fileystem
     datastreams.forEach(datastream -> {

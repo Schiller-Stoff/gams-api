@@ -192,8 +192,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       digitalObjectRepository.save(digitalObject);
 
-      Datastream datastream = TestDatastream.generate(digitalObject, "testDsId");
-      Datastream datastream2 = TestDatastream.generate(digitalObject, "testDsId2");
+      Datastream datastream = TestDatastream.generate(digitalObject, "testDsId.xml");
+      Datastream datastream2 = TestDatastream.generate(digitalObject, "testDsId2.xml");
 
       datastreamRepository.save(datastream);
       datastreamRepository.save(datastream2);
@@ -244,7 +244,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getBaseMetadata().getTitle(),
               digitalObject.getBaseMetadata().getDescription(),
               digitalObject.getBaseMetadata().getCreator(),
-              digitalObject.getBaseMetadata().getRights()
+              digitalObject.getBaseMetadata().getRights(),
+              digitalObject.getPublisher(),
+              digitalObject.getObjectType(),
+              digitalObject.getProject().getProjectAbbr()
           );
 
 
@@ -321,12 +324,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
 
-    final DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), "RANDOM_PID_8d7");
+    final DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() +  ".8d7");
     digitalObjectRepository.save(
         digitalObject1
     );
 
-    final DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), "RANDOM_PID_8d8123");
+    final DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), digitalObject1.getId() +  ".123");
     digitalObjectRepository.save(
         digitalObject2
     );

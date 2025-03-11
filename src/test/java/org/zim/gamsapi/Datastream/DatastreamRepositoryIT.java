@@ -77,7 +77,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void saveDatastreamExistsWithExpectedID() {
         // using the DatastreamId from the test datastream
-        Datastream datastream = TestDatastream.generate(testDigitalObject, "SOME_RANDOM_DSID");
+        Datastream datastream = TestDatastream.generate(testDigitalObject, "RANDOM1.rdf");
         datastreamRepository.save(datastream);
 
         Assertions.assertThat(
@@ -103,7 +103,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Test
     public void deleteDatastreamRemovesDatastream() {
         Datastream datastream = datastreamRepository.save(
-            TestDatastream.generate(testDigitalObject, "SOME_RANDOM_DSID_45123")
+            TestDatastream.generate(testDigitalObject, "RANDOM2.ttl")
         );
         Assertions.assertThat(
                         datastreamRepository.findById(datastream.deriveDatastreamId()))
@@ -182,11 +182,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), "DIGITAL_OBJECT_TO_BE_DELETED");
+            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), TestProject.PROJECT_ABBR.getValue() + ".an.object");
 
             digitalObjectRepository.save(digitalObject);
 
-            Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "DSID_TO_BE_DELETED");
+            Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "rand5.txt");
 
             datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
 
@@ -433,7 +433,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         DigitalObject unsavedObject = TestDigitalObject.generate();
         unsavedObject.setId("NOT_SAVED_OBJECT_923");
 
-        Datastream aDatastream = TestDatastream.generate(unsavedObject, "RANDOM_DSID_123456");
+        Datastream aDatastream = TestDatastream.generate(unsavedObject, "rand3.xml");
 
 
         org.junit.jupiter.api.Assertions.assertThrows(

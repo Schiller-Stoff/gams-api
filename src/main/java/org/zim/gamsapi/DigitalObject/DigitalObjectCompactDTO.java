@@ -14,6 +14,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class DigitalObjectCompactDTO {
 
     private String id;
@@ -24,9 +25,6 @@ public class DigitalObjectCompactDTO {
      */
     @Builder.Default
     private List<String> datastreams = new ArrayList<>();
-
-
-    private String parent;
 
     private String objectType;
 
@@ -46,9 +44,6 @@ public class DigitalObjectCompactDTO {
 
     private String publisher;
 
-    @Builder.Default
-    private Set<String> types = new HashSet<>();
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -60,26 +55,6 @@ public class DigitalObjectCompactDTO {
     @Override
     public int hashCode() {
         return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-
-        return "DigitalObjectCompactDTO{" +
-                "id='" + id + '\'' +
-                ", datastreams=" + datastreams +
-                ", parent=" + parent +
-                ", objectType='" + objectType + '\'' +
-                ", published=" + published +
-                ", created=" + created +
-                ", modified=" + modified +
-                ", projectAbbr=" + projectAbbr +
-                ", baseMetadata=" + baseMetadata +
-                ", createdBy='" + createdBy + '\'' +
-                ", modifiedBy='" + modifiedBy + '\'' +
-                ", publisher='" + publisher + '\'' +
-                ", types=" + types +
-                '}';
     }
 
 }

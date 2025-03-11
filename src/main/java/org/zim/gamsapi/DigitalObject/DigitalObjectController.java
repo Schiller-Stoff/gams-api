@@ -18,12 +18,9 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-
 import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.constraints.Null;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,7 +146,6 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(
         project.getProjectAbbr(),
         objectType,
-        types,
         PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
 
   }
@@ -191,25 +187,17 @@ public class DigitalObjectController {
     return "DigitalObject/show_all";
   }
 
-
-  @PutMapping(value = { "/{id}", "/{id}/" })
+  @PutMapping(value = {"/{id}", "/{id}/"})
   public String createObject(
-      // digital object needs to be described by the request body (otherwise nested
-      // base metadata mapping would fail)
-      @RequestBody DigitalObject digitalObject,
-      @RequestParam Optional<String> parent,
-      Project project,
-      Model model,
-      @RequestHeader Map<String, String> requestHeader) {
+          // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
+          @RequestBody DigitalObject digitalObject,
+          Project project,
+          Model model,
+          @RequestHeader Map<String, String> requestHeader
+  ) {
     // project membership is not automatically bound by spring.
     digitalObject.setProject(project);
     // assign child objects if available
-
-    parent
-        .ifPresent(
-            strings -> digitalObject.setParent(new DigitalObjectBuilder().id(parent.get()).build()));
-
-    System.out.println("***********" + digitalObject);
 
     DigitalObject savedObject = digitalObjectService.save(digitalObject);
     model.addAttribute("do", savedObject);

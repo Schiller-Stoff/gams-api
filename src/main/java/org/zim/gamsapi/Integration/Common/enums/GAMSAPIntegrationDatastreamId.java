@@ -13,12 +13,12 @@ public enum GAMSAPIntegrationDatastreamId {
   /**
    * Datastream id of defined rdf datastream.
    */
-  RDF_DATASTREAM_ID("RDF"),
+  RDF_DATASTREAM_ID("RDF.xml"),
 
   /**
    * Datastream id of integrated basic search.
    */
-  SEARCH_DATASTREAM_ID("SEARCH_INDEX");
+  SEARCH_DATASTREAM_ID("SEARCH.json");
 
 
   public final String name;

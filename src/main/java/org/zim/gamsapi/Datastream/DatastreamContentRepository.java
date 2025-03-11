@@ -32,6 +32,19 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
    public DatastreamContentRepository(GAMSStorageProperties gamsStorageProperties){
      GAMS_FILES_ROOT = Paths.get(gamsStorageProperties.getRootPath()).toAbsolutePath();
+
+      // create root location if it does not exist
+      if(!Files.exists(GAMS_FILES_ROOT)){
+        try {
+          Files.createDirectories(GAMS_FILES_ROOT);
+          log.info("Created root location for GAMS files at {}", GAMS_FILES_ROOT);
+        } catch (IOException e) {
+          String msg = String.format("Could not create root location for GAMS files at %s. Original error: %s", GAMS_FILES_ROOT, e);
+          log.error(msg);
+          throw new DatastreamCannotWriteFileException(msg);
+        }
+      }
+
    }
 
 
@@ -45,7 +58,7 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     // error if root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
-      String msg = String.format("No files stored in GAMS. The root location %s does not exist. For datastream with id %s", GAMS_FILES_ROOT, datastreamId);
+      String msg = String.format("No files stored in GAMS. The root location %s does not exist and needs to be created first. Make sure to correctly configure the gams-api application. For datastream with id %s", GAMS_FILES_ROOT, datastreamId);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }

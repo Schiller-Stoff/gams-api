@@ -22,7 +22,7 @@ public interface DigitalObjectListItemView {
 
     String getCreated();
 
-    Set<String> getTypes();
+    String getModified();
 
     interface ProjectView {
         String getProjectAbbr();

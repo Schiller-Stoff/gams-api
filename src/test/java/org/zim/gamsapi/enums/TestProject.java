@@ -27,4 +27,10 @@ public enum TestProject {
             .build();
     }
 
+    public static Project generate(String projectAbbr){
+        return Project.builder()
+            .projectAbbr(projectAbbr)
+            .build();
+    }
+
 }

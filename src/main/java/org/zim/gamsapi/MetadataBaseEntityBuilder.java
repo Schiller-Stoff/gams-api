@@ -46,12 +46,6 @@ public class MetadataBaseEntityBuilder {
       throw new IllegalStateException(msg);
     }
 
-    if((metadataBaseEntity.getDescription() == null) || metadataBaseEntity.getDescription().isEmpty()){
-      String msg = String.format("MetadataBaseEntity's description must not be null or empty! Happened at class %s", this.getClass().getName());
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-
     return metadataBaseEntity;
   }
 }

@@ -27,13 +27,11 @@ public interface DigitalObjectDetailsView {
 
     Date getModified();
 
-    Set<String> getTypes();
-
-    String getParent();
-
     String getCreatedBy();
 
     String getModifiedBy();
+
+    String getPublisher();
 
     interface ProjectView {
         String getProjectAbbr();

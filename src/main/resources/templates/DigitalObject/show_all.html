@@ -147,7 +147,7 @@
               <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.title'">title</a>
             </th>
             <th scope="col">
-              <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=created'">created</a>
+              <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
             </th>
             <!--          <th scope="col">-->
             <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
@@ -165,7 +165,7 @@
                     th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"
             ></a></td>
             <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.title}"></span></td>
-            <td><span th:if="${do.baseMetadata}" th:text="${do.created}"></span></td>
+            <td><span th:text="${do.modified}"></span></td>
             <!--          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>-->
             <td><div>
               <!--<a th:href="${do.metaAddress}" target="_blank">Fedora6 profile</a> -->
@@ -242,18 +242,6 @@
           <input name="sortBy" th:value="${sortBy}" type="hidden" class="form-control">
         </form>
         <br/>
-        <form
-                onsubmit="return confirm('Are you sure you want to delete all digital objects from the current project?');"
-                action="#"
-                th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects'}"
-                method="delete"
-                th:method="DELETE"
-                class="d-inline"
-        >
-          <!-- <input type="hidden" name="id" th:field="*{id}"/> -->
-          <!-- <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> -->
-          <input type="submit" class="btn btn-danger d-inline" value="Delete all objects"/>
-        </form>
       </div>
 
 

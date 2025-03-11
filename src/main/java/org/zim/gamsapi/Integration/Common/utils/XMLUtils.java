@@ -19,10 +19,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -55,6 +52,28 @@ public class XMLUtils {
       throw new IntegrationDataProcessingException(msg);
     }
   }
+
+  /**
+   * Parses given InputStream to Document.
+   * TODO test
+   * @param source InputStream to be parsed
+   * @return Parsed xml document
+   * @throws IntegrationDataProcessingException
+   */
+  public static Document parseXml(InputStream source) throws IntegrationDataProcessingException {
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    try {
+      DocumentBuilder db = dbf.newDocumentBuilder();
+      return db.parse(
+          new InputSource(new InputStreamReader(source, StandardCharsets.UTF_8))
+      );
+    } catch (ParserConfigurationException | SAXException | IOException e){
+      String msg = "Failed to parse given source datastream as XML." + e + "\n";
+      log.error(msg);
+      throw new IntegrationDataProcessingException(msg);
+    }
+  }
+
 
   /**
    * Transforms given Document to a byte array
@@ -154,35 +173,35 @@ public class XMLUtils {
     // TODO how to build a propper error message?
     if((attributeName == null) || (attributeName.isEmpty())){
       String msg = "Given attributename is null or empty";
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 
     String nodeName = sourceNode.getNodeName();
     if((nodeName == null) || (nodeName.isEmpty())){
         String msg = String.format("Cannot extract attribute %s from given node without tagname.", attributeName);
-        log.error(msg);
+        //log.error(msg);
         throw new IntegrationDataProcessingException(msg);
     }
 
     NamedNodeMap attributes = sourceNode.getAttributes();
     if((attributes == null) || (attributes.getLength() == 0)){
       String msg = String.format("Failed to extract attribute %s from given node with name %s", attributeName, nodeName);
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 
     Node attribute = attributes.getNamedItem(attributeName);
     if(attribute == null){
       String msg = String.format("Failed to extract attribute %s from node %s. Attribute is null (not available)", attributeName, nodeName);
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 
     String attributeValue = attribute.getTextContent();
     if((attributeValue == null) || (attributeValue.isEmpty())){
       String msg = String.format("Failed to extract attribute %s from node %s. Attribute is defined but it's value is null or empty.", attributeValue, attributeName);
-      log.error(msg);
+      //log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
 

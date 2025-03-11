@@ -10,7 +10,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
  */
 public enum TestDatastream {
 
-    DSID("test"),
+    DSID("test.xml"),
     DATASTREAM_NAME("test-datastream");
 
     private final String value;
@@ -21,6 +21,14 @@ public enum TestDatastream {
 
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Generates a test datastream using the values defined in the enum.
+     * @return The generated datastream.
+     */
+    public static Datastream generate(){
+        return generate(TestDigitalObject.generate());
     }
 
     /**

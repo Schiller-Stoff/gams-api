@@ -21,7 +21,6 @@ public class BagitSipJsonDigitalObjectConverter implements Converter<BagitSipJso
             .id(source.getId())
             .project(source.getProject())
             .objectType(source.getObjectType())
-            .types(source.getTypes())
             .publisher(source.getPublisher())
             .baseMetadata(new MetadataBaseEntityBuilder()
                 .title(source.getTitle())
@@ -29,11 +28,6 @@ public class BagitSipJsonDigitalObjectConverter implements Converter<BagitSipJso
                 .description(source.getDescription())
                 .rights(source.getRights())
                 .build());
-
-        // parent might be null
-        if(source.getParent() != null){
-            digitalObjectBuilder.parent(source.getParent());
-        }
 
         return digitalObjectBuilder.build();
     }

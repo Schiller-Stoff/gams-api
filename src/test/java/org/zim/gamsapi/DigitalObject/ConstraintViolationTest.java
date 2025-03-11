@@ -1,19 +1,17 @@
 package org.zim.gamsapi.DigitalObject;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import jakarta.validation.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.UnitTest;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class ConstraintViolationTest extends UnitTest {
 
@@ -29,27 +27,16 @@ public class ConstraintViolationTest extends UnitTest {
 
     @Test
     public void shouldRaiseNoConstraintViolation() {
-        DigitalObject digitalObject = new DigitalObjectBuilder()
-            .project(Project.builder().projectAbbr("foo").build())
-            .id("foo")
-            .publisher("foo")
-            .baseMetadata(TestMetadataBaseEntity.generate())
-            .build();
-
+        DigitalObject digitalObject = TestDigitalObject.generate();
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet, is(empty()));
     }
 
     @Test
-    public void shouldRaiseConstraintViolationIfPidIsNull() {
-        DigitalObject digitalObject = new DigitalObject();
+    public void shouldRaiseValidationExceptionIfIdIsNull() {
+        DigitalObject digitalObject = TestDigitalObject.generate();
         digitalObject.setId(null);
-        digitalObject.setProject(Project.builder().projectAbbr("Foo").build());
-        digitalObject.setPublisher("Foo");
-        digitalObject.setBaseMetadata(TestMetadataBaseEntity.generate());
-
-        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
-        assertThat(violationSet.size(), is(1));
+        Assertions.assertThrows(ValidationException.class, () -> validator.validate(digitalObject));
     }
 
 
@@ -84,6 +71,53 @@ public class ConstraintViolationTest extends UnitTest {
         // set creator to null
         metadataBaseEntity.setCreator(null);
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
+        assertThat(violationSet.size(), is(1));
+    }
+
+    @Test
+    public void raisesConstraintViolationIfProjectAbbrIsNotContainedInId(){
+
+        DigitalObject digitalObject = new DigitalObjectBuilder()
+            .project(Project.builder().projectAbbr("foo").build())
+            .id("foo")
+            .publisher("foo")
+            .baseMetadata(TestMetadataBaseEntity.generate())
+            .build();
+
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
+        assertThat(violationSet, not(empty()));
+
+    }
+
+    @Test
+    public void shouldRaiseOneConstraintViolationIfIdIsTooLong(){
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObject.setId(digitalObject.getId() + "12345678901312312321312312323"); //
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
+        assertThat(violationSet.size(), is(1));
+    }
+
+    @Test
+    public void shouldRaiseConstraintViolationIfIdContains$(){
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObject.setId(digitalObject.getId() + "$");
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
+        assertThat(violationSet.size(), is(1));
+    }
+
+    @Test
+    public void doesNotRaiseConstraintViolationIfIdContainsDots(){
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObject.setId(digitalObject.getId() + "...");
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
+        assertThat(violationSet, is(empty()));
+    }
+
+    @Test
+    public void shouldRaiseIfIdContainsUppercasedAChar(){
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObject.setId(digitalObject.getId() + "A");
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));
     }
 

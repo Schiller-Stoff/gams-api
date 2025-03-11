@@ -3,6 +3,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -45,7 +46,7 @@ public class BagitContentFile {
     /**
      * Description of the datastream
      */
-    @NotEmpty
+    @Size(max = 2000)
     private String description;
 
 

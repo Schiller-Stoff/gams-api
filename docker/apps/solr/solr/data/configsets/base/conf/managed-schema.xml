@@ -42,6 +42,7 @@
   </fieldType>
   <fieldType name="ignored" class="solr.StrField" indexed="false" stored="false" multiValued="true"/>
   <fieldType name="knn_vector" class="solr.DenseVectorField" omitNorms="true" vectorDimension="20"/>
+  <fieldType name="date_range" class="solr.DateRangeField"/>
   <fieldType name="location" class="solr.LatLonPointSpatialField" docValues="true"/>
   <fieldType name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType" geo="true" maxDistErr="0.001" distErrPct="0.025" distanceUnits="kilometers"/>
   <fieldType name="lowercase" class="solr.TextField" positionIncrementGap="100">
@@ -448,31 +449,88 @@
       <tokenizer name="whitespace"/>
     </analyzer>
   </fieldType>
-  <field name="_datastreams" type="text_general" multiValued="true"/>
-  <field name="_fulltext" type="text_general" multiValued="false"/>
+
+  <!--  Internal solr fields -->
   <field name="_nest_path_" type="_nest_path_"/>
-  <field name="_id" type="text_general" multiValued="false"/>
-  <field name="_projectAbbr" type="text_general" multiValued="false"/>
-  <field name="_type" type="text_general" multiValued="false"/>
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
-  <field name="desc" type="text_gen_sort" multiValued="false" required="false"/>
-  <field name="types" type="strings"/>
-  <!-- Person data -->
-  <field name="firstname" type="text_general"/>
-  <field name="surname" type="text_general"/>
-  <field name="birthdate" type="pdate" multiValued="false"/>
-  <field name="deathdate" type="pdate" multiValued="false"/>
 
-  <!-- Geographical data -->
-  <field name="location" type="location"/>
-
+  <!--  Basic id field of every solr document-->
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="properties" type="text_general"/>
-  <field name="title" multiValued="false" type="text_gen_sort"/>
-  <field name="vector" type="knn_vector" multiValued="false" indexed="true" stored="true"/>
-  <field name="word" type="text_general"/>
+
+  <!--
+  *****
+  Basic system required fields
+  *****
+  -->
+  <field name="objectTitle" type="strings"/>
+  <field name="objectDesc" type="strings"/>
+  <field name="objectDatastreams" type="strings" multiValued="true"/>
+  <field name="objectFulltext" type="text_general" multiValued="false"/>
+  <field name="objectProjectAbbr" type="string" multiValued="false"/>
+  <field name="objectType" type="string" multiValued="false"/>
+  <field name="objectCreator" type="strings"/>
+  <field name="objectPublisher" type="strings"/>
+  <field name="objectRights" type="strings"/>
+
+
+  <!--
+  *****
+  Basic entity properties
+  *****
+  -->
+  <field name="entityTitle" type="text_gen_sort" multiValued="false" required="false"/>
+  <field name="entityTitles" type="strings" multiValued="true" required="false"/>
+  <field name="entityDesc" type="string" multiValued="false" required="false"/>
+  <field name="entityDescs" type="strings" multiValued="true" required="false"/>
+  <field name="entityKeywords" type="pints" multiValued="true" required="false"/>
+  <field name="entityTypes" type="strings" multiValued="true" required="false"/>
+  <field name="entityTags" type="strings" multiValued="true" required="false"/>
+  <field name="entitySortField" type="text_gen_sort" multiValued="false" required="false"/>
+
+  <!--  Value fields-->
+  <field name="entityVector" type="knn_vector" multiValued="false" indexed="true" stored="true"/>
+  <field name="entityRank" type="rank" multiValued="false" indexed="true" stored="true"/>
+  <field name="entityValues" type="pfloats" multiValued="true" required="false"/>
+
+  <!--  Pointers and linking logic-->
+  <field name="entityPointers" type="strings" multiValued="true" required="false"/>
+  <field name="entityPointerLabels" type="strings" multiValued="true" required="false"/>
+  <field name="entityParents" type="string" multiValued="true" required="false"/>
+  <field name="entityParentLabels" type="string" multiValued="true" required="false"/>
+  <field name="entityChildren" type="strings" multiValued="true" required="false"/>
+  <field name="entityChildrenLabels" type="strings" multiValued="true" required="false"/>
+  <field name="entityExternalReferences" type="strings" multiValued="true" required="false"/>
+  <field name="entityExternalReferenceLabels" type="strings" multiValued="true" required="false"/>
+
+  <!--  Date fields-->
+  <field name="entityDates" type="pdates" multiValued="true" required="false"/>
+  <field name="entityStartDate" type="pdate" multiValued="false" required="false"/>
+  <field name="entityEndDate" type="pdate" multiValued="false" required="false"/>
+  <!-- Date range fields-->
+  <field name="entityStartDateRanges" type="date_range" multiValued="true" required="false" indexed="true" stored="true" />
+  <field name="entityEndDateRanges" type="date_range" multiValued="true" required="false" indexed="true" stored="true" />
+
+  <!-- Geographical fields-->
+  <field name="entityLongLat" type="location"/>
+  <field name="entityLocationShape" type="location_rpt" indexed="true" stored="true"/>
+  <field name="entityLocationLabels" type="strings" multiValued="true"/>
+
+
+  <!--
+   *****
+   Person data
+   *****
+  -->
+  <field name="persFirstname" type="strings" multiValued="true"/>
+  <field name="persSurname" type="strings" multiValued="true"/>
+  <field name="persMiddlename" type="strings" multiValued="true"/>
+  <field name="persAlternativeName" type="strings" multiValued="true"/>
+  <field name="persBirthdate" type="pdate" multiValued="true"/>
+  <field name="persDeathdate" type="pdate" multiValued="true"/>
+
+
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
@@ -542,18 +600,16 @@
   <dynamicField name="*_d" type="pdouble" indexed="true" stored="true"/>
   <dynamicField name="*_t" type="text_general" multiValued="false" indexed="true" stored="true"/>
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
-  <copyField source="_type" dest="type_str" maxChars="256"/>
-  <copyField source="types" dest="types_str" maxChars="256"/>
-  <copyField source="word" dest="word_str" maxChars="256"/>
-  <copyField source="desc" dest="desc_str" maxChars="256"/>
-  <copyField source="title" dest="title_str" maxChars="256"/>
-  <copyField source="properties" dest="properties_str" maxChars="256"/>
-  <copyField source="_id" dest="_id_str" maxChars="256"/>
-  <copyField source="_datastreams" dest="_datastreams_str" maxChars="256"/>
-  <copyField source="_projectAbbr" dest="_projectAbbr_str" maxChars="256"/>
-  <copyField source="_fulltext" dest="_fulltext_str" maxChars="256"/>
-  <copyField source="birthdate" dest="_birthdate_str" maxChars="256"/>
-  <copyField source="deathdate" dest="_deathdate_str" maxChars="256"/>
-  <copyField source="location" dest="_location_str" maxChars="256"/>
-  <copyField source="surname" dest="_surname_str" maxChars="256"/>
+<!--  <copyField source="_type" dest="type_str" maxChars="256"/>-->
+<!--  <copyField source="types" dest="types_str" maxChars="256"/>-->
+<!--  <copyField source="desc" dest="desc_str" maxChars="256"/>-->
+<!--  <copyField source="title" dest="title_str" maxChars="256"/>-->
+<!--  <copyField source="properties" dest="properties_str" maxChars="256"/>-->
+<!--  <copyField source="_datastreams" dest="_datastreams_str" maxChars="256"/>-->
+<!--  <copyField source="_projectAbbr" dest="_projectAbbr_str" maxChars="256"/>-->
+<!--  <copyField source="_fulltext" dest="_fulltext_str" maxChars="256"/>-->
+<!--  <copyField source="birthdate" dest="_birthdate_str" maxChars="256"/>-->
+<!--  <copyField source="deathdate" dest="_deathdate_str" maxChars="256"/>-->
+<!--  <copyField source="location" dest="_location_str" maxChars="256"/>-->
+<!--  <copyField source="surname" dest="_surname_str" maxChars="256"/>-->
 </schema>
