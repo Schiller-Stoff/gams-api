@@ -9,16 +9,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
-import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
+
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 
 import java.util.Map;
 
@@ -29,8 +29,8 @@ import java.util.Map;
 public class DatastreamController {
 
   private final IDatastreamService datastreamService;
-  private final IProjectService projectService;
-  private final IDigitalObjectService digitalObjectService;
+ // private final IProjectService projectService;
+ // private final IDigitalObjectService digitalObjectService;
   private final IDatastreamContentService datastreamContentService;
 
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
@@ -43,8 +43,16 @@ public class DatastreamController {
 
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public IDatastreamDetailsView getDatastreamJson(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
+  @Operation(summary = "Get datastream details as JSON")
+  public IDatastreamDetailsView getDatastreamJson(@PathVariable String dsid, @PathVariable String id, Model model, @PathVariable String projectAbbr) {
+    DigitalObject digitalObject = new DigitalObject();
+    digitalObject.setId(id);
+    Datastream datastream = new DatastreamBuilder()
+        .dsid(dsid)
+        .digitalObject(id)
+        .build();
     datastream.setDigitalObject(digitalObject);
+    Project project = new Project(projectAbbr, "");
     IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
         DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
     model.addAttribute(foundDatastream);
@@ -52,6 +60,7 @@ public class DatastreamController {
     return foundDatastream;
   }
 
+  @Hidden
   @DeleteMapping
   public String deleteDatastream(
           @PathVariable String id,
@@ -82,6 +91,9 @@ public class DatastreamController {
    */
   @GetMapping( path = {"/content", "/content/"})
   @ResponseBody
+  @Operation(summary = "Get datastream content")
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "dsid", description = "ID of the datastream", required = true)
   public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid){
     Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
     datastream = datastreamService.findById(datastream.deriveDatastreamId());

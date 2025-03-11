@@ -1,7 +1,6 @@
 package org.zim.gamsapi.Project.interfaces;
 
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.User.User;
 
 import java.util.List;
 
@@ -14,5 +13,7 @@ public interface IProjectService {
   Project findProject(String projectAbbr);
 
   List<Project> findAll();
+
+Project findByAbbr(String projectAbbr);
 
 }

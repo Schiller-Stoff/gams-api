@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Integration.BaseSearch;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 @RequestMapping(value = {"/api/v1/integration/search", "/api/v1/integration/search/"})
 @Slf4j
 @RequiredArgsConstructor
+@Hidden
 @RestController
 public class BaseSearchProxyController implements IIntegrationProxyController {
 
