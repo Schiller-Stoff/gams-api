@@ -18,12 +18,9 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-
 import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.constraints.Null;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -149,7 +146,6 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(
         project.getProjectAbbr(),
         objectType,
-        types,
         PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
 
   }
@@ -189,32 +185,6 @@ public class DigitalObjectController {
 
     // log.info("Found objects {} for project {}", digitalObjects, project);
     return "DigitalObject/show_all";
-  }
-
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-  @ResponseBody
-  public List<DigitalObjectListItemView> getProjectObjectsJson(
-          Model model,
-          Project project,
-          // for pagination
-          @RequestParam(defaultValue = "0") int pageIndex,
-          @RequestParam(defaultValue = "15") int pageSize,
-          // optional parameters searching for explicit types?
-          @RequestParam Optional<String> objectType
-  ) {
-    // limit page size
-    if (pageSize >= 20) {
-      pageSize = 20;
-    }
-
-    model.addAttribute(project);
-
-    return digitalObjectService.findAllByProjectAbbr(
-            project.getProjectAbbr(),
-            objectType,
-            PageRequest.of(pageIndex, pageSize, Sort.by("id"))
-    ).toList();
-
   }
 
   @PutMapping(value = {"/{id}", "/{id}/"})
