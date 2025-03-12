@@ -16,6 +16,7 @@ import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
@@ -57,7 +58,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @BeforeEach
   public void setup(){
-    testProject = Project
+    testProject = ProjectBuilder
       .builder()
       .projectAbbr(TestProject.PROJECT_ABBR.getValue())
       .build();
@@ -96,7 +97,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
       String projectAbbr = "nonexist";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
       Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
@@ -108,7 +109,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
       String projectAbbr = "existing";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
       DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
@@ -136,7 +137,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsDigitalObjectWhenItExists() {
 
-      Project project = Project.builder().projectAbbr("random").build();
+      Project project = ProjectBuilder.builder().projectAbbr("random").build();
       projectRepository.save(project);
 
       DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
@@ -164,7 +165,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
       String projectAbbr = "nonexist";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
       Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
       Assertions.assertThat(result).isEmpty();
@@ -174,7 +175,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
       String projectAbbr = "project";
-      Project project = Project.builder().projectAbbr(projectAbbr).build();
+      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
       DigitalObject digitalObject = new DigitalObjectBuilder()

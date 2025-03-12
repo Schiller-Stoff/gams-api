@@ -8,6 +8,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
@@ -34,7 +35,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
     @BeforeEach
     public void setup(){
-        testProject = Project
+        testProject = ProjectBuilder
             .builder()
             .projectAbbr(TestProject.PROJECT_ABBR.getValue())
             .build();

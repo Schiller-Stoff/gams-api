@@ -33,7 +33,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
   @Test
   public void projectDeletionFailIfDigitalObjectStillReferencesTheProject(){
 
-    Project project = Project.builder()
+    Project project = ProjectBuilder.builder()
         .projectAbbr(TestProject.PROJECT_ABBR.getValue())
         .build();
 
@@ -53,7 +53,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
   @Test
   public void savedProjectIsFindable(){
 
-    Project project = Project.builder()
+    Project project = ProjectBuilder.builder()
         .projectAbbr(TestProject.PROJECT_ABBR.getValue())
         .build();
 

@@ -1,6 +1,7 @@
 package org.zim.gamsapi.enums;
 
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 
 /**
  * Enum for test project credentials.
@@ -37,7 +38,7 @@ public enum TestProject {
      * @return The generated project.
      */
     public static Project generate(String projectAbbr){
-        return Project.builder()
+        return ProjectBuilder.builder()
             .projectAbbr(projectAbbr)
             .description(PROJECT_DESCRIPTION.getValue())
             // following fields are supplied by the database / spring security worflows

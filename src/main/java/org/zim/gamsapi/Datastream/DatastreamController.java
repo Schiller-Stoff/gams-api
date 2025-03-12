@@ -14,6 +14,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 
 import io.swagger.v3.oas.annotations.Hidden;
@@ -52,7 +53,12 @@ public class DatastreamController {
         .digitalObject(id)
         .build();
     datastream.setDigitalObject(digitalObject);
-    Project project = new Project(projectAbbr, "");
+
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
+
     IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
         DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
     model.addAttribute(foundDatastream);

@@ -23,8 +23,8 @@ public class ProjectTest extends UnitTest {
       // given
       final String PROJECT_ABBR = "projectAbbr";
 
-      Project project1 = Project.builder().projectAbbr(PROJECT_ABBR).build();
-      Project project2 = Project.builder().projectAbbr(PROJECT_ABBR).build();
+      Project project1 = ProjectBuilder.builder().projectAbbr(PROJECT_ABBR).build();
+      Project project2 = ProjectBuilder.builder().projectAbbr(PROJECT_ABBR).build();
 
       // then
       Assertions.assertEquals(project1, project2);

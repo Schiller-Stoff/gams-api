@@ -2,7 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Project.Project;
-import java.util.Set;
+import org.zim.gamsapi.Project.ProjectBuilder;
 
 @Slf4j
 public class DigitalObjectBuilder {
@@ -31,7 +31,7 @@ public class DigitalObjectBuilder {
   }
 
   public DigitalObjectBuilder project(String project) {
-    digitalObject.setProject(Project.builder().projectAbbr(project).build());
+    digitalObject.setProject(ProjectBuilder.builder().projectAbbr(project).build());
     return this;
   }
 

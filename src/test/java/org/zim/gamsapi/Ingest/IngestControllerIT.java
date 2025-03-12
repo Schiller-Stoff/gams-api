@@ -1,7 +1,6 @@
 package org.zim.gamsapi.Ingest;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,7 +16,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestBag;
 import org.zim.gamsapi.enums.TestProject;
@@ -57,7 +56,7 @@ public class IngestControllerIT extends IntegrationTest {
   @BeforeEach
   public void setup() throws IOException {
     bagFile = TestBag.loadFile();
-    projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+    projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
   @Test

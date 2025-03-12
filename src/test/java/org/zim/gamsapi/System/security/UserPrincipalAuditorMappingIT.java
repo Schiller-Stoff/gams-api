@@ -17,7 +17,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestBag;
 import org.zim.gamsapi.enums.TestDigitalObject;
@@ -50,7 +50,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
   @BeforeAll
   public void setup() throws IOException {
     bagFile = TestBag.loadFile();
-    projectRepository.save(Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+    projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
   }
 
   @AfterAll

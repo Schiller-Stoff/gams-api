@@ -23,7 +23,6 @@ import java.util.Objects;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Slf4j
 @ToString
 @EntityListeners(AuditingEntityListener.class)

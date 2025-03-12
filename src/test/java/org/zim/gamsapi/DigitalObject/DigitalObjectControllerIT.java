@@ -17,6 +17,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDatastreamContent;
@@ -51,7 +52,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @BeforeEach
   public void setup() {
-    testProject = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+    testProject = ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
     projectRepository.save(testProject);
   }
 

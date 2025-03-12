@@ -16,6 +16,7 @@ import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import io.micrometer.common.lang.Nullable;
@@ -71,7 +72,12 @@ public class DigitalObjectController {
   public DigitalObjectCompactDTO getJson(@PathVariable String projectAbbr, @PathVariable String id, Model model) {
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(id);
-    Project project = new Project(projectAbbr, "");
+
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
+
     digitalObject.setProject(project);
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
     var datastreamDetailsViews = datastreamService.findAll(digitalObject);
@@ -139,7 +145,10 @@ public class DigitalObjectController {
       pageSize = 20;
     }
 
-    Project project = new Project(projectAbbr, "");
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
 
     model.addAttribute(project);
 
@@ -230,7 +239,12 @@ public class DigitalObjectController {
   @GetMapping(params = { "style" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr, @Nullable @RequestParam String style) {
-    Project project = new Project(projectAbbr, "");
+    Project project = ProjectBuilder
+        .builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
+
     if (!style.equalsIgnoreCase("idlist")) {
       String msg = String.format("Unsupported view style %s", style);
       log.error(msg);
