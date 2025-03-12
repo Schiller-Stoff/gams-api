@@ -2,10 +2,7 @@ package org.zim.gamsapi.Project;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -65,6 +62,27 @@ public class ProjectRepositoryIT extends IntegrationTest {
     org.assertj.core.api.Assertions.assertThat(
         projectRepository.findById(project.getProjectAbbr()).get()
     ).isEqualTo(project);
+
+  }
+
+  @Nested
+  public class FindLastModifiedDateByProjectAbbr {
+
+    @Test
+    public void returnsExpectedModifiedDate(){
+
+      // contains no modification date etc.
+      Project project = TestProject.generate();
+
+      // saved project will contain modification date
+      Project savedProject = projectRepository.save(project);
+
+      // method returns same time as saved project's modification date
+      org.assertj.core.api.Assertions.assertThat(
+          projectRepository.findLastModifiedDateByProjectAbbr(project.getProjectAbbr()).get()
+      ).hasSameTimeAs(savedProject.getModified());
+
+    }
 
   }
 
