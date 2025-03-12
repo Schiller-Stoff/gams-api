@@ -33,7 +33,7 @@ public class ProjectControllerIT extends IntegrationTest {
     @Test
     public void projectAbbrContainedInWebclientProjectsOverview() throws Exception {
 
-      Project project = Project.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
+      Project project = ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
 
       projectRepository.save(project);
 
