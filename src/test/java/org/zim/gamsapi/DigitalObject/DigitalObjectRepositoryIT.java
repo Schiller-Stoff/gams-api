@@ -175,4 +175,69 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     }
 
 
+    /**
+     * Tests time based modification auditing properties of the digital object entity.
+     * (Without createdBy and modifiedBy)
+     */
+    @Nested
+    public class ModificationAuditing {
+
+        /**
+         * User auditing is disabled for this test-class
+         */
+        @Test
+        public void userAuditingFieldsShouldBeNull(){
+
+            DigitalObject savedObject = digitalObjectRepository.save(
+                TestDigitalObject.generate(testProject.getProjectAbbr())
+            );
+
+            Assertions.assertThat(savedObject.getCreatedBy()).isNull();
+            Assertions.assertThat(savedObject.getModifiedBy()).isNull();
+
+        }
+
+        @Test
+        public void modificationAuditingPropertiesAreNotNull(){
+
+            DigitalObject savedObject = digitalObjectRepository.save(
+                TestDigitalObject.generate(testProject.getProjectAbbr())
+            );
+
+            // first some null assertions
+            Assertions.assertThat(savedObject.getCreated()).isNotNull();
+            Assertions.assertThat(savedObject.getModified()).isNotNull();
+
+        }
+
+        @Test
+        public void modificationAuditingPropertiesAreUpdated(){
+
+            DigitalObject savedObject = digitalObjectRepository.save(
+                TestDigitalObject.generate(testProject.getProjectAbbr())
+            );
+
+            // save the last modified date
+            Date lastModified = savedObject.getModified();
+
+            // update the object
+            savedObject.setPublisher("new publisher");
+            savedObject = digitalObjectRepository.save(savedObject);
+
+            // the last modified date should be updated
+            Assertions.assertThat(savedObject.getModified())
+                .isNotEqualTo(lastModified);
+
+            // the last modified date should be after the last modified date
+            Assertions.assertThat(savedObject.getModified())
+                .isAfter(lastModified);
+
+            // the creation date should be before the last modified date
+            Assertions.assertThat(savedObject.getCreated())
+                .isBefore(savedObject.getModified());
+
+        }
+
+
+    }
 }
