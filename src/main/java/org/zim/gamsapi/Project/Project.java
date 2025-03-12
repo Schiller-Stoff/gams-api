@@ -6,6 +6,12 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -20,6 +26,7 @@ import java.util.Objects;
 @Builder
 @Slf4j
 @ToString
+@EntityListeners(AuditingEntityListener.class)
 public class Project {
 
   @NotBlank
@@ -31,6 +38,29 @@ public class Project {
 
   @Column(name = "description")
   private String description;
+
+  /**
+   * Creation date of the digital object / datastream
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @CreationTimestamp
+  private Date created;
+
+  /**
+   * Last modified date of the digital object / datastream
+   */
+  @Temporal(TemporalType.TIMESTAMP)
+  @UpdateTimestamp
+  private Date modified;
+
+  @Column(name = "created_by")
+  @CreatedBy
+  private String createdBy;
+
+  @Column(name = "modified_by")
+  @LastModifiedBy
+  private String modifiedBy;
+
 
   @Override
   public boolean equals(Object o) {
@@ -44,6 +74,8 @@ public class Project {
   public int hashCode() {
     return Objects.hash(projectAbbr);
   }
+
+
 
 
 }

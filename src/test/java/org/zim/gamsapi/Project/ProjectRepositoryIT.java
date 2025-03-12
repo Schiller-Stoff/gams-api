@@ -86,4 +86,66 @@ public class ProjectRepositoryIT extends IntegrationTest {
 
   }
 
+  /**
+   * Tests for time based modification auditing properties of the project entity.
+   * createdBy and modifiedBy are excluded.
+   */
+  @Nested
+  public class ModificationAuditing {
+
+    /**
+     * User auditing is disabled for this test-class
+     */
+    @Test
+    public void userAuditingFieldsShouldBeNull(){
+      Project savedProject = projectRepository.save(
+          TestProject.generate()
+      );
+      org.assertj.core.api.Assertions.assertThat(savedProject.getCreatedBy()).isNull();
+      org.assertj.core.api.Assertions.assertThat(savedProject.getModifiedBy()).isNull();
+    }
+
+    @Test
+    public void modificationAuditingPropertiesAreNotNull(){
+
+      Project savedProject = projectRepository.save(
+          TestProject.generate()
+      );
+
+      // first some null assertions
+      org.assertj.core.api.Assertions.assertThat(savedProject.getCreated()).isNotNull();
+      org.assertj.core.api.Assertions.assertThat(savedProject.getModified()).isNotNull();
+
+    }
+
+    @Test
+    public void modificationAuditingPropertiesAreUpdated(){
+
+      Project savedProject = projectRepository.save(
+          TestProject.generate()
+      );
+
+      // save the last modified date
+      java.util.Date lastModified = savedProject.getModified();
+
+      // update the project
+      savedProject.setDescription("new description");
+      savedProject = projectRepository.save(savedProject);
+
+      // check if the modification date has been updated
+      org.assertj.core.api.Assertions.assertThat(
+          savedProject.getModified()
+      ).isAfter(lastModified);
+
+      // modification date is different from created
+      org.assertj.core.api.Assertions.assertThat(
+          savedProject.getModified()
+      ).isNotEqualTo(
+          savedProject.getCreated()
+      );
+
+    }
+
+  }
+
 }
