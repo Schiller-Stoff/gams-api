@@ -12,7 +12,8 @@ import java.util.Optional;
 public interface IProjectRepository extends CrudRepository<Project, String> {
 
   /**
-   * Find the last modified date of a project by its abbreviation.
+   * Finds the last modified date (!CAREFUL: Only considers direct changes to the project repository = Project Table)
+   * of a project by its abbreviation. Changes done to referenced entities are not considered.
    * @param projectAbbr The abbreviation of the project.
    * @return The last modified date of the project.
    */
