@@ -80,6 +80,6 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return The last modified date of the digital object.
    */
   @Query("SELECT MAX(do.modified) FROM DigitalObject do WHERE do.project.projectAbbr = :projectAbbr")
-  Optional<Date> findMaxLastModifiedDateByProjectId(@Param("projectAbbr") String projectAbbr);
+  Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
 }

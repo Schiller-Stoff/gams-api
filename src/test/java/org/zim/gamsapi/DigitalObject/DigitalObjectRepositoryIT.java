@@ -131,7 +131,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
 
     @Nested
-    public class FindMaxLastModifiedDateByProjectId {
+    public class FindMaxLastModifiedDateByProjectAbbr {
 
 
         @Test
@@ -142,7 +142,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
 
             Assertions.assertThat(
-                digitalObjectRepository.findMaxLastModifiedDateByProjectId(testProject.getProjectAbbr()).get()
+                digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get()
             ).hasSameTimeAs(savedDigitalObject.getModified());
 
 
@@ -159,7 +159,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             DigitalObject savedLaterDigitalObject = digitalObjectRepository.save(laterDigitalObject);
 
             // returns the singular last modified date over all digital objects in a project.
-            Date actualModfiedDate = digitalObjectRepository.findMaxLastModifiedDateByProjectId(testProject.getProjectAbbr()).get();
+            Date actualModfiedDate = digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
 
             // the last modified date should be the same as the last saved digital object
             Assertions.assertThat(actualModfiedDate)
