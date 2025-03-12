@@ -516,5 +516,80 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     }
 
 
+    /**
+     * Tests for time based modification auditing properties of the datastream entity.
+     * createdBy and modifiedBy are excluded.
+     */
+    @Nested
+    public class ModificationAuditing {
+
+
+        /**
+         * User auditing is disabled for this test-class
+         */
+        @Test
+        public void userAuditingFieldsShouldBeNull(){
+
+            Datastream foundDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            org.assertj.core.api.Assertions.assertThat(foundDatastream.getCreatedBy()).isNull();
+            org.assertj.core.api.Assertions.assertThat(foundDatastream.getModifiedBy()).isNull();
+
+        }
+
+        @Test
+        public void modificationAuditingPropertiesAreNotNull(){
+
+            Datastream foundDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            // first some null assertions
+            org.assertj.core.api.Assertions.assertThat(foundDatastream.getCreated()).isNotNull();
+            org.assertj.core.api.Assertions.assertThat(foundDatastream.getModified()).isNotNull();
+
+        }
+
+        @Test
+        public void modificationAuditingPropertiesAreUpdated(){
+
+            Datastream foundDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            Date created = foundDatastream.getCreated();
+            Date modified = foundDatastream.getModified();
+
+
+            // update the datastream
+            foundDatastream.setType("bla");
+            foundDatastream = datastreamRepository.save(foundDatastream);
+
+            // check if the modification date has been updated
+            org.assertj.core.api.Assertions.assertThat(
+                foundDatastream.getModified()
+            ).isAfter(modified);
+
+            // modification date is different from created
+            org.assertj.core.api.Assertions.assertThat(
+                foundDatastream.getModified()
+            ).isNotEqualTo(
+                foundDatastream.getCreated()
+            );
+
+        }
+
+    }
 
 }
