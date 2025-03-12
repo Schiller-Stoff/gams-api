@@ -22,6 +22,8 @@ import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
+import java.util.Date;
+
 /**
  * Integration test for the DatastreamRepository.
  */
@@ -440,6 +442,76 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             DataIntegrityViolationException.class,
             () -> datastreamRepository.save(aDatastream)
         );
+
+    }
+
+    @Nested
+    public class FindMaxLastModifiedDateByProjectAbbr {
+
+        @Test
+        public void returnsExpectedModifiedDate(){
+
+            // first find saved test datastream (done in beforeEach before)
+            Datastream savedDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            // query last modified date
+            Date lastModified = datastreamRepository
+                .findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+
+            // modified of datastream should be assigned
+            Assertions.assertThat(savedDatastream.getModified())
+                    .isNotNull();
+
+            // last modified should be equal to the saved datastream
+            Assertions.assertThat(lastModified)
+                .isNotNull()
+                .isEqualTo(savedDatastream.getModified());
+
+        }
+
+        @Test
+        public void returnsLastModifedDateOfDatastreams(){
+
+            // first find saved test datastream (done in beforeEach before)
+            Datastream savedDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            // assert first datastream has a modified date
+            Assertions.assertThat(savedDatastream.getModified())
+                .isNotNull();
+
+            // save another datastream
+            Datastream savedLaterDatastream = datastreamRepository.save(
+                TestDatastream.generate(testDigitalObject, "rand4.xml")
+            );
+
+            // assert second datastream has a modified date
+            Assertions.assertThat(savedLaterDatastream.getModified())
+                .isNotNull();
+
+            // query last modified date
+            Date lastModified = datastreamRepository
+                .findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+
+            // last modified should be equal to the saved later datastream
+            Assertions.assertThat(lastModified)
+                .isNotNull()
+                .hasSameTimeAs(savedLaterDatastream.getModified());
+
+            // last modified should not be equal to the first datastream
+            Assertions.assertThat(lastModified)
+                .isNotEqualTo(savedDatastream.getModified());
+
+        }
 
     }
 

@@ -3,10 +3,14 @@ package org.zim.gamsapi.Datastream;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamMimeView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -63,5 +67,14 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    */
   List<IDatastreamMimeView> findAllDatastreamMimeViewsByDigitalObject(DigitalObject digitalObject);
 
+
+  /**
+   * Returns the latest modified date of a datastream for given project abbreviation.
+   * E.g. for project 'memo' returns the data XYZ because the TEI file from object memo.1 was modified last.
+   * @param projectAbbr project abbreviation
+   * @return latest modified date of a datastream
+   */
+  @Query("SELECT MAX(ds.modified) FROM Datastream ds JOIN ds.digitalObject do WHERE do.project.projectAbbr = :projectAbbr")
+  Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
 }
