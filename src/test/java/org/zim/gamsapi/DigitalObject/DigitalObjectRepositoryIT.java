@@ -11,8 +11,8 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
-
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -130,6 +130,49 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
 
 
+    @Nested
+    public class FindMaxLastModifiedDateByProjectId {
+
+
+        @Test
+        public void returnsExpectedModifiedDate(){
+
+            final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
+
+            DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
+
+            Assertions.assertThat(
+                digitalObjectRepository.findMaxLastModifiedDateByProjectId(testProject.getProjectAbbr()).get()
+            ).hasSameTimeAs(savedDigitalObject.getModified());
+
+
+        }
+
+        @Test
+        public void returnsExpectedNewestModificationTimestamp(){
+
+            final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
+            DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
+
+            // object that was created later on
+            final DigitalObject laterDigitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
+            DigitalObject savedLaterDigitalObject = digitalObjectRepository.save(laterDigitalObject);
+
+            // returns the singular last modified date over all digital objects in a project.
+            Date actualModfiedDate = digitalObjectRepository.findMaxLastModifiedDateByProjectId(testProject.getProjectAbbr()).get();
+
+            // the last modified date should be the same as the last saved digital object
+            Assertions.assertThat(actualModfiedDate)
+                .hasSameTimeAs(savedLaterDigitalObject.getModified());
+
+            // the last modified date should not be the same as the first saved digital object
+            Assertions.assertThat(actualModfiedDate)
+                .isNotEqualTo(savedDigitalObject.getModified());
+
+        }
+
+
+    }
 
 
 }
