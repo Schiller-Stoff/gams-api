@@ -33,3 +33,7 @@ logging:
   level:
     org.zim.gamsapi: ${LOG_LEVEL:DEBUG}
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+  logback:
+    # cleans log file on startup
+    rollingpolicy:
+      clean-history-on-start: true
