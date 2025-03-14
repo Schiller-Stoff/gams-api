@@ -3,6 +3,7 @@ package org.zim.gamsapi.Project.ProjectModification;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.Date;
     indexes = @Index(columnList = "latest_modification_date"))
 @Getter
 @Setter
+@ToString
 public class ProjectModification {
 
   /**
