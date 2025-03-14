@@ -137,11 +137,8 @@ public class ProjectControllerIT extends IntegrationTest {
 
     }
 
-    // TODO test(s) if expected last modified date is returned
-
     @Test
     public void HEADProjectResponsesWithContainedLastModifiedHeader() throws Exception {
-      // TODO implement
 
       Project savedProject = projectRepository.save(TestProject.generate());
 
