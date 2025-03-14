@@ -3,6 +3,7 @@ package org.zim.gamsapi.Project;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,12 +11,16 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Project.ProjectModification.IProjectModificationService;
 import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
+import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 
 import io.swagger.v3.oas.annotations.Operation;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -69,7 +74,7 @@ public class ProjectController {
   @RequestMapping(value = "/{projectAbbr}", method = RequestMethod.HEAD)
   public ResponseEntity<Void> checkProjectModification(
       @PathVariable String projectAbbr,
-      @RequestHeader(value = "If-Modified-Since", required = false) String ifModifiedSince
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
   ) {
 
     // Get latest modification date across entire entity hierarchy
@@ -79,20 +84,22 @@ public class ProjectController {
     // Format for HTTP header
     ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
 
-    // TODO reenable next lines?
     // Handle conditional request
-//    if (ifModifiedSince != null) {
-//      try {
-//        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
-//            ifModifiedSince, DateTimeFormatter.RFC_1123_DATE_TIME);
-//
-//        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
-//          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-//        }
-//      } catch (DateTimeParseException e) {
-//        // Invalid date format, ignore header
-//      }
-//    }
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
 
     return ResponseEntity.ok()
         .lastModified(zonedDateTime)

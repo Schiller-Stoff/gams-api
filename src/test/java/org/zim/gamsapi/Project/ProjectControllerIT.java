@@ -222,6 +222,42 @@ public class ProjectControllerIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
+
+      Project savedProject = projectRepository.save(TestProject.generate());
+
+      final String MALFORMED_DATE = "PETER";
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.head(
+              String.format("/api/v1/projects/%s", savedProject.getProjectAbbr())
+          ).header("If-Modified-Since", MALFORMED_DATE)
+      ).andExpect(status().isBadRequest());
+
+    }
+
+
+    /**
+     * Tests if the server responds with a 304 status code if the If-Modified-Since header is set to a date in the future.
+     * @throws Exception if the test fails (mockMvc.perform)
+     */
+    @Test
+    public void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
+
+      Project savedProject = projectRepository.save(TestProject.generate());
+
+      // Create a date in the future that's properly formatted for HTTP headers
+      ZonedDateTime futureDate = ZonedDateTime.now(ZoneId.systemDefault()).plusYears(1);
+      String ifModifiedSinceHeader = DateTimeFormatter.RFC_1123_DATE_TIME.format(futureDate);
+
+      mockMvc.perform(
+        MockMvcRequestBuilders.head(
+          String.format("/api/v1/projects/%s", savedProject.getProjectAbbr())
+        ).header("If-Modified-Since", ifModifiedSinceHeader)
+      ).andExpect(status().isNotModified());
+
+    }
 
   }
 
