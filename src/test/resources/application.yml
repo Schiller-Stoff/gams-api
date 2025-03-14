@@ -22,3 +22,14 @@ testcontainers:
 gams:
   storage:
     rootPath: ${GAMS_FILES_ROOT_PATH:gams-test}
+
+
+########
+# Logging
+# (handled in different profiles)
+logging:
+  file:
+    name: ${LOG_FILE:log/test.log}
+  level:
+    org.zim.gamsapi: ${LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
