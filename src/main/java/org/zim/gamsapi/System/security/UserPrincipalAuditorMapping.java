@@ -26,8 +26,15 @@ public class UserPrincipalAuditorMapping implements IUserPrincipalAuditorMapping
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     // if auth fails
-    if((authentication == null) || !authentication.isAuthenticated()){
-      String msg = String.format("Tried to map UserPrincipal to Auditor but failed. User seems not to be authenticated so no Auditor can be assigned. Happened in class %s ", this.getClass().getName());
+    if((authentication == null)){
+      String msg = String.format("Tried to map UserPrincipal to Auditor but failed. Authentication is null. Happened in class %s ", this.getClass().getName());
+      log.error(msg);
+      throw new UserAuthenticationRequiredException(msg);
+    }
+
+    // if user is not authenticated (mapping can only be done if user is authenticated)
+    if (!authentication.isAuthenticated()){
+      String msg = String.format("Tried to map UserPrincipal to Auditor but failed. User is not authenticated. %s", authentication);
       log.error(msg);
       throw new UserAuthenticationRequiredException(msg);
     }
