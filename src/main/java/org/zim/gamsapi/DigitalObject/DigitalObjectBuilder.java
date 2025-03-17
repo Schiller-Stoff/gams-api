@@ -45,6 +45,11 @@ public class DigitalObjectBuilder {
     return this;
   }
 
+  public DigitalObjectBuilder funder(String funder) {
+    digitalObject.setFunder(funder);
+    return this;
+  }
+
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
       String msg = String.format("Digital object ID must not be null or empty! Happened at class %s", this.getClass().getName());

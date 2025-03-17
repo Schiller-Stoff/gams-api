@@ -72,5 +72,16 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertEquals("test-title", digitalObject.getBaseMetadata().getTitle());
   }
 
+  @Test
+  public void mayBuildADigitalObjectWithExpectedValuesAndFunder(){
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("projectAbbr.1")
+        .project("projectAbbr")
+        .publisher("test-publisher")
+        .funder("test-funder")
+        .build();
+
+    Assertions.assertEquals("test-funder", digitalObject.getFunder());
+  }
 
 }
