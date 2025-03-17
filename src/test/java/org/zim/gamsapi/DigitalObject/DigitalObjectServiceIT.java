@@ -157,6 +157,29 @@ public class DigitalObjectServiceIT extends IntegrationTest {
         digitalObjectService.findById(id);
       });
     }
+
+    @Test
+    public void returnsDigitalObjectWithExpectedProperties(){
+
+      Project project = TestProject.generate();
+      Project savedProject = projectRepository.save(project);
+
+      DigitalObject digitalObject = TestDigitalObject.generate(savedProject.getProjectAbbr());
+      DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
+
+      DigitalObject foundObject = digitalObjectService.findById(savedDigitalObject.getId());
+      Assertions.assertThat(foundObject.getFunder()).isEqualTo(digitalObject.getFunder());
+      Assertions.assertThat(foundObject.getId()).isEqualTo(digitalObject.getId());
+      Assertions.assertThat(foundObject.getObjectType()).isEqualTo(digitalObject.getObjectType());
+      Assertions.assertThat(foundObject.getPublisher()).isEqualTo(digitalObject.getPublisher());
+      Assertions.assertThat(foundObject.getProject()).isEqualTo(digitalObject.getProject());
+      Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(digitalObject.getBaseMetadata());
+      // cannot be equal is being assigned by the database
+      Assertions.assertThat(foundObject.getModified()).isNotEqualTo(digitalObject.getModified());
+      Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(digitalObject.getCreated());
+
+    }
+
   }
 
   @Nested

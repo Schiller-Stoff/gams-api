@@ -63,6 +63,37 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
         }
 
+        @Test
+        public void savedObjectContainsExpectedProperties(){
+
+            DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
+
+            DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
+
+            Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
+                .isNotNull()
+                .isPresent();
+
+            Assertions.assertThat(savedDigitalObject.getId()).isEqualTo(digitalObject.getId());
+            Assertions.assertThat(savedDigitalObject.getPublisher()).isEqualTo(digitalObject.getPublisher());
+            Assertions.assertThat(savedDigitalObject.getFunder()).isEqualTo(digitalObject.getFunder());
+            Assertions.assertThat(savedDigitalObject.getObjectType()).isEqualTo(digitalObject.getObjectType());
+            Assertions.assertThat(savedDigitalObject.getBaseMetadata()).isEqualTo(digitalObject.getBaseMetadata());
+            Assertions.assertThat(savedDigitalObject.getPublished()).isEqualTo(digitalObject.getPublished());
+            // following fields are being defined by the database
+            Assertions.assertThat(savedDigitalObject.getCreated()).isNotEqualTo(digitalObject.getCreated());
+            Assertions.assertThat(savedDigitalObject.getModified()).isNotEqualTo(digitalObject.getModified());
+
+        }
+
+        @Test
+        public void savesDigitalObjectWithMissingFunder(){
+            DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
+            digitalObject.setFunder(null);
+            DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
+            Assertions.assertThat(savedDigitalObject.getFunder()).isNull();
+        }
+
 
     }
 
