@@ -1,9 +1,9 @@
 {
-  "title": "Gedenktafel Seekapelle Bregenz",
-  "description": "Born digital TEI Dokument zur Beschreibung eines Erinnerungsortes bzw. Erinnerungszeichens.",
-  "creator": "demo (GAMS-project)",
-  "rights": "TODO",
-  "publisher": "TODO",
+  "title": "test-title",
+  "description": "test-description",
+  "creator": "test-creator",
+  "rights": "test-rights",
+  "publisher": "test-publisher",
   "contentFiles": [
     {
       "size": 498,
@@ -56,5 +56,5 @@
   "recid": "test.test",
   "project": "test",
   "objectType": "TEI",
-  "funder": "test"
+  "funder": "test-funder"
 }
