@@ -1,6 +1,5 @@
 package org.zim.gamsapi.DigitalObject.DigitalObjectModification;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
