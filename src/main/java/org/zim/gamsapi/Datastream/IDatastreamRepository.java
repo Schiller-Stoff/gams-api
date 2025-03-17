@@ -77,4 +77,12 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
   @Query("SELECT MAX(ds.modified) FROM Datastream ds JOIN ds.digitalObject do WHERE do.project.projectAbbr = :projectAbbr")
   Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
+  /**
+   * Returns the latest modified date of a datastream for given digital object id.
+   * @param digitalObjectId digital object id
+   * @return latest modified date of a datastream
+   */
+  @Query("SELECT MAX(ds.modified) FROM Datastream ds JOIN ds.digitalObject do WHERE do.id = :digitalObjectId")
+  Optional<Date> findMaxLastModifiedDateByDigitalObjectId(String digitalObjectId);
+
 }

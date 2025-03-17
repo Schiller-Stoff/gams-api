@@ -6,22 +6,34 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Datastream.DatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
+import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
+import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
+import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +47,46 @@ public class DigitalObjectController {
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
   private final ConversionService conversionService;
+  private final IDigitalObjectModificationService digitalObjectModificationService;
+
+
+  @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkDigitalObjectModification(
+      @PathVariable String id,
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
+  ) {
+
+    // Get latest modification date across entire entity hierarchy
+    DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
+        findLatestModificationDate(id);
+
+    LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
+
+    // Format for HTTP header
+    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
+
+    // Handle conditional request
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
+
+    return ResponseEntity.ok()
+        .lastModified(zonedDateTime)
+        .build();
+
+  }
 
   // @GetMapping(value = {"/{id}", "/{id}/"}, produces =
   // MimeTypeUtils.APPLICATION_JSON_VALUE)
