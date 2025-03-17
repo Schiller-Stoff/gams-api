@@ -9,16 +9,21 @@ import org.zim.gamsapi.MetadataBaseEntityBuilder;
  */
 public class TestMetadataBaseEntity {
 
+  public static final String TITLE = "test-title";
+  public static final String DESCRIPTION = "test-description";
+  public static final String RIGHTS = "test-rights";
+  public static final String CREATOR = "test-creator";
+
   /**
    * Generates a MetadataBaseEntity with hardcoded test values.
    * @return MetadataBaseEntity with hardcoded test values.
    */
   public static MetadataBaseEntity generate(){
     return new MetadataBaseEntityBuilder()
-        .title("test-title")
-        .rights("test-rights")
-        .creator("test-creator")
-        .description("test-description")
+        .title(TITLE)
+        .rights(RIGHTS)
+        .creator(CREATOR)
+        .description(DESCRIPTION)
         .build();
   }
 

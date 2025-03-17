@@ -9,10 +9,16 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 public enum TestDigitalObject {
 
     DIGITAL_OBJECT_ID("test.test"),
+    DIGITAL_OBJECT_PROJECT_ABBR(TestProject.PROJECT_ABBR.getValue()),
     DIGITAL_OBJECT_NAME("test-digital-object"),
     DIGITAL_OBJECT_TYPE("test-digital-object-type"),
     DIGITAL_OBJECT_PUBLISHER("test-publisher"),
-    DIGITAL_OBJECT_FUNDER("test-funder");
+    DIGITAL_OBJECT_FUNDER("test-funder"),
+    DIGITAL_OBJECT_TITLE(TestMetadataBaseEntity.TITLE),
+    DIGITAL_OBJECT_DESCRIPTION(TestMetadataBaseEntity.DESCRIPTION),
+    DIGITAL_OBJECT_CREATOR(TestMetadataBaseEntity.CREATOR),
+    DIGITAL_OBJECT_RIGHTS(TestMetadataBaseEntity.RIGHTS);
+
 
     private final String value;
 
@@ -38,7 +44,7 @@ public enum TestDigitalObject {
      * @return The generated digital object.
      */
     public static DigitalObject generate(){
-        return generate(TestProject.PROJECT_ABBR.getValue(), DIGITAL_OBJECT_ID.getValue());
+        return generate(DIGITAL_OBJECT_PROJECT_ABBR.getValue(), DIGITAL_OBJECT_ID.getValue());
     }
 
     /**
