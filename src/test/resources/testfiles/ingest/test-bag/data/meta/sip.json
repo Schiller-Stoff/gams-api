@@ -55,5 +55,6 @@
   "source": "local",
   "recid": "test.test",
   "project": "test",
-  "objectType": "TEI"
+  "objectType": "TEI",
+  "funder": "test"
 }
