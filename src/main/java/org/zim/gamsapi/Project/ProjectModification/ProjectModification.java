@@ -12,9 +12,6 @@ import java.util.Date;
  * Helper entity to store the latest modification date of a project.
  * Needed for scalability reasons.
  */
-@Entity
-@Table(name = "project_modification_summary",
-    indexes = @Index(columnList = "latest_modification_date"))
 @Getter
 @Setter
 @ToString
@@ -29,7 +26,7 @@ public class ProjectModification {
   /**
    * The latest modification date of the project.
    */
-  @Column(name = "latest_modification_date")
+  //@Column(name = "latest_modification_date")
   private Date latestModificationDate;
 
   /**

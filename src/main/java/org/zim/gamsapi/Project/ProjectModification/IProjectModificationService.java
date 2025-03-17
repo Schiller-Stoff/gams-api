@@ -1,10 +1,12 @@
 package org.zim.gamsapi.Project.ProjectModification;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-
 public interface IProjectModificationService {
 
+  /**
+   * Finds the latest modification date of a project (based on own modified date AND referenced digital object AND referenced datastream modified dates).
+   * @param projectAbbr The project abbreviation.
+   * @return The latest modification date.
+   */
   ProjectModification findLatestModificationDate(String projectAbbr);
 
   /**

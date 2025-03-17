@@ -2,9 +2,7 @@ package org.zim.gamsapi.Project.ProjectModification;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
@@ -17,23 +15,16 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
-//@EnableCaching
 @Slf4j
 public class ProjectModificationService implements IProjectModificationService {
-  private final IProjectModificationRepository summaryRepository;
   private final IProjectRepository projectRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
-  //private final CacheManager cacheManager;
 
-  // TODO deactivated caching during development
-  //@Cacheable(cacheNames = "projectModificationDates", key = "#projectId")
-  //@Transactional(readOnly = true)
   @Transactional
   public ProjectModification findLatestModificationDate(String projectAbbr) {
 
@@ -46,31 +37,6 @@ public class ProjectModificationService implements IProjectModificationService {
     ProjectModification projectModification = calculateLatestModificationDate(projectAbbr);
     log.info("Calculated latest modification date for project {} as {}", projectAbbr, projectModification);
     return projectModification;
-
-    //
-    // down below is workflow using the project summary table
-    // (saving info into own table and using it for caching)
-
-//
-//    return summaryRepository.findById(projectId)
-//        // First check summary table
-//        .map( projectModificationSummary -> {
-//          log.info("Found latest modification date for project " + projectId);
-//          return projectModificationSummary.getLatestModificationDate();
-//        })
-//        .orElseGet(() -> {
-//          log.info("No latest modification date found for project " + projectId);
-//          // If no summary exists, calculate directly
-//          LocalDateTime date = calculateLatestModificationDate(projectId);
-//          // and update the project modification table
-//          // TODO this update should be done inside an update job?
-//          log.info("Creating project modification summary for project " + projectId);
-//          ProjectModificationSummary projectModificationSummary = new ProjectModificationSummary();
-//          projectModificationSummary.setProjectId(projectId);
-//          projectModificationSummary.setLatestModificationDate(date);
-//          summaryRepository.save(projectModificationSummary);
-//          return date;
-//        });
   }
 
 
@@ -138,28 +104,6 @@ public class ProjectModificationService implements IProjectModificationService {
     return projectModification;
 
   }
-
-//  // TODO implement or comment out?
-//  // Background job to update summaries
-//  @Scheduled(fixedRate = 60000) // Run every minute
-//  @Transactional
-//  public void updateModificationSummaries() {
-//    // Process recently modified entities in batches
-//    // ...implementation details...
-//  }
-
-
-//  @Transactional
-//  public void createSummaryIfNotExists(String projectAbbr, Date date) {
-//    log.info("Creating project modification summary for project " + projectAbbr);
-//    // TODO implement or comment out?
-//    // Create a new summary entry if not exists
-//    // ...implementation details...
-//    ProjectModification projectModification = new ProjectModification();
-//    projectModification.setProjectAbbr(projectAbbr);
-//    projectModification.setLatestModificationDate(date);
-//    summaryRepository.save(projectModification);
-//  }
 
   /**
    * Converts a Date object to a LocalDateTime object using the system default time zone.
