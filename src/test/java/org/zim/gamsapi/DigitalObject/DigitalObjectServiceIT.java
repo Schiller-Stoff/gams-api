@@ -108,14 +108,13 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      String projectAbbr = "existing";
-      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
+      Project project = TestProject.generate();
       projectRepository.save(project);
 
       DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
+      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), Pageable.unpaged());
 
       Assertions.assertThat(result).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
@@ -137,7 +136,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsDigitalObjectWhenItExists() {
 
-      Project project = ProjectBuilder.builder().projectAbbr("random").build();
+      Project project = TestProject.generate();
       projectRepository.save(project);
 
       DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());

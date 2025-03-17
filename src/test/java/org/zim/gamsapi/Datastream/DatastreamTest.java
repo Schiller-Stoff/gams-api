@@ -40,7 +40,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          TestDigitalObject.generate("foo")
+          TestDigitalObject.generate()
       );
 
       Datastream datastream2 = new Datastream();
@@ -62,7 +62,7 @@ public class DatastreamTest extends UnitTest {
       Datastream datastream = new Datastream();
       datastream.setDsid("dsid");
       datastream.setDigitalObject(
-          TestDigitalObject.generate("foo")
+          TestDigitalObject.generate()
       );
 
       DatastreamId datastreamId = datastream.deriveDatastreamId();
@@ -84,7 +84,7 @@ public class DatastreamTest extends UnitTest {
     public void throwsExceptionWhenDsidIsNull(){
       Datastream datastream = new Datastream();
       datastream.setDigitalObject(
-          TestDigitalObject.generate("foo")
+          TestDigitalObject.generate()
       );
       Assertions.assertThrows(
           IllegalStateException.class,
@@ -99,8 +99,6 @@ public class DatastreamTest extends UnitTest {
 
     private static ValidatorFactory validatorFactory;
     private static Validator validator;
-
-    private final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate("foo");
 
     @BeforeAll
     static void init() {
