@@ -1,15 +1,17 @@
 package org.zim.gamsapi.Ingest;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -19,6 +21,7 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestBag;
+import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
 
 import java.io.File;
@@ -90,4 +93,95 @@ public class IngestControllerIT extends IntegrationTest {
         )
         .andExpect(status().isBadRequest());
   }
+
+  @Nested
+  public class IngestDigitalObjectWebViewAssertions {
+
+    private String response;
+
+    /**
+     * Ingests a bag and retrieves the view of the test digital object.
+     * @throws Exception If the test fails.
+     */
+    @BeforeEach
+    public void setup() throws Exception {
+
+      // check if the test response is already there
+      if(response != null){
+        if (response.length() > 10){
+          return;
+        }
+        String msg = String.format("Response was not null but too short. Got %s", response);
+        throw new IllegalStateException(msg);
+      }
+
+
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                  .part(mockPart)
+          )
+          .andExpect(status().isOk());
+
+      final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(URL)
+                  .accept(MediaType.TEXT_HTML)
+                  .contentType(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+          .andReturn();
+
+      response = mvcResult.getResponse().getContentAsString();
+
+    }
+
+    @Test
+    public void testDigitalObjectViewContainsExpectedObjectId(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewShouldContainExpectedProjectAbbr(){
+      Assertions.assertThat(response).contains(TestProject.PROJECT_ABBR.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewContainsExpectedTitle(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewShouldContainExpectedDescription(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewContainsExpectedCreator(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewContainsExpectedFunder(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewContainsExpectedPublisher(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue());
+    }
+
+    @Test
+    public void digitalObjectViewContainsExpectedRights(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue());
+    }
+
+
+  }
+
 }
