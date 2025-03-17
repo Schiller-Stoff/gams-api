@@ -23,6 +23,7 @@ public class BagitSipJsonDigitalObjectConverterTest extends UnitTest {
     bagitSipJson.setDescription("testDescription");
     bagitSipJson.setRights("testRights");
     bagitSipJson.setPublisher("testPublisher");
+    bagitSipJson.setFunder("testFunder");
 
     BagitSipJsonDigitalObjectConverter bagitSipJsonDigitalObjectConverter = new BagitSipJsonDigitalObjectConverter();
     DigitalObject convertedDigitalObject = bagitSipJsonDigitalObjectConverter.convert(bagitSipJson);
@@ -37,6 +38,7 @@ public class BagitSipJsonDigitalObjectConverterTest extends UnitTest {
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getRights()).isEqualTo(bagitSipJson.getRights());
     Assertions.assertThat(convertedDigitalObject.getPublisher()).isEqualTo(bagitSipJson.getPublisher());
 
+    Assertions.assertThat(convertedDigitalObject.getFunder()).isEqualTo(bagitSipJson.getFunder());
   }
 
   @Test
