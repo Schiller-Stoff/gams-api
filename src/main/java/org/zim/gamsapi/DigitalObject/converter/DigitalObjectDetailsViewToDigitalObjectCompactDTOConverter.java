@@ -24,6 +24,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())
                 .publisher(source.getPublisher())
+                .funder(source.getFunder())
                 .build();
     }
 }

@@ -33,6 +33,8 @@ public interface DigitalObjectDetailsView {
 
     String getPublisher();
 
+    String getFunder();
+
     interface ProjectView {
         String getProjectAbbr();
     }

@@ -395,7 +395,36 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getBaseMetadata().getRights(),
               digitalObject.getPublisher(),
               digitalObject.getObjectType(),
-              digitalObject.getProject().getProjectAbbr()
+              digitalObject.getProject().getProjectAbbr(),
+              digitalObject.getFunder()
+          );
+
+
+    }
+
+    @Test
+    public void getDigitalObjectContainsExpectedFunder() throws Exception {
+
+      DigitalObject digitalObject = TestDigitalObject.generate();
+
+      digitalObjectRepository.save(digitalObject);
+
+      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .accept(MediaType.TEXT_HTML)
+                  .contentType(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+          .andReturn();
+
+      // funder should be present in returned view
+      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              digitalObject.getFunder()
           );
 
 
