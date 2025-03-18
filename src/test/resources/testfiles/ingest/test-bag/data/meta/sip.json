@@ -4,6 +4,7 @@
   "creator": "test-creator",
   "rights": "test-rights",
   "publisher": "test-publisher",
+  "mainResource": "test.txt",
   "contentFiles": [
     {
       "size": 498,

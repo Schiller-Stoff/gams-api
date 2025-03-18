@@ -17,7 +17,8 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_TITLE(TestMetadataBaseEntity.TITLE),
     DIGITAL_OBJECT_DESCRIPTION(TestMetadataBaseEntity.DESCRIPTION),
     DIGITAL_OBJECT_CREATOR(TestMetadataBaseEntity.CREATOR),
-    DIGITAL_OBJECT_RIGHTS(TestMetadataBaseEntity.RIGHTS);
+    DIGITAL_OBJECT_RIGHTS(TestMetadataBaseEntity.RIGHTS),
+    DIGITAL_OBJECT_MAIN_RESOURCE(TestDatastream.DSID.getValue());
 
 
     private final String value;
