@@ -43,14 +43,26 @@
     },
     {
       "size": 22226,
-      "bagpath": "/data/content/SOURCE.xml",
-      "dsid": "SOURCE.xml",
+      "bagpath": "/data/content/test.xml",
+      "dsid": "test.xml",
       "mimetype": "application/xml",
-      "title": "Datastream containing the SOURCE.xml file",
+      "title": "Datastream containing the test.xml file",
       "description": "Datastream for GAMS project demo.",
       "creator": "demo",
       "rights": "CC BY 4.0",
       "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"]
+    },
+    {
+      "size": 1000,
+      "bagpath": "/data/content/test.txt",
+      "dsid": "test.txt",
+      "mimetype": "text/plain",
+      "title": "test-title",
+      "description": "test-description",
+      "creator": "test-creator",
+      "rights": "test-rights",
+      "publisher": "test GAMS project",
       "tags": ["test-tag1", "test-tag2", "test-tag3"]
     }
   ],
