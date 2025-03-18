@@ -3,6 +3,8 @@ package org.zim.gamsapi.enums;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.MetadataBaseEntity;
+
 import java.util.Set;
 
 /**
@@ -11,10 +13,15 @@ import java.util.Set;
  */
 public enum TestDatastream {
 
-    DSID("test.xml"),
-    DATASTREAM_NAME("test-datastream");
+    DSID("test.txt"),
+    DATASTREAM_NAME("test-datastream"),
+    FILE_NAME(TestDatastreamContent.ORIGINAL_FILENAME.getValue()),
+    MIME_TYPE(TestDatastreamContent.CONTENT_TYPE.getValue())
+
+    ;
 
     public static final Set<String> DATASTREAM_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
+    public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestMetadataBaseEntity.generate();
 
     private final String value;
 
@@ -54,10 +61,10 @@ public enum TestDatastream {
             .dsid(dsid)
             .digitalObject(digitalObject)
             .tags(DATASTREAM_TAGS)
-            .baseMetadata(TestMetadataBaseEntity.generate())
+            .baseMetadata(METADATA_BASE_ENTITY)
             .size( (long) TestDatastreamContent.CONTENT.getValue().length())
-            .mimeType(TestDatastreamContent.CONTENT_TYPE.getValue())
-            .fileName(TestDatastreamContent.ORIGINAL_FILENAME.getValue())
+            .mimeType(MIME_TYPE.getValue())
+            .fileName(FILE_NAME.getValue())
             .build();
     }
 }
