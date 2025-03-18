@@ -50,6 +50,11 @@ public class DigitalObjectBuilder {
     return this;
   }
 
+  public DigitalObjectBuilder mainResource(String mainResource) {
+    digitalObject.setMainResource(mainResource);
+    return this;
+  }
+
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
       String msg = String.format("Digital object ID must not be null or empty! Happened at class %s", this.getClass().getName());

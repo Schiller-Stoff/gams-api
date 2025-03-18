@@ -92,4 +92,20 @@ public class DigitalObjectBuilderTest extends UnitTest {
 
   }
 
+  @Test
+  public void mayBuildDigitalObjectWithExpectedMainResource(){
+    final String MAIN_RESOURCE = "mainResource";
+
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("projectAbbr.1")
+        .project("projectAbbr")
+        .publisher("test-publisher")
+        .funder("test-funder")
+        .mainResource(MAIN_RESOURCE)
+        .build();
+
+    Assertions.assertEquals(MAIN_RESOURCE, digitalObject.getMainResource());
+
+  }
+
 }
