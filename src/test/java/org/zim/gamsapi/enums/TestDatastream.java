@@ -3,6 +3,7 @@ package org.zim.gamsapi.enums;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import java.util.Set;
 
 /**
  * Enum for test datastream.
@@ -12,6 +13,8 @@ public enum TestDatastream {
 
     DSID("test.xml"),
     DATASTREAM_NAME("test-datastream");
+
+    public static final Set<String> DATASTREAM_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
 
     private final String value;
 
@@ -50,6 +53,7 @@ public enum TestDatastream {
         return new DatastreamBuilder()
             .dsid(dsid)
             .digitalObject(digitalObject)
+            .tags(DATASTREAM_TAGS)
             .baseMetadata(TestMetadataBaseEntity.generate())
             .size( (long) TestDatastreamContent.CONTENT.getValue().length())
             .mimeType(TestDatastreamContent.CONTENT_TYPE.getValue())
