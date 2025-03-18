@@ -84,4 +84,12 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertEquals("test-funder", digitalObject.getFunder());
   }
 
+  @Test
+  public void builderHelperMethodReturnsAnInstance(){
+    DigitalObjectBuilder digitalObjectBuilder = DigitalObjectBuilder.builder();
+    Assertions.assertNotNull(digitalObjectBuilder);
+    Assertions.assertTrue(digitalObjectBuilder instanceof DigitalObjectBuilder);
+
+  }
+
 }

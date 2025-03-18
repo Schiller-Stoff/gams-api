@@ -72,5 +72,13 @@ public class DigitalObjectBuilder {
     return digitalObject;
   }
 
+  /**
+   * Helper method to create a new DigitalObjectBuilder.
+   * @return A new DigitalObjectBuilder.
+   */
+  public static DigitalObjectBuilder builder(){
+    return new DigitalObjectBuilder();
+  }
+
 
 }
