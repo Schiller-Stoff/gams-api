@@ -36,6 +36,9 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     Assertions.assertEquals(digitalObjectCompactDTO.getPublisher(), testObjectDetailsView.getPublisher());
     Assertions.assertEquals(digitalObjectCompactDTO.getPublished(), testObjectDetailsView.getPublished());
 
+    Assertions.assertEquals(digitalObjectCompactDTO.getFunder(), testObjectDetailsView.getFunder());
+    Assertions.assertEquals(digitalObjectCompactDTO.getMainResource(), testObjectDetailsView.getMainResource());
+
   }
 
   /**
@@ -105,6 +108,11 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     @Override
     public String getFunder() {
       return "test";
+    }
+
+    @Override
+    public String getMainResource() {
+      return "test-mainresource";
     }
   }
 

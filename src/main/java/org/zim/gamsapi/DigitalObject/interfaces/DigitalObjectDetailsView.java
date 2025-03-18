@@ -35,6 +35,8 @@ public interface DigitalObjectDetailsView {
 
     String getFunder();
 
+    String getMainResource();
+
     interface ProjectView {
         String getProjectAbbr();
     }
