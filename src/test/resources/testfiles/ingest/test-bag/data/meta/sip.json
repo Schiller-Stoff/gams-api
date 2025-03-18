@@ -14,7 +14,8 @@
       "description": "Datastream for GAMS project demo.",
       "creator": "demo",
       "rights": "CC BY 4.0",
-      "publisher": "demo GAMS project"
+      "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"]
     },
     {
       "dsid": "DC.xml",
@@ -25,7 +26,8 @@
       "rights": "Creative Commons Attribution-NonCommercial 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)",
       "publisher": "Gams",
       "size": 1107,
-      "bagpath": "/data/content/DC.xml"
+      "bagpath": "/data/content/DC.xml",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"]
     },
     {
       "size": 193,
@@ -36,7 +38,8 @@
       "description": "Datastream for GAMS project demo.",
       "creator": "demo",
       "rights": "CC BY 4.0",
-      "publisher": "demo GAMS project"
+      "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"]
     },
     {
       "size": 22226,
@@ -47,7 +50,8 @@
       "description": "Datastream for GAMS project demo.",
       "creator": "demo",
       "rights": "CC BY 4.0",
-      "publisher": "demo GAMS project"
+      "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"]
     }
   ],
   "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",
