@@ -592,4 +592,52 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
     }
 
+
+    @Nested
+    public class Save {
+
+        @Test
+        public void savingOfDatastreamShouldReturnExpectedProperties(){
+
+            Datastream datastream = TestDatastream.generate(testDigitalObject);
+
+            Datastream savedDatastream = datastreamRepository.save(datastream);
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getDsid)
+                .isEqualTo(datastream.getDsid());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getDigitalObject)
+                .isEqualTo(datastream.getDigitalObject());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getBaseMetadata)
+                .isEqualTo(datastream.getBaseMetadata());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getTags)
+                .isEqualTo(datastream.getTags());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getSize)
+                .isEqualTo(datastream.getSize());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getMimeType)
+                .isEqualTo(datastream.getMimeType());
+
+            // clean up
+            datastreamRepository.delete(savedDatastream);
+
+
+        }
+
+    }
 }

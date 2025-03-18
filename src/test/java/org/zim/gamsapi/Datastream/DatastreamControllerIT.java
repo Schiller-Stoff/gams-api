@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
@@ -70,6 +71,7 @@ public class DatastreamControllerIT extends IntegrationTest {
   public class WebClientTests {
 
     @Test
+    @Transactional
     public void getDatastreamRendersExpectedDsidInView() throws Exception {
 
       Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.txt");
@@ -104,6 +106,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
     @Test
+    @Transactional
     public void datastreamViewDisplaysExpectedMetadata() throws Exception {
 
       Datastream datastream = TestDatastream.generate(testDigitalObject);
@@ -122,7 +125,9 @@ public class DatastreamControllerIT extends IntegrationTest {
           .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
           .andReturn();
 
-      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+      String responseContent = mvcResult.getResponse().getContentAsString();
+
+      Assertions.assertThat(responseContent)
           .contains(
               datastream.getDsid(),
               datastream.getMimeType(),
@@ -131,6 +136,10 @@ public class DatastreamControllerIT extends IntegrationTest {
               datastream.getBaseMetadata().getDescription(),
               datastream.getBaseMetadata().getCreator()
           );
+
+      datastream.getTags().forEach(tag -> {
+        Assertions.assertThat(responseContent).contains(tag);
+      });
 
 
       // cleanup
