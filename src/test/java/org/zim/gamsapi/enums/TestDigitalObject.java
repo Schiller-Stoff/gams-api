@@ -70,6 +70,7 @@ public enum TestDigitalObject {
             .publisher(DIGITAL_OBJECT_PUBLISHER.getValue())
             .objectType(DIGITAL_OBJECT_TYPE.getValue())
             .funder(DIGITAL_OBJECT_FUNDER.getValue())
+            .mainResource(DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
             .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
