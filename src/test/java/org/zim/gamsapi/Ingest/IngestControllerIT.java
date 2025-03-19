@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -310,6 +311,34 @@ public class IngestControllerIT extends IntegrationTest {
       TestDatastream.DATASTREAM_LANG.forEach(lang -> Assertions.assertThat(response).contains(lang));
     }
 
+  }
+
+  @Nested
+  public class FailedIngestShouldHaveNoSideEffectsTests {
+
+    @Test
+    public void doesNotCreateDatastreamContentIfProjectWasNotFound() throws Exception {
+
+      final String NOT_EXISTING_PROJECT_ABBR = "NOT_EXISTING";
+
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", NOT_EXISTING_PROJECT_ABBR)
+                  .part(mockPart)
+          )
+          .andExpect(status().is4xxClientError());
+
+      Assertions.assertThat(
+          datastreamContentRepository.exists(DatastreamId.builder()
+              .digitalObject(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+              .dsid(TestDatastream.DSID.getValue())
+              .build()
+          )
+      ).isFalse();
+
+    }
 
   }
 
