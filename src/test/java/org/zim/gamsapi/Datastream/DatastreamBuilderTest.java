@@ -92,4 +92,16 @@ public class DatastreamBuilderTest extends UnitTest {
     Assertions.assertNotNull(datastreamBuilder);
   }
 
+  @Test
+  public void builtDatastreamContainsExpectedLang(){
+    Set<String> stringSet = Set.of("lang1", "lang2", "lang3");
+    Datastream datastream = new DatastreamBuilder()
+        .digitalObject("digitalObjectId")
+        .dsid("dsid")
+        .lang(stringSet)
+        .build();
+    Assertions.assertNotNull(datastream);
+    Assertions.assertEquals(stringSet, datastream.getLang());
+  }
+
 }
