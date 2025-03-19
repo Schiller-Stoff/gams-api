@@ -628,9 +628,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::getMimeType)
                 .isEqualTo(datastream.getMimeType());
 
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getLang)
+                .isEqualTo(datastream.getLang());
+
             // clean up
             datastreamRepository.delete(savedDatastream);
-
 
         }
 

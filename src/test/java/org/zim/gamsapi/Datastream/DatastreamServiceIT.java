@@ -102,6 +102,17 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void savedDatastreamHasExpectedLangProperty(){
+      Datastream datastream = TestDatastream.generate(testObject);
+      Datastream savedDatastream = datastreamService.save(datastream, TEST_MULTIPART_FILE);
+      org.assertj.core.api.Assertions.assertThat(savedDatastream)
+          .isNotNull()
+          .extracting(Datastream::getLang)
+          .isEqualTo(datastream.getLang());
+
+    }
+
 
   }
 
