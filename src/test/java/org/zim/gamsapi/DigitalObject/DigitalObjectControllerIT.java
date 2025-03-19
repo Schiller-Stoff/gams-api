@@ -351,12 +351,21 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
           .andReturn();
 
-      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+      String response = mvcResult.getResponse().getContentAsString();
+      org.assertj.core.api.Assertions.assertThat(response)
           .contains(
               digitalObject.getId(),
               digitalObject.getProject().getProjectAbbr(),
-              digitalObject.getObjectType()
+              digitalObject.getObjectType(),
+              digitalObject.getFunder(),
+              digitalObject.getPublisher(),
+              digitalObject.getMainResource()
           );
+
+      //match expected datastream id ONLY ONCE! (because datastreams are not created)
+      org.assertj.core.api.Assertions.assertThat(response).containsPattern(
+          String.format("(%s.*?){1}", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
+      );
 
 
     }

@@ -48,6 +48,8 @@ public class BagitSipJson {
 
     private String funder;
 
+    private String mainResource;
+
     /**
      * TODO write tests if validation of bagit-content file works as expected!
      */
