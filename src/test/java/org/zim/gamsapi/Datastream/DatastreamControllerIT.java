@@ -25,8 +25,6 @@ import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDatastreamContent;
 import org.zim.gamsapi.enums.TestDigitalObject;
 
-import java.nio.charset.StandardCharsets;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates security filters
@@ -137,14 +135,19 @@ public class DatastreamControllerIT extends IntegrationTest {
               datastream.getBaseMetadata().getCreator()
           );
 
+      Assertions.assertThat(datastream.getTags()).isNotEmpty();
       datastream.getTags().forEach(tag -> {
         Assertions.assertThat(responseContent).contains(tag);
+      });
+
+      Assertions.assertThat(datastream.getLang()).isNotEmpty();
+      datastream.getLang().forEach(lang -> {
+        Assertions.assertThat(responseContent).contains(lang);
       });
 
 
       // cleanup
       datastreamRepository.delete(datastream);
-
 
     }
 

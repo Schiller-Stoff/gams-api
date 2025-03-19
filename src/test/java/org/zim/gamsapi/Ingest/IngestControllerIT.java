@@ -304,6 +304,12 @@ public class IngestControllerIT extends IntegrationTest {
       Assertions.assertThat(response).contains(TestDatastream.METADATA_BASE_ENTITY.getCreator());
     }
 
+    @Test
+    @Transactional
+    public void testDatastreamViewContainsExpectedLang(){
+      TestDatastream.DATASTREAM_LANG.forEach(lang -> Assertions.assertThat(response).contains(lang));
+    }
+
 
   }
 
