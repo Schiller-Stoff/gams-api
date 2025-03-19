@@ -544,17 +544,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void modificationAuditingPropertiesAreNotNull(){
-
-            Datastream foundDatastream = datastreamRepository.findById(
-                DatastreamId.builder()
-                    .dsid(testDatastream.getDsid())
-                    .digitalObject(testDigitalObject.getId())
-                    .build()
-            ).get();
+            Datastream savedDatastream = datastreamRepository
+                .save(TestDatastream.generate(testDigitalObject, "rand5.xml"));
 
             // first some null assertions
-            org.assertj.core.api.Assertions.assertThat(foundDatastream.getCreated()).isNotNull();
-            org.assertj.core.api.Assertions.assertThat(foundDatastream.getModified()).isNotNull();
+            org.assertj.core.api.Assertions.assertThat(savedDatastream.getCreated()).isNotNull();
+            org.assertj.core.api.Assertions.assertThat(savedDatastream.getModified()).isNotNull();
 
         }
 
