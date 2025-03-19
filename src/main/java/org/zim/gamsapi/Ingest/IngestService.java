@@ -17,6 +17,8 @@ import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.*;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,14 +29,24 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 public class IngestService implements IIngestService {
 
+  private final IProjectRepository projectRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
   private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
-  @Transactional
+  @Transactional(rollbackFor = {
+      // any exception will trigger a rollback
+      Exception.class}
+  )
   public void ingest(Ingest ingest) {
+
+    if(!projectRepository.existsById(ingest.getProjectAbbr())){
+      String msg = String.format("Project %s does not exist. Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
+      log.warn(msg);
+      throw new ProjectNotFoundException(msg);
+    }
 
     // 01. unzip bagitinfo to temp
     Path bagDirPath;
