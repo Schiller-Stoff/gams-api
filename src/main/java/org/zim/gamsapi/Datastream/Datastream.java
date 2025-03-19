@@ -119,6 +119,13 @@ public class Datastream {
   private Set<String> tags = new HashSet<>();
 
   /**
+   * Language of the datastream.
+   */
+  @ElementCollection
+  @NotNull
+  private Set<String> lang;
+
+  /**
    * Derives the DatastreamId from the current Datastream object.
    * Follows the pattern of the DatastreamId class which represents the logic stored in the database.
    * @return
