@@ -27,7 +27,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
@@ -63,12 +62,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Nested
   public class PUTRequests {
 
-
     @Test
-    public void createsExpectedDigitalObject() throws Exception {
+    public void createsDigitalObjectWithExpectedId() throws Exception {
       // Arrange
       DigitalObject expectedDigitalObject = TestDigitalObject.generate();
-
       ObjectMapper objectMapper = new ObjectMapper();
       String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
 
@@ -88,6 +85,38 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .extracting(DigitalObjectDetailsView::getId)
             .isEqualTo(expectedDigitalObject.getId()
       );
+
+    }
+
+
+    @Test
+    public void createsDigitalObjectWithExpectedProperties() throws Exception {
+
+      // Arrange
+      DigitalObject expectedDigitalObject = TestDigitalObject.generate();
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
+
+      // Act
+      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), expectedDigitalObject.getId())
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(expectedDigitalObjectJson))
+          // PUT request will redirect to GET
+          .andExpect(status().is3xxRedirection());
+
+      DigitalObjectDetailsView foundObject = digitalObjectRepository
+          .findDigitalObjectById(expectedDigitalObject.getId()).orElseThrow(AssertionError::new);
+
+      org.assertj.core.api.Assertions.assertThat(foundObject.getId()).isEqualTo(expectedDigitalObject.getId());
+      org.assertj.core.api.Assertions.assertThat(foundObject.getMainResource()).isEqualTo(expectedDigitalObject.getMainResource());
+      org.assertj.core.api.Assertions.assertThat(foundObject.getFunder()).isEqualTo(expectedDigitalObject.getFunder());
+      org.assertj.core.api.Assertions.assertThat(foundObject.getPublisher()).isEqualTo(expectedDigitalObject.getPublisher());
+      org.assertj.core.api.Assertions.assertThat(foundObject.getObjectType()).isEqualTo(expectedDigitalObject.getObjectType());
+      org.assertj.core.api.Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(expectedDigitalObject.getBaseMetadata());
+
+      org.assertj.core.api.Assertions.assertThat(foundObject.getPublished()).isEqualTo(expectedDigitalObject.getPublished());
+
 
     }
 

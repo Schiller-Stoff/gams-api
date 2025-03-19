@@ -173,6 +173,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(foundObject.getPublisher()).isEqualTo(digitalObject.getPublisher());
       Assertions.assertThat(foundObject.getProject()).isEqualTo(digitalObject.getProject());
       Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(digitalObject.getBaseMetadata());
+      Assertions.assertThat(foundObject.getMainResource()).isEqualTo(digitalObject.getMainResource());
       // cannot be equal is being assigned by the database
       Assertions.assertThat(foundObject.getModified()).isNotEqualTo(digitalObject.getModified());
       Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(digitalObject.getCreated());

@@ -80,6 +80,8 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             Assertions.assertThat(savedDigitalObject.getObjectType()).isEqualTo(digitalObject.getObjectType());
             Assertions.assertThat(savedDigitalObject.getBaseMetadata()).isEqualTo(digitalObject.getBaseMetadata());
             Assertions.assertThat(savedDigitalObject.getPublished()).isEqualTo(digitalObject.getPublished());
+            Assertions.assertThat(savedDigitalObject.getMainResource()).isEqualTo(digitalObject.getMainResource());
+
             // following fields are being defined by the database
             Assertions.assertThat(savedDigitalObject.getCreated()).isNotEqualTo(digitalObject.getCreated());
             Assertions.assertThat(savedDigitalObject.getModified()).isNotEqualTo(digitalObject.getModified());
@@ -92,6 +94,14 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             digitalObject.setFunder(null);
             DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
             Assertions.assertThat(savedDigitalObject.getFunder()).isNull();
+        }
+
+        @Test
+        public void savesDigitalObjectWithMissingMainResource(){
+            DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
+            digitalObject.setMainResource(null);
+            DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
+            Assertions.assertThat(savedDigitalObject.getMainResource()).isNull();
         }
 
 

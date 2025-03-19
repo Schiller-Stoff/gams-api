@@ -183,6 +183,11 @@ public class IngestControllerIT extends IntegrationTest {
       Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue());
     }
 
+    @Test
+    public void digitalObjectViewContainsExpectedMainResource(){
+      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue());
+    }
+
 
   }
 
