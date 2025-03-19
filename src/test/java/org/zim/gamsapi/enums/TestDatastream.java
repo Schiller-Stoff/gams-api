@@ -21,6 +21,7 @@ public enum TestDatastream {
     ;
 
     public static final Set<String> DATASTREAM_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
+    public static final Set<String> DATASTREAM_LANG = Set.of("test-lang1", "test-lang2", "test-lang3");
     public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestMetadataBaseEntity.generate();
 
     private final String value;
@@ -65,6 +66,7 @@ public enum TestDatastream {
             .size( (long) TestDatastreamContent.CONTENT.getValue().length())
             .mimeType(MIME_TYPE.getValue())
             .fileName(FILE_NAME.getValue())
+            .lang(DATASTREAM_LANG)
             .build();
     }
 }
