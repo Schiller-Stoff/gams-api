@@ -16,7 +16,8 @@
       "creator": "demo",
       "rights": "CC BY 4.0",
       "publisher": "demo GAMS project",
-      "tags": ["test-tag1", "test-tag2", "test-tag3"]
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
     },
     {
       "dsid": "DC.xml",
@@ -28,7 +29,8 @@
       "publisher": "Gams",
       "size": 1107,
       "bagpath": "/data/content/DC.xml",
-      "tags": ["test-tag1", "test-tag2", "test-tag3"]
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
     },
     {
       "size": 193,
@@ -40,7 +42,8 @@
       "creator": "demo",
       "rights": "CC BY 4.0",
       "publisher": "demo GAMS project",
-      "tags": ["test-tag1", "test-tag2", "test-tag3"]
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
     },
     {
       "size": 22226,
@@ -52,7 +55,8 @@
       "creator": "demo",
       "rights": "CC BY 4.0",
       "publisher": "demo GAMS project",
-      "tags": ["test-tag1", "test-tag2", "test-tag3"]
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
     },
     {
       "size": 1000,
@@ -64,7 +68,8 @@
       "creator": "test-creator",
       "rights": "test-rights",
       "publisher": "test GAMS project",
-      "tags": ["test-tag1", "test-tag2", "test-tag3"]
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
     }
   ],
   "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",
