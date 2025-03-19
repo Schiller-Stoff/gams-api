@@ -49,6 +49,8 @@ public interface IDatastreamDetailsView {
 
     Set<String> getTags();
 
+    Set<String> getLang();
+
     interface DigitalObjectView {
         String getId();
     }
