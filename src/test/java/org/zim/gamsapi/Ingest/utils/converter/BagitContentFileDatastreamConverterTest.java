@@ -8,6 +8,8 @@ import org.zim.gamsapi.Ingest.utils.Bagit.BagitContentFile;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDatastream;
 
+import java.util.Set;
+
 public class BagitContentFileDatastreamConverterTest extends UnitTest {
 
 
@@ -24,6 +26,8 @@ public class BagitContentFileDatastreamConverterTest extends UnitTest {
     bagitContentFile.setCreator("creator");
     bagitContentFile.setDescription("description");
     bagitContentFile.setRights("rights");
+    bagitContentFile.setTags(Set.of("tag1", "tag2"));
+    bagitContentFile.setLang(Set.of("lang1", "lang2"));
   }
 
 
@@ -41,7 +45,7 @@ public class BagitContentFileDatastreamConverterTest extends UnitTest {
     Assertions.assertEquals(bagitContentFile.getDescription(), datastream.getBaseMetadata().getDescription());
     Assertions.assertEquals(bagitContentFile.getRights(), datastream.getBaseMetadata().getRights());
     Assertions.assertEquals(bagitContentFile.getTags(), datastream.getTags());
-
+    Assertions.assertEquals(bagitContentFile.getLang(), datastream.getLang());
 
   }
 
@@ -49,6 +53,12 @@ public class BagitContentFileDatastreamConverterTest extends UnitTest {
   public void convertedBagContainsExpectedTags(){
     Datastream datastream = converter.convert(bagitContentFile);
     Assertions.assertEquals(bagitContentFile.getTags(), datastream.getTags());
+  }
+
+  @Test
+  public void convertedBagContainsExpectedLang(){
+    Datastream datastream = converter.convert(bagitContentFile);
+    Assertions.assertEquals(bagitContentFile.getLang(), datastream.getLang());
   }
 
 }

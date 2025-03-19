@@ -72,5 +72,11 @@ public class BagitContentFile {
     @NotNull
     private Set<String> tags = new HashSet<>();
 
+    /**
+     * Language of the datastream / content file mapped from the sip.json
+     */
+    @NotNull
+    private Set<String> lang = new HashSet<>();
+
 
 }

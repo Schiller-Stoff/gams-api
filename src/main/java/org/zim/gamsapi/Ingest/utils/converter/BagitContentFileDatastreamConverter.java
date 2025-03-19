@@ -25,6 +25,7 @@ public class BagitContentFileDatastreamConverter implements Converter<BagitConte
         .mimeType(source.getMimetype())
         .size(source.getSize())
         .tags(source.getTags())
+        .lang(source.getLang())
         // omitted fields - because not available in a BagitContentFile
         //.fileName()
         //.data()
