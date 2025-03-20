@@ -10,24 +10,46 @@ import java.util.List;
  */
 public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntry, Long> {
 
-  //TODO jdoc
+  /**
+   * Find DublinCoreEntries by digital object and name.
+   * @param digitalObject digital object
+   * @param name name of the DublinCoreElement
+   * @return a list of DublinCoreEntries
+   */
   List<DublinCoreEntry> findByDigitalObjectAndName(DigitalObject digitalObject, String name);
 
-  //TODO jdoc
+  /**
+   * Find DublinCoreEntries by digital object.
+   * @param digitalObject digital object
+   * @return a list of DublinCoreEntries
+   */
   List<DublinCoreEntry> findByDigitalObject(DigitalObject digitalObject);
 
-  // TODO jdoc
-  // TODO do I need this method?
+  /**
+   * Find DublinCoreEntries by digital object id.
+   * @param digitalObjectId digital object id
+   * @param name name of the DublinCoreElement
+   * @return a list of DublinCoreEntries
+   */
   @Query(value = "SELECT dcm FROM DublinCoreEntry dcm WHERE dcm.digitalObject.id = :digitalObjectId " +
       "AND dcm.name = :name")
   List<DublinCoreEntry> findMetadataByDigitalObjectIdAndName(String digitalObjectId, String name);
 
-  // Efficiently find objects by metadata value
-  // + ignore case
+  /**
+   * Find DublinCoreEntries by digital object id.
+   * @param name name of the DublinCoreElement
+   * @param value value of the DublinCoreElement
+   * @return a list of digital objects
+   */
   @Query(value = "SELECT DISTINCT dcm.digitalObject FROM DublinCoreEntry dcm " +
       "WHERE dcm.name = :name AND LOWER(dcm.value) LIKE CONCAT('%', LOWER(:value), '%')")
   List<DigitalObject> findDigitalObjectsByDublinCoreElementValue(String name, String value);
 
 
+  /**
+   * Deletes all DublinCoreEntries for a given digital object.
+   * @param digitalObject digital object
+   */
+  void deleteAllByDigitalObject(DigitalObject digitalObject);
 
 }

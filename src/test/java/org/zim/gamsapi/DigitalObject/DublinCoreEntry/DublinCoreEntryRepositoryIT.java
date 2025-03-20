@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -87,7 +88,22 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
     }
 
+    @Test
+    @Transactional
+    public void deletionOfAllDublinCoreEntriesForObjectDeletesCreatedEntry(){
 
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      DigitalObject savedObject =  digitalObjectRepository.save(digitalObject);
+      DublinCoreEntry dublinCoreEntry = TestDublinCoreEntry.generate(savedObject);
+      dublinCoreEntryRepository.save(dublinCoreEntry);
+
+      Assertions.assertThat(digitalObjectRepository.count()).isGreaterThan(0);
+      Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
+
+      dublinCoreEntryRepository.deleteAllByDigitalObject(savedObject);
+      Assertions.assertThat(dublinCoreEntryRepository.count()).isEqualTo(0);
+
+    }
 
   }
 
