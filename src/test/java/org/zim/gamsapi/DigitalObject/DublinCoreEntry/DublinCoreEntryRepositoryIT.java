@@ -73,6 +73,20 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void deletionOfdigitalObjectThrowsExceptionIfDublinCoreEntryStillExists(){
+
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+      DublinCoreEntry dublinCoreEntry = TestDublinCoreEntry.generate(digitalObject.getId());
+      dublinCoreEntryRepository.save(dublinCoreEntry);
+
+      org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
+        digitalObjectRepository.delete(digitalObject);
+      });
+
+    }
+
 
 
   }
