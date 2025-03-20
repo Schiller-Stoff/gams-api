@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
@@ -31,6 +32,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
   private final IDatastreamContentRepository fileSystemRepository;
+  private final IDublinCoreEntryRepository dublinCoreEntryRepository;
 
   @Override
   @Transactional
@@ -127,6 +129,8 @@ public class DigitalObjectService implements IDigitalObjectService {
     datastreams.forEach(datastream -> {
       fileSystemRepository.delete(datastream.deriveDatastreamId());
     });
+
+    dublinCoreEntryRepository.deleteAllByDigitalObject(digitalObject);
 
     digitalObjectRepository.delete(digitalObject);
     log.info("Successfully deleted digital object {}", digitalObject);

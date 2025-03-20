@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
@@ -19,10 +21,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDatastream;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.enums.*;
 
 import java.util.HashSet;
 import java.util.Optional;
@@ -46,6 +45,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectService digitalObjectService;
+
+  @Autowired
+  IDublinCoreEntryRepository dublinCoreEntryRepository;
 
   Project testProject;
 
@@ -262,6 +264,22 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void deletesReferencedDublinCoreEntries(){
+
+      DigitalObject digitalObject = TestDigitalObject.generate();
+
+      digitalObjectRepository.save(digitalObject);
+
+      final DublinCoreEntry TEST_DUBLIN_CORE_ENTRY = TestDublinCoreEntry.generate(digitalObject.getId());
+
+      dublinCoreEntryRepository.save(TEST_DUBLIN_CORE_ENTRY);
+
+      digitalObjectService.delete(digitalObject);
+
+      Assertions.assertThat(dublinCoreEntryRepository.existsById(TEST_DUBLIN_CORE_ENTRY.getId())).isFalse();
+
+    }
 
   }
 
