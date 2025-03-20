@@ -56,14 +56,14 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
 
     if(!authentication.get().isAuthenticated()){
       String msg = String.format("User authentication is required for state changing operations on GAMS. Against url %s for method: %s", requestUri, requestMethod);
-      log.trace(msg);
+      log.debug(msg);
       throw new AccessDeniedException(msg);
     }
 
     //TODO test
     if(authorizationContext.getRequest().getSession() == null){
       String msg = String.format("User session is required for state changing operations on GAMS. Against url %s for method: %s", requestUri, requestMethod);
-      log.trace(msg);
+      log.debug(msg);
       throw new UserAuthenticationRequiredException(msg);
     }
 
@@ -84,7 +84,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
 
     if(userAuthorities.contains(GAMSAPIAuthorities.getAnonymous())){
       String msg = String.format("User with name %s is not authorized for state changing operations on the GAMS-API because having anonymous role: %s. Url: %s Method: %s", username, GAMSAPIAuthorities.getAnonymous(), requestUri, requestMethod);
-      log.trace(msg);
+      log.debug(msg);
       throw new UserNotAuthorizedException(msg);
     }
 
@@ -116,7 +116,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     // there is no role that contains the project-abbreviation ()
     if(filteredRoles.isEmpty()) {
       String msg = String.format("User %s is not assigned to project %s. Url: %s Method: %s. Has authorities: %s", username, projectAbbr, requestUri, requestMethod, userAuthorities);
-      log.trace(msg);
+      log.debug(msg);
       throw new UserNotAssignedToProjectException(msg);
     }
 
