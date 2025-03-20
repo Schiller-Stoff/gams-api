@@ -62,7 +62,7 @@ public class IngestControllerIT extends IntegrationTest {
   @BeforeEach
   public void setup() throws IOException {
     bagFile = TestBag.loadFile();
-    projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+    projectRepository.save(TestProject.generate());
   }
 
   @Test
@@ -84,8 +84,9 @@ public class IngestControllerIT extends IntegrationTest {
 
   @Test
   public void ingestFailesIfProjectAbbrDiffersFromBagitSipJSONProject() throws Exception {
-
-    final String MISMATCHING_PROJECT_ABBR = "DIFFERENT";
+    final String MISMATCHING_PROJECT_ABBR = "different";
+    // need to ensure that the different project is there (otherwise a 404 error will be thrown)
+    projectRepository.save(TestProject.generate(MISMATCHING_PROJECT_ABBR));
 
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
