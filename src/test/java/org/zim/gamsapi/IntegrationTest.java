@@ -2,20 +2,17 @@ package org.zim.gamsapi;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
@@ -48,6 +45,9 @@ public abstract class IntegrationTest {
 
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;;
+
+  @Autowired
+  IDublinCoreEntryRepository dublinCoreElementRepository;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
@@ -102,6 +102,7 @@ public abstract class IntegrationTest {
   @AfterEach
   public void tearDown(){
     datastreamContentRepository.deleteAll();
+    dublinCoreElementRepository.deleteAll();
     datastreamRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
