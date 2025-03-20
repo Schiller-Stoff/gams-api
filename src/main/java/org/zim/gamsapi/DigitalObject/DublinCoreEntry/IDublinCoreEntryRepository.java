@@ -17,6 +17,7 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
   List<DublinCoreEntry> findByDigitalObject(DigitalObject digitalObject);
 
   // TODO jdoc
+  // TODO do I need this method?
   @Query(value = "SELECT dcm FROM DublinCoreEntry dcm WHERE dcm.digitalObject.id = :digitalObjectId " +
       "AND dcm.name = :name")
   List<DublinCoreEntry> findMetadataByDigitalObjectIdAndName(String digitalObjectId, String name);
