@@ -32,6 +32,7 @@ logging:
     name: ${LOG_FILE:log/test.log}
   level:
     org.zim.gamsapi: ${LOG_LEVEL:DEBUG}
+    org.zim.gamsapi.System.security: ${SECURITY_LOG_LEVEL:DEBUG}
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
   logback:
     # cleans log file on startup
