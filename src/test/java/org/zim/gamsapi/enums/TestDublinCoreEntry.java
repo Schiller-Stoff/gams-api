@@ -1,5 +1,6 @@
 package org.zim.gamsapi.enums;
 
+import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 
 /**
@@ -22,6 +23,14 @@ public enum TestDublinCoreEntry {
   public String getValue() {
     return value;
   }
+
+  public static DublinCoreEntry generate(DigitalObject digitalObject){
+    return DublinCoreEntry.builder()
+        .name(NAME.getValue())
+        .value(VALUE.getValue())
+        .digitalObject(digitalObject).build();
+  }
+
 
   public static DublinCoreEntry generate(String objectId){
     return DublinCoreEntry.builder()
