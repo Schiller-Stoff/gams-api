@@ -53,13 +53,6 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     bagFile = TestBag.loadFile();
   }
 
-  @AfterAll
-  public void tearDown(){
-    datastreamRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-  }
-
 
   /**
    * Creates a Project as global admin -> then ingests as project admin role.
@@ -125,9 +118,6 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     Assertions.assertThat(datastreamRepository.findAll()).isNotEmpty();
     Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
 
-    // cleanup
-    datastreamRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
   }
 
 
