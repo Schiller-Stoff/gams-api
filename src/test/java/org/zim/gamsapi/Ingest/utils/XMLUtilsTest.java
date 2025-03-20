@@ -2,6 +2,7 @@ package org.zim.gamsapi.Ingest.utils;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,11 +17,13 @@ import org.zim.gamsapi.UnitTest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class XMLUtilsTest extends UnitTest {
 
   private final String TESTFOLDER_LOCATION = "testfiles/tei";
   private final String TESTFILE_LOCATION = TESTFOLDER_LOCATION + "/TEI_SOURCE.xml";
+  private final String TESTDC_LOCATION = "testfiles/ingest/test-bag/data/content/DC.xml";
 
   @Nested
   public class ParseXml {
@@ -170,6 +173,42 @@ public class XMLUtilsTest extends UnitTest {
       Assertions.assertThat(actualAttributeValue).isEqualTo("kanone");
 
     }
+
+  }
+
+  @Nested
+  public class ExtractDCElements {
+
+    private List<XMLUtils.XMLElement> dcElements;
+
+    @BeforeEach
+    public void setup() throws IOException {
+      if(dcElements != null) return;
+      InputStream dcXML = new ClassPathResource(TESTDC_LOCATION).getInputStream();
+      Document dcDocument = XMLUtils.parseXml(dcXML.readAllBytes());
+      dcElements =  XMLUtils.extractDCElements(dcDocument);
+    }
+
+    @Test
+    public void extractsAtLeast1DCElement() throws IOException {
+      Assertions.assertThat(dcElements.size()).isGreaterThan(0);
+    }
+
+    @Test
+    public void extractsExpectedDCTitleElement() throws IOException {
+      Assertions.assertThat(
+          dcElements.stream().anyMatch(e -> e.getName().equals("title"))
+      ).isTrue();
+    }
+
+    @Test
+    public void extracedTitleElementHasExpectedValue() throws IOException {
+      final String EXPECTED_TITLE_VALUE = "test-dc-title";
+      Assertions.assertThat(
+          dcElements.stream().anyMatch(e -> e.getName().equals("title") && e.getValue().equals(EXPECTED_TITLE_VALUE))
+      ).isTrue();
+    }
+
 
   }
 
