@@ -43,7 +43,7 @@ public class IngestService implements IIngestService {
   public void ingest(Ingest ingest) {
 
     if(!projectRepository.existsById(ingest.getProjectAbbr())){
-      String msg = String.format("Project %s does not exist. Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
+      String msg = String.format("Project defined for the ingest operation %s does not exist (defined in given request url - bag's sip.json was not analyzed). Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
       log.warn(msg);
       throw new ProjectNotFoundException(msg);
     }
