@@ -8,9 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
-
 import java.util.List;
-
 import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;
 import static org.hibernate.jpa.QueryHints.HINT_READONLY;
 
@@ -62,20 +60,23 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
 
   /**
    * Find digital objects by project abbreviation and DublinCoreElement name and value.
+   * See also: https://claude.ai/chat/5a33a7d3-40b4-48a1-aee7-1b010bf1a7e1
    * @param projectAbbr project abbreviation
    * @param name name of the DublinCoreElement
    * @param value value of the DublinCoreElement
    * @param pageable pagination information
    * @return a page of digital objects
    */
-  @Query(value = "SELECT DISTINCT do FROM DigitalObject do " +
+  @Query(value = "SELECT do FROM DigitalObject do " +
       "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
       "WHERE dcm.name = :name " +
       "AND LOWER(dcm.value) LIKE CONCAT('%', LOWER(:value), '%') " +
-      "AND do.project.projectAbbr = :projectAbbr")
+      "AND do.project.projectAbbr = :projectAbbr " +
+      "GROUP BY do.id " +
+      "ORDER BY MIN(dcm.value)"
+  )
   @QueryHints(value = {
       @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
-      //@QueryHint(name = HINT_CACHEABLE, value = "true"),
       @QueryHint(name = HINT_READONLY, value = "true")
   })
   Page<DigitalObjectListItemView> findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(
