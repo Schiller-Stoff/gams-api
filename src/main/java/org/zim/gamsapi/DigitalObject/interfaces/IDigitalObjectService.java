@@ -77,4 +77,13 @@ public interface IDigitalObjectService {
    */
   List<String> findAllIdsByProjectAbbr(String projectAbbr);
 
+  /**
+   * Find all digital objects for a given project (with project abbreviation) and Dublin Core Element name and value.
+   * @param projectAbbr identifier of the project
+   * @param dcEntryName name of the Dublin Core Element
+   * @param dcEntryValue value of the Dublin Core Element
+   * @param pageAble pagination
+   * @return
+   */
+  Page<DigitalObjectListItemView> findDigitalObjectsByProjectAbbrAndDublinCore(String projectAbbr, String dcEntryName, String dcEntryValue, Pageable pageAble);
 }
