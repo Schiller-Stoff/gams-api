@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -178,5 +179,40 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
   }
 
+
+  @Nested
+  public class FindDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue {
+
+    @Test
+    public void findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValueIsNotEmpty() {
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDublinCoreEntry.NAME.getValue(),
+          TestDublinCoreEntry.VALUE.getValue(),
+          PageRequest.of(0, 10)
+      );
+
+      Assertions.assertThat(foundObjects).isNotEmpty();
+    }
+
+    @Test
+    public void findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValueIsEmpty_whenNoMatch() {
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(
+          TestProject.PROJECT_ABBR.getValue(),
+          "foo",
+          "bar",
+          PageRequest.of(0, 10)
+      );
+
+      Assertions.assertThat(foundObjects).isEmpty();
+    }
+
+  }
 
 }

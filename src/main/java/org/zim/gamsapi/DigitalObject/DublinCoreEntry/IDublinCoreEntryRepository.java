@@ -1,9 +1,19 @@
 package org.zim.gamsapi.DigitalObject.DublinCoreEntry;
 
+import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+
 import java.util.List;
+
+import static org.hibernate.jpa.HibernateHints.HINT_CACHEABLE;
+import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;
+import static org.hibernate.jpa.QueryHints.HINT_READONLY;
 
 /**
  * Repository for the DublinCoreElement entity.
@@ -45,11 +55,52 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
       "WHERE dcm.name = :name AND LOWER(dcm.value) LIKE CONCAT('%', LOWER(:value), '%')")
   List<DigitalObject> findDigitalObjectsByDublinCoreElementValue(String name, String value);
 
-
   /**
    * Deletes all DublinCoreEntries for a given digital object.
    * @param digitalObject digital object
    */
   void deleteAllByDigitalObject(DigitalObject digitalObject);
+
+  /**
+   * Find digital objects by project abbreviation and DublinCoreElement name and value.
+   * @param projectAbbr project abbreviation
+   * @param name name of the DublinCoreElement
+   * @param value value of the DublinCoreElement
+   * @param pageable pagination information
+   * @return a page of digital objects
+   */
+  @Query(value = "SELECT DISTINCT do FROM DigitalObject do " +
+      "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
+      "WHERE dcm.name = :name " +
+      "AND LOWER(dcm.value) LIKE CONCAT('%', LOWER(:value), '%') " +
+      "AND do.project.projectAbbr = :projectAbbr")
+  @QueryHints(value = {
+      @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
+      //@QueryHint(name = HINT_CACHEABLE, value = "true"),
+      @QueryHint(name = HINT_READONLY, value = "true")
+  })
+  Page<DigitalObjectListItemView> findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(
+      String projectAbbr, String name, String value, Pageable pageable);
+
+
+
+   //Option 2: Native query using fulltext search (provided by POSTGRES)
+//  @Query(value = "SELECT do.id, do.object_type, do.publisher, do.created, do.published, " +
+//      "do.modified, do.created_by, do.modified_by, p.project_abbr, " +
+//      "mb.title, mb.description " +
+//      "FROM digital_object do " +
+//      "JOIN project p ON do.project_project_abbr = p.project_abbr " +
+//      "JOIN dublin_core_entry dcm ON dcm.digital_object_id = do.id " +
+//      "WHERE dcm.name = :name " +
+//      "AND to_tsvector('english', dcm.value) @@ plainto_tsquery('english', :value) " +
+//      "AND do.project_project_abbr = :projectAbbr",
+//      nativeQuery = true,
+//      countQuery = "SELECT COUNT(DISTINCT do.id) FROM digital_object do " +
+//          "JOIN dublin_core_entry dcm ON dcm.digital_object_id = do.id " +
+//          "WHERE dcm.name = :name " +
+//          "AND to_tsvector('english', dcm.value) @@ plainto_tsquery('english', :value) " +
+//          "AND do.project_project_abbr = :projectAbbr")
+//  Page<Object[]> findDigitalObjectsByProjectAbbrAndDublinCoreElementValueFullText(
+//      String projectAbbr, String name, String value, Pageable pageable);
 
 }
