@@ -1,12 +1,10 @@
 package org.zim.gamsapi.Project;
 
-import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,15 +17,12 @@ import org.zim.gamsapi.Project.ProjectModification.IProjectModificationService;
 import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
-
 import io.swagger.v3.oas.annotations.Operation;
-
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
