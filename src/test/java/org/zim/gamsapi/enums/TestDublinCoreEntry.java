@@ -31,13 +31,16 @@ public enum TestDublinCoreEntry {
         .digitalObject(digitalObject).build();
   }
 
-
   public static DublinCoreEntry generate(String objectId){
+    return generate(PROJECT_ABBR.getValue(), objectId);
+  }
+
+  public static DublinCoreEntry generate(String projectAbbr, String objectId){
     return DublinCoreEntry.builder()
         .name(NAME.getValue())
         .value(VALUE.getValue())
         .digitalObject(
-            TestDigitalObject.generate(PROJECT_ABBR.getValue(), objectId)
+            TestDigitalObject.generate(projectAbbr, objectId)
         ).build();
   }
 
