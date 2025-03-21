@@ -10,6 +10,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -91,12 +92,12 @@ public class IngestServiceIT extends IntegrationTest {
   @Test
   public void createsExpectedDublinCoreEntryNamesForTestDigitalObject() {
 
-    List<DublinCoreEntry> dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(TestDigitalObject.generate());
+    var dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(TestDigitalObject.generate());
 
     Assertions.assertThat(dublinCoreEntries)
         .isNotEmpty();
 
-    List<String> foundDcElementNames = dublinCoreEntries.stream().map(DublinCoreEntry::getName).toList();
+    List<String> foundDcElementNames = dublinCoreEntries.stream().map(DublinCoreEntrySummaryView::getName).toList();
 
     Assertions.assertThat(foundDcElementNames)
         .contains(

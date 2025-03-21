@@ -164,7 +164,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       digitalObjectRepository.save(digitalObject);
       dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
 
-      List<DublinCoreEntry> dublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectAndName(
+      var dublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectAndName(
           digitalObject, DC_TITLE
       );
 

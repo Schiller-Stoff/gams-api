@@ -11,7 +11,6 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 
 import java.util.List;
 
-import static org.hibernate.jpa.HibernateHints.HINT_CACHEABLE;
 import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;
 import static org.hibernate.jpa.QueryHints.HINT_READONLY;
 
@@ -26,14 +25,14 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    * @param name name of the DublinCoreElement
    * @return a list of DublinCoreEntries
    */
-  List<DublinCoreEntry> findByDigitalObjectAndName(DigitalObject digitalObject, String name);
+  List<DublinCoreEntrySummaryView> findByDigitalObjectAndName(DigitalObject digitalObject, String name);
 
   /**
    * Find DublinCoreEntries by digital object.
    * @param digitalObject digital object
    * @return a list of DublinCoreEntries
    */
-  List<DublinCoreEntry> findByDigitalObject(DigitalObject digitalObject);
+  List<DublinCoreEntrySummaryView> findByDigitalObject(DigitalObject digitalObject);
 
   /**
    * Find DublinCoreEntries by digital object id.
@@ -43,7 +42,7 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    */
   @Query(value = "SELECT dcm FROM DublinCoreEntry dcm WHERE dcm.digitalObject.id = :digitalObjectId " +
       "AND dcm.name = :name")
-  List<DublinCoreEntry> findMetadataByDigitalObjectIdAndName(String digitalObjectId, String name);
+  List<DublinCoreEntrySummaryView> findMetadataByDigitalObjectIdAndName(String digitalObjectId, String name);
 
   /**
    * Find DublinCoreEntries by digital object id.
