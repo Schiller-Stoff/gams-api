@@ -168,4 +168,11 @@ public class DigitalObjectService implements IDigitalObjectService {
                     return new DigitalObjectNotFoundException(msg);
                 });
     }
+
+    @Override
+    @Transactional
+    public Page<DigitalObjectListItemView> findDigitalObjectsByProjectAbbrAndDublinCore(String projectAbbr, String dcEntryName, String dcEntryValue, Pageable pageAble) {
+        return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(projectAbbr, dcEntryName, dcEntryValue, pageAble);
+    }
+
 }

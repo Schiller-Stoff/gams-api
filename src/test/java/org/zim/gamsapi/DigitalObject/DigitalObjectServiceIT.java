@@ -23,9 +23,7 @@ import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.*;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -283,5 +281,93 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
+
+  @Nested
+  public class DublinCoreSearch {
+
+    Project additionalProject = TestProject.generate("bar");
+
+    @BeforeEach
+    public void setup(){
+
+      // 1 object belongs to a different project
+      projectRepository.save(additionalProject);
+
+      List<DigitalObject> digitalObjects = List.of(
+          TestDigitalObject.generate("test", "test.foo"),
+          TestDigitalObject.generate("test", "test.bar"),
+          TestDigitalObject.generate("test", "test.baz"),
+          // belongs to a different project
+          TestDigitalObject.generate(additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".peter")
+      );
+
+      digitalObjects.forEach(digitalObjectRepository::save);
+
+      List<DublinCoreEntry> dublinCoreEntries = List.of(
+          TestDublinCoreEntry.generate(digitalObjects.get(0).getId()),
+          TestDublinCoreEntry.generate(digitalObjects.get(1).getId()),
+          TestDublinCoreEntry.generate(digitalObjects.get(2).getId()),
+          TestDublinCoreEntry.generate(additionalProject.getProjectAbbr(), digitalObjects.get(3).getId())
+      );
+
+      dublinCoreEntries.forEach(dublinCoreEntryRepository::save);
+
+    }
+
+    @Test
+    public void findsExpectedObjectCountForProjectTest(){
+
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+          // only three objects assigned to this project
+          testProject.getProjectAbbr(),
+          TestDublinCoreEntry.NAME.getValue(),
+          TestDublinCoreEntry.VALUE.getValue(),
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(foundDigitalObjects)
+          .isNotEmpty()
+      ;
+
+      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(3);
+    }
+
+    @Test
+    public void findsTheOneObjectFromDifferentProject(){
+
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+          // only three objects assigned to this project
+          additionalProject.getProjectAbbr(),
+          TestDublinCoreEntry.NAME.getValue(),
+          TestDublinCoreEntry.VALUE.getValue(),
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(foundDigitalObjects)
+          .isNotEmpty()
+      ;
+
+      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void searchingNonExistentDublinCoreFieldYieldsNoResults(){
+
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+          // only three objects assigned to this project
+          testProject.getProjectAbbr(),
+          "nonExistentField",
+          "nonExistentValue",
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(foundDigitalObjects)
+          .isEmpty()
+      ;
+
+    }
+
+  }
 
 }
