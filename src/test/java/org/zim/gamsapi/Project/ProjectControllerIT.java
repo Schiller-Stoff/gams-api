@@ -1,6 +1,7 @@
 package org.zim.gamsapi.Project;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestDublinCoreEntry;
 import org.zim.gamsapi.enums.TestProject;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,6 +40,9 @@ public class ProjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
+
+  @Autowired
+  private IDublinCoreEntryRepository dublinCoreEntryRepository;
 
   // disables auditing
   // (necessary -> otherwise the createdBy fields etc. from Project need to be filled)
@@ -259,5 +266,50 @@ public class ProjectControllerIT extends IntegrationTest {
   }
 
 
+  @Nested
+  public class DublinCoreSearch {
+
+    Project testProject = TestProject.generate();
+    DigitalObject testDigitalObject = TestDigitalObject.generate();
+    DublinCoreEntry testDublinCoreEntry = TestDublinCoreEntry.generate(testDigitalObject.getId());
+
+    @BeforeEach
+    public void setup() {
+      projectRepository.save(testProject);
+      digitalObjectRepository.save(testDigitalObject);
+      dublinCoreEntryRepository.save(testDublinCoreEntry);
+    }
+
+    @Test
+    public void GETDublinCoreEntryReturnsExpectedTestObject() throws Exception {
+
+      final String SEARCH_URL = "/api/v1/projects/search/dc";
+
+      String requestUrl = String.format(
+          "%s?projectAbbr=%s&dcEntryName=%s&dcEntryValue=%s",
+          SEARCH_URL,
+          testProject.getProjectAbbr(),
+          testDublinCoreEntry.getName(),
+          testDublinCoreEntry.getValue()
+      );
+
+      String response = mockMvc.perform(
+          MockMvcRequestBuilders.get(requestUrl)
+      ).andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(
+              testDigitalObject.getId(),
+              testDigitalObject.getProject().getProjectAbbr(),
+              testDigitalObject.getBaseMetadata().getTitle(),
+              testDigitalObject.getBaseMetadata().getDescription()
+          );
+
+    }
+
+  }
 
 }

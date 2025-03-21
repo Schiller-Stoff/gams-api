@@ -1,14 +1,20 @@
 package org.zim.gamsapi.Project;
 
+import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.ProjectModification.IProjectModificationService;
 import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
@@ -21,6 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,6 +37,8 @@ public class ProjectController {
 
   private final IProjectService projectService;
   private final IProjectModificationService projectModificationService;
+
+  private final IDigitalObjectService digitalObjectService;
 
   @Hidden
   @PutMapping(path = "/{projectAbbr}")
@@ -104,6 +113,31 @@ public class ProjectController {
     return ResponseEntity.ok()
         .lastModified(zonedDateTime)
         .build();
+  }
+
+  @GetMapping(path = "/search/dc", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  @Operation(summary = "A list of objects belonging to a project")
+  public Page<DigitalObjectListItemView> searchDigitalObjects(
+      // dublin core search parameters
+      @RequestParam String projectAbbr,
+      @RequestParam String dcEntryName,
+      @RequestParam String dcEntryValue,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "20") int pageSize,
+      // TODO this sortBy is weird -> want to sort by dc / but creates error.
+      @RequestParam(defaultValue = "dcEntryValue") String sortBy
+  ){
+
+    // limit page size
+    if (pageSize >= 20) {
+      pageSize = 20;
+    }
+
+    return digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+        projectAbbr, dcEntryName, dcEntryValue, PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
 }
