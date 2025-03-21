@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestDublinCoreEntry;
@@ -195,7 +196,9 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
           PageRequest.of(0, 10)
       );
 
-      Assertions.assertThat(foundObjects).isNotEmpty();
+      Assertions.assertThat(foundObjects)
+          .isNotEmpty()
+          .hasSize(1);
     }
 
     @Test
@@ -211,6 +214,40 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       );
 
       Assertions.assertThat(foundObjects).isEmpty();
+    }
+
+    @Test
+    public void findByDublinCoreOverTwoProjects(){
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+
+      // save another object to a different project
+      Project additionalProject = TestProject.generate("foo");
+      projectRepository.save(additionalProject);
+      DigitalObject digitalObject2 = TestDigitalObject.generate(
+          additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".bar"
+      );
+
+      digitalObjectRepository.save(digitalObject2);
+      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(
+          additionalProject.getProjectAbbr(), digitalObject2.getId())
+      );
+
+      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementValue(
+          // search across both projects
+          List.of(TestProject.PROJECT_ABBR.getValue(), additionalProject.getProjectAbbr()),
+          TestDublinCoreEntry.NAME.getValue(),
+          TestDublinCoreEntry.VALUE.getValue(),
+          PageRequest.of(0, 10)
+      );
+
+      Assertions.assertThat(foundObjects)
+          .isNotEmpty()
+          .hasSize(2)
+      ;
+
+
     }
 
   }

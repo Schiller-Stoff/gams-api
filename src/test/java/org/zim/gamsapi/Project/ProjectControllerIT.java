@@ -286,7 +286,7 @@ public class ProjectControllerIT extends IntegrationTest {
       final String SEARCH_URL = "/api/v1/projects/search/dc";
 
       String requestUrl = String.format(
-          "%s?projectAbbr=%s&dcEntryName=%s&dcEntryValue=%s",
+          "%s?projectAbbrs=%s&dcEntryName=%s&dcEntryValue=%s",
           SEARCH_URL,
           testProject.getProjectAbbr(),
           testDublinCoreEntry.getName(),
