@@ -33,7 +33,7 @@ public class DublinCoreEntry {
   /**
    * Digital object the dublin core element belongs to.
    */
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY) // fetchType lazy = means that the digital object is loaded only when accessed
   @JoinColumn(name = "digital_object_id", nullable = false)
   @NotNull
   private DigitalObject digitalObject;
