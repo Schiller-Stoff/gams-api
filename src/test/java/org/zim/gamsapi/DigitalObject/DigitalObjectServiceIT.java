@@ -317,9 +317,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void findsExpectedObjectCountForProjectTest(){
 
-      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
           // only three objects assigned to this project
-          testProject.getProjectAbbr(),
+          List.of(testProject.getProjectAbbr()),
           TestDublinCoreEntry.NAME.getValue(),
           TestDublinCoreEntry.VALUE.getValue(),
           Pageable.unpaged()
@@ -335,9 +335,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void findsTheOneObjectFromDifferentProject(){
 
-      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
           // only three objects assigned to this project
-          additionalProject.getProjectAbbr(),
+          List.of(additionalProject.getProjectAbbr()),
           TestDublinCoreEntry.NAME.getValue(),
           TestDublinCoreEntry.VALUE.getValue(),
           Pageable.unpaged()
@@ -352,11 +352,31 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
+    public void searchingObjectMatchingBothProjectReturnsExpectedCount(){
+
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
+          // only three objects assigned to this project
+          List.of(testProject.getProjectAbbr(), additionalProject.getProjectAbbr()),
+          TestDublinCoreEntry.NAME.getValue(),
+          TestDublinCoreEntry.VALUE.getValue(),
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(foundDigitalObjects)
+          .isNotEmpty()
+      ;
+
+      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(4);
+
+
+    }
+
+    @Test
     public void searchingNonExistentDublinCoreFieldYieldsNoResults(){
 
-      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
+      var foundDigitalObjects = digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
           // only three objects assigned to this project
-          testProject.getProjectAbbr(),
+          List.of(testProject.getProjectAbbr()),
           "nonExistentField",
           "nonExistentValue",
           Pageable.unpaged()

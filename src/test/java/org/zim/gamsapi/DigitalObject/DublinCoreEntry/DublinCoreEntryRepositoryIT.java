@@ -188,8 +188,8 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       DigitalObject digitalObject = TestDigitalObject.generate();
       digitalObjectRepository.save(digitalObject);
       dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(
-          TestProject.PROJECT_ABBR.getValue(),
+      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementValue(
+          List.of(TestProject.PROJECT_ABBR.getValue()),
           TestDublinCoreEntry.NAME.getValue(),
           TestDublinCoreEntry.VALUE.getValue(),
           PageRequest.of(0, 10)
@@ -203,8 +203,8 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       DigitalObject digitalObject = TestDigitalObject.generate();
       digitalObjectRepository.save(digitalObject);
       dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(
-          TestProject.PROJECT_ABBR.getValue(),
+      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementValue(
+          List.of(TestProject.PROJECT_ABBR.getValue()),
           "foo",
           "bar",
           PageRequest.of(0, 10)
