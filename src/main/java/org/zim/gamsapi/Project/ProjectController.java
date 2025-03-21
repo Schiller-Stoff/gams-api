@@ -119,8 +119,8 @@ public class ProjectController {
   @ResponseBody
   @Operation(summary = "Dublin core search based on digital objects and project.")
   public Page<DigitalObjectListItemView> searchDigitalObjects(
+      @RequestParam List<String> projectAbbrs,
       // dublin core search parameters
-      @RequestParam List<String> projectAbbr,
       @RequestParam String dcEntryName,
       @RequestParam String dcEntryValue,
       // for pagination
@@ -134,7 +134,7 @@ public class ProjectController {
     }
 
     return digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
-        projectAbbr, dcEntryName, dcEntryValue, PageRequest.of(pageIndex, pageSize)
+        projectAbbrs, dcEntryName, dcEntryValue, PageRequest.of(pageIndex, pageSize)
     );
   }
 
