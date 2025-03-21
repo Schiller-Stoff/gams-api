@@ -170,8 +170,9 @@ public class DigitalObjectService implements IDigitalObjectService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<DigitalObjectListItemView> findDigitalObjectsByProjectAbbrAndDublinCore(String projectAbbr, String dcEntryName, String dcEntryValue, Pageable pageAble) {
+        log.trace("Trying to find digital objects by project abbreviation {} and dublin core entry name {} and value {}", projectAbbr, dcEntryName, dcEntryValue);
         return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementValue(projectAbbr, dcEntryName, dcEntryValue, pageAble);
     }
 
