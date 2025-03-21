@@ -117,7 +117,7 @@ public class ProjectController {
 
   @GetMapping(path = "/search/dc", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  @Operation(summary = "A list of objects belonging to a project")
+  @Operation(summary = "Dublin core search based on digital objects and project.")
   public Page<DigitalObjectListItemView> searchDigitalObjects(
       // dublin core search parameters
       @RequestParam String projectAbbr,
@@ -125,9 +125,7 @@ public class ProjectController {
       @RequestParam String dcEntryValue,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
-      @RequestParam(defaultValue = "20") int pageSize,
-      // TODO this sortBy is weird -> want to sort by dc / but creates error.
-      @RequestParam(defaultValue = "dcEntryValue") String sortBy
+      @RequestParam(defaultValue = "20") int pageSize
   ){
 
     // limit page size
@@ -136,7 +134,7 @@ public class ProjectController {
     }
 
     return digitalObjectService.findDigitalObjectsByProjectAbbrAndDublinCore(
-        projectAbbr, dcEntryName, dcEntryValue, PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+        projectAbbr, dcEntryName, dcEntryValue, PageRequest.of(pageIndex, pageSize)
     );
   }
 
