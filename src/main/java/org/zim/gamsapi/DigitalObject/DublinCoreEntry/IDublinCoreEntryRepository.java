@@ -117,7 +117,6 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    * @param searchTerm search term
    * @param pageable pagination information
    * @return a page of digital objects
-   * TODO think about ordering?
    */
   @Query(value = "SELECT DISTINCT do FROM DigitalObject do " +
       "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
