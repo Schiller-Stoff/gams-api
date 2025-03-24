@@ -60,29 +60,6 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    */
   void deleteAllByDigitalObject(DigitalObject digitalObject);
 
-  /**
-   * TODO remove this method? I think this is completely unncessary
-   * Find digital objects by multiple project abbreviations and DublinCoreElement name and value.
-   * @param projectAbbrs list of project abbreviations
-   * @param name name of the DublinCoreElement
-   * @param value value of the DublinCoreElement
-   * @param pageable pagination information
-   * @return a page of digital objects
-   */
-  @Query(value = "SELECT do FROM DigitalObject do " +
-      "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
-      "WHERE dcm.name = :name " +
-      "AND LOWER(dcm.value) LIKE CONCAT('%', LOWER(:value), '%') " +
-      "AND do.project.projectAbbr IN :projectAbbrs " +
-      "GROUP BY do.id " +
-      "ORDER BY MIN(dcm.value)"
-  )
-  @QueryHints(value = {
-      @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
-      @QueryHint(name = HINT_READONLY, value = "true")
-  })
-  Page<DigitalObjectListItemView> findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementValue(
-      List<String> projectAbbrs, String name, String value, Pageable pageable);
 
   /**
    * "Tagged search for dublin core": Finds objects based on exact match of defined dublin core field.

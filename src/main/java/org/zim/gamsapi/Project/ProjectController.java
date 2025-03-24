@@ -115,9 +115,8 @@ public class ProjectController {
   /**
    * Search for digital objects based on Dublin Core metadata.
    * @param projectAbbrs list of project abbreviations
-   * @param dcEntryName name of the DublinCoreElement
-   * @param contains value of the DublinCoreElement
-   * @param matches list of values of the DublinCoreElement
+   * @param dcField name of the DublinCoreElement on which to search
+   * @param search list of values of the DublinCoreElement
    * @param pageIndex page index
    * @param pageSize page size
    * @return a page of digital objects
@@ -125,39 +124,24 @@ public class ProjectController {
   @GetMapping(path = "/search/dc", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(summary = "Dublin core search based on digital objects and different projects.")
-  public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCore(
+  public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreExactMatch(
       @RequestParam List<String> projectAbbrs,
-      // dublin core search parameters
-      @RequestParam String dcEntryName,
-      @RequestParam(required = false) String contains,
-      @RequestParam(required = false) @NotEmpty List<String> matches,
+      @RequestParam String dcField,
+      @RequestParam @NotEmpty List<String> search,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize
   ){
 
-    if (contains == null && matches == null) {
-      String msg = "You have to provide either 'contains' or 'matches' within your request url. Both missing are not allowed.";
-      log.error(msg);
-      throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
-    }
-
     // limit page size
-    if (pageSize >= 20) {
-      pageSize = 20;
+    if (pageSize >= 100) {
+      pageSize = 100;
     }
 
-    // tagged based search
-    if (matches != null) {
-      return digitalObjectService.searchObjectsByDublincCoreTags(
-          projectAbbrs, dcEntryName, matches, PageRequest.of(pageIndex, pageSize)
-      );
-    }
-
-    // LIKE search via singular value.
-    return digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
-        projectAbbrs, dcEntryName, contains, PageRequest.of(pageIndex, pageSize)
+    return digitalObjectService.searchObjectsByDublincCoreTags(
+        projectAbbrs, dcField, search, PageRequest.of(pageIndex, pageSize)
     );
+
   }
 
   /**

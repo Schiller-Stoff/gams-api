@@ -275,8 +275,7 @@ public class ProjectControllerIT extends IntegrationTest {
     DigitalObject testDigitalObject = TestDigitalObject.generate();
     DublinCoreEntry testDublinCoreEntry = TestDublinCoreEntry.generate(testDigitalObject.getId());
 
-    final String CONTAINS_SEARCH_URL_TEMPLATE = "/api/v1/projects/search/dc?projectAbbrs=%s&dcEntryName=%s&contains=%s";
-    final String MATCHES_SEARCH_URL_TEMPLATE = "/api/v1/projects/search/dc?projectAbbrs=%s&dcEntryName=%s&matches=%s";
+    final String SEARCH_URL_TEMPLATE = "/api/v1/projects/search/dc?projectAbbrs=%s&dcField=%s&search=%s";
 
     @BeforeEach
     public void setup() {
@@ -288,7 +287,7 @@ public class ProjectControllerIT extends IntegrationTest {
     @Test
     public void GETDublinCoreEntryWithContainsReturnsExpectedTestObject() throws Exception {
       String requestUrl = String.format(
-          CONTAINS_SEARCH_URL_TEMPLATE,
+          SEARCH_URL_TEMPLATE,
           testProject.getProjectAbbr(),
           testDublinCoreEntry.getName(),
           testDublinCoreEntry.getValue()
@@ -312,33 +311,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void GETDublinCoreEntryWithMatchesReturnsExpectedTestObject() throws Exception {
-      String requestUrl = String.format(
-          MATCHES_SEARCH_URL_TEMPLATE,
-          testProject.getProjectAbbr(),
-          testDublinCoreEntry.getName(),
-          testDublinCoreEntry.getValue()
-      );
-
-      String response = mockMvc.perform(
-          MockMvcRequestBuilders.get(requestUrl)
-      ).andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-
-      Assertions.assertThat(response)
-          .contains(
-              testDigitalObject.getId(),
-              testDigitalObject.getProject().getProjectAbbr(),
-              testDigitalObject.getBaseMetadata().getTitle(),
-              testDigitalObject.getBaseMetadata().getDescription()
-          );
-
-    }
-
-    @Test
-    public void returnsErrorIfMatchesAndContainsNotDefined() throws Exception {
+    public void returnsErrorIfSearchParamsWereNotDefined() throws Exception {
       final String MALFORMED_URL = "/api/v1/projects/search/dc?projectAbbrs=%s";
       mockMvc.perform(
           MockMvcRequestBuilders.get(MALFORMED_URL)
