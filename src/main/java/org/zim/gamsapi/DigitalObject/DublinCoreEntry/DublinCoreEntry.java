@@ -41,13 +41,13 @@ public class DublinCoreEntry {
   /**
    * Dublin core element name.
    */
-  @Column(name = "name", nullable = false, length = 50)
+  @Column(name = "name", nullable = false, length = 20)
   private String name;
 
   /**
    * Dublin core element value.
    */
-  @Column(name = "value", nullable = false)
+  @Column(name = "value", nullable = false, length = 5000)
   private String value;
 
 
