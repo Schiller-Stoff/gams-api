@@ -24,6 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -157,6 +158,46 @@ public class ProjectController {
     return digitalObjectService.findDigitalObjectsByProjectAbbrsAndDublinCore(
         projectAbbrs, dcEntryName, contains, PageRequest.of(pageIndex, pageSize)
     );
+  }
+
+  /**
+   * Fulltext search over all dublin core fields of a digital object.
+   * @param projects list of project abbreviations
+   * @param dcFields list of DublinCoreElement names
+   * @param search fulltext search string
+   * @param pageIndex page index
+   * @param pageSize page size
+   * @return a page of digital objects
+   */
+  @GetMapping(path = "/search/dc/fulltext", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  @Operation(summary = "Dublin core fulltext search based on digital objects and multiple projects.")
+  public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreFulltext(
+      @RequestParam Set<String> projects,
+      // dublin core search parameters
+      @RequestParam(
+          required = false,
+          // sets default value empty set
+          defaultValue = ""
+      ) Set<String> dcFields,
+      @RequestParam String search,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "20") int pageSize
+  ){
+
+    // limit page size
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    return digitalObjectService.searchByDCFulltext(
+        projects,
+        dcFields,
+        search,
+        PageRequest.of(pageIndex, pageSize)
+    );
+
   }
 
 }

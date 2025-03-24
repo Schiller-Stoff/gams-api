@@ -26,6 +26,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Set;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -344,6 +346,79 @@ public class ProjectControllerIT extends IntegrationTest {
           status().isBadRequest()
       );
 
+
+    }
+
+    @Nested
+    public class DCFulltextSearch {
+
+      final String FULLTEXT_SEARCH_URL_TEMPLATE = "/api/v1/projects/search/dc/fulltext?projects=%s&search=%s";
+
+      @Test
+      public void findsExpectedTestObjectJSON_whenSearchingOverAllDCFields() throws Exception {
+
+        // arbitrary substring of test data
+        final String TEST_FULLTEXT_QUERY = TestDublinCoreEntry.VALUE.getValue().substring(0,3);
+
+        String requestUrl = String.format(
+            FULLTEXT_SEARCH_URL_TEMPLATE,
+            testProject.getProjectAbbr(),
+            TEST_FULLTEXT_QUERY
+        );
+        String response = mockMvc.perform(
+                MockMvcRequestBuilders.get(requestUrl)
+            )
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+
+        Assertions.assertThat(response)
+            .contains(
+                testDigitalObject.getId(),
+                testDigitalObject.getProject().getProjectAbbr(),
+                testDigitalObject.getBaseMetadata().getTitle(),
+                testDigitalObject.getBaseMetadata().getDescription()
+            );
+
+      }
+
+      @Test
+      public void findsNothingWhenRestrictedToANonOccuringDCField() throws Exception {
+
+        // arbitrary substring of test data
+        final String TEST_FULLTEXT_QUERY = TestDublinCoreEntry.VALUE.getValue().substring(0,3);
+        final Set<String> TEST_NON_OCCURING_DC_FIELDS = Set.of("type", "format");
+
+        String REQUEST_URL = String.format(
+            "/api/v1/projects/search/dc/fulltext?projects=%s&search=%s",
+            testProject.getProjectAbbr(),
+            TEST_FULLTEXT_QUERY
+        );
+
+        // add dcFields to request url
+        REQUEST_URL += TEST_NON_OCCURING_DC_FIELDS.stream()
+            .reduce("", (acc, field) -> acc + "&dcFields=" + field);
+
+        String response = mockMvc.perform(
+                MockMvcRequestBuilders.get(REQUEST_URL)
+            )
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+
+        Assertions.assertThat(response)
+            .doesNotContain(
+                testDigitalObject.getId(),
+                testDigitalObject.getProject().getProjectAbbr(),
+                testDigitalObject.getBaseMetadata().getTitle(),
+                testDigitalObject.getBaseMetadata().getDescription()
+            );
+
+      }
 
     }
 
