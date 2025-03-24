@@ -283,7 +283,6 @@ public class ProjectControllerIT extends IntegrationTest {
       dublinCoreEntryRepository.save(testDublinCoreEntry);
     }
 
-    // TODO rename test to clarify what it's doing!
     @Test
     public void GETDublinCoreEntryWithContainsReturnsExpectedTestObject() throws Exception {
       String requestUrl = String.format(
