@@ -330,7 +330,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       var foundDigitalObjects = digitalObjectService.searchObjectsByDublincCoreTags(
           // only three objects assigned to this project
-          List.of(testProject.getProjectAbbr()),
+          Set.of(testProject.getProjectAbbr()),
           TestDublinCoreEntry.NAME.getValue(),
           TEST_SEARCH_VALUES,
           Pageable.unpaged()
@@ -354,7 +354,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       var foundDigitalObjects = digitalObjectService.searchObjectsByDublincCoreTags(
           // only three objects assigned to this project
-          List.of(testProject.getProjectAbbr()),
+          Set.of(testProject.getProjectAbbr()),
           TestDublinCoreEntry.NAME.getValue(),
           TEST_SEARCH_VALUES,
           Pageable.unpaged()

@@ -84,7 +84,7 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
       @QueryHint(name = HINT_READONLY, value = "true")
   })
   Page<DigitalObjectListItemView> findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-      List<String> projectAbbrs, String name, List<String> values, Pageable pageable);
+      Set<String> projectAbbrs, String name, List<String> values, Pageable pageable);
 
 
   /**
@@ -109,13 +109,12 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
       Pageable pageable);
 
   /**
-   * TODO jdoc -- fulltext search for specific dc-fields
-   * TODO test
-   * @param projectAbbrs
-   * @param elementNames
-   * @param searchTerm
-   * @param pageable
-   * @return
+   * Fulltext search over all dublin core fields of a digital object -> allows to retrict search to certain specific dc-fields.
+   * @param projectAbbrs list of project abbreviations
+   * @param elementNames list of DublinCoreElement names
+   * @param searchTerm search term
+   * @param pageable pagination information
+   * @return a page of digital objects
    */
   @Query(value = "SELECT DISTINCT do FROM DigitalObject do " +
       "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +

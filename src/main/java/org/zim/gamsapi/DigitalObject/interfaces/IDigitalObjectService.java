@@ -98,7 +98,6 @@ public interface IDigitalObjectService {
    * @param dcEntryValue list of values of the DublinCoreElement
    * @param pageAble pagination
    * @return a page of digital objects
-   * TODO refactor to work with set
    */
-  Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(List<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble);
+  Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(Set<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble);
 }

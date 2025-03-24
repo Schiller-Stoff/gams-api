@@ -125,7 +125,7 @@ public class ProjectController {
   @ResponseBody
   @Operation(summary = "Dublin core search based on digital objects and different projects.")
   public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreExactMatch(
-      @RequestParam List<String> projectAbbrs,
+      @RequestParam Set<String> projectAbbrs,
       @RequestParam String dcField,
       @RequestParam @NotEmpty List<String> search,
       // for pagination

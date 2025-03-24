@@ -190,7 +190,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       digitalObjectRepository.save(digitalObject);
       dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
       var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          List.of(TestProject.PROJECT_ABBR.getValue()),
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
           TestDublinCoreEntry.NAME.getValue(),
           List.of(TestDublinCoreEntry.VALUE.getValue()),
           PageRequest.of(0, 10)
@@ -220,7 +220,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       digitalObjectRepository.save(digitalObject);
       dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
       var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          List.of(TestProject.PROJECT_ABBR.getValue()),
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
           TEST_DC_FIELD,
           TEST_DUBLIN_CORE_VALUES,
           PageRequest.of(0, 10)
@@ -238,7 +238,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       digitalObjectRepository.save(digitalObject);
       dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
       var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          List.of(TestProject.PROJECT_ABBR.getValue()),
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
           "foo",
           List.of("bar"),
           PageRequest.of(0, 10)
@@ -267,7 +267,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
       var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
           // search across both projects
-          List.of(TestProject.PROJECT_ABBR.getValue(), additionalProject.getProjectAbbr()),
+          Set.of(TestProject.PROJECT_ABBR.getValue(), additionalProject.getProjectAbbr()),
           TestDublinCoreEntry.NAME.getValue(),
           List.of(TestDublinCoreEntry.VALUE.getValue()),
           PageRequest.of(0, 10)

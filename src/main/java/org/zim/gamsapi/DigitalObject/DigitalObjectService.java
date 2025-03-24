@@ -171,7 +171,7 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(List<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble){
+    public Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(Set<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble){
       String msg = String.format("Trying to find digital objects by project abbreviation %s and dublin core entry name %s and values %s", projectAbbrs, dcEntryName, dcEntryValue);
       log.trace(msg);
       return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(projectAbbrs, dcEntryName, dcEntryValue, pageAble);
