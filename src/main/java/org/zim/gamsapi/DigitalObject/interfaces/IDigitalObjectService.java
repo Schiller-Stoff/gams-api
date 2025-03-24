@@ -86,4 +86,15 @@ public interface IDigitalObjectService {
    * @return
    */
   Page<DigitalObjectListItemView> findDigitalObjectsByProjectAbbrsAndDublinCore(List<String> projectAbbrs, String dcEntryName, String dcEntryValue, Pageable pageAble);
+
+  /**
+   * Find all digital objects for defined projects: Filter by dublin core element name and defined values.
+   * The object is being returned when one value in the value list matches exactly.
+   * @param projectAbbrs list of project abbreviations
+   * @param dcEntryName name of the DublinCoreElement
+   * @param dcEntryValue list of values of the DublinCoreElement
+   * @param pageAble pagination
+   * @return a page of digital objects
+   */
+  Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(List<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble);
 }

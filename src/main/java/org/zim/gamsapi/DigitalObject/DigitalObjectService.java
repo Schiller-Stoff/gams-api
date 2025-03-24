@@ -176,4 +176,11 @@ public class DigitalObjectService implements IDigitalObjectService {
         return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementValue(projectAbbrs, dcEntryName, dcEntryValue, pageAble);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(List<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble){
+      // TODO add logging
+      return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(projectAbbrs, dcEntryName, dcEntryValue, pageAble);
+    }
+
 }
