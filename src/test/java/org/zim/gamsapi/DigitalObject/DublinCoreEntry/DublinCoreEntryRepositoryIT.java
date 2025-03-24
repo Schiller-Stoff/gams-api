@@ -365,6 +365,115 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
     }
 
 
+    @Nested
+    public class FindDigitalObjectsByFulltextOnSpecificElements {
+
+      @Test
+      public void findsExpectedDigitalObject(){
+
+        // take an arbitrary part of the test data
+        final String TEST_FULLTEXT_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(
+            0,
+            4
+        );
+
+        // field to search for according to test data
+        final Set<String> TEST_DC_FULLTEXT_SEARCH_FIELDS = Set.of(
+            TestDublinCoreEntry.NAME.getValue(),
+            "foo"
+        );
+
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObjectRepository.save(digitalObject);
+        dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+
+        var foundObjects = dublinCoreEntryRepository.findDigitalObjectsByFulltextOnSpecificElements(
+            Set.of(TestProject.PROJECT_ABBR.getValue()),
+            TEST_DC_FULLTEXT_SEARCH_FIELDS,
+            TEST_FULLTEXT_SEARCH_VALUE,
+            PageRequest.of(0, 10)
+        );
+
+        Assertions.assertThat(foundObjects)
+            .isNotEmpty()
+            .hasSize(1);
+
+      }
+
+
+      @Test
+      public void fulltextDCSearchReturnsNothingWhenDCElementsValueDontMatch(){
+
+        // take an arbitrary part of the test data
+        final String TEST_FULLTEXT_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(
+            0,
+            4
+        );
+
+        // set search field to nonsense value
+        final Set<String> TEST_DC_FULLTEXT_SEARCH_FIELDS = Set.of(
+            "foo","bar", "hudri"
+        );
+
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObjectRepository.save(digitalObject);
+        dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+        var foundObjects = dublinCoreEntryRepository.findDigitalObjectsByFulltextOnSpecificElements(
+            Set.of(TestProject.PROJECT_ABBR.getValue()),
+            TEST_DC_FULLTEXT_SEARCH_FIELDS,
+            TEST_FULLTEXT_SEARCH_VALUE,
+            PageRequest.of(0, 10)
+        );
+
+        Assertions.assertThat(foundObjects)
+            .isEmpty();
+
+      }
+
+      @Test
+      public void fulltextDCSpecifiedSearchFindsValuesOverTwoProjects(){
+
+        // take an arbitrary part of the test data
+        final String TEST_FULLTEXT_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(0, 4);
+
+        // field to search for according to test data
+        final Set<String> TEST_DC_FULLTEXT_SEARCH_FIELDS = Set.of(
+            TestDublinCoreEntry.NAME.getValue()
+        );
+
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        digitalObjectRepository.save(digitalObject);
+        dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+
+        // save another object to a different project
+        Project additionalProject = TestProject.generate("foo");
+        projectRepository.save(additionalProject);
+        DigitalObject digitalObject2 = TestDigitalObject.generate(
+            additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".bar"
+        );
+
+        digitalObjectRepository.save(digitalObject2);
+        dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(
+            additionalProject.getProjectAbbr(), digitalObject2.getId())
+        );
+
+        var foundObjects = dublinCoreEntryRepository.findDigitalObjectsByFulltextOnSpecificElements(
+            // search across both projects
+            Set.of(TestProject.PROJECT_ABBR.getValue(), additionalProject.getProjectAbbr()),
+            TEST_DC_FULLTEXT_SEARCH_FIELDS,
+            TEST_FULLTEXT_SEARCH_VALUE,
+            PageRequest.of(0, 10)
+        );
+
+        Assertions.assertThat(foundObjects)
+            .isNotEmpty()
+            .hasSize(2)
+        ;
+
+      }
+
+
+    }
 
 
   }
