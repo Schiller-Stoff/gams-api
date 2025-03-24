@@ -475,11 +475,85 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(0);
 
-
-
-
     }
 
 
   }
+
+  @Nested
+  public class DublinCoreFulltextSearch {
+
+    Project additionalProject = TestProject.generate("bar");
+
+    @BeforeEach
+    public void setup(){
+
+      // 1 object belongs to a different project
+      projectRepository.save(additionalProject);
+
+      List<DigitalObject> digitalObjects = List.of(
+          TestDigitalObject.generate("test", "test.foo"),
+          TestDigitalObject.generate("test", "test.bar"),
+          TestDigitalObject.generate("test", "test.baz"),
+          // belongs to a different project
+          TestDigitalObject.generate(additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".peter")
+      );
+
+      digitalObjects.forEach(digitalObjectRepository::save);
+
+      List<DublinCoreEntry> dublinCoreEntries = List.of(
+          TestDublinCoreEntry.generate(digitalObjects.get(0).getId()),
+          TestDublinCoreEntry.generate(digitalObjects.get(1).getId()),
+          TestDublinCoreEntry.generate(digitalObjects.get(2).getId()),
+          TestDublinCoreEntry.generate(additionalProject.getProjectAbbr(), digitalObjects.get(3).getId())
+      );
+
+      dublinCoreEntries.forEach(dublinCoreEntryRepository::save);
+
+    }
+
+
+    @Test
+    public void findsExpectedObjectCount(){
+
+      // arbitrary fulltext-search query (based on test data)
+      final String TEST_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(0, 3);
+
+      var foundDigitalObjects = digitalObjectService.searchByDCFulltext(
+          // only three objects assigned to this project
+          Set.of(testProject.getProjectAbbr()),
+          // empty -> runs fulltext across all dc fields
+          Set.of(),
+          TEST_SEARCH_VALUE,
+          Pageable.unpaged()
+      );
+      Assertions.assertThat(foundDigitalObjects)
+          .isNotEmpty()
+      ;
+      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(3);
+    }
+
+    @Test
+    public void findsNothingWhenNotInDCField(){
+
+      // arbitrary fulltext-search query (based on test data)
+      final String TEST_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(0, 3);
+      final Set<String> TEST_DC_FIELDS = Set.of("type"); // should not be found
+
+      var foundDigitalObjects = digitalObjectService.searchByDCFulltext(
+          // only three objects assigned to this project
+          Set.of(testProject.getProjectAbbr()),
+          TEST_DC_FIELDS,
+          TEST_SEARCH_VALUE,
+          Pageable.unpaged()
+      );
+      Assertions.assertThat(foundDigitalObjects)
+          .isEmpty();
+      ;
+      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(0);
+
+    }
+
+  }
+
 }
