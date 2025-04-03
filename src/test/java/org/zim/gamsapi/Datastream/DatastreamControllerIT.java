@@ -25,6 +25,8 @@ import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDatastreamContent;
 import org.zim.gamsapi.enums.TestDigitalObject;
 
+import java.util.Set;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates security filters
@@ -261,8 +263,12 @@ public class DatastreamControllerIT extends IntegrationTest {
   }
 
 
+  /**
+   * Tests for .../datastream/... endpoint
+   * e.g. .../datatsream?tag=...
+   */
   @Nested
-  public class DatastreamFiltering {
+  public class SingleDatastreamFiltering {
 
     @Nested
     public class MainResource {
@@ -361,6 +367,154 @@ public class DatastreamControllerIT extends IntegrationTest {
 
       }
 
+    }
+
+    @Nested
+    public class TagFiltering {
+
+      @Test
+      public void returnsExpectedSingularDatastreamsByTag() throws Exception {
+
+        // first datastream uses default test-tags
+        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
+        datastreamRepository.save(datastream1);
+
+        // second datastream uses no tags
+        Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+        datastream2.setTags(Set.of());
+        datastreamRepository.save(datastream2);
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId(),
+            datastream1.getTags().iterator().next()
+        );
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // Assert
+        Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(
+                datastream1.getDsid(),
+                testDigitalObject.getId(),
+                datastream1.getSize().toString(),
+                datastream1.getFileName()
+            )
+            .doesNotContain(
+                datastream2.getDsid()
+            );
+      }
+
+      @Test
+      public void throwsIfNoSingularDatastreamWasMatched() throws Exception {
+
+        // first datastream uses default test-tags
+        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
+        datastreamRepository.save(datastream1);
+
+        // second datastream also uses default test-tags
+        Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+        datastreamRepository.save(datastream2);
+
+        final String TAG_MATCHES_BOTH_DATASTREAMS = datastream1.getTags().iterator().next();
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId(),
+            TAG_MATCHES_BOTH_DATASTREAMS
+        );
+
+        // Act
+        mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isConflict());
+
+      }
+
+      @Test
+      public void throwsIfNoDatastreamWasMatched() throws Exception {
+
+        // first datastream uses default test-tags
+        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
+        datastreamRepository.save(datastream1);
+
+        final String NOT_DEFINED_TEST_TAG = "test-tag-not-defined";
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId(),
+            NOT_DEFINED_TEST_TAG
+        );
+
+        // Act
+        mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNotFound());
+      }
+
+
+      @Test
+      public void filtersAreCombinedWithAndLogic() throws Exception {
+
+        // first datastream uses default test-tags
+        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
+        datastreamRepository.save(datastream1);
+
+        final String SHARED_TAG = datastream1.getTags().iterator().next();
+        final String UNIQUE_TAG = "test-tag-unique";
+
+        Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+        datastream2.setTags(
+            Set.of(
+                SHARED_TAG,
+                UNIQUE_TAG
+            )
+        );
+        datastreamRepository.save(datastream2);
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream?tag=%s&tag=%s",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId(),
+            SHARED_TAG,
+            UNIQUE_TAG
+        );
+
+        // Act
+        var mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(
+                datastream2.getDsid(),
+                testDigitalObject.getId(),
+                UNIQUE_TAG
+            ).doesNotContain(
+                datastream1.getDsid()
+            );
+
+      }
 
 
     }
