@@ -16,25 +16,58 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}", "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/"})
+@RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{id}"})
 @Controller
 public class DatastreamController {
 
   private final IDatastreamService datastreamService;
- // private final IProjectService projectService;
- // private final IDigitalObjectService digitalObjectService;
   private final IDatastreamContentService datastreamContentService;
 
-  @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
+
+  @GetMapping(path = {"/datastream/content", "/datastream/content/"})
+  @ResponseBody
+  @Operation(summary = "Get datastream content")
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  public ResponseEntity<InputStreamResource> getDatastreamContent(
+      @PathVariable String id,
+      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
+  ){
+
+    IDatastreamDetailsView foundDatastream;
+    // use main datastream if no tags are provided
+    if(tags.isEmpty()){
+      foundDatastream =  datastreamService.findMainDatastreamByDigitalObjectId(id);
+    } else {
+      foundDatastream = datastreamService.findSingularDatastreamDetailsViewByObjectIdAndTags(id, tags);
+    }
+
+    DatastreamId datastreamId = DatastreamId.builder()
+        .dsid(foundDatastream.getDsid())
+        .digitalObject(foundDatastream.getDigitalObject().getId())
+        .build();
+
+    InputStreamResource inputStreamResource = datastreamContentService.load(datastreamId);
+
+    return ResponseEntity.ok()
+        .contentLength(foundDatastream.getSize())
+        .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))
+        .body( inputStreamResource);
+
+  }
+
+
+  @GetMapping(
+      path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
+      produces = MimeTypeUtils.TEXT_HTML_VALUE
+  )
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
     IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(DatastreamId.builder().dsid(datastream.getDsid()).digitalObject(digitalObject.getId()).build());
     model.addAttribute("datastream", foundDatastream);
@@ -42,7 +75,10 @@ public class DatastreamController {
     return "Datastream/show";
   }
 
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(
+      path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
+      produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+  )
   @ResponseBody
   @Operation(summary = "Get datastream details as JSON")
   public IDatastreamDetailsView getDatastreamJson(@PathVariable String dsid, @PathVariable String id, Model model, @PathVariable String projectAbbr) {
@@ -67,7 +103,7 @@ public class DatastreamController {
   }
 
   @Hidden
-  @DeleteMapping
+  @DeleteMapping(path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"})
   public String deleteDatastream(
           @PathVariable String id,
           @PathVariable String dsid,
@@ -95,15 +131,25 @@ public class DatastreamController {
    * @param dsid datastream-id
    * @return binary-data of the datastream
    */
-  @GetMapping( path = {"/content", "/content/"})
+  @GetMapping( path = {"/datastreams/{dsid}/content", "/datastreams/{dsid}/content/"})
   @ResponseBody
   @Operation(summary = "Get datastream content")
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   @Parameter(name = "dsid", description = "ID of the datastream", required = true)
-  public ResponseEntity<InputStreamResource> getDatastreamContent(@PathVariable String id, @PathVariable String dsid){
-    Datastream datastream = new DatastreamBuilder().dsid(dsid).digitalObject(id).build();
-    datastream = datastreamService.findById(datastream.deriveDatastreamId());
+  public ResponseEntity<InputStreamResource> getDatastreamContent(
+      @PathVariable String id,
+      @PathVariable String dsid
+  ){
+    Datastream datastream = new DatastreamBuilder()
+        .dsid(dsid)
+        .digitalObject(id)
+        .build();
+
+    datastream = datastreamService
+        .findById(datastream.deriveDatastreamId());
+
     InputStreamResource inputStreamResource = datastreamContentService.load(datastream.deriveDatastreamId());
+
     return ResponseEntity.ok()
         .contentLength(datastream.getSize())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))

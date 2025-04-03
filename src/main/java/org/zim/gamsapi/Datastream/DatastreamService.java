@@ -2,22 +2,22 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamException;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.exceptions.*;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -120,4 +120,66 @@ public class DatastreamService implements IDatastreamService {
       return new DatastreamNotFoundException(msg);
     });
   }
+
+  @Override
+  public IDatastreamDetailsView findSingularDatastreamDetailsViewByObjectIdAndTags(String digitalObjectId, Set<String> tags) {
+
+    if(!digitalObjectRepository.existsById(digitalObjectId)){
+      String msg = String.format("Digital object with id %s does not exist. Cannot find datastream via tags.", digitalObjectId);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+
+    var foundDatastreams = datastreamRepository.findDatastreamByDigitalObject_IdAndTagsIn(
+        digitalObjectId,
+        tags
+    );
+
+    if (foundDatastreams.isEmpty()) {
+      String msg = String.format("No datastream(s) found for digital object %s having the tags: %s", digitalObjectId, tags);
+      log.error(msg);
+      throw new DatastreamNotFoundException(msg);
+    }
+    // method allows only to match a single datastream
+    if (foundDatastreams.size() > 1) {
+      // concatenate all dsids (were given tags matched)
+      String matchedDsids = foundDatastreams.stream()
+          .map(IDatastreamDetailsView::getDsid)
+          .reduce("", (a, b) -> a + ", " + b);
+
+      String msg = String.format("Multiple datastreams found for digital object %s having the tags: %s. Matched datastreams are: %s .", digitalObjectId, tags, matchedDsids);
+      log.error(msg);
+      throw new DatastreamAmbiguousMatchException(msg);
+    }
+    return foundDatastreams.get(0);
+  }
+
+
+  @Override
+  public IDatastreamDetailsView findMainDatastreamByDigitalObjectId(String digitalObjectId) {
+
+    DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId).orElseThrow(() -> {
+      String msg = String.format("Cannot find digital object with id %s", digitalObjectId);
+      log.info(msg);
+      return new DigitalObjectNotFoundException(msg);
+    });
+
+    // check if mainResource is set
+    if (digitalObject.getMainResource() == null || digitalObject.getMainResource().isEmpty()) {
+      String msg = String.format("Digital object %s has no mainResource datastream defined. mainResource Property is null or empty.", digitalObject);
+      log.warn(msg);
+      throw new DigitalObjectNoMainResourceDatastreamDefinedException(msg);
+    }
+
+    return datastreamRepository.findDatastreamByDigitalObject_IdAndDsid(
+        digitalObjectId,
+        digitalObject.getMainResource()
+    ).orElseThrow(() -> {
+      String msg = String.format("Cannot find mainResource datastream for digital object %s for mainResource %s", digitalObjectId, digitalObject.getMainResource());
+      log.info(msg);
+      return new DatastreamNotFoundException(msg);
+    });
+
+  }
+
 }

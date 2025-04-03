@@ -8,8 +8,6 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamMimeView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -66,6 +64,24 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    * @return view of datastreams containing dsid and mimetype
    */
   List<IDatastreamMimeView> findAllDatastreamMimeViewsByDigitalObject(DigitalObject digitalObject);
+
+
+  /**
+   * Finds a list of datastream projections by digital object id and given tags.
+   * @param digitalObjectId id of the datastream's parent digital object
+   * @param tags tags to be matched
+   * @return list of datastream projections
+   */
+  List<IDatastreamDetailsView> findDatastreamByDigitalObject_IdAndTagsIn(String digitalObjectId, Set<String> tags);
+
+
+  /**
+   * Finds a datastreamDetailsView by digital object id and dsid.
+   * @param digitalObjectId Digital object to be found
+   * @param dsid datastream identifier
+   * @return datastream projection.
+   */
+  Optional<IDatastreamDetailsView> findDatastreamByDigitalObject_IdAndDsid(String digitalObjectId, String dsid);
 
 
   /**
