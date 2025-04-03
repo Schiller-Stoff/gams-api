@@ -13,12 +13,15 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -79,6 +82,24 @@ public class DatastreamController {
       foundDatastream = datastreamService.findSingularDatastreamDetailsViewByObjectIdAndTags(id, tags);
     }
     return foundDatastream;
+  }
+
+  @GetMapping(path = {"/datastreams", "/datastreams/"})
+  @ResponseBody
+  @Operation(summary = "Get all datastreams")
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  public List<IDatastreamDetailsView> findAllDatastreams(
+      @PathVariable String id,
+      @PathVariable String projectAbbr
+  ) {
+    return datastreamService.findAll(
+        DigitalObjectBuilder.builder()
+            .id(id)
+            .project(projectAbbr)
+            //  TODO setting publisher is unnecessary here - maybe remove from builder the not empty check?
+            .publisher("123")
+            .build()
+    );
   }
 
 
