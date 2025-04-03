@@ -1,5 +1,7 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
@@ -21,6 +23,14 @@ public interface IDatastreamService {
 
 
   List<IDatastreamDetailsView> findAll(DigitalObject digitalObject);
+
+  /**
+   * Allows to findall datastreams for a given digital object id combined with pagination
+   * @param digitalObjectId digital object id
+   * @param pageable pagination information
+   * @return page of datastream projections
+   */
+  Page<IDatastreamDetailsView> findAll(String digitalObjectId, Pageable pageable);
 
   IDatastreamDetailsView findDatastreamDetailsById(DatastreamId dsid) throws DatastreamNotFoundException;
 
@@ -47,5 +57,7 @@ public interface IDatastreamService {
    * @return found mainResource datastream projection
    */
   IDatastreamDetailsView findMainDatastreamByDigitalObjectId(String digitalObjectId);
+
+
 
 }

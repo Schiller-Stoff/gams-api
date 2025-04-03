@@ -1,5 +1,7 @@
 package org.zim.gamsapi.Datastream;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -37,6 +39,16 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    * @return list of datastream projections.
    */
   List<IDatastreamDetailsView> findAllByDigitalObjectId(String digitalObjectId);
+
+
+  /**
+   * Projection method to return a page of datastream details views. Excludes the actual datastream content.
+   * Searches a datastream based on the parent digital object and it's datastream-identifier.
+   * @param digitalObjectId Digital object to be found
+   * @param pageable pagination information
+   * @return page of datastream projections.
+   */
+  Page<IDatastreamDetailsView> findAllByDigitalObjectId(String digitalObjectId, Pageable pageable);
 
   Set<Datastream> findAllByDigitalObject(DigitalObject digitalObject);
 

@@ -3,6 +3,9 @@ package org.zim.gamsapi.Datastream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -88,17 +91,22 @@ public class DatastreamController {
   @ResponseBody
   @Operation(summary = "Get all datastreams")
   @Parameter(name = "id", description = "ID of the digital object", required = true)
-  public List<IDatastreamDetailsView> findAllDatastreams(
+  public Page<IDatastreamDetailsView> findAllDatastreams(
       @PathVariable String id,
-      @PathVariable String projectAbbr
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "dsid") String sortBy
   ) {
+
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
     return datastreamService.findAll(
-        DigitalObjectBuilder.builder()
-            .id(id)
-            .project(projectAbbr)
-            //  TODO setting publisher is unnecessary here - maybe remove from builder the not empty check?
-            .publisher("123")
-            .build()
+        id,
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
   }
 
