@@ -526,4 +526,135 @@ public class DatastreamControllerIT extends IntegrationTest {
   }
 
 
+  /**
+   * Tests for .../datastreams/... endpoint
+   */
+  @Nested
+  public class MultipleDatastreamsFiltering {
+
+
+    @Test
+    public void returnsAJSONListOfExpectedDatastreams() throws Exception {
+
+      Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
+      datastreamRepository.save(datastream1);
+
+      Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+      datastreamRepository.save(datastream2);
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams",
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId()
+      );
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              datastream1.getDsid(),
+              testDigitalObject.getId(),
+              datastream1.getSize().toString(),
+              datastream1.getFileName()
+          )
+          .contains(
+              datastream2.getDsid(),
+              testDigitalObject.getId(),
+              datastream2.getSize().toString(),
+              datastream2.getFileName()
+          );
+
+    }
+
+    @Test
+    public void returnsAnEmptyListOfNoDatastreamsWereFound() throws Exception {
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams",
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId()
+      );
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .isNotNull()
+          .doesNotContain(
+              testDigitalObject.getId(),
+              "fileName",
+              "baseMetadata"
+          );
+
+    }
+
+    @Test
+    public void returnsExpectedDatastreamsIfMultipleTagsWereUsed() throws Exception {
+
+      Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
+      datastreamRepository.save(datastream1);
+
+      final String SHARED_TAG = datastream1.getTags().iterator().next();
+      final String UNIQUE_TAG = "test-tag-unique";
+
+      Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+      datastream2.setTags(
+          Set.of(
+              UNIQUE_TAG,
+              SHARED_TAG
+          )
+      );
+      datastreamRepository.save(datastream2);
+
+      // using both unique and shared tag -> should only return datastream2
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams?tag=%s&tag=%s&pageSize=100",
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId(),
+          SHARED_TAG,
+          UNIQUE_TAG
+      );
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .doesNotContain(
+              datastream1.getDsid()
+          )
+          .contains(
+              datastream2.getDsid(),
+              testDigitalObject.getId(),
+              datastream2.getSize().toString(),
+              datastream2.getFileName()
+          );
+
+    }
+
+  }
+
 }
