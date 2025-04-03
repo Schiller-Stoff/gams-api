@@ -519,7 +519,127 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     }
 
+    @Nested
+    public class DatastreamContent {
 
+      @Test
+      public void returnsExpectedMainDatastreamContent() throws Exception {
+
+        // Arrange
+        Datastream datastream = TestDatastream.generate(testDigitalObject);
+        datastreamContentRepository.save(
+            TestDatastreamContent.CONTENT.getValue().getBytes(),
+            datastream.deriveDatastreamId()
+        );
+        datastreamRepository.save(datastream);
+
+        // set datastream as main resource on digital object
+        testDigitalObject.setMainResource(datastream.getDsid());
+        digitalObjectRepository.save(testDigitalObject);
+
+        final String URL = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream/content",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId()
+        );
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(URL)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // Assert
+        Assertions.assertThat(mvcResult.getResponse())
+            .isNotNull();
+        Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .isEqualTo(TestDatastreamContent.CONTENT.getValue());
+
+      }
+
+      @Test
+      public void returnsErrorIfNoMainResourceWasSet() throws Exception {
+
+        // Arrange
+        Datastream datastream = TestDatastream.generate(testDigitalObject);
+        datastreamContentRepository.save(
+            TestDatastreamContent.CONTENT.getValue().getBytes(),
+            datastream.deriveDatastreamId()
+        );
+        datastreamRepository.save(datastream);
+
+        // make sure that mein resource is not set
+        testDigitalObject.setMainResource(null);
+        digitalObjectRepository.save(testDigitalObject);
+
+        final String URL = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream/content",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId()
+        );
+
+        // Act
+        mockMvc.perform(
+                MockMvcRequestBuilders.get(URL)
+            )
+            .andExpect(status().is5xxServerError());
+      }
+
+      @Test
+      public void allowsToAccessSingularDatastreamContentViaTagFiltering() throws Exception {
+
+        final String TEST_DATASTREAM_CONTENT = TestDatastreamContent.CONTENT.getValue();
+
+        // Arrange
+        Datastream datastream = TestDatastream.generate(testDigitalObject);
+        datastreamRepository.save(datastream);
+        // save content for datastream
+        datastreamContentRepository.save(
+            "____SHOULD___NOT___MATCH__".getBytes(),
+            datastream.deriveDatastreamId()
+        );
+
+        final String SHARED_TAG = datastream.getTags().iterator().next();
+        final String UNIQUE_TAG = "test-tag-unique";
+
+        Datastream datastream2 = TestDatastream.generate(testDigitalObject);
+        datastream2.setTags(Set.of(UNIQUE_TAG, SHARED_TAG));
+        datastreamRepository.save(datastream2);
+        // save content for datastream2
+        datastreamContentRepository.save(
+            TEST_DATASTREAM_CONTENT.getBytes(),
+            datastream2.deriveDatastreamId()
+        );
+
+        // url
+        final String URL = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream/content?tag=%s&tag=%s",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId(),
+            SHARED_TAG,
+            UNIQUE_TAG
+        );
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(URL)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // Assert
+        Assertions.assertThat(mvcResult.getResponse())
+            .isNotNull();
+
+        // should match datastream2 content
+        Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .isEqualTo(TEST_DATASTREAM_CONTENT);
+
+      }
+
+
+    }
 
 
 
