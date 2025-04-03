@@ -59,5 +59,14 @@ public interface IDatastreamService {
   IDatastreamDetailsView findMainDatastreamByDigitalObjectId(String digitalObjectId);
 
 
+  /**
+   * Finds and returns a page of datastream projections by the given digital object id and tags.
+   * The tags are used to filter the datastreams.
+   * @param digitalObjectId digital object id
+   * @param tags tags to be used for searching
+   * @param pageable pagination information
+   * @return page of datastream projections
+   */
+  Page<IDatastreamDetailsView> findAll(String digitalObjectId, Set<String> tags, Pageable pageable);
 
 }

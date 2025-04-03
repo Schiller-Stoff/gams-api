@@ -86,6 +86,23 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    */
   List<IDatastreamDetailsView> findDatastreamByDigitalObject_IdAndTagsIn(String digitalObjectId, Set<String> tags);
 
+  /**
+   * Finds a list of datastream projections by digital object id and given tags.
+   * Given tags are understood via AND logic.
+   * @param digitalObjectId id of the datastreams parent digital object
+   * @param tags tags to be matched
+   * @param tagCount helper argument
+   * @param pageable pagination information
+   * @return page of datastream projections
+   */
+  @Query("SELECT d FROM Datastream d WHERE d.digitalObject.id = :digitalObjectId AND " +
+      "(SELECT COUNT(DISTINCT t) FROM d.tags t WHERE t IN :tags) = :tagCount")
+  Page<IDatastreamDetailsView> findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(
+      @Param("digitalObjectId") String digitalObjectId,
+      @Param("tags") Set<String> tags,
+      @Param("tagCount") long tagCount,
+      Pageable pageable
+  );
 
   /**
    * Finds a datastreamDetailsView by digital object id and dsid.

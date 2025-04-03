@@ -90,6 +90,7 @@ public class DatastreamController {
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   public Page<IDatastreamDetailsView> findAllDatastreams(
       @PathVariable String id,
+      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "100") int pageSize,
@@ -101,10 +102,20 @@ public class DatastreamController {
       pageSize = 100;
     }
 
+    // return just pageing information if no tags are provided
+    if(tags.isEmpty()){
+      return datastreamService.findAll(
+          id,
+          PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+      );
+    }
+
     return datastreamService.findAll(
         id,
+        tags,
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
+
   }
 
 

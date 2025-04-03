@@ -187,4 +187,9 @@ public class DatastreamService implements IDatastreamService {
   public Page<IDatastreamDetailsView> findAll(String digitalObjectId, Pageable pageable) {
     return datastreamRepository.findAllByDigitalObjectId(digitalObjectId, pageable);
   }
+
+  @Override
+  public Page<IDatastreamDetailsView> findAll(String digitalObjectId, Set<String> tags, Pageable pageable) {
+    return datastreamRepository.findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(digitalObjectId, tags, tags.size(), pageable);
+  }
 }
