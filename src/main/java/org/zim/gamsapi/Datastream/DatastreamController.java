@@ -63,6 +63,24 @@ public class DatastreamController {
 
   }
 
+  @GetMapping(path = {"/datastream", "/datastream/"})
+  @ResponseBody
+  @Operation(summary = "Get datastream details")
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  public IDatastreamDetailsView retrieveSingularDatastream(
+      @PathVariable String id,
+      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
+  ){
+    IDatastreamDetailsView foundDatastream;
+    // use main datastream if no tags are provided
+    if(tags.isEmpty()){
+      foundDatastream =  datastreamService.findMainDatastreamByDigitalObjectId(id);
+    } else {
+      foundDatastream = datastreamService.findSingularDatastreamDetailsViewByObjectIdAndTags(id, tags);
+    }
+    return foundDatastream;
+  }
+
 
   @GetMapping(
       path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
