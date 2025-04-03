@@ -3,6 +3,7 @@ package org.zim.gamsapi.Datastream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,10 +132,10 @@ public class DatastreamService implements IDatastreamService {
       throw new DigitalObjectNotFoundException(msg);
     }
 
-    var foundDatastreams = datastreamRepository.findDatastreamByDigitalObject_IdAndTagsIn(
-        digitalObjectId,
-        tags
-    );
+    var foundDatastreams = datastreamRepository.findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(
+        digitalObjectId, tags,
+        tags.size(),
+        PageRequest.of(0, 1));
 
     if (foundDatastreams.isEmpty()) {
       String msg = String.format("No datastream(s) found for digital object %s having the tags: %s", digitalObjectId, tags);
@@ -142,7 +143,7 @@ public class DatastreamService implements IDatastreamService {
       throw new DatastreamNotFoundException(msg);
     }
     // method allows only to match a single datastream
-    if (foundDatastreams.size() > 1) {
+    if (foundDatastreams.getTotalElements() > 1) {
       // concatenate all dsids (were given tags matched)
       String matchedDsids = foundDatastreams.stream()
           .map(IDatastreamDetailsView::getDsid)
@@ -152,7 +153,9 @@ public class DatastreamService implements IDatastreamService {
       log.error(msg);
       throw new DatastreamAmbiguousMatchException(msg);
     }
-    return foundDatastreams.get(0);
+
+    // return the first datastream found
+    return foundDatastreams.getContent().get(0);
   }
 
 

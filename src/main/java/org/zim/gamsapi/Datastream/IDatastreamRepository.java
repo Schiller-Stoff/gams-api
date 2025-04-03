@@ -80,14 +80,6 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
 
   /**
    * Finds a list of datastream projections by digital object id and given tags.
-   * @param digitalObjectId id of the datastream's parent digital object
-   * @param tags tags to be matched
-   * @return list of datastream projections
-   */
-  List<IDatastreamDetailsView> findDatastreamByDigitalObject_IdAndTagsIn(String digitalObjectId, Set<String> tags);
-
-  /**
-   * Finds a list of datastream projections by digital object id and given tags.
    * Given tags are understood via AND logic.
    * @param digitalObjectId id of the datastreams parent digital object
    * @param tags tags to be matched
