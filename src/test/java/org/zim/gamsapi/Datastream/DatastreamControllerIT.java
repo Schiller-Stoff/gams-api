@@ -261,4 +261,115 @@ public class DatastreamControllerIT extends IntegrationTest {
   }
 
 
+  @Nested
+  public class DatastreamFiltering {
+
+    @Nested
+    public class MainResource {
+      @Test
+      public void returnsErrorIfNoMainResourceIsSetOnTheDigitalObject() throws Exception {
+
+        // ensure that the digital object has no main resource set
+        testDigitalObject.setMainResource("");
+        digitalObjectRepository.save(testDigitalObject);
+
+        Datastream datastream = TestDatastream.generate(
+            testDigitalObject,
+            "testDsid.txt"
+        );
+        datastreamRepository.save(datastream);
+
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId()
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().is5xxServerError());
+
+
+      }
+
+      @Test
+      public void returnsClientErrorIfMainResourceIsNotFound() throws Exception {
+
+        // set as main resource on digital object
+        testDigitalObject.setMainResource("nonExistingDsid");
+        digitalObjectRepository.save(testDigitalObject);
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId()
+        );
+
+        // saving an unrelated datastream
+        Datastream datastream = TestDatastream.generate(
+            testDigitalObject,
+            "testDsid.txt"
+        );
+        datastreamRepository.save(datastream);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNotFound());
+
+      }
+
+
+      @Test
+      public void returnsExpectedMainDatastreamJSONByDefault() throws Exception {
+
+        Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.txt");
+        datastreamRepository.save(datastream);
+
+        // set as main resource on digital object
+        testDigitalObject.setMainResource(datastream.getDsid());
+        digitalObjectRepository.save(testDigitalObject);
+
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s/datastream",
+            testProject.getProjectAbbr(),
+            testDigitalObject.getId()
+        );
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(
+                datastream.getDsid(),
+                testDigitalObject.getId(),
+                datastream.getSize().toString(),
+                datastream.getFileName()
+            );
+
+
+      }
+
+
+
+    }
+
+
+
+
+
+  }
+
+
 }
