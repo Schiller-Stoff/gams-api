@@ -34,13 +34,29 @@ public class ProjectController {
 
   private final IProjectService projectService;
   private final IProjectModificationService projectModificationService;
-
   private final IDigitalObjectService digitalObjectService;
+
+  @PatchMapping(path = "/{projectAbbr}")
+  @ResponseBody
+  public Project changeProject(
+      @PathVariable String projectAbbr,
+      @RequestBody Project project
+  ){
+    // project abbreviation is set via path variable and not via json
+    project.setProjectAbbr(projectAbbr);
+    return projectService.updateProject(project);
+  }
 
   @Hidden
   @PutMapping(path = "/{projectAbbr}")
-  public String createProject(Project project, Model model){
-    projectService.save(project);;
+  public String createProject(
+      @PathVariable String projectAbbr,
+      // read out description argument from given json
+      @RequestBody Project projectToBeSaved,
+      Model model
+  ){
+    projectToBeSaved.setProjectAbbr(projectAbbr);
+    projectService.save(projectToBeSaved);;
     List<Project> projects = projectService.findAll();
     model.addAttribute("projects", projects);
     return "Project/show_all";
