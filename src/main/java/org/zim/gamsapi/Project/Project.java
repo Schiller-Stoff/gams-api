@@ -35,7 +35,10 @@ public class Project {
   @Pattern(regexp = "^[a-z0-9]*$")
   private String projectAbbr;
 
-  @Column(name = "description")
+  /**
+   * Description of the GAMS project
+   */
+  @Column(name = "description", length = 5000)
   private String description;
 
   /**
