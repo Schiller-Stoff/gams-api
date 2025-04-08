@@ -14,6 +14,13 @@ public interface IProjectService {
 
   List<Project> findAll();
 
-Project findByAbbr(String projectAbbr);
+  Project findByAbbr(String projectAbbr);
+
+  /**
+   * Allows to update a project. Usually used in conjunction with PATCH requests.
+   * @param project New project information.
+   * @return updated project
+   */
+  Project updateProject(Project project);
 
 }

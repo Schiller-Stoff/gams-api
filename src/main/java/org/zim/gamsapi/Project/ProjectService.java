@@ -70,4 +70,18 @@ public class ProjectService implements IProjectService {
   public Project findByAbbr(String projectAbbr) {
     return findProject(projectAbbr);
   }
+
+  @Override
+  @Transactional
+  public Project updateProject(Project project) {
+    Project foundProject =  projectRepository.findById(project.getProjectAbbr()).orElseThrow(() -> {
+      String msg = String.format("Project %s not found. Cannot update project", project.getProjectAbbr());
+      log.error(msg);
+      return new ProjectNotFoundException(msg);
+    });
+    foundProject.setDescription(project.getDescription());
+    Project savedProject = projectRepository.save(foundProject);
+    log.trace("Successfully updated project {}", foundProject);
+    return savedProject;
+  }
 }
