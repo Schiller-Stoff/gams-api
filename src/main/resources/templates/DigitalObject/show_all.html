@@ -20,6 +20,8 @@
         </ol>
       </nav>
       <h2 class="mb-3" th:text="${project.projectAbbr}"></h2>
+      <p><span>Projektbeschreibung: </span><span th:text="${project.getDescription()}"></span></p>
+      <hr/>
       <p>
         Overview over all stored digital objects for project <i th:text="${project.projectAbbr}"></i>.
       </p>
