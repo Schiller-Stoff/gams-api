@@ -27,7 +27,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Set;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -91,10 +90,91 @@ public class ProjectControllerIT extends IntegrationTest {
           "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
       );
 
-      // first create a project
       mockMvc.perform(
           MockMvcRequestBuilders.put(TEST_PROJECT_URL)
       ).andExpect(status().isOk());
+    }
+
+    /**
+     * Tests if a PUT request for creating a project returns https status 200 when a
+     * requestBody = JSON was defined.
+     */
+    @Test
+    public void PUTRequestAllowsToSaveProjectDescription() throws Exception {
+
+      final String TEST_PROJECT_URL = String.format(
+          "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
+      );
+
+      final String TEST_PROJECT_DESCRIPTION = TestProject.PROJECT_DESCRIPTION.getValue();
+      final String TEST_PROJECT_PUT_REQUEST_BODY =  "{\"description\": \"" + TEST_PROJECT_DESCRIPTION + "\"}";
+
+      // first create a project
+      String responseBody = mockMvc.perform(
+          MockMvcRequestBuilders.put(TEST_PROJECT_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_PROJECT_PUT_REQUEST_BODY)
+      ).andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(responseBody)
+          .contains(TEST_PROJECT_DESCRIPTION);
+    }
+
+  }
+
+  @Nested
+  public class ProjectUpdate {
+
+    @Test
+    public void PATCHofProjectAllowsToUpdateDescription() throws Exception {
+
+      // first save test project
+      projectRepository.save(TestProject.generate());
+
+      final String TEST_PROJECT_URL = String.format(
+          "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
+      );
+
+      // update the project description
+      final String UPDATED_TEST_PROJECT_DESCRIPTION = "Updated description";
+      final String TEST_PROJECT_PATCH_REQUEST_BODY =  "{\"description\": \"" + UPDATED_TEST_PROJECT_DESCRIPTION + "\"}";
+
+      final String RESPONSE_BODY  = mockMvc.perform(
+          MockMvcRequestBuilders.patch(TEST_PROJECT_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_PROJECT_PATCH_REQUEST_BODY)
+      ).andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      // assert via response body
+      Assertions.assertThat(RESPONSE_BODY).contains(
+          UPDATED_TEST_PROJECT_DESCRIPTION
+      );
+
+      // assert additionally via repo layer
+      Project updatedProject = projectRepository.findById(
+          TestProject.PROJECT_ABBR.getValue()).orElseThrow();
+      Assertions.assertThat(
+          updatedProject.getDescription()
+      ).isEqualTo(UPDATED_TEST_PROJECT_DESCRIPTION);
+
+    }
+
+    @Test
+    public void requestBodyIsRequired() throws Exception {
+
+      projectRepository.save(TestProject.generate());
+
+      final String TEST_PROJECT_URL = String.format(
+          "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(TEST_PROJECT_URL)
+          ).andExpect(status().is4xxClientError());
 
     }
 
