@@ -236,8 +236,11 @@ public class DigitalObjectController {
         id,
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
 
+    // retrieve project info from database
+    Project foundProject = projectService.findProject(project.getProjectAbbr());
+
     model.addAttribute("digitalObjects", digitalObjects.toList());
-    model.addAttribute(project);
+    model.addAttribute(foundProject);
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("totalItems", digitalObjects.getTotalElements());
