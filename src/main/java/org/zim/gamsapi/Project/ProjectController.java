@@ -52,11 +52,25 @@ public class ProjectController {
   public String createProject(
       @PathVariable String projectAbbr,
       // read out description argument from given json
-      @RequestBody Project projectToBeSaved,
+      @RequestBody Optional<Project> projectToBeSaved,
       Model model
   ){
-    projectToBeSaved.setProjectAbbr(projectAbbr);
-    projectService.save(projectToBeSaved);;
+
+    projectToBeSaved.ifPresentOrElse(
+        // if given responseBody is available, save it
+        project -> {
+          project.setProjectAbbr(projectAbbr);
+          projectService.save(project);
+        }, () -> {
+          // if no responseBody is given, create a new project instance with the given projectAbbr
+          projectService.save(
+              ProjectBuilder
+                  .builder()
+                  .projectAbbr(projectAbbr)
+                  .build()
+          );
+    });
+
     List<Project> projects = projectService.findAll();
     model.addAttribute("projects", projects);
     return "Project/show_all";
