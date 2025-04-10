@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -48,6 +49,9 @@ public abstract class IntegrationTest {
 
   @Autowired
   IDublinCoreEntryRepository dublinCoreElementRepository;
+
+  @Autowired
+  IGAMSCollectionRepository collectionRepository;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
@@ -104,6 +108,7 @@ public abstract class IntegrationTest {
     datastreamContentRepository.deleteAll();
     dublinCoreElementRepository.deleteAll();
     datastreamRepository.deleteAll();
+    collectionRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
   }

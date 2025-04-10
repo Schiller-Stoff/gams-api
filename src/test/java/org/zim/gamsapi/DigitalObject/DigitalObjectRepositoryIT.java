@@ -1,21 +1,27 @@
 package org.zim.gamsapi.DigitalObject;
 
+import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.GAMSCollection.GAMSCollection;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestGAMSCollection;
 import org.zim.gamsapi.enums.TestProject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DigitalObjectRepositoryIT extends IntegrationTest {
 
@@ -27,6 +33,9 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
     @Autowired
     IProjectRepository projectRepository;
+
+    @Autowired
+    IGAMSCollectionRepository collectionRepository;
 
     Project testProject;
 
@@ -282,4 +291,49 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
 
     }
+
+    @Nested
+    public class FindObjectsByCollection {
+
+        DigitalObject testObject;
+        GAMSCollection testGAMSCollection;
+
+        @BeforeEach
+        public void setup() {
+            testObject = TestDigitalObject.generate();
+            digitalObjectRepository.save(testObject);
+            testGAMSCollection = TestGAMSCollection.generate();
+            collectionRepository.save(testGAMSCollection);
+        }
+
+        @Test
+        public void findsExpectedGamsCollectionObjectCount(){
+            var foundObjects = digitalObjectRepository.findDigitalObjectsByCollectionId(
+                testGAMSCollection.getId(),
+                PageRequest.of(0,1000)
+            );
+
+            Assertions.assertThat(foundObjects.getTotalElements())
+                .isEqualTo(1);
+        }
+
+        @Test
+        @Transactional
+        public void findsExpectedGamsCollectionObject(){
+            var foundObjects = digitalObjectRepository.findDigitalObjectsByCollectionId(
+                testGAMSCollection.getId(),
+                PageRequest.of(0,1000)
+            );
+
+            // get first object
+            var foundObject = foundObjects.getContent().get(0);
+            Assertions.assertThat(foundObject.getId())
+                .isEqualTo(
+                    // object in the test-collection
+                    testGAMSCollection.getDigitalObjects().iterator().next().getId()
+                );
+        }
+
+    }
+
 }
