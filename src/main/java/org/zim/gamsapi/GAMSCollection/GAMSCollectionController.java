@@ -13,12 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Controller
 @RequestMapping({"/api/v1/"})
@@ -48,19 +45,19 @@ public class GAMSCollectionController {
 
   @PutMapping(value = "/collections/{id}")
   @ResponseBody
-  @Operation(summary = "Create or update a collection")
-  public ResponseEntity<GAMSCollection> createOrUpdateCollection(
+  @Operation(summary = "Create a GAMS collection")
+  public void createCollection(
       @PathVariable String id,
-      @RequestBody GAMSCollection GAMSCollection,
-      @RequestHeader Map<String, String> requestHeader) {
+      @RequestBody CreateGAMSCollectionDTO createGAMSCollectionDTO
+  ) {
+    GAMSCollection gamsCollection = GAMSCollection.builder()
+        .id(id)
+        .project(ProjectBuilder.builder().projectAbbr(createGAMSCollectionDTO.getProjectAbbr()).build())
+        .title(createGAMSCollectionDTO.getTitle())
+        .description(createGAMSCollectionDTO.getDescription())
+        .build();
 
-    // Ensure the ID in the path matches the ID in the body
-    if (!id.equals(GAMSCollection.getId())) {
-      GAMSCollection.setId(id);
-    }
-
-    GAMSCollection savedGAMSCollection = collectionService.save(GAMSCollection);
-    return ResponseEntity.ok(savedGAMSCollection);
+    collectionService.save(gamsCollection);
   }
 
   @DeleteMapping(value = "/collections/{id}")

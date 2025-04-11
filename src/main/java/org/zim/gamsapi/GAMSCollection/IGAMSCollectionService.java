@@ -9,7 +9,7 @@ import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import java.util.List;
 
 public interface IGAMSCollectionService {
-  GAMSCollection save(GAMSCollection GAMSCollection);
+  void save(GAMSCollection GAMSCollection);
   void delete(GAMSCollection GAMSCollection);
   GAMSCollectionDetailsView findById(String id);
   Page<GamsCollectionCompactView> findAll(Pageable pageable);

@@ -28,10 +28,9 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional
-  public GAMSCollection save(GAMSCollection GAMSCollection) {
-    GAMSCollection savedGAMSCollection = collectionRepository.save(GAMSCollection);
+  public void save(GAMSCollection gamsCollection) {
+    GAMSCollection savedGAMSCollection = collectionRepository.save(gamsCollection);
     log.info("Successfully saved collection:  {}", savedGAMSCollection);
-    return savedGAMSCollection;
   }
 
   @Override
