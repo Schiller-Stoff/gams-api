@@ -16,6 +16,8 @@ public interface IGAMSCollectionRepository extends CrudRepository<GAMSCollection
 
   Optional<GAMSCollectionDetailsView> findProjectedById(String id);
 
+  Page<GamsCollectionCompactView> findByDigitalObjectsId(String id, Pageable pageable);
+
   Page<GamsCollectionCompactView> findAllProjectedBy(Pageable pageable);
 
   List<GAMSCollection> findByProject_ProjectAbbr(String projectAbbr);

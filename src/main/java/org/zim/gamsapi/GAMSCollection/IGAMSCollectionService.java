@@ -17,6 +17,6 @@ public interface IGAMSCollectionService {
   Page<GamsCollectionCompactView> findByProjectAbbr(String projectAbbr, Pageable pageable);
   GAMSCollection addDigitalObjectToCollection(String collectionId, String digitalObjectId);
   GAMSCollection removeDigitalObjectFromCollection(String collectionId, String digitalObjectId);
-  List<GAMSCollection> findByDigitalObject(String digitalObjectId);
+  Page<GamsCollectionCompactView> findByDigitalObject(String digitalObjectId, Pageable pageable);
   Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(String collectionId, Pageable pageable);
 }
