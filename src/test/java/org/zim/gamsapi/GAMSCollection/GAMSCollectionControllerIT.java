@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -262,6 +263,57 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       Assertions.assertThat(
            collectionRepository.existsById(GAMS_COLLECTION_ID)
        ).isTrue();
+
+    }
+
+
+  }
+
+  @Nested
+  public class POSTGAMSCollection {
+
+    GAMSCollection testGAMSCollection;
+
+    @BeforeEach
+    public void setup() {
+      testGAMSCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testGAMSCollection);
+    }
+
+    @Test
+    @Transactional
+    public void addDigitalObjectToCollection() throws Exception {
+
+      // save an additional gams collection
+      final String GAMS_COLLECTION_ID = "test-collection-id-random";
+      final GAMSCollection TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId(),
+          GAMS_COLLECTION_ID
+      );
+      collectionRepository.save(TEST_GAMS_COLLECTION);
+
+      final String URL = String.format(
+          "/api/v1/collections/%s/objects/%s",
+          // add object to different collection
+          GAMS_COLLECTION_ID,
+          testDigitalObject.getId()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.post(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      // assert that the collection contains the digital object
+      Assertions.assertThat(
+          collectionRepository.findById(TEST_GAMS_COLLECTION.getId())
+              .get()
+              .getDigitalObjects()
+      ).contains(testDigitalObject);
 
     }
 

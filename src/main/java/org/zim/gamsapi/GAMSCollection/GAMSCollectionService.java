@@ -15,7 +15,9 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -81,19 +83,27 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional
-  public GAMSCollection addDigitalObjectToCollection(String collectionId, String digitalObjectId) {
-//    GAMSCollectionDetailsView gamsCollection = findById(collectionId);
-//    DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
-//        .orElseThrow(() -> {
-//          String msg = String.format("Digital object with id %s not found", digitalObjectId);
-//          log.error(msg);
-//          return new DigitalObjectNotFoundException(msg);
-//        });
-//
-//    gamsCollection.getDigitalObjects().add(digitalObject);
-    //TODO fix
-    return null;
-    //return collectionRepository.save(gamsCollection);
+  public void addDigitalObjectToCollection(String collectionId, String digitalObjectId) {
+
+    var gamsCollection =  collectionRepository.findById(collectionId)
+        .orElseThrow(() -> {
+          String msg = String.format("Collection with id %s not found", collectionId);
+          log.error(msg);
+          return new CollectionNotFoundException(msg);
+        });
+
+    var digitalObject = digitalObjectRepository.findById(digitalObjectId)
+        .orElseThrow(() -> {
+          String msg = String.format("Digital object with id %s not found", digitalObjectId);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        });
+
+    Set<DigitalObject> digitalObjects = new HashSet<>(gamsCollection.getDigitalObjects());
+    digitalObjects.add(digitalObject);
+
+    gamsCollection.setDigitalObjects(digitalObjects);
+    collectionRepository.save(gamsCollection);
   }
 
   @Override

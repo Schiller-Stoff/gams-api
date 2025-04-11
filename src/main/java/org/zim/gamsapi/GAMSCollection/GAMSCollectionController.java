@@ -73,10 +73,10 @@ public class GAMSCollectionController {
   @PostMapping(value = "/collections/{id}/objects/{objectId}")
   @ResponseBody
   @Operation(summary = "Add a digital object to a collection")
-  public GAMSCollection addDigitalObjectToCollection(
+  public void addDigitalObjectToCollection(
       @PathVariable String id,
       @PathVariable String objectId) {
-    return collectionService.addDigitalObjectToCollection(id, objectId);
+    collectionService.addDigitalObjectToCollection(id, objectId);
   }
 
 
