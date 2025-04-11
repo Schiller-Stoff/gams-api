@@ -1,5 +1,6 @@
 package org.zim.gamsapi.GAMSCollection;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -224,7 +225,45 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       collectionRepository.save(testGAMSCollection);
     }
 
-   // TODO implement tests
+    @Test
+    public void savesExpectedGamsCollection() throws Exception {
+
+      final String GAMS_COLLECTION_ID = "test-collection-id-random";
+
+      final String URL = "/api/v1/collections/" + GAMS_COLLECTION_ID;
+      GAMSCollection gamsCollection = TestGAMSCollection.generate(
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId(),
+          GAMS_COLLECTION_ID
+      );
+
+      final String REQUEST_BODY = """
+          {
+            "title": "%s",
+            "description": "%s",
+            "projectAbbr": "%s"
+          }
+          """.formatted(
+              gamsCollection.getTitle(),
+              gamsCollection.getDescription(),
+              gamsCollection.getProject().getProjectAbbr()
+          );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.put(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(REQUEST_BODY)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      // assert that the collection exists in the database
+      Assertions.assertThat(
+           collectionRepository.existsById(GAMS_COLLECTION_ID)
+       ).isTrue();
+
+    }
 
 
   }
