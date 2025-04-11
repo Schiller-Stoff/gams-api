@@ -40,7 +40,7 @@ public enum TestGAMSCollection {
         .description(DESCRIPTION.getValue())
         .project(TestProject.generate(projectAbbr))
         .digitalObjects(
-            Set.of(TestDigitalObject.generate(digitalObjectId))
+            Set.of(TestDigitalObject.generate(projectAbbr, digitalObjectId))
         )
         .build();
   }
