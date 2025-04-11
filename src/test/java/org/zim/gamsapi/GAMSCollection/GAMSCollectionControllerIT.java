@@ -166,6 +166,50 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void GETAllCollectionsForASpecificObject() throws Exception {
+
+      // saving a second collection to be found
+      final String SECOND_COLLCTION_ID = "test-collection-id-2";
+      final GAMSCollection SECOND_TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId(),
+          SECOND_COLLCTION_ID
+      );
+      collectionRepository.save(SECOND_TEST_GAMS_COLLECTION);
+
+      final String URL = String.format(
+          "/api/v1/projects/%s/objects/%s/collections",
+          testProject.getProjectAbbr(),
+          testDigitalObject.getId()
+      );
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+          .andReturn();
+
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              // response contains first collection data
+              testGAMSCollection.getId(),
+              testGAMSCollection.getTitle(),
+              testGAMSCollection.getDescription(),
+              testGAMSCollection.getDigitalObjects().iterator().next().getId(),
+              testGAMSCollection.getProject().getProjectAbbr(),
+              // response contains second collection data
+              SECOND_TEST_GAMS_COLLECTION.getId(),
+              SECOND_TEST_GAMS_COLLECTION.getTitle(),
+              SECOND_TEST_GAMS_COLLECTION.getDescription(),
+              SECOND_TEST_GAMS_COLLECTION.getProject().getProjectAbbr()
+          );
+
+    }
+
   }
 
 

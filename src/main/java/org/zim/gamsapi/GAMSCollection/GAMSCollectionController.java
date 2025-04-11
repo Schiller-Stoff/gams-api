@@ -100,11 +100,14 @@ public class GAMSCollectionController {
     return collectionService.findByProjectAbbr(projectAbbr, PageRequest.of(0,1000));
   }
 
-  @GetMapping(value = "/collections/objects/{objectId}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/projects/{projectAbbr}/objects/{id}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(summary = "Get all collections containing a specific digital object")
-  public List<GAMSCollection> getCollectionsByDigitalObject(@PathVariable String objectId) {
-    return collectionService.findByDigitalObject(objectId);
+  public Page<GamsCollectionCompactView> getCollectionsByDigitalObject(
+      @PathVariable String id
+  ) {
+    // TODO add pagination params
+    return collectionService.findByDigitalObject(id, PageRequest.of(0, 10000));
   }
 
   @DeleteMapping(value = "/collections/{id}/objects/{objectId}")

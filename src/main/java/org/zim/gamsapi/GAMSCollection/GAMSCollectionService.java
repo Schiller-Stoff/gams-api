@@ -116,7 +116,7 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<GAMSCollection> findByDigitalObject(String digitalObjectId) {
+  public Page<GamsCollectionCompactView> findByDigitalObject(String digitalObjectId, Pageable pageable) {
     DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
         .orElseThrow(() -> {
           String msg = String.format("Digital object with id %s not found", digitalObjectId);
@@ -124,7 +124,7 @@ public class GAMSCollectionService implements IGAMSCollectionService {
           return new DigitalObjectNotFoundException(msg);
         });
 
-    return collectionRepository.findByDigitalObjectsContaining(digitalObject);
+    return collectionRepository.findByDigitalObjectsId(digitalObject.getId(), pageable);
   }
 
   @Override
