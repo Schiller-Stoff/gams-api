@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -24,6 +27,47 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+  @ExceptionHandler(TransactionSystemException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleTransactionSystemExceotion(TransactionSystemException ex) {
+
+    String msg = String.format("TransactionSystemException: %s", ex.getMessage());
+    log.error(msg);
+
+    Throwable cause = ex.getCause();
+
+    while (cause != null) {
+      if (cause instanceof ConstraintViolationException) {
+        var violations = ((ConstraintViolationException) cause).getConstraintViolations();
+        Map<String, String> errors = new HashMap<>();
+        for (var violation : violations) {
+          String propertyName = violation.getPropertyPath().toString();
+          String errMessage = String.format("Property %s | %s | But given was: %s | Validated domain class: %s", violation.getPropertyPath().toString(), violation.getMessage(), violation.getInvalidValue().toString(), violation.getRootBeanClass());
+          errors.put(propertyName, errMessage);
+        }
+        msg = "ConstraintViolationException in the database layer - aborting operations.";
+        log.error(msg, cause);
+        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, msg, errors);
+        return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException){
+        msg = "DataIntegrityViolationException in teh database layer";
+        log.error(msg, cause);
+        var errors = new HashMap<String, String>();
+        errors.put("error", dataIntegrityViolationException.getMostSpecificCause().getMessage());
+        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            msg,
+            errors
+        );
+        return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      cause = cause.getCause();
+    }
+
+    GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, msg);
+    return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
