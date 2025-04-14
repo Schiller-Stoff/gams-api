@@ -83,7 +83,7 @@ public class GAMSCollectionController {
     collectionService.updateMetadata(gamsCollection);
   }
 
-  @DeleteMapping(value = "/projects/{projectAbb}/collections/{id}")
+  @DeleteMapping(value = "/projects/{projectAbbr}/collections/{id}")
   @ResponseBody
   @Operation(summary = "Delete a collection")
   public ResponseEntity<Void> deleteCollection(@PathVariable String id) {
