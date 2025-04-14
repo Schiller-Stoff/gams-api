@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
-import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.ProjectBuilder;
-import org.zim.gamsapi.Project.interfaces.IProjectService;
 
 @Controller
 @RequestMapping({"/api/v1/"})
