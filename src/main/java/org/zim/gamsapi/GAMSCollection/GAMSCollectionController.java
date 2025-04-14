@@ -168,10 +168,11 @@ public class GAMSCollectionController {
   @DeleteMapping(value = "/projects/{projectAbbr}/collections/{id}/objects/{objectId}")
   @ResponseBody
   @Operation(summary = "Remove a digital object from a collection")
-  public GAMSCollection removeDigitalObjectFromCollection(
+  public ResponseEntity<Void> removeDigitalObjectFromCollection(
       @PathVariable String id,
       @PathVariable String objectId) {
-    return collectionService.removeDigitalObjectFromCollection(id, objectId);
+    collectionService.removeDigitalObjectFromCollection(id, objectId);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping(value = "/{id}", produces = MimeTypeUtils.TEXT_HTML_VALUE)

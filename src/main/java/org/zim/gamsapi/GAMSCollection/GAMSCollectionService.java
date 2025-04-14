@@ -113,19 +113,23 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional
-  public GAMSCollection removeDigitalObjectFromCollection(String collectionId, String digitalObjectId) {
-    GAMSCollectionDetailsView GAMSCollection = findById(collectionId);
+  public void removeDigitalObjectFromCollection(String collectionId, String digitalObjectId) {
+    var gamsCollection =  collectionRepository.findById(collectionId)
+        .orElseThrow(() -> {
+          String msg = String.format("Collection with id %s not found. Tried to remove digital object with id %s fr the collection. Aborting operation.", collectionId, digitalObjectId);
+          log.error(msg);
+          return new CollectionNotFoundException(msg);
+        });
+
     DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
         .orElseThrow(() -> {
-          String msg = String.format("Digital object with id %s not found", digitalObjectId);
+          String msg = String.format("Digital object %s to be removed from collection with id %s not found", collectionId, digitalObjectId);
           log.error(msg);
           return new DigitalObjectNotFoundException(msg);
         });
 
-    GAMSCollection.getDigitalObjects().remove(digitalObject);
-    // TODO fix
-    return null;
-    //return collectionRepository.save(GAMSCollection);
+    gamsCollection.getDigitalObjects().remove(digitalObject);
+    collectionRepository.save(gamsCollection);
   }
 
   @Override

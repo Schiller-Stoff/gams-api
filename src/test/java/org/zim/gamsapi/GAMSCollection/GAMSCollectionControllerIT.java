@@ -505,5 +505,57 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       }).isInstanceOf(CollectionNotFoundException.class);
 
     }
+
+    @Nested
+    public class RemoveDigitalObjectFromCollection {
+
+      @Test
+      public void removesExpectedDigitalObjectFromCollection() throws Exception {
+
+        collectionService.addDigitalObjectToCollection(
+            testGAMSCollection.getId(),
+            testDigitalObject.getId()
+        );
+
+        // assert that both exist
+        Assertions.assertThat(collectionRepository.existsById(testGAMSCollection.getId()))
+            .isTrue();
+        Assertions.assertThat(digitalObjectRepository.existsById(testDigitalObject.getId()))
+            .isTrue();
+
+        var foundObjectsInTestCollection = digitalObjectRepository.findDigitalObjectsByCollectionId(
+            testGAMSCollection.getId(),
+            PageRequest.of(0, 100)
+        );
+
+        Assertions.assertThat(foundObjectsInTestCollection.getContent())
+            .hasSize(1);
+
+        final String URL = String.format(
+            "/api/v1/projects/%s/collections/%s/objects/%s",
+            testProject.getProjectAbbr(),
+            testGAMSCollection.getId(),
+            testDigitalObject.getId()
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.delete(URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isNoContent());
+
+        // assert that the collection is now empty
+        var foundObjectsInTestCollectionAfterDeletion = digitalObjectRepository.findDigitalObjectsByCollectionId(
+            testGAMSCollection.getId(), PageRequest.of(0, 100)
+        );
+
+        Assertions.assertThat(foundObjectsInTestCollectionAfterDeletion.getContent()).hasSize(0);
+
+
+      }
+
+    }
+
   }
 }
