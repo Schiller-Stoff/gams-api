@@ -412,4 +412,36 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class DELETEGAMSCollection {
+
+    GAMSCollection testGAMSCollection;
+
+    @BeforeEach
+    public void setup() {
+      testGAMSCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testGAMSCollection);
+    }
+
+    @Test
+    public void deletesExpectedGamsCollection() throws Exception {
+
+      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isNoContent());
+
+      // assert that the collection does not exist in the database
+      Assertions.assertThat(
+          collectionRepository.existsById(testGAMSCollection.getId())
+      ).isFalse();
+
+    }
+
+  }
+
 }
