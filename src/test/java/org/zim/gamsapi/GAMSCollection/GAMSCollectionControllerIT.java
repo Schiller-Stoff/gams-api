@@ -485,7 +485,5 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       }).isInstanceOf(CollectionNotFoundException.class);
 
     }
-
   }
-
 }
