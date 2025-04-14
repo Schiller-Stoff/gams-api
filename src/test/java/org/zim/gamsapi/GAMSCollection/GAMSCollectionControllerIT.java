@@ -282,7 +282,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
     @Test
     @Transactional
-    public void addDigitalObjectToCollection() throws Exception {
+    public void addsExpectedDigitalObjectToCollection() throws Exception {
 
       // save an additional gams collection
       final String GAMS_COLLECTION_ID = "test-collection-id-random";
