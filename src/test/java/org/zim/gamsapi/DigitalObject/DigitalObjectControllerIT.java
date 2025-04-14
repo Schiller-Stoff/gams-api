@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -15,14 +16,14 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
+import org.zim.gamsapi.GAMSCollection.GAMSCollection;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDatastream;
-import org.zim.gamsapi.enums.TestDatastreamContent;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.enums.*;
+
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,6 +48,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
+  private IGAMSCollectionRepository collectionRepository;
 
   @MockBean
   private AuditingHandler auditingHandler;
@@ -178,6 +182,28 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       // assert that the datastream content has been deleted
       org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(datastream.deriveDatastreamId())).isFalse();
+
+    }
+
+    @Test
+    public void mayNotDeleteADigitalObjectReferencedByAGamsCollection() throws Exception {
+
+      // Arrange
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+
+      // test collection references the test object automatically
+      GAMSCollection gamsCollection = TestGAMSCollection.generate();
+      collectionRepository.save(gamsCollection);
+
+      // Act
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(
+              "/api/v1/projects/{projectAbbr}/objects/{id}",
+                  testProject.getProjectAbbr(),
+                  digitalObject.getId())
+              .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().is4xxClientError());
 
     }
 
