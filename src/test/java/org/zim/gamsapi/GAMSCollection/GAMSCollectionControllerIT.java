@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.GAMSCollection.exceptions.CollectionNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
@@ -39,6 +41,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
   @Autowired
   private IGAMSCollectionRepository collectionRepository;
+
+  @Autowired
+  private IGAMSCollectionService collectionService;
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
@@ -439,6 +444,45 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       Assertions.assertThat(
           collectionRepository.existsById(testGAMSCollection.getId())
       ).isFalse();
+
+    }
+
+    @Test
+    public void deletionWorksEvenIfDigitalObjectsIsStillBeingReferenced() throws Exception {
+
+      // try to delete a collection that still references a digital object
+      collectionService.addDigitalObjectToCollection(
+          testGAMSCollection.getId(),
+          testDigitalObject.getId()
+      );
+
+      var foundObjects = collectionService.findDigitalObjectsByCollectionId(
+          testGAMSCollection.getId(), PageRequest.of(0, 100)
+      );
+
+      Assertions.assertThat(foundObjects.getContent())
+          .hasSize(1);
+
+      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isNoContent());
+
+      // assert that the collection does not exist in the database
+      Assertions.assertThat(
+          collectionRepository.existsById(testGAMSCollection.getId())
+      ).isFalse();
+
+      // assert that now finding digital objects by the defined collection id throws an exception
+      Assertions.assertThatThrownBy(() -> {
+        collectionService.findDigitalObjectsByCollectionId(
+            testGAMSCollection.getId(), PageRequest.of(0, 100)
+        );
+      }).isInstanceOf(CollectionNotFoundException.class);
 
     }
 
