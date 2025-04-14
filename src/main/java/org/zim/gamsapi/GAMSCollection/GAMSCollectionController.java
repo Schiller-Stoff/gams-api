@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,10 +29,20 @@ public class GAMSCollectionController {
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/collections", "/collections/"})
   @ResponseBody
   @Operation(summary = "Get all collections")
-  public Page<GamsCollectionCompactView> getAllCollections() {
+  public Page<GamsCollectionCompactView> getAllCollections(
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy
+  ) {
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
     log.error("TRIGGERED CONTROLLER Page<CollectionCompactView> getAllCollections");
     // TODO redo pageing parameters!
-    return collectionService.findAll(PageRequest.of(0,1000));
+    return collectionService.findAll(PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
   }
 
   @GetMapping(value = "/collections/{id}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
@@ -98,27 +109,64 @@ public class GAMSCollectionController {
   @GetMapping(value = "/collections/{id}/objects", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(summary = "Get all digital objects in a collection")
-  public Page<DigitalObjectListItemView> getCollectionObjects(@PathVariable String id) {
-    // TODO think about pagination params!
-    return collectionService.findDigitalObjectsByCollectionId(id, PageRequest.of(0,10000));
+  public Page<DigitalObjectListItemView> getCollectionObjects(
+      @PathVariable String id,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy
+  ) {
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    return collectionService.findDigitalObjectsByCollectionId(
+        id,
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
   @GetMapping(value = "/projects/{projectAbbr}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(summary = "Get all collections owned by a project")
-  public Page<GamsCollectionCompactView> getCollectionsByProject(@PathVariable String projectAbbr) {
-    // TODO handle pageSie parameters
-    return collectionService.findByProjectAbbr(projectAbbr, PageRequest.of(0,1000));
+  public Page<GamsCollectionCompactView> getCollectionsByProject(
+      @PathVariable String projectAbbr,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy
+  ) {
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    return collectionService.findByProjectAbbr(
+        projectAbbr,
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
   @GetMapping(value = "/projects/{projectAbbr}/objects/{id}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(summary = "Get all collections containing a specific digital object")
   public Page<GamsCollectionCompactView> getCollectionsByDigitalObject(
-      @PathVariable String id
+      @PathVariable String id,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy
   ) {
-    // TODO add pagination params
-    return collectionService.findByDigitalObject(id, PageRequest.of(0, 10000));
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    return collectionService.findByDigitalObject(
+        id,
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
   @DeleteMapping(value = "/collections/{id}/objects/{objectId}")
