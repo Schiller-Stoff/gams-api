@@ -24,8 +24,6 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 public class GAMSCollectionController {
 
   private final IGAMSCollectionService collectionService;
-  private final IProjectService projectService;
-  private final IDigitalObjectService digitalObjectService;
 
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/collections", "/collections/"})
   @ResponseBody
