@@ -305,8 +305,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
                   .contentType(MediaType.APPLICATION_JSON)
                   .accept(MediaType.APPLICATION_JSON)
           )
-          .andExpect(status().isOk())
-          .andReturn();
+          .andExpect(status().isOk());
 
       // assert that the collection contains the digital object
       Assertions.assertThat(
@@ -320,5 +319,97 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class PATCHGAMSCollection {
+
+    GAMSCollection testGAMSCollection;
+
+    @BeforeEach
+    public void setup() {
+      testGAMSCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testGAMSCollection);
+    }
+
+    @Test
+    public void updatesGamsCollectionToExpectedValues() throws Exception {
+
+      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+      final String TEST_COLLECTION_CHANGED_TITLE = "changed-title";
+      final String TEST_COLLECTION_CHANGED_DESCRIPTION = "changed-description";
+
+      final String REQUEST_BODY = """
+          {
+            "title": "%s",
+            "description": "%s",
+            "projectAbbr": "%s"
+          }
+          """.formatted(
+              TEST_COLLECTION_CHANGED_TITLE,
+              TEST_COLLECTION_CHANGED_DESCRIPTION,
+              testGAMSCollection.getProject().getProjectAbbr()
+          );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(REQUEST_BODY)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk());
+
+      GAMSCollection foundCollection = collectionRepository.findById(testGAMSCollection.getId())
+          .orElseThrow(() -> {
+            String msg = String.format("Collection with id %s not found", testGAMSCollection.getId());
+            return new AssertionError(msg);
+          });
+
+      // assert that the collection now has changed values
+      Assertions.assertThat(foundCollection.getTitle())
+          .isEqualTo(TEST_COLLECTION_CHANGED_TITLE);
+      Assertions.assertThat(foundCollection.getDescription())
+          .isEqualTo(TEST_COLLECTION_CHANGED_DESCRIPTION);
+
+      // asssert that the collection does not have the old values
+      Assertions.assertThat(foundCollection.getTitle())
+          .isNotEqualTo(testGAMSCollection.getTitle());
+      Assertions.assertThat(foundCollection.getDescription())
+          .isNotEqualTo(testGAMSCollection.getDescription());
+
+
+    }
+
+    @Test
+    public void throwsIfExpectedCollectionWasNotFound() throws Exception {
+
+      // TODO implement
+
+      final String TEST_NON_EXISTENT_COLLECTION_ID = "test-non-existent-collection-id";
+
+      final String URL = "/api/v1/collections/" + TEST_NON_EXISTENT_COLLECTION_ID;
+
+      final String REQUEST_BODY = """
+          {
+            "title": "%s",
+            "description": "%s",
+            "projectAbbr": "%s"
+          }
+          """.formatted(
+          testGAMSCollection.getId(),
+          testGAMSCollection.getTitle(),
+          testGAMSCollection.getProject().getProjectAbbr()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(REQUEST_BODY)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isNotFound());
+
+    }
+
+
+  }
 
 }

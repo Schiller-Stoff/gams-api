@@ -60,6 +60,22 @@ public class GAMSCollectionController {
     collectionService.save(gamsCollection);
   }
 
+  @PatchMapping(value = "/collections/{id}")
+  @ResponseBody
+  @Operation(summary = "Update basic metadata of a gams collection like title or description")
+  public void updateCollection(
+      @PathVariable String id,
+      @RequestBody CreateGAMSCollectionDTO createGAMSCollectionDTO
+  ) {
+    GAMSCollection gamsCollection = GAMSCollection.builder()
+        .id(id)
+        .project(ProjectBuilder.builder().projectAbbr(createGAMSCollectionDTO.getProjectAbbr()).build())
+        .title(createGAMSCollectionDTO.getTitle())
+        .description(createGAMSCollectionDTO.getDescription())
+        .build();
+    collectionService.updateMetadata(gamsCollection);
+  }
+
   @DeleteMapping(value = "/collections/{id}")
   @ResponseBody
   @Operation(summary = "Delete a collection")

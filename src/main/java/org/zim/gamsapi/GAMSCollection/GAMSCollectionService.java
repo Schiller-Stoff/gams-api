@@ -31,6 +31,11 @@ public class GAMSCollectionService implements IGAMSCollectionService {
   @Override
   @Transactional
   public void save(GAMSCollection gamsCollection) {
+    if(collectionRepository.existsById(gamsCollection.getId())) {
+      String msg = String.format("Collection with id %s already exists", gamsCollection.getId());
+      log.error(msg);
+      throw new CollectionNotFoundException(msg);
+    }
     GAMSCollection savedGAMSCollection = collectionRepository.save(gamsCollection);
     log.info("Successfully saved collection:  {}", savedGAMSCollection);
   }
@@ -149,4 +154,16 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   }
 
+  @Override
+  @Transactional
+  public void updateMetadata(GAMSCollection gamsCollection) {
+    GAMSCollection existingCollection = collectionRepository.findById(gamsCollection.getId())
+        .orElseThrow(() -> {
+          String msg = String.format("Collection with id %s not found", gamsCollection.getId());
+          log.error(msg);
+          return new CollectionNotFoundException(msg);
+        });
+    existingCollection.setTitle(gamsCollection.getTitle());
+    existingCollection.setDescription(gamsCollection.getDescription());
+  }
 }

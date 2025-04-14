@@ -19,4 +19,10 @@ public interface IGAMSCollectionService {
   GAMSCollection removeDigitalObjectFromCollection(String collectionId, String digitalObjectId);
   Page<GamsCollectionCompactView> findByDigitalObject(String digitalObjectId, Pageable pageable);
   Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(String collectionId, Pageable pageable);
+
+  /**
+   * Update metadata of a GAMS collection. (Ignores the ID / project abbr and only updates)
+   * @param gamsCollection the GAMS collection to update
+   */
+  void updateMetadata(GAMSCollection gamsCollection);
 }
