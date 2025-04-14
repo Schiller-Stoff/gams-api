@@ -1,6 +1,5 @@
 package org.zim.gamsapi.GAMSCollection;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -236,7 +235,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       final String GAMS_COLLECTION_ID = "test-collection-id-random";
 
-      final String URL = "/api/v1/collections/" + GAMS_COLLECTION_ID;
+      final String URL = String.format(
+          "/api/v1/projects/%s/collections/%s",
+          testProject.getProjectAbbr(),
+          GAMS_COLLECTION_ID
+      );
+
       GAMSCollection gamsCollection = TestGAMSCollection.generate(
           testProject.getProjectAbbr(),
           testDigitalObject.getId(),
@@ -299,8 +303,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       collectionRepository.save(TEST_GAMS_COLLECTION);
 
       final String URL = String.format(
-          "/api/v1/collections/%s/objects/%s",
+          "/api/v1/projects/%s/collections/%s/objects/%s",
           // add object to different collection
+          testProject.getProjectAbbr(),
           GAMS_COLLECTION_ID,
           testDigitalObject.getId()
       );
@@ -338,7 +343,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     @Test
     public void updatesGamsCollectionToExpectedValues() throws Exception {
 
-      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+      final String URL = String.format(
+          "/api/v1/projects/%s/collections/%s",
+          testProject.getProjectAbbr(),
+          testGAMSCollection.getId()
+      );
+
       final String TEST_COLLECTION_CHANGED_TITLE = "changed-title";
       final String TEST_COLLECTION_CHANGED_DESCRIPTION = "changed-description";
 
@@ -386,11 +396,13 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     @Test
     public void throwsIfExpectedCollectionWasNotFound() throws Exception {
 
-      // TODO implement
-
       final String TEST_NON_EXISTENT_COLLECTION_ID = "test-non-existent-collection-id";
 
-      final String URL = "/api/v1/collections/" + TEST_NON_EXISTENT_COLLECTION_ID;
+      final String URL = String.format(
+          "/api/v1/projects/%s/collections/%s",
+          testProject.getProjectAbbr(),
+          TEST_NON_EXISTENT_COLLECTION_ID
+      );
 
       final String REQUEST_BODY = """
           {
@@ -431,7 +443,11 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     @Test
     public void deletesExpectedGamsCollection() throws Exception {
 
-      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+      final String URL = String.format(
+          "/api/v1/projects/%s/collections/%s",
+          testProject.getProjectAbbr(),
+          testGAMSCollection.getId()
+      );
 
       mockMvc.perform(
               MockMvcRequestBuilders.delete(URL)
@@ -463,7 +479,11 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       Assertions.assertThat(foundObjects.getContent())
           .hasSize(1);
 
-      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+      final String URL = String.format(
+          "/api/v1/projects/%s/collections/%s",
+          testProject.getProjectAbbr(),
+          testGAMSCollection.getId()
+      );
 
       mockMvc.perform(
               MockMvcRequestBuilders.delete(URL)

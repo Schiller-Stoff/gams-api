@@ -50,7 +50,7 @@ public class GAMSCollectionController {
     return collectionService.findById(id);
   }
 
-  @PutMapping(value = "/collections/{id}")
+  @PutMapping(value = "/projects/{projectAbbr}/collections/{id}")
   @ResponseBody
   @Operation(summary = "Create a GAMS collection")
   public void createCollection(
@@ -67,7 +67,7 @@ public class GAMSCollectionController {
     collectionService.save(gamsCollection);
   }
 
-  @PatchMapping(value = "/collections/{id}")
+  @PatchMapping(value = "/projects/{projectAbbr}/collections/{id}")
   @ResponseBody
   @Operation(summary = "Update basic metadata of a gams collection like title or description")
   public void updateCollection(
@@ -83,7 +83,7 @@ public class GAMSCollectionController {
     collectionService.updateMetadata(gamsCollection);
   }
 
-  @DeleteMapping(value = "/collections/{id}")
+  @DeleteMapping(value = "/projects/{projectAbb}/collections/{id}")
   @ResponseBody
   @Operation(summary = "Delete a collection")
   public ResponseEntity<Void> deleteCollection(@PathVariable String id) {
@@ -91,7 +91,7 @@ public class GAMSCollectionController {
     return ResponseEntity.noContent().build();
   }
 
-  @PostMapping(value = "/collections/{id}/objects/{objectId}")
+  @PostMapping(value = "/projects/{projectAbbr}/collections/{id}/objects/{objectId}")
   @ResponseBody
   @Operation(summary = "Add a digital object to a collection")
   public void addDigitalObjectToCollection(
@@ -165,7 +165,7 @@ public class GAMSCollectionController {
     );
   }
 
-  @DeleteMapping(value = "/collections/{id}/objects/{objectId}")
+  @DeleteMapping(value = "/projects/{projectAbbr}/collections/{id}/objects/{objectId}")
   @ResponseBody
   @Operation(summary = "Remove a digital object from a collection")
   public GAMSCollection removeDigitalObjectFromCollection(
