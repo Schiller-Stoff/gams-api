@@ -8,9 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -50,6 +49,24 @@ public class GAMSCollectionRepositoryIT extends IntegrationTest {
     testProject = testDigitalObject.getProject();
     projectRepository.save(testProject);
     digitalObjectRepository.save(testDigitalObject);
+
+  }
+
+  @Nested
+  public class CASCADING {
+
+    @Test
+    public void deletionOfADigitalObjectStillReferencedByACollectionThrows(){
+
+      final GAMSCollection TEST_GAMS_COLLECTION = TestGAMSCollection
+          .generate();
+      collectionRepository.save(TEST_GAMS_COLLECTION);
+      Assertions.assertThatThrownBy(() -> {
+        digitalObjectRepository.delete(testDigitalObject);
+      }).isInstanceOf(DataIntegrityViolationException.class);
+
+    }
+
 
   }
 
