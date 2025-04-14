@@ -25,4 +25,11 @@ public interface IGAMSCollectionService {
    * @param gamsCollection the GAMS collection to update
    */
   void updateMetadata(GAMSCollection gamsCollection);
+
+  /**
+   * Delete a GAMS collection by ID
+   * @param id the ID of the GAMS collection to delete
+   */
+  void deleteById(String id);
+
 }

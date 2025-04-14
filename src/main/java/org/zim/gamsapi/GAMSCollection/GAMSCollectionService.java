@@ -166,4 +166,15 @@ public class GAMSCollectionService implements IGAMSCollectionService {
     existingCollection.setTitle(gamsCollection.getTitle());
     existingCollection.setDescription(gamsCollection.getDescription());
   }
+
+  @Transactional
+  @Override
+  public void deleteById(String id) {
+    if(!collectionRepository.existsById(id)) {
+      String msg = String.format("Collection with id %s does not exist and therefore cannot be deleted!", id);
+      log.error(msg);
+      throw new CollectionNotFoundException(msg);
+    }
+    collectionRepository.deleteById(id);
+  }
 }

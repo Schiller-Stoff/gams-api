@@ -87,9 +87,7 @@ public class GAMSCollectionController {
   @ResponseBody
   @Operation(summary = "Delete a collection")
   public ResponseEntity<Void> deleteCollection(@PathVariable String id) {
-    GAMSCollectionDetailsView GAMSCollection = collectionService.findById(id);
-    // TODO implement
-    //collectionService.delete(GAMSCollection);
+    collectionService.deleteById(id);
     return ResponseEntity.noContent().build();
   }
 
