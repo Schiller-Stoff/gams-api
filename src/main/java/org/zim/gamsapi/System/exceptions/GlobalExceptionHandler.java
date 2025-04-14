@@ -16,6 +16,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -30,43 +32,17 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(TransactionSystemException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleTransactionSystemExceotion(TransactionSystemException ex) {
-
     String msg = String.format("TransactionSystemException: %s", ex.getMessage());
     log.error(msg);
+    return drillRootErrorCause(ex);
+  }
 
-    Throwable cause = ex.getCause();
-
-    while (cause != null) {
-      if (cause instanceof ConstraintViolationException) {
-        var violations = ((ConstraintViolationException) cause).getConstraintViolations();
-        Map<String, String> errors = new HashMap<>();
-        for (var violation : violations) {
-          String propertyName = violation.getPropertyPath().toString();
-          String errMessage = String.format("Property %s | %s | But given was: %s | Validated domain class: %s", violation.getPropertyPath().toString(), violation.getMessage(), violation.getInvalidValue().toString(), violation.getRootBeanClass());
-          errors.put(propertyName, errMessage);
-        }
-        msg = "ConstraintViolationException in the database layer - aborting operations.";
-        log.error(msg, cause);
-        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, msg, errors);
-        return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException){
-        msg = "DataIntegrityViolationException in teh database layer";
-        log.error(msg, cause);
-        var errors = new HashMap<String, String>();
-        errors.put("error", dataIntegrityViolationException.getMostSpecificCause().getMessage());
-        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            msg,
-            errors
-        );
-        return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-      cause = cause.getCause();
-    }
-
-    GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, msg);
-    return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
+    // TODO implement
+    String msg = String.format("DataIntegrityViolationException: %s", ex.getMessage());
+    log.error(msg);
+    return drillRootErrorCause(ex);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -112,8 +88,66 @@ public class GlobalExceptionHandler {
       errors.put(fieldName, errorMessage);
     });
 
-    GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.BAD_REQUEST, "Validation error", errors);
+    GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(
+        HttpStatus.BAD_REQUEST,
+        "Validation error",
+        errors);
     return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.BAD_REQUEST);
+  }
+
+//  // Handle all other exceptions
+//  @ExceptionHandler(Exception.class)
+//  protected ResponseEntity<GamsAPIErrorResponse> handleAllExceptions(
+//      Exception ex, WebRequest request) {
+//    return drillRootErrorCause(ex);
+//  }
+
+  /**
+   * Drill down the root cause of given error and return a response entity with the error message.
+   * @param cause the cause of the error
+   * @return a response entity with the error message
+   */
+  public ResponseEntity<GamsAPIErrorResponse> drillRootErrorCause(Throwable cause){
+    String msg;
+    ResponseEntity<GamsAPIErrorResponse> responseEntity = null;
+    // TODO refactor following code! (make cleaner!)
+    while (cause != null) {
+      if (cause instanceof ConstraintViolationException) {
+        var violations = ((ConstraintViolationException) cause).getConstraintViolations();
+        Map<String, String> errors = new HashMap<>();
+        for (var violation : violations) {
+          String propertyName = violation.getPropertyPath().toString();
+          String errMessage = String.format("Property %s | %s | But given was: %s | Validated domain class: %s", violation.getPropertyPath().toString(), violation.getMessage(), violation.getInvalidValue().toString(), violation.getRootBeanClass());
+          errors.put(propertyName, errMessage);
+        }
+        msg = "ConstraintViolationException in the database layer - aborting operations.";
+        log.error(msg, cause);
+        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, msg, errors);
+        responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
+      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException){
+        msg = "DataIntegrityViolationException in the database layer";
+        log.error(msg, cause);
+        var errors = new HashMap<String, String>();
+        errors.put("error", dataIntegrityViolationException.getMostSpecificCause().getMessage());
+        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(
+            HttpStatus.CONFLICT,
+            msg,
+            errors
+        );
+        responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
+      }
+
+      cause = cause.getCause();
+    }
+
+    if (responseEntity == null) {
+      String errMsg = String.format("Response entity is unexpectedly null - for cause %s", cause);
+      log.error(errMsg);
+      GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errMsg);
+      responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
+    }
+
+    return responseEntity;
   }
 
 }
