@@ -1,10 +1,7 @@
 package org.zim.gamsapi.GAMSCollection;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates security filters
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled("GAMS collection is deactivated in the current version of GAMS5.")
 public class GAMSCollectionControllerIT extends IntegrationTest {
 
 

@@ -16,7 +16,7 @@ import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.Project.ProjectBuilder;
 
-@Controller
+//@Controller
 @RequestMapping({"/api/v1/"})
 @Slf4j
 @RequiredArgsConstructor
