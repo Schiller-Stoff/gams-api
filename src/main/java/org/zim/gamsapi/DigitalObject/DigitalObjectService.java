@@ -2,6 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IProjectRepository projectRepository;
   private final IDatastreamContentRepository fileSystemRepository;
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   @Override
   @Transactional
@@ -45,7 +47,11 @@ public class DigitalObjectService implements IDigitalObjectService {
             }
     );
 
-    return digitalObjectRepository.save(digitalObject);
+    DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectCreatedEvent(this, savedObject)
+    );
+    return savedObject;
   }
 
   @Override
