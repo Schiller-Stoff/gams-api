@@ -2,6 +2,7 @@ package org.zim.gamsapi.Ingest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -40,6 +42,7 @@ public class IngestService implements IIngestService {
   private final ConversionService conversionService;
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   @Override
   @Transactional(rollbackFor = {
@@ -146,6 +149,11 @@ public class IngestService implements IIngestService {
                 throw e;
               }
             });
+
+      applicationEventPublisher.publishEvent(
+          new DigitalObjectCreatedEvent(this, savedObject)
+      );
+
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
       ZipUtils.deleteDir(bagDirPath);
