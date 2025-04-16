@@ -10,11 +10,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.testcontainers.containers.SolrContainer;
+import org.testcontainers.utility.DockerImageName;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 /**
@@ -59,10 +61,19 @@ public abstract class IntegrationTest {
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
 
+  static final SolrContainer solr;
+
   // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
   static {
     postgres = new PostgreSQLContainer<>("postgres:13-alpine");
     postgres.start();
+
+    solr = new SolrContainer(DockerImageName.parse("solr:9.2.1"));
+    // TODO use copyToContainer to copy the solr config files from the resources folder
+//    solr.withCopyToContainer(
+//        Transferable.of()
+//    )
+    solr.start();
   }
 
   @DynamicPropertySource
@@ -70,6 +81,10 @@ public abstract class IntegrationTest {
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
+
+    // set solr host and port
+    registry.add("gams.docker.baseSearchUrl", () -> String.format("""
+        http://%s:%s""", solr.getHost(), solr.getSolrPort()));
   }
 
   /**
