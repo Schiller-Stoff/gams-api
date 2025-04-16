@@ -28,8 +28,11 @@ public class SOLRClient {
 
   private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  private final String SOLR_BASE_URL;
+
   public SOLRClient(GAMSDockerDNS configProperties) {
     // TODO consider timeouts / retries / error handling / etc. against SOLR.
+    SOLR_BASE_URL = configProperties.getBaseSearchUrl();
     this.webClient = WebClient.builder()
         .baseUrl(configProperties.getBaseSearchUrl())
         .build();
@@ -109,7 +112,7 @@ public class SOLRClient {
           .bodyToMono(String.class)
           .block();
     } catch (WebClientException e) {
-      String msg = String.format("Failed to create solr core for project %s. With url %s and body %s Cause: %s. Original error: %s", coreName, URL, body, e.getMessage(), e);
+      String msg = String.format("Failed to create solr core for project %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, URL, body, e.getMessage(), e);
       log.error(msg);
       throw new IntegrationServiceException(msg);
     }
