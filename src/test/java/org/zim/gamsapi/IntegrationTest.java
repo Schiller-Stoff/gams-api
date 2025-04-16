@@ -53,6 +53,9 @@ public abstract class IntegrationTest {
   @Autowired
   IGAMSCollectionRepository collectionRepository;
 
+  @Autowired
+  EventCaptureListener eventCaptureListener;
+
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
 
@@ -105,6 +108,7 @@ public abstract class IntegrationTest {
    */
   @AfterEach
   public void tearDown(){
+    eventCaptureListener.clearEvents();
     datastreamContentRepository.deleteAll();
     dublinCoreElementRepository.deleteAll();
     datastreamRepository.deleteAll();
