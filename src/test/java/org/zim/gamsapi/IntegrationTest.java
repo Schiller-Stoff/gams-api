@@ -11,13 +11,20 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.SolrContainer;
+import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+
+import java.io.File;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -70,8 +77,31 @@ public abstract class IntegrationTest {
 
     // setup of solr (without same config as in docker-compose)
     solr = new SolrContainer(DockerImageName.parse("solr:9.2.1"));
-    solr.withCommand("solr-precreate", "gams");
-    solr.start();
+
+    // Create a configset directory to mount (somewhere in the container)
+    solr.withCopyToContainer(
+        MountableFile.forHostPath(
+            new File("docker/apps/solr/solr").getAbsolutePath()
+        ), "/configsets/gams_config"
+    );
+
+    // Use the mounted config when creating the core
+    solr.withCommand("solr-precreate gams /configsets/gams_config");
+
+    // Add appropriate wait strategy
+    // Use a more reliable wait strategy - waiting for the HTTP endpoint
+    solr.waitingFor(Wait.forHttp("/solr/admin/cores?action=STATUS")
+        .forPort(8983)
+        .withStartupTimeout(Duration.of(90, ChronoUnit.SECONDS)));
+
+    try {
+      solr.start();
+    } catch (Exception e) {
+      String msg = String.format("Solr didn't start correctly for testing. Got solr logs: %s Got exception: %s", solr.getLogs(), e);
+      log.error(msg);
+      throw e;
+    }
+
   }
 
   @DynamicPropertySource
