@@ -68,11 +68,9 @@ public abstract class IntegrationTest {
     postgres = new PostgreSQLContainer<>("postgres:13-alpine");
     postgres.start();
 
+    // setup of solr (without same config as in docker-compose)
     solr = new SolrContainer(DockerImageName.parse("solr:9.2.1"));
-    // TODO use copyToContainer to copy the solr config files from the resources folder
-//    solr.withCopyToContainer(
-//        Transferable.of()
-//    )
+    solr.withCommand("solr-precreate", "gams");
     solr.start();
   }
 
