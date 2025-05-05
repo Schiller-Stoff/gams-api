@@ -9,6 +9,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationServiceException;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
@@ -111,6 +112,13 @@ public class SOLRClient {
           .retrieve()
           .bodyToMono(String.class)
           .block();
+    } catch (WebClientResponseException e){
+      // This exception contains the response body from the server
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format("Failed to create solr core for project %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
+          coreName, SOLR_BASE_URL, URL, e.getStatusCode(), errorResponseBody);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
     } catch (WebClientException e) {
       String msg = String.format("Failed to create solr core for project %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, URL, body, e.getMessage(), e);
       log.error(msg);
