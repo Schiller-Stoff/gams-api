@@ -65,6 +65,12 @@ public abstract class IntegrationTest {
   @Autowired
   EventCaptureListener eventCaptureListener;
 
+  // TODO use constant
+  public static final String SOLR_TEST_CORE = "test";
+
+  // TODO use constant
+  public static final String SOLR_GAMS_CORE = "gams";
+
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
 
@@ -77,29 +83,37 @@ public abstract class IntegrationTest {
 
     // setup of solr (without same config as in docker-compose)
     solr = new SolrContainer(DockerImageName.parse("solr:9.2.1"));
-
-    // Create a configset directory to mount (somewhere in the container)
+    // deactivate zookeeper for testing (leads to some bugs in the testcontainers)
+    solr.withZookeeper(false);
+    // copy the solr config to the container (later on we can use them via exec in container)
     solr.withCopyToContainer(
         MountableFile.forHostPath(
             new File("docker/apps/solr/solr").getAbsolutePath()
-        ), "/configsets/gams_config"
+        ), "/gams_config"
     );
 
-    // Use the mounted config when creating the core
-    solr.withCommand("solr-precreate gams /configsets/gams_config");
+    // .withCommand seems not to work with the solr container
+    // solr.withCommand("solr-precreate hupfi");
 
     // Add appropriate wait strategy
     // Use a more reliable wait strategy - waiting for the HTTP endpoint
     solr.waitingFor(Wait.forHttp("/solr/admin/cores?action=STATUS")
         .forPort(8983)
+        // TODO bit long interrupt time!
         .withStartupTimeout(Duration.of(90, ChronoUnit.SECONDS)));
 
     try {
       solr.start();
+      // create the expected base cores
+      solr.execInContainer("bash", "bin/solr", "create_core", "-c", "test", "-d", "/gams_config/data/configsets/base");
+      solr.execInContainer("bash", "bin/solr", "create_core", "-c", "gams", "-d", "/gams_config/data/gams");
+      // make sure that configuration stuff is available (like the configsets)
+      solr.execInContainer("cp", "-r","/gams_config/data", "/var/solr");
     } catch (Exception e) {
       String msg = String.format("Solr didn't start correctly for testing. Got solr logs: %s Got exception: %s", solr.getLogs(), e);
       log.error(msg);
-      throw e;
+      // TODO better handle IOException?
+      //throw e;
     }
 
   }
