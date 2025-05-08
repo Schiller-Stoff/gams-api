@@ -149,6 +149,10 @@ public class SOLRClientIT extends IntegrationTest {
     Assertions.assertThat(
         solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
     ).isTrue();
+    // core should still exist
+    Assertions.assertThat(
+        solrClient.coreExists(TEST_CORE_NAME)
+    ).isTrue();
 
     // remove core
     solrClient.removeCore(TEST_CORE_NAME);
