@@ -218,18 +218,12 @@ public class SOLRClient {
    */
   public void removeCore(String coreName){
 
-    final String URL = String.format("%s?action=UNLOAD&core=%s", SOLR_CORE_ADMIN_API_ENDPOINT, coreName);
-    String body = """
-                {
-                    deleteInstanceDir: true
-                  }
-              """;
+    final String URL = String.format("%s?action=UNLOAD&core=%s&deleteInstanceDir=true", SOLR_CORE_ADMIN_API_ENDPOINT, coreName);
 
     try {
       webClient.post()
           .uri(URL)
           .contentType(MediaType.APPLICATION_JSON)
-          .body(BodyInserters.fromValue(body))
           .retrieve()
           .bodyToMono(String.class)
           .block();
@@ -241,7 +235,7 @@ public class SOLRClient {
       log.error(msg);
       throw new IntegrationServiceException(msg);
     } catch (WebClientException e) {
-      String msg = String.format("Failed to delete solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, URL, body, e.getMessage(), e);
+      String msg = String.format("Failed to delete solr core %s. Via baseUrl %s and endpoint %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, URL, e.getMessage(), e);
       log.error(msg);
       throw new IntegrationServiceException(msg);
     }
