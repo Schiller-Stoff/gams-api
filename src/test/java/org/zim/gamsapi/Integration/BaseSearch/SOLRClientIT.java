@@ -46,7 +46,10 @@ public class SOLRClientIT extends IntegrationTest {
     Assertions.assertThat(
         solrClient.coreExists(TEST_CORE_NAME)
     ).isTrue();
-    // TODO danger -> core still exists after test!
+    solrClient.removeCore(TEST_CORE_NAME);
+    Assertions.assertThat(
+        solrClient.coreExists(TEST_CORE_NAME)
+    ).isFalse();
   }
 
   @Test
@@ -75,10 +78,10 @@ public class SOLRClientIT extends IntegrationTest {
   }
 
   @Test
-  @Disabled
-  public void wipeCoreWorksAsExpected(){
+  public void checkCoreIsEmptyWorksAsExpected(){
 
     final String TEST_CORE_NAME = "DOES_NOT_EXIST";
+
     // this core should not exist
     Assertions.assertThat(
         solrClient.coreExists(TEST_CORE_NAME)
@@ -101,6 +104,56 @@ public class SOLRClientIT extends IntegrationTest {
     // this core should be filled now with data
     Assertions.assertThat(
         solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
+    ).isFalse();
+
+    solrClient.removeCore(TEST_CORE_NAME);
+    // core should not exist now
+    Assertions.assertThat(
+        solrClient.coreExists(TEST_CORE_NAME)
+    ).isFalse();
+  }
+
+  @Test
+  public void wipeCoreWorksAsExpected(){
+
+    final String TEST_CORE_NAME = "DOES_NOT_EXIST";
+
+    // this core should not exist
+    Assertions.assertThat(
+        solrClient.coreExists(TEST_CORE_NAME)
+    ).isFalse();
+    solrClient.createCore(TEST_CORE_NAME);
+    // created core exists now
+    Assertions.assertThat(
+        solrClient.coreExists(TEST_CORE_NAME)
+    ).isTrue();
+
+    // core should be empty now
+    Assertions.assertThat(
+        solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
+    ).isTrue();
+
+    final BaseSearch baseSearch = new BaseSearch();
+    baseSearch.addProperty("id", "123");
+    solrClient.post(TEST_CORE_NAME, baseSearch);
+
+    // this core should be filled now with data
+    Assertions.assertThat(
+        solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
+    ).isFalse();
+
+    // wipe core
+    solrClient.wipeCore(TEST_CORE_NAME);
+    // core should be empty again
+    Assertions.assertThat(
+        solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
+    ).isTrue();
+
+    // remove core
+    solrClient.removeCore(TEST_CORE_NAME);
+    // core should not exist now
+    Assertions.assertThat(
+        solrClient.coreExists(TEST_CORE_NAME)
     ).isFalse();
 
   }
