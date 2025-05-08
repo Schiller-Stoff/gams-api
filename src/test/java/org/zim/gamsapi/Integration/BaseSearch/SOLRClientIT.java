@@ -2,6 +2,7 @@ package org.zim.gamsapi.Integration.BaseSearch;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -157,6 +158,36 @@ public class SOLRClientIT extends IntegrationTest {
     ).isFalse();
 
   }
+
+
+  @Nested
+  public class Post {
+
+    @Test
+    public void postingDataToSolrFillsTestedCore(){
+
+      final String TEST_CORE_NAME = "DOES_NOT_EXIST";
+      Assertions.assertThat(
+          solrClient.coreExists(TEST_CORE_NAME)
+      ).isFalse();
+
+      solrClient.createCore(TEST_CORE_NAME);
+      Assertions.assertThat(
+          solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
+      ).isTrue();
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty("id", "123");
+      solrClient.post(TEST_CORE_NAME, baseSearch);
+
+      Assertions.assertThat(solrClient.checkCoreIsEmpty(TEST_CORE_NAME)).isFalse();
+
+      // clean up
+      solrClient.removeCore(TEST_CORE_NAME);
+    }
+
+  }
+
 
   @Test
   @Disabled
