@@ -108,10 +108,9 @@ public abstract class IntegrationTest {
       // make sure that configuration stuff is available (like the configsets)
       solr.execInContainer("cp", "-r","/gams_config/data", "/var/solr");
     } catch (Exception e) {
-      String msg = String.format("Solr didn't start correctly for testing. Got solr logs: %s Got exception: %s", solr.getLogs(), e);
+      String msg = String.format("Solr didn't start correctly for testing. Exec in container didn't work. Got solr logs: %s Got exception: %s", solr.getLogs(), e);
       log.error(msg);
-      // TODO better handle IOException?
-      //throw e;
+      throw new AssertionError(msg);
     }
 
   }
