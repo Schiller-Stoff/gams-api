@@ -65,10 +65,8 @@ public abstract class IntegrationTest {
   @Autowired
   EventCaptureListener eventCaptureListener;
 
-  // TODO use constant
   public static final String SOLR_TEST_CORE = "test";
 
-  // TODO use constant
   public static final String SOLR_GAMS_CORE = "gams";
 
   // First launch postgres for all integration tests
@@ -105,8 +103,8 @@ public abstract class IntegrationTest {
     try {
       solr.start();
       // create the expected base cores
-      solr.execInContainer("bash", "bin/solr", "create_core", "-c", "test", "-d", "/gams_config/data/configsets/base");
-      solr.execInContainer("bash", "bin/solr", "create_core", "-c", "gams", "-d", "/gams_config/data/gams");
+      solr.execInContainer("bash", "bin/solr", "create_core", "-c", IntegrationTest.SOLR_TEST_CORE, "-d", "/gams_config/data/configsets/base");
+      solr.execInContainer("bash", "bin/solr", "create_core", "-c", IntegrationTest.SOLR_GAMS_CORE, "-d", "/gams_config/data/gams");
       // make sure that configuration stuff is available (like the configsets)
       solr.execInContainer("cp", "-r","/gams_config/data", "/var/solr");
     } catch (Exception e) {
