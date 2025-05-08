@@ -84,10 +84,12 @@ public class SOLRClient {
         .bodyValue(data)
         .retrieve()
         .toBodilessEntity()
-        .onErrorComplete()
-        .toFuture()
-        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
+        .block();
+    // from here alternative approach via async client
+//        .onErrorComplete()
+//        .toFuture()
+//        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
+//        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
   }
 
   /**
@@ -153,10 +155,12 @@ public class SOLRClient {
         .body(BodyInserters.fromValue(body))
         .retrieve()
         .toBodilessEntity()
-        .onErrorComplete()
-        .toFuture()
-        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
+        .block();
+    // from here alternative approach async
+//        .onErrorComplete()
+//        .toFuture()
+//        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
+//        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
 
   }
 
@@ -224,6 +228,53 @@ public class SOLRClient {
       throw new IntegrationServiceException(msg);
     }
 
+
+  }
+
+  /**
+   * Wipes all documents from a core.
+   * @param coreName the name of the core to wipe
+   */
+  public void wipeCore(String coreName){
+    log.trace("Wiping core {}", coreName);
+    this.delete(coreName, "*:*");
+  }
+
+  /**
+   * Checks if a core is empty.
+   * @param coreName the name of the core to check
+   */
+  public boolean checkCoreIsEmpty(String coreName){
+    log.trace("Checking if core {} is empty", coreName);
+    final String CORE_QUERY_URL = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/select?q=*:*&rows=0";
+
+    try {
+      String response = webClient.get()
+          .uri(CORE_QUERY_URL)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+
+      // Parse the response to check numFound field
+      int numFound = OBJECT_MAPPER.readTree(response)
+          .path("response")
+          .path("numFound")
+          .asInt();
+
+      log.trace("Core {} has {} documents", coreName, numFound);
+      return numFound == 0;
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format("Failed to check if solr core %s is empty. Via url: %s Status: %s. Error response from solr: %s",
+          coreName, CORE_QUERY_URL, e.getStatusCode(), errorResponseBody);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (Exception e) {
+      String msg = String.format("Failed to check if solr core %s is empty. Via url: %s Cause: %s Original error: %s",
+          coreName, CORE_QUERY_URL, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
 
   }
 
