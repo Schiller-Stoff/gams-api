@@ -78,18 +78,28 @@ public class SOLRClient {
 
     String postUrl = String.format("%s/%s/update/json/docs?commit=true", SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
 
-    webClient.post()
-        .uri(postUrl)
-        .contentType(MediaType.APPLICATION_JSON)
-        .bodyValue(data)
-        .retrieve()
-        .toBodilessEntity()
-        .block();
-    // from here alternative approach via async client
-//        .onErrorComplete()
-//        .toFuture()
-//        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-//        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
+    try {
+      webClient.post()
+          .uri(postUrl)
+          .contentType(MediaType.APPLICATION_JSON)
+          .bodyValue(data)
+          .retrieve()
+          .toBodilessEntity()
+          .block();
+    } catch (WebClientResponseException e) {
+      // This exception contains the response body from the server
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
+          coreName, SOLR_BASE_URL, postUrl, e.getStatusCode(), errorResponseBody);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, postUrl, data, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+
+
   }
 
   /**
@@ -135,35 +145,43 @@ public class SOLRClient {
    * @param coreName the name of the core to delete documents from
    * @param query the query to match documents to delete
    */
-  public void delete(String coreName, String query){
+  public void delete(String coreName, String query) {
 
     final String URL = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true";
 
     String body = """
-                {
-                    "delete": {
-                      "query": "%s"
-                    }
-                  }
-            """.formatted(query);
+            {
+                "delete": {
+                  "query": "%s"
+                }
+              }
+        """.formatted(query);
 
     log.trace("Deleting documents from core {} with query {} at base url {} and constructed body {}", coreName, query, URL, body);
 
-    webClient.post()
-        .uri(URL)
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(BodyInserters.fromValue(body))
-        .retrieve()
-        .toBodilessEntity()
-        .block();
-    // from here alternative approach async
-//        .onErrorComplete()
-//        .toFuture()
-//        .orTimeout(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-//        .thenAccept(response -> log.trace("Successfully posted data to solr core {}", coreName));
+    try {
+      webClient.post()
+          .uri(URL)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(BodyInserters.fromValue(body))
+          .retrieve()
+          .toBodilessEntity()
+          .block();
+    } catch (WebClientResponseException e) {
+      // This exception contains the response body from the server
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format("Failed to delete documents from solr core %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
+          coreName, SOLR_BASE_URL, URL, e.getStatusCode(), errorResponseBody);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format("Failed to delete documents from solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, URL, body, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+
+    }
 
   }
-
 
   /**
    * Check if a core exists for a given project.
