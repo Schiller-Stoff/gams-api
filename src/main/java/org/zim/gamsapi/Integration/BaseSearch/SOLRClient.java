@@ -27,6 +27,8 @@ public class SOLRClient {
 
   private final String SOLR_SINGLE_CORE_API_ENDPOINT = "/solr";
 
+  private final String SOLR_CORE_ADMIN_API_ENDPOINT = SOLR_SINGLE_CORE_API_ENDPOINT + "/admin/cores";
+
   private final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final String SOLR_BASE_URL;
@@ -187,4 +189,42 @@ public class SOLRClient {
     }
 
   }
+
+  /**
+   * Deletes a core from the SOLR server.
+   * @param coreName the name of the core to delete
+   */
+  public void removeCore(String coreName){
+
+    final String URL = String.format("%s?action=UNLOAD&core=%s", SOLR_CORE_ADMIN_API_ENDPOINT, coreName);
+    String body = """
+                {
+                    deleteInstanceDir: true
+                  }
+              """;
+
+    try {
+      webClient.post()
+          .uri(URL)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body(BodyInserters.fromValue(body))
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientResponseException e){
+      // This exception contains the response body from the server
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format("Failed to delete solr core %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
+          coreName, SOLR_BASE_URL, URL, e.getStatusCode(), errorResponseBody);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format("Failed to delete solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, URL, body, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+
+
+  }
+
 }
