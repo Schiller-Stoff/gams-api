@@ -31,4 +31,6 @@ public class GAMSDockerDNS {
   @NotBlank
   private String triplestoreUrl;
 
+  @NotBlank
+  private String elasticsearchUrl;
 }

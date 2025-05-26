@@ -21,3 +21,5 @@ gams:
     baseSearchUrl: ${BASE_SEARCH_URL:http://localhost:8983}
     # TODO remove hardcoded gams database?
     triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}
+    # elasticsearch
+    elasticsearchUrl: ${ELASTICSEARCH_URL:http://localhost:9200}
