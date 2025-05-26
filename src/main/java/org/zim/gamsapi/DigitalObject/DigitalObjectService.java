@@ -2,6 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
@@ -31,6 +33,8 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDatastreamRepository datastreamRepository;
   private final IProjectRepository projectRepository;
   private final IDatastreamContentRepository fileSystemRepository;
+  private final IDublinCoreEntryRepository dublinCoreEntryRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   @Override
   @Transactional
@@ -43,7 +47,11 @@ public class DigitalObjectService implements IDigitalObjectService {
             }
     );
 
-    return digitalObjectRepository.save(digitalObject);
+    DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectCreatedEvent(this, savedObject)
+    );
+    return savedObject;
   }
 
   @Override
@@ -128,6 +136,8 @@ public class DigitalObjectService implements IDigitalObjectService {
       fileSystemRepository.delete(datastream.deriveDatastreamId());
     });
 
+    dublinCoreEntryRepository.deleteAllByDigitalObject(digitalObject);
+
     digitalObjectRepository.delete(digitalObject);
     log.info("Successfully deleted digital object {}", digitalObject);
   }
@@ -163,5 +173,26 @@ public class DigitalObjectService implements IDigitalObjectService {
                     log.info(msg);
                     return new DigitalObjectNotFoundException(msg);
                 });
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(Set<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble){
+      String msg = String.format("Trying to find digital objects by project abbreviation %s and dublin core entry name %s and values %s", projectAbbrs, dcEntryName, dcEntryValue);
+      log.trace(msg);
+      return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(projectAbbrs, dcEntryName, dcEntryValue, pageAble);
+    }
+
+    @Override
+    public Page<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntryNames, String fulltext, Pageable pageAble) {
+      if(dcEntryNames.isEmpty()){
+        String msg = String.format("No concrete dublin core elements specified - fulltext-searching over all dc fields. Trying to find digital objects by project abbreviations %s and fulltext %s", projectAbbrs, fulltext);
+        log.trace(msg);
+        return dublinCoreEntryRepository.findDigitalObjectsByDCFulltext(projectAbbrs, fulltext, pageAble);
+      }
+      String msg = String.format("Dublin core elements for fulltext-search specified - Trying to find digital objects by project abbreviation %s and dublin core entry names %s and fulltext %s", projectAbbrs, dcEntryNames, fulltext);
+      log.trace(msg);
+      return dublinCoreEntryRepository.findDigitalObjectsByFulltextOnSpecificElements(projectAbbrs, dcEntryNames, fulltext, pageAble);
+
     }
 }

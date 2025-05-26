@@ -2,7 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Project.Project;
-import java.util.Set;
+import org.zim.gamsapi.Project.ProjectBuilder;
 
 @Slf4j
 public class DigitalObjectBuilder {
@@ -31,7 +31,7 @@ public class DigitalObjectBuilder {
   }
 
   public DigitalObjectBuilder project(String project) {
-    digitalObject.setProject(Project.builder().projectAbbr(project).build());
+    digitalObject.setProject(ProjectBuilder.builder().projectAbbr(project).build());
     return this;
   }
 
@@ -42,6 +42,16 @@ public class DigitalObjectBuilder {
 
   public DigitalObjectBuilder publisher(String publisher) {
     digitalObject.setPublisher(publisher);
+    return this;
+  }
+
+  public DigitalObjectBuilder funder(String funder) {
+    digitalObject.setFunder(funder);
+    return this;
+  }
+
+  public DigitalObjectBuilder mainResource(String mainResource) {
+    digitalObject.setMainResource(mainResource);
     return this;
   }
 
@@ -65,6 +75,14 @@ public class DigitalObjectBuilder {
     }
 
     return digitalObject;
+  }
+
+  /**
+   * Helper method to create a new DigitalObjectBuilder.
+   * @return A new DigitalObjectBuilder.
+   */
+  public static DigitalObjectBuilder builder(){
+    return new DigitalObjectBuilder();
   }
 
 

@@ -89,7 +89,27 @@ public class DatastreamServiceIT extends IntegrationTest {
       org.assertj.core.api.Assertions.assertThat(
           datastreamRepository.findById(datastream.deriveDatastreamId())
       ).isNotNull().isEmpty();
+    }
 
+    @Test
+    public void savedDatastreamHasExpectedTagProperty(){
+      Datastream datastream = TestDatastream.generate(testObject);
+      Datastream savedDatastream = datastreamService.save(datastream, TEST_MULTIPART_FILE);
+      org.assertj.core.api.Assertions.assertThat(savedDatastream)
+          .isNotNull()
+          .extracting(Datastream::getTags)
+          .isEqualTo(datastream.getTags());
+
+    }
+
+    @Test
+    public void savedDatastreamHasExpectedLangProperty(){
+      Datastream datastream = TestDatastream.generate(testObject);
+      Datastream savedDatastream = datastreamService.save(datastream, TEST_MULTIPART_FILE);
+      org.assertj.core.api.Assertions.assertThat(savedDatastream)
+          .isNotNull()
+          .extracting(Datastream::getLang)
+          .isEqualTo(datastream.getLang());
 
     }
 

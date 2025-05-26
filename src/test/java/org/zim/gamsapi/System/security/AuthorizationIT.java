@@ -6,14 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockPart;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 import org.zim.gamsapi.enums.TestProject;
@@ -56,7 +54,7 @@ public class AuthorizationIT extends IntegrationTest {
   }
 
   @Test
-  public void projectAdminAuthorizedForProjectIngest_throwsServerErrorAtProcessingAfterBeingAuthorized() throws Exception {
+  public void projectAdminAuthorizedForProjectIngest_throwsExpected404ErrorBecauseProjectDoesNotExist() throws Exception {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
@@ -75,13 +73,13 @@ public class AuthorizationIT extends IntegrationTest {
                 )
         )
         .andExpect(
-            status().is5xxServerError()
+            status().isNotFound()
         );
 
   }
 
   @Test
-  public void globalAdminMayIngest_throwsServerErrorAtProcessingAfterBeingAuthorized() throws Exception {
+  public void globalAdminMayIngest_throwsExpected404ErrorBecauseProjectDoesNotExist() throws Exception {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
@@ -98,7 +96,7 @@ public class AuthorizationIT extends IntegrationTest {
                 )
         )
         .andExpect(
-            status().is5xxServerError()
+            status().isNotFound()
         );
   }
 

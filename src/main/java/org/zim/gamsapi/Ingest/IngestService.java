@@ -2,13 +2,19 @@ package org.zim.gamsapi.Ingest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
@@ -17,6 +23,9 @@ import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.*;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
+import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,14 +36,26 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 public class IngestService implements IIngestService {
 
+  private final IProjectRepository projectRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
   private final IDatastreamContentRepository datastreamContentRepository;
+  private final IDublinCoreEntryRepository dublinCoreElementRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
 
   @Override
-  @Transactional
+  @Transactional(rollbackFor = {
+      // any exception will trigger a rollback
+      Exception.class}
+  )
   public void ingest(Ingest ingest) {
+
+    if(!projectRepository.existsById(ingest.getProjectAbbr())){
+      String msg = String.format("Project defined for the ingest operation %s does not exist (defined in given request url - bag's sip.json was not analyzed). Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
+      log.warn(msg);
+      throw new ProjectNotFoundException(msg);
+    }
 
     // 01. unzip bagitinfo to temp
     Path bagDirPath;
@@ -63,7 +84,7 @@ public class IngestService implements IIngestService {
         log.error(msg);
         throw new IngestTypeConversionException(msg);
       }
-      digitalObjectRepository.save(digitalObject);
+      final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
       // 03. build and save datastreams from sip.json in the bagit payload
@@ -88,7 +109,7 @@ public class IngestService implements IIngestService {
                 throw new IngestProcessingException(msg);
               }
 
-              datastream.setDigitalObject(digitalObject);
+              datastream.setDigitalObject(savedObject);
               datastream.setFileName(contentFilePath.getFileName().toString());
               datastream.setSize((long) datastreamContent.length);
               datastream.setMimeType(contentFile.getMimetype());
@@ -99,6 +120,25 @@ public class IngestService implements IIngestService {
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
                 datastreamRepository.save(datastream);
+
+                // also save dublin core metadata
+                if(contentFile.getDsid().equals(GAMSDsid.DC.getValue())){
+                  Document dublinCore = XMLUtils.parseXml(datastreamContent);
+                  XMLUtils
+                      .extractDCElements(dublinCore)
+                      .forEach(dcElement -> {
+                        DublinCoreEntry dublinCoreEntry = DublinCoreEntry
+                            .builder()
+                            .name(dcElement.getName())
+                            .value(dcElement.getValue())
+                            .digitalObject(savedObject)
+                            .build();
+                        dublinCoreElementRepository.save(dublinCoreEntry);
+                        log.info("Successfully saved dublinCoreEntry: {}", dublinCoreEntry);
+                      });
+
+                }
+
               } catch (Exception e){
                 // make sure that in any case the file on the filesystem is being deleted
                 if(datastreamContentRepository.exists(datastream.deriveDatastreamId())){
@@ -109,6 +149,11 @@ public class IngestService implements IIngestService {
                 throw e;
               }
             });
+
+      applicationEventPublisher.publishEvent(
+          new DigitalObjectCreatedEvent(this, savedObject)
+      );
+
     } catch (Exception e){
       // make sure that in any case the temp directory is deleted
       ZipUtils.deleteDir(bagDirPath);

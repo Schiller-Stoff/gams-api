@@ -4,6 +4,7 @@ import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.MetadataBaseEntity;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Spring Data JPA Projection Interface for a singular Datastream.
@@ -45,6 +46,10 @@ public interface IDatastreamDetailsView {
     String getCreatedBy();
 
     String getModifiedBy();
+
+    Set<String> getTags();
+
+    Set<String> getLang();
 
     interface DigitalObjectView {
         String getId();

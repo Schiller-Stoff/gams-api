@@ -34,6 +34,28 @@ Run application in 'dev' profile (best via IDE settings)
 
 ```
 
+# Testing
+
+Integration and unittests are meant to be run separately via own maven goals.
+
+## Unit tests
+
+**/*Test.java classes
+
+```sh
+# run all tests
+./mvnw test
+```
+
+## Integration tests
+
+**/*IT.java classes
+
+```sh
+# run all tests
+./mvnw integration-test
+
+```
 
 ## Profiles
 

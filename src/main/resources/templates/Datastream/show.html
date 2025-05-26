@@ -55,6 +55,14 @@
                     <small>description</small>
                     <p th:text="${datastream.baseMetadata.description}"></p>
                 </li>
+                <li class="list-group-item bg-light">
+                    <small>tags</small>
+                    <p th:text="${datastream.getTags}"></p>
+                </li>
+                <li class="list-group-item bg-light">
+                    <small>languages</small>
+                    <p th:text="${datastream.getLang}"></p>
+                </li>
                 <!--        <li class="list-group-item bg-light">-->
                 <!--            <small>dc:subject</small>-->
                 <!--            <p th:text="${datastream.baseMetadata.subject}"></p>-->

@@ -22,3 +22,19 @@ testcontainers:
 gams:
   storage:
     rootPath: ${GAMS_FILES_ROOT_PATH:gams-test}
+
+
+########
+# Logging
+# (handled in different profiles)
+logging:
+  file:
+    name: ${LOG_FILE:log/test.log}
+  level:
+    org.zim.gamsapi: ${LOG_LEVEL:DEBUG}
+    org.zim.gamsapi.System.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+  logback:
+    # cleans log file on startup
+    rollingpolicy:
+      clean-history-on-start: true

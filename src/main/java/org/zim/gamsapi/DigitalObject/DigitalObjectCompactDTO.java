@@ -44,6 +44,10 @@ public class DigitalObjectCompactDTO {
 
     private String publisher;
 
+    private String funder;
+
+    private String mainResource;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

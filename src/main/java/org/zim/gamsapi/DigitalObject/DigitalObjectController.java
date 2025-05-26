@@ -1,27 +1,41 @@
 package org.zim.gamsapi.DigitalObject;
 
+import io.micrometer.common.lang.Nullable;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Datastream.DatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
+import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
+import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.utils.ControllerUtils;
-import io.micrometer.common.lang.Nullable;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -34,6 +48,46 @@ public class DigitalObjectController {
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
   private final ConversionService conversionService;
+  private final IDigitalObjectModificationService digitalObjectModificationService;
+
+
+  @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkDigitalObjectModification(
+      @PathVariable String id,
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
+  ) {
+
+    // Get latest modification date across entire entity hierarchy
+    DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
+        findLatestModificationDate(id);
+
+    LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
+
+    // Format for HTTP header
+    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
+
+    // Handle conditional request
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
+
+    return ResponseEntity.ok()
+        .lastModified(zonedDateTime)
+        .build();
+
+  }
 
   // @GetMapping(value = {"/{id}", "/{id}/"}, produces =
   // MimeTypeUtils.APPLICATION_JSON_VALUE)
@@ -71,7 +125,12 @@ public class DigitalObjectController {
   public DigitalObjectCompactDTO getJson(@PathVariable String projectAbbr, @PathVariable String id, Model model) {
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(id);
-    Project project = new Project(projectAbbr, "");
+
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
+
     digitalObject.setProject(project);
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
     var datastreamDetailsViews = datastreamService.findAll(digitalObject);
@@ -139,7 +198,10 @@ public class DigitalObjectController {
       pageSize = 20;
     }
 
-    Project project = new Project(projectAbbr, "");
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
 
     model.addAttribute(project);
 
@@ -174,8 +236,11 @@ public class DigitalObjectController {
         id,
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
 
+    // retrieve project info from database
+    Project foundProject = projectService.findProject(project.getProjectAbbr());
+
     model.addAttribute("digitalObjects", digitalObjects.toList());
-    model.addAttribute(project);
+    model.addAttribute(foundProject);
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("totalItems", digitalObjects.getTotalElements());
@@ -230,7 +295,12 @@ public class DigitalObjectController {
   @GetMapping(params = { "style" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr, @Nullable @RequestParam String style) {
-    Project project = new Project(projectAbbr, "");
+    Project project = ProjectBuilder
+        .builder()
+        .projectAbbr(projectAbbr)
+        .description("")
+        .build();
+
     if (!style.equalsIgnoreCase("idlist")) {
       String msg = String.format("Unsupported view style %s", style);
       log.error(msg);

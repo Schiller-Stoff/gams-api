@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class BagitContentFile {
@@ -62,6 +65,18 @@ public class BagitContentFile {
      */
     @NotEmpty
     private String rights;
+
+    /**
+     * Tags of the datastream / content file mapped from the sip.json
+     */
+    @NotNull
+    private Set<String> tags = new HashSet<>();
+
+    /**
+     * Language of the datastream / content file mapped from the sip.json
+     */
+    @NotNull
+    private Set<String> lang = new HashSet<>();
 
 
 }

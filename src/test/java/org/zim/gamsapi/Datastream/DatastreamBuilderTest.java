@@ -74,4 +74,34 @@ public class DatastreamBuilderTest extends UnitTest {
 
   }
 
+  @Test
+  public void builtDatastreamContainsExpectedTags(){
+    Set<String> stringSet = Set.of("tag1", "tag2", "tag3");
+    Datastream datastream = new DatastreamBuilder()
+        .digitalObject("digitalObjectId")
+        .dsid("dsid")
+        .tags(stringSet)
+        .build();
+    Assertions.assertNotNull(datastream);
+    Assertions.assertEquals(stringSet, datastream.getTags());
+  }
+
+  @Test
+  public void builderReturnsDatastreamBuilderInstance(){
+    DatastreamBuilder datastreamBuilder = DatastreamBuilder.builder();
+    Assertions.assertNotNull(datastreamBuilder);
+  }
+
+  @Test
+  public void builtDatastreamContainsExpectedLang(){
+    Set<String> stringSet = Set.of("lang1", "lang2", "lang3");
+    Datastream datastream = new DatastreamBuilder()
+        .digitalObject("digitalObjectId")
+        .dsid("dsid")
+        .lang(stringSet)
+        .build();
+    Assertions.assertNotNull(datastream);
+    Assertions.assertEquals(stringSet, datastream.getLang());
+  }
+
 }

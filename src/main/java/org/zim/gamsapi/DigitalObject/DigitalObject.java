@@ -97,6 +97,18 @@ public class DigitalObject {
   @NotEmpty
   private String publisher;
 
+  /**
+   * Funder of the digital object
+   */
+  @Column(name = "funder")
+  private String funder;
+
+  /**
+   * Main resource of the digital object
+   */
+  @Column(name = "main_resource")
+  private String mainResource;
+
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

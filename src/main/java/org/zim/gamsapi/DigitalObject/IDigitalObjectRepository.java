@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,5 +72,26 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return a list of digital object ids
    */
   List<DigitalObjectIdView> findAllByProject_ProjectAbbr(String projectAbbr);
+
+  /**
+   * Finds the most recent modification timestamp for any digital object for given project.
+   * E.g. for project 'memo' it returns a date for the latest modified digital object.
+   * @param projectAbbr The abbreviation of the project.
+   * @return The last modified date of the digital object.
+   */
+  @Query("SELECT MAX(do.modified) FROM DigitalObject do WHERE do.project.projectAbbr = :projectAbbr")
+  Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+
+  /**
+   * Finds all digital objects for a given collection.
+   * @param collectionId identifier of the collection
+   * @param pageable pagination
+   * @return a page of digital objects as projection
+   */
+  @Query("SELECT do FROM GAMSCollection c JOIN c.digitalObjects do WHERE c.id = :collectionId")
+  Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(
+      @Param("collectionId") String collectionId,
+      Pageable pageable
+  );
 
 }

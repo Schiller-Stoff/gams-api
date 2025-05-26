@@ -72,5 +72,40 @@ public class DigitalObjectBuilderTest extends UnitTest {
     Assertions.assertEquals("test-title", digitalObject.getBaseMetadata().getTitle());
   }
 
+  @Test
+  public void mayBuildADigitalObjectWithExpectedValuesAndFunder(){
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("projectAbbr.1")
+        .project("projectAbbr")
+        .publisher("test-publisher")
+        .funder("test-funder")
+        .build();
+
+    Assertions.assertEquals("test-funder", digitalObject.getFunder());
+  }
+
+  @Test
+  public void builderHelperMethodReturnsAnInstance(){
+    DigitalObjectBuilder digitalObjectBuilder = DigitalObjectBuilder.builder();
+    Assertions.assertNotNull(digitalObjectBuilder);
+    Assertions.assertTrue(digitalObjectBuilder instanceof DigitalObjectBuilder);
+
+  }
+
+  @Test
+  public void mayBuildDigitalObjectWithExpectedMainResource(){
+    final String MAIN_RESOURCE = "mainResource";
+
+    DigitalObject digitalObject = new DigitalObjectBuilder()
+        .id("projectAbbr.1")
+        .project("projectAbbr")
+        .publisher("test-publisher")
+        .funder("test-funder")
+        .mainResource(MAIN_RESOURCE)
+        .build();
+
+    Assertions.assertEquals(MAIN_RESOURCE, digitalObject.getMainResource());
+
+  }
 
 }

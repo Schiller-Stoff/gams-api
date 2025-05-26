@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Integration.Common.utils;
 
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.*;
 import org.xml.sax.InputSource;
@@ -21,6 +22,8 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class for handling XML - throwing useful HttpStatus
@@ -240,5 +243,41 @@ public class XMLUtils {
 
     return sourceNode;
   }
+
+  /**
+   * Extracts Dublin Core elements from given Dublin Core document.
+   * @param dublinCore Dublin Core document to extract elements from.
+   * @return List of extracted Dublin Core elements.
+   */
+  public static List<XMLElement> extractDCElements(Document dublinCore) {
+    // TODO validate if dublin core?
+    List<XMLElement> dcElements = new ArrayList<>();
+    NodeList dublinCoreElements = XMLUtils.getAllXpath("/*/*", dublinCore);
+    for(int i = 0; i < dublinCoreElements.getLength(); i++){
+      String elementName = dublinCoreElements.item(i).getNodeName().replace("dc:", "");
+      String elementValue = dublinCoreElements.item(i).getTextContent();
+      XMLElement dcElement = XMLElement.builder()
+          .name(elementName)
+          .value(elementValue)
+          .build();
+      dcElements.add(dcElement);
+    }
+    return dcElements;
+  }
+
+
+  /**
+   * Helper class for XML elements.
+   */
+  @Setter
+  @Getter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @Builder
+  public static class XMLElement {
+    private String name;
+    private String value;
+  }
+
 
 }

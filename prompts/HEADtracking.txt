@@ -1,0 +1,39 @@
+
+# HEAD request for tracking changes in a Spring Boot REST API
+
+## Problem
+
+I need assistance from an experienced Java Spring developer with expertise in Spring Boot, Spring Web, and REST API design. Please provide concise, practical solutions based on domain-driven design principles.
+My current project "gams-api" is a Spring Boot REST API application with the following technologies:
+Java
+Spring Boot
+Spring Web
+PostgreSQL
+Docker
+Lombok
+
+## Context
+
+The application follows domain-driven design with this entity relationship:
+Project <- contains (multiple) <- DigitalObject <- contains (multiple) <- Datastream
+Each entity has corresponding domain classes, services, and repositories in the application.
+
+I'm implementing features that involve entity relationship navigation, modification tracking, and REST endpoint design for client synchronization. I need specific code examples and implementation approaches that follow Spring best practices.
+If you're unsure about any aspect, please say so rather than making assumptions. I value technical accuracy and implementation-ready solutions.
+
+## Additional requirements
+1. Scaling: We need to actively consider the aspect of scalability for our solutions. The REST-API app (with postgres) should scale upt to millions of DigitalObjects, few hundreds of Projects and tens of millions of Datastreams (in total). ALWAYS consider this scaling requirements in your answers.
+2. Performance: The solution should be performant and efficient. Avoid unnecessary database queries and optimize the code for performance.
+3. Security: Ensure that the solution is secure and follows best practices for REST API security.
+4. Error Handling: Implement proper error handling and response codes for the REST API.
+5. Documentation: Provide clear and concise documentation for the implemented solution.
+6. Testing: Include unit tests for the implemented solution to ensure correctness and reliability.
+
+## Task(s)
+
+- I need to implement a HEAD request against the /project/projectID endpoint.
+- This HEAD request should show if a project was changed - also considering changes being made to referenced entities.
+- E.g. if a user has changed the DigitalObject "memo.5" belonging to the Project "memo" -> then the HEAD request against Project memo
+  should consider this change (to the DigitalObject table) in the lastModifiedDate.
+
+How would you solve my task?

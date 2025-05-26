@@ -111,6 +111,19 @@ public class Datastream {
   @NotNull
   private Set<String> contentRestrictions = new HashSet<>();
 
+  /**
+   * Tags for the datastream.
+   */
+  @ElementCollection
+  @NotNull
+  private Set<String> tags = new HashSet<>();
+
+  /**
+   * Language of the datastream.
+   */
+  @ElementCollection
+  @NotNull
+  private Set<String> lang;
 
   /**
    * Derives the DatastreamId from the current Datastream object.

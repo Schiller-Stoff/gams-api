@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
@@ -78,7 +79,7 @@ public class ConstraintViolationTest extends UnitTest {
     public void raisesConstraintViolationIfProjectAbbrIsNotContainedInId(){
 
         DigitalObject digitalObject = new DigitalObjectBuilder()
-            .project(Project.builder().projectAbbr("foo").build())
+            .project(ProjectBuilder.builder().projectAbbr("foo").build())
             .id("foo")
             .publisher("foo")
             .baseMetadata(TestMetadataBaseEntity.generate())

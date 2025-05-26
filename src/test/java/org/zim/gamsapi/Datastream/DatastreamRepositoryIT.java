@@ -22,6 +22,8 @@ import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
 import org.zim.gamsapi.enums.TestProject;
 
+import java.util.Date;
+
 /**
  * Integration test for the DatastreamRepository.
  */
@@ -443,6 +445,198 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
     }
 
+    @Nested
+    public class FindMaxLastModifiedDateByProjectAbbr {
+
+        @Test
+        public void returnsExpectedModifiedDate(){
+
+            // first find saved test datastream (done in beforeEach before)
+            Datastream savedDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            // query last modified date
+            Date lastModified = datastreamRepository
+                .findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+
+            // modified of datastream should be assigned
+            Assertions.assertThat(savedDatastream.getModified())
+                    .isNotNull();
+
+            // last modified should be equal to the saved datastream
+            Assertions.assertThat(lastModified)
+                .isNotNull()
+                .isEqualTo(savedDatastream.getModified());
+
+        }
+
+        @Test
+        public void returnsLastModifedDateOfDatastreams(){
+
+            // first find saved test datastream (done in beforeEach before)
+            Datastream savedDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            // assert first datastream has a modified date
+            Assertions.assertThat(savedDatastream.getModified())
+                .isNotNull();
+
+            // save another datastream
+            Datastream savedLaterDatastream = datastreamRepository.save(
+                TestDatastream.generate(testDigitalObject, "rand4.xml")
+            );
+
+            // assert second datastream has a modified date
+            Assertions.assertThat(savedLaterDatastream.getModified())
+                .isNotNull();
+
+            // query last modified date
+            Date lastModified = datastreamRepository
+                .findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+
+            // last modified should be equal to the saved later datastream
+            Assertions.assertThat(lastModified)
+                .isNotNull()
+                .hasSameTimeAs(savedLaterDatastream.getModified());
+
+            // last modified should not be equal to the first datastream
+            Assertions.assertThat(lastModified)
+                .isNotEqualTo(savedDatastream.getModified());
+
+        }
+
+    }
 
 
+    /**
+     * Tests for time based modification auditing properties of the datastream entity.
+     * createdBy and modifiedBy are excluded.
+     */
+    @Nested
+    public class ModificationAuditing {
+
+
+        /**
+         * User auditing is disabled for this test-class
+         */
+        @Test
+        public void userAuditingFieldsShouldBeNull(){
+
+            Datastream foundDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            org.assertj.core.api.Assertions.assertThat(foundDatastream.getCreatedBy()).isNull();
+            org.assertj.core.api.Assertions.assertThat(foundDatastream.getModifiedBy()).isNull();
+
+        }
+
+        @Test
+        public void modificationAuditingPropertiesAreNotNull(){
+            Datastream savedDatastream = datastreamRepository
+                .save(TestDatastream.generate(testDigitalObject, "rand5.xml"));
+
+            // first some null assertions
+            org.assertj.core.api.Assertions.assertThat(savedDatastream.getCreated()).isNotNull();
+            org.assertj.core.api.Assertions.assertThat(savedDatastream.getModified()).isNotNull();
+
+        }
+
+        @Test
+        public void modificationAuditingPropertiesAreUpdated(){
+
+            Datastream foundDatastream = datastreamRepository.findById(
+                DatastreamId.builder()
+                    .dsid(testDatastream.getDsid())
+                    .digitalObject(testDigitalObject.getId())
+                    .build()
+            ).get();
+
+            Date created = foundDatastream.getCreated();
+            Date modified = foundDatastream.getModified();
+
+
+            // update the datastream
+            foundDatastream.setType("bla");
+            foundDatastream = datastreamRepository.save(foundDatastream);
+
+            // check if the modification date has been updated
+            org.assertj.core.api.Assertions.assertThat(
+                foundDatastream.getModified()
+            ).isAfter(modified);
+
+            // modification date is different from created
+            org.assertj.core.api.Assertions.assertThat(
+                foundDatastream.getModified()
+            ).isNotEqualTo(
+                foundDatastream.getCreated()
+            );
+
+        }
+
+    }
+
+
+    @Nested
+    public class Save {
+
+        @Test
+        public void savingOfDatastreamShouldReturnExpectedProperties(){
+
+            Datastream datastream = TestDatastream.generate(testDigitalObject);
+
+            Datastream savedDatastream = datastreamRepository.save(datastream);
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getDsid)
+                .isEqualTo(datastream.getDsid());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getDigitalObject)
+                .isEqualTo(datastream.getDigitalObject());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getBaseMetadata)
+                .isEqualTo(datastream.getBaseMetadata());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getTags)
+                .isEqualTo(datastream.getTags());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getSize)
+                .isEqualTo(datastream.getSize());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getMimeType)
+                .isEqualTo(datastream.getMimeType());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getLang)
+                .isEqualTo(datastream.getLang());
+
+            // clean up
+            datastreamRepository.delete(savedDatastream);
+
+        }
+
+    }
 }
