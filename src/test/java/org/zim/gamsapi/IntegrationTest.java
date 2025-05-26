@@ -14,6 +14,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.SolrContainer;
 import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
@@ -77,12 +78,29 @@ public abstract class IntegrationTest {
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
 
+  static final ElasticsearchContainer elasticSearch;
+
   //static final SolrContainer solr;
 
   // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
   static {
     postgres = new PostgreSQLContainer<>("postgres:13-alpine");
     postgres.start();
+
+    // TODO replace with used version according spring data doc
+    elasticSearch = new ElasticsearchContainer(
+        "elasticsearch:9.0.1"
+    );
+    elasticSearch
+        // disable SSL and security for testing
+        .withEnv("discovery.type", "single-node")
+        .withEnv("xpack.security.enabled", "false")
+        .withEnv("xpack.security.transport.ssl.enabled", "false")
+        .withEnv("xpack.security.http.ssl.enabled", "false");
+
+    elasticSearch.start();
+
+    log.info("*** Starting elasticsearch at address: {}", elasticSearch.getHttpHostAddress());
 
 //    // setup of solr (without same config as in docker-compose)
 //    solr = new SolrContainer(DockerImageName.parse("solr:9.2.1"));
@@ -122,9 +140,13 @@ public abstract class IntegrationTest {
 
   @DynamicPropertySource
   static void configureProperties(DynamicPropertyRegistry registry) {
+    // dynamic postgres configuration
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
+
+    // dynamic elasticsearch configuration
+    registry.add("gams.docker.elasticsearchUrl", () -> String.format("http://%s", elasticSearch.getHttpHostAddress()));
 
     // set solr host and port
 //    registry.add("gams.docker.baseSearchUrl", () -> String.format("""
