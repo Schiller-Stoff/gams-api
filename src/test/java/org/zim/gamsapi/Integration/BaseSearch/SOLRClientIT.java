@@ -11,7 +11,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.IntegrationTest;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("Deactivated integration testing for SOLR")
+@Disabled("Deactivated integration testing for SOLR because of unclear issues with the solr test-container.")
 public class SOLRClientIT extends IntegrationTest {
 
   // disables auditing
