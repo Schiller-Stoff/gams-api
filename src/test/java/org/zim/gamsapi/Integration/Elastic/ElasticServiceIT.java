@@ -21,7 +21,7 @@ import org.zim.gamsapi.enums.TestProject;
  * a specific context for testing ElasticSearch functionalities.
  */
 @Slf4j
-public class ElasticServiceIT extends IntegrationTest {
+public class ElasticServiceIT extends ElasticIntegrationTest {
 
   // disables auditing
   @MockBean

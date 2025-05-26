@@ -6,6 +6,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -23,6 +25,7 @@ import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Integration.BaseSearch.SOLRClient;
+import org.zim.gamsapi.Integration.Elastic.ElasticDigitalObjectRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 import java.io.File;
@@ -70,6 +73,9 @@ public abstract class IntegrationTest {
 
   @Autowired
   EventCaptureListener eventCaptureListener;
+
+  @Autowired
+  ElasticDigitalObjectRepository elasticDigitalObjectRepository;
 
   public static final String SOLR_TEST_CORE = "test";
 
