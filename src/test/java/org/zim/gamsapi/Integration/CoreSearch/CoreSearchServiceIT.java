@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Elastic;
+package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -9,7 +9,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
@@ -21,17 +20,17 @@ import org.zim.gamsapi.enums.TestProject;
  * a specific context for testing ElasticSearch functionalities.
  */
 @Slf4j
-public class ElasticServiceIT extends ElasticIntegrationTest {
+public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
 
   // disables auditing
   @MockBean
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private ElasticService elasticService;
+  private CoreSearchService coreSearchService;
 
   @Autowired
-  private ElasticDigitalObjectRepository elasticDigitalObjectRepository;
+  private CoreSearchRepository coreSearchRepository;
 
   @Autowired
   private IProjectRepository projectRepository;
@@ -59,13 +58,13 @@ public class ElasticServiceIT extends ElasticIntegrationTest {
           TEST_DIGITAL_OBJECT
       );
 
-      elasticService.indexObject(
+      coreSearchService.indexObject(
           TEST_PROJECT.getProjectAbbr(),
           TEST_DIGITAL_OBJECT.getId()
       );
 
       Assertions.assertThat(
-          elasticDigitalObjectRepository.existsById(TEST_DIGITAL_OBJECT.getId())
+          coreSearchRepository.existsById(TEST_DIGITAL_OBJECT.getId())
       ).isTrue();
 
     }

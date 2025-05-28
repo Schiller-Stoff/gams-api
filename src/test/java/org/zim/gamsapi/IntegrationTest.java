@@ -1,36 +1,24 @@
 package org.zim.gamsapi;
 
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.SolrContainer;
-import org.testcontainers.containers.wait.strategy.LogMessageWaitStrategy;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Integration.BaseSearch.SOLRClient;
-import org.zim.gamsapi.Integration.Elastic.ElasticDigitalObjectRepository;
+import org.zim.gamsapi.Integration.CoreSearch.CoreSearchRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-
-import java.io.File;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -75,7 +63,7 @@ public abstract class IntegrationTest {
   EventCaptureListener eventCaptureListener;
 
   @Autowired
-  ElasticDigitalObjectRepository elasticDigitalObjectRepository;
+  CoreSearchRepository coreSearchRepository;
 
   public static final String SOLR_TEST_CORE = "test";
 

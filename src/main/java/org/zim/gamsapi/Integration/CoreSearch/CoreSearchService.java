@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Elastic;
+package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +10,9 @@ import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ElasticService implements IIntegrationService {
+public class CoreSearchService implements IIntegrationService {
 
-  private final ElasticDigitalObjectRepository digitalObjectElasticRepository;
+  private final CoreSearchRepository digitalObjectElasticRepository;
 
   private final IDigitalObjectRepository digitalObjectRepository;
 
@@ -24,9 +24,9 @@ public class ElasticService implements IIntegrationService {
         // TODO rethink logging
         .orElseThrow(() -> new IntegrationServiceException("Digital object not found with ID: " + id));
 
-    ElasticDigitalObject elasticDigitalObject = new ElasticDigitalObject();
-    elasticDigitalObject.setId(digitalObject.getId());
-    digitalObjectElasticRepository.save(elasticDigitalObject);
+    CoreSearchEntity coreSearchEntity = new CoreSearchEntity();
+    coreSearchEntity.setId(digitalObject.getId());
+    digitalObjectElasticRepository.save(coreSearchEntity);
   }
 
   @Override

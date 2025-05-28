@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Elastic;
+package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -12,20 +12,20 @@ import org.zim.gamsapi.IntegrationTest;
  * additionally to the base integration test setup (postgres / auth / etc.).
  */
 @Slf4j
-public class ElasticIntegrationTest extends IntegrationTest {
+public class CoreSearchIntegrationTest extends IntegrationTest {
 
   @Autowired
-  ElasticDigitalObjectRepository elasticDigitalObjectRepository;
+  CoreSearchRepository coreSearchRepository;
 
   @Autowired
   ElasticsearchOperations elasticsearchOperations;
 
   @AfterEach
   public void tearDown() throws InterruptedException {
-    elasticDigitalObjectRepository.deleteAll();
+    coreSearchRepository.deleteAll();
     // seems necessary to create and recreate the elastic index for testing
     // (otherwise there is a OptimisticTransactionLock exception)
-    IndexCoordinates indexCoordinates = IndexCoordinates.of(ElasticDigitalObject.INDEX_NAME);
+    IndexCoordinates indexCoordinates = IndexCoordinates.of(CoreSearchEntity.INDEX_NAME);
     elasticsearchOperations.indexOps(indexCoordinates).delete();
     elasticsearchOperations.indexOps(indexCoordinates).create();
   }

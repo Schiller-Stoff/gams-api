@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Integration.Elastic;
+package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +12,9 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ElasticEventListener {
+public class CoreSearchEventListener {
 
-  private final ElasticService elasticService;
+  private final CoreSearchService coreSearchService;
 
   /**
    * Listen for DigitalObjectCreatedEvent, but only process after the transaction is committed.
@@ -27,7 +27,7 @@ public class ElasticEventListener {
     log.debug("Handling elastic search DigitalObjectCreatedEvent for object: {}", digitalObject.getId());
 
     try {
-      elasticService.indexObject(
+      coreSearchService.indexObject(
           digitalObject.getProject().getProjectAbbr(),
           digitalObject.getId()
       );

@@ -1,12 +1,10 @@
-package org.zim.gamsapi.Integration.Elastic;
+package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
-import org.springframework.data.elasticsearch.client.erhlc.AbstractElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 
@@ -14,7 +12,7 @@ import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
 @EnableElasticsearchRepositories
 @RequiredArgsConstructor
 @Slf4j
-public class ElasticConfig extends ElasticsearchConfiguration {
+public class CoreSearchConfig extends ElasticsearchConfiguration {
 
   private final GAMSDockerDNS gamsDockerDNS;
 
