@@ -25,8 +25,7 @@ public class ElasticIntegrationTest extends IntegrationTest {
     elasticDigitalObjectRepository.deleteAll();
     // seems necessary to create and recreate the elastic index for testing
     // (otherwise there is a OptimisticTransactionLock exception)
-    // TODO think about hardcoded index name
-    IndexCoordinates indexCoordinates = IndexCoordinates.of("digitalobject");
+    IndexCoordinates indexCoordinates = IndexCoordinates.of(ElasticDigitalObject.INDEX_NAME);
     elasticsearchOperations.indexOps(indexCoordinates).delete();
     elasticsearchOperations.indexOps(indexCoordinates).create();
   }

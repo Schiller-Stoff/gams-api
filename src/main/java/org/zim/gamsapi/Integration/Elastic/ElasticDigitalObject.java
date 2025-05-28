@@ -7,8 +7,13 @@ import org.springframework.data.elasticsearch.annotations.Document;
 
 @Getter
 @Setter
-@Document(indexName = "digitalobject", createIndex = true)
+@Document(indexName = ElasticDigitalObject.INDEX_NAME, createIndex = true)
 public class ElasticDigitalObject {
+
+  /**
+   * The name of the index in Elasticsearch where digital objects are stored.
+   */
+  public static final String INDEX_NAME = "digital_object";
 
   // TODO add more fields to elastic search
 
