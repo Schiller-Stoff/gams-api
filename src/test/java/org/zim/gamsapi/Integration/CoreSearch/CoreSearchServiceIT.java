@@ -49,11 +49,13 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
 
   /**
    * Ingests the test bag before all tests and then
-   * checks if the expected data is stored in ElasticSearch.
+   * checks if the found entity has expected values.
    */
   @Nested
   @TestInstance(TestInstance.Lifecycle.PER_CLASS)
   public class IngestResult {
+
+    private CoreSearchEntity FOUND_ENTITY;
 
     @BeforeAll
     public void setup() throws IOException {
@@ -72,18 +74,34 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(),
           TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
-    }
 
-    /**
-     * Tests if the ElasticSearch service can save a DigitalObject
-     * and verifies that the object is stored as expected.
-     */
-    @Test
-    public void storesExpectedObject(){
+      // verify existence in the repository
       Assertions.assertThat(
           coreSearchRepository.existsById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
       ).isTrue();
+
+      FOUND_ENTITY = coreSearchRepository.findById(
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      ).orElseThrow();
+
     }
+
+    /**
+     * Checks if expected entity exists in elastic search.
+     */
+    @Test
+    public void expectedObjectExists(){
+      Assertions.assertThat(
+          FOUND_ENTITY
+      ).isNotNull();
+    }
+
+    @Test
+    public void foundObjectHasExpectedId(){
+      Assertions.assertThat(FOUND_ENTITY.getId())
+          .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+    }
+
   }
 
 

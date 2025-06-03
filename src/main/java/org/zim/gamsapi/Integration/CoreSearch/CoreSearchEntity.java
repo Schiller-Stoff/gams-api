@@ -2,6 +2,7 @@ package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -14,6 +15,7 @@ import java.util.List;
  */
 @Getter
 @Setter
+@ToString
 @Document(indexName = CoreSearchEntity.INDEX_NAME, createIndex = true)
 public class CoreSearchEntity {
 
