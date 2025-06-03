@@ -2,17 +2,21 @@ package org.zim.gamsapi.Integration.CoreSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Ingest.Ingest;
+import org.zim.gamsapi.Ingest.IngestService;
+import org.zim.gamsapi.Ingest.utils.ZipUtils;
+import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestBag;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestProject;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Integration test for the ElasticSearch service.
@@ -38,8 +42,37 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
+  @Autowired
+  private IngestService ingestService;
+
+  File bagFile;
+
+  /**
+   * Ingests the test bag before all tests and then
+   * checks if the expected data is stored in ElasticSearch.
+   */
   @Nested
-  public class IndexObject {
+  @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+  public class IngestResult {
+
+    @BeforeAll
+    public void setup() throws IOException {
+      bagFile = TestBag.loadFile();
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+      ingestService.ingest(ingest);
+
+      // call index object
+      coreSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+    }
 
     /**
      * Tests if the ElasticSearch service can save a DigitalObject
@@ -47,27 +80,18 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
      */
     @Test
     public void storesExpectedObject(){
-
-      final Project TEST_PROJECT = TestProject.generate();
-      projectRepository.save(
-          TEST_PROJECT
-      );
-
-      final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
-      digitalObjectRepository.save(
-          TEST_DIGITAL_OBJECT
-      );
-
-      coreSearchService.indexObject(
-          TEST_PROJECT.getProjectAbbr(),
-          TEST_DIGITAL_OBJECT.getId()
-      );
-
       Assertions.assertThat(
-          coreSearchRepository.existsById(TEST_DIGITAL_OBJECT.getId())
+          coreSearchRepository.existsById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
       ).isTrue();
-
     }
+  }
+
+
+
+  @Nested
+  public class IndexObject {
+
+
 
   }
 

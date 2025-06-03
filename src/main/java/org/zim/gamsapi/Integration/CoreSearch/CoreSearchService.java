@@ -3,9 +3,16 @@ package org.zim.gamsapi.Integration.CoreSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.zim.gamsapi.Datastream.DatastreamContentRepository;
+import org.zim.gamsapi.Datastream.DatastreamId;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationServiceException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
+import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
+import java.io.IOException;
 
 @Service
 @Slf4j
@@ -15,6 +22,7 @@ public class CoreSearchService implements IIntegrationService {
   private final CoreSearchRepository digitalObjectElasticRepository;
 
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final DatastreamContentRepository datastreamContentRepository;
 
   public void indexObject(String projectId, String id) {
     log.info("Adding digital object to elasticsearch with ID: {}", id);
@@ -24,7 +32,46 @@ public class CoreSearchService implements IIntegrationService {
         // TODO rethink logging
         .orElseThrow(() -> new IntegrationServiceException("Digital object not found with ID: " + id));
 
+    // to be indexed in elastic search
     CoreSearchEntity coreSearchEntity = new CoreSearchEntity();
+
+    // TODO load dublin core - map to CoreSearchEntity?
+    final var DC_DATASTREAM_ID = DatastreamId.builder()
+        .digitalObject(id)
+        // TODO I'm very unsure because of case sensitivity
+        .dsid(GAMSAPIntegrationDatastreamId.DUBLIN_CORE_DATASTREAM_ID.name)
+        .build();
+
+    var xmlContent =  datastreamContentRepository.findById(DC_DATASTREAM_ID);
+
+    Document dcXml;
+    try {
+      dcXml = XMLUtils.parseXml(xmlContent.getInputStream());
+    } catch (IOException e) {
+      String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", xmlContent.getDescription(), DC_DATASTREAM_ID, e);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    }
+
+    // retrieve all child elements of the root element
+    // TODO validate if it's correct dublin core?
+    // TODO this might be risky (will index all elements in the xml file)
+    var dcNodes = XMLUtils.getAllXpath("/*/*", dcXml);
+
+    for (int i = 0; i < dcNodes.getLength(); i++) {
+      var node = dcNodes.item(i);
+      String nodeName = node.getNodeName();
+      String nodeValue = node.getTextContent();
+
+      switch (nodeName) {
+        case "dc:title":
+          coreSearchEntity.addTitle(nodeValue);
+          log.debug("Indexing title: {}", nodeValue);
+      }
+
+    }
+
+    // then save to elastic search
     coreSearchEntity.setId(digitalObject.getId());
     digitalObjectElasticRepository.save(coreSearchEntity);
   }
