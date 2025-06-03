@@ -9,6 +9,7 @@ import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
+import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationServiceException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
@@ -62,10 +63,24 @@ public class CoreSearchService implements IIntegrationService {
       var node = dcNodes.item(i);
       String nodeName = node.getNodeName();
       String nodeValue = node.getTextContent();
+      // read out potential DC lang field
+      // TODO rethink assignment of DC lang field
+      String optionalDcLang = null;
+      try {
+        optionalDcLang = XMLUtils.extractAttributeValue("xml:lang", node);
+      } catch (IntegrationDataProcessingException e){
+        // no lang attribute found
+        log.trace("No lang attribute found for dublin core element {}", nodeName);
+      }
 
       switch (nodeName) {
         case "dc:title":
-          coreSearchEntity.addTitle(nodeValue);
+          var dcTitle = CoreSearchEntity.DCELement.builder()
+              .name(nodeName)
+              .value(nodeValue)
+              .lang(optionalDcLang)
+              .build();
+          coreSearchEntity.addTitle(dcTitle);
           log.debug("Indexing title: {}", nodeValue);
       }
 
@@ -75,6 +90,7 @@ public class CoreSearchService implements IIntegrationService {
     coreSearchEntity.setId(digitalObject.getId());
     digitalObjectElasticRepository.save(coreSearchEntity);
   }
+
 
   @Override
   public void indexObjects(String projectAbbr) {

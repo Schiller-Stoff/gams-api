@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Integration.CoreSearch;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,7 +9,9 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a digital object written stored via the integrated CoreSearchService.
@@ -29,13 +32,22 @@ public class CoreSearchEntity {
   @Id
   private String id;
 
-  @Field(type = FieldType.Text)
-  private List<String> titles = new ArrayList<>();
+  @Field(type = FieldType.Object)
+  private List<DCELement> titles = new ArrayList<>();
 
-  public void addTitle(String title) {
-    if (title != null) {
-      this.titles.add(title);
+  public void addTitle(DCELement dcElement) {
+    if (dcElement != null) {
+      this.titles.add(dcElement);
     }
+  }
+
+  @Getter
+  @Setter
+  @Builder
+  public static class DCELement {
+    String name;
+    String value;
+    String lang;
   }
 
 }

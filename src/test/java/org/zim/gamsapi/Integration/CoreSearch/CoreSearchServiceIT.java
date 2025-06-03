@@ -102,6 +102,27 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
           .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
     }
 
+    @Test
+    public void foundObjectHasExpectedTitle() {
+      Assertions.assertThat(FOUND_ENTITY.getTitles())
+          .isNotEmpty()
+          .anySatisfy(title -> {
+            Assertions.assertThat(title.getName()).isEqualTo("dc:title");
+            Assertions.assertThat(title.getValue()).isEqualTo("test-dc-title");
+          });
+    }
+
+    @Test
+    public void hasExpectedTitleWithLang() {
+      Assertions.assertThat(FOUND_ENTITY.getTitles())
+          .isNotEmpty()
+          .anySatisfy(title -> {
+            Assertions.assertThat(title.getName()).isEqualTo("dc:title");
+            Assertions.assertThat(title.getValue()).isEqualTo("test-dc-title-en");
+            Assertions.assertThat(title.getLang()).isEqualTo("en");
+          });
+    }
+
   }
 
 
