@@ -73,11 +73,15 @@ public class CoreSearchService implements IIntegrationService {
         log.trace("No lang attribute found for dublin core element {}", nodeName);
       }
 
-      switch (nodeName) {
+      // remove "xml:" or "dc:" prefix if it exists
+      String nodeNameRemovedPrefix = nodeName.contains(":") ?
+          nodeName.substring(nodeName.indexOf(":") + 1) : nodeName;
+
+      switch (nodeNameRemovedPrefix) {
         // TODO dangerouse - doesn't work with default namespace
-        case "dc:title":
+        case "title":
           var dcTitle = CoreSearchEntity.DCELement.builder()
-              .name(nodeName)
+              .name(nodeNameRemovedPrefix)
               .value(nodeValue)
               .lang(optionalDcLang)
               .build();

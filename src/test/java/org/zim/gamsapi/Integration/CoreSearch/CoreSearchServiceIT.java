@@ -107,7 +107,7 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
       Assertions.assertThat(FOUND_ENTITY.getTitles())
           .isNotEmpty()
           .anySatisfy(title -> {
-            Assertions.assertThat(title.getName()).isEqualTo("dc:title");
+            Assertions.assertThat(title.getName()).isEqualTo("title");
             Assertions.assertThat(title.getValue()).isEqualTo("test-dc-title");
           });
     }
@@ -117,10 +117,16 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
       Assertions.assertThat(FOUND_ENTITY.getTitles())
           .isNotEmpty()
           .anySatisfy(title -> {
-            Assertions.assertThat(title.getName()).isEqualTo("dc:title");
+            Assertions.assertThat(title.getName()).isEqualTo("title");
             Assertions.assertThat(title.getValue()).isEqualTo("test-dc-title-en");
             Assertions.assertThat(title.getLang()).isEqualTo("en");
           });
+    }
+
+    @Test
+    public void doesNotContainDCElementsWithPrefix(){
+      Assertions.assertThat(FOUND_ENTITY.getTitles())
+          .noneMatch(dceLement -> dceLement.getName().contains(":"));
     }
 
   }
