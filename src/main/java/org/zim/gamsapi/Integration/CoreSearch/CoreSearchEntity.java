@@ -64,6 +64,7 @@ public class CoreSearchEntity {
   @Getter
   @Setter
   @Builder
+  @ToString
   public static class DCElement {
     String name;
     String value;
