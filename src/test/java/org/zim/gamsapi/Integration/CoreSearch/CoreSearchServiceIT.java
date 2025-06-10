@@ -184,6 +184,17 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
           });
     }
 
+    @Test
+    public void hasExpectedMappedEnglishDCContributor() {
+      Assertions.assertThat(FOUND_ENTITY.getContributors())
+          .isNotEmpty()
+          .anySatisfy(dcElement -> {
+            Assertions.assertThat(dcElement.getName()).isEqualTo("contributor");
+            Assertions.assertThat(dcElement.getValue()).isEqualTo("test-dc-contributor-en");
+            Assertions.assertThat(dcElement.getLang()).isEqualTo("en");
+          });
+    }
+
   }
 
 
