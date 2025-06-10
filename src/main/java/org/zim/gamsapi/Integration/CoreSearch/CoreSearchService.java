@@ -90,6 +90,8 @@ public class CoreSearchService implements IIntegrationService {
           coreSearchEntity.addTitle(dcElement);
         case "description":
           coreSearchEntity.addDescription(dcElement);
+        case "relation":
+          coreSearchEntity.addRelation(dcElement);
       }
 
       log.trace("Indexing dublin core element: {}", dcElement);

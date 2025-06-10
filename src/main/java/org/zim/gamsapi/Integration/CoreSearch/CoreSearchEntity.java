@@ -46,6 +46,13 @@ public class CoreSearchEntity {
   @Field(type = FieldType.Object)
   private List<DCElement> descriptions = new ArrayList<>();
 
+  /**
+   * Represents relation elements from dublin core.
+   * This can include links to related digital objects or resources.
+   */
+  @Field(type = FieldType.Object)
+  private List<DCElement> relations = new ArrayList<>();
+
   public void addTitle(DCElement dcElement) {
     if (dcElement != null) {
       this.titles.add(dcElement);
@@ -55,6 +62,12 @@ public class CoreSearchEntity {
   public void addDescription(DCElement dcElement) {
     if (dcElement != null) {
       this.descriptions.add(dcElement);
+    }
+  }
+
+  public void addRelation(DCElement dcElement) {
+    if (dcElement != null) {
+      this.relations.add(dcElement);
     }
   }
 

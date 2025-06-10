@@ -151,6 +151,17 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
           });
     }
 
+    @Test
+    public void hasExpectedMappedEnglishDCRelation() {
+      Assertions.assertThat(FOUND_ENTITY.getRelations())
+          .isNotEmpty()
+          .anySatisfy(dcElement -> {
+            Assertions.assertThat(dcElement.getName()).isEqualTo("relation");
+            Assertions.assertThat(dcElement.getValue()).isEqualTo("test-dc-relation-en");
+            Assertions.assertThat(dcElement.getLang()).isEqualTo("en");
+          });
+    }
+
   }
 
 
