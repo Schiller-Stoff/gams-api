@@ -9,6 +9,7 @@
     <dc:relation>http://schuchardt.uni-graz.at</dc:relation>
     <dc:relation xml:lang="en">test-dc-relation-en</dc:relation>
     <dc:creator>Paris, Gaston</dc:creator>
+    <dc:creator xml:lang="en">test-dc-creator-en</dc:creator>
     <dc:publisher>Institut für Sprachwissenschaft, Karl-Franzens-Universität Graz</dc:publisher>
     <dc:contributor>Schuchardt, Hugo</dc:contributor>
     <dc:language>fr</dc:language>
