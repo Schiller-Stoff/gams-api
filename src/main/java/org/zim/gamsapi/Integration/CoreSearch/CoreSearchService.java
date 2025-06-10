@@ -98,6 +98,8 @@ public class CoreSearchService implements IIntegrationService {
           coreSearchEntity.addPublisher(dcElement);
         case "contributor":
           coreSearchEntity.addContributor(dcElement);
+        case "language":
+          coreSearchEntity.addLanguage(dcElement);
       }
 
       log.trace("Indexing dublin core element: {}", dcElement);

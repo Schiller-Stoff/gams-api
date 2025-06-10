@@ -71,6 +71,12 @@ public class CoreSearchEntity {
   @Field(type = FieldType.Object)
   private List<DCElement> contributors = new ArrayList<>();
 
+  /**
+   * Represents language elements from dublin core.
+   */
+  @Field(type = FieldType.Object)
+  private List<DCElement> languages = new ArrayList<>();
+
   public void addTitle(DCElement dcElement) {
     if (dcElement != null) {
       this.titles.add(dcElement);
@@ -104,6 +110,12 @@ public class CoreSearchEntity {
   public void addContributor(DCElement dcElement) {
     if (dcElement != null) {
       this.contributors.add(dcElement);
+    }
+  }
+
+  public void addLanguage(DCElement dcElement) {
+    if (dcElement != null) {
+      this.languages.add(dcElement);
     }
   }
 

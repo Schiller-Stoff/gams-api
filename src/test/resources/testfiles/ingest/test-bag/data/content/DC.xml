@@ -15,6 +15,7 @@
     <dc:contributor>Schuchardt, Hugo</dc:contributor>
     <dc:contributor xml:lang="en">test-dc-contributor-en</dc:contributor>
     <dc:language>fr</dc:language>
+    <dc:language xml:lang="en">test-dc-language-en</dc:language>
     <dc:date>1873-02-17</dc:date>
     <dc:type>Brief</dc:type>
     <dc:format>text/xml</dc:format>
