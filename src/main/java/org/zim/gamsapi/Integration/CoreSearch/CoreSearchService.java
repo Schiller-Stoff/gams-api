@@ -67,7 +67,6 @@ public class CoreSearchService implements IIntegrationService {
       String nodeName = node.getNodeName();
       String nodeValue = node.getTextContent();
       // read out potential DC lang field
-      // TODO rethink assignment of DC lang field
       String optionalDcLang = null;
       try {
         optionalDcLang = XMLUtils.extractAttributeValue("xml:lang", node);
@@ -80,25 +79,20 @@ public class CoreSearchService implements IIntegrationService {
       String nodeNameRemovedPrefix = nodeName.contains(":") ?
           nodeName.substring(nodeName.indexOf(":") + 1) : nodeName;
 
+      var dcElement = CoreSearchEntity.DCElement.builder()
+          .name(nodeNameRemovedPrefix)
+          .value(nodeValue)
+          .lang(optionalDcLang)
+          .build();
+
       switch (nodeNameRemovedPrefix) {
         case "title":
-          var dcTitle = CoreSearchEntity.DCElement.builder()
-              .name(nodeNameRemovedPrefix)
-              .value(nodeValue)
-              .lang(optionalDcLang)
-              .build();
-          coreSearchEntity.addTitle(dcTitle);
-          log.debug("Indexing title: {}", nodeValue);
+          coreSearchEntity.addTitle(dcElement);
         case "description":
-          coreSearchEntity.addDescription(
-              CoreSearchEntity.DCElement.builder()
-                  .name(nodeNameRemovedPrefix)
-                  .value(nodeValue)
-                  .lang(optionalDcLang)
-                  .build()
-          );
-          log.debug("Indexing description: {}", nodeValue);
+          coreSearchEntity.addDescription(dcElement);
       }
+
+      log.trace("Indexing dublin core element: {}", dcElement);
 
     }
 
