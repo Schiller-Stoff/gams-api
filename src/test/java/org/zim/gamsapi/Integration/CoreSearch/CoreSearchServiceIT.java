@@ -129,6 +129,27 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
           .noneMatch(dceLement -> dceLement.getName().contains(":"));
     }
 
+    @Test
+    public void hasExpectedDescriptionDCValues() {
+      Assertions.assertThat(FOUND_ENTITY.getDescriptions())
+          .isNotEmpty()
+          .anySatisfy(dcElement -> {
+            Assertions.assertThat(dcElement.getName()).isEqualTo("description");
+            Assertions.assertThat(dcElement.getValue()).isEqualTo("test-dc-description");
+          });
+    }
+
+    @Test
+    public void hasExpectedMappedEnglishDCDescription() {
+      Assertions.assertThat(FOUND_ENTITY.getDescriptions())
+          .isNotEmpty()
+          .anySatisfy(dcElement -> {
+            Assertions.assertThat(dcElement.getName()).isEqualTo("description");
+            Assertions.assertThat(dcElement.getValue()).isEqualTo("test-dc-description-en");
+            Assertions.assertThat(dcElement.getLang()).isEqualTo("en");
+          });
+    }
+
   }
 
 

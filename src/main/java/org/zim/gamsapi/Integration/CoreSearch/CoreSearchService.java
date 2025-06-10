@@ -79,13 +79,22 @@ public class CoreSearchService implements IIntegrationService {
 
       switch (nodeNameRemovedPrefix) {
         case "title":
-          var dcTitle = CoreSearchEntity.DCELement.builder()
+          var dcTitle = CoreSearchEntity.DCElement.builder()
               .name(nodeNameRemovedPrefix)
               .value(nodeValue)
               .lang(optionalDcLang)
               .build();
           coreSearchEntity.addTitle(dcTitle);
           log.debug("Indexing title: {}", nodeValue);
+        case "description":
+          coreSearchEntity.addDescription(
+              CoreSearchEntity.DCElement.builder()
+                  .name(nodeNameRemovedPrefix)
+                  .value(nodeValue)
+                  .lang(optionalDcLang)
+                  .build()
+          );
+          log.debug("Indexing description: {}", nodeValue);
       }
 
     }
