@@ -74,6 +74,7 @@ public class CoreSearchService implements IIntegrationService {
       }
 
       switch (nodeName) {
+        // TODO dangerouse - doesn't work with default namespace
         case "dc:title":
           var dcTitle = CoreSearchEntity.DCELement.builder()
               .name(nodeName)
