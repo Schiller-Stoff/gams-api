@@ -11,6 +11,7 @@
     <dc:creator>Paris, Gaston</dc:creator>
     <dc:creator xml:lang="en">test-dc-creator-en</dc:creator>
     <dc:publisher>Institut für Sprachwissenschaft, Karl-Franzens-Universität Graz</dc:publisher>
+    <dc:publisher xml:lang="en">test-dc-publisher-en</dc:publisher>
     <dc:contributor>Schuchardt, Hugo</dc:contributor>
     <dc:language>fr</dc:language>
     <dc:date>1873-02-17</dc:date>

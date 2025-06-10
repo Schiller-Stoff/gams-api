@@ -59,6 +59,12 @@ public class CoreSearchEntity {
   @Field(type = FieldType.Object)
   private List<DCElement> creators = new ArrayList<>();
 
+  /**
+   * Represents publisher elements from dublin core.
+   */
+  @Field(type = FieldType.Object)
+  private List<DCElement> publishers = new ArrayList<>();
+
   public void addTitle(DCElement dcElement) {
     if (dcElement != null) {
       this.titles.add(dcElement);
@@ -80,6 +86,12 @@ public class CoreSearchEntity {
   public void addCreator(DCElement dcElement) {
     if (dcElement != null) {
       this.creators.add(dcElement);
+    }
+  }
+
+  public void addPublisher(DCElement dcElement) {
+    if (dcElement != null) {
+      this.publishers.add(dcElement);
     }
   }
 
