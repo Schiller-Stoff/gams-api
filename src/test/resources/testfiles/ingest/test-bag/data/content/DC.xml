@@ -17,6 +17,7 @@
     <dc:language>fr</dc:language>
     <dc:language xml:lang="en">test-dc-language-en</dc:language>
     <dc:date>1873-02-17</dc:date>
+    <dc:date xml:lang="en">test-dc-date-en</dc:date>
     <dc:type>Brief</dc:type>
     <dc:format>text/xml</dc:format>
     <dc:source>Universitätsbibliothek Graz Abteilung für Sondersammlungen 08564</dc:source>
