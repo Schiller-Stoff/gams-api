@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.Ingest.Ingest;
 import org.zim.gamsapi.Ingest.IngestService;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -157,6 +158,22 @@ public class CoreSearchServiceIT extends CoreSearchIntegrationTest {
   @Nested
   public class IndexObject {
 
+    @Test
+    public void throwsExceptionWhenObjectNotFound() {
+
+      final String NOT_EXISTENT_OBJECT_ID = "non-existing-id";
+
+      // create a GAMS project
+      projectRepository.save(
+          TestProject.generate()
+      );
+
+      // do not create any object
+      Assertions.assertThatThrownBy(() -> coreSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          NOT_EXISTENT_OBJECT_ID
+      )).isInstanceOf(DigitalObjectNotFoundException.class);
+    }
 
 
   }

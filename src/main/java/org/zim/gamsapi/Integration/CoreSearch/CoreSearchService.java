@@ -8,9 +8,9 @@ import org.zim.gamsapi.Datastream.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.zim.gamsapi.Integration.Common.exceptions.IntegrationDataProcessingException;
-import org.zim.gamsapi.Integration.Common.exceptions.IntegrationServiceException;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationService;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import java.io.IOException;
@@ -30,8 +30,11 @@ public class CoreSearchService implements IIntegrationService {
 
     // Fetch the digital object from the repository
     var digitalObject = digitalObjectRepository.findById(id)
-        // TODO rethink logging
-        .orElseThrow(() -> new IntegrationServiceException("Digital object not found with ID: " + id));
+        .orElseThrow(() -> {
+          String msg = String.format("Aborting indexing object for the core search service. Could not find digital object with ID: %s. For project %s", id, projectId);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        });
 
     // to be indexed in elastic search
     CoreSearchEntity coreSearchEntity = new CoreSearchEntity();
