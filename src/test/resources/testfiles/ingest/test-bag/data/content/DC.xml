@@ -7,6 +7,7 @@
     <dc:description xml:lang="en">test-dc-description-en</dc:description>
     <dc:relation>Hugo Schuchardt Archiv</dc:relation>
     <dc:relation>http://schuchardt.uni-graz.at</dc:relation>
+    <dc:relation xml:lang="en">test-dc-relation-en</dc:relation>
     <dc:creator>Paris, Gaston</dc:creator>
     <dc:publisher>Institut für Sprachwissenschaft, Karl-Franzens-Universität Graz</dc:publisher>
     <dc:contributor>Schuchardt, Hugo</dc:contributor>
