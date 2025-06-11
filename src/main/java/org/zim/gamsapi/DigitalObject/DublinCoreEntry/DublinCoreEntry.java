@@ -13,7 +13,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 @Table( indexes = {
     @Index(name = "idx_dc_digital_object_id", columnList = "digital_object_id"),
     @Index(name = "idx_dc_name", columnList = "name"),
-    @Index(name = "idx_dc_value", columnList = "value")
+    @Index(name = "idx_dc_value", columnList = "value"),
+    @Index(name = "idx_dc_language", columnList = "language")
 })
 @Getter
 @Setter
@@ -49,6 +50,13 @@ public class DublinCoreEntry {
    */
   @Column(name = "value", nullable = false, length = 5000)
   private String value;
+
+  /**
+   * Dublin core element language.
+   * Optional, can be null.
+   */
+  @Column(name = "language", length = 50)
+  private String language;
 
 
 }
