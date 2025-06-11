@@ -6,6 +6,11 @@ package org.zim.gamsapi.Integration.Common.enums;
 public enum GAMSAPIntegrationDatastreamId {
 
   /**
+   * Datastream id of the dublin core datastream.
+   */
+  DUBLIN_CORE_DATASTREAM_ID("DC.xml"),
+
+  /**
    * Datastream id of the source datastream.
    */
   SOURCE_DATASTREAM_ID("SOURCE"),

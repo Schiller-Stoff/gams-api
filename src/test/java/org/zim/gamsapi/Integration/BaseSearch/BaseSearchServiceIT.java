@@ -26,7 +26,7 @@ import org.zim.gamsapi.enums.TestProject;
 
 @Slf4j
 @Disabled("Disabled because of unclear solr integration test issues.")
-public class BaseSearchServiceIT extends IntegrationTest {
+public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
   @Autowired
   private BaseSearchService baseSearchService;

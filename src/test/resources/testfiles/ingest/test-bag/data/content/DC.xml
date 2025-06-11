@@ -1,5 +1,33 @@
-<?xml version="1.0" encoding="UTF-8"?><oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:t="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>test-dc-title</dc:title><dc:relation>Hugo Schuchardt Archiv</dc:relation><dc:relation>http://schuchardt.uni-graz.at</dc:relation><dc:creator>Paris, Gaston</dc:creator><dc:publisher>Institut für Sprachwissenschaft, Karl-Franzens-Universität Graz</dc:publisher><dc:contributor>Schuchardt, Hugo</dc:contributor><dc:language>fr</dc:language><dc:date>1873-02-17</dc:date><dc:type>Brief</dc:type><dc:format>text/xml</dc:format><dc:source>Universitätsbibliothek Graz Abteilung für Sondersammlungen 08564</dc:source><dc:coverage>Paris</dc:coverage><dc:rights>Creative Commons BY-NC 4.0</dc:rights><dc:rights>http://creativecommons.org/licenses/by-nc/4.0</dc:rights><dc:subject>
-                  Romania (Zeitschrift)
-               </dc:subject><dc:subject>
-                  Rumänisch
-               </dc:subject></oai_dc:dc>
+<?xml version="1.0" encoding="UTF-8"?>
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+           xmlns:t="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <dc:title>test-dc-title</dc:title>
+    <dc:title xml:lang="en">test-dc-title-en</dc:title>
+    <dc:description>test-dc-description</dc:description>
+    <dc:description xml:lang="en">test-dc-description-en</dc:description>
+    <dc:relation>Hugo Schuchardt Archiv</dc:relation>
+    <dc:relation>http://schuchardt.uni-graz.at</dc:relation>
+    <dc:relation xml:lang="en">test-dc-relation-en</dc:relation>
+    <dc:creator>Paris, Gaston</dc:creator>
+    <dc:creator xml:lang="en">test-dc-creator-en</dc:creator>
+    <dc:publisher>Institut für Sprachwissenschaft, Karl-Franzens-Universität Graz</dc:publisher>
+    <dc:publisher xml:lang="en">test-dc-publisher-en</dc:publisher>
+    <dc:contributor>Schuchardt, Hugo</dc:contributor>
+    <dc:contributor xml:lang="en">test-dc-contributor-en</dc:contributor>
+    <dc:language>fr</dc:language>
+    <dc:language xml:lang="en">test-dc-language-en</dc:language>
+    <dc:date>1873-02-17</dc:date>
+    <dc:date xml:lang="en">test-dc-date-en</dc:date>
+    <dc:type>Brief</dc:type>
+    <dc:format>text/xml</dc:format>
+    <dc:source>Universitätsbibliothek Graz Abteilung für Sondersammlungen 08564</dc:source>
+    <dc:coverage>Paris</dc:coverage>
+    <dc:rights>Creative Commons BY-NC 4.0</dc:rights>
+    <dc:rights>http://creativecommons.org/licenses/by-nc/4.0</dc:rights>
+    <dc:subject>
+        Romania (Zeitschrift)
+    </dc:subject>
+    <dc:subject>
+        Rumänisch
+    </dc:subject>
+</oai_dc:dc>

@@ -12,7 +12,7 @@ import org.zim.gamsapi.IntegrationTest;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled("Deactivated integration testing for SOLR because of unclear issues with the solr test-container.")
-public class SOLRClientIT extends IntegrationTest {
+public class SOLRClientIT extends BaseSearchIntegrationTest {
 
   // disables auditing
   @MockBean
@@ -74,7 +74,7 @@ public class SOLRClientIT extends IntegrationTest {
   public void verifyThatTestCoreExists(){
     Assertions.assertThat(
         solrClient.coreExists(
-            IntegrationTest.SOLR_TEST_CORE
+            BaseSearchIntegrationTest.SOLR_TEST_CORE
         )
     ).isTrue();
   }
