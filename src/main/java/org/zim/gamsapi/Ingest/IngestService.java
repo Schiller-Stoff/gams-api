@@ -131,6 +131,7 @@ public class IngestService implements IIngestService {
                             .builder()
                             .name(dcElement.getName())
                             .value(dcElement.getValue())
+                            .language(dcElement.getLanguage())
                             .digitalObject(savedObject)
                             .build();
                         dublinCoreElementRepository.save(dublinCoreEntry);
