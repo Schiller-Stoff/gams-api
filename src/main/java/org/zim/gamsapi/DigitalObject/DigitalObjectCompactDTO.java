@@ -2,6 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.*;
 
@@ -47,6 +48,12 @@ public class DigitalObjectCompactDTO {
     private String funder;
 
     private String mainResource;
+
+    /**
+     * Map of Dublin Core entries, where the key is the name of the entry and the value is a list of
+     * DublinCoreEntrySummaryView objects.
+     */
+    private Map<String, List<DublinCoreEntrySummaryView>> dublinCore = new HashMap<>();
 
     @Override
     public boolean equals(Object o) {
