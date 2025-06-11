@@ -12,9 +12,9 @@ import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
@@ -233,9 +233,10 @@ public class DigitalObjectService implements IDigitalObjectService {
       // setting found dublin core entries
       var foundDublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectId(digitalObjectId);
       // convert to map with name as key
-      Map<String, List<DublinCoreEntrySummaryView>> dcMap = new HashMap<>();
+      Map<String, List<DublinCoreEntryCompactDTO>> dcMap = new HashMap<>();
       for (DublinCoreEntrySummaryView entry : foundDublinCoreEntries) {
-        dcMap.computeIfAbsent(entry.getName(), k -> new ArrayList<>()).add(entry);
+        DublinCoreEntryCompactDTO converted = conversionService.convert(entry, DublinCoreEntryCompactDTO.class);
+        dcMap.computeIfAbsent(entry.getName(), k -> new ArrayList<>()).add(converted);
       }
 
       digitalObjectCompactDTO.setDublinCore(dcMap);
