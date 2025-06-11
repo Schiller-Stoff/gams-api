@@ -121,6 +121,31 @@ public class IngestServiceIT extends IntegrationTest {
               "subject",
               "type");
     }
+
+    @Nested
+    public class DublinCoreEntries {
+
+      @Test
+      public void testObjectHasDublinCoreTitleEntryWithExpectedLanguage(){
+
+        var dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(
+            TestDigitalObject.generate()
+        );
+
+        Assertions.assertThat(dublinCoreEntries)
+            .isNotEmpty();
+
+        // there should be a dublin core entry with name "title" AND language "en"
+        Assertions.assertThat(dublinCoreEntries)
+            .anySatisfy(dcEntry -> {
+              Assertions.assertThat(dcEntry.getLanguage()).isNotNull();
+              Assertions.assertThat(dcEntry.getName()).isEqualTo("title");
+              Assertions.assertThat(dcEntry.getLanguage()).isEqualTo("en");
+            });
+      }
+
+    }
+
   }
 
   @Nested
