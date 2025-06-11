@@ -122,38 +122,8 @@ public class DigitalObjectController {
   @Operation(summary = "Get a digital object by its ID")
   @Parameter(name = "projectAbbr", description = "The project abbreviation", required = true)
   @Parameter(name = "id", description = "The digital object ID", required = true)
-  public DigitalObjectCompactDTO getJson(@PathVariable String projectAbbr, @PathVariable String id, Model model) {
-    DigitalObject digitalObject = new DigitalObject();
-    digitalObject.setId(id);
-
-    Project project = ProjectBuilder.builder()
-        .projectAbbr(projectAbbr)
-        .description("")
-        .build();
-
-    digitalObject.setProject(project);
-    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
-        DigitalObjectCompactDTO.class);
-
-    if (digitalObjectCompactDTO == null) {
-      String msg = String.format(
-          "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s",
-          digitalObject, project);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
-    digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews
-            .stream()
-            .map(
-                IDatastreamDetailsView::getDsid)
-            .collect(Collectors.toList()));
-
-    model.addAttribute(digitalObjectCompactDTO);
-    log.info("Found digital object {} for project {}", digitalObject, project);
-    return digitalObjectCompactDTO;
+  public DigitalObjectCompactDTO getJson(@PathVariable String id) {
+    return digitalObjectService.findDigitalObjectCompactDTOById(id);
   }
 
   @GetMapping(value = { "/{id}", "/{id}/" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
