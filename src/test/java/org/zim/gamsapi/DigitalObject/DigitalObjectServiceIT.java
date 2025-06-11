@@ -281,7 +281,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
-
   @Nested
   public class DublinCoreMatchesSearch {
 
@@ -370,6 +369,44 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   }
+
+  @Nested
+  public class FindDigitalObjectCompactDTOById {
+
+    private final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
+    private final DublinCoreEntry TEST_DUBLIN_CORE_ENTRY = TestDublinCoreEntry.generate(TEST_DIGITAL_OBJECT.getId());
+
+    @BeforeEach
+    public void setup(){
+      digitalObjectRepository.save(TEST_DIGITAL_OBJECT);
+      dublinCoreEntryRepository.save(TEST_DUBLIN_CORE_ENTRY);
+    }
+
+    @Test
+    public void containsExpectedDublinCoreEntry(){
+
+      var foundDigitalObject = digitalObjectService.findDigitalObjectCompactDTOById(TEST_DIGITAL_OBJECT.getId());
+
+      Assertions.assertThat(foundDigitalObject)
+          .isNotNull();
+
+      var entries = foundDigitalObject.getDublinCore();
+
+      Assertions.assertThat(entries)
+          .isNotEmpty()
+          .hasSize(1)
+          .containsKey(TEST_DUBLIN_CORE_ENTRY.getName());
+
+      var testElementEntries = entries.get(TEST_DUBLIN_CORE_ENTRY.getName());
+      Assertions.assertThat(testElementEntries)
+          .anySatisfy(entry -> {
+            Assertions.assertThat(entry.language()).isEqualTo(TEST_DUBLIN_CORE_ENTRY.getLanguage());
+            Assertions.assertThat(entry.value()).isEqualTo(TEST_DUBLIN_CORE_ENTRY.getValue());
+          });
+    }
+
+  }
+
 
   @Nested
   public class DublinCoreFulltextSearch {
