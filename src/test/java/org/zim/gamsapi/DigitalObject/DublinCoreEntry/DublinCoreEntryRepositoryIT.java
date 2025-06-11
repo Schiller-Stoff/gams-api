@@ -110,15 +110,20 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
   }
 
+  /**
+   * Tests for saving DublinCoreEntries.
+   */
   @Nested
   public class Save {
+
+    final DigitalObject TEST_OBJECT = TestDigitalObject.generate();
+    final DublinCoreEntry TEST_DC_ENTRY = TestDublinCoreEntry.generate(TEST_OBJECT.getId());
 
     @Test
     public void afterSavingThereAreMoreThan0DublinCoreEntries() {
       // need to first save the digital object
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
+      digitalObjectRepository.save(TEST_OBJECT);
+      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(TEST_OBJECT.getId()));
       Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
     }
 
@@ -128,6 +133,30 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
         dublinCoreEntryRepository.save(TestDublinCoreEntry.generate("nix"));
       }).isInstanceOf(Exception.class);
     }
+
+    @Test
+    public void savesEntryWithExpectedLanguage() {
+      digitalObjectRepository.save(TEST_OBJECT);
+      dublinCoreEntryRepository.save(TEST_DC_ENTRY);
+
+      var foundDcEntry = dublinCoreEntryRepository.findById(TEST_DC_ENTRY.getId());
+      Assertions.assertThat(foundDcEntry).isPresent();
+
+      Assertions.assertThat(foundDcEntry.get().getLanguage())
+              .isEqualTo(TEST_DC_ENTRY.getLanguage());
+
+    }
+
+    @Test
+    public void savesDublinCoreEntryWithLanguageNull(){
+      TEST_DC_ENTRY.setLanguage(null);
+      digitalObjectRepository.save(TEST_OBJECT);
+      dublinCoreEntryRepository.save(TEST_DC_ENTRY);
+      var foundDcEntry = dublinCoreEntryRepository.findById(TEST_DC_ENTRY.getId());
+      Assertions.assertThat(foundDcEntry).isPresent();
+      Assertions.assertThat(foundDcEntry.get().getLanguage()).isNull();
+    }
+
   }
 
 
