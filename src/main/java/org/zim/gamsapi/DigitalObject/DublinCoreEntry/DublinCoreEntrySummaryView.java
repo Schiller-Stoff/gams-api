@@ -13,6 +13,8 @@ public interface DublinCoreEntrySummaryView {
 
   String getValue();
 
+  String getLanguage();
+
   DigitalObjectIdView getDigitalObject();
 
 }
