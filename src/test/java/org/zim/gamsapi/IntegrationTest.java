@@ -10,18 +10,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.Integration.CoreSearch.CoreSearchRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
  * to avoid code duplication.
- * Checks if needed external services are running + provides necessary spring 
- * configuration like running in test profile and starting the application contexts 
+ * Checks if needed external services are running + provides necessary spring
+ * configuration like running in test profile and starting the application contexts
  * on random ports.
  */
 @Slf4j
@@ -56,14 +58,34 @@ public abstract class IntegrationTest {
   @Autowired
   EventCaptureListener eventCaptureListener;
 
+  @Autowired
+  CoreSearchRepository coreSearchRepository;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
+
+  static final ElasticsearchContainer elasticSearch;
 
   // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
   static {
     postgres = new PostgreSQLContainer<>("postgres:13-alpine");
     postgres.start();
+
+    // TODO replace with used version according spring data doc
+    elasticSearch = new ElasticsearchContainer(
+        "elasticsearch:9.0.1"
+    );
+    elasticSearch
+        // disable SSL and security for testing
+        .withEnv("discovery.type", "single-node")
+        .withEnv("xpack.security.enabled", "false")
+        .withEnv("xpack.security.transport.ssl.enabled", "false")
+        .withEnv("xpack.security.http.ssl.enabled", "false");
+
+    elasticSearch.start();
+
+    log.info("*** Starting elasticsearch at address: {}", elasticSearch.getHttpHostAddress());
+
   }
 
   @DynamicPropertySource
@@ -72,6 +94,9 @@ public abstract class IntegrationTest {
     registry.add("spring.datasource.url", postgres::getJdbcUrl);
     registry.add("spring.datasource.username", postgres::getUsername);
     registry.add("spring.datasource.password", postgres::getPassword);
+
+    // dynamic elasticsearch configuration
+    registry.add("gams.docker.elasticsearchUrl", () -> String.format("http://%s", elasticSearch.getHttpHostAddress()));
 
   }
 
