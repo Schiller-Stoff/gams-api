@@ -1,5 +1,6 @@
 package org.zim.gamsapi.DigitalObject.DublinCoreEntry;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -56,6 +57,7 @@ public class DublinCoreEntry {
    * Optional, can be null.
    */
   @Column(name = "language", length = 50)
+  @Nullable
   private String language;
 
 
