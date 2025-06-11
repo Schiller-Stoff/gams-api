@@ -26,17 +26,17 @@ services:
       # needs additional wsl config to work if under wsl and bug occurs: https://stackoverflow.com/questions/65582382/wsl2-docker-linux-permission-issue-with-volumes
      # - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
 
-  elasticsearch:
-    image: elasticsearch:9.0.1
-    container_name: elasticsearch
-    hostname: elasticsearch
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      # disable security features for development
-      - discovery.type=single-node
-      - xpack.security.enabled=false
+#  elasticsearch:
+#    image: elasticsearch:9.0.1
+#    container_name: elasticsearch
+#    hostname: elasticsearch
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    environment:
+#      # disable security features for development
+#      - discovery.type=single-node
+#      - xpack.security.enabled=false
 
   baseSearch:
     container_name: baseSearch
