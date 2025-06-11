@@ -3,6 +3,7 @@ package org.zim.gamsapi.DigitalObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,8 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectChildSelfReferenceException;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
@@ -19,10 +23,9 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,6 +38,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDatastreamContentRepository fileSystemRepository;
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final ConversionService conversionService;
 
   @Override
   @Transactional
@@ -194,5 +198,47 @@ public class DigitalObjectService implements IDigitalObjectService {
       log.trace(msg);
       return dublinCoreEntryRepository.findDigitalObjectsByFulltextOnSpecificElements(projectAbbrs, dcEntryNames, fulltext, pageAble);
 
+    }
+
+    @Override
+    public DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String digitalObjectId) {
+      var foundObject = digitalObjectRepository.findDigitalObjectById(digitalObjectId).orElseThrow(
+          () -> {
+            String msg = String.format("Cannot find digital object via id: %s", digitalObjectId);
+            log.info(msg);
+            return new DigitalObjectNotFoundException(msg);
+          });
+
+      // converting details view to compactDTO
+      DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
+          DigitalObjectCompactDTO.class);
+      if (digitalObjectCompactDTO == null) {
+        String msg = String.format(
+            "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s",
+            digitalObjectId);
+        log.error(msg);
+        throw new DigitalObjectConversionException(msg);
+      }
+
+      // setting found datastreams
+      var foundDatastreams = datastreamRepository.findAllByDigitalObjectId(digitalObjectId);
+      digitalObjectCompactDTO.setDatastreams(
+          foundDatastreams
+              .stream()
+              .map(
+                  IDatastreamDetailsView::getDsid)
+              .collect(Collectors.toList())
+      );
+
+      // setting found dublin core entries
+      var foundDublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectId(digitalObjectId);
+      // convert to map with name as key
+      Map<String, List<DublinCoreEntrySummaryView>> dcMap = new HashMap<>();
+      for (DublinCoreEntrySummaryView entry : foundDublinCoreEntries) {
+        dcMap.computeIfAbsent(entry.getName(), k -> new ArrayList<>()).add(entry);
+      }
+
+      digitalObjectCompactDTO.setDublinCore(dcMap);
+      return digitalObjectCompactDTO;
     }
 }

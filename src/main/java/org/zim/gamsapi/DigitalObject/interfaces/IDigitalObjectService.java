@@ -3,6 +3,7 @@ package org.zim.gamsapi.DigitalObject.interfaces;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -100,4 +101,13 @@ public interface IDigitalObjectService {
    * @return a page of digital objects
    */
   Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(Set<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble);
+
+
+  /**
+   * Find a digital object by its id and return a compact DTO representation.
+   * @param id the id of the digital object
+   * @return a DigitalObjectCompactDTO representation of the digital object
+   */
+  DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String id);
+
 }
