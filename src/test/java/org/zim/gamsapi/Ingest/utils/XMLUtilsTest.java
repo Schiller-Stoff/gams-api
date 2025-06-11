@@ -209,6 +209,21 @@ public class XMLUtilsTest extends UnitTest {
       ).isTrue();
     }
 
+    @Test
+    public void extractedElementWithValueHasExpectedLanguage() throws IOException {
+      final String EXPECTED_LANGUAGE = "en";
+      Assertions.assertThat(
+          dcElements.stream().anyMatch(e -> e.getValue().equals("test-dc-title-en") && e.getLanguage().equals(EXPECTED_LANGUAGE))
+      ).isTrue();
+    }
+
+    @Test
+    public void extractedElementWithValueHasNullLanguageIfEmpty() throws IOException {
+      Assertions.assertThat(
+          dcElements.stream().anyMatch(e -> e.getValue().equals("test-dc-title") && e.getLanguage() == null)
+      ).isTrue();
+    }
+
 
   }
 
