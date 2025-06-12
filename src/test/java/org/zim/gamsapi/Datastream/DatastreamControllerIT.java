@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamControllerIT extends IntegrationTest {
 
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private MockMvc mockMvc;
 
@@ -157,7 +158,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  @Disabled("In the current version the REST-API does not support the deletion of individual datastreams. Only digital objects might be deleted.")
+  @Disabled("The current version of the REST-API does not support the deletion of individual datastreams. Only digital objects might be deleted.")
   public class DELETEDatastream {
 
     @Test
