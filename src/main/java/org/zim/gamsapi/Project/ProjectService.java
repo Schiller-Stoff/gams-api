@@ -93,7 +93,7 @@ public class ProjectService implements IProjectService {
 
   @Override
   public void verifyProjectAbbrMatchesObjectId(String projectAbbr, String digitalObjectId) {
-    if(!projectAbbr.startsWith(digitalObjectId)){
+    if(!digitalObjectId.startsWith(projectAbbr)){
       String msg = String.format("Project abbreviation %s does not match the digital object ID %s", projectAbbr, digitalObjectId);
       log.error(msg);
       throw new ProjectObjectMismatchException(msg);
