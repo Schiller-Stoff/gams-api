@@ -24,7 +24,7 @@ public class IngestController {
 
   private final IIngestService ingestService;
 
-  @PostMapping(produces = "application/json", path = {"/api/v1/projects/{projectAbbr}/objects/", "/api/v1/projects/{projectAbbr}/objects"})
+  @PostMapping(produces = "application/json", path = { "/api/v1/projects/{projectAbbr}/objects"})
   @ResponseBody
   public void ingest(@ModelAttribute Ingest ingest, HttpServletRequest request) {
 

@@ -35,7 +35,7 @@ public class DatastreamController {
   private final IDatastreamContentService datastreamContentService;
 
 
-  @GetMapping(path = {"/datastream/content", "/datastream/content/"})
+  @GetMapping(path = {"/datastream/content"})
   @ResponseBody
   @Operation(summary = "Get datastream content")
   @Parameter(name = "id", description = "ID of the digital object", required = true)
@@ -66,7 +66,7 @@ public class DatastreamController {
 
   }
 
-  @GetMapping(path = {"/datastream", "/datastream/"})
+  @GetMapping(path = {"/datastream" })
   @ResponseBody
   @Operation(summary = "Get datastream details")
   @Parameter(name = "id", description = "ID of the digital object", required = true)
@@ -84,7 +84,7 @@ public class DatastreamController {
     return foundDatastream;
   }
 
-  @GetMapping(path = {"/datastreams", "/datastreams/"})
+  @GetMapping(path = {"/datastreams" })
   @ResponseBody
   @Operation(summary = "Get all datastreams")
   @Parameter(name = "id", description = "ID of the digital object", required = true)
@@ -120,7 +120,7 @@ public class DatastreamController {
 
 
   @GetMapping(
-      path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
+      path = {"/datastreams/{dsid}" },
       produces = MimeTypeUtils.TEXT_HTML_VALUE
   )
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
@@ -131,7 +131,7 @@ public class DatastreamController {
   }
 
   @GetMapping(
-      path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
+      path = {"/datastreams/{dsid}" },
       produces = MimeTypeUtils.APPLICATION_JSON_VALUE
   )
   @ResponseBody
@@ -158,7 +158,7 @@ public class DatastreamController {
   }
 
   @Hidden
-  @DeleteMapping(path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"})
+  @DeleteMapping(path = {"/datastreams/{dsid}" })
   public String deleteDatastream(
           @PathVariable String id,
           @PathVariable String dsid,
@@ -186,7 +186,7 @@ public class DatastreamController {
    * @param dsid datastream-id
    * @return binary-data of the datastream
    */
-  @GetMapping( path = {"/datastreams/{dsid}/content", "/datastreams/{dsid}/content/"})
+  @GetMapping( path = {"/datastreams/{dsid}/content" })
   @ResponseBody
   @Operation(summary = "Get datastream content")
   @Parameter(name = "id", description = "ID of the digital object", required = true)

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Integration.Common.interfaces.IIntegrationController;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/search", "/api/v1/integration/projects/{projectAbbr}/objects/search/"})
+@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/search"})
 @Slf4j
 @RequiredArgsConstructor
 @Hidden

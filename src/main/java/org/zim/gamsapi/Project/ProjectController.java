@@ -29,7 +29,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/v1/projects", "/api/v1/projects/"})
+@RequestMapping({"/api/v1/projects" })
 public class ProjectController {
 
   private final IProjectService projectService;

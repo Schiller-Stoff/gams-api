@@ -15,7 +15,7 @@ import org.zim.gamsapi.System.configproperties.GAMSDockerDNS;
  * Routes incoming search request to dedicated GAMS search service.
  */
 @Controller
-@RequestMapping(value = {"/api/v1/integration/search", "/api/v1/integration/search/"})
+@RequestMapping(value = {"/api/v1/integration/search" })
 @Slf4j
 @RequiredArgsConstructor
 @Hidden

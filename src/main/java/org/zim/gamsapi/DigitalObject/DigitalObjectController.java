@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects", "/api/v1/projects/{projectAbbr}/objects/" })
+@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = "Digital Objects", description = "Digital object management operations")
@@ -131,7 +131,7 @@ public class DigitalObjectController {
     return digitalObjectService.findDigitalObjectCompactDTOById(id);
   }
 
-  @GetMapping(value = { "/{id}", "/{id}/" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     // first query digital object projection dto
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
@@ -237,7 +237,7 @@ public class DigitalObjectController {
     return "DigitalObject/show_all";
   }
 
-  @PutMapping(value = {"/{id}", "/{id}/"})
+  @PutMapping(value = {"/{id}"})
   public String createObject(
           // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
           @RequestBody DigitalObject digitalObject,
@@ -258,7 +258,7 @@ public class DigitalObjectController {
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getId();
   }
 
-  @DeleteMapping(value = { "/{id}", "/{id}/" })
+  @DeleteMapping(value = { "/{id}" })
   public String deleteObject(
       DigitalObject digitalObject,
       Project project,

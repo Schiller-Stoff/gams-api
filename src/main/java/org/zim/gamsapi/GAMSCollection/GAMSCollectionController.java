@@ -17,14 +17,14 @@ import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.Project.ProjectBuilder;
 
 //@Controller
-@RequestMapping({"/api/v1/"})
+@RequestMapping({"/api/v1"})
 @Slf4j
 @RequiredArgsConstructor
 public class GAMSCollectionController {
 
   private final IGAMSCollectionService collectionService;
 
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/collections", "/collections/"})
+  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/collections" })
   @ResponseBody
   @Operation(summary = "Get all collections")
   public Page<GamsCollectionCompactView> getAllCollections(

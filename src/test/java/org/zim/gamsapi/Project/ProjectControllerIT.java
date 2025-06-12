@@ -62,7 +62,7 @@ public class ProjectControllerIT extends IntegrationTest {
 
       projectRepository.save(project);
 
-      MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/").accept(MediaType.TEXT_HTML))
+      MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects").accept(MediaType.TEXT_HTML))
         .andExpect(MockMvcResultMatchers.status().isOk())
           // verifies that webclient html is being returned
           .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
