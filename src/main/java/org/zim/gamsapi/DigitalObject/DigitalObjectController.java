@@ -245,14 +245,6 @@ public class DigitalObjectController {
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
 
-  @DeleteMapping
-  public String deleteAllForProject(Project project, @RequestHeader Map<String, String> requestHeader) {
-    projectService.deleteProject(project);
-    log.info("Deleted all objects for project {}", project);
-    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
-  }
-
 
   @Operation(
       summary = "Get all digital object IDs for a project",
