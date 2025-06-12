@@ -1,5 +1,7 @@
 package org.zim.gamsapi.Datastream;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,18 +17,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
-import org.zim.gamsapi.System.utils.ControllerUtils;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import java.util.Map;
+
 import java.util.Set;
 
 @Slf4j
@@ -54,7 +51,7 @@ public class DatastreamController {
       }
   )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
-  @Parameter(name = "tag", description = "Tags of the datastream to retrieve. If not specified, the main datastream will be returned. (Defined tags must match exactly one datastream)", required = false)
+  @Parameter(name = "tag", description = "Tags of the datastream to retrieve. If not specified, the main datastream will be returned. (Defined tags must match exactly one datastream)")
   public ResponseEntity<InputStreamResource> getDatastreamContent(
       @PathVariable String projectAbbr,
       @PathVariable String id,
@@ -142,7 +139,7 @@ public class DatastreamController {
       pageSize = 100;
     }
 
-    // return just pageing information if no tags are provided
+    // return just paging information if no tags are provided
     if(tags.isEmpty()){
       return datastreamService.findAll(
           id,
@@ -200,19 +197,18 @@ public class DatastreamController {
         .build();
     datastream.setDigitalObject(digitalObject);
 
-    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
+    return datastreamService.findDatastreamDetailsById(
         DatastreamId.builder()
             .digitalObject(digitalObject.getId())
             .dsid(datastream.getDsid())
             .build()
     );
-    return foundDatastream;
   }
 
 
   /**
    * Dynamically (according to mimetype) returns stored datastream content
-   * https://www.baeldung.com/spring-controller-return-image-file
+   * <a href="https://www.baeldung.com/spring-controller-return-image-file">Return image via spring baeldung</a>
    * @param id digital-object-id
    * @param dsid datastream-id
    * @return binary-data of the datastream
