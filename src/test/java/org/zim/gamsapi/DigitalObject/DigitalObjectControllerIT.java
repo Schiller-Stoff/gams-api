@@ -70,6 +70,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
+  @Disabled("Disabled because PUT requests for digital objects are not allowed in the current API version. Use ingest workflow instead.")
   public class PUTRequests {
 
     @Test

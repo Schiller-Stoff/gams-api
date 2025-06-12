@@ -234,27 +234,6 @@ public class DigitalObjectController {
     return "DigitalObject/show_all";
   }
 
-  @PutMapping(value = {"/{id}"})
-  public String createObject(
-          // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
-          @RequestBody DigitalObject digitalObject,
-          Project project,
-          Model model,
-          @RequestHeader Map<String, String> requestHeader
-  ) {
-    // project membership is not automatically bound by spring.
-    digitalObject.setProject(project);
-    // assign child objects if available
-
-    DigitalObject savedObject = digitalObjectService.save(digitalObject);
-    model.addAttribute("do", savedObject);
-    log.info("Created object {} for project {}", savedObject, project);
-
-    // needed to consider proxy forwarding
-    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getId();
-  }
-
   @DeleteMapping(value = { "/{id}" })
   public String deleteObject(
       DigitalObject digitalObject,
