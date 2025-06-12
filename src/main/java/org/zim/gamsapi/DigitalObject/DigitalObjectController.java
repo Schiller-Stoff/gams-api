@@ -93,34 +93,6 @@ public class DigitalObjectController {
 
   }
 
-  // @GetMapping(value = {"/{id}", "/{id}/"}, produces =
-  // MimeTypeUtils.APPLICATION_JSON_VALUE)
-  // @ResponseBody
-  public DigitalObjectCompactDTO getObjectJson(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
-        DigitalObjectCompactDTO.class);
-
-    if (digitalObjectCompactDTO == null) {
-      String msg = String.format(
-          "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s",
-          digitalObject, project);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
-    digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews
-            .stream()
-            .map(
-                IDatastreamDetailsView::getDsid)
-            .collect(Collectors.toList()));
-
-    model.addAttribute(digitalObjectCompactDTO);
-    log.info("Found digital object {} for project {}", digitalObject, project);
-    return digitalObjectCompactDTO;
-  }
-
   @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(summary = "Get a digital object by its ID")
