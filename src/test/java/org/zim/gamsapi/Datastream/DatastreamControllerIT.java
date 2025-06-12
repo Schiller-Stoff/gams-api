@@ -267,7 +267,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   /**
    * Tests for .../datastream/... endpoint
-   * e.g. .../datatsream?tag=...
+   * e.g. .../datastream?tag=...
    */
   @Nested
   public class SingleDatastreamFiltering {
