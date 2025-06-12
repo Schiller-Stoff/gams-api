@@ -235,14 +235,23 @@ public class DigitalObjectController {
   }
 
   @DeleteMapping(value = { "/{id}" })
+  @Operation
   public String deleteObject(
-      DigitalObject digitalObject,
-      Project project,
+      @PathVariable String id,
+      @PathVariable String projectAbbr,
       @RequestHeader Map<String, String> requestHeader) {
+
+    DigitalObject digitalObject = DigitalObjectBuilder
+        .builder()
+        .id(id)
+        .project(projectAbbr)
+        .publisher("_")
+        .build();
+
     this.digitalObjectService.delete(digitalObject);
-    log.info("Deleted object {} for project {}", digitalObject, project);
+    log.info("Deleted object {} for project {}", digitalObject, projectAbbr);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
+    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
   }
 
 
