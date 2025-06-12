@@ -1,5 +1,8 @@
 package org.zim.gamsapi.Datastream;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -18,6 +21,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +33,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{id}"})
 @Controller
+@Tag(name = OpenAPIConfig.DATASTREAMS_TAG, description = OpenAPIConfig.DATASTREAMS_TAG_DESCRIPTION)
 public class DatastreamController {
 
   private final IDatastreamService datastreamService;
@@ -37,9 +42,21 @@ public class DatastreamController {
 
   @GetMapping(path = {"/datastream/content"})
   @ResponseBody
-  @Operation(summary = "Get datastream content")
+  @Operation(
+      summary = "Get the content of the digital object's main datastream.",
+      description = "Retrieves the binary content of the main datastream of defined digital object. Allows to return a different datastream content via specifying datastream tags.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Datastream content",
+              content = @Content(mediaType = "application/octet-stream")),
+          @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content),
+          @ApiResponse(responseCode = "409", description = "Datastream ambiguous match: Defined tag variable must match exactly one datastream of the digital object.", content = @Content),
+          @ApiResponse(responseCode = "500", description = "Main datastream is not defined.", content = @Content)
+      }
+  )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "tag", description = "Tags of the datastream to retrieve. If not specified, the main datastream will be returned. (Defined tags must match exactly one datastream)", required = false)
   public ResponseEntity<InputStreamResource> getDatastreamContent(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
   ){
