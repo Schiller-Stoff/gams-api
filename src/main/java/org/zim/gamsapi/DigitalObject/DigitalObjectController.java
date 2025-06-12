@@ -4,7 +4,6 @@ import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -162,11 +161,9 @@ public class DigitalObjectController {
       summary = "Get digital objects for a project",
       description = "Retrieves paginated list of digital objects for a specific project with optional filtering",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Successfully retrieved digital objects",
-              content = @Content(mediaType = "application/json",
-                  schema = @Schema(implementation = DigitalObjectListItemView.class))),
-          @ApiResponse(responseCode = "404", description = "Project or object not found"),
-          @ApiResponse(responseCode = "403", description = "Access denied to project")
+          @ApiResponse(responseCode = "200", description = "Successfully retrieved digital objects"),
+          @ApiResponse(responseCode = "404", description = "Project not found", content = @Content),
+          @ApiResponse(responseCode = "403", description = "Access denied to project", content = @Content)
       }
   )
   public List<DigitalObjectListItemView> getProjectObjectsJson(
@@ -277,6 +274,8 @@ public class DigitalObjectController {
     return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
   }
 
+
+  @Operation(hidden = true)
   @GetMapping(params = { "style" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr, @Nullable @RequestParam String style) {
