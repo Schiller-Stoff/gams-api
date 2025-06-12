@@ -101,7 +101,28 @@ gams:
 springdoc:
   swagger-ui:
     path: "/api/v1/openapi"
-    # config-url: ${SWAGGER_CONFIG_URL:http://localhost:18085/v3/api-docs/swagger-config}
+    operationsSorter: "method"
+    tagsSorter: "alpha"
+    docExpansion: "none"
+    displayRequestDuration: true
+    showExtensions: true
+    showCommonExtensions: true
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    # Performance optimization for large APIs
+    syntaxHighlight:
+      theme: "nord"
+    tryItOutEnabled: true
+    filter: true
+    persistAuthorization: true
   api-docs:
-    path: "/api/v1/openapi"
+    path: "/api/v1/api-docs"
+    enabled: true
+  cache:
+    disabled: false
+  # Performance optimization
+  model-and-view-allowed: false
+  # Security
+  show-actuator: false
+
 
