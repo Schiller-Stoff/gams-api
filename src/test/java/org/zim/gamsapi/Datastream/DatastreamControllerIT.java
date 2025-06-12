@@ -4,10 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -56,7 +56,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   private DigitalObject testDigitalObject;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
 
@@ -139,14 +139,10 @@ public class DatastreamControllerIT extends IntegrationTest {
           );
 
       Assertions.assertThat(datastream.getTags()).isNotEmpty();
-      datastream.getTags().forEach(tag -> {
-        Assertions.assertThat(responseContent).contains(tag);
-      });
+      datastream.getTags().forEach(tag -> Assertions.assertThat(responseContent).contains(tag));
 
       Assertions.assertThat(datastream.getLang()).isNotEmpty();
-      datastream.getLang().forEach(lang -> {
-        Assertions.assertThat(responseContent).contains(lang);
-      });
+      datastream.getLang().forEach(lang -> Assertions.assertThat(responseContent).contains(lang));
 
 
       // cleanup
@@ -176,9 +172,7 @@ public class DatastreamControllerIT extends IntegrationTest {
           .andExpect(status().is3xxRedirection());
 
       // assertions
-      org.junit.jupiter.api.Assertions.assertThrows(DatastreamNotFoundException.class, () -> {
-        datastreamService.findById(testDatastream.deriveDatastreamId());
-      });
+      org.junit.jupiter.api.Assertions.assertThrows(DatastreamNotFoundException.class, () -> datastreamService.findById(testDatastream.deriveDatastreamId()));
 
       Assertions.assertThat(datastreamService.findAll(testDigitalObject))
           .isNotNull()
