@@ -115,9 +115,20 @@ public class DatastreamController {
 
   @GetMapping(path = {"/datastreams" })
   @ResponseBody
-  @Operation(summary = "Get all datastreams")
+  @Operation(
+      summary = "Get all datastreams details",
+      description = "Retrieves all datastreams details of a digital object. Allows to filter by tags and paginate results.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "List of datastreams",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Digital object / project not found", content = @Content)
+      }
+
+  )
+  @Parameter(name = "projectAbbr", description = "Project abbreviation of the GAMS project", required = true)
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   public Page<IDatastreamDetailsView> findAllDatastreams(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags,
       // for pagination
