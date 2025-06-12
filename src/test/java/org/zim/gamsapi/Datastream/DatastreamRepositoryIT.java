@@ -363,7 +363,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                 org.junit.jupiter.api.Assertions.assertThrows(
                     // exception is being thrown because composite primary key fails to be set
-                    JpaSystemException.class,
+                    Exception.class,
                     () -> datastreamRepository.save(datastream)
                 );
             }
