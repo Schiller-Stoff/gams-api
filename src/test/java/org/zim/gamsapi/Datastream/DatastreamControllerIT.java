@@ -157,6 +157,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
+  @Disabled("In the current version the REST-API does not support the deletion of individual datastreams. Only digital objects might be deleted.")
   public class DELETEDatastream {
 
     @Test

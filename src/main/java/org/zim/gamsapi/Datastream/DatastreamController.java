@@ -209,27 +209,6 @@ public class DatastreamController {
     return foundDatastream;
   }
 
-  @Hidden
-  @DeleteMapping(path = {"/datastreams/{dsid}" })
-  public String deleteDatastream(
-          @PathVariable String id,
-          @PathVariable String dsid,
-          Project project,
-          @RequestHeader Map<String, String> requestHeader
-  ) {
-
-    Datastream datastream = new DatastreamBuilder()
-        .dsid(dsid)
-        .digitalObject(id)
-        .build();
-
-    datastreamService.delete(datastream);
-    log.info("Successfully deleted datastream: {}", datastream);
-    String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + datastream.getDigitalObject().getId();
-  }
-
-
 
   /**
    * Dynamically (according to mimetype) returns stored datastream content
