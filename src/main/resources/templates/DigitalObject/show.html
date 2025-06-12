@@ -42,33 +42,33 @@
               <h2 class="h4">Datastreams</h2>
               <p>Displays all datastreams of a digital object</p>
               <p></p>
-              <ul class="list-group-flush p-0">
+              <ul class="list-group p-0">
                 <li th:each="dsid : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item bg-light">
 
                   <a style="color:black" th:text="${dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}"></a>
 
-                  <div>
-<!--                    <span th:text="${dstream.globalId + ' (global datastream id)'}"> </span>-->
-                    <!-- <span th:text="${dstream.mimeType}"></span> -->
-                    <!--
-                    <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>
-                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>
-                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>
-                    -->
-                    <form
-                            onsubmit="return confirm('Are you sure you want to delete this datastream?');"
-                            action="#"
-                            th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}}"
-                            th:object="${do}"
-                            method="delete"
-                            th:method="DELETE"
-                            class="d-inline"
-                    >
-                      <!-- <input type="hidden" name="id" th:field="*{id}"/> -->
-                      <!-- <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> -->
-                      <input type="submit" class="btn btn-outline-dark" value="Delete"/>
-                    </form>
-                  </div>
+<!--                  <div>-->
+<!--&lt;!&ndash;                    <span th:text="${dstream.globalId + ' (global datastream id)'}"> </span>&ndash;&gt;-->
+<!--                    &lt;!&ndash; <span th:text="${dstream.mimeType}"></span> &ndash;&gt;-->
+<!--                    &lt;!&ndash;-->
+<!--                    <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>-->
+<!--                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>-->
+<!--                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>-->
+<!--                    &ndash;&gt;-->
+<!--                    <form-->
+<!--                            onsubmit="return confirm('Are you sure you want to delete this datastream?');"-->
+<!--                            action="#"-->
+<!--                            th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}}"-->
+<!--                            th:object="${do}"-->
+<!--                            method="delete"-->
+<!--                            th:method="DELETE"-->
+<!--                            class="d-inline"-->
+<!--                    >-->
+<!--                      &lt;!&ndash; <input type="hidden" name="id" th:field="*{id}"/> &ndash;&gt;-->
+<!--                      &lt;!&ndash; <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> &ndash;&gt;-->
+<!--                      <input type="submit" class="btn btn-outline-dark" value="Delete"/>-->
+<!--                    </form>-->
+<!--                  </div>-->
                 </li>
               </ul>
               <br/>
