@@ -29,6 +29,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,7 +46,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = "Digital Objects", description = "Digital object management operations")
+@Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
 public class DigitalObjectController {
 
   private final DigitalObjectService digitalObjectService;

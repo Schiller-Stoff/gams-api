@@ -17,6 +17,21 @@ import java.util.List;
 @Configuration
 public class OpenAPIConfig {
 
+  /**
+   * Tags for the API documentation.
+   */
+  public static final String DIGITAL_OBJECTS_TAG = "Digital Objects";
+  public static final String DIGITAL_OBJECTS_TAG_DESCRIPTION = "Digital object CRUD operations";
+  public static final String PROJECTS_TAG = "Projects";
+  public static final String PROJECTS_TAG_DESCRIPTION = "Project management operations";
+  public static final String DATASTREAMS_TAG = "Datastreams";
+  public static final String DATASTREAMS_TAG_DESCRIPTION = "Datastream content and metadata operations";
+  public static final String SEARCH_TAG = "Search";
+  public static final String SEARCH_TAG_DESCRIPTION = "Search and filtering operations";
+  public static final String INTEGRATION_TAG = "Integration";
+  public static final String INTEGRATION_TAG_DESCRIPTION = "Integration services (hidden from public API)";
+
+
   @Value("${server.port:18085}")
   private String serverPort;
 
@@ -32,11 +47,11 @@ public class OpenAPIConfig {
         .components(new io.swagger.v3.oas.models.Components()
             .addSecuritySchemes("oauth2", createOAuth2Scheme()))
         .tags(List.of(
-            new Tag().name("Projects").description("Project management operations"),
-            new Tag().name("Digital Objects").description("Digital object CRUD operations"),
-            new Tag().name("Datastreams").description("Datastream content and metadata operations"),
-            new Tag().name("Search").description("Search and filtering operations"),
-            new Tag().name("Integration").description("Integration services (hidden from public API)")
+            new Tag().name(PROJECTS_TAG).description(PROJECTS_TAG_DESCRIPTION),
+            new Tag().name(DIGITAL_OBJECTS_TAG).description(DIGITAL_OBJECTS_TAG_DESCRIPTION),
+            new Tag().name(DATASTREAMS_TAG).description(DATASTREAMS_TAG_DESCRIPTION),
+            new Tag().name(SEARCH_TAG).description(SEARCH_TAG_DESCRIPTION),
+            new Tag().name(INTEGRATION_TAG).description(INTEGRATION_TAG_DESCRIPTION)
         ));
   }
 
