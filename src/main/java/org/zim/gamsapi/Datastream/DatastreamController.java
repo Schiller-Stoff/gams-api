@@ -175,8 +175,23 @@ public class DatastreamController {
       produces = MimeTypeUtils.APPLICATION_JSON_VALUE
   )
   @ResponseBody
-  @Operation(summary = "Get datastream details as JSON")
-  public IDatastreamDetailsView getDatastreamJson(@PathVariable String dsid, @PathVariable String id, Model model, @PathVariable String projectAbbr) {
+  @Operation(
+      summary = "Get datastream details as JSON",
+      description = "Retrieves the details of a specific datastream by its ID in JSON format.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Datastream details in JSON format",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content)
+      }
+  )
+  @Parameter(name = "projectAbbr", description = "Project abbreviation of the GAMS project", required = true)
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "dsid", description = "ID of the datastream", required = true)
+  public IDatastreamDetailsView getDatastreamJson(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @PathVariable String dsid
+  ) {
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(id);
     Datastream datastream = new DatastreamBuilder()
@@ -185,15 +200,12 @@ public class DatastreamController {
         .build();
     datastream.setDigitalObject(digitalObject);
 
-    Project project = ProjectBuilder.builder()
-        .projectAbbr(projectAbbr)
-        .description("")
-        .build();
-
     IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
-        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
-    model.addAttribute(foundDatastream);
-    model.addAttribute(project);
+        DatastreamId.builder()
+            .digitalObject(digitalObject.getId())
+            .dsid(datastream.getDsid())
+            .build()
+    );
     return foundDatastream;
   }
 
