@@ -3,6 +3,10 @@ package org.zim.gamsapi.DigitalObject;
 import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
@@ -42,6 +46,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects", "/api/v1/projects/{projectAbbr}/objects/" })
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = "Digital Objects", description = "Digital object management operations")
 public class DigitalObjectController {
 
   private final DigitalObjectService digitalObjectService;
@@ -153,7 +158,17 @@ public class DigitalObjectController {
 
   @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  @Operation(summary = "Get all digital objects for a project")
+  @Operation(
+      summary = "Get digital objects for a project",
+      description = "Retrieves paginated list of digital objects for a specific project with optional filtering",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Successfully retrieved digital objects",
+              content = @Content(mediaType = "application/json",
+                  schema = @Schema(implementation = DigitalObjectListItemView.class))),
+          @ApiResponse(responseCode = "404", description = "Project or object not found"),
+          @ApiResponse(responseCode = "403", description = "Access denied to project")
+      }
+  )
   public List<DigitalObjectListItemView> getProjectObjectsJson(
       @PathVariable String projectAbbr,
       Model model,
