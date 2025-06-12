@@ -47,7 +47,7 @@ public class DatastreamController {
       description = "Retrieves the binary content of the main datastream of defined digital object. Allows to return a different datastream content via specifying datastream tags.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Datastream content",
-              content = @Content(mediaType = "application/octet-stream")),
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)),
           @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content),
           @ApiResponse(responseCode = "409", description = "Datastream ambiguous match: Defined tag variable must match exactly one datastream of the digital object.", content = @Content),
           @ApiResponse(responseCode = "500", description = "Main datastream is not defined.", content = @Content)
@@ -85,9 +85,21 @@ public class DatastreamController {
 
   @GetMapping(path = {"/datastream" })
   @ResponseBody
-  @Operation(summary = "Get datastream details")
+  @Operation(
+      summary = "Get datastream details",
+      description = "Retrieves the details of a digital object's main datastream or a specific datastream by tags. If no tags are provided, the main datastream will be returned.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Datastream details",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content),
+          @ApiResponse(responseCode = "409", description = "Datastream ambiguous match: Defined tag variable must match exactly one datastream of the digital object.", content = @Content),
+          @ApiResponse(responseCode = "500", description = "Main datastream is not defined.", content = @Content)
+      }
+
+  )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   public IDatastreamDetailsView retrieveSingularDatastream(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
   ){
