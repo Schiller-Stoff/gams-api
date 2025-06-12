@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import java.util.List;
 import java.util.Set;
@@ -41,6 +40,13 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    * @return a list of DublinCoreEntries
    */
   List<DublinCoreEntrySummaryView> findByDigitalObjectId(String digitalObjectId);
+
+  /**
+   * Find DublinCoreEntries by digital object ids.
+   * @param digitalObjectIds set of digital object ids
+   * @return a list of DublinCoreEntries
+   */
+  List<DublinCoreEntrySummaryView> findByDigitalObjectIdIn(Set<String> digitalObjectIds);
 
   /**
    * Find DublinCoreEntries by digital object id.
