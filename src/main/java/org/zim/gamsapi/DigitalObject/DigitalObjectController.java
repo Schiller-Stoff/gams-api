@@ -275,21 +275,19 @@ public class DigitalObjectController {
   }
 
 
-  @Operation(hidden = true)
-  @GetMapping(params = { "style" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Get all digital object IDs for a project",
+      description = "Retrieves a list of all digital object IDs for a specific project"
+  )
+  @GetMapping(value = "/ids", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr, @Nullable @RequestParam String style) {
+  public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr) {
     Project project = ProjectBuilder
         .builder()
         .projectAbbr(projectAbbr)
         .description("")
         .build();
 
-    if (!style.equalsIgnoreCase("idlist")) {
-      String msg = String.format("Unsupported view style %s", style);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
     return digitalObjectService.findAllIdsByProjectAbbr(project.getProjectAbbr());
   }
 
