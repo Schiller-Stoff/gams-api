@@ -22,6 +22,8 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 
 import java.util.Set;
@@ -35,6 +37,7 @@ public class DatastreamController {
 
   private final IDatastreamService datastreamService;
   private final IDatastreamContentService datastreamContentService;
+  private final IProjectService projectService;
 
 
   @GetMapping(path = {"/datastream/content"})
@@ -57,6 +60,14 @@ public class DatastreamController {
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
   ){
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Cannot retrieve datastream content. Project %s not found.", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
     IDatastreamDetailsView foundDatastream;
     // use main datastream if no tags are provided
@@ -100,6 +111,15 @@ public class DatastreamController {
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
   ){
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream details", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     IDatastreamDetailsView foundDatastream;
     // use main datastream if no tags are provided
     if(tags.isEmpty()){
@@ -133,6 +153,14 @@ public class DatastreamController {
       @RequestParam(defaultValue = "100") int pageSize,
       @RequestParam(defaultValue = "dsid") String sortBy
   ) {
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream list", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
     // limit pageSize to max 100
     if (pageSize >= 100) {
@@ -189,6 +217,15 @@ public class DatastreamController {
       @PathVariable String id,
       @PathVariable String dsid
   ) {
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream details", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(id);
     Datastream datastream = new DatastreamBuilder()
@@ -215,13 +252,26 @@ public class DatastreamController {
    */
   @GetMapping( path = {"/datastreams/{dsid}/content" })
   @ResponseBody
-  @Operation(summary = "Get datastream content")
+  @Operation(
+      summary = "Get datastream content",
+      description = "Retrieves the binary content of a specific datastream by its ID. The content type is determined by the datastream's MIME type."
+  )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   @Parameter(name = "dsid", description = "ID of the datastream", required = true)
   public ResponseEntity<InputStreamResource> getDatastreamContent(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @PathVariable String dsid
   ){
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream content", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     Datastream datastream = new DatastreamBuilder()
         .dsid(dsid)
         .digitalObject(id)
