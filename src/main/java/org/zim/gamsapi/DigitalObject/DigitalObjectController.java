@@ -207,7 +207,8 @@ public class DigitalObjectController {
   }
 
   @DeleteMapping(value = { "/{id}" })
-  @Operation
+  @Operation(summary = "Delete a digital object by its ID",
+      description = "Deletes a digital object from the specified project. This operation is irreversible.")
   public String deleteObject(
       @PathVariable String id,
       @PathVariable String projectAbbr,
