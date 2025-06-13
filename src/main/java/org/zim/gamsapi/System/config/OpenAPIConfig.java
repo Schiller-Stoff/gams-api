@@ -48,10 +48,10 @@ public class OpenAPIConfig {
   public OpenAPI openAPI() {
     return new OpenAPI()
         .info(getInfo())
-        .servers(getServers())
-        .addSecurityItem(new SecurityRequirement().addList("oauth2"))
-        .components(new io.swagger.v3.oas.models.Components()
-            .addSecuritySchemes("oauth2", createOAuth2Scheme()))
+        //.servers(getServers())
+        //.addSecurityItem(new SecurityRequirement().addList("oauth2"))
+        //.components(new io.swagger.v3.oas.models.Components()
+        //    .addSecuritySchemes("oauth2", createOAuth2Scheme()))
         .tags(List.of(
             new Tag().name(PROJECTS_TAG).description(PROJECTS_TAG_DESCRIPTION),
             new Tag().name(DIGITAL_OBJECTS_TAG).description(DIGITAL_OBJECTS_TAG_DESCRIPTION),
