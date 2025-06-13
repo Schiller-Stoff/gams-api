@@ -29,7 +29,10 @@ public class OpenAPIConfig {
   public static final String SEARCH_TAG = "Search";
   public static final String SEARCH_TAG_DESCRIPTION = "Search and filtering operations";
   public static final String INTEGRATION_TAG = "Integration";
-  public static final String INTEGRATION_TAG_DESCRIPTION = "Integration services (hidden from public API)";
+  public static final String INTEGRATION_TAG_DESCRIPTION = "Integration services for non-core systems";
+  public static final String INGEST_TAG = "Ingest";
+  public static final String INGEST_TAG_DESCRIPTION = "Ingest services for bulk upload digital objects and datastreams";
+
 
 
   @Value("${server.port:18085}")
@@ -51,7 +54,9 @@ public class OpenAPIConfig {
             new Tag().name(DIGITAL_OBJECTS_TAG).description(DIGITAL_OBJECTS_TAG_DESCRIPTION),
             new Tag().name(DATASTREAMS_TAG).description(DATASTREAMS_TAG_DESCRIPTION),
             new Tag().name(SEARCH_TAG).description(SEARCH_TAG_DESCRIPTION),
-            new Tag().name(INTEGRATION_TAG).description(INTEGRATION_TAG_DESCRIPTION)
+            new Tag().name(INTEGRATION_TAG).description(INTEGRATION_TAG_DESCRIPTION),
+            new Tag().name(INGEST_TAG).description(INGEST_TAG_DESCRIPTION)
+
         ));
   }
 
@@ -76,7 +81,7 @@ public class OpenAPIConfig {
             .name("Apache 2.0")
             .url("https://www.apache.org/licenses/LICENSE-2.0.html"))
         .contact(new Contact()
-            .name("Sebastian Schiller-Stoff / ZIM")
+            .name("Sebastian David Schiller-Stoff / DDH")
             .email("sebastian.schiller-stoff@uni-graz.at")
             .url("https://zimlab.uni-graz.at/gams5"));
   }
