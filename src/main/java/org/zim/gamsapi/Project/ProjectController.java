@@ -1,28 +1,25 @@
 package org.zim.gamsapi.Project;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
-import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Project.ProjectModification.IProjectModificationService;
 import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
-import io.swagger.v3.oas.annotations.Operation;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -37,7 +34,6 @@ public class ProjectController {
 
   private final IProjectService projectService;
   private final IProjectModificationService projectModificationService;
-  private final IDigitalObjectService digitalObjectService;
 
   @PatchMapping(path = "/{projectAbbr}")
   @ResponseBody
