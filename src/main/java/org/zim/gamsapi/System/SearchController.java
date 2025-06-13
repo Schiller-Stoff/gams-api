@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
-
 import java.util.List;
 import java.util.Set;
 
