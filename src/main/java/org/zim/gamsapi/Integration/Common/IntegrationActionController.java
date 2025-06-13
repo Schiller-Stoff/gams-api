@@ -74,7 +74,7 @@ public class IntegrationActionController {
   }
 
   @Operation(
-      summary = "Integrate all digital objects for a project",
+      summary = "Add all project's digital objects to external services",
       description = "This endpoint allows to integrate all objects for a project in external systems.",
       responses = {
           @ApiResponse(
@@ -98,7 +98,7 @@ public class IntegrationActionController {
   }
 
   @Operation(
-      summary = "Delete all digital object integrations for a project",
+      summary = "Delete all digital object from external services for a project",
       description = "This endpoint allows to delete all digital object integrations for a project in external systems.",
       responses = {
           @ApiResponse(
