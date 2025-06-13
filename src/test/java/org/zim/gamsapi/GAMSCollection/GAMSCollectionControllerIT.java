@@ -26,7 +26,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates security filters
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("GAMS collection is deactivated in the current version of GAMS5.")
 public class GAMSCollectionControllerIT extends IntegrationTest {
 
 
@@ -77,7 +76,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     @Test
     public void GETAllCollectionsContainsExpectedJsonValues() throws Exception {
 
-      final String URL = "/api/v1/collections/";
+      final String URL = "/api/v1/collections";
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(URL)

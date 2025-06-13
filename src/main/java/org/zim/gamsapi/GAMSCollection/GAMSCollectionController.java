@@ -1,6 +1,7 @@
 package org.zim.gamsapi.GAMSCollection;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,11 +16,13 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.Project.ProjectBuilder;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
 
-//@Controller
+@Controller
 @RequestMapping({"/api/v1"})
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = OpenAPIConfig.GAMS_COLLECTIONS_TAG, description = OpenAPIConfig.GAMS_COLLECTIONS_TAG_DESCRIPTION)
 public class GAMSCollectionController {
 
   private final IGAMSCollectionService collectionService;
@@ -37,8 +40,6 @@ public class GAMSCollectionController {
     if (pageSize >= 100) {
       pageSize = 100;
     }
-
-    log.error("TRIGGERED CONTROLLER Page<CollectionCompactView> getAllCollections");
     // TODO redo pageing parameters!
     return collectionService.findAll(PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
   }
