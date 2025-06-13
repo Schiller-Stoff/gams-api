@@ -1,6 +1,8 @@
 package org.zim.gamsapi.Project;
 
-import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import io.swagger.v3.oas.annotations.Operation;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -30,6 +33,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping({"/api/v1/projects" })
+@Tag(name = OpenAPIConfig.PROJECTS_TAG, description = OpenAPIConfig.PROJECTS_TAG_DESCRIPTION)
 public class ProjectController {
 
   private final IProjectService projectService;
@@ -38,6 +42,16 @@ public class ProjectController {
 
   @PatchMapping(path = "/{projectAbbr}")
   @ResponseBody
+  @Operation(
+      summary = "Change a project's metadata",
+      description = "Allows to change a project's metadata by providing the project abbreviation in the path variable and the new project data in the request body.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project updated successfully",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Project not found",
+              content = @Content)
+      }
+  )
   public Project changeProject(
       @PathVariable String projectAbbr,
       @RequestBody Project project
@@ -47,8 +61,15 @@ public class ProjectController {
     return projectService.updateProject(project);
   }
 
-  @Hidden
   @PutMapping(path = "/{projectAbbr}")
+  @Operation(
+      summary = "Create a GAMS project",
+      description = "Allows to create a GAMS project by providing the project abbreviation in the path variable and the project data in the request body.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project successfully created",
+              content = @Content(mediaType = MimeTypeUtils.TEXT_HTML_VALUE))
+      }
+  )
   public String createProject(
       @PathVariable String projectAbbr,
       // read out description argument from given json
@@ -76,30 +97,57 @@ public class ProjectController {
     return "Project/show_all";
   }
 
-  @Hidden
   @DeleteMapping(path = "/{projectAbbr}")
   @ResponseBody
-  @Operation(summary = "Delete a project by abbreviation")
+  @Operation(
+      summary = "Delete a project by abbreviation",
+      description = "Deletes a project by its abbreviation. The project must exist.",
+      responses = {
+          @ApiResponse(responseCode = "204", description = "Project deleted successfully",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Project not found",
+              content = @Content)
+      }
+  )
   public void deleteProject(@PathVariable String projectAbbr){
     Project project = projectService.findByAbbr(projectAbbr);
-    log.info("Deleting project: " + project.getDescription());
+    String msg = String.format("Project with abbreviation %s was deleted", projectAbbr);
+    log.info(msg);
     projectService.deleteProject(project);
   }
 
   @GetMapping
   @ResponseBody
-  @Operation(summary = "A list of projects with metadata")
+  @Operation(
+      summary = "A list of projects with metadata",
+      description = "Returns a list of all projects with their metadata.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "List of projects",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+      }
+  )
   public List<Project> showProjects(){
+    // TODO needs pagination
     return projectService.findAll();
   }
 
   @GetMapping(path = "/{projectAbbr}")
   @ResponseBody
-  @Operation(summary = "A single project by proj́ect abbreviation and metadata")
+  @Operation(
+      summary = "A single project by proj́ect abbreviation and metadata",
+      description = "Returns a single project by its abbreviation with all metadata.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project found",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Project not found",
+              content = @Content)
+      }
+  )
   public Project getProjectByAbbr(@PathVariable String projectAbbr) {
     return projectService.findProject(projectAbbr);
   }
 
+  @Operation(hidden = true)
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String showProjectsViaWebClient(Model model){
     List<Project> projects = projectService.findAll();
@@ -107,6 +155,18 @@ public class ProjectController {
     return "Project/show_all";
   }
 
+  @Operation(
+      summary = "Check if a project has been modified since a given date",
+      description = "Checks if a project has been modified since a given date. If the project has not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project has been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Project has not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
   @RequestMapping(value = "/{projectAbbr}", method = RequestMethod.HEAD)
   public ResponseEntity<Void> checkProjectModification(
       @PathVariable String projectAbbr,
@@ -153,7 +213,16 @@ public class ProjectController {
    */
   @GetMapping(path = "/search/dc", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  @Operation(summary = "Dublin core search based on digital objects and different projects.")
+  @Operation(
+      summary = "Dublin core search based on digital objects and different projects.",
+      description = "Searches for digital objects based on Dublin Core metadata. The search is performed on a specific Dublin Core field with exact match.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital objects found",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+              content = @Content)
+      }
+  )
   public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreExactMatch(
       @RequestParam Set<String> projectAbbrs,
       @RequestParam String dcField,
@@ -185,7 +254,16 @@ public class ProjectController {
    */
   @GetMapping(path = "/search/dc/fulltext", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
-  @Operation(summary = "Dublin core fulltext search based on digital objects and multiple projects.")
+  @Operation(
+      summary = "Dublin core fulltext search based on digital objects and multiple projects.",
+      description = "Searches for digital objects based on a fulltext search over all Dublin Core fields. The search is performed on multiple projects and can include multiple Dublin Core fields.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital objects found",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+              content = @Content)
+      }
+  )
   public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreFulltext(
       @RequestParam Set<String> projects,
       // dublin core search parameters
