@@ -33,7 +33,4 @@ public class GAMSDockerDNS {
 
   @NotBlank
   private String elasticsearchUrl;
-
-  @NotBlank
-  private String keycloakUrl;
 }
