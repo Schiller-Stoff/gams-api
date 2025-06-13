@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
-import io.swagger.v3.oas.annotations.Hidden;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 
 import java.io.IOException;

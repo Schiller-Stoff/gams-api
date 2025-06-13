@@ -31,7 +31,7 @@ public class OpenAPIConfig {
   public static final String INTEGRATION_TAG = "Integration";
   public static final String INTEGRATION_TAG_DESCRIPTION = "Integration services for non-core systems";
   public static final String INGEST_TAG = "Ingest";
-  public static final String INGEST_TAG_DESCRIPTION = "Ingest services for bulk upload digital objects and datastreams";
+  public static final String INGEST_TAG_DESCRIPTION = "Ingest digital objects and datastreams in bulk";
 
 
 
