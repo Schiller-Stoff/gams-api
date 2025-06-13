@@ -109,9 +109,11 @@ public class OpenAPIConfig {
         .flows(new io.swagger.v3.oas.models.security.OAuthFlows()
             .authorizationCode(new io.swagger.v3.oas.models.security.OAuthFlow()
                 // TODO keycloak URLs should be configured via properties
-                .authorizationUrl("https://your-keycloak-server/auth")
+                //.authorizationUrl("http://localhost:18085/api/v1/auth")
+                .authorizationUrl("http://localhost:8182/realms/gams-realm/protocol/openid-connect/auth")
                 // TODO token url should be configured via properties
-                .tokenUrl("https://your-keycloak-server/token")
+                //.tokenUrl("http://localhost:8182/realms/gams-realm")
+                .tokenUrl("http://localhost:8182/realms/gams-realm/protocol/openid-connect/token")
                 .scopes(new io.swagger.v3.oas.models.security.Scopes()
                     .addString("read", "Read access")
                     .addString("write", "Write access"))));
