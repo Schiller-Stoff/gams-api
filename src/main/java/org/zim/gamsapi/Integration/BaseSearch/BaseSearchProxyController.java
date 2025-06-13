@@ -42,7 +42,7 @@ public class BaseSearchProxyController implements IIntegrationProxyController {
     // proxy against read only endpoint.
     // TODO should expose "baseSearch" in url
     // TOD refactor
-    String targetUrl = gamsConfigProperties.getBaseSearchUrl() + "/" +  request.getRequestURI().replace("/api/v1/integration/baseSearch/", "");
+    String targetUrl = gamsConfigProperties.getBaseSearchUrl() + "/" +  request.getRequestURI().replace("/api/v1/integration/search/", "");
     return proxyService.proxy(request, body, targetUrl);
   }
 }
