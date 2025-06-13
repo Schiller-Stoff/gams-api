@@ -4,10 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -29,10 +29,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class GAMSCollectionControllerIT extends IntegrationTest {
 
 
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private MockMvc mockMvc;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @Autowired
@@ -124,7 +125,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void GETcollectionsForProjectContainsExpectedJsonValues() throws Exception {
+    public void GETCollectionsForProjectContainsExpectedJsonValues() throws Exception {
       final String URL = String.format("/api/v1/projects/%s/collections", testProject.getProjectAbbr());
 
       MvcResult mvcResult = mockMvc.perform(
@@ -173,11 +174,11 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     public void GETAllCollectionsForASpecificObject() throws Exception {
 
       // saving a second collection to be found
-      final String SECOND_COLLCTION_ID = "test-collection-id-2";
+      final String SECOND_COLLECTION_ID = "test-collection-id-2";
       final GAMSCollection SECOND_TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
           testProject.getProjectAbbr(),
           testDigitalObject.getId(),
-          SECOND_COLLCTION_ID
+          SECOND_COLLECTION_ID
       );
       collectionRepository.save(SECOND_TEST_GAMS_COLLECTION);
 
@@ -314,10 +315,13 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
           )
           .andExpect(status().isOk());
 
+      var foundCollection = collectionRepository.findById(TEST_GAMS_COLLECTION.getId())
+          .orElseThrow(() -> {
+            String msg = String.format("Collection with id %s not found", TEST_GAMS_COLLECTION.getId());
+            return new AssertionError(msg);});
+
       // assert that the collection contains the digital object
-      Assertions.assertThat(
-          collectionRepository.findById(TEST_GAMS_COLLECTION.getId())
-              .get()
+      Assertions.assertThat(foundCollection
               .getDigitalObjects()
       ).contains(testDigitalObject);
 
@@ -381,7 +385,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       Assertions.assertThat(foundCollection.getDescription())
           .isEqualTo(TEST_COLLECTION_CHANGED_DESCRIPTION);
 
-      // asssert that the collection does not have the old values
+      // assert that the collection does not have the old values
       Assertions.assertThat(foundCollection.getTitle())
           .isNotEqualTo(testGAMSCollection.getTitle());
       Assertions.assertThat(foundCollection.getDescription())
@@ -495,11 +499,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       ).isFalse();
 
       // assert that now finding digital objects by the defined collection id throws an exception
-      Assertions.assertThatThrownBy(() -> {
-        collectionService.findDigitalObjectsByCollectionId(
-            testGAMSCollection.getId(), PageRequest.of(0, 100)
-        );
-      }).isInstanceOf(CollectionNotFoundException.class);
+      Assertions.assertThatThrownBy(() -> collectionService.findDigitalObjectsByCollectionId(
+          testGAMSCollection.getId(), PageRequest.of(0, 100)
+      )).isInstanceOf(CollectionNotFoundException.class);
 
     }
 
