@@ -19,6 +19,7 @@ public class AuthEndpointController {
   @GetMapping("/api/v1/auth")
   public String login(@RequestHeader Map<String, String> requestHeader) {
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
+    // TODO dangerous redirect - hardcoded realm?
     return "redirect:" + origin + "oauth2/authorization/gams-realm";
   }
 
