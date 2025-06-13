@@ -26,9 +26,8 @@ public class IngestController {
 
   private final IIngestService ingestService;
 
-  @PostMapping(
-      value = "/api/v1/projects/{projectAbbr}/objects/ingest"
-  )
+  @PostMapping(produces = "application/json", path = { "/api/v1/projects/{projectAbbr}/objects"})
+  @ResponseBody
   @Operation(
       summary = "Ingest a zipped bag folder",
       description = "Ingests a zipped BagIt folder containing digital objects and datastreams into the specified project. " +
