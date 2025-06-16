@@ -2,7 +2,9 @@ package org.zim.gamsapi.System;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,10 +14,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryDTO;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryService;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
@@ -35,6 +40,7 @@ public class SearchController {
    * Service for searching digital objects.
    */
   private final IDigitalObjectService digitalObjectService;
+  private final DublinCoreEntryService dublinCoreEntryService;
 
   /**
    * Fulltext search over all dublin core fields of a digital object.
@@ -124,6 +130,54 @@ public class SearchController {
     return digitalObjectService.searchObjectsByDublincCoreTags(
         projectAbbrs, dcField, search, PageRequest.of(pageIndex, pageSize)
     );
+
+  }
+
+  @Operation(
+      summary = "Advanced search for Dublin Core entries with multiple filters.",
+      description = "Searches for Dublin Core entries based on multiple filter criteria. The search is performed using a multi-value map of filters.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Dublin Core entries found",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+              content = @Content)
+      }
+  )
+  @GetMapping(path = "/dc/advancedFilter", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  @Parameter(
+      name = "dcEntries",
+      required = false,
+      description = "Multi-value map of Dublin Core entries to filter by. Each key is a Dublin Core field name and the values are the search terms.",
+      schema = @Schema(type = "object"))
+  public Page<DublinCoreEntryDTO> searchDCEntries(
+      //@RequestParam MultiValueMap<String, String> requestParams,
+      @RequestParam MultiValueMap<String, String> dcEntries,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "20") int pageSize
+  ) {
+
+    // limit page size
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    // needs to be removed from the dc search multivalue map
+    dcEntries.remove("pageIndex");
+    dcEntries.remove("pageSize");
+
+    // example call:
+    // http://localhost:18085/api/v1/search/dc/advancedFilter?Type=Brief
+
+    // TODO validate requestParams?
+
+    //TODO redo log
+    log.error("*** got multiValueMap: {} ***", dcEntries);
+
+
+    // TODO implement what
+    return dublinCoreEntryService.findAll(dcEntries, PageRequest.of(pageIndex, pageSize));
 
   }
 
