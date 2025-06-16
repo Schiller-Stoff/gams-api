@@ -1,5 +1,6 @@
 package org.zim.gamsapi.DigitalObject;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -15,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectException;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-import java.util.*;
+
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * Domain object representing a digital object in sense of OAIS.
@@ -73,6 +76,8 @@ public class DigitalObject {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(nullable = false)
   @NotNull
+  // this will fix some serialization issues with Hibernate proxies
+  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
   private Project project;
 
   @Embedded
