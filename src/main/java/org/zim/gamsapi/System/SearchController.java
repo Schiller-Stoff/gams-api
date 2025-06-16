@@ -20,11 +20,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryService;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+
 import java.util.List;
 import java.util.Set;
 
@@ -202,5 +205,60 @@ public class SearchController {
 
   }
 
+
+  @GetMapping(path = "/dc/advanced", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  @Operation(
+      summary = "Advanced multi-criteria Dublin Core search for digital objects",
+      description = "Advanced search supporting multiple Dublin Core criteria with different search modes. " +
+          "Supports exact match, contains, and fulltext search modes.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital objects found",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+              content = @Content)
+      }
+  )
+  @Parameter(
+      name = "dcEntries",
+      required = false,
+      examples = {
+          @ExampleObject(
+              name = "dc.type search",
+              summary = "Return all dc.type fields with value 'Brief'",
+              value = "{\"type\": [\"Brief\"]}",
+              description = "Search for type field entries"
+          ),
+          @ExampleObject(
+              name = "Multi-field search",
+              summary = "Search across multiple DC fields",
+              value = "{\"type\": [\"Brief\"], \"subject\": [\"test\"], \"language\": [\"en\"]}",
+              description = "Combined search across multiple fields"
+          )
+      },
+      description = "Multi-value map of Dublin Core entries to filter by.",
+      schema = @Schema(type = "object")
+  )
+  public Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreAdvanced(
+      @RequestParam MultiValueMap<String, String> dcCriteria,
+      @RequestParam Set<String> projects,
+      @RequestParam(defaultValue = "EXACT_MATCH") DigitalObjectDublinCoreSpecification.SearchMode searchMode,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "20") int pageSize) {
+
+    pageSize = Math.min(pageSize, 20); // Limit page size
+
+    // Remove pagination parameters from criteria map
+    dcCriteria.remove("projects");
+    dcCriteria.remove("searchMode");
+    dcCriteria.remove("pageIndex");
+    dcCriteria.remove("pageSize");
+
+    log.debug("Advanced DC search - criteria: {}, projects: {}, mode: {}",
+        dcCriteria, projects, searchMode);
+
+    return digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
+        dcCriteria, projects, searchMode, PageRequest.of(pageIndex, pageSize));
+  }
 
 }

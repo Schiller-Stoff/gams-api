@@ -6,8 +6,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
@@ -15,6 +17,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
@@ -242,4 +245,60 @@ public class DigitalObjectService implements IDigitalObjectService {
       digitalObjectCompactDTO.setDublinCore(dcMap);
       return digitalObjectCompactDTO;
     }
+
+
+  /**
+   * Advanced Dublin Core search using Criteria API for complex multi-field queries.
+   * This method supports:
+   * - Multiple Dublin Core fields with multiple values each
+   * - Different search modes (exact, contains, fulltext)
+   * - Project filtering
+   * - Type-safe query building
+   * Use this for complex search scenarios with multiple criteria.
+   *
+   * @param dublinCoreFilters MultiValueMap of DC field names to search values
+   * @param projectAbbrs Set of project abbreviations to filter by
+   * @param searchMode Search mode (EXACT_MATCH, CONTAINS, FULLTEXT)
+   * @param pageable Pagination information
+   * @return Page of digital objects matching the criteria
+   */
+  public Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
+      MultiValueMap<String, String> dublinCoreFilters,
+      Set<String> projectAbbrs,
+      DigitalObjectDublinCoreSpecification.SearchMode searchMode,
+      Pageable pageable) {
+
+    log.debug("Searching digital objects with DC criteria: {}, projects: {}, mode: {}",
+        dublinCoreFilters, projectAbbrs, searchMode);
+
+    Specification<DigitalObject> spec = new DigitalObjectDublinCoreSpecification(
+        dublinCoreFilters, projectAbbrs, searchMode);
+
+    // Convert to projection for consistent API
+    Page<DigitalObject> digitalObjects = digitalObjectRepository.findAll(spec, pageable);
+
+    var mappedObjects = digitalObjects.map(digitalObject -> {
+      // Convert to DTO
+      var dto = conversionService.convert(digitalObject, DigitalObjectSearchResultDTO.class);
+      if (dto == null) {
+        String msg = String.format("Failed to convert DigitalObject to DigitalObjectCompactDTO for object %s", digitalObject.getId());
+        log.error(msg);
+        throw new DigitalObjectConversionException(msg);
+      }
+
+      // Set Dublin Core entries
+      Map<String, List<DublinCoreEntryCompactDTO>> dcMap = new HashMap<>();
+      dublinCoreEntryRepository.findByDigitalObjectId(digitalObject.getId())
+          .forEach(entry -> {
+            DublinCoreEntryCompactDTO converted = conversionService.convert(entry, DublinCoreEntryCompactDTO.class);
+            dcMap.computeIfAbsent(entry.getName(), k -> new ArrayList<>()).add(converted);
+          });
+      dto.setDublinCore(dcMap);
+
+      return dto;
+    });
+
+    return mappedObjects;
+  }
+
 }
