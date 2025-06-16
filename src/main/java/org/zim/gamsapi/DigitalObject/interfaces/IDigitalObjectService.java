@@ -2,8 +2,11 @@ package org.zim.gamsapi.DigitalObject.interfaces;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -110,4 +113,17 @@ public interface IDigitalObjectService {
    */
   DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String id);
 
+  /**
+   * Search digital objects by Dublin Core criteria.
+   * @param dublinCoreFilters a map of Dublin Core filters where the key is the Dublin Core element name and the value is a list of values to match
+   * @param projectAbbrs a set of project abbreviations to filter the digital objects by their associated projects
+   * @param searchMode the search mode to use (e.g., exact match, fulltext)
+   * @param pageable pagination information
+   * @return a page of DigitalObjectSearchResultDTO containing the search results
+   */
+  Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
+      MultiValueMap<String, String> dublinCoreFilters,
+      Set<String> projectAbbrs,
+      DigitalObjectDublinCoreSpecification.SearchMode searchMode,
+      Pageable pageable);
 }
