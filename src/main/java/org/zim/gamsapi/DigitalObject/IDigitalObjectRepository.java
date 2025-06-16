@@ -2,6 +2,7 @@ package org.zim.gamsapi.DigitalObject;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -13,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String> {
+public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String>, JpaSpecificationExecutor<DigitalObject> {
 
   @Modifying(flushAutomatically = true)
   void deleteAllByProject_ProjectAbbr(String projectAbbr);
@@ -93,5 +94,7 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
       @Param("collectionId") String collectionId,
       Pageable pageable
   );
+
+
 
 }
