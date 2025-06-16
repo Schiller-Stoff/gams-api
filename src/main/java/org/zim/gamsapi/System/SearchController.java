@@ -4,6 +4,7 @@ package org.zim.gamsapi.System;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -143,11 +144,31 @@ public class SearchController {
               content = @Content)
       }
   )
-  @GetMapping(path = "/dc/advancedFilter", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/dc/entrySearch", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Parameter(
       name = "dcEntries",
       required = false,
+      examples = {
+          @ExampleObject(
+              name = "dc.type search",
+              summary = "Return all dc.type fields with value 'Brief' (URL expressed as JSON)",
+              value = "{\"type\": [\"Brief\"]}",
+              description = "blah"
+          ),
+          @ExampleObject(
+              name = "dc.type subject multi search",
+              summary = "Return all dc.subject fields with value 'test' (URL expressed as JSON)",
+              value = "{\"subject\": [\"test\", \"test2\", \"test3\"]}",
+              description = "blah"
+          ),
+          @ExampleObject(
+              name = "Combined dy.type search",
+              summary = "Return all dc entries that are dc.type equals 'Brief' OR dc.subject with value 'test' OR language 'en' (URL expressed as JSON)",
+              value = "{\"type\": [\"Brief\"], \"subject\": [\"test\"], \"language\": [\"en\"]}",
+              description = "blahhh"
+          )
+      },
       description = "Multi-value map of Dublin Core entries to filter by. Each key is a Dublin Core field name and the values are the search terms.",
       schema = @Schema(type = "object"))
   public Page<DublinCoreEntryDTO> searchDCEntries(

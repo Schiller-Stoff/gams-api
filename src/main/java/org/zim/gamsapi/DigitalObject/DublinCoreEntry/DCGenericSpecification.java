@@ -36,55 +36,38 @@ public class DCGenericSpecification<T> implements Specification<T> {
    */
   @Override
   public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-    // Prevent cartesian product issues in counting queries
-    if (query.getResultType() == Long.class || query.getResultType() == long.class) {
-      query.distinct(true);
-    }
+    List<Predicate> predicates = new ArrayList<>();
 
-    // TODO seems weird
-    if (combinedFilters == null || combinedFilters.isEmpty()) {
-      return null;
-    }
+    if (combinedFilters != null && !combinedFilters.isEmpty()) {
+      List<Predicate> orPredicates = new ArrayList<>();
 
-    List<Predicate> fieldPredicates = new ArrayList<>();
-
-    // Process each filter field
-    for (String dcName : combinedFilters.keySet()) {
-      List<String> values = combinedFilters.get(dcName);
-
-      if (values == null || values.isEmpty()) continue;
-
-      // Create a list of value predicates for this field
-      List<Predicate> valuePredicates = new ArrayList<>();
-      for (String value : values) {
-        if (value != null && !value.isEmpty()) {
-          // For each value, we need entries where name=dcName AND value LIKE %value%
-          // These individual conditions are combined with AND for the same field
-          valuePredicates.add(
-              criteriaBuilder.equal(
-                  // TODO hardcoded dc field
+      combinedFilters.forEach((dcName, values) -> {
+        if (values != null && !values.isEmpty()) {
+          for (String value : values) {
+            if (value != null && !value.isEmpty()) {
+              // Create a predicate that checks both name and value match
+              // TODO remove hardcoded dc field names
+              Predicate namePredicate = criteriaBuilder.equal(root.get("name"), dcName);
+              Predicate valuePredicate = criteriaBuilder.like(
+                  // TODO remove hardcoded dc field names
                   root.get("value"),
                   value
-              )
-          );
+              );
+
+              // Combine name and value predicates with AND
+              orPredicates.add(criteriaBuilder.and(namePredicate, valuePredicate));
+            }
+          }
         }
-      }
+      });
 
-      if (!valuePredicates.isEmpty()) {
-        // Combine the name predicate with the AND of all value predicates
-        // TODO hardcoded dc field
-        Predicate namePredicate = criteriaBuilder.equal(root.get("name"), dcName);
-
-        // Combine all values with AND for this field
-        Predicate valuesAndPredicate = criteriaBuilder.and(valuePredicates.toArray(new Predicate[0]));
-
-        // Add the combined field predicate to the list of field predicates
-        fieldPredicates.add(criteriaBuilder.and(namePredicate, valuesAndPredicate));
+      // Combine all name-value pairs with OR (we want entries matching any of the criteria)
+      if (!orPredicates.isEmpty()) {
+        predicates.add(criteriaBuilder.or(orPredicates.toArray(new Predicate[0])));
       }
     }
 
-    // Combine different field predicates with OR
-    return fieldPredicates.isEmpty() ? null :
-        criteriaBuilder.or(fieldPredicates.toArray(new Predicate[0]));
+    // Return the final combined predicate or null if no predicates were created
+    return predicates.isEmpty() ? null : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
   }
 }
