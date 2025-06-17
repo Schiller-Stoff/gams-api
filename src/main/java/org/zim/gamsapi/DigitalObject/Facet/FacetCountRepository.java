@@ -87,70 +87,6 @@ public class FacetCountRepository {
   }
 
   /**
-   * ALTERNATIVE: Simplified query without drill-down logic for testing
-   */
-  public Map<String, List<FacetValue>> getFacetCountsSimple(
-      Set<String> projectAbbrs,
-      Set<String> facetFields) {
-
-    if (facetFields.isEmpty()) {
-      return Collections.emptyMap();
-    }
-
-    // Simple query without filters - good for testing
-    String sql = """
-            SELECT dce.name as facet_field, dce.value as facet_value, COUNT(DISTINCT dob.id) as count
-            FROM dublin_core_entry dce 
-            JOIN digital_object dob ON dob.id = dce.digital_object_id 
-            WHERE dob.project_project_abbr = ANY(:projectAbbrs) 
-            AND dce.name = ANY(:facetFields)
-            GROUP BY dce.name, dce.value 
-            ORDER BY dce.name, count DESC, dce.value
-            """;
-
-    Query query = entityManager.createNativeQuery(sql);
-    query.setParameter("projectAbbrs", projectAbbrs.toArray(new String[0]));
-    query.setParameter("facetFields", facetFields.toArray(new String[0]));
-
-    @SuppressWarnings("unchecked")
-    List<Object[]> results = query.getResultList();
-
-    return parseFacetResults(results, new LinkedMultiValueMap<>());
-  }
-
-  /**
-   * CORRECTED: Drill-down aware facet counts (proper implementation)
-   */
-  public Map<String, List<FacetValue>> getFacetCountsWithDrillDown(
-      Set<String> projectAbbrs,
-      MultiValueMap<String, String> selectedFacets,
-      Set<String> facetFields) {
-
-    if (facetFields.isEmpty()) {
-      return Collections.emptyMap();
-    }
-
-    // For drill-down, we need to calculate facets for each field separately
-    // excluding filters for that specific field
-    Map<String, List<FacetValue>> allFacetCounts = new LinkedHashMap<>();
-
-    for (String facetField : facetFields) {
-      // Create filters excluding the current facet field
-      MultiValueMap<String, String> filtersExcludingCurrent = new LinkedMultiValueMap<>();
-      selectedFacets.entrySet().stream()
-          .filter(entry -> !entry.getKey().equals(facetField))
-          .forEach(entry -> filtersExcludingCurrent.addAll(entry.getKey(), entry.getValue()));
-
-      List<FacetValue> facetValues = getFacetValuesForField(
-          projectAbbrs, filtersExcludingCurrent, facetField, selectedFacets.get(facetField));
-
-      allFacetCounts.put(facetField, facetValues);
-    }
-
-    return allFacetCounts;
-  }
-
-  /**
    * Get facet values for a single field with proper drill-down logic
    */
   private List<FacetValue> getFacetValuesForField(
@@ -275,24 +211,4 @@ public class FacetCountRepository {
     return ((Number) query.getSingleResult()).longValue();
   }
 
-  /**
-   * Get available facet fields for a project (auto-discovery)
-   */
-  public Set<String> getAvailableFacetFields(Set<String> projectAbbrs) {
-    String sql = """
-            SELECT DISTINCT dce.name 
-            FROM dublin_core_entry dce 
-            JOIN digital_object dob ON dob.id = dce.digital_object_id 
-            WHERE dob.project_project_abbr = ANY(:projectAbbrs) 
-            ORDER BY dce.name
-            """;
-
-    Query query = entityManager.createNativeQuery(sql);
-    query.setParameter("projectAbbrs", projectAbbrs.toArray(new String[0]));
-
-    @SuppressWarnings("unchecked")
-    List<String> results = query.getResultList();
-
-    return new LinkedHashSet<>(results);
-  }
 }

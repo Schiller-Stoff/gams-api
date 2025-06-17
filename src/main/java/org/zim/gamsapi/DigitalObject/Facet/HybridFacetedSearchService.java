@@ -82,13 +82,6 @@ public class HybridFacetedSearchService {
   }
 
   /**
-   * Auto-discovery: Get available facet fields for a project
-   */
-  public Set<String> getAvailableFacetFields(Set<String> projectAbbrs) {
-    return facetCountRepository.getAvailableFacetFields(projectAbbrs);
-  }
-
-  /**
    * Simplified search with default facet fields
    */
   public FacetedSearchResponse searchWithDefaultFacets(
