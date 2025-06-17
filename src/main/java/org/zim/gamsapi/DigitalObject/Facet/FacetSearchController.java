@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
@@ -84,7 +85,7 @@ public class FacetSearchController {
 
     // Use default facets - customize these based on your domain
     return hybridFacetedService.searchWithDefaultFacets(
-        projects, dcFiltersCleaned, PageRequest.of(pageIndex, pageSize));
+        projects, dcFiltersCleaned, PageRequest.of(pageIndex, pageSize, Sort.by("id").ascending()));
   }
 
   /**
