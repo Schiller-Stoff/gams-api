@@ -22,6 +22,7 @@ import org.zim.gamsapi.Datastream.DatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
