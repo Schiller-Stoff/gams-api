@@ -33,9 +33,9 @@ import java.util.Set;
 @Controller
 @RequestMapping({"/api/v1/facets"})
 @Tag(name = OpenAPIConfig.FACET_TAG, description = OpenAPIConfig.FACET_TAG_DESCRIPTION)
-public class HybridFacetedSearchController {
+public class FacetSearchController {
 
-  private final HybridFacetedSearchService hybridFacetedService;
+  private final FacetSearchService hybridFacetedService;
 
   /**
    * Simplified endpoint with sensible defaults
@@ -71,7 +71,7 @@ public class HybridFacetedSearchController {
           )
       }
   )
-  public FacetedSearchResponse searchFacetedSimple(
+  public FacetSearchResponse searchFacetedSimple(
       @RequestParam Set<String> projects,
       @RequestParam MultiValueMap<String, String> dcFilters,
       @RequestParam(defaultValue = "0") int pageIndex,

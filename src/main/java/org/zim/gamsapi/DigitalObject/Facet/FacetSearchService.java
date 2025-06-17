@@ -18,7 +18,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class HybridFacetedSearchService {
+public class FacetSearchService {
 
   private final IDigitalObjectService digitalObjectService; // Your existing service
   private final FacetCountRepository facetCountRepository;  // New native SQL repository
@@ -30,7 +30,7 @@ public class HybridFacetedSearchService {
    * ✅ Your existing Criteria-based search for main results
    * ✅ Native SQL only for facet counting performance
    */
-  public FacetedSearchResponse searchWithFacets(
+  public FacetSearchResponse searchWithFacets(
       Set<String> projectAbbrs,
       MultiValueMap<String, String> selectedFacets,
       Set<String> facetFields,
@@ -65,7 +65,7 @@ public class HybridFacetedSearchService {
     long totalTime = System.currentTimeMillis() - startTime;
 
     // Build response
-    return FacetedSearchResponse.builder()
+    return FacetSearchResponse.builder()
         .results(searchResults)
         .availableFacets(availableFacets)
         .selectedFacets(selectedFacets)
@@ -84,7 +84,7 @@ public class HybridFacetedSearchService {
   /**
    * Simplified search with default facet fields
    */
-  public FacetedSearchResponse searchWithDefaultFacets(
+  public FacetSearchResponse searchWithDefaultFacets(
       Set<String> projectAbbrs,
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {

@@ -13,7 +13,7 @@ import java.util.Map;
  */
 @Data
 @Builder
-public class FacetedSearchResponse {
+public class FacetSearchResponse {
   private Page<DigitalObjectSearchResultDTO> results;
   private Map<String, List<FacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
