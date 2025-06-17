@@ -1,6 +1,7 @@
 package org.zim.gamsapi.DigitalObject;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
@@ -32,6 +33,7 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
 @ToString
+@JacksonXmlRootElement(localName = "digitalObject")
 public class DigitalObject {
 
   /**
