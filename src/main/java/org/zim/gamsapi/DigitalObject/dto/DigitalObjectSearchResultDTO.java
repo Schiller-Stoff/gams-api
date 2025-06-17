@@ -1,5 +1,8 @@
 package org.zim.gamsapi.DigitalObject.dto;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
@@ -9,6 +12,7 @@ import java.util.Map;
 
 @Data
 @Builder
+@JacksonXmlRootElement(localName = "digitalObject")
 public class DigitalObjectSearchResultDTO {
   private String id;
   private String title;
