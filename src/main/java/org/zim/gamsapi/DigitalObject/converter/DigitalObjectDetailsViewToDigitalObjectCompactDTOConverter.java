@@ -2,7 +2,7 @@ package org.zim.gamsapi.DigitalObject.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.zim.gamsapi.DigitalObject.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import java.util.ArrayList;
 
