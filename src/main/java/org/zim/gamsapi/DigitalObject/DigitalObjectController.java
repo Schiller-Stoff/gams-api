@@ -95,7 +95,10 @@ public class DigitalObjectController {
 
   }
 
-  @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = { "/{id}" }, produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get a digital object by its ID")
   @Parameter(name = "projectAbbr", description = "The project abbreviation", required = true)
@@ -129,7 +132,10 @@ public class DigitalObjectController {
     return "DigitalObject/show";
   }
 
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Get digital objects for a project",
@@ -140,7 +146,7 @@ public class DigitalObjectController {
           @ApiResponse(responseCode = "403", description = "Access denied to project", content = @Content)
       }
   )
-  public List<DigitalObjectListItemView> getProjectObjectsJson(
+  public Page<DigitalObjectListItemView> getProjectObjectsJson(
       @PathVariable String projectAbbr,
       Model model,
       // for pagination
@@ -164,7 +170,7 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(
         project.getProjectAbbr(),
         objectType,
-        PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
+        PageRequest.of(pageIndex, pageSize, Sort.by("id")));
 
   }
 
@@ -234,7 +240,10 @@ public class DigitalObjectController {
       summary = "Get all digital object IDs for a project",
       description = "Retrieves a list of all digital object IDs for a specific project"
   )
-  @GetMapping(value = "/ids", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/ids", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr) {
     Project project = ProjectBuilder
@@ -243,6 +252,7 @@ public class DigitalObjectController {
         .description("")
         .build();
 
+    // TODO should return a paginated response
     return digitalObjectService.findAllIdsByProjectAbbr(project.getProjectAbbr());
   }
 
