@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject;
+package org.zim.gamsapi.DigitalObject.dto;
 
 import lombok.*;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
