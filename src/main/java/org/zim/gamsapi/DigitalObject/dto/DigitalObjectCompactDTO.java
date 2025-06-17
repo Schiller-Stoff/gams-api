@@ -20,6 +20,7 @@ import java.util.*;
 @Builder
 @ToString
 @JacksonXmlRootElement(localName = "digitalObject")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DigitalObjectCompactDTO {
 
     private String id;
