@@ -1,5 +1,7 @@
 package org.zim.gamsapi.Datastream;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
@@ -35,6 +37,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
 @IdClass(DatastreamId.class)
+@JacksonXmlRootElement(localName = "datastream")
 public class Datastream {
 
 
@@ -42,6 +45,7 @@ public class Datastream {
   @NotNull
   @JoinColumn(nullable = false)
   @Id
+  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
   private DigitalObject digitalObject;
 
   /**
