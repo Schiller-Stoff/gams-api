@@ -53,7 +53,7 @@ public class HybridFacetedSearchController {
    * MAIN ENDPOINT: Complete faceted search with results + facet counts
    * Uses your existing Criteria-based search logic with optimized facet counting
    */
-  @GetMapping(path = "/faceted", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/complete", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Hybrid faceted search with optimized performance",
@@ -167,7 +167,7 @@ public class HybridFacetedSearchController {
   /**
    * Simplified endpoint with sensible defaults
    */
-  @GetMapping(path = "/faceted/simple", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/main", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Simplified faceted search with default settings",
@@ -201,7 +201,7 @@ public class HybridFacetedSearchController {
    * Get facet counts only (without search results)
    * Useful for dynamic UI updates, autocomplete, etc.
    */
-  @GetMapping(path = "/facets/counts", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/counts", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Get facet counts without search results",
@@ -245,7 +245,7 @@ public class HybridFacetedSearchController {
   /**
    * Enhanced version of your existing advanced search with facets
    */
-  @GetMapping(path = "/dc/advanced-faceted", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/dc/advanced", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Enhanced version of your existing advanced search with facets",
@@ -497,7 +497,7 @@ public class HybridFacetedSearchController {
   /**
    * Health check for faceted search functionality
    */
-  @GetMapping(path = "/faceted/health", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/health", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Health check for faceted search",
