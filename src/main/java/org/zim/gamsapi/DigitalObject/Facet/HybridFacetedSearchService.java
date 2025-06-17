@@ -96,8 +96,9 @@ public class HybridFacetedSearchService {
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {
 
+    // TODO use some kind of constant - reuse on controller level?
     // Default facet fields - customize based on your domain
-    Set<String> defaultFacets = Set.of("coverage", "type", "creator", "subject", "language");
+    Set<String> defaultFacets = Set.of("coverage", "type", "creator", "subject", "language", "format");
 
     return searchWithFacets(projectAbbrs, selectedFacets, defaultFacets, pageable);
   }
