@@ -37,7 +37,7 @@ public class OpenAPIConfig {
   public static final String USER_TAG = "User";
   public static final String USER_TAG_DESCRIPTION = "User management and authentication operations";
   public static final String FACET_TAG = "Facets";
-  public static final String FACET_TAG_DESCRIPTION = "Faceted search and filtering operations";
+  public static final String FACET_TAG_DESCRIPTION = "Faceted search based on digital objects and dublin core";
 
   @Value("${server.port:18085}")
   private String serverPort;
