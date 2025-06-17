@@ -4,7 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
