@@ -572,7 +572,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertEquals("[]", mvcResult.getResponse().getContentAsString());
+    org.assertj.core.api.Assertions.assertThat(
+        mvcResult.getResponse().getContentAsString()
+    ).contains("\"content\":[]");
+
   }
 
   @Test
