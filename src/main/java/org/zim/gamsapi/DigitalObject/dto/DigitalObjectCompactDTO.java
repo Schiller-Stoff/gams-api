@@ -1,5 +1,9 @@
 package org.zim.gamsapi.DigitalObject.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.*;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.MetadataBaseEntity;
@@ -15,6 +19,7 @@ import java.util.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@JacksonXmlRootElement(localName = "digitalObject")
 public class DigitalObjectCompactDTO {
 
     private String id;
@@ -24,6 +29,8 @@ public class DigitalObjectCompactDTO {
      * TODO this seems wrong here?
      */
     @Builder.Default
+    @JacksonXmlElementWrapper(localName = "datastreams")
+    @JacksonXmlProperty(localName = "dsid")
     private List<String> datastreams = new ArrayList<>();
 
     private String objectType;
