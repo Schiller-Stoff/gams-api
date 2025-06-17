@@ -18,8 +18,6 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestDublinCoreEntry;
 import org.zim.gamsapi.enums.TestProject;
-
-import java.util.List;
 import java.util.Set;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -206,108 +204,6 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
     }
 
-
-
-  }
-
-  @Nested
-  public class FindDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues {
-
-    @Test
-    public void findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementFixedValuesIsNotEmpty() {
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          Set.of(TestProject.PROJECT_ABBR.getValue()),
-          TestDublinCoreEntry.NAME.getValue(),
-          List.of(TestDublinCoreEntry.VALUE.getValue()),
-          PageRequest.of(0, 10)
-      );
-
-      Assertions.assertThat(foundObjects)
-          .isNotEmpty()
-          .hasSize(1);
-    }
-
-    /**
-     * Test if the method returns a match even when just one of the given values is found.
-     */
-    @Test
-    public void matchesIfOneDCValueWasFound() {
-
-      final String TEST_DC_FIELD = TestDublinCoreEntry.NAME.getValue();
-      final List<String> TEST_DUBLIN_CORE_VALUES = List.of(
-          // first fields don't exist in test data
-          "foo",
-          "bar",
-          "hudri",
-          TestDublinCoreEntry.VALUE.getValue()
-      );
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          Set.of(TestProject.PROJECT_ABBR.getValue()),
-          TEST_DC_FIELD,
-          TEST_DUBLIN_CORE_VALUES,
-          PageRequest.of(0, 10)
-      );
-
-      // expect one match even though "wrong" test values were given
-      Assertions.assertThat(foundObjects)
-          .isNotEmpty()
-          .hasSize(1);
-    }
-
-    @Test
-    public void findDigitalObjectListItemViewsByProjectAbbrAndDublinCoreElementFixedValuesIsEmpty_whenNoMatch() {
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          Set.of(TestProject.PROJECT_ABBR.getValue()),
-          "foo",
-          List.of("bar"),
-          PageRequest.of(0, 10)
-      );
-
-      Assertions.assertThat(foundObjects).isEmpty();
-    }
-
-    @Test
-    public void findByDublinCoreFixedValuesOverTwoProjects(){
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-
-      // save another object to a different project
-      Project additionalProject = TestProject.generate("foo");
-      projectRepository.save(additionalProject);
-      DigitalObject digitalObject2 = TestDigitalObject.generate(
-          additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".bar"
-      );
-
-      digitalObjectRepository.save(digitalObject2);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(
-          additionalProject.getProjectAbbr(), digitalObject2.getId())
-      );
-
-      var foundObjects = dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-          // search across both projects
-          Set.of(TestProject.PROJECT_ABBR.getValue(), additionalProject.getProjectAbbr()),
-          TestDublinCoreEntry.NAME.getValue(),
-          List.of(TestDublinCoreEntry.VALUE.getValue()),
-          PageRequest.of(0, 10)
-      );
-
-      Assertions.assertThat(foundObjects)
-          .isNotEmpty()
-          .hasSize(2)
-      ;
-
-    }
 
     @Nested
     public class FindDigitalObjectsByFulltext {

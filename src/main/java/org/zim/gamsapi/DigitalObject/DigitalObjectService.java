@@ -184,14 +184,6 @@ public class DigitalObjectService implements IDigitalObjectService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(Set<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble){
-      String msg = String.format("Trying to find digital objects by project abbreviation %s and dublin core entry name %s and values %s", projectAbbrs, dcEntryName, dcEntryValue);
-      log.trace(msg);
-      return dublinCoreEntryRepository.findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(projectAbbrs, dcEntryName, dcEntryValue, pageAble);
-    }
-
-    @Override
     public Page<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntryNames, String fulltext, Pageable pageAble) {
       if(dcEntryNames.isEmpty()){
         String msg = String.format("No concrete dublin core elements specified - fulltext-searching over all dc fields. Trying to find digital objects by project abbreviations %s and fulltext %s", projectAbbrs, fulltext);

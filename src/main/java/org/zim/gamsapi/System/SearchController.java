@@ -96,47 +96,6 @@ public class SearchController {
   }
 
 
-  /**
-   * Search for digital objects based on Dublin Core metadata.
-   * @param projectAbbrs list of project abbreviations
-   * @param dcField name of the DublinCoreElement on which to search
-   * @param search list of values of the DublinCoreElement
-   * @param pageIndex page index
-   * @param pageSize page size
-   * @return a page of digital objects
-   */
-  @GetMapping(path = "/dc", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
-  @ResponseBody
-  @Operation(
-      summary = "Dublin core search based on digital objects and different projects.",
-      description = "Searches for digital objects based on Dublin Core metadata. The search is performed on a specific Dublin Core field with exact match.",
-      responses = {
-          @ApiResponse(responseCode = "200", description = "Digital objects found",
-              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
-          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
-              content = @Content)
-      }
-  )
-  public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreExactMatch(
-      @RequestParam Set<String> projectAbbrs,
-      @RequestParam String dcField,
-      @RequestParam @NotEmpty List<String> search,
-      // for pagination
-      @RequestParam(defaultValue = "0") int pageIndex,
-      @RequestParam(defaultValue = "20") int pageSize
-  ){
-
-    // limit page size
-    if (pageSize >= 100) {
-      pageSize = 100;
-    }
-
-    return digitalObjectService.searchObjectsByDublincCoreTags(
-        projectAbbrs, dcField, search, PageRequest.of(pageIndex, pageSize)
-    );
-
-  }
-
   @Operation(
       summary = "Advanced search for Dublin Core entries with multiple filters.",
       description = "Searches for Dublin Core entries based on multiple filter criteria. The search is performed using a multi-value map of filters.",

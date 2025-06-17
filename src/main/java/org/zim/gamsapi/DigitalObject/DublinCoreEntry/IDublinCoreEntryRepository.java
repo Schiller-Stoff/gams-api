@@ -75,33 +75,6 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    */
   void deleteAllByDigitalObject(DigitalObject digitalObject);
 
-
-  /**
-   * "Tagged search for dublin core": Finds objects based on exact match of defined dublin core field.
-   * Returns the object when at least one of given values was found (exactly) in the DublinCoreElement.
-   * E.g. dc:subject = 'food'. Allows to search across multiple projects and define the dc:field to search for.
-   * @param projectAbbrs list of project abbreviations
-   * @param name name of the DublinCoreElement
-   * @param values values to check in the DublinCoreElement
-   * @param pageable pagination information
-   * @return a page of digital objects
-   */
-  @Query(value = "SELECT do FROM DigitalObject do " +
-      "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
-      "WHERE dcm.name = :name " +
-      "AND dcm.value IN :values " +
-      "AND do.project.projectAbbr IN :projectAbbrs " +
-      "GROUP BY do.id " +
-      "ORDER BY MIN(dcm.value)"
-  )
-  @QueryHints(value = {
-      @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
-      @QueryHint(name = HINT_READONLY, value = "true")
-  })
-  Page<DigitalObjectListItemView> findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-      Set<String> projectAbbrs, String name, List<String> values, Pageable pageable);
-
-
   /**
    * Fulltext search over all dublin core fields of a digital object.
    * Allows to search across multiple projects.

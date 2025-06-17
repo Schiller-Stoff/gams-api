@@ -63,44 +63,6 @@ public class SearchControllerIT extends IntegrationTest {
       dublinCoreEntryRepository.save(testDublinCoreEntry);
     }
 
-    @Test
-    public void GETDublinCoreEntryWithContainsReturnsExpectedTestObject() throws Exception {
-      String requestUrl = String.format(
-          SEARCH_URL_TEMPLATE,
-          testProject.getProjectAbbr(),
-          testDublinCoreEntry.getName(),
-          testDublinCoreEntry.getValue()
-      );
-
-      String response = mockMvc.perform(
-              MockMvcRequestBuilders.get(requestUrl)
-          ).andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
-
-      Assertions.assertThat(response)
-          .contains(
-              testDigitalObject.getId(),
-              testDigitalObject.getProject().getProjectAbbr(),
-              testDigitalObject.getBaseMetadata().getTitle(),
-              testDigitalObject.getBaseMetadata().getDescription()
-          );
-
-    }
-
-    @Test
-    public void returnsErrorIfSearchParamsWereNotDefined() throws Exception {
-      final String MALFORMED_URL = "/api/v1/search/dc?projectAbbrs=%s";
-      mockMvc.perform(
-          MockMvcRequestBuilders.get(MALFORMED_URL)
-      ).andExpect(
-          status().isBadRequest()
-      );
-
-
-    }
-
     @Nested
     public class DCFulltextSearch {
 
