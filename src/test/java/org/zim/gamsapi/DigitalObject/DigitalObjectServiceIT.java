@@ -21,6 +21,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.enums.*;
 
 import java.util.*;
@@ -190,8 +191,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       String projectAbbr = "nonexist";
       Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
-      Assertions.assertThat(result).isEmpty();
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
+      Assertions.assertThat(result.getContent()).isEmpty();
 
     }
 
@@ -210,9 +211,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .build();
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
 
-      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent()).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
     }

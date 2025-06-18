@@ -8,6 +8,8 @@ import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.System.dto.PagedResponse;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,7 +48,7 @@ public interface IDigitalObjectService {
    * @param pageable pagination
    * @return a page of digital objects as projection
    */
-  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable);
+  PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable);
 
   /**
    * Find all digital objects for a given project (with project abbreviation).

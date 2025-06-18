@@ -31,6 +31,7 @@ import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -146,7 +147,7 @@ public class DigitalObjectController {
           @ApiResponse(responseCode = "403", description = "Access denied to project", content = @Content)
       }
   )
-  public Page<DigitalObjectListItemView> getProjectObjectsJson(
+  public PagedResponse<DigitalObjectListItemView> getProjectObjectsJson(
       @PathVariable String projectAbbr,
       Model model,
       // for pagination
