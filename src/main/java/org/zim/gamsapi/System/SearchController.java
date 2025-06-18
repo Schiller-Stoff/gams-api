@@ -24,6 +24,7 @@ import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +73,7 @@ public class SearchController {
       required = false,
       schema = @Schema(type = "string", examples = "xml,json")
   )
-  public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreFulltext(
+  public PagedResponse<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreFulltext(
       @RequestParam Set<String> projects,
       // dublin core search parameters
       @RequestParam(

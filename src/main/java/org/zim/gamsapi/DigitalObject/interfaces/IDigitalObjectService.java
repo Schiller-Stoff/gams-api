@@ -53,7 +53,6 @@ public interface IDigitalObjectService {
 
   void delete(DigitalObject digitalObject);
 
-
   /**
    * Find a digital object by its id.
    * @param id the id of the digital object
@@ -79,11 +78,7 @@ public interface IDigitalObjectService {
    * @param pageAble pagination
    * @return a page of digital objects
    */
-  Page<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntries, String fulltext, Pageable pageAble);
-
-
-
-
+  PagedResponse<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntries, String fulltext, Pageable pageAble);
 
   /**
    * Find a digital object by its id and return a compact DTO representation.

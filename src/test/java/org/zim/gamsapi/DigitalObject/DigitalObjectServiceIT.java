@@ -367,10 +367,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           TEST_SEARCH_VALUE,
           Pageable.unpaged()
       );
-      Assertions.assertThat(foundDigitalObjects)
+      Assertions.assertThat(foundDigitalObjects.getContent())
           .isNotEmpty()
       ;
-      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(3);
+      Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(3);
     }
 
     @Test
@@ -387,10 +387,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           TEST_SEARCH_VALUE,
           Pageable.unpaged()
       );
-      Assertions.assertThat(foundDigitalObjects)
+      Assertions.assertThat(foundDigitalObjects.getContent())
           .isEmpty();
       ;
-      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(0);
+      Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(0);
 
     }
 
