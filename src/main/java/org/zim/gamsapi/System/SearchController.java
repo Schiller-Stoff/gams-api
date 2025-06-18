@@ -50,7 +50,10 @@ public class SearchController {
    * @param pageSize page size
    * @return a page of digital objects
    */
-  @GetMapping(path = "/dc/fulltext", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/dc/fulltext", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Dublin core fulltext search based on digital objects and multiple projects.",
@@ -81,6 +84,8 @@ public class SearchController {
       pageSize = 100;
     }
 
+    //TODO include dublin core data into response?
+
     return digitalObjectService.searchByDCFulltext(
         projects,
         dcFields,
@@ -89,7 +94,10 @@ public class SearchController {
     );
   }
 
-  @GetMapping(path = "/dc", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/dc", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Advanced multi-criteria Dublin Core search for digital objects",
@@ -136,6 +144,7 @@ public class SearchController {
     dcCriteria.remove("searchMode");
     dcCriteria.remove("pageIndex");
     dcCriteria.remove("pageSize");
+    dcCriteria.remove("format");
 
     log.debug("Advanced DC search - criteria: {}, projects: {}, mode: {}",
         dcCriteria, projects, searchMode);
