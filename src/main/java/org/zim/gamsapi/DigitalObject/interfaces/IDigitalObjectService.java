@@ -1,6 +1,5 @@
 package org.zim.gamsapi.DigitalObject.interfaces;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
