@@ -1,5 +1,6 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.Date;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
  * https://thorben-janssen.com/spring-data-jpa-query-projections/
  * (Names of the mapped getter methods must be same as in Datastream)
  */
+@JacksonXmlRootElement(localName = "datastream")
 public interface IDatastreamDetailsView {
 
 

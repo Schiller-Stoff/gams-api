@@ -91,7 +91,10 @@ public class DatastreamController {
 
   }
 
-  @GetMapping(path = {"/datastream" })
+  @GetMapping(path = {"/datastream"}, produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Get datastream details",
@@ -130,7 +133,10 @@ public class DatastreamController {
     return foundDatastream;
   }
 
-  @GetMapping(path = {"/datastreams" })
+  @GetMapping(path = {"/datastreams" }, produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Get all datastreams details",
@@ -197,7 +203,10 @@ public class DatastreamController {
 
   @GetMapping(
       path = {"/datastreams/{dsid}" },
-      produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+      produces = {
+          MimeTypeUtils.APPLICATION_JSON_VALUE,
+          MimeTypeUtils.APPLICATION_XML_VALUE
+      }
   )
   @ResponseBody
   @Operation(
