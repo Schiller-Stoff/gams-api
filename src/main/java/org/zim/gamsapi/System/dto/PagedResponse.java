@@ -3,6 +3,7 @@ package org.zim.gamsapi.System.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import java.util.List;
  */
 @Data
 @Builder
+@JacksonXmlRootElement(localName = "pagedResponse")
 public class PagedResponse<T> {
 
   // Main content
