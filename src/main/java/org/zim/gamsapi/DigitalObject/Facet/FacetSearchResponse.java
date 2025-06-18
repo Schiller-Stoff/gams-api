@@ -1,10 +1,13 @@
 package org.zim.gamsapi.DigitalObject.Facet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +19,10 @@ import java.util.Map;
 @Builder
 @JacksonXmlRootElement(localName = "facets")
 public class FacetSearchResponse {
-  private Page<DigitalObjectSearchResultDTO> results;
+
+  @JsonProperty("facetResult")
+  @JacksonXmlElementWrapper(localName = "facetResult")
+  private PagedResponse<DigitalObjectSearchResultDTO> results;
   private Map<String, List<FacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
   private long filteredCount;
