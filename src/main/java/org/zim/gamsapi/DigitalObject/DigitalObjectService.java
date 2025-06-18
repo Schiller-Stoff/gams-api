@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -252,7 +253,7 @@ public class DigitalObjectService implements IDigitalObjectService {
         dublinCoreFilters, projectAbbrs, searchMode);
 
     // Convert to projection for consistent API
-    var digitalObjects = digitalObjectRepository.findAll(spec, pageable);
+    Page<DigitalObject> digitalObjects = digitalObjectRepository.findAll(spec, pageable);
 
     var mappedObjects = digitalObjects.map(digitalObject -> {
       // Convert to DTO
