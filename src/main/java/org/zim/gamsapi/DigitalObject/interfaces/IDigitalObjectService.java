@@ -31,7 +31,7 @@ public interface IDigitalObjectService {
    * @param pageable pagination
    * @return a page of digital objects as projection
    */
-  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
+  PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Filter by object type.

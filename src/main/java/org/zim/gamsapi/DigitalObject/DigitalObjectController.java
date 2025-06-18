@@ -191,10 +191,7 @@ public class DigitalObjectController {
       pageSize = 100;
     }
 
-    // Page<DigitalObject> digitalObjects =
-    // digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(),
-    // PageRequest.of(pageIndex, pageSize, Sort.by("id")));
-    Page<DigitalObjectListItemView> digitalObjects = digitalObjectService.findAllByProjectAbbr(
+    var digitalObjects = digitalObjectService.findAllByProjectAbbr(
         project.getProjectAbbr(),
         id,
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
@@ -202,12 +199,12 @@ public class DigitalObjectController {
     // retrieve project info from database
     Project foundProject = projectService.findProject(project.getProjectAbbr());
 
-    model.addAttribute("digitalObjects", digitalObjects.toList());
+    model.addAttribute("digitalObjects", digitalObjects.getContent());
     model.addAttribute(foundProject);
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
-    model.addAttribute("totalItems", digitalObjects.getTotalElements());
-    model.addAttribute("totalPages", digitalObjects.getTotalPages());
+    model.addAttribute("totalItems", digitalObjects.getPagination().getTotalElements());
+    model.addAttribute("totalPages", digitalObjects.getPagination().getTotalPages());
     model.addAttribute("searchId", id);
     model.addAttribute("sortBy", sortBy);
 
