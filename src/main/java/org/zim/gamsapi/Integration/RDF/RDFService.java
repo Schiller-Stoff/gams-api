@@ -15,7 +15,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -25,7 +25,6 @@ import org.zim.gamsapi.Integration.RDF.utils.JenaFusekiClient;
 import org.zim.gamsapi.Integration.RDF.utils.RDFSearchProperties;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 @Service

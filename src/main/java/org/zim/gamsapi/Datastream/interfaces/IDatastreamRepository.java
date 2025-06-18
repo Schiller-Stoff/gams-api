@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Datastream;
+package org.zim.gamsapi.Datastream.interfaces;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -6,9 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamIdView;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamMimeView;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import java.util.Date;
 import java.util.List;
