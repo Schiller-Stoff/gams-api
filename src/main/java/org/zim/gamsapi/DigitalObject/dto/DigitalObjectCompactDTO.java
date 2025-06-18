@@ -1,6 +1,5 @@
 package org.zim.gamsapi.DigitalObject.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -20,7 +19,6 @@ import java.util.*;
 @Builder
 @ToString
 @JacksonXmlRootElement(localName = "digitalObject")
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class DigitalObjectCompactDTO {
 
     private String id;

@@ -1,8 +1,6 @@
 package org.zim.gamsapi.Datastream.interfaces;
 
-import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.MetadataBaseEntity;
-
 import java.util.Date;
 import java.util.Set;
 
