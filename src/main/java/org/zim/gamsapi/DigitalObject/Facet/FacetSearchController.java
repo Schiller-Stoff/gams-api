@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,6 @@ import java.util.Set;
 
 /**
  * HYBRID FACETED SEARCH CONTROLLER
- *
  * Provides clean REST API for faceted search while using the hybrid approach:
  * Criteria API for main search (your existing logic)
  * Native SQL only for facet counting (performance optimization)
@@ -126,7 +124,6 @@ public class FacetSearchController {
    * Removes non-DC parameters like pagination, projects, etc.
    */
   private MultiValueMap<String, String> extractDublinCoreFilters(MultiValueMap<String, String> allParams) {
-    MultiValueMap<String, String> dcFilters = new LinkedMultiValueMap<>(allParams);
 
     // includes now all request parameters, not just "dc.*" ones
     // only keep parameters keys that start with "dc."
