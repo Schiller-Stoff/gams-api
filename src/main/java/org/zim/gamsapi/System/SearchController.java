@@ -61,11 +61,16 @@ public class SearchController {
       summary = "Dublin core fulltext search based on digital objects and multiple projects.",
       description = "Searches for digital objects based on a fulltext search over all Dublin Core fields. The search is performed on multiple projects and can include multiple Dublin Core fields.",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Digital objects found",
-              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "200", description = "Digital objects found"),
           @ApiResponse(responseCode = "400", description = "Invalid request parameters",
               content = @Content)
       }
+  )
+  @Parameter(
+      name = "format",
+      description = "Format of the response. Defaults to JSON.",
+      required = false,
+      schema = @Schema(type = "string", examples = "xml,json")
   )
   public Page<DigitalObjectListItemView> searchDigitalObjectsViaDublinCoreFulltext(
       @RequestParam Set<String> projects,
@@ -106,10 +111,8 @@ public class SearchController {
       description = "Advanced search supporting multiple Dublin Core criteria with different search modes. " +
           "Supports exact match, contains, and fulltext search modes.",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Digital objects found",
-              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
-          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
-              content = @Content)
+          @ApiResponse(responseCode = "200", description = "Digital objects found"),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters")
       }
   )
   @Parameter(
@@ -119,18 +122,24 @@ public class SearchController {
           @ExampleObject(
               name = "dc.type search",
               summary = "Return all dc.type fields with value 'Brief'",
-              value = "{\"dc.type\": [\"Brief\"]}",
+              value = "?projects=vipa&dc.type=Brief",
               description = "Search for type field entries"
           ),
           @ExampleObject(
               name = "Multi-field search",
               summary = "Search across multiple DC fields",
-              value = "{\"dc.type\": [\"Brief\"], \"dc.subject\": [\"test\"], \"dc.language\": [\"en\"]}",
+              value = "?projects=vipa&dc.title=Vienna&dc.creator=John&dc.subject=History",
               description = "Combined search across multiple fields"
           )
       },
       description = "Multi-value map of Dublin Core entries to filter by.",
       schema = @Schema(type = "object")
+  )
+  @Parameter(
+      name = "format",
+      description = "Format of the response. Defaults to JSON.",
+      required = false,
+      schema = @Schema(type = "string", defaultValue = "json", examples = "xml,json")
   )
   public Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
