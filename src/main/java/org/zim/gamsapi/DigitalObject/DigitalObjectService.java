@@ -238,11 +238,13 @@ public class DigitalObjectService implements IDigitalObjectService {
    * @param pageable Pagination information
    * @return Page of digital objects matching the criteria
    */
-  public Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
+  public PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
       MultiValueMap<String, String> dublinCoreFilters,
       Set<String> projectAbbrs,
       DigitalObjectDublinCoreSpecification.SearchMode searchMode,
       Pageable pageable) {
+
+    // TODO TESTS!
 
     log.debug("Searching digital objects with DC criteria: {}, projects: {}, mode: {}",
         dublinCoreFilters, projectAbbrs, searchMode);
@@ -274,7 +276,7 @@ public class DigitalObjectService implements IDigitalObjectService {
       return dto;
     });
 
-    return mappedObjects;
+    return PagedResponse.from(mappedObjects);
   }
 
 }

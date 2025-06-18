@@ -95,7 +95,7 @@ public interface IDigitalObjectService {
    * @param pageable pagination information
    * @return a page of DigitalObjectSearchResultDTO containing the search results
    */
-  Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
+  PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
       MultiValueMap<String, String> dublinCoreFilters,
       Set<String> projectAbbrs,
       DigitalObjectDublinCoreSpecification.SearchMode searchMode,

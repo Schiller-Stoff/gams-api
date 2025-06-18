@@ -69,7 +69,7 @@ public class FacetSearchService {
         .results(searchResults)
         .availableFacets(availableFacets)
         .selectedFacets(selectedFacets)
-        .filteredCount(searchResults.getTotalElements())
+        .filteredCount(searchResults.getPagination().getTotalElements())
         .totalUnfilteredCount(totalUnfilteredCount)
         .metrics(FacetSearchMetrics.builder()
             .searchTimeMs(searchTime)

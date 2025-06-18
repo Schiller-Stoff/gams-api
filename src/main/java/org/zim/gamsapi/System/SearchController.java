@@ -142,7 +142,7 @@ public class SearchController {
       required = false,
       schema = @Schema(type = "string", defaultValue = "json", examples = "xml,json")
   )
-  public Page<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreAdvanced(
+  public PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
       @RequestParam(defaultValue = "EXACT_MATCH") DigitalObjectDublinCoreSpecification.SearchMode searchMode,
