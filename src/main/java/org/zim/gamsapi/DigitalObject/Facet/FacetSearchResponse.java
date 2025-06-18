@@ -1,5 +1,6 @@
 package org.zim.gamsapi.DigitalObject.Facet;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -13,6 +14,7 @@ import java.util.Map;
  */
 @Data
 @Builder
+@JacksonXmlRootElement(localName = "facets")
 public class FacetSearchResponse {
   private Page<DigitalObjectSearchResultDTO> results;
   private Map<String, List<FacetValue>> availableFacets;
