@@ -88,19 +88,6 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  @Transactional
-  public List<DigitalObject> findAllByProjectAbbr(String projectAbbr) {
-    projectRepository.findById(projectAbbr).orElseThrow(
-            () -> {
-              String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
-              log.error(msg);
-              return new ProjectNotFoundException(msg);
-            }
-    );
-    return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr);
-  }
-
-  @Override
   public List<String> findAllIdsByProjectAbbr(String projectAbbr) {
     return digitalObjectRepository
         .findAllByProject_ProjectAbbr(projectAbbr)
