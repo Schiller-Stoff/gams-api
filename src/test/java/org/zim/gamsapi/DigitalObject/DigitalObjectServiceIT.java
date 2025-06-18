@@ -3,10 +3,10 @@ package org.zim.gamsapi.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
@@ -54,7 +54,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   // Deactivates the auditing process.
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @BeforeEach
@@ -101,9 +101,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr,Optional.empty(),  Pageable.unpaged());
 
-      Assertions.assertThat(result).isEmpty();
+      Assertions.assertThat(result.getContent()).isEmpty();
 
     }
 
@@ -115,9 +115,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), Pageable.unpaged());
+      var result = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), Optional.empty(), Pageable.unpaged());
 
-      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent()).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
     }
@@ -125,8 +125,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void throwsExceptionWhenProjectDoesNotExist() {
       String projectAbbr = "nonExistentProject";
-
-      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged()))
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
           .isInstanceOf(ProjectNotFoundException.class);
     }
   }

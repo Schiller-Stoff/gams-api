@@ -73,21 +73,6 @@ public class DigitalObjectService implements IDigitalObjectService {
 
   @Override
   @Transactional
-  public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Pageable pageable) {
-
-    projectRepository.findById(projectAbbr).orElseThrow(
-      () -> {
-        String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
-        log.error(msg);
-        return new ProjectNotFoundException(msg);
-      }
-    );
-
-    return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable);
-  }
-
-  @Override
-  @Transactional
   public Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
     projectRepository.findById(projectAbbr).orElseThrow(
             () -> {
@@ -98,7 +83,6 @@ public class DigitalObjectService implements IDigitalObjectService {
     );
     return digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable);
   }
-
 
   @Override
   @Transactional

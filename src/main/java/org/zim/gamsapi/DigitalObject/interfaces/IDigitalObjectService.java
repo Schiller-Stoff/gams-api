@@ -25,14 +25,6 @@ public interface IDigitalObjectService {
   List<DigitalObject> findAll();
 
   /**
-   * Find all digital objects for a given project (with project abbreviation).
-   * @param projectAbbr identifier of the project
-   * @param pageable pagination
-   * @return a page of digital objects as projection
-   */
-  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Pageable pageable);
-
-  /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
    * @param projectAbbr identifier of the project
    * @param containedInPid substring filter for digital object's id
