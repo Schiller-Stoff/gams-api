@@ -2,7 +2,6 @@ package org.zim.gamsapi.GAMSCollection;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,7 +12,7 @@ import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +25,6 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   private final IGAMSCollectionRepository collectionRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
-  private final IProjectRepository projectRepository;
 
   @Override
   @Transactional
@@ -60,7 +58,7 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<GamsCollectionCompactView> findAll(Pageable pageable) {
+  public PagedResponse<GamsCollectionCompactView> findAll(Pageable pageable) {
     log.error("TRIGGERED SERVICE findAll(Pageable pageable)");
     log.error("Pageable: {}", pageable);
     var collections = collectionRepository.findAllProjectedBy(pageable);
@@ -71,7 +69,9 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
     log.error("FOUND {} collections", collections.getTotalElements());
 
-    return collectionRepository.findAllProjectedBy(pageable);
+    return PagedResponse.from(
+        collectionRepository.findAllProjectedBy(pageable)
+    );
   }
 
   @Override
@@ -82,8 +82,10 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<GamsCollectionCompactView> findByProjectAbbr(String projectAbbr, Pageable pageable) {
-    return collectionRepository.findByProject_ProjectAbbr(projectAbbr, pageable);
+  public PagedResponse<GamsCollectionCompactView> findByProjectAbbr(String projectAbbr, Pageable pageable) {
+    return PagedResponse.from(
+        collectionRepository.findByProject_ProjectAbbr(projectAbbr, pageable)
+    );
   }
 
   @Override
@@ -134,7 +136,7 @@ public class GAMSCollectionService implements IGAMSCollectionService {
 
   @Override
   @Transactional(readOnly = true)
-  public Page<GamsCollectionCompactView> findByDigitalObject(String digitalObjectId, Pageable pageable) {
+  public PagedResponse<GamsCollectionCompactView> findByDigitalObject(String digitalObjectId, Pageable pageable) {
     DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
         .orElseThrow(() -> {
           String msg = String.format("Digital object with id %s not found", digitalObjectId);
@@ -142,11 +144,13 @@ public class GAMSCollectionService implements IGAMSCollectionService {
           return new DigitalObjectNotFoundException(msg);
         });
 
-    return collectionRepository.findByDigitalObjectsId(digitalObject.getId(), pageable);
+    return PagedResponse.from(
+        collectionRepository.findByDigitalObjectsId(digitalObject.getId(), pageable)
+    );
   }
 
   @Override
-  public Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(String collectionId, Pageable pageable){
+  public PagedResponse<DigitalObjectListItemView> findDigitalObjectsByCollectionId(String collectionId, Pageable pageable){
 
     if(!collectionRepository.existsById(collectionId)) {
       String msg = String.format("Collection with id %s does not exist!", collectionId);
@@ -154,7 +158,9 @@ public class GAMSCollectionService implements IGAMSCollectionService {
       throw new CollectionNotFoundException(msg);
     }
 
-    return digitalObjectRepository.findDigitalObjectsByCollectionId(collectionId, pageable);
+    return PagedResponse.from(
+        digitalObjectRepository.findDigitalObjectsByCollectionId(collectionId, pageable)
+    );
 
   }
 
