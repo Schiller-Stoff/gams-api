@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
@@ -25,6 +24,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.Set;
 
@@ -150,7 +150,7 @@ public class DatastreamController {
   )
   @Parameter(name = "projectAbbr", description = "Project abbreviation of the GAMS project", required = true)
   @Parameter(name = "id", description = "ID of the digital object", required = true)
-  public Page<IDatastreamDetailsView> findAllDatastreams(
+  public PagedResponse<IDatastreamDetailsView> findAllDatastreams(
       @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags,
