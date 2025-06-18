@@ -25,6 +25,8 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -117,13 +119,13 @@ public class SearchController {
           @ExampleObject(
               name = "dc.type search",
               summary = "Return all dc.type fields with value 'Brief'",
-              value = "{\"type\": [\"Brief\"]}",
+              value = "{\"dc.type\": [\"Brief\"]}",
               description = "Search for type field entries"
           ),
           @ExampleObject(
               name = "Multi-field search",
               summary = "Search across multiple DC fields",
-              value = "{\"type\": [\"Brief\"], \"subject\": [\"test\"], \"language\": [\"en\"]}",
+              value = "{\"dc.type\": [\"Brief\"], \"dc.subject\": [\"test\"], \"dc.language\": [\"en\"]}",
               description = "Combined search across multiple fields"
           )
       },
@@ -139,18 +141,21 @@ public class SearchController {
 
     pageSize = Math.min(pageSize, 20); // Limit page size
 
-    // Remove pagination parameters from criteria map
-    dcCriteria.remove("projects");
-    dcCriteria.remove("searchMode");
-    dcCriteria.remove("pageIndex");
-    dcCriteria.remove("pageSize");
-    dcCriteria.remove("format");
+    // includes now all request parameters, not just "dc.*" ones
+    // only keep parameters keys that start with "dc."
+    var filteredDcFields = new HashMap<String, List<String>>();
+    dcCriteria.forEach((key, values) -> {
+      if (key.startsWith("dc.")) {
+        String newKey = key.substring(3); // Remove "dc." prefix
+        filteredDcFields.put(newKey, values);
+      }
+    });
 
     log.debug("Advanced DC search - criteria: {}, projects: {}, mode: {}",
         dcCriteria, projects, searchMode);
 
     return digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
-        dcCriteria, projects, searchMode, PageRequest.of(pageIndex, pageSize));
+        MultiValueMap.fromMultiValue(filteredDcFields), projects, searchMode, PageRequest.of(pageIndex, pageSize));
   }
 
 }

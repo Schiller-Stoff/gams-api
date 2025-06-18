@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +43,10 @@ public class FacetSearchController {
   /**
    * Simplified endpoint with sensible defaults
    */
-  @GetMapping( produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping( produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Simplified faceted search with default settings",
@@ -62,12 +67,12 @@ public class FacetSearchController {
           ),
           @ExampleObject(
               name = "More complex use case",
-              value = "?projects=vipa&coverage=Wien&coverage=Nürnberg",
+              value = "?projects=vipa&coverage=Wien&dc.coverage=Nürnberg",
               description = "Multiple coverage values with OR logic + facet counts"
           ),
           @ExampleObject(
               name = "Multi-facet filtering",
-              value = "?projects=vipa&coverage=Wien&type=Brief",
+              value = "?projects=vipa&dc.coverage=Wien&dc.type=Brief",
               description = "Filter by coverage AND type, show remaining facet options"
           )
       }
@@ -92,7 +97,10 @@ public class FacetSearchController {
    * Get facet counts only (without search results)
    * Useful for dynamic UI updates, autocomplete, etc.
    */
-  @GetMapping(path = "/counts", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(path = "/counts", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(
       summary = "Get facet counts without search results",
@@ -120,14 +128,17 @@ public class FacetSearchController {
   private MultiValueMap<String, String> extractDublinCoreFilters(MultiValueMap<String, String> allParams) {
     MultiValueMap<String, String> dcFilters = new LinkedMultiValueMap<>(allParams);
 
-    // Remove non-Dublin Core parameters
-    dcFilters.remove("projects");
-    dcFilters.remove("facetFields");
-    dcFilters.remove("autoFacets");
-    dcFilters.remove("pageIndex");
-    dcFilters.remove("pageSize");
+    // includes now all request parameters, not just "dc.*" ones
+    // only keep parameters keys that start with "dc."
+    var filteredDcFields = new HashMap<String, List<String>>();
+    allParams.forEach((key, values) -> {
+      if (key.startsWith("dc.")) {
+        String newKey = key.substring(3); // Remove "dc." prefix
+        filteredDcFields.put(newKey, values);
+      }
+    });
 
-    return dcFilters;
+    return MultiValueMap.fromMultiValue(filteredDcFields);
   }
 
 }
