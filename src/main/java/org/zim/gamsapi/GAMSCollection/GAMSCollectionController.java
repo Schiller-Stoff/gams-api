@@ -27,7 +27,10 @@ public class GAMSCollectionController {
 
   private final IGAMSCollectionService collectionService;
 
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/collections" })
+  @GetMapping(produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE,
+  }, value = {"/collections" })
   @ResponseBody
   @Operation(summary = "Get all collections")
   public Page<GamsCollectionCompactView> getAllCollections(
@@ -44,7 +47,10 @@ public class GAMSCollectionController {
     return collectionService.findAll(PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
   }
 
-  @GetMapping(value = "/collections/{id}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/collections/{id}", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get a collection by ID")
   public GAMSCollectionDetailsView getCollection(@PathVariable String id) {
@@ -103,7 +109,10 @@ public class GAMSCollectionController {
 
 
 
-  @GetMapping(value = "/collections/{id}/objects", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/collections/{id}/objects", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get all digital objects in a collection")
   public Page<DigitalObjectListItemView> getCollectionObjects(
@@ -124,7 +133,10 @@ public class GAMSCollectionController {
     );
   }
 
-  @GetMapping(value = "/projects/{projectAbbr}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/projects/{projectAbbr}/collections", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE,
+  })
   @ResponseBody
   @Operation(summary = "Get all collections owned by a project")
   public Page<GamsCollectionCompactView> getCollectionsByProject(
@@ -145,7 +157,10 @@ public class GAMSCollectionController {
     );
   }
 
-  @GetMapping(value = "/projects/{projectAbbr}/objects/{id}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/projects/{projectAbbr}/objects/{id}/collections", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get all collections containing a specific digital object")
   public Page<GamsCollectionCompactView> getCollectionsByDigitalObject(
