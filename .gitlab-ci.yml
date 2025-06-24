@@ -40,4 +40,4 @@ build-native:
   script:
     - ./mvnw $MAVEN_CLI_OPTS -Pnative spring-boot:build-image -DskipTests
   only:
-    - develop
+    - main
