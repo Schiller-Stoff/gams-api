@@ -10,6 +10,7 @@ public enum TestDublinCoreEntry {
 
   NAME("title"),
   VALUE("test-dc-title"),
+  LANGUAGE("en"),
   OBJECT_ID(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
   PROJECT_ABBR(TestProject.PROJECT_ABBR.getValue()),
   ;
@@ -28,6 +29,7 @@ public enum TestDublinCoreEntry {
     return DublinCoreEntry.builder()
         .name(NAME.getValue())
         .value(VALUE.getValue())
+        .language(LANGUAGE.getValue())
         .digitalObject(digitalObject).build();
   }
 
@@ -39,6 +41,7 @@ public enum TestDublinCoreEntry {
     return DublinCoreEntry.builder()
         .name(NAME.getValue())
         .value(VALUE.getValue())
+        .language(LANGUAGE.getValue())
         .digitalObject(
             TestDigitalObject.generate(projectAbbr, objectId)
         ).build();

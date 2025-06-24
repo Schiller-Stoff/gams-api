@@ -1,9 +1,9 @@
 package org.zim.gamsapi.GAMSCollection;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -15,19 +15,25 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.Project.ProjectBuilder;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
-//@Controller
-@RequestMapping({"/api/v1/"})
+@Controller
+@RequestMapping({"/api/v1"})
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = OpenAPIConfig.GAMS_COLLECTIONS_TAG, description = OpenAPIConfig.GAMS_COLLECTIONS_TAG_DESCRIPTION)
 public class GAMSCollectionController {
 
   private final IGAMSCollectionService collectionService;
 
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE, value = {"/collections", "/collections/"})
+  @GetMapping(produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE,
+  }, value = {"/collections" })
   @ResponseBody
   @Operation(summary = "Get all collections")
-  public Page<GamsCollectionCompactView> getAllCollections(
+  public PagedResponse<GamsCollectionCompactView> getAllCollections(
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "100") int pageSize,
@@ -37,13 +43,16 @@ public class GAMSCollectionController {
     if (pageSize >= 100) {
       pageSize = 100;
     }
-
-    log.error("TRIGGERED CONTROLLER Page<CollectionCompactView> getAllCollections");
     // TODO redo pageing parameters!
-    return collectionService.findAll(PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
+    return collectionService.findAll(
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
-  @GetMapping(value = "/collections/{id}", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/collections/{id}", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get a collection by ID")
   public GAMSCollectionDetailsView getCollection(@PathVariable String id) {
@@ -102,10 +111,13 @@ public class GAMSCollectionController {
 
 
 
-  @GetMapping(value = "/collections/{id}/objects", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/collections/{id}/objects", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get all digital objects in a collection")
-  public Page<DigitalObjectListItemView> getCollectionObjects(
+  public PagedResponse<DigitalObjectListItemView> getCollectionObjects(
       @PathVariable String id,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
@@ -123,10 +135,13 @@ public class GAMSCollectionController {
     );
   }
 
-  @GetMapping(value = "/projects/{projectAbbr}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/projects/{projectAbbr}/collections", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE,
+  })
   @ResponseBody
   @Operation(summary = "Get all collections owned by a project")
-  public Page<GamsCollectionCompactView> getCollectionsByProject(
+  public PagedResponse<GamsCollectionCompactView> getCollectionsByProject(
       @PathVariable String projectAbbr,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
@@ -144,10 +159,13 @@ public class GAMSCollectionController {
     );
   }
 
-  @GetMapping(value = "/projects/{projectAbbr}/objects/{id}/collections", produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/projects/{projectAbbr}/objects/{id}/collections", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get all collections containing a specific digital object")
-  public Page<GamsCollectionCompactView> getCollectionsByDigitalObject(
+  public PagedResponse<GamsCollectionCompactView> getCollectionsByDigitalObject(
       @PathVariable String id,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,

@@ -260,6 +260,13 @@ public class XMLUtils {
           .name(elementName)
           .value(elementValue)
           .build();
+
+      try {
+        String elementLanguage = XMLUtils.extractAttributeValue("xml:lang", dublinCoreElements.item(i));
+        dcElement.setLanguage(elementLanguage);
+      } catch (IntegrationDataProcessingException e) {
+        // leave language empty if not available
+      }
       dcElements.add(dcElement);
     }
     return dcElements;
@@ -277,6 +284,7 @@ public class XMLUtils {
   public static class XMLElement {
     private String name;
     private String value;
+    private String language;
   }
 
 

@@ -1,7 +1,10 @@
-package org.zim.gamsapi.DigitalObject;
+package org.zim.gamsapi.DigitalObject.dto;
 
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.*;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.*;
 
@@ -15,6 +18,7 @@ import java.util.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@JacksonXmlRootElement(localName = "digitalObject")
 public class DigitalObjectCompactDTO {
 
     private String id;
@@ -24,6 +28,8 @@ public class DigitalObjectCompactDTO {
      * TODO this seems wrong here?
      */
     @Builder.Default
+    @JacksonXmlElementWrapper(localName = "datastreams")
+    @JacksonXmlProperty(localName = "dsid")
     private List<String> datastreams = new ArrayList<>();
 
     private String objectType;
@@ -47,6 +53,12 @@ public class DigitalObjectCompactDTO {
     private String funder;
 
     private String mainResource;
+
+    /**
+     * Map of Dublin Core entries, where the key is the name of the entry and the value is a list of
+     * DublinCoreEntrySummaryView objects.
+     */
+    private Map<String, List<DublinCoreEntryCompactDTO>> dublinCore = new HashMap<>();
 
     @Override
     public boolean equals(Object o) {

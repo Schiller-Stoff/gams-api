@@ -1,5 +1,7 @@
 package org.zim.gamsapi.DigitalObject.interfaces;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import java.util.Set;
 
 /**
@@ -12,6 +14,7 @@ import java.util.Set;
  *
  * (Names of the mapped getter methods must be same as in DigitalObject)
  */
+@JacksonXmlRootElement(localName = "digitalObject")
 public interface DigitalObjectListItemView {
 
     String getId();

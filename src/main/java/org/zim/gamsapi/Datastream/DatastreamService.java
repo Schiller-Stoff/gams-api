@@ -2,7 +2,6 @@ package org.zim.gamsapi.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,12 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.exceptions.*;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -187,12 +188,14 @@ public class DatastreamService implements IDatastreamService {
   }
 
   @Override
-  public Page<IDatastreamDetailsView> findAll(String digitalObjectId, Pageable pageable) {
-    return datastreamRepository.findAllByDigitalObjectId(digitalObjectId, pageable);
+  public PagedResponse<IDatastreamDetailsView> findAll(String digitalObjectId, Pageable pageable) {
+    return PagedResponse.from(datastreamRepository.findAllByDigitalObjectId(digitalObjectId, pageable));
   }
 
   @Override
-  public Page<IDatastreamDetailsView> findAll(String digitalObjectId, Set<String> tags, Pageable pageable) {
-    return datastreamRepository.findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(digitalObjectId, tags, tags.size(), pageable);
+  public PagedResponse<IDatastreamDetailsView> findAll(String digitalObjectId, Set<String> tags, Pageable pageable) {
+    return PagedResponse.from(
+        datastreamRepository.findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(digitalObjectId, tags, tags.size(), pageable)
+    );
   }
 }

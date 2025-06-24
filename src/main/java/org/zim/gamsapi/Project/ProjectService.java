@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Project.exceptions.ProjectAlreadyExistsException;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.exceptions.ProjectObjectMismatchException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
-import org.zim.gamsapi.User.User;
+
 import java.util.*;
 
 @Service
@@ -83,5 +84,19 @@ public class ProjectService implements IProjectService {
     Project savedProject = projectRepository.save(foundProject);
     log.trace("Successfully updated project {}", foundProject);
     return savedProject;
+  }
+
+  @Override
+  public boolean exists(String projectAbbr) {
+    return projectRepository.existsById(projectAbbr);
+  }
+
+  @Override
+  public void verifyProjectAbbrMatchesObjectId(String projectAbbr, String digitalObjectId) {
+    if(!digitalObjectId.startsWith(projectAbbr)){
+      String msg = String.format("Project abbreviation %s does not match the digital object ID %s", projectAbbr, digitalObjectId);
+      log.error(msg);
+      throw new ProjectObjectMismatchException(msg);
+    }
   }
 }

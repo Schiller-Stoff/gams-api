@@ -1,9 +1,14 @@
 package org.zim.gamsapi.DigitalObject.interfaces;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.System.dto.PagedResponse;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,21 +24,13 @@ public interface IDigitalObjectService {
   List<DigitalObject> findAll();
 
   /**
-   * Find all digital objects for a given project (with project abbreviation).
-   * @param projectAbbr identifier of the project
-   * @param pageable pagination
-   * @return a page of digital objects as projection
-   */
-  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Pageable pageable);
-
-  /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
    * @param projectAbbr identifier of the project
    * @param containedInPid substring filter for digital object's id
    * @param pageable pagination
    * @return a page of digital objects as projection
    */
-  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
+  PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Filter by object type.
@@ -42,14 +39,8 @@ public interface IDigitalObjectService {
    * @param pageable pagination
    * @return a page of digital objects as projection
    */
-  Page<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable);
+  PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable);
 
-  /**
-   * Find all digital objects for a given project (with project abbreviation).
-   * @param projectAbbr identifier of the project
-   * @return a list of digital objects
-   */
-  List<DigitalObject> findAllByProjectAbbr(String projectAbbr);
 
   /**
    * Find a digital object by its id.
@@ -60,7 +51,6 @@ public interface IDigitalObjectService {
   DigitalObject findById(String pid) throws DigitalObjectNotFoundException;
 
   void delete(DigitalObject digitalObject);
-
 
   /**
    * Find a digital object by its id.
@@ -87,17 +77,26 @@ public interface IDigitalObjectService {
    * @param pageAble pagination
    * @return a page of digital objects
    */
-  Page<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntries, String fulltext, Pageable pageAble);
-
+  PagedResponse<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntries, String fulltext, Pageable pageAble);
 
   /**
-   * Find all digital objects for defined projects: Filter by dublin core element name and defined values.
-   * The object is being returned when one value in the value list matches exactly.
-   * @param projectAbbrs list of project abbreviations
-   * @param dcEntryName name of the DublinCoreElement
-   * @param dcEntryValue list of values of the DublinCoreElement
-   * @param pageAble pagination
-   * @return a page of digital objects
+   * Find a digital object by its id and return a compact DTO representation.
+   * @param id the id of the digital object
+   * @return a DigitalObjectCompactDTO representation of the digital object
    */
-  Page<DigitalObjectListItemView> searchObjectsByDublincCoreTags(Set<String> projectAbbrs, String dcEntryName, List<String> dcEntryValue, Pageable pageAble);
+  DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String id);
+
+  /**
+   * Search digital objects by Dublin Core criteria.
+   * @param dublinCoreFilters a map of Dublin Core filters where the key is the Dublin Core element name and the value is a list of values to match
+   * @param projectAbbrs a set of project abbreviations to filter the digital objects by their associated projects
+   * @param searchMode the search mode to use (e.g., exact match, fulltext)
+   * @param pageable pagination information
+   * @return a page of DigitalObjectSearchResultDTO containing the search results
+   */
+  PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
+      MultiValueMap<String, String> dublinCoreFilters,
+      Set<String> projectAbbrs,
+      DigitalObjectDublinCoreSpecification.SearchMode searchMode,
+      Pageable pageable);
 }

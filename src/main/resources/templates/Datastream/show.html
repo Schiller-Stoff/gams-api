@@ -38,7 +38,7 @@
                 <p><b>Filesize:</b> <span th:text="${datastream.size}"></span></p>
             </div>
             <div class="mt-2">
-                <a target="_blank" class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Download</a>
+                <a target="_blank" class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
             </div>
 
             <h2 class="h4 mt-1">Metadata</h2>
@@ -105,15 +105,15 @@
                 <!--        </li>-->
             </ul>
             <br/>
-            <h4>Content preview</h4>
-            <div class="border border-2">
-                <embed
-                        th:src="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"
-                        width="100%"
-                        height="600px"
-                        th:type="${datastream.mimeType}"
-                ></embed>
-            </div>
+<!--            <h4>Content preview</h4>-->
+<!--            <div class="border border-2">-->
+<!--                <embed-->
+<!--                        th:src="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"-->
+<!--                        width="100%"-->
+<!--                        height="600px"-->
+<!--                        th:type="${datastream.mimeType}"-->
+<!--                ></embed>-->
+<!--            </div>-->
 
         </div>
 

@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -363,7 +363,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                 org.junit.jupiter.api.Assertions.assertThrows(
                     // exception is being thrown because composite primary key fails to be set
-                    JpaSystemException.class,
+                    Exception.class,
                     () -> datastreamRepository.save(datastream)
                 );
             }

@@ -139,22 +139,22 @@
 
       </div>
       <div class="webcirilo-box">
-        <table class="table table-striped table-hover table-sm">
+        <table class="table table-striped table-hover border border-2">
           <thead>
           <tr>
             <th scope="col">
-              <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=id'">ID</a>
+              <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=id'">ID</a>
             </th>
             <th scope="col">
-              <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.title'">title</a>
+              <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.title'">title</a>
             </th>
             <th scope="col">
-              <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
+              <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
             </th>
             <!--          <th scope="col">-->
             <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
             <!--          </th>-->
-            <th scope="col">Delete</th>
+<!--            <th scope="col">Delete</th>-->
 <!--            <th scope="col">Integrate</th>-->
           </tr>
           </thead>
@@ -169,19 +169,19 @@
             <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.title}"></span></td>
             <td><span th:text="${do.modified}"></span></td>
             <!--          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>-->
-            <td><div>
-              <!--<a th:href="${do.metaAddress}" target="_blank">Fedora6 profile</a> -->
-              <form
-                      onsubmit="return confirm('Are you sure you want to delete this digital object?');"
-                      action="#"
-                      th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
-                      method="delete"
-                      th:method="DELETE"
-                      class="d-inline"
-              >
-                <input type="submit" class="btn btn-outline-dark" value="Delete" />
-              </form>
-            </div></td>
+<!--            <td><div>-->
+<!--              &lt;!&ndash;<a th:href="${do.metaAddress}" target="_blank">Fedora6 profile</a> &ndash;&gt;-->
+<!--              <form-->
+<!--                      onsubmit="return confirm('Are you sure you want to delete this digital object?');"-->
+<!--                      action="#"-->
+<!--                      th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
+<!--                      method="delete"-->
+<!--                      th:method="DELETE"-->
+<!--                      class="d-inline"-->
+<!--              >-->
+<!--                <input type="submit" class="btn btn-outline-dark" value="Delete" />-->
+<!--              </form>-->
+<!--            </div></td>-->
 <!--            <td><div>-->
 <!--              <form-->
 <!--                      th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->

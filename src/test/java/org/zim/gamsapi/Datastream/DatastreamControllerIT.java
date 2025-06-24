@@ -4,10 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamControllerIT extends IntegrationTest {
 
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private MockMvc mockMvc;
 
@@ -55,7 +57,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   private DigitalObject testDigitalObject;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
 
@@ -138,14 +140,10 @@ public class DatastreamControllerIT extends IntegrationTest {
           );
 
       Assertions.assertThat(datastream.getTags()).isNotEmpty();
-      datastream.getTags().forEach(tag -> {
-        Assertions.assertThat(responseContent).contains(tag);
-      });
+      datastream.getTags().forEach(tag -> Assertions.assertThat(responseContent).contains(tag));
 
       Assertions.assertThat(datastream.getLang()).isNotEmpty();
-      datastream.getLang().forEach(lang -> {
-        Assertions.assertThat(responseContent).contains(lang);
-      });
+      datastream.getLang().forEach(lang -> Assertions.assertThat(responseContent).contains(lang));
 
 
       // cleanup
@@ -157,6 +155,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
+  @Disabled("The current version of the REST-API does not support the deletion of individual datastreams. Only digital objects might be deleted.")
   public class DELETEDatastream {
 
     @Test
@@ -174,9 +173,7 @@ public class DatastreamControllerIT extends IntegrationTest {
           .andExpect(status().is3xxRedirection());
 
       // assertions
-      org.junit.jupiter.api.Assertions.assertThrows(DatastreamNotFoundException.class, () -> {
-        datastreamService.findById(testDatastream.deriveDatastreamId());
-      });
+      org.junit.jupiter.api.Assertions.assertThrows(DatastreamNotFoundException.class, () -> datastreamService.findById(testDatastream.deriveDatastreamId()));
 
       Assertions.assertThat(datastreamService.findAll(testDigitalObject))
           .isNotNull()
@@ -265,7 +262,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
   /**
    * Tests for .../datastream/... endpoint
-   * e.g. .../datatsream?tag=...
+   * e.g. .../datastream?tag=...
    */
   @Nested
   public class SingleDatastreamFiltering {

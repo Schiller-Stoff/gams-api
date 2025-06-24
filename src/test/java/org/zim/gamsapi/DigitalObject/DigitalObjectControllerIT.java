@@ -5,7 +5,6 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -13,8 +12,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
@@ -55,6 +56,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @MockBean
   private AuditingHandler auditingHandler;
 
+  @Autowired
+  private IDublinCoreEntryRepository dublinCoreEntryRepository;
+
   private Project testProject;
 
   @BeforeEach
@@ -64,6 +68,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
+  @Disabled("Disabled because PUT requests for digital objects are not allowed in the current API version. Use ingest workflow instead.")
   public class PUTRequests {
 
     @Test
@@ -353,6 +358,45 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
+  public class GETRequests {
+
+    final DigitalObject TEST_OBJECT = TestDigitalObject.generate();
+    final DublinCoreEntry TEST_DC_ENTRY = TestDublinCoreEntry.generate(TEST_OBJECT);
+    String digitalObjectJsonResponse;
+
+    @BeforeEach
+    public void setup() throws Exception {
+      digitalObjectRepository.save(TEST_OBJECT);
+      dublinCoreEntryRepository.save(TEST_DC_ENTRY);
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s",
+          TEST_OBJECT.getProject().getProjectAbbr(),
+          TEST_OBJECT.getId()
+      );
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .contentType(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      digitalObjectJsonResponse = mvcResult.getResponse().getContentAsString();
+    }
+
+    @Test
+    public void getDigitalObjectContainsExpectedDublinCoreTestValue() throws Exception {
+      org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
+          .contains(TEST_DC_ENTRY.getLanguage())
+          .contains(TEST_DC_ENTRY.getValue())
+          .contains(TEST_OBJECT.getId())
+          .contains(TEST_OBJECT.getProject().getProjectAbbr());
+    }
+
+  }
+
+  @Nested
   public class WebclientTests {
 
 
@@ -526,7 +570,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertEquals("[]", mvcResult.getResponse().getContentAsString());
+    org.assertj.core.api.Assertions.assertThat(
+        mvcResult.getResponse().getContentAsString()
+    ).contains("\"results\":[]");
+
   }
 
   @Test

@@ -25,7 +25,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void getRequestDoesntRequireAuthentication() throws Exception {
-    final String PROJECTS_URL =  "/api/v1/projects/";
+    final String PROJECTS_URL =  "/api/v1/projects";
     mockMvc.perform(
       MockMvcRequestBuilders.get(PROJECTS_URL)
     ).andExpect(
@@ -35,7 +35,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void headRequestDoesntRequireAuthentication() throws Exception {
-    final String PROJECTS_URL =  "/api/v1/projects/";
+    final String PROJECTS_URL =  "/api/v1/projects";
     mockMvc.perform(
         MockMvcRequestBuilders.head(PROJECTS_URL)
     ).andExpect(

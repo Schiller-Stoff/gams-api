@@ -3,6 +3,9 @@ package org.zim.gamsapi.DigitalObject;
 import io.micrometer.common.lang.Nullable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
@@ -19,6 +22,7 @@ import org.zim.gamsapi.Datastream.DatastreamService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
@@ -26,6 +30,8 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,9 +45,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects", "/api/v1/projects/{projectAbbr}/objects/" })
+@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
+@Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
 public class DigitalObjectController {
 
   private final DigitalObjectService digitalObjectService;
@@ -89,74 +96,19 @@ public class DigitalObjectController {
 
   }
 
-  // @GetMapping(value = {"/{id}", "/{id}/"}, produces =
-  // MimeTypeUtils.APPLICATION_JSON_VALUE)
-  // @ResponseBody
-  public DigitalObjectCompactDTO getObjectJson(DigitalObject digitalObject, Project project, Model model) {
-    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
-        DigitalObjectCompactDTO.class);
-
-    if (digitalObjectCompactDTO == null) {
-      String msg = String.format(
-          "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s",
-          digitalObject, project);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
-    digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews
-            .stream()
-            .map(
-                IDatastreamDetailsView::getDsid)
-            .collect(Collectors.toList()));
-
-    model.addAttribute(digitalObjectCompactDTO);
-    log.info("Found digital object {} for project {}", digitalObject, project);
-    return digitalObjectCompactDTO;
-  }
-
-  @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(value = { "/{id}" }, produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
   @Operation(summary = "Get a digital object by its ID")
   @Parameter(name = "projectAbbr", description = "The project abbreviation", required = true)
   @Parameter(name = "id", description = "The digital object ID", required = true)
-  public DigitalObjectCompactDTO getJson(@PathVariable String projectAbbr, @PathVariable String id, Model model) {
-    DigitalObject digitalObject = new DigitalObject();
-    digitalObject.setId(id);
-
-    Project project = ProjectBuilder.builder()
-        .projectAbbr(projectAbbr)
-        .description("")
-        .build();
-
-    digitalObject.setProject(project);
-    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
-        DigitalObjectCompactDTO.class);
-
-    if (digitalObjectCompactDTO == null) {
-      String msg = String.format(
-          "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s",
-          digitalObject, project);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
-    digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews
-            .stream()
-            .map(
-                IDatastreamDetailsView::getDsid)
-            .collect(Collectors.toList()));
-
-    model.addAttribute(digitalObjectCompactDTO);
-    log.info("Found digital object {} for project {}", digitalObject, project);
-    return digitalObjectCompactDTO;
+  public DigitalObjectCompactDTO getJson(@PathVariable String id) {
+    return digitalObjectService.findDigitalObjectCompactDTOById(id);
   }
 
-  @GetMapping(value = { "/{id}", "/{id}/" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     // first query digital object projection dto
     DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
@@ -181,10 +133,21 @@ public class DigitalObjectController {
     return "DigitalObject/show";
   }
 
-  @GetMapping(produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @GetMapping(produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
-  @Operation(summary = "Get all digital objects for a project")
-  public List<DigitalObjectListItemView> getProjectObjectsJson(
+  @Operation(
+      summary = "Get digital objects for a project",
+      description = "Retrieves paginated list of digital objects for a specific project with optional filtering",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Successfully retrieved digital objects"),
+          @ApiResponse(responseCode = "404", description = "Project not found", content = @Content),
+          @ApiResponse(responseCode = "403", description = "Access denied to project", content = @Content)
+      }
+  )
+  public PagedResponse<DigitalObjectListItemView> getProjectObjectsJson(
       @PathVariable String projectAbbr,
       Model model,
       // for pagination
@@ -208,7 +171,7 @@ public class DigitalObjectController {
     return digitalObjectService.findAllByProjectAbbr(
         project.getProjectAbbr(),
         objectType,
-        PageRequest.of(pageIndex, pageSize, Sort.by("id"))).toList();
+        PageRequest.of(pageIndex, pageSize, Sort.by("id")));
 
   }
 
@@ -228,10 +191,7 @@ public class DigitalObjectController {
       pageSize = 100;
     }
 
-    // Page<DigitalObject> digitalObjects =
-    // digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(),
-    // PageRequest.of(pageIndex, pageSize, Sort.by("id")));
-    Page<DigitalObjectListItemView> digitalObjects = digitalObjectService.findAllByProjectAbbr(
+    var digitalObjects = digitalObjectService.findAllByProjectAbbr(
         project.getProjectAbbr(),
         id,
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
@@ -239,12 +199,12 @@ public class DigitalObjectController {
     // retrieve project info from database
     Project foundProject = projectService.findProject(project.getProjectAbbr());
 
-    model.addAttribute("digitalObjects", digitalObjects.toList());
+    model.addAttribute("digitalObjects", digitalObjects.getContent());
     model.addAttribute(foundProject);
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
-    model.addAttribute("totalItems", digitalObjects.getTotalElements());
-    model.addAttribute("totalPages", digitalObjects.getTotalPages());
+    model.addAttribute("totalItems", digitalObjects.getPagination().getTotalElements());
+    model.addAttribute("totalPages", digitalObjects.getPagination().getTotalPages());
     model.addAttribute("searchId", id);
     model.addAttribute("sortBy", sortBy);
 
@@ -252,60 +212,45 @@ public class DigitalObjectController {
     return "DigitalObject/show_all";
   }
 
-  @PutMapping(value = {"/{id}", "/{id}/"})
-  public String createObject(
-          // digital object needs to be described by the request body (otherwise nested base metadata mapping would fail)
-          @RequestBody DigitalObject digitalObject,
-          Project project,
-          Model model,
-          @RequestHeader Map<String, String> requestHeader
-  ) {
-    // project membership is not automatically bound by spring.
-    digitalObject.setProject(project);
-    // assign child objects if available
-
-    DigitalObject savedObject = digitalObjectService.save(digitalObject);
-    model.addAttribute("do", savedObject);
-    log.info("Created object {} for project {}", savedObject, project);
-
-    // needed to consider proxy forwarding
-    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + savedObject.getId();
-  }
-
-  @DeleteMapping(value = { "/{id}", "/{id}/" })
+  @DeleteMapping(value = { "/{id}" })
+  @Operation(summary = "Delete a digital object by its ID",
+      description = "Deletes a digital object from the specified project. This operation is irreversible.")
   public String deleteObject(
-      DigitalObject digitalObject,
-      Project project,
+      @PathVariable String id,
+      @PathVariable String projectAbbr,
       @RequestHeader Map<String, String> requestHeader) {
+
+    DigitalObject digitalObject = DigitalObjectBuilder
+        .builder()
+        .id(id)
+        .project(projectAbbr)
+        .publisher("_")
+        .build();
+
     this.digitalObjectService.delete(digitalObject);
-    log.info("Deleted object {} for project {}", digitalObject, project);
+    log.info("Deleted object {} for project {}", digitalObject, projectAbbr);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
+    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
   }
 
-  @DeleteMapping
-  public String deleteAllForProject(Project project, @RequestHeader Map<String, String> requestHeader) {
-    projectService.deleteProject(project);
-    log.info("Deleted all objects for project {}", project);
-    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + project.getProjectAbbr() + "/objects";
-  }
 
-  @GetMapping(params = { "style" }, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @Operation(
+      summary = "Get all digital object IDs for a project",
+      description = "Retrieves a list of all digital object IDs for a specific project"
+  )
+  @GetMapping(value = "/ids", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
-  public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr, @Nullable @RequestParam String style) {
+  public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr) {
     Project project = ProjectBuilder
         .builder()
         .projectAbbr(projectAbbr)
         .description("")
         .build();
 
-    if (!style.equalsIgnoreCase("idlist")) {
-      String msg = String.format("Unsupported view style %s", style);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
+    // TODO should return a paginated response
     return digitalObjectService.findAllIdsByProjectAbbr(project.getProjectAbbr());
   }
 

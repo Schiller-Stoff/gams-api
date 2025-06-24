@@ -3,12 +3,11 @@ package org.zim.gamsapi.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -21,6 +20,7 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.enums.*;
 
 import java.util.*;
@@ -53,7 +53,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   // Deactivates the auditing process.
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @BeforeEach
@@ -100,9 +100,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged());
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr,Optional.empty(),  Pageable.unpaged());
 
-      Assertions.assertThat(result).isEmpty();
+      Assertions.assertThat(result.getContent()).isEmpty();
 
     }
 
@@ -114,9 +114,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), Pageable.unpaged());
+      var result = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), Optional.empty(), Pageable.unpaged());
 
-      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent()).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
     }
@@ -124,8 +124,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void throwsExceptionWhenProjectDoesNotExist() {
       String projectAbbr = "nonExistentProject";
-
-      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Pageable.unpaged()))
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
           .isInstanceOf(ProjectNotFoundException.class);
     }
   }
@@ -190,8 +189,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       String projectAbbr = "nonexist";
       Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
       projectRepository.save(project);
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
-      Assertions.assertThat(result).isEmpty();
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
+      Assertions.assertThat(result.getContent()).isEmpty();
 
     }
 
@@ -210,9 +209,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .build();
       digitalObjectRepository.save(digitalObject);
 
-      Page<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
 
-      Assertions.assertThat(result).isNotEmpty();
+      Assertions.assertThat(result.getContent()).isNotEmpty();
       Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
 
     }
@@ -283,93 +282,42 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   @Nested
-  public class DublinCoreMatchesSearch {
+  public class FindDigitalObjectCompactDTOById {
 
-    Project additionalProject = TestProject.generate("bar");
+    private final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
+    private final DublinCoreEntry TEST_DUBLIN_CORE_ENTRY = TestDublinCoreEntry.generate(TEST_DIGITAL_OBJECT.getId());
 
     @BeforeEach
     public void setup(){
-
-      // 1 object belongs to a different project
-      projectRepository.save(additionalProject);
-
-      List<DigitalObject> digitalObjects = List.of(
-          TestDigitalObject.generate("test", "test.foo"),
-          TestDigitalObject.generate("test", "test.bar"),
-          TestDigitalObject.generate("test", "test.baz"),
-          // belongs to a different project
-          TestDigitalObject.generate(additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".peter")
-      );
-
-      digitalObjects.forEach(digitalObjectRepository::save);
-
-      List<DublinCoreEntry> dublinCoreEntries = List.of(
-          TestDublinCoreEntry.generate(digitalObjects.get(0).getId()),
-          TestDublinCoreEntry.generate(digitalObjects.get(1).getId()),
-          TestDublinCoreEntry.generate(digitalObjects.get(2).getId()),
-          TestDublinCoreEntry.generate(additionalProject.getProjectAbbr(), digitalObjects.get(3).getId())
-      );
-
-      dublinCoreEntries.forEach(dublinCoreEntryRepository::save);
-
+      digitalObjectRepository.save(TEST_DIGITAL_OBJECT);
+      dublinCoreEntryRepository.save(TEST_DUBLIN_CORE_ENTRY);
     }
 
-
     @Test
-    public void findsExpectedObjectCountForProjectTest(){
+    public void containsExpectedDublinCoreEntry(){
 
-      // all three objects should be matched exactly
-      final List<String> TEST_SEARCH_VALUES = List.of(
-          // field values do not exist
-          "foo123123132",
-          "bar123123132",
-          "hudri123332",
-          // this should be matched
-          TestDublinCoreEntry.VALUE.getValue()
-      );
+      var foundDigitalObject = digitalObjectService.findDigitalObjectCompactDTOById(TEST_DIGITAL_OBJECT.getId());
 
-      var foundDigitalObjects = digitalObjectService.searchObjectsByDublincCoreTags(
-          // only three objects assigned to this project
-          Set.of(testProject.getProjectAbbr()),
-          TestDublinCoreEntry.NAME.getValue(),
-          TEST_SEARCH_VALUES,
-          Pageable.unpaged()
-      );
+      Assertions.assertThat(foundDigitalObject)
+          .isNotNull();
 
-      Assertions.assertThat(foundDigitalObjects)
+      var entries = foundDigitalObject.getDublinCore();
+
+      Assertions.assertThat(entries)
           .isNotEmpty()
-      ;
+          .hasSize(1)
+          .containsKey(TEST_DUBLIN_CORE_ENTRY.getName());
 
-      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(3);
+      var testElementEntries = entries.get(TEST_DUBLIN_CORE_ENTRY.getName());
+      Assertions.assertThat(testElementEntries)
+          .anySatisfy(entry -> {
+            Assertions.assertThat(entry.language()).isEqualTo(TEST_DUBLIN_CORE_ENTRY.getLanguage());
+            Assertions.assertThat(entry.value()).isEqualTo(TEST_DUBLIN_CORE_ENTRY.getValue());
+          });
     }
-
-    @Test
-    public void ifGivenUppercasedSearchValues_shouldReturnNothing() {
-
-      // all three objects should be matched exactly
-      final List<String> TEST_SEARCH_VALUES = List.of(
-          // this should NOT be matched (because uppercased)
-          TestDublinCoreEntry.VALUE.getValue().toUpperCase()
-      );
-
-      var foundDigitalObjects = digitalObjectService.searchObjectsByDublincCoreTags(
-          // only three objects assigned to this project
-          Set.of(testProject.getProjectAbbr()),
-          TestDublinCoreEntry.NAME.getValue(),
-          TEST_SEARCH_VALUES,
-          Pageable.unpaged()
-      );
-
-      Assertions.assertThat(foundDigitalObjects)
-          .isEmpty();
-      ;
-
-      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(0);
-
-    }
-
 
   }
+
 
   @Nested
   public class DublinCoreFulltextSearch {
@@ -418,10 +366,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           TEST_SEARCH_VALUE,
           Pageable.unpaged()
       );
-      Assertions.assertThat(foundDigitalObjects)
+      Assertions.assertThat(foundDigitalObjects.getContent())
           .isNotEmpty()
       ;
-      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(3);
+      Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(3);
     }
 
     @Test
@@ -438,10 +386,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           TEST_SEARCH_VALUE,
           Pageable.unpaged()
       );
-      Assertions.assertThat(foundDigitalObjects)
+      Assertions.assertThat(foundDigitalObjects.getContent())
           .isEmpty();
       ;
-      Assertions.assertThat(foundDigitalObjects.getTotalElements()).isEqualTo(0);
+      Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(0);
 
     }
 

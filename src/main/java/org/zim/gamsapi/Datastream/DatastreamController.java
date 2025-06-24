@@ -1,9 +1,13 @@
 package org.zim.gamsapi.Datastream;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
@@ -12,37 +16,58 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
-import org.zim.gamsapi.System.utils.ControllerUtils;
-import io.swagger.v3.oas.annotations.Hidden;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import java.util.Map;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectService;
+import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
+
 import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{id}"})
 @Controller
+@Tag(name = OpenAPIConfig.DATASTREAMS_TAG, description = OpenAPIConfig.DATASTREAMS_TAG_DESCRIPTION)
 public class DatastreamController {
 
   private final IDatastreamService datastreamService;
   private final IDatastreamContentService datastreamContentService;
+  private final IProjectService projectService;
 
 
-  @GetMapping(path = {"/datastream/content", "/datastream/content/"})
+  @GetMapping(path = {"/datastream/content"})
   @ResponseBody
-  @Operation(summary = "Get datastream content")
+  @Operation(
+      summary = "Get the content of the digital object's main datastream.",
+      description = "Retrieves the binary content of the main datastream of defined digital object. Allows to return a different datastream content via specifying datastream tags.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Datastream content",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_OCTET_STREAM_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content),
+          @ApiResponse(responseCode = "409", description = "Datastream ambiguous match: Defined tag variable must match exactly one datastream of the digital object.", content = @Content),
+          @ApiResponse(responseCode = "500", description = "Main datastream is not defined.", content = @Content)
+      }
+  )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "tag", description = "Tags of the datastream to retrieve. If not specified, the main datastream will be returned. (Defined tags must match exactly one datastream)")
   public ResponseEntity<InputStreamResource> getDatastreamContent(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
   ){
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Cannot retrieve datastream content. Project %s not found.", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
     IDatastreamDetailsView foundDatastream;
     // use main datastream if no tags are provided
@@ -66,14 +91,38 @@ public class DatastreamController {
 
   }
 
-  @GetMapping(path = {"/datastream", "/datastream/"})
+  @GetMapping(path = {"/datastream"}, produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
-  @Operation(summary = "Get datastream details")
+  @Operation(
+      summary = "Get datastream details",
+      description = "Retrieves the details of a digital object's main datastream or a specific datastream by tags. If no tags are provided, the main datastream will be returned.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Datastream details",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content),
+          @ApiResponse(responseCode = "409", description = "Datastream ambiguous match: Defined tag variable must match exactly one datastream of the digital object.", content = @Content),
+          @ApiResponse(responseCode = "500", description = "Main datastream is not defined.", content = @Content)
+      }
+
+  )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   public IDatastreamDetailsView retrieveSingularDatastream(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
   ){
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream details", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     IDatastreamDetailsView foundDatastream;
     // use main datastream if no tags are provided
     if(tags.isEmpty()){
@@ -84,11 +133,25 @@ public class DatastreamController {
     return foundDatastream;
   }
 
-  @GetMapping(path = {"/datastreams", "/datastreams/"})
+  @GetMapping(path = {"/datastreams" }, produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
   @ResponseBody
-  @Operation(summary = "Get all datastreams")
+  @Operation(
+      summary = "Get all datastreams details",
+      description = "Retrieves all datastreams details of a digital object. Allows to filter by tags and paginate results.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "List of datastreams",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Digital object / project not found", content = @Content)
+      }
+
+  )
+  @Parameter(name = "projectAbbr", description = "Project abbreviation of the GAMS project", required = true)
   @Parameter(name = "id", description = "ID of the digital object", required = true)
-  public Page<IDatastreamDetailsView> findAllDatastreams(
+  public PagedResponse<IDatastreamDetailsView> findAllDatastreams(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags,
       // for pagination
@@ -97,12 +160,20 @@ public class DatastreamController {
       @RequestParam(defaultValue = "dsid") String sortBy
   ) {
 
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream list", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     // limit pageSize to max 100
     if (pageSize >= 100) {
       pageSize = 100;
     }
 
-    // return just pageing information if no tags are provided
+    // return just paging information if no tags are provided
     if(tags.isEmpty()){
       return datastreamService.findAll(
           id,
@@ -120,7 +191,7 @@ public class DatastreamController {
 
 
   @GetMapping(
-      path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
+      path = {"/datastreams/{dsid}" },
       produces = MimeTypeUtils.TEXT_HTML_VALUE
   )
   public String getDatastream(Datastream datastream, DigitalObject digitalObject, Model model, Project project) {
@@ -131,12 +202,39 @@ public class DatastreamController {
   }
 
   @GetMapping(
-      path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"},
-      produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+      path = {"/datastreams/{dsid}" },
+      produces = {
+          MimeTypeUtils.APPLICATION_JSON_VALUE,
+          MimeTypeUtils.APPLICATION_XML_VALUE
+      }
   )
   @ResponseBody
-  @Operation(summary = "Get datastream details as JSON")
-  public IDatastreamDetailsView getDatastreamJson(@PathVariable String dsid, @PathVariable String id, Model model, @PathVariable String projectAbbr) {
+  @Operation(
+      summary = "Get datastream details as JSON",
+      description = "Retrieves the details of a specific datastream by its ID in JSON format.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Datastream details in JSON format",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "404", description = "Datastream not found", content = @Content)
+      }
+  )
+  @Parameter(name = "projectAbbr", description = "Project abbreviation of the GAMS project", required = true)
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "dsid", description = "ID of the datastream", required = true)
+  public IDatastreamDetailsView getDatastreamJson(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @PathVariable String dsid
+  ) {
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream details", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(id);
     Datastream datastream = new DatastreamBuilder()
@@ -145,56 +243,44 @@ public class DatastreamController {
         .build();
     datastream.setDigitalObject(digitalObject);
 
-    Project project = ProjectBuilder.builder()
-        .projectAbbr(projectAbbr)
-        .description("")
-        .build();
-
-    IDatastreamDetailsView foundDatastream = datastreamService.findDatastreamDetailsById(
-        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(datastream.getDsid()).build());
-    model.addAttribute(foundDatastream);
-    model.addAttribute(project);
-    return foundDatastream;
+    return datastreamService.findDatastreamDetailsById(
+        DatastreamId.builder()
+            .digitalObject(digitalObject.getId())
+            .dsid(datastream.getDsid())
+            .build()
+    );
   }
-
-  @Hidden
-  @DeleteMapping(path = {"/datastreams/{dsid}", "/datastreams/{dsid}/"})
-  public String deleteDatastream(
-          @PathVariable String id,
-          @PathVariable String dsid,
-          Project project,
-          @RequestHeader Map<String, String> requestHeader
-  ) {
-
-    Datastream datastream = new DatastreamBuilder()
-        .dsid(dsid)
-        .digitalObject(id)
-        .build();
-
-    datastreamService.delete(datastream);
-    log.info("Successfully deleted datastream: {}", datastream);
-    String resolvedOrigin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + resolvedOrigin + "api/v1/projects/" + project.getProjectAbbr() + "/objects/" + datastream.getDigitalObject().getId();
-  }
-
 
 
   /**
    * Dynamically (according to mimetype) returns stored datastream content
-   * https://www.baeldung.com/spring-controller-return-image-file
+   * <a href="https://www.baeldung.com/spring-controller-return-image-file">Return image via spring baeldung</a>
    * @param id digital-object-id
    * @param dsid datastream-id
    * @return binary-data of the datastream
    */
-  @GetMapping( path = {"/datastreams/{dsid}/content", "/datastreams/{dsid}/content/"})
+  @GetMapping( path = {"/datastreams/{dsid}/content" })
   @ResponseBody
-  @Operation(summary = "Get datastream content")
+  @Operation(
+      summary = "Get datastream content",
+      description = "Retrieves the binary content of a specific datastream by its ID. The content type is determined by the datastream's MIME type."
+  )
   @Parameter(name = "id", description = "ID of the digital object", required = true)
   @Parameter(name = "dsid", description = "ID of the datastream", required = true)
   public ResponseEntity<InputStreamResource> getDatastreamContent(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @PathVariable String dsid
   ){
+
+    if(!projectService.exists(projectAbbr)){
+      String msg = String.format("Project %s not found. Cannot retrieve datastream content", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
     Datastream datastream = new DatastreamBuilder()
         .dsid(dsid)
         .digitalObject(id)

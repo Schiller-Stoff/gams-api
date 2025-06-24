@@ -4,6 +4,7 @@ import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
@@ -17,7 +18,7 @@ import static org.hibernate.jpa.QueryHints.HINT_READONLY;
 /**
  * Repository for the DublinCoreElement entity.
  */
-public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntry, Long> {
+public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntry, Long>, JpaSpecificationExecutor<DublinCoreEntry> {
 
   /**
    * Find DublinCoreEntries by digital object and name.
@@ -33,6 +34,20 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    * @return a list of DublinCoreEntries
    */
   List<DublinCoreEntrySummaryView> findByDigitalObject(DigitalObject digitalObject);
+
+  /**
+   * Find DublinCoreEntries by digital object id.
+   * @param digitalObjectId digital object id
+   * @return a list of DublinCoreEntries
+   */
+  List<DublinCoreEntrySummaryView> findByDigitalObjectId(String digitalObjectId);
+
+  /**
+   * Find DublinCoreEntries by digital object ids.
+   * @param digitalObjectIds set of digital object ids
+   * @return a list of DublinCoreEntries
+   */
+  List<DublinCoreEntrySummaryView> findByDigitalObjectIdIn(Set<String> digitalObjectIds);
 
   /**
    * Find DublinCoreEntries by digital object id.
@@ -59,33 +74,6 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    * @param digitalObject digital object
    */
   void deleteAllByDigitalObject(DigitalObject digitalObject);
-
-
-  /**
-   * "Tagged search for dublin core": Finds objects based on exact match of defined dublin core field.
-   * Returns the object when at least one of given values was found (exactly) in the DublinCoreElement.
-   * E.g. dc:subject = 'food'. Allows to search across multiple projects and define the dc:field to search for.
-   * @param projectAbbrs list of project abbreviations
-   * @param name name of the DublinCoreElement
-   * @param values values to check in the DublinCoreElement
-   * @param pageable pagination information
-   * @return a page of digital objects
-   */
-  @Query(value = "SELECT do FROM DigitalObject do " +
-      "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
-      "WHERE dcm.name = :name " +
-      "AND dcm.value IN :values " +
-      "AND do.project.projectAbbr IN :projectAbbrs " +
-      "GROUP BY do.id " +
-      "ORDER BY MIN(dcm.value)"
-  )
-  @QueryHints(value = {
-      @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
-      @QueryHint(name = HINT_READONLY, value = "true")
-  })
-  Page<DigitalObjectListItemView> findDigitalObjectListItemViewsByProjectAbbrsAndDublinCoreElementFixedValues(
-      Set<String> projectAbbrs, String name, List<String> values, Pageable pageable);
-
 
   /**
    * Fulltext search over all dublin core fields of a digital object.
