@@ -163,7 +163,7 @@
                     th:text="${do.id}"
                     th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"
             ></a></td>
-            <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.title}"></span></td>
+            <td><span th:title="${do.getBaseMetadata().getTitle()}" th:if="${do.baseMetadata}" th:text="${#strings.abbreviate(do.baseMetadata.title, 50)}"></span></td>
             <td><span th:text="${do.modified}"></span></td>
             <!--          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>-->
 <!--            <td><div>-->
