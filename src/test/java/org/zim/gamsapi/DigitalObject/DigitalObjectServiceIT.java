@@ -388,7 +388,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       );
       Assertions.assertThat(foundDigitalObjects.getContent())
           .isEmpty();
-      ;
       Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(0);
 
     }
