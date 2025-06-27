@@ -59,9 +59,10 @@ public class ProjectRepositoryIT extends IntegrationTest {
 
     projectRepository.save(project);
 
-    org.assertj.core.api.Assertions.assertThat(
-        projectRepository.findById(project.getProjectAbbr()).get()
-    ).isEqualTo(project);
+    var foundProject = projectRepository.findById(project.getProjectAbbr());
+    org.assertj.core.api.Assertions.assertThat(foundProject).isPresent();
+    org.assertj.core.api.Assertions.assertThat(foundProject.get())
+        .isEqualTo(project);
 
   }
 
@@ -77,9 +78,13 @@ public class ProjectRepositoryIT extends IntegrationTest {
       // saved project will contain modification date
       Project savedProject = projectRepository.save(project);
 
+      var foundProjectDate = projectRepository
+          .findLastModifiedDateByProjectAbbr(project.getProjectAbbr());
+      org.assertj.core.api.Assertions.assertThat(foundProjectDate).isPresent();
+
       // method returns same time as saved project's modification date
       org.assertj.core.api.Assertions.assertThat(
-          projectRepository.findLastModifiedDateByProjectAbbr(project.getProjectAbbr()).get()
+          foundProjectDate.get()
       ).hasSameTimeAs(savedProject.getModified());
 
     }
