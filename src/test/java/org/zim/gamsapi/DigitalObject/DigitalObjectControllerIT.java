@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DigitalObjectControllerIT extends IntegrationTest {
 
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private MockMvc mockMvc;
 
@@ -53,7 +54,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Autowired
   private IGAMSCollectionRepository collectionRepository;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @Autowired
@@ -301,7 +302,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     /**
-     * If a client supplies a If-Modified-Since header wit an invalid date format,
+     * If a client supplies an If-Modified-Since header wit an invalid date format,
      * the server should respond with a 400 Bad Request status.
      * @throws Exception if the test fails (mockMvc.perform)
      */
@@ -327,7 +328,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     /**
-     * If a client supplies a If-Modified-Since header with a date that is after the last modified date of the object,
+     * If a client supplies an If-Modified-Since header with a date that is after the last modified date of the object,
      * the server should respond with a 304 Not Modified status.
      * @throws Exception if the test fails (mockMvc.perform)
      */
@@ -386,7 +387,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void getDigitalObjectContainsExpectedDublinCoreTestValue() throws Exception {
+    public void getDigitalObjectContainsExpectedDublinCoreTestValue() {
       org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
           .contains(TEST_DC_ENTRY.getLanguage())
           .contains(TEST_DC_ENTRY.getValue())
@@ -625,10 +626,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Test
-  public void deleteObjectDoesNotThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), "nonExistentId")
+  public void deleteObjectDoesShouldThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
+    mockMvc.perform(MockMvcRequestBuilders.delete(
+        "/api/v1/projects/{projectAbbr}/objects/{id}",
+                testProject.getProjectAbbr(), "nonExistentId")
             .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().is3xxRedirection());
+        .andExpect(status().is4xxClientError());
   }
 
   @Test

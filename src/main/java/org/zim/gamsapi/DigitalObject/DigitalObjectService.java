@@ -112,6 +112,13 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
+
+    if(!digitalObjectRepository.existsById(digitalObject.getId())){
+      String msg = String.format("Failed to delete digital object with id %s. It does not exist!", digitalObject.getId());
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
 
