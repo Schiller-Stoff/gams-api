@@ -70,6 +70,14 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   /**
    * Find all digital objects for a given project (via project abbreviation) as projection.
    * @param projectAbbr identifier of the project
+   * @param pageable pagination
+   * @return a list of digital object ids
+   */
+  Page<DigitalObjectIdView> findAllByProject_ProjectAbbr(String projectAbbr, Pageable pageable);
+
+  /**
+   * Find all digital objects for a given project (via project abbreviation) as projection.
+   * @param projectAbbr identifier of the project
    * @return a list of digital object ids
    */
   List<DigitalObjectIdView> findAllByProject_ProjectAbbr(String projectAbbr);
