@@ -394,6 +394,28 @@ public class DigitalObjectControllerIT extends IntegrationTest {
           .contains(TEST_OBJECT.getProject().getProjectAbbr());
     }
 
+    @Test
+    public void getAllObjectIdsReturnsExpectedIds() throws Exception {
+      // Arrange
+      DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".1");
+      DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".2");
+
+      digitalObjectRepository.save(digitalObject1);
+      digitalObjectRepository.save(digitalObject2);
+
+      final String URL = String.format("/api/v1/projects/%s/objects/ids", testProject.getProjectAbbr());
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(URL)
+              .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andReturn();
+
+      // Assert
+      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(digitalObject1.getId(), digitalObject2.getId());
+    }
+
   }
 
   @Nested

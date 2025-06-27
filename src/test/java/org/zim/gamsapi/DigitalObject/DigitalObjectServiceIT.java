@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.Datastream.Datastream;
@@ -226,7 +227,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
 
-
   @Nested
   public class Delete {
 
@@ -392,6 +392,40 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(0);
 
     }
+
+  }
+
+
+  @Nested
+  public class FindAllIdsByProjectAbbr {
+
+    @Test
+    public void returnsExpectedDigitalObjectIds(){
+
+      final String TEST_OBJECT01_ID = String.format("%s.object1", testProject.getProjectAbbr());
+      final String TEST_OBJECT02_ID = String.format("%s.object2", testProject.getProjectAbbr());
+
+      DigitalObject digitalObject1 = TestDigitalObject.generate(
+          testProject.getProjectAbbr(), TEST_OBJECT01_ID);
+      DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), TEST_OBJECT02_ID);
+
+      digitalObjectRepository.save(digitalObject1);
+      digitalObjectRepository.save(digitalObject2);
+
+      var paginatedIds = digitalObjectService.findAllIdsByProjectAbbr(
+          testProject.getProjectAbbr(), PageRequest.of(0,1000)
+      );
+
+      Assertions
+          .assertThat(paginatedIds)
+          .isNotNull();
+
+      Assertions.assertThat(paginatedIds.getContent())
+          .hasSize(2)
+          .contains(digitalObject1.getId(), digitalObject2.getId());
+
+    }
+
 
   }
 

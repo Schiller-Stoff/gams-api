@@ -63,13 +63,14 @@ public interface IDigitalObjectService {
   /**
    * Find all digital objects for a given project (with project abbreviation) and just return their ids.
    * @param projectAbbr identifier of the project
+   * @param pageable pagination
    * @return a list of digital object ids
    */
-  List<String> findAllIdsByProjectAbbr(String projectAbbr);
+  PagedResponse<String> findAllIdsByProjectAbbr(String projectAbbr, Pageable pageable);
 
 
   /**
-   * Fulltext search over objects of defined project. Searches for string occurence in defined dublin core fields.
+   * Fulltext search over objects of defined project. Searches for string occurrence in defined dublin core fields.
    * The object is being returned when one value in the value list matches exactly.
    * @param projectAbbrs list of project abbreviations
    * @param dcEntries list of DublinCoreElement names. If empty all dublin core fields will be searched

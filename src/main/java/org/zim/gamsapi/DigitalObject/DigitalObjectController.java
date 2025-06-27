@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -243,7 +241,17 @@ public class DigitalObjectController {
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
   @ResponseBody
-  public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr) {
+  public PagedResponse<String> findAllIdsByProjectAbbr(
+      @PathVariable String projectAbbr,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10000") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy
+  ) {
+    // limit pageSize
+    if (pageSize >= 10000) {
+      pageSize = 10000;
+    }
+
     Project project = ProjectBuilder
         .builder()
         .projectAbbr(projectAbbr)
@@ -251,7 +259,10 @@ public class DigitalObjectController {
         .build();
 
     // TODO should return a paginated response
-    return digitalObjectService.findAllIdsByProjectAbbr(project.getProjectAbbr());
+    return digitalObjectService.findAllIdsByProjectAbbr(
+        project.getProjectAbbr(),
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
 }

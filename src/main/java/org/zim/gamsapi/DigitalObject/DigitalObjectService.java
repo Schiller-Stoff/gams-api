@@ -88,12 +88,13 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  public List<String> findAllIdsByProjectAbbr(String projectAbbr) {
-    return digitalObjectRepository
-        .findAllByProject_ProjectAbbr(projectAbbr)
-        .stream()
-        .map(DigitalObjectIdView::getId)
-        .toList();
+  public PagedResponse<String> findAllIdsByProjectAbbr(String projectAbbr, Pageable pageable) {
+
+    var mappedIdsPaginated = digitalObjectRepository
+        .findAllByProject_ProjectAbbr(projectAbbr, pageable)
+        .map(DigitalObjectIdView::getId);
+
+    return PagedResponse.from(mappedIdsPaginated);
   }
 
   @Override
