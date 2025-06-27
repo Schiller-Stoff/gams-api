@@ -158,9 +158,23 @@ public class ProjectController {
 
   @Operation(hidden = true)
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
-  public String showProjectsViaWebClient(Model model){
-    List<Project> projects = projectService.findAll();
-    model.addAttribute("projects", projects);
+  public String showProjectsViaWebClient(
+      Model model,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "projectAbbr") String sortBy
+  ){
+    var projects = projectService.findAllPaged(
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
+    model.addAttribute("projects", projects.getContent());
+    model.addAttribute("pageSize", pageSize);
+    model.addAttribute("pageIndex", pageIndex);
+    model.addAttribute("totalItems", projects.getPagination().getTotalElements());
+    model.addAttribute("totalPages", projects.getPagination().getTotalPages());
+    model.addAttribute("sortBy", sortBy);
+
     return "Project/show_all";
   }
 
