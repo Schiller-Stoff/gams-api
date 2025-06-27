@@ -71,6 +71,41 @@ public class ProjectControllerIT extends IntegrationTest {
   }
 
   @Nested
+  public class GETProject {
+
+
+    @Test
+    public void GETProjectOverviewReturns200() throws Exception {
+      mockMvc.perform(
+          MockMvcRequestBuilders.get("/api/v1/projects")
+              .accept(MediaType.APPLICATION_JSON)
+      ).andExpect(status().isOk());
+    }
+
+    @Test
+    public void GETProjectOverviewReturnsExpectedProjects() throws Exception {
+      // save test project
+      Project testProject = TestProject.generate();
+      projectRepository.save(testProject);
+
+      // perform GET request
+      MvcResult mvcResult = mockMvc.perform(
+          MockMvcRequestBuilders.get("/api/v1/projects")
+              .accept(MediaType.APPLICATION_JSON)
+      ).andExpect(status().isOk())
+          .andReturn();
+
+      String responseBody = mvcResult.getResponse().getContentAsString();
+
+      // assert that the response body contains the project abbreviation
+      Assertions.assertThat(responseBody).contains(testProject.getProjectAbbr());
+    }
+
+
+
+  }
+
+  @Nested
   public class ProjectCreation {
 
     /**

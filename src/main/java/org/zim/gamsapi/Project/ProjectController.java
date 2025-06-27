@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,8 @@ import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -121,9 +125,19 @@ public class ProjectController {
               content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
       }
   )
-  public List<Project> showProjects(){
-    // TODO needs pagination
-    return projectService.findAll();
+  public PagedResponse<Project> showProjects(
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "projectAbbr") String sortBy
+  ){
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    return projectService.findAllPaged(
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
   @GetMapping(path = "/{projectAbbr}")

@@ -1,6 +1,8 @@
 package org.zim.gamsapi.Project.interfaces;
 
+import org.springframework.data.domain.Pageable;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.List;
 
@@ -29,6 +31,13 @@ public interface IProjectService {
   Project findProject(String projectAbbr);
 
   List<Project> findAll();
+
+  /**
+   * Finds all projects and returns them as a paginated response.
+   * @param pageable Pagination information including page number, size, and sorting.
+   * @return a paginated response containing a list of projects.
+   */
+  PagedResponse<Project> findAllPaged(Pageable pageable);
 
   Project findByAbbr(String projectAbbr);
 
