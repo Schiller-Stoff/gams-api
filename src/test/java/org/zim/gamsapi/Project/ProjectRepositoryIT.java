@@ -4,9 +4,9 @@ package org.zim.gamsapi.Project;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
@@ -26,7 +26,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
   IDigitalObjectRepository digitalObjectRepository;
 
   // disables auditing
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
 
