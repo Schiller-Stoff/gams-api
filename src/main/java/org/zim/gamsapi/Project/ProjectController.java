@@ -61,19 +61,19 @@ public class ProjectController {
   }
 
   @PutMapping(path = "/{projectAbbr}")
+  @ResponseBody
   @Operation(
       summary = "Create a GAMS project",
       description = "Allows to create a GAMS project by providing the project abbreviation in the path variable and the project data in the request body.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Project successfully created",
-              content = @Content(mediaType = MimeTypeUtils.TEXT_HTML_VALUE))
+              content = @Content)
       }
   )
-  public String createProject(
+  public void createProject(
       @PathVariable String projectAbbr,
       // read out description argument from given json
-      @RequestBody Optional<Project> projectToBeSaved,
-      Model model
+      @RequestBody Optional<Project> projectToBeSaved
   ){
 
     projectToBeSaved.ifPresentOrElse(
@@ -91,9 +91,6 @@ public class ProjectController {
           );
     });
 
-    List<Project> projects = projectService.findAll();
-    model.addAttribute("projects", projects);
-    return "Project/show_all";
   }
 
   @DeleteMapping(path = "/{projectAbbr}")

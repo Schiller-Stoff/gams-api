@@ -140,17 +140,19 @@ public class ProjectControllerIT extends IntegrationTest {
       final String TEST_PROJECT_PUT_REQUEST_BODY =  "{\"description\": \"" + TEST_PROJECT_DESCRIPTION + "\"}";
 
       // first create a project
-      String responseBody = mockMvc.perform(
+      mockMvc.perform(
           MockMvcRequestBuilders.put(TEST_PROJECT_URL)
               .contentType(MediaType.APPLICATION_JSON)
               .content(TEST_PROJECT_PUT_REQUEST_BODY)
-      ).andExpect(status().isOk())
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
+      ).andExpect(status().isOk());
 
-      Assertions.assertThat(responseBody)
-          .contains(TEST_PROJECT_DESCRIPTION);
+      // assert that the project was saved
+      var foundProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue());
+      Assertions.assertThat(foundProject).isPresent();
+
+      // assert that expected description was saved
+      Assertions.assertThat(foundProject.get().getDescription())
+          .isEqualTo(TEST_PROJECT_DESCRIPTION);
     }
 
     @Test
