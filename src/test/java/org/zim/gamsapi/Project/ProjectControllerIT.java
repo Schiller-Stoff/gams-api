@@ -118,6 +118,31 @@ public class ProjectControllerIT extends IntegrationTest {
           .contains(TEST_PROJECT_DESCRIPTION);
     }
 
+    @Test
+    public void PUTRequestAllowsToSaveProjectTitle() throws Exception {
+
+      final String TEST_PROJECT_URL = String.format(
+          "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
+      );
+
+      final String TEST_PROJECT_TITLE = TestProject.PROJECT_TITLE.getValue();
+      final String TEST_PROJECT_PUT_REQUEST_BODY =  "{\"title\": \"" + TEST_PROJECT_TITLE + "\"}";
+
+      // create the project
+      mockMvc.perform(
+          MockMvcRequestBuilders.put(TEST_PROJECT_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_PROJECT_PUT_REQUEST_BODY)
+      ).andExpect(status().isOk());
+
+      // assert that the project was saved
+      var foundProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue());
+      Assertions.assertThat(foundProject).isPresent();
+      // assert that expected title was saved
+      Assertions.assertThat(foundProject.get().getTitle())
+          .isEqualTo(TEST_PROJECT_TITLE);
+    }
+
   }
 
   @Nested

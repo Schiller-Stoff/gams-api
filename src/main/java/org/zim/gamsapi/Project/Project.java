@@ -36,6 +36,12 @@ public class Project {
   private String projectAbbr;
 
   /**
+   * Title of the GAMS project
+   */
+  @Column(name = "title", length = 255)
+  private String title;
+
+  /**
    * Description of the GAMS project
    */
   @Column(name = "description", length = 5000)
