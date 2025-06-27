@@ -10,7 +10,7 @@ import org.zim.gamsapi.Project.ProjectBuilder;
 public enum TestProject {
 
     PROJECT_ABBR("test"),
-    PROJECT_NAME("test-project"),
+    PROJECT_TITLE("test-project"),
     PROJECT_DESCRIPTION("test-description");
 
     private final String value;
@@ -41,6 +41,7 @@ public enum TestProject {
         return ProjectBuilder.builder()
             .projectAbbr(projectAbbr)
             .description(PROJECT_DESCRIPTION.getValue())
+            .title(PROJECT_TITLE.getValue())
             // following fields are supplied by the database / spring security worflows
             //.createdBy(TestUser.USERNAME.getValue())
             //.modifiedBy(TestUser.USERNAME.getValue())
