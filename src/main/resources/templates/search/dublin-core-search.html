@@ -39,7 +39,7 @@
                             </h5>
                         </div>
                         <div class="card-body">
-                            <form id="searchForm" method="GET" action="/api/v1/search/dc/view">
+                            <form id="searchForm" method="GET" action="/api/v1/search/dc">
 
                                 <!-- Project Selection -->
                                 <div class="row mb-3">
@@ -76,21 +76,21 @@
                                             <div class="col-md-4">
                                                 <select class="form-select dc-field-select" name="dcField">
                                                     <option value="">Select DC Field</option>
-                                                    <option value="title">Title</option>
-                                                    <option value="creator">Creator</option>
-                                                    <option value="subject">Subject</option>
-                                                    <option value="description">Description</option>
-                                                    <option value="publisher">Publisher</option>
-                                                    <option value="contributor">Contributor</option>
-                                                    <option value="date">Date</option>
-                                                    <option value="type">Type</option>
-                                                    <option value="format">Format</option>
-                                                    <option value="identifier">Identifier</option>
-                                                    <option value="source">Source</option>
-                                                    <option value="language">Language</option>
-                                                    <option value="relation">Relation</option>
-                                                    <option value="coverage">Coverage</option>
-                                                    <option value="rights">Rights</option>
+                                                    <option value="dc.title">Title</option>
+                                                    <option value="dc.creator">Creator</option>
+                                                    <option value="dc.subject">Subject</option>
+                                                    <option value="dc.description">Description</option>
+                                                    <option value="dc.publisher">Publisher</option>
+                                                    <option value="dc.contributor">Contributor</option>
+                                                    <option value="dc.date">Date</option>
+                                                    <option value="dc.type">Type</option>
+                                                    <option value="dc.format">Format</option>
+                                                    <option value="dc.identifier">Identifier</option>
+                                                    <option value="dc.source">Source</option>
+                                                    <option value="dc.language">Language</option>
+                                                    <option value="dc.relation">Relation</option>
+                                                    <option value="dc.coverage">Coverage</option>
+                                                    <option value="dc.rights">Rights</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
@@ -259,7 +259,7 @@
                             <ul class="pagination">
                                 <!-- Previous Page -->
                                 <li class="page-item" th:classappend="${searchResults.getPagination().isFirst()} ? 'disabled'">
-                                    <a class="page-link" th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/search/dc/view?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}">
+                                    <a class="page-link" th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/search/dc?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}">
                                         <i class="ti ti-chevron-left"></i> Previous
                                     </a>
                                 </li>
@@ -269,13 +269,13 @@
                                     class="page-item"
                                     th:classappend="${page == searchResults.getPagination().getTotalElements()} ? 'active'">
                                     <a class="page-link"
-                                       th:href="@{'/api/v1/search/dc/view?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                       th:href="@{'/api/v1/search/dc?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                        th:text="${page + 1}">1</a>
                                 </li>
 
                                 <!-- Next Page -->
                                 <li class="page-item" th:classappend="${searchResults.getPagination().isLast()} ? 'disabled'">
-                                    <a class="page-link" th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/search/dc/view?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}">
+                                    <a class="page-link" th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/search/dc?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}">
                                         Next <i class="ti ti-chevron-right"></i>
                                     </a>
                                 </li>
@@ -308,21 +308,21 @@
                 <div class="col-md-4">
                     <select class="form-select dc-field-select" name="dcField">
                         <option value="">Select DC Field</option>
-                        <option value="title">Title</option>
-                        <option value="creator">Creator</option>
-                        <option value="subject">Subject</option>
-                        <option value="description">Description</option>
-                        <option value="publisher">Publisher</option>
-                        <option value="contributor">Contributor</option>
-                        <option value="date">Date</option>
-                        <option value="type">Type</option>
-                        <option value="format">Format</option>
-                        <option value="identifier">Identifier</option>
-                        <option value="source">Source</option>
-                        <option value="language">Language</option>
-                        <option value="relation">Relation</option>
-                        <option value="coverage">Coverage</option>
-                        <option value="rights">Rights</option>
+                        <option value="dc.title">Title</option>
+                        <option value="dc.creator">Creator</option>
+                        <option value="dc.subject">Subject</option>
+                        <option value="dc.description">Description</option>
+                        <option value="dc.publisher">Publisher</option>
+                        <option value="dc.contributor">Contributor</option>
+                        <option value="dc.date">Date</option>
+                        <option value="dc.type">Type</option>
+                        <option value="dc.format">Format</option>
+                        <option value="dc.identifier">Identifier</option>
+                        <option value="dc.source">Source</option>
+                        <option value="dc.language">Language</option>
+                        <option value="dc.relation">Relation</option>
+                        <option value="dc.coverage">Coverage</option>
+                        <option value="dc.rights">Rights</option>
                     </select>
                 </div>
                 <div class="col-md-6">
@@ -395,12 +395,12 @@
                 return;
             }
 
-            window.location.href = '/api/v1/search/dc/view?' + params.toString();
+            window.location.href = '/api/v1/search/dc?' + params.toString();
         });
 
         // Clear form
         $('#clearForm').click(function() {
-            window.location.href = '/api/v1/search/dc/view';
+            window.location.href = '/api/v1/search/dc';
         });
 
         // Initialize remove button states

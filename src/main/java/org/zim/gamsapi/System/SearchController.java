@@ -51,6 +51,11 @@ public class SearchController {
   private final IProjectService projectService;
 
   /**
+   * Endpoint for searching digital objects via Dublin Core fulltext.
+   */
+  private final String DC_SEARCH_ENDPOINT = "/dc";
+
+  /**
    * Fulltext search over all dublin core fields of a digital object.
    * @param projects list of project abbreviations
    * @param dcFields list of DublinCoreElement names
@@ -108,7 +113,7 @@ public class SearchController {
     );
   }
 
-  @GetMapping(path = "/dc", produces = {
+  @GetMapping(path = DC_SEARCH_ENDPOINT, produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
@@ -185,7 +190,7 @@ public class SearchController {
    * @param model Spring MVC model
    * @return Thymeleaf template name
    */
-  @GetMapping("/dc/view")
+  @GetMapping(value = DC_SEARCH_ENDPOINT, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String searchView(
       @RequestParam(required = false) Set<String> projects,
       @RequestParam(defaultValue = "EXACT_MATCH") DigitalObjectDublinCoreSpecification.SearchMode searchMode,
@@ -203,19 +208,27 @@ public class SearchController {
     model.addAttribute("searchMode", searchMode);
     model.addAttribute("pageSize", pageSize);
 
-    // Extract Dublin Core criteria from request parameters
-    MultiValueMap<String, String> dcCriteria = extractDublinCoreCriteria(allParams);
-    model.addAttribute("dcCriteria", dcCriteria);
+    // extract dublin core criteria from request parameters
+    // only keep parameters keys that start with "dc."
+    var filteredDcFields = new HashMap<String, List<String>>();
+    allParams.forEach((key, values) -> {
+      if (key.startsWith("dc.")) {
+        String newKey = key.substring(3); // Remove "dc." prefix
+        filteredDcFields.put(newKey, values);
+      }
+    });
+    model.addAttribute("dcCriteria", filteredDcFields);
 
+    // TODO check error handling for empty projects or criteria
     // Perform search if projects are selected and DC criteria exist
-    if (projects != null && !projects.isEmpty() && !dcCriteria.isEmpty()) {
+    if (projects != null && !projects.isEmpty() && !filteredDcFields.isEmpty()) {
       try {
         // Limit page size to prevent excessive load
-        pageSize = Math.min(pageSize, 100);
+        pageSize = Math.min(pageSize, 20);
 
         PagedResponse<DigitalObjectSearchResultDTO> searchResults = digitalObjectService
             .searchDigitalObjectsByDublinCoreCriteria(
-                dcCriteria,
+                MultiValueMap.fromMultiValue(filteredDcFields),
                 projects,
                 searchMode,
                 PageRequest.of(pageIndex, pageSize)
@@ -224,7 +237,8 @@ public class SearchController {
         model.addAttribute("searchResults", searchResults);
 
         // Build current query string for pagination
-        String currentQuery = buildQueryString(projects, searchMode, dcCriteria, pageSize);
+        // TODO call of MultiValueMap.fromMultiValue(filteredDcFields) is not necessary, as it is already a MultiValueMap
+        String currentQuery = buildQueryString(projects, searchMode, MultiValueMap.fromMultiValue(filteredDcFields), pageSize);
         model.addAttribute("currentQuery", currentQuery);
 
         log.debug("Search completed - found {} results", searchResults.getPagination().getTotalElements());
@@ -233,7 +247,9 @@ public class SearchController {
         log.error("Error performing Dublin Core search", e);
         model.addAttribute("searchError", "An error occurred while searching. Please try again.");
       }
-    } else if (projects != null && !projects.isEmpty() && dcCriteria.isEmpty()) {
+      // TODO does the following check work?
+      // TODO is it necessary to check for empty projects or criteria?
+    } else if (projects != null && !projects.isEmpty() && filteredDcFields.isEmpty()) {
       model.addAttribute("searchInfo", "Please add at least one Dublin Core search criterion.");
     }
 
