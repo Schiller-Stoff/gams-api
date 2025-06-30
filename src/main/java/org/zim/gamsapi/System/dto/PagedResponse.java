@@ -140,6 +140,12 @@ public class PagedResponse<T> {
     return from(page, metadata);
   }
 
-
+  /**
+   * Check if the content is empty.
+   * @return true if content is empty, false otherwise
+   */
+  public boolean isEmpty(){
+    return this.content.isEmpty();
+}
 
 }
