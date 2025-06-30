@@ -25,10 +25,10 @@
             <p>
                 Overview over a singular datastream
             </p>
-<!--            <div>-->
-<!--                <a class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id})" th:text="'Back to object (' + ${digitalObject.id} + ')'"></a>-->
-<!--            </div>-->
-            <div class="bg-light p-2">
+
+            <div class="card border border-2 p-2">
+
+            <div class="p-2">
                 <p><b>File metadata</b></p>
 <!--                <p><b>Dsid:</b> <span th:text="${datastream.dsid}"></span></p>-->
                 <p><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></p>
@@ -36,7 +36,7 @@
                 <p><b>Filesize:</b> <span th:text="${datastream.size}"></span></p>
             </div>
             <div class="mt-2">
-                <a target="_blank" class="btn btn-outline-dark mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
+                <a target="_blank" class="btn btn-outline-primary mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
             </div>
 
             <h2 class="h4 mt-1">Metadata</h2>
@@ -112,7 +112,7 @@
 <!--                        th:type="${datastream.mimeType}"-->
 <!--                ></embed>-->
 <!--            </div>-->
-
+            </div>
         </div>
 
         <footer th:replace="fragments/general.html :: footer"></footer>
