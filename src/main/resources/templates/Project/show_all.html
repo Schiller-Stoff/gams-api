@@ -21,7 +21,7 @@
             <h2>GAMS Projects</h2>
             <p>List of all GAMS projects.</p>
             <ul class="list-group" style="list-style: none;">
-                <li th:each="project : ${projects}" class="list-group-item">
+                <li th:each="project : ${projects}" class="list-group-item border border-2">
                     <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr}"></a>
                     <p th:text="${project.getDescription()}"></p>
                 </li>
