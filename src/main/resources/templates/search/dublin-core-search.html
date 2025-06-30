@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/general.html :: headtemplate" />
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+    <aside th:replace="fragments/general.html :: aside"></aside>
+    <div class="body-wrapper">
+        <header th:replace="fragments/general.html :: header"></header>
+        <div class="container-fluid" style="min-height: 100vh">
+
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+                    <li class="breadcrumb-item active">Dublin Core Search</li>
+                </ol>
+            </nav>
+
+            <!-- Page Title -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2>Dublin Core Search</h2>
+                    <p class="text-muted">Advanced search across digital objects using Dublin Core metadata fields.</p>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="ti ti-search me-2"></i>Search Parameters
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="searchForm" method="GET" action="/api/v1/search/dc/view">
+
+                                <!-- Project Selection -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="projects" class="form-label">Projects <span class="text-danger">*</span></label>
+                                        <select multiple class="form-select" id="projects" name="projects" required>
+                                            <option th:each="project : ${projects}"
+                                                    th:value="${project.projectAbbr}"
+                                                    th:text="${project.projectAbbr + ' - ' + project.description}"
+                                                    th:selected="${selectedProjects != null && selectedProjects.contains(project.projectAbbr)}">
+                                            </option>
+                                        </select>
+                                        <div class="form-text">Hold Ctrl/Cmd to select multiple projects</div>
+                                    </div>
+
+                                    <!-- Search Mode -->
+                                    <div class="col-md-6">
+                                        <label for="searchMode" class="form-label">Search Mode</label>
+                                        <select class="form-select" id="searchMode" name="searchMode">
+                                            <option value="EXACT_MATCH" th:selected="${searchMode == null || searchMode == 'EXACT_MATCH'}">Exact Match</option>
+                                            <option value="CONTAINS" th:selected="${searchMode == 'CONTAINS'}">Contains (substring)</option>
+                                            <option value="FULLTEXT" th:selected="${searchMode == 'FULLTEXT'}">Fulltext Search</option>
+                                        </select>
+                                        <div class="form-text">Choose how to match the search terms</div>
+                                    </div>
+                                </div>
+
+                                <!-- Dublin Core Criteria Dynamic Fields -->
+                                <div class="mb-3">
+                                    <label class="form-label">Dublin Core Search Criteria</label>
+                                    <div id="dcCriteriaContainer">
+                                        <!-- Dynamic DC criteria fields will be added here -->
+                                        <div class="dc-criteria-row row mb-2" th:if="${dcCriteria == null || dcCriteria.isEmpty()}">
+                                            <div class="col-md-4">
+                                                <select class="form-select dc-field-select" name="dcField">
+                                                    <option value="">Select DC Field</option>
+                                                    <option value="title">Title</option>
+                                                    <option value="creator">Creator</option>
+                                                    <option value="subject">Subject</option>
+                                                    <option value="description">Description</option>
+                                                    <option value="publisher">Publisher</option>
+                                                    <option value="contributor">Contributor</option>
+                                                    <option value="date">Date</option>
+                                                    <option value="type">Type</option>
+                                                    <option value="format">Format</option>
+                                                    <option value="identifier">Identifier</option>
+                                                    <option value="source">Source</option>
+                                                    <option value="language">Language</option>
+                                                    <option value="relation">Relation</option>
+                                                    <option value="coverage">Coverage</option>
+                                                    <option value="rights">Rights</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control dc-value-input"
+                                                       placeholder="Enter search value..." name="dcValue">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-outline-danger remove-criteria-btn" disabled>
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Pre-populate existing criteria if any -->
+                                        <div th:each="entry : ${dcCriteria}" class="dc-criteria-row row mb-2">
+                                            <div class="col-md-4">
+                                                <select class="form-select dc-field-select" name="dcField">
+                                                    <option value="">Select DC Field</option>
+                                                    <option value="title" th:selected="${entry.key == 'title'}">Title</option>
+                                                    <option value="creator" th:selected="${entry.key == 'creator'}">Creator</option>
+                                                    <option value="subject" th:selected="${entry.key == 'subject'}">Subject</option>
+                                                    <option value="description" th:selected="${entry.key == 'description'}">Description</option>
+                                                    <option value="publisher" th:selected="${entry.key == 'publisher'}">Publisher</option>
+                                                    <option value="contributor" th:selected="${entry.key == 'contributor'}">Contributor</option>
+                                                    <option value="date" th:selected="${entry.key == 'date'}">Date</option>
+                                                    <option value="type" th:selected="${entry.key == 'type'}">Type</option>
+                                                    <option value="format" th:selected="${entry.key == 'format'}">Format</option>
+                                                    <option value="identifier" th:selected="${entry.key == 'identifier'}">Identifier</option>
+                                                    <option value="source" th:selected="${entry.key == 'source'}">Source</option>
+                                                    <option value="language" th:selected="${entry.key == 'language'}">Language</option>
+                                                    <option value="relation" th:selected="${entry.key == 'relation'}">Relation</option>
+                                                    <option value="coverage" th:selected="${entry.key == 'coverage'}">Coverage</option>
+                                                    <option value="rights" th:selected="${entry.key == 'rights'}">Rights</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <input type="text" class="form-control dc-value-input"
+                                                       name="dcValue" th:value="${#strings.listJoin(entry.value, ', ')}">
+                                            </div>
+                                            <div class="col-md-2">
+                                                <button type="button" class="btn btn-outline-danger remove-criteria-btn">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="addCriteriaBtn">
+                                        <i class="ti ti-plus me-1"></i>Add Criteria
+                                    </button>
+                                </div>
+
+                                <!-- Pagination Settings -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="pageSize" class="form-label">Results per page</label>
+                                        <select class="form-select" id="pageSize" name="pageSize">
+                                            <option value="10" th:selected="${pageSize == 10}">10</option>
+                                            <option value="20" th:selected="${pageSize == null || pageSize == 20}">20 (default)</option>
+                                            <option value="50" th:selected="${pageSize == 50}">50</option>
+                                            <option value="100" th:selected="${pageSize == 100}">100</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="ti ti-search me-2"></i>Search Digital Objects
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-lg ms-2" id="clearForm">
+                                            <i class="ti ti-refresh me-2"></i>Clear Form
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div th:if="${searchResults != null}" class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="ti ti-list me-2"></i>Search Results
+                            </h5>
+                            <span class="badge bg-light text-dark">
+                                Total: <span th:text="${searchResults.getPagination().getTotalElements()}">0</span> objects
+                                (Page <span th:text="${searchResults.getPagination().getSize() + 1}">1</span> of <span th:text="${searchResults.getPagination().getTotalPages()}">1</span>)
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:if="${searchResults.isEmpty()}" class="text-center py-5">
+                                <i class="ti ti-search-off display-4 text-muted"></i>
+                                <h4 class="text-muted mt-3">No results found</h4>
+                                <p class="text-muted">Try adjusting your search criteria or search mode.</p>
+                            </div>
+
+                            <!-- Results Table -->
+                            <div th:if="${!searchResults.isEmpty()}" class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Type</th>
+                                        <th>Project</th>
+                                        <th>Dublin Core Metadata</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="result : ${searchResults.content}">
+                                        <td>
+                                            <code th:text="${result.id}">o:gams.123</code>
+                                        </td>
+                                        <td>
+                                            <strong th:text="${result.title ?: 'No title'}">Object Title</strong>
+                                        </td>
+                                        <td>
+                                            <span th:text="${#strings.abbreviate(result.description ?: 'No description', 100)}">Description...</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info" th:text="${result.objectType ?: 'Unknown'}">Type</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="${result.projectAbbr}">PROJECT</span>
+                                        </td>
+                                        <td>
+                                            <!-- Dublin Core Metadata Display -->
+                                            <div th:if="${result.getDublinCore() != null && !result.dublinCore.isEmpty()}" class="dublin-core-metadata">
+                                                <div th:each="dcEntry : ${result.getDublinCore()}" class="mb-1">
+                                                    <small class="text-muted" th:text="${'dc:' + dcEntry.key}">dc:field</small>:
+                                                    <span th:each="value, iterStat : ${dcEntry.value}" class="badge bg-light text-dark me-1">
+                                                            <span th:text="${#strings.abbreviate(value.value, 50)}">value</span>
+                                                            <span th:if="${value.language != null && !value.language.isEmpty()}"
+                                                                  class="ms-1 text-muted" th:text="${'(' + value.language + ')'}">
+                                                            </span>
+                                                        </span>
+                                                </div>
+                                            </div>
+                                            <span th:if="${result.dublinCore == null || result.getDublinCore().isEmpty()}" class="text-muted">
+                                                    No DC metadata
+                                                </span>
+                                        </td>
+                                        <td>
+                                            <a th:href="'/api/v1/projects/' + ${result.projectAbbr} + '/objects/' + ${result.id}"
+                                               class="btn btn-outline-primary btn-sm" target="_blank">
+                                                <i class="ti ti-external-link"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div th:if="${!searchResults.isEmpty() && searchResults.getPagination().getTotalPages() > 1}" class="d-flex justify-content-center mt-4">
+                        <nav aria-label="Search results pagination">
+                            <ul class="pagination">
+                                <!-- Previous Page -->
+                                <li class="page-item" th:classappend="${searchResults.getPagination().isFirst()} ? 'disabled'">
+                                    <a class="page-link" th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/search/dc/view?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}">
+                                        <i class="ti ti-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+
+                                <!-- Page Numbers -->
+                                <li th:each="page : ${#numbers.sequence(0, searchResults.getPagination().getTotalPages() - 1)}"
+                                    class="page-item"
+                                    th:classappend="${page == searchResults.getPagination().getTotalElements()} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{'/api/v1/search/dc/view?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                       th:text="${page + 1}">1</a>
+                                </li>
+
+                                <!-- Next Page -->
+                                <li class="page-item" th:classappend="${searchResults.getPagination().isLast()} ? 'disabled'">
+                                    <a class="page-link" th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/search/dc/view?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}">
+                                        Next <i class="ti ti-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <footer th:replace="fragments/general.html :: footer"></footer>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/sidebarmenu.js"></script>
+<script src="/assets/js/app.min.js"></script>
+<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+
+<!-- Custom DC Search JavaScript -->
+<script>
+    $(document).ready(function() {
+
+        // Add new Dublin Core criteria row
+        $('#addCriteriaBtn').click(function() {
+            const newRow = `
+            <div class="dc-criteria-row row mb-2">
+                <div class="col-md-4">
+                    <select class="form-select dc-field-select" name="dcField">
+                        <option value="">Select DC Field</option>
+                        <option value="title">Title</option>
+                        <option value="creator">Creator</option>
+                        <option value="subject">Subject</option>
+                        <option value="description">Description</option>
+                        <option value="publisher">Publisher</option>
+                        <option value="contributor">Contributor</option>
+                        <option value="date">Date</option>
+                        <option value="type">Type</option>
+                        <option value="format">Format</option>
+                        <option value="identifier">Identifier</option>
+                        <option value="source">Source</option>
+                        <option value="language">Language</option>
+                        <option value="relation">Relation</option>
+                        <option value="coverage">Coverage</option>
+                        <option value="rights">Rights</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control dc-value-input"
+                           placeholder="Enter search value..." name="dcValue">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger remove-criteria-btn">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+            $('#dcCriteriaContainer').append(newRow);
+            updateRemoveButtons();
+        });
+
+        // Remove Dublin Core criteria row
+        $(document).on('click', '.remove-criteria-btn', function() {
+            $(this).closest('.dc-criteria-row').remove();
+            updateRemoveButtons();
+        });
+
+        // Update remove button states
+        function updateRemoveButtons() {
+            const rows = $('.dc-criteria-row');
+            if (rows.length <= 1) {
+                $('.remove-criteria-btn').prop('disabled', true);
+            } else {
+                $('.remove-criteria-btn').prop('disabled', false);
+            }
+        }
+
+        // Form submission handling
+        $('#searchForm').submit(function(e) {
+            e.preventDefault();
+
+            // Build the query parameters
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+
+            // Add projects
+            const projects = formData.getAll('projects');
+            projects.forEach(project => {
+                if (project) params.append('projects', project);
+            });
+
+            // Add search mode
+            params.append('searchMode', formData.get('searchMode'));
+            params.append('pageSize', formData.get('pageSize'));
+            params.append('pageIndex', '0'); // Always start from first page
+
+            // Process Dublin Core criteria
+            const dcFields = formData.getAll('dcField');
+            const dcValues = formData.getAll('dcValue');
+
+            for (let i = 0; i < dcFields.length; i++) {
+                if (dcFields[i] && dcValues[i]) {
+                    // Handle multiple values separated by comma
+                    const values = dcValues[i].split(',').map(v => v.trim()).filter(v => v);
+                    values.forEach(value => {
+                        params.append(dcFields[i], value);
+                    });
+                }
+            }
+
+            // Redirect with query parameters
+            if (projects.length === 0) {
+                alert('Please select at least one project.');
+                return;
+            }
+
+            window.location.href = '/api/v1/search/dc/view?' + params.toString();
+        });
+
+        // Clear form
+        $('#clearForm').click(function() {
+            window.location.href = '/api/v1/search/dc/view';
+        });
+
+        // Initialize remove button states
+        updateRemoveButtons();
+    });
+</script>
+
+<!-- Custom CSS for Dublin Core Search -->
+<style>
+    .dublin-core-metadata {
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 0.875rem;
+    }
+
+    .dc-criteria-row {
+        border: 1px solid #e9ecef;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background-color: #f8f9fa;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.375rem;
+        margin: 0 0.125rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+        .dc-criteria-row .col-md-4,
+        .dc-criteria-row .col-md-6,
+        .dc-criteria-row .col-md-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+</style>
+
+</body>
+</html>
