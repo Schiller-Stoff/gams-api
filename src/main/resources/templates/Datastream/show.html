@@ -26,38 +26,43 @@
                 Overview over a singular datastream
             </p>
 
-            <div class="card border border-2 p-2">
+            <div class="card border border-2">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ti ti-file me-2"></i>Datastream details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="h5">Stored file</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
+                        <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.fileName}"></span></li>
+                        <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
+                    </ul>
 
-            <div class="p-2">
-                <p><b>File metadata</b></p>
-<!--                <p><b>Dsid:</b> <span th:text="${datastream.dsid}"></span></p>-->
-                <p><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></p>
-                <p><b>Filename:</b> <span th:text="${datastream.fileName}"></span></p>
-                <p><b>Filesize:</b> <span th:text="${datastream.size}"></span></p>
-            </div>
             <div class="mt-2">
                 <a target="_blank" class="btn btn-outline-primary mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
             </div>
 
-            <h2 class="h4 mt-1">Metadata</h2>
-            <ul class="list-group-flush p-0" th:if="${datastream.baseMetadata}">
-                <li class="list-group-item bg-light">
+            <h4 class="h5 mt-1">Metadata</h4>
+            <ul class="list-group" th:if="${datastream.baseMetadata}">
+                <li class="list-group-item">
                     <small>title</small>
                     <p th:text="${datastream.baseMetadata.title}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                     <small>creator</small>
                     <p th:text="${datastream.baseMetadata.creator}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                     <small>description</small>
                     <p th:text="${datastream.baseMetadata.description}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                     <small>tags</small>
                     <p th:text="${datastream.getTags}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                     <small>languages</small>
                     <p th:text="${datastream.getLang}"></p>
                 </li>
@@ -112,6 +117,7 @@
 <!--                        th:type="${datastream.mimeType}"-->
 <!--                ></embed>-->
 <!--            </div>-->
+                </div>
             </div>
         </div>
 

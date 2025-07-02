@@ -29,18 +29,29 @@
 <!--          <a class="btn btn-outline-dark mb-3" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>-->
 <!--        </div>-->
 
-        <div class="border border-2 card p-2">
+        <div class="border border-2 card">
+            <div class="card-header">
+                <h3 class="mb-0 h5">
+                    <i class="ti ti-book me-2"></i>Object details
+                </h3>
+            </div>
+            <div class="card-body">
 
-        <div class="p-2">
+                <ul class="list-group">
+                    <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
+                    <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
+                </ul>
 
-          <p><b>Id:</b> <span th:text="${do.id}"></span></p>
-          <p><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></p>
-          <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
-          <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'"></a></p> -->
-        </div>
-              <h2 class="h4">Datastreams</h2>
+<!--        <div>-->
+<!--          <p><b>Id:</b> <span th:text="${do.id}"></span></p>-->
+<!--          <p><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></p>-->
+<!--          &lt;!&ndash; <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> &ndash;&gt;-->
+<!--          &lt;!&ndash; <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'"></a></p> &ndash;&gt;-->
+<!--        </div>-->
+                <br/>
+              <h2 class="h5">Datastreams</h2>
               <p>Displays all datastreams of a digital object</p>
-              <ul class="list-group list-group-flush">
+              <ul class="list-group">
                 <li th:each="dsid : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item">
 
                   <a th:text="${dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}"></a>
@@ -70,32 +81,32 @@
                 </li>
               </ul>
               <br/>
-              <h2 class="h4">Metadata</h2>
+              <h2 class="h5">Metadata</h2>
               <p>Primary metadata derived from the GAMS-API</p>
-              <ul class="list-group-flush p-0">
-                <li class="list-group-item bg-light">
+              <ul class="list-group">
+                <li class="list-group-item">
                   <small>identifier</small>
                   <p th:text="${do.id}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>object type</small>
                   <p th:text="${do.objectType}"></p>
                 </li>
-                  <li class="list-group-item bg-light">
+                  <li class="list-group-item">
                       <small>main resource</small>
                       <p th:text="${do.mainResource}"></p>
                   </li>
               </ul>
-              <ul class="list-group-flush p-0" th:if="${do.baseMetadata}">
-                <li class="list-group-item bg-light">
+              <ul class="list-group mt-2" th:if="${do.baseMetadata}">
+                <li class="list-group-item">
                   <small>title</small>
                   <p th:text="${do.baseMetadata.title}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>creator</small>
                   <p th:text="${do.baseMetadata.creator}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>description</small>
                   <p th:text="${do.baseMetadata.description}"></p>
                 </li>
@@ -103,7 +114,7 @@
                 <!--            <small>dc:subject</small>-->
                 <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
                 <!--          </li>-->
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>publisher</small>
                   <p th:text="${do.publisher}"></p>
                 </li>
@@ -139,16 +150,17 @@
                 <!--            <small>dc:coverage</small>-->
                 <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
                 <!--          </li>-->
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>rights</small>
                   <p th:text="${do.baseMetadata.rights}"></p>
                 </li>
-              <li class="list-group-item bg-light">
+              <li class="list-group-item">
                   <small>funder</small>
                   <p th:text="${do.funder}"></p>
               </li>
               </ul>
               <br/>
+                </div>
 
         </div>
       </div>
