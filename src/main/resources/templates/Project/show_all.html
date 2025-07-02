@@ -20,6 +20,15 @@
             </nav>
             <h2>GAMS Projects</h2>
             <p>List of all GAMS projects.</p>
+
+            <div class="border border-2 card">
+                <div class="card-header">
+                    <h3 class="mb-0 h5">
+                        <i class="ti ti-list-search me-2"></i>Project overview
+                    </h3>
+                </div>
+                <div class="card-body">
+
             <ul class="list-group" style="list-style: none;">
                 <li th:each="project : ${projects}" class="list-group-item border border-2">
                     <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr}"></a>
@@ -191,6 +200,8 @@
 <!--                        <button type="button" class="btn btn-outline-link m-1">Link</button>-->
 <!--                      </div>-->
 <!--                    </div>-->
+                    </div>
+            </div>
 
     </div>
         <footer th:replace="fragments/general.html :: footer"></footer>
