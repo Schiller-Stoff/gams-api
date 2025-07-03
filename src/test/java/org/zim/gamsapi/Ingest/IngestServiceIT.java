@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
@@ -15,6 +15,7 @@ import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
+import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
@@ -54,7 +55,7 @@ public class IngestServiceIT extends IntegrationTest {
   File bagFile;
 
   // disables auditing
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @Nested
@@ -172,7 +173,31 @@ public class IngestServiceIT extends IntegrationTest {
 
     }
 
+  }
 
+  @Nested
+  public class IngestErrors {
+
+    @Test
+    public void ingestThrowsIfDigitalObjectAlreadyExists() throws IOException {
+
+      bagFile = TestBag.loadFile();
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // save object first (should result in conflict)
+      digitalObjectRepository.save(TestDigitalObject.generate());
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+
+      Assertions.assertThatThrownBy(
+          () -> ingestService.ingest(ingest)
+      ).isInstanceOf(IngestObjectAlreadyExistsException.class);
+
+    }
 
 
   }

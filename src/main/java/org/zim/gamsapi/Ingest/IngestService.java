@@ -13,10 +13,12 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
+import org.zim.gamsapi.DigitalObject.DigitalObjectService;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
+import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
@@ -43,6 +45,7 @@ public class IngestService implements IIngestService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final DigitalObjectService digitalObjectService;
 
   @Override
   @Transactional(rollbackFor = {
@@ -84,6 +87,14 @@ public class IngestService implements IIngestService {
         log.error(msg);
         throw new IngestTypeConversionException(msg);
       }
+
+      // abort ingest if digital object already exists
+      if(digitalObjectRepository.existsById(digitalObject.getId())){
+        String msg = String.format("Cannot ingest object with id %s. Digital object already exists and must be deleted before another ingest process. Ingest metadata: %s", digitalObject.getId(), ingest);
+        log.error(msg);
+        throw new IngestObjectAlreadyExistsException(msg);
+      }
+
       final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
