@@ -128,6 +128,23 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
           .isInstanceOf(ProjectNotFoundException.class);
     }
+
+    @Test
+    public void findsDigitalObjectViaContainedInId(){
+      // saves test object to test project
+      final DigitalObject TEST_SAVED_OBJECT = TestDigitalObject.generate();
+      digitalObjectRepository.save(TEST_SAVED_OBJECT);
+
+      digitalObjectService.findAllByProjectAbbr(testProject.getProjectAbbr(), TEST_SAVED_OBJECT.getId(), PageRequest.of(0,100))
+          .getContent()
+          .forEach(digitalObject -> {
+            Assertions.assertThat(digitalObject.getId()).isEqualTo(TEST_SAVED_OBJECT.getId());
+            Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testProject.getProjectAbbr());
+          });
+
+    }
+
+
   }
 
   @Nested
