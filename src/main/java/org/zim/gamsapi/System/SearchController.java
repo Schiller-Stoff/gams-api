@@ -191,7 +191,7 @@ public class SearchController {
    */
   @GetMapping(value = DC_SEARCH_ENDPOINT, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String searchView(
-      @RequestParam(required = false) Set<String> projects,
+      @RequestParam Set<String> projects,
       @RequestParam(defaultValue = "EXACT_MATCH") DigitalObjectDublinCoreSpecification.SearchMode searchMode,
       @RequestParam MultiValueMap<String, String> allParams,
       @RequestParam(defaultValue = "0") int pageIndex,
@@ -216,42 +216,33 @@ public class SearchController {
         filteredDcFields.put(newKey, values);
       }
     });
+    var filteredDcAsMultivalueMap = MultiValueMap.fromMultiValue(filteredDcFields);
+
     model.addAttribute("dcCriteria", filteredDcFields);
 
-    // TODO check error handling for empty projects or criteria
-    // Perform search if projects are selected and DC criteria exist
-    if (projects != null && !projects.isEmpty() && !filteredDcFields.isEmpty()) {
-      try {
-        // Limit page size to prevent excessive load
-        pageSize = Math.min(pageSize, 20);
+    // Limit page size to prevent excessive load
+    pageSize = Math.min(pageSize, 20);
 
-        PagedResponse<DigitalObjectSearchResultDTO> searchResults = digitalObjectService
-            .searchDigitalObjectsByDublinCoreCriteria(
-                MultiValueMap.fromMultiValue(filteredDcFields),
-                projects,
-                searchMode,
-                PageRequest.of(pageIndex, pageSize)
-            );
+    PagedResponse<DigitalObjectSearchResultDTO> searchResults = digitalObjectService
+        .searchDigitalObjectsByDublinCoreCriteria(
+            filteredDcAsMultivalueMap,
+            projects,
+            searchMode,
+            PageRequest.of(pageIndex, pageSize)
+        );
 
-        model.addAttribute("searchResults", searchResults);
+    model.addAttribute("searchResults", searchResults);
 
-        // Build current query string for pagination
-        // TODO call of MultiValueMap.fromMultiValue(filteredDcFields) is not necessary, as it is already a MultiValueMap
-        String currentQuery = buildQueryString(projects, searchMode, MultiValueMap.fromMultiValue(filteredDcFields), pageSize);
-        model.addAttribute("currentQuery", currentQuery);
+    // Build current query string for pagination
+    String currentQuery = buildQueryString(
+        projects,
+        searchMode,
+        filteredDcAsMultivalueMap,
+        pageSize
+    );
 
-        log.debug("Search completed - found {} results", searchResults.getPagination().getTotalElements());
-
-      } catch (Exception e) {
-        log.error("Error performing Dublin Core search", e);
-        model.addAttribute("searchError", "An error occurred while searching. Please try again.");
-      }
-      // TODO does the following check work?
-      // TODO is it necessary to check for empty projects or criteria?
-    } else if (projects != null && !projects.isEmpty() && filteredDcFields.isEmpty()) {
-      model.addAttribute("searchInfo", "Please add at least one Dublin Core search criterion.");
-    }
-
+    model.addAttribute("currentQuery", currentQuery);
+    log.debug("Search completed - found {} results", searchResults.getPagination().getTotalElements());
     return "search/dublin-core-search";
   }
 
