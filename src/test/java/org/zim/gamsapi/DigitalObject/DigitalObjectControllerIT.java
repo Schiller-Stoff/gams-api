@@ -407,6 +407,19 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contains(TEST_OBJECT.getProject().getProjectAbbr());
       }
 
+      @Test
+      public void trailingSlashWillReturnError() throws Exception {
+        final String TRAILING_SLASH_REQUEST_URL = String.format(
+            "%s/",
+            REQUEST_URL
+        );
+        // Act & Assert
+        mockMvc.perform(
+                MockMvcRequestBuilders.get(TRAILING_SLASH_REQUEST_URL)
+            )
+            .andExpect(status().isNotFound());
+      }
+
     }
 
     @Nested
