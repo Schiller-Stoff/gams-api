@@ -7,9 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -133,6 +135,81 @@ public class SearchControllerIT extends IntegrationTest {
             );
 
       }
+
+    }
+
+    @Nested
+    public class DublinCoreFieldSearch {
+
+      final String DC_SEARCH_BASE_URL = "/api/v1/search/dc";
+      final String TEST_DC_ENTRY_NAME = TestDublinCoreEntry.NAME.getValue();
+      final String TEST_DC_ENTRY_VALUE = TestDublinCoreEntry.VALUE.getValue();
+
+      final String TEST_DC_URL_QUERY = "dc." + TEST_DC_ENTRY_NAME + "=" + TEST_DC_ENTRY_VALUE;
+
+      final String TEST_DC_SEARCH_REQUEST_URL = String.format("%s?projects=%s&%s",
+          DC_SEARCH_BASE_URL,
+          testProject.getProjectAbbr(),
+          TEST_DC_URL_QUERY
+      );
+
+      @Nested
+      public class ResponseBodyTests {
+
+        @Test
+        public void returnedSearchJsonContainsExpectedDCValues() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MediaType.APPLICATION_JSON)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+        }
+
+        @Test
+        public void projectsUrlParamMightNotBeEmpty() throws Exception {
+
+          final String TEST_DC_SEARCH_REQUEST_URL_EMPTY_PROJECTS = String.format(
+              "%s?%s",
+              DC_SEARCH_BASE_URL,
+              TEST_DC_URL_QUERY
+          );
+
+          mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL_EMPTY_PROJECTS)
+                      .accept(MediaType.APPLICATION_JSON)
+              )
+              .andExpect(status().is4xxClientError());
+        }
+
+      }
+
+      @Nested
+      public class Webclient {
+
+        @Test
+        public void webclientContainsExpectedDcSearchValues() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MimeTypeUtils.TEXT_HTML_VALUE)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+
+        }
+
+      }
+
 
     }
 
