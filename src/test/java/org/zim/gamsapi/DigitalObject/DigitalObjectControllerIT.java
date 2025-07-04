@@ -363,12 +363,50 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     final DigitalObject TEST_OBJECT = TestDigitalObject.generate();
     final DublinCoreEntry TEST_DC_ENTRY = TestDublinCoreEntry.generate(TEST_OBJECT);
-    String digitalObjectJsonResponse;
 
     @BeforeEach
     public void setup() throws Exception {
       digitalObjectRepository.save(TEST_OBJECT);
       dublinCoreEntryRepository.save(TEST_DC_ENTRY);
+    }
+
+    @Nested
+    public class GETAllDigitalObjects {
+
+      final String REQUEST_URL = String.format(
+          "/api/v1/projects/%s/objects",
+          TEST_OBJECT.getProject().getProjectAbbr()
+      );
+
+      @Test
+      public void formatXmlReturnsExpectedDigitalObjectId() throws Exception {
+
+        final String FORMAT_XML_REQUEST_URL = String.format(
+            "%s?format=xml",
+            REQUEST_URL
+        );
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(FORMAT_XML_REQUEST_URL)
+            )
+            .andExpect(status().isOk())
+            .andExpect(result -> result
+                .getResponse()
+                .getContentType()
+                .equals(MediaType.APPLICATION_XML_VALUE))
+            .andReturn();
+
+        // Assert
+        String response = mvcResult.getResponse().getContentAsString();
+
+        org.assertj.core.api.Assertions.assertThat(response)
+            .contains("<")
+            .contains(">")
+            .contains(TEST_OBJECT.getId())
+            .contains(TEST_OBJECT.getProject().getProjectAbbr());
+      }
+
     }
 
     @Nested
