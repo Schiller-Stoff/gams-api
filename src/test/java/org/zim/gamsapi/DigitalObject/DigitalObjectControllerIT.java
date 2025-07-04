@@ -369,53 +369,64 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     public void setup() throws Exception {
       digitalObjectRepository.save(TEST_OBJECT);
       dublinCoreEntryRepository.save(TEST_DC_ENTRY);
-
-      String url = String.format(
-          "/api/v1/projects/%s/objects/%s",
-          TEST_OBJECT.getProject().getProjectAbbr(),
-          TEST_OBJECT.getId()
-      );
-      MvcResult mvcResult = mockMvc.perform(
-              MockMvcRequestBuilders.get(url)
-                  .accept(MediaType.APPLICATION_JSON)
-                  .contentType(MediaType.APPLICATION_JSON)
-          )
-          .andExpect(status().isOk())
-          .andReturn();
-
-      digitalObjectJsonResponse = mvcResult.getResponse().getContentAsString();
     }
 
-    @Test
-    public void getDigitalObjectContainsExpectedDublinCoreTestValue() {
-      org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
-          .contains(TEST_DC_ENTRY.getLanguage())
-          .contains(TEST_DC_ENTRY.getValue())
-          .contains(TEST_OBJECT.getId())
-          .contains(TEST_OBJECT.getProject().getProjectAbbr());
+    @Nested
+    public class GETSingularDigitalObject {
+
+      String digitalObjectJsonResponse;
+
+      @BeforeEach
+      public void setup() throws Exception {
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            TEST_OBJECT.getProject().getProjectAbbr(),
+            TEST_OBJECT.getId()
+        );
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        digitalObjectJsonResponse = mvcResult.getResponse().getContentAsString();
+      }
+
+      @Test
+      public void getDigitalObjectContainsExpectedDublinCoreTestValue() {
+        org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
+            .contains(TEST_DC_ENTRY.getLanguage())
+            .contains(TEST_DC_ENTRY.getValue())
+            .contains(TEST_OBJECT.getId())
+            .contains(TEST_OBJECT.getProject().getProjectAbbr());
+      }
+
+      @Test
+      public void getAllObjectIdsReturnsExpectedIds() throws Exception {
+        // Arrange
+        DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".1");
+        DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".2");
+
+        digitalObjectRepository.save(digitalObject1);
+        digitalObjectRepository.save(digitalObject2);
+
+        final String URL = String.format("/api/v1/projects/%s/objects/ids", testProject.getProjectAbbr());
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(URL)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // Assert
+        org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(digitalObject1.getId(), digitalObject2.getId());
+      }
+
     }
 
-    @Test
-    public void getAllObjectIdsReturnsExpectedIds() throws Exception {
-      // Arrange
-      DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".1");
-      DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".2");
-
-      digitalObjectRepository.save(digitalObject1);
-      digitalObjectRepository.save(digitalObject2);
-
-      final String URL = String.format("/api/v1/projects/%s/objects/ids", testProject.getProjectAbbr());
-
-      // Act
-      MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(URL)
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk())
-          .andReturn();
-
-      // Assert
-      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-          .contains(digitalObject1.getId(), digitalObject2.getId());
-    }
 
   }
 
