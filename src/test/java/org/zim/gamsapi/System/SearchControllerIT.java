@@ -223,7 +223,7 @@ public class SearchControllerIT extends IntegrationTest {
               .getContentAsString();
 
           Assertions.assertThat(response)
-              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE, "<", ">");
         }
 
       }
