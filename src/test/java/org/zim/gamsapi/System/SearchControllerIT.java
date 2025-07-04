@@ -187,6 +187,45 @@ public class SearchControllerIT extends IntegrationTest {
               .andExpect(status().is4xxClientError());
         }
 
+        @Test
+        public void acceptXmlWillReturnExpectedDcSearchValues() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MimeTypeUtils.APPLICATION_XML_VALUE)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+        }
+
+        @Test
+        public void formatXmlWillReturnExpectedDcSearchValues() throws Exception {
+          // append format=xml to request url
+          final String TEST_DC_SEARCH_REQUEST_URL_XML_FORMAT = String.format(
+              "%s&format=xml",
+              TEST_DC_SEARCH_REQUEST_URL
+          );
+
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL_XML_FORMAT)
+              )
+              .andExpect(status().isOk())
+              .andExpect(
+                  result -> result.getResponse().getContentType()
+                      .equals(MimeTypeUtils.APPLICATION_XML_VALUE)
+              )
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+        }
+
       }
 
       @Nested
