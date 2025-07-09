@@ -284,9 +284,15 @@ public class DigitalObjectService implements IDigitalObjectService {
           });
       dto.setDublinCore(dcMap);
 
-      dto.setMainResource(
-          mainDatastreams.getOrDefault(digitalObject.getId(), null)
-      );
+      var foundMainDatastream = mainDatastreams
+          .getOrDefault(digitalObject.getId(), null);
+      if (foundMainDatastream != null) {
+        // Set main resource if available
+        dto.setMainResource(
+            conversionService.convert(foundMainDatastream, DatastreamMainResourceDto.class)
+        );
+      }
+
 
       return dto;
     });
