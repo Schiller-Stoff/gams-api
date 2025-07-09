@@ -2,6 +2,17 @@ const webCirilo = (() => {
 
   console.log("Initializing cirilo-web library!");
 
+
+  /**
+   * Opens the current link in a new tab with the given format value as url parameter.
+   * @param formatValue {string} The value of the format parameter to be set in the url.
+   */
+  const tabOpenCurLinkWithFormatUrlParam = (formatValue) => {
+    let url = new URL(window.location.href);
+    url.searchParams.set("format", formatValue);
+    window.open(url.toString(), "_blank");
+  }
+
   /**
    * Intended to be put on onsubmit attributes on html forms.
    * Appends input valiue to form action value.
@@ -268,6 +279,7 @@ const webCirilo = (() => {
     appendFormSubmitPath,
     addChecksumRequestParam,
     postIngestSubmit,
-    applySubmitObjectMetaPropertiesListener
+    applySubmitObjectMetaPropertiesListener,
+    tabOpenCurLinkWithFormatUrlParam
   };
 })();
