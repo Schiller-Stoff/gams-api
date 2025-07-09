@@ -66,14 +66,6 @@ public class DigitalObjectService implements IDigitalObjectService {
 
   @Override
   @Transactional
-  public List<DigitalObject> findAll() {
-    List<DigitalObject> digitalObjects = new ArrayList<>();
-    digitalObjectRepository.findAll().forEach(digitalObjects::add);
-    return digitalObjects;
-  }
-
-  @Override
-  @Transactional
   public PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
     // TODO write unit + integration tests!
     projectRepository.findById(projectAbbr).orElseThrow(

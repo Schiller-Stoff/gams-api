@@ -17,11 +17,6 @@ public interface IDigitalObjectService {
 
   DigitalObject save(DigitalObject digitalObject);
 
-  /**
-   * Find all digital objects.
-   * @return list of digital objects
-   */
-  List<DigitalObject> findAll();
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
