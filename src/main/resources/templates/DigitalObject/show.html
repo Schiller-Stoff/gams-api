@@ -25,16 +25,16 @@
         <p>
           Overview over a singular digital object
         </p>
-<!--        <div>-->
-<!--          <a class="btn btn-outline-dark mb-3" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>-->
-<!--        </div>-->
-
         <div class="border border-2 card">
-            <div class="card-header">
-                <h3 class="mb-0 h5">
-                    <i class="ti ti-book me-2"></i>Object details
-                </h3>
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-book me-2"></i>Object details
+            </h3>
+            <div>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
             </div>
+          </div>
             <div class="card-body">
 
                 <ul class="list-group">
