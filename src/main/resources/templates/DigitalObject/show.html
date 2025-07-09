@@ -94,7 +94,7 @@
                 </li>
                   <li class="list-group-item">
                       <small>main resource</small>
-                      <p th:text="${do.mainResource}"></p>
+                      <p th:text="${do.mainResource?.getDsid()}"></p>
                   </li>
               </ul>
               <ul class="list-group mt-2" th:if="${do.baseMetadata}">

@@ -123,7 +123,7 @@ public class DigitalObjectController {
     // then query datastreams projections and assign to dto
     var datastreamDetailsViews = datastreamService.findAll(digitalObject);
     digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
+        datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toSet()));
 
     model.addAttribute("do", digitalObjectCompactDTO);
     model.addAttribute(project);

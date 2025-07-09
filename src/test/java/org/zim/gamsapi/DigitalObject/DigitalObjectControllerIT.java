@@ -513,15 +513,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               digitalObject.getProject().getProjectAbbr(),
               digitalObject.getObjectType(),
               digitalObject.getFunder(),
-              digitalObject.getPublisher(),
-              digitalObject.getMainResource()
+              digitalObject.getPublisher()
           );
-
-      //match expected datastream id ONLY ONCE! (because datastreams are not created)
-      org.assertj.core.api.Assertions.assertThat(response).containsPattern(
-          String.format("(%s.*?){1}", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-      );
-
 
     }
 

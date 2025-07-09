@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
@@ -190,13 +191,19 @@ public class DigitalObjectService implements IDigitalObjectService {
 
       // setting found datastreams
       var foundDatastreams = datastreamRepository.findAllByDigitalObjectId(digitalObjectId);
-      digitalObjectCompactDTO.setDatastreams(
-          foundDatastreams
-              .stream()
-              .map(
-                  IDatastreamDetailsView::getDsid)
-              .collect(Collectors.toList())
-      );
+      Set<String> datastreamIds = new HashSet<>();
+      foundDatastreams.forEach(datastreamDetailsView -> {
+        datastreamIds.add(datastreamDetailsView.getDsid());
+        // set main resource if it exists
+        if (foundObject.getMainResource() != null && !foundObject.getMainResource().isEmpty()) {
+          if( datastreamDetailsView.getDsid().equals(foundObject.getMainResource())) {
+            digitalObjectCompactDTO.setMainResource(
+                conversionService.convert(datastreamDetailsView, DatastreamMainResourceDto.class)
+            );
+          }
+        }
+      });
+      digitalObjectCompactDTO.setDatastreams(datastreamIds);
 
       // setting found dublin core entries
       var foundDublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectId(digitalObjectId);

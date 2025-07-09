@@ -37,7 +37,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     Assertions.assertEquals(digitalObjectCompactDTO.getPublished(), testObjectDetailsView.getPublished());
 
     Assertions.assertEquals(digitalObjectCompactDTO.getFunder(), testObjectDetailsView.getFunder());
-    Assertions.assertEquals(digitalObjectCompactDTO.getMainResource(), testObjectDetailsView.getMainResource());
 
   }
 
