@@ -52,13 +52,6 @@ public interface IDigitalObjectService {
 
   void delete(DigitalObject digitalObject);
 
-  /**
-   * Find a digital object by its id.
-   * @param id the id of the digital object
-   * @return a digital object as projection
-   */
-  DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id);
-
 
   /**
    * Find all digital objects for a given project (with project abbreviation) and just return their ids.

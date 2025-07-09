@@ -109,7 +109,7 @@ public class DigitalObjectController {
   @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(DigitalObject digitalObject, Project project, Model model) {
     // first query digital object projection dto
-    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
+    var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
     DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
         DigitalObjectCompactDTO.class);
     if (digitalObjectCompactDTO == null) {

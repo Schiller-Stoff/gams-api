@@ -161,17 +161,6 @@ public class DigitalObjectService implements IDigitalObjectService {
     }
 
     @Override
-    @Transactional
-    public DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id) {
-        return digitalObjectRepository.findDigitalObjectById(id).orElseThrow(
-                () -> {
-                    String msg = String.format("Cannot find digital object via id: %s", id);
-                    log.info(msg);
-                    return new DigitalObjectNotFoundException(msg);
-                });
-    }
-
-    @Override
     public PagedResponse<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntryNames, String fulltext, Pageable pageAble) {
       if(dcEntryNames.isEmpty()){
         String msg = String.format("No concrete dublin core elements specified - fulltext-searching over all dc fields. Trying to find digital objects by project abbreviations %s and fulltext %s", projectAbbrs, fulltext);
