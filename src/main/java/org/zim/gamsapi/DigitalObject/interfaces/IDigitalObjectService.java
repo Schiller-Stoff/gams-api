@@ -8,8 +8,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
