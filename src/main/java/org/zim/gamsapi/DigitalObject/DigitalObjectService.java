@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
@@ -259,9 +260,24 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     Specification<DigitalObject> spec = new DigitalObjectDublinCoreSpecification(
         dublinCoreFilters, projectAbbrs, searchMode);
-
-    // Convert to projection for consistent API
     Page<DigitalObject> digitalObjects = digitalObjectRepository.findAll(spec, pageable);
+
+    // Additionally fetch dublin core entries and the main datastreams
+
+    // Extract IDs for batch fetching
+    Set<String> digitalObjectIds = digitalObjects.getContent()
+        .stream()
+        .map(DigitalObject::getId)
+        .collect(Collectors.toSet());
+
+    Map<String, IDatastreamMainResourceView> mainDatastreams = datastreamRepository
+        .findMainDatastreamsByDigitalObjectIds(digitalObjectIds)
+        .stream()
+        .collect(Collectors.toMap(
+            ds -> ds.getDigitalObject().getId(),
+            ds -> ds
+        ));
+
 
     var mappedObjects = digitalObjects.map(digitalObject -> {
       // Convert to DTO
@@ -281,8 +297,15 @@ public class DigitalObjectService implements IDigitalObjectService {
           });
       dto.setDublinCore(dcMap);
 
+      dto.setMainResource(
+          mainDatastreams.getOrDefault(digitalObject.getId(), null)
+      );
+
       return dto;
     });
+
+
+
 
     return PagedResponse.from(mappedObjects);
   }
