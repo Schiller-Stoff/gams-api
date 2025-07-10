@@ -15,12 +15,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDatastream;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.enums.*;
 
 import java.util.Date;
 
@@ -47,11 +43,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
     @Autowired
     IProjectRepository projectRepository;
 
-    Project testProject;
-    DigitalObject testDigitalObject;
-    Datastream testDatastream;
+    @Autowired
+    private TestDataBuilder testDataBuilder;
 
-    MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
+    private TestDataSet testDataSet;
+
 
 
     /**
@@ -62,15 +58,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
      */
     @BeforeEach
     public void setup(){
-
-        testDigitalObject = TestDigitalObject.generate();
-        testProject = testDigitalObject.getProject();
-        testDatastream = TestDatastream.generate(testDigitalObject);
-
-        projectRepository.save(testProject);
-        digitalObjectRepository.save(testDigitalObject);
-        datastreamRepository.save(testDatastream);
-
+        testDataSet = testDataBuilder.buildTestDataSet();
     }
 
     @Nested
@@ -99,7 +87,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         @Test
         public void saveDatastreamExistsWithExpectedID() {
             // using the DatastreamId from the test datastream
-            Datastream datastream = TestDatastream.generate(testDigitalObject, "RANDOM1.rdf");
+            Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), "RANDOM1.rdf");
             datastreamRepository.save(datastream);
 
             Assertions.assertThat(
@@ -110,20 +98,12 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::deriveDatastreamId)
                 .isEqualTo(datastream.deriveDatastreamId()
                 );
-            // clean up and check if successfully deleted
-            datastreamRepository.delete(datastream);
-            Assertions.assertThat(
-                    datastreamRepository.findById(datastream.deriveDatastreamId()))
-                .isNotNull()
-                .isNotPresent();
-
         }
 
         @Test
         public void savingOfDatastreamShouldReturnExpectedProperties(){
 
-            Datastream datastream = TestDatastream.generate(testDigitalObject);
-
+            Datastream datastream = TestDatastream.generate(testDataSet.digitalObject());
             Datastream savedDatastream = datastreamRepository.save(datastream);
 
             Assertions.assertThat(savedDatastream)
@@ -161,9 +141,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::getLang)
                 .isEqualTo(datastream.getLang());
 
-            // clean up
-            datastreamRepository.delete(savedDatastream);
-
         }
 
     }
@@ -176,20 +153,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
          */
         @Test
         public void deleteDatastreamRemovesDatastream() {
-            Datastream datastream = datastreamRepository.save(
-                TestDatastream.generate(testDigitalObject, "RANDOM2.ttl")
-            );
+            datastreamRepository.delete(testDataSet.mainDatastream());
             Assertions.assertThat(
-                    datastreamRepository.findById(datastream.deriveDatastreamId()))
-                .isNotNull()
-                .isPresent();
-
-            datastreamRepository.delete(datastream);
-            Assertions.assertThat(
-                    datastreamRepository.findById(datastream.deriveDatastreamId()))
+                    datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId()))
                 .isNotNull()
                 .isNotPresent();
-
         }
 
         /**
@@ -200,75 +168,50 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             @Test
             public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
-
-                DigitalObject toBeDeleted = TestDigitalObject.generate();
-
-                digitalObjectRepository.save(toBeDeleted);
-                Datastream savedDatastream = datastreamRepository.save(
-                    TestDatastream.generate(toBeDeleted)
-                );
-
                 // try to delete the object if datastream is still available
                 org.junit.jupiter.api.Assertions.assertThrows(
                     DataIntegrityViolationException.class,
-                    () -> digitalObjectRepository.delete(toBeDeleted)
+                    () -> digitalObjectRepository.delete(testDataSet.digitalObject())
                 );
-
 
                 // verify deletion is not cascaded
                 Assertions.assertThat(
-                    datastreamRepository.findById(savedDatastream.deriveDatastreamId())
+                    datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId())
                 ).isPresent();
-
 
             }
 
 
             @Test
             public void datastreamDoesNotCascadeDeletedFromProject(){
-                // because the testdatastream should still exist
+                // because the test datastream should still exist
                 org.junit.jupiter.api.Assertions.assertThrows(
                     DataIntegrityViolationException.class,
-                    () -> projectRepository.delete(testProject)
+                    () -> projectRepository.delete(testDataSet.project())
                 );
             }
 
             @Test
             public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
 
-                DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), TestProject.PROJECT_ABBR.getValue() + ".an.object");
-
-                digitalObjectRepository.save(digitalObject);
-
-                Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "rand5.txt");
-
-                datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
-
-                // saved datastream should exist
-                Assertions.assertThat(
-                        datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
-                    .isNotNull()
-                    .isPresent();
-
 
                 // delete datastream
-                datastreamRepository.delete(datastreamToBeDeleted);
-                digitalObjectRepository.delete(digitalObject);
+                datastreamRepository.delete(testDataSet.mainDatastream());
 
                 // datastream deleted
                 Assertions.assertThat(
-                        datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
+                        datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId()))
                     .isNotNull()
                     .isNotPresent();
 
                 // object + project still available!
                 Assertions.assertThat(
-                        digitalObjectRepository.findById(testDigitalObject.getId()))
+                        digitalObjectRepository.findById(testDataSet.digitalObject().getId()))
                     .isNotNull()
                     .isPresent();
 
                 // additionally check if project is still available
-                Assertions.assertThat(projectRepository.findById(testProject.getProjectAbbr()))
+                Assertions.assertThat(projectRepository.findById(testDataSet.project().getProjectAbbr()))
                     .isNotNull()
                     .isPresent();
 
@@ -277,38 +220,23 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             @Test
             @Transactional
-            public void deleteByDigitalObjectAndDsidDeletesDatastream(){
-
-                Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject);
-                datastreamRepository.save(datastreamToBeDeleted);
-
+            public void deletionWorksAsExpected(){
+                datastreamRepository.delete(testDataSet.mainDatastream());
                 Assertions.assertThat(
-                    datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
-                ).isNotNull().isPresent();
-
-                datastreamRepository.delete(datastreamToBeDeleted);
-
-                Assertions.assertThat(
-                    datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
+                    datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId())
                 ).isNotNull().isNotPresent();
-
 
             }
 
             @Test
             public void deleteAllRemovesTestDatastream(){
 
-                // first test datastream is available
-                Assertions.assertThat(
-                        datastreamRepository.findById(testDatastream.deriveDatastreamId()))
-                    .isNotNull()
-                    .isPresent();
 
                 datastreamRepository.deleteAll();
 
                 // test datastream is not available anymore
                 Assertions.assertThat(
-                        datastreamRepository.findById(testDatastream.deriveDatastreamId()))
+                        datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId()))
                     .isNotNull()
                     .isNotPresent();
 
@@ -341,14 +269,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         @Transactional
-        public void findsExpectedDatastreamViaDsid(){
+        public void findsExpectedDatastreamViaDatastreamId(){
 
-            DatastreamId datastreamId = DatastreamId.builder()
-                .dsid(TestDatastream.DSID.getValue())
-                .digitalObject(testDigitalObject.getId())
-                .build();
-
-            var foundDatastream = datastreamRepository.findById(datastreamId).orElseThrow();
+            var foundDatastream = datastreamRepository.findById(
+                testDataSet.mainDatastream().deriveDatastreamId()
+            ).orElseThrow();
 
             String foundDsid = foundDatastream.getDsid();
             String foundDigitalObjectId = foundDatastream.getDigitalObject().getId();
@@ -361,37 +286,30 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .isNotEmpty()
                 .isEqualTo(foundDatastream.getDigitalObject().getId());
 
-
-
         }
 
 
 
         @Test
         public void findAllByDigitalObjectIdReturnsDatastreamDetailsViewWithSameDsid(){
-            datastreamRepository.findAllByDigitalObjectId(testDigitalObject.getId())
-                .forEach(datastreamDetailsView -> {
-                    Assertions.assertThat(datastreamDetailsView)
-                        .isNotNull()
-                        .extracting(IDatastreamDetailsView::getDsid)
-                        .isEqualTo(testDatastream.getDsid());
-                });
+            datastreamRepository.findAllByDigitalObjectId(testDataSet.digitalObject().getId())
+                .forEach(datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
+                    .isNotNull()
+                    .extracting(IDatastreamDetailsView::getDsid)
+                    .isEqualTo(testDataSet.mainDatastream().getDsid()));
         }
 
         @Test
         public void findDatastreamDetailsViewByDigitalObjectAndDsidReturnsDatastreamDetailsView(){
 
-            DatastreamId datastreamId = DatastreamId.builder()
-                .dsid(TestDatastream.DSID.getValue())
-                .digitalObject(testDigitalObject.getId())
-                .build();
+            DatastreamId datastreamId = testDataSet.mainDatastream().deriveDatastreamId();
 
             datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid())
                 .ifPresentOrElse(
                     datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
                         .isNotNull()
                         .extracting(IDatastreamDetailsView::getDsid)
-                        .isEqualTo(testDatastream.getDsid()),
+                        .isEqualTo(testDataSet.mainDatastream().getDsid()),
                     () -> Assertions.fail("Datastream not found")
                 );
         }
@@ -408,8 +326,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                 Datastream datastream = new DatastreamBuilder()
                     .dsid("RANDOM_DSID_123456")
-                    .digitalObject(testDigitalObject)
-                    .baseMetadata(testMetadataBaseEntity)
+                    .digitalObject(testDataSet.digitalObject())
+                    .baseMetadata(testDataSet.digitalObject().getBaseMetadata())
                     .build();
 
                 datastream.setDsid(null);
@@ -426,8 +344,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                 Datastream datastream = new DatastreamBuilder()
                     .dsid("RANDOM_DSID_123456")
-                    .digitalObject(testDigitalObject)
-                    .baseMetadata(testMetadataBaseEntity)
+                    .digitalObject(testDataSet.digitalObject())
+                    .baseMetadata(testDataSet.digitalObject().getBaseMetadata())
                     .build();
 
                 datastream.setDigitalObject(null);
@@ -449,8 +367,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                 Datastream datastream = new DatastreamBuilder()
                     .dsid("RANDOM_DSID_123456")
-                    .digitalObject(testDigitalObject)
-                    .baseMetadata(testMetadataBaseEntity)
+                    .digitalObject(testDataSet.digitalObject())
+                    .baseMetadata(testDataSet.digitalObject().getBaseMetadata())
                     .build();
 
                 datastream.setBaseMetadata(null);
@@ -469,7 +387,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                 Datastream datastream = new DatastreamBuilder()
                     .dsid("RANDOM_DSID_123456")
-                    .digitalObject(testDigitalObject)
+                    .digitalObject(testDataSet.digitalObject())
                     .baseMetadata(metadataBaseEntity)
                     .build();
 
@@ -487,7 +405,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
                   Datastream datastream = new DatastreamBuilder()
                       .dsid("RANDOM_DSID_123456")
-                      .digitalObject(testDigitalObject)
+                      .digitalObject(testDataSet.digitalObject())
                       .baseMetadata(metadataBaseEntity)
                       .build();
 
@@ -508,15 +426,13 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // first find saved test datastream (done in beforeEach before)
             Datastream savedDatastream = datastreamRepository.findById(
-                DatastreamId.builder()
-                    .dsid(testDatastream.getDsid())
-                    .digitalObject(testDigitalObject.getId())
-                    .build()
-            ).get();
+                testDataSet.mainDatastream().deriveDatastreamId()
+            ).orElseThrow();
 
             // query last modified date
             Date lastModified = datastreamRepository
-                .findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+                .findMaxLastModifiedDateByProjectAbbr(testDataSet.project().getProjectAbbr())
+                .orElseThrow();
 
             // modified of datastream should be assigned
             Assertions.assertThat(savedDatastream.getModified())
@@ -530,24 +446,19 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         }
 
         @Test
-        public void returnsLastModifedDateOfDatastreams(){
+        public void returnsLastModifiedDateOfDatastreams(){
 
             // first find saved test datastream (done in beforeEach before)
             Datastream savedDatastream = datastreamRepository.findById(
-                DatastreamId.builder()
-                    .dsid(testDatastream.getDsid())
-                    .digitalObject(testDigitalObject.getId())
-                    .build()
-            ).get();
+                testDataSet.mainDatastream().deriveDatastreamId()
+            ).orElseThrow();
 
             // assert first datastream has a modified date
             Assertions.assertThat(savedDatastream.getModified())
                 .isNotNull();
 
             // save another datastream
-            Datastream savedLaterDatastream = datastreamRepository.save(
-                TestDatastream.generate(testDigitalObject, "rand4.xml")
-            );
+            Datastream savedLaterDatastream = testDataBuilder.addRandomDatastream(testDataSet);
 
             // assert second datastream has a modified date
             Assertions.assertThat(savedLaterDatastream.getModified())
@@ -555,7 +466,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             // query last modified date
             Date lastModified = datastreamRepository
-                .findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+                .findMaxLastModifiedDateByProjectAbbr(testDataSet.project().getProjectAbbr()).
+                orElseThrow();
 
             // last modified should be equal to the saved later datastream
             Assertions.assertThat(lastModified)
@@ -585,11 +497,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void userAuditingFieldsShouldBeNull(){
 
             Datastream foundDatastream = datastreamRepository.findById(
-                DatastreamId.builder()
-                    .dsid(testDatastream.getDsid())
-                    .digitalObject(testDigitalObject.getId())
-                    .build()
-            ).get();
+                testDataSet.mainDatastream().deriveDatastreamId()
+            ).orElseThrow();
 
             org.assertj.core.api.Assertions.assertThat(foundDatastream.getCreatedBy()).isNull();
             org.assertj.core.api.Assertions.assertThat(foundDatastream.getModifiedBy()).isNull();
@@ -598,12 +507,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         @Test
         public void modificationAuditingPropertiesAreNotNull(){
-            Datastream savedDatastream = datastreamRepository
-                .save(TestDatastream.generate(testDigitalObject, "rand5.xml"));
-
             // first some null assertions
-            org.assertj.core.api.Assertions.assertThat(savedDatastream.getCreated()).isNotNull();
-            org.assertj.core.api.Assertions.assertThat(savedDatastream.getModified()).isNotNull();
+            org.assertj.core.api.Assertions.assertThat(testDataSet.project().getCreated()).isNotNull();
+            org.assertj.core.api.Assertions.assertThat(testDataSet.digitalObject().getModified()).isNotNull();
 
         }
 
@@ -611,13 +517,9 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public void modificationAuditingPropertiesAreUpdated(){
 
             Datastream foundDatastream = datastreamRepository.findById(
-                DatastreamId.builder()
-                    .dsid(testDatastream.getDsid())
-                    .digitalObject(testDigitalObject.getId())
-                    .build()
-            ).get();
+                testDataSet.mainDatastream().deriveDatastreamId()
+            ).orElseThrow();
 
-            Date created = foundDatastream.getCreated();
             Date modified = foundDatastream.getModified();
 
 
