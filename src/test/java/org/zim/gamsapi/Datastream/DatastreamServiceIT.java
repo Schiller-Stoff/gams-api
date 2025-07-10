@@ -2,9 +2,9 @@ package org.zim.gamsapi.Datastream;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
@@ -19,6 +19,7 @@ import org.zim.gamsapi.enums.TestDatastream;
 import org.zim.gamsapi.enums.TestDatastreamContent;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+
 import java.io.IOException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,7 +39,7 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   private DigitalObject testObject;
