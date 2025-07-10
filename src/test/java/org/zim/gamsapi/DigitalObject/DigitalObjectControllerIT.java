@@ -392,16 +392,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void getAllObjectIdsReturnsExpectedIds() throws Exception {
 
-        // TODO refactor!
-        // TODO maybe save multiple digital objects in test data set?
-        // TODO maybe save multiple datastreams in test data set?
-
-        // Arrange
-        DigitalObject digitalObject1 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), testDataSet.project().getProjectAbbr() + ".1");
-        DigitalObject digitalObject2 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), testDataSet.project().getProjectAbbr() + ".2");
-
-        digitalObjectRepository.save(digitalObject1);
-        digitalObjectRepository.save(digitalObject2);
+        DigitalObject additionalDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
         final String URL = String.format("/api/v1/projects/%s/objects/ids", testDataSet.project().getProjectAbbr());
 
@@ -413,7 +404,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
         // Assert
         org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-            .contains(digitalObject1.getId(), digitalObject2.getId());
+            .contains(testDataSet.digitalObject().getId(), additionalDigitalObject.getId());
       }
 
     }
