@@ -4,10 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IngestControllerIT extends IntegrationTest {
 
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private MockMvc mockMvc;
 
@@ -52,7 +53,7 @@ public class IngestControllerIT extends IntegrationTest {
   IDatastreamContentRepository datastreamContentRepository;
 
   // disables auditing
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
 
@@ -82,7 +83,7 @@ public class IngestControllerIT extends IntegrationTest {
   }
 
   @Test
-  public void ingestFailesIfProjectAbbrDiffersFromBagitSipJSONProject() throws Exception {
+  public void ingestFailsIfProjectAbbrDiffersFromBagitSipJSONProject() throws Exception {
     final String MISMATCHING_PROJECT_ABBR = "different";
     // need to ensure that the different project is there (otherwise a 404 error will be thrown)
     projectRepository.save(TestProject.generate(MISMATCHING_PROJECT_ABBR));
@@ -98,27 +99,14 @@ public class IngestControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class IngestDigitalObjectWebViewAssertions {
-
-    private String response;
+  public class IngestDigitalObjectGETAssertions {
 
     /**
-     * Ingests a bag and retrieves the view of the test digital object.
+     * Performing test data ingest before each test.
      * @throws Exception If the test fails.
      */
     @BeforeEach
-    public void setup() throws Exception {
-
-      // check if the test response is already there
-      if(response != null){
-        if (response.length() > 10){
-          return;
-        }
-        String msg = String.format("Response was not null but too short. Got %s", response);
-        throw new IllegalStateException(msg);
-      }
-
-
+    public void setUp() throws Exception {
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
@@ -128,74 +116,104 @@ public class IngestControllerIT extends IntegrationTest {
           )
           .andExpect(status().isOk());
 
-      final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+    }
 
-      MvcResult mvcResult = mockMvc.perform(
-              MockMvcRequestBuilders.get(URL)
-                  .accept(MediaType.TEXT_HTML)
-                  .contentType(MediaType.TEXT_HTML)
-          )
-          .andExpect(status().isOk())
-          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-          .andReturn();
 
-      response = mvcResult.getResponse().getContentAsString();
+
+    @Nested
+    public class WebViewAssertion{
+
+      private String response;
+
+      /**
+       * Ingests a bag and retrieves the view of the test digital object.
+       * @throws Exception If the test fails.
+       */
+      @BeforeEach
+      public void setup() throws Exception {
+        // check if the test response is already there
+        if(response != null){
+          if (response.length() > 10){
+            return;
+          }
+          String msg = String.format("Response was not null but too short. Got %s", response);
+          throw new IllegalStateException(msg);
+        }
+
+        final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(URL)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
+
+        response = mvcResult.getResponse().getContentAsString();
+
+      }
+
+      @Test
+      public void testDigitalObjectViewContainsExpectedObjectId(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewShouldContainExpectedProjectAbbr(){
+        Assertions.assertThat(response).contains(TestProject.PROJECT_ABBR.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewContainsExpectedTitle(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewShouldContainExpectedDescription(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewContainsExpectedCreator(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewContainsExpectedFunder(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewContainsExpectedPublisher(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewContainsExpectedRights(){
+        Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue());
+      }
+
+      @Test
+      public void digitalObjectViewContainsExpectedMainResourceTwice(){
+        // check if label of main resource is there
+        Assertions.assertThat(response).contains("main resource");
+        // check if the value of the main resource is there
+        Assertions.assertThat(response).contains(String.format("<p>%s</p>", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue()));
+        //match expected datastream id two times (once in list overview / once as main-resource)
+        Assertions.assertThat(response).containsPattern(
+            String.format("(%s.*?){2}", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
+        );
+
+      }
 
     }
 
-    @Test
-    public void testDigitalObjectViewContainsExpectedObjectId(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-    }
 
-    @Test
-    public void digitalObjectViewShouldContainExpectedProjectAbbr(){
-      Assertions.assertThat(response).contains(TestProject.PROJECT_ABBR.getValue());
-    }
 
-    @Test
-    public void digitalObjectViewContainsExpectedTitle(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue());
-    }
 
-    @Test
-    public void digitalObjectViewShouldContainExpectedDescription(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue());
-    }
-
-    @Test
-    public void digitalObjectViewContainsExpectedCreator(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue());
-    }
-
-    @Test
-    public void digitalObjectViewContainsExpectedFunder(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue());
-    }
-
-    @Test
-    public void digitalObjectViewContainsExpectedPublisher(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue());
-    }
-
-    @Test
-    public void digitalObjectViewContainsExpectedRights(){
-      Assertions.assertThat(response).contains(TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue());
-    }
-
-    @Test
-    public void digitalObjectViewContainsExpectedMainResourceTwice(){
-      // check if label of main resource is there
-      Assertions.assertThat(response).contains("main resource");
-      // check if the value of the main resource is there
-      Assertions.assertThat(response).contains(String.format("<p>%s</p>", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue()));
-      //match expected datastream id two times (once in list overview / once as main-resource)
-      Assertions.assertThat(response).containsPattern(
-          String.format("(%s.*?){2}", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-      );
-
-    }
 
 
   }
