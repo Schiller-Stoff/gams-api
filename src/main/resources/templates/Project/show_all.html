@@ -34,7 +34,7 @@
                 <div class="card-body" style="min-height: 100vh">
 
             <ul class="list-group" style="list-style: none;">
-                <li th:each="project : ${projects}" class="list-group-item border border-2">
+                <li th:each="project : ${projects}" class="list-group-item">
                     <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr}"></a>
                     <p th:text="${project.getDescription()}"></p>
                 </li>
