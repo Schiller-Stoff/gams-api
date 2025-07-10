@@ -10,28 +10,15 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDatastream;
-import org.zim.gamsapi.enums.TestDatastreamContent;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
-
-import java.io.IOException;
+import org.zim.gamsapi.enums.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {
 
   @Autowired
   IDatastreamService datastreamService;
-  @Autowired
-  IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  IProjectRepository projectRepository;
 
   @Autowired
   IDatastreamRepository datastreamRepository;
@@ -42,19 +29,16 @@ public class DatastreamServiceIT extends IntegrationTest {
   @MockitoBean
   private AuditingHandler auditingHandler;
 
-  private DigitalObject testObject;
+  @Autowired
+  private TestDataBuilder testDataBuilder;
 
-  private Project testProject;
+  private TestDataSet testDataSet;
 
   final private MockMultipartFile TEST_MULTIPART_FILE = TestDatastreamContent.generate();
 
   @BeforeEach
   public void setup(){
-    testObject = TestDigitalObject.generate();
-    testProject = testObject.getProject();
-    projectRepository.save(testObject.getProject());
-    digitalObjectRepository.save(testObject);
-
+    testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
@@ -78,7 +62,12 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void datastreamExistsAfterSaving(){
 
-      Datastream datastream = TestDatastream.generate(testObject);
+      final String RANDOM_DSID = "SOME_RANDOM_DSID.txt";
+      Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), RANDOM_DSID);
+
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamRepository.findById(datastream.deriveDatastreamId())
+      ).isNotNull().isEmpty();
 
       datastreamService.save(datastream, TEST_MULTIPART_FILE);
 
@@ -86,16 +75,17 @@ public class DatastreamServiceIT extends IntegrationTest {
           datastreamRepository.findById(datastream.deriveDatastreamId())
       ).isNotNull().isPresent();
 
-      // cleanup
-      datastreamRepository.delete(datastream);
-      org.assertj.core.api.Assertions.assertThat(
-          datastreamRepository.findById(datastream.deriveDatastreamId())
-      ).isNotNull().isEmpty();
     }
 
     @Test
     public void savedDatastreamHasExpectedTagProperty(){
-      Datastream datastream = TestDatastream.generate(testObject);
+      final String RANDOM_DSID = "SOME_RANDOM_DSID.txt";
+      Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), RANDOM_DSID);
+
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamRepository.findById(datastream.deriveDatastreamId())
+      ).isNotNull().isEmpty();
+
       Datastream savedDatastream = datastreamService.save(datastream, TEST_MULTIPART_FILE);
       org.assertj.core.api.Assertions.assertThat(savedDatastream)
           .isNotNull()
@@ -106,7 +96,13 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void savedDatastreamHasExpectedLangProperty(){
-      Datastream datastream = TestDatastream.generate(testObject);
+      final String RANDOM_DSID = "SOME_RANDOM_DSID.txt";
+      Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), RANDOM_DSID);
+
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamRepository.findById(datastream.deriveDatastreamId())
+      ).isNotNull().isEmpty();
+
       Datastream savedDatastream = datastreamService.save(datastream, TEST_MULTIPART_FILE);
       org.assertj.core.api.Assertions.assertThat(savedDatastream)
           .isNotNull()
@@ -121,22 +117,18 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Nested
   public class DeleteDatastream {
     @Test
-    public void successfullyDeletesDatastream() throws IOException {
-
-      Datastream toBeDeleted = TestDatastream.generate(testObject);
-      datastreamRepository.save(toBeDeleted);
-      datastreamContentRepository.save(TEST_MULTIPART_FILE.getBytes(), toBeDeleted.deriveDatastreamId());
+    public void successfullyDeletesDatastream() {
 
       // actual deletion
-      datastreamService.delete(toBeDeleted);
+      datastreamService.delete(testDataSet.mainDatastream());
 
       // check if datastream is deleted
-      org.assertj.core.api.Assertions.assertThat(datastreamRepository.findById(toBeDeleted.deriveDatastreamId()))
+      org.assertj.core.api.Assertions.assertThat(datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId()))
           .isNotNull()
           .isEmpty();
 
-      // check if datastream content is deleted
-      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(toBeDeleted.deriveDatastreamId()))
+      // check if datastream content is also deleted
+      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(testDataSet.mainDatastream().deriveDatastreamId()))
           .isFalse();
 
     }
@@ -158,7 +150,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void deleteThrowsWhenDatastreamDoesNotExist() {
       Datastream datastream = new DatastreamBuilder()
           .dsid("SOME_RANDOM_DSID")
-          .digitalObject(testObject)
+          .digitalObject(testDataSet.digitalObject())
           .baseMetadata(TestMetadataBaseEntity.generate())
           .build();
 
@@ -176,22 +168,11 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void returnsExpectedCountOfDatastreams(){
-
-      Datastream datastream = TestDatastream.generate(testObject);
-      Datastream datastream2 = TestDatastream.generate(testObject, "DSID2.txt");
-
-      datastreamRepository.save(datastream);
-      datastreamRepository.save(datastream2);
-
-      org.assertj.core.api.Assertions.assertThat(datastreamService.findAll(testObject))
+      testDataBuilder.addRandomDatastream(testDataSet);
+      org.assertj.core.api.Assertions.assertThat(datastreamService.findAll(testDataSet.digitalObject()))
           .isNotNull()
           .isNotEmpty()
           .hasSize(2);
-
-      // cleanup
-      datastreamRepository.delete(datastream);
-      datastreamRepository.delete(datastream2);
-
     }
 
   }
@@ -201,24 +182,18 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void returnsExpectedDatastream(){
-
-      Datastream datastream = TestDatastream.generate(testObject);
-
-      datastreamRepository.save(datastream);
-
-      org.assertj.core.api.Assertions.assertThat(datastreamService.findById(datastream.deriveDatastreamId()))
-          .isNotNull()
-          .isEqualTo(datastream);
-
-      // cleanup
-      datastreamRepository.delete(datastream);
-
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId()))
+            .isNotNull()
+            .isEqualTo(testDataBuilder.buildTestDataSet().mainDatastream());
     }
 
     @Test
     public void throwsIfDatastreamNotFound(){
 
-      DatastreamId randomId = new DatastreamId("SOME_RANDOM_PID", "SOME_RANDOM_DSID");
+      DatastreamId randomId = new DatastreamId(
+          "SOME_RANDOM_PID",
+          "SOME_RANDOM_DSID");
 
       Assertions.assertThrows(
           DatastreamNotFoundException.class,
@@ -236,17 +211,11 @@ public class DatastreamServiceIT extends IntegrationTest {
     @Test
     public void returnsExpectedDatastreamDetailsView(){
 
-      Datastream datastream = TestDatastream.generate(testObject);
-
-      datastreamRepository.save(datastream);
-
-      org.assertj.core.api.Assertions.assertThat(datastreamService.findDatastreamDetailsById(datastream.deriveDatastreamId()))
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamService.findDatastreamDetailsById(testDataSet.mainDatastream().deriveDatastreamId()))
           .isNotNull()
           .extracting("dsid")
-          .isEqualTo(datastream.getDsid());
-
-      // cleanup
-      datastreamRepository.delete(datastream);
+          .isEqualTo(testDataSet.mainDatastream().getDsid());
 
     }
 
