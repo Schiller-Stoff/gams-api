@@ -2,15 +2,22 @@ package org.zim.gamsapi.DigitalObject.Facet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
+import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * HYBRID SERVICE: Combines Criteria API search with native SQL facet counting
@@ -22,6 +29,8 @@ public class FacetSearchService {
 
   private final IDigitalObjectService digitalObjectService; // Your existing service
   private final FacetCountRepository facetCountRepository;  // New native SQL repository
+  private final IDatastreamRepository datastreamRepository; // For main resource metadata
+  private final ConversionService conversionService; // For DTO conversions
 
   /**
    * MAIN HYBRID FACETED SEARCH METHOD
@@ -63,6 +72,34 @@ public class FacetSearchService {
     long totalUnfilteredCount = facetCountRepository.getTotalObjectCount(projectAbbrs);
 
     long totalTime = System.currentTimeMillis() - startTime;
+
+
+    // Step04: include metadata about main resource
+    // Extract IDs for batch fetching
+    Set<String> digitalObjectIds = searchResults.getContent()
+        .stream()
+        .map(DigitalObjectSearchResultDTO::getId)
+        .collect(Collectors.toSet());
+
+    // retrieve main datastreams for these IDs and store in a map
+    Map<String, IDatastreamMainResourceView> mainDatastreams = datastreamRepository
+        .findMainDatastreamsByDigitalObjectIds(digitalObjectIds)
+        .stream()
+        .collect(Collectors.toMap(
+            ds -> ds.getDigitalObject().getId(),
+            ds -> ds
+        ));
+    // assign main resource metadata to each search result in pagination
+    searchResults.getContent().forEach(
+        result -> {
+          // Set main resource metadata in each search result
+          IDatastreamMainResourceView mainResource = mainDatastreams.get(result.getId());
+          if (mainResource != null) {
+            result.setMainResource(
+                conversionService.convert(mainResource, DatastreamMainResourceDto.class));
+          }
+        }
+    );
 
     // Build response
     return FacetSearchResponse.builder()
