@@ -19,6 +19,7 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.*;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Integration test for the DatastreamRepository.
@@ -313,6 +314,28 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                     () -> Assertions.fail("Datastream not found")
                 );
         }
+
+        @Test
+        public void findsExpectedMainDatastreamsByDigitalObjectIds(){
+
+            var foundMainDatastreams = datastreamRepository.findMainDatastreamsByDigitalObjectIds(
+                Set.of(testDataSet.digitalObject().getId())
+            );
+
+            Assertions.assertThat(foundMainDatastreams)
+                .isNotNull()
+                .isNotEmpty()
+                .hasSize(1)
+                .allSatisfy(datastream -> {
+                    Assertions.assertThat(datastream.getDsid())
+                        .isEqualTo(testDataSet.mainDatastream().getDsid());
+                    Assertions.assertThat(datastream.getDigitalObject().getId())
+                        .isEqualTo(testDataSet.digitalObject().getId());
+                    Assertions.assertThat(datastream.getBaseMetadata().getTitle())
+                        .isEqualTo(testDataSet.mainDatastream().getBaseMetadata().getTitle());
+                });
+        }
+
 
     }
 
