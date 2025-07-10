@@ -12,16 +12,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.MimeTypeUtils;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestDataBuilder;
+import org.zim.gamsapi.enums.TestDataSet;
 import org.zim.gamsapi.enums.TestDublinCoreEntry;
-import org.zim.gamsapi.enums.TestProject;
 
 import java.util.Set;
 
@@ -34,35 +28,24 @@ public class SearchControllerIT extends IntegrationTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @Autowired
-  private IProjectRepository projectRepository;
-
-  @Autowired
-  private IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  private IDublinCoreEntryRepository dublinCoreEntryRepository;
-
   // disables auditing
   // (necessary -> otherwise the createdBy fields etc. from Project need to be filled)
   // this auditing / security test is done in a separate test
   @MockitoBean
   private AuditingHandler auditingHandler;
 
+  private TestDataSet testDataSet;
+
+  @Autowired
+  private TestDataBuilder testDataBuilder;
+
   @Nested
   public class DublinCoreSearch {
 
-    Project testProject = TestProject.generate();
-    DigitalObject testDigitalObject = TestDigitalObject.generate();
-    DublinCoreEntry testDublinCoreEntry = TestDublinCoreEntry.generate(testDigitalObject.getId());
-
-    final String SEARCH_URL_TEMPLATE = "/api/v1/search/dc?projectAbbrs=%s&dcField=%s&search=%s";
 
     @BeforeEach
     public void setup() {
-      projectRepository.save(testProject);
-      digitalObjectRepository.save(testDigitalObject);
-      dublinCoreEntryRepository.save(testDublinCoreEntry);
+      testDataSet = testDataBuilder.buildTestDataSet();
     }
 
     @Nested
@@ -78,7 +61,7 @@ public class SearchControllerIT extends IntegrationTest {
 
         String requestUrl = String.format(
             FULLTEXT_SEARCH_URL_TEMPLATE,
-            testProject.getProjectAbbr(),
+            testDataSet.project().getProjectAbbr(),
             TEST_FULLTEXT_QUERY
         );
         String response = mockMvc.perform(
@@ -92,10 +75,10 @@ public class SearchControllerIT extends IntegrationTest {
 
         Assertions.assertThat(response)
             .contains(
-                testDigitalObject.getId(),
-                testDigitalObject.getProject().getProjectAbbr(),
-                testDigitalObject.getBaseMetadata().getTitle(),
-                testDigitalObject.getBaseMetadata().getDescription()
+                testDataSet.digitalObject().getId(),
+                testDataSet.digitalObject().getProject().getProjectAbbr(),
+                testDataSet.digitalObject().getBaseMetadata().getTitle(),
+                testDataSet.digitalObject().getBaseMetadata().getDescription()
             );
 
       }
@@ -109,7 +92,7 @@ public class SearchControllerIT extends IntegrationTest {
 
         String REQUEST_URL = String.format(
             "/api/v1/search/dc/fulltext?projects=%s&search=%s",
-            testProject.getProjectAbbr(),
+            testDataSet.project().getProjectAbbr(),
             TEST_FULLTEXT_QUERY
         );
 
@@ -128,10 +111,10 @@ public class SearchControllerIT extends IntegrationTest {
 
         Assertions.assertThat(response)
             .doesNotContain(
-                testDigitalObject.getId(),
-                testDigitalObject.getProject().getProjectAbbr(),
-                testDigitalObject.getBaseMetadata().getTitle(),
-                testDigitalObject.getBaseMetadata().getDescription()
+                testDataSet.digitalObject().getId(),
+                testDataSet.digitalObject().getProject().getProjectAbbr(),
+                testDataSet.digitalObject().getBaseMetadata().getTitle(),
+                testDataSet.digitalObject().getBaseMetadata().getDescription()
             );
 
       }
@@ -142,16 +125,18 @@ public class SearchControllerIT extends IntegrationTest {
     public class DublinCoreFieldSearch {
 
       final String DC_SEARCH_BASE_URL = "/api/v1/search/dc";
-      final String TEST_DC_ENTRY_NAME = TestDublinCoreEntry.NAME.getValue();
-      final String TEST_DC_ENTRY_VALUE = TestDublinCoreEntry.VALUE.getValue();
+      String TEST_DC_URL_QUERY;
+      String TEST_DC_SEARCH_REQUEST_URL;
 
-      final String TEST_DC_URL_QUERY = "dc." + TEST_DC_ENTRY_NAME + "=" + TEST_DC_ENTRY_VALUE;
-
-      final String TEST_DC_SEARCH_REQUEST_URL = String.format("%s?projects=%s&%s",
-          DC_SEARCH_BASE_URL,
-          testProject.getProjectAbbr(),
-          TEST_DC_URL_QUERY
-      );
+      @BeforeEach
+      public void setup() {
+        TEST_DC_URL_QUERY = "dc." + testDataSet.dublinCoreEntry().getName() + "=" + testDataSet.dublinCoreEntry().getValue();
+        TEST_DC_SEARCH_REQUEST_URL = String.format("%s?projects=%s&%s",
+            DC_SEARCH_BASE_URL,
+            testDataSet.project().getProjectAbbr(),
+            TEST_DC_URL_QUERY
+        );
+      }
 
       @Nested
       public class ResponseBodyTests {
@@ -168,7 +153,7 @@ public class SearchControllerIT extends IntegrationTest {
               .getContentAsString();
 
           Assertions.assertThat(response)
-              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue());
         }
 
         @Test
@@ -199,7 +184,7 @@ public class SearchControllerIT extends IntegrationTest {
               .getContentAsString();
 
           Assertions.assertThat(response)
-              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue());
         }
 
         @Test
@@ -223,7 +208,7 @@ public class SearchControllerIT extends IntegrationTest {
               .getContentAsString();
 
           Assertions.assertThat(response)
-              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE, "<", ">");
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue(), "<", ">");
         }
 
       }
@@ -243,7 +228,7 @@ public class SearchControllerIT extends IntegrationTest {
               .getContentAsString();
 
           Assertions.assertThat(response)
-              .contains(TEST_DC_ENTRY_NAME, TEST_DC_ENTRY_VALUE);
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue());
 
         }
 
