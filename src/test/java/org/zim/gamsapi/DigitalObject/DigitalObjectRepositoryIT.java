@@ -273,7 +273,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
         }
 
-        // TODO update collection section?
+        // TODO update collection section? via using testDataSet class and testDataBuilder?
 
         @Nested
         public class FindObjectsByCollection {
