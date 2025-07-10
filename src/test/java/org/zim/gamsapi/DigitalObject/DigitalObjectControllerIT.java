@@ -12,23 +12,20 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
@@ -40,16 +37,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   private MockMvc mockMvc;
 
   @Autowired
-  private IProjectRepository projectRepository;
-
-  @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
   @Autowired
   private IDatastreamRepository datastreamRepository;
-
-  @Autowired
-  private IDatastreamContentRepository datastreamContentRepository;
 
   @Autowired
   private IGAMSCollectionRepository collectionRepository;
@@ -57,15 +48,14 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @MockitoBean
   private AuditingHandler auditingHandler;
 
-  @Autowired
-  private IDublinCoreEntryRepository dublinCoreEntryRepository;
+  private TestDataSet testDataSet;
 
-  private Project testProject;
+  @Autowired
+  private TestDataBuilder testDataBuilder;
 
   @BeforeEach
   public void setup() {
-    testProject = ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build();
-    projectRepository.save(testProject);
+    testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
@@ -80,7 +70,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
 
       // Act
-      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), expectedDigitalObject.getId())
+      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), expectedDigitalObject.getId())
           .contentType(MediaType.APPLICATION_JSON)
           .content(expectedDigitalObjectJson))
           // PUT request will redirect to GET
@@ -109,7 +99,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
 
       // Act
-      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), expectedDigitalObject.getId())
+      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), expectedDigitalObject.getId())
               .contentType(MediaType.APPLICATION_JSON)
               .content(expectedDigitalObjectJson))
           // PUT request will redirect to GET
@@ -142,52 +132,16 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     @Test
     public void deleteDigitalObjectWhenItExists() throws Exception {
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
 
       // Act
-      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
+      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
           .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().is3xxRedirection());
 
       // Assert
       org.assertj.core.api.Assertions.assertThat(
-          digitalObjectRepository.findDigitalObjectById(digitalObject.getId()))
+          digitalObjectRepository.findDigitalObjectById(testDataSet.digitalObject().getId()))
             .isNotPresent();
-
-    }
-
-    @Test
-    public void deleteDigitalObjectWhenItContainsDatastreams() throws Exception {
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
-
-      Datastream datastream = TestDatastream.generate(digitalObject);
-
-      datastreamRepository.save(datastream);
-      datastreamContentRepository.save(TestDatastreamContent.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
-
-
-      // Act
-      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is3xxRedirection());
-
-      // Assert
-      org.assertj.core.api.Assertions.assertThat(
-              digitalObjectRepository.findDigitalObjectById(digitalObject.getId()))
-          .isNotPresent();
-
-      org.assertj.core.api.Assertions.assertThat(
-              datastreamRepository.findById(datastream.deriveDatastreamId()))
-          .isNotPresent();
-
-      // assert that the datastream content has been deleted
-      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(datastream.deriveDatastreamId())).isFalse();
 
     }
 
@@ -206,13 +160,21 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       mockMvc.perform(
           MockMvcRequestBuilders.delete(
               "/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testProject.getProjectAbbr(),
+                  testDataSet.project().getProjectAbbr(),
                   digitalObject.getId())
               .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().is4xxClientError());
 
     }
 
+    @Test
+    public void deleteObjectDoesShouldThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
+      mockMvc.perform(MockMvcRequestBuilders.delete(
+                  "/api/v1/projects/{projectAbbr}/objects/{id}",
+                  testDataSet.project().getProjectAbbr(), "nonExistentId")
+              .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().is4xxClientError());
+    }
   }
 
   @Nested
@@ -220,15 +182,11 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     @Test
     public void headDigitalObjectReturns200ifObjectExists() throws Exception {
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
 
       // Act
       mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testProject.getProjectAbbr(),
-                  digitalObject.getId())
+                  testDataSet.project().getProjectAbbr(),
+                  testDataSet.digitalObject().getId())
           .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk());
 
@@ -238,7 +196,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
       // Act
       mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testProject.getProjectAbbr(),
+                  testDataSet.project().getProjectAbbr(),
                   "nonExistentId")
           .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isNotFound());
@@ -248,14 +206,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void HEADDigitalObjectResponsesWithIncludedLastModifiedHeader() throws Exception {
 
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-
       // assert
       mockMvc.perform(
           MockMvcRequestBuilders.head(
-              "/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId()
+              "/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
           )
       ).andExpect(
           MockMvcResultMatchers.header().exists("Last-Modified"));
@@ -271,14 +225,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void HEADDigitalObjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
 
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObject = digitalObjectRepository.save(digitalObject);
-
       // Act
       String lastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
-              "/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId()
+              "/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
           )
       ).andReturn().getResponse().getHeader("Last-Modified");
 
@@ -292,7 +242,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
 
       // expected date
-      Date expectedDate = digitalObject.getModified();
+      Date expectedDate = testDataSet.digitalObject().getModified();
       // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
       expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
 
@@ -309,13 +259,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
 
-      DigitalObject savedObject = digitalObjectRepository.save(
-          TestDigitalObject.generate(testProject.getProjectAbbr())
-      );
 
       final String MALFORMED_DATE = "PETER";
 
-      final String URL = String.format("/api/v1/projects/%s/objects/%s", savedObject.getProject().getProjectAbbr(), savedObject.getId());
+      final String URL = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
       mockMvc.perform(
           MockMvcRequestBuilders
@@ -335,15 +282,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
 
-      DigitalObject savedObject = digitalObjectRepository.save(
-          TestDigitalObject.generate(testProject.getProjectAbbr())
-      );
 
       // Create a date in the future that's properly formatted for HTTP headers
       ZonedDateTime futureDate = ZonedDateTime.now(ZoneId.systemDefault()).plusYears(1);
       String ifModifiedSinceHeader = DateTimeFormatter.RFC_1123_DATE_TIME.format(futureDate);
 
-      final String URL = String.format("/api/v1/projects/%s/objects/%s", savedObject.getProject().getProjectAbbr(), savedObject.getId());
+      final String URL = String.format("/api/v1/projects/%s/objects/%s", testDataSet.digitalObject().getProject().getProjectAbbr(), testDataSet.digitalObject().getId());
 
       mockMvc.perform(
           MockMvcRequestBuilders
@@ -361,21 +305,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Nested
   public class GETRequests {
 
-    final DigitalObject TEST_OBJECT = TestDigitalObject.generate();
-    final DublinCoreEntry TEST_DC_ENTRY = TestDublinCoreEntry.generate(TEST_OBJECT);
-
-    @BeforeEach
-    public void setup() throws Exception {
-      digitalObjectRepository.save(TEST_OBJECT);
-      dublinCoreEntryRepository.save(TEST_DC_ENTRY);
-    }
-
     @Nested
     public class GETAllDigitalObjects {
 
       final String REQUEST_URL = String.format(
           "/api/v1/projects/%s/objects",
-          TEST_OBJECT.getProject().getProjectAbbr()
+          testDataSet.project().getProjectAbbr()
       );
 
       @Test
@@ -403,8 +338,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         org.assertj.core.api.Assertions.assertThat(response)
             .contains("<")
             .contains(">")
-            .contains(TEST_OBJECT.getId())
-            .contains(TEST_OBJECT.getProject().getProjectAbbr());
+            .contains(testDataSet.digitalObject().getId())
+            .contains(testDataSet.digitalObject().getProject().getProjectAbbr());
       }
 
       @Test
@@ -431,8 +366,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       public void setup() throws Exception {
         String url = String.format(
             "/api/v1/projects/%s/objects/%s",
-            TEST_OBJECT.getProject().getProjectAbbr(),
-            TEST_OBJECT.getId()
+            testDataSet.digitalObject().getProject().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
         );
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -448,22 +383,27 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void getDigitalObjectContainsExpectedDublinCoreTestValue() {
         org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
-            .contains(TEST_DC_ENTRY.getLanguage())
-            .contains(TEST_DC_ENTRY.getValue())
-            .contains(TEST_OBJECT.getId())
-            .contains(TEST_OBJECT.getProject().getProjectAbbr());
+            .contains(testDataSet.dublinCoreEntry().getLanguage())
+            .contains(testDataSet.dublinCoreEntry().getValue())
+            .contains(testDataSet.digitalObject().getId())
+            .contains(testDataSet.digitalObject().getProject().getProjectAbbr());
       }
 
       @Test
       public void getAllObjectIdsReturnsExpectedIds() throws Exception {
+
+        // TODO refactor!
+        // TODO maybe save multiple digital objects in test data set?
+        // TODO maybe save multiple datastreams in test data set?
+
         // Arrange
-        DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".1");
-        DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() + ".2");
+        DigitalObject digitalObject1 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), testDataSet.project().getProjectAbbr() + ".1");
+        DigitalObject digitalObject2 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), testDataSet.project().getProjectAbbr() + ".2");
 
         digitalObjectRepository.save(digitalObject1);
         digitalObjectRepository.save(digitalObject2);
 
-        final String URL = String.format("/api/v1/projects/%s/objects/ids", testProject.getProjectAbbr());
+        final String URL = String.format("/api/v1/projects/%s/objects/ids", testDataSet.project().getProjectAbbr());
 
         // Act
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(URL)
@@ -485,16 +425,11 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   public class WebclientTests {
 
 
-
     @Test
     public void getDigitalObjectRendersExpectedViewValues() throws Exception {
 
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObject.setObjectType("testObjectType");
 
-      digitalObjectRepository.save(digitalObject);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
       MvcResult mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.get(url)
@@ -509,11 +444,11 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       String response = mvcResult.getResponse().getContentAsString();
       org.assertj.core.api.Assertions.assertThat(response)
           .contains(
-              digitalObject.getId(),
-              digitalObject.getProject().getProjectAbbr(),
-              digitalObject.getObjectType(),
-              digitalObject.getFunder(),
-              digitalObject.getPublisher()
+              testDataSet.digitalObject().getId(),
+              testDataSet.project().getProjectAbbr(),
+              testDataSet.digitalObject().getObjectType(),
+              testDataSet.digitalObject().getFunder(),
+              testDataSet.digitalObject().getPublisher()
           );
 
     }
@@ -521,6 +456,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     @Test
     public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
+
+      // TODO refactor: test with multiple datastreams
 
       DigitalObject digitalObject = TestDigitalObject.generate();
 
@@ -532,7 +469,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       datastreamRepository.save(datastream);
       datastreamRepository.save(datastream2);
 
-      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), digitalObject.getId());
 
       MvcResult mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.get(url)
@@ -555,11 +492,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
 
-      DigitalObject digitalObject = TestDigitalObject.generate();
 
-      digitalObjectRepository.save(digitalObject);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
       MvcResult mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.get(url)
@@ -574,15 +508,15 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       // all values of the metadata base entity should be present in the view
       org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              digitalObject.getId(),
-              digitalObject.getBaseMetadata().getTitle(),
-              digitalObject.getBaseMetadata().getDescription(),
-              digitalObject.getBaseMetadata().getCreator(),
-              digitalObject.getBaseMetadata().getRights(),
-              digitalObject.getPublisher(),
-              digitalObject.getObjectType(),
-              digitalObject.getProject().getProjectAbbr(),
-              digitalObject.getFunder()
+              testDataSet.digitalObject().getId(),
+              testDataSet.digitalObject().getBaseMetadata().getTitle(),
+              testDataSet.digitalObject().getBaseMetadata().getDescription(),
+              testDataSet.digitalObject().getBaseMetadata().getCreator(),
+              testDataSet.digitalObject().getBaseMetadata().getRights(),
+              testDataSet.digitalObject().getPublisher(),
+              testDataSet.digitalObject().getObjectType(),
+              testDataSet.digitalObject().getProject().getProjectAbbr(),
+              testDataSet.digitalObject().getFunder()
           );
 
 
@@ -591,11 +525,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void getDigitalObjectContainsExpectedFunder() throws Exception {
 
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testProject.getProjectAbbr(), digitalObject.getId());
+      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(url)
@@ -610,7 +540,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       // funder should be present in returned view
       org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              digitalObject.getFunder()
+              testDataSet.digitalObject().getFunder()
           );
 
 
@@ -622,28 +552,26 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getObjectJsonReturnsDigitalObjectWhenItExists() throws Exception {
 
-    DigitalObject digitalObject = TestDigitalObject.generate();
-    digitalObjectRepository.save(digitalObject);
-
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(digitalObject.getId()));
+    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(testDataSet.digitalObject().getId()));
 
   }
 
   @Test
   public void getObjectJsonThrowsExceptionWhenDigitalObjectDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), "nonExistentId")
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), "nonExistentId")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
   @Test
   public void getProjectObjectsJsonReturnsEmptyListWhenNoDigitalObjectsExistForProject() throws Exception {
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testProject.getProjectAbbr())
+    testDataBuilder.removeAllExceptProjects(testDataSet);
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -656,53 +584,32 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Test
   public void getProjectObjectsJsonReturnsDigitalObjectsWhenTheyExistForProject() throws Exception {
-    final DigitalObject digitalObject = TestDigitalObject.generate();
-    digitalObjectRepository.save(digitalObject);
-
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testProject.getProjectAbbr())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
 
-    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(digitalObject.getId()));
+    Assertions.assertTrue(mvcResult.getResponse().getContentAsString().contains(testDataSet.digitalObject().getId()));
 
   }
 
-  @Test
-  public void deleteObjectRemovesDigitalObjectWhenItExists() throws Exception {
-    final DigitalObject digitalObject = TestDigitalObject.generate();
-    digitalObjectRepository.save(digitalObject);
-
-    mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testProject.getProjectAbbr(), digitalObject.getId())
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().is3xxRedirection());
-
-    Assertions.assertFalse(digitalObjectRepository.existsById(digitalObject.getId()));
-  }
-
-  @Test
-  public void deleteObjectDoesShouldThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.delete(
-        "/api/v1/projects/{projectAbbr}/objects/{id}",
-                testProject.getProjectAbbr(), "nonExistentId")
-            .contentType(MediaType.APPLICATION_JSON))
-        .andExpect(status().is4xxClientError());
-  }
 
   @Test
   public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
 
-    final DigitalObject digitalObject1 = TestDigitalObject.generate(testProject.getProjectAbbr(), testProject.getProjectAbbr() +  ".8d7");
+    // TODO refactor test dataset on multiple digital objects
+
+    final DigitalObject digitalObject1 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), testDataSet.project().getProjectAbbr() +  ".8d7");
     digitalObjectRepository.save(
         digitalObject1
     );
 
-    final DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), digitalObject1.getId() +  ".123");
+    final DigitalObject digitalObject2 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), digitalObject1.getId() +  ".123");
     digitalObjectRepository.save(
         digitalObject2
     );
 
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testProject.getProjectAbbr())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
