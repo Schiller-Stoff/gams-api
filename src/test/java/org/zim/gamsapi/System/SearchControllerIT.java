@@ -167,8 +167,6 @@ public class SearchControllerIT extends IntegrationTest {
               .getResponse()
               .getContentAsString();
 
-          System.out.println("Response: " + response);
-
           Assertions.assertThat(response)
               .contains(
                   testDataSet.mainDatastream().getMimeType(),
