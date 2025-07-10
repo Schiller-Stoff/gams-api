@@ -73,161 +73,271 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
     }
 
-    /**
-     * Tests if a saved datastream exists with the expected globalID.
-     */
-    @Test
-    public void saveDatastreamExistsWithExpectedID() {
-        // using the DatastreamId from the test datastream
-        Datastream datastream = TestDatastream.generate(testDigitalObject, "RANDOM1.rdf");
-        datastreamRepository.save(datastream);
+    @Nested
+    public class SaveDatastreams {
 
-        Assertions.assertThat(
-                datastreamRepository.findById(datastream.deriveDatastreamId()))
+        @Test
+        public void throwsIfObjectIsNotSaved(){
+
+            DigitalObject unsavedObject = TestDigitalObject.generate();
+            unsavedObject.setId("NOT_SAVED_OBJECT_923");
+
+            Datastream aDatastream = TestDatastream.generate(unsavedObject, "rand3.xml");
+
+
+            org.junit.jupiter.api.Assertions.assertThrows(
+                DataIntegrityViolationException.class,
+                () -> datastreamRepository.save(aDatastream)
+            );
+
+        }
+
+
+        /**
+         * Tests if a saved datastream exists with the expected globalID.
+         */
+        @Test
+        public void saveDatastreamExistsWithExpectedID() {
+            // using the DatastreamId from the test datastream
+            Datastream datastream = TestDatastream.generate(testDigitalObject, "RANDOM1.rdf");
+            datastreamRepository.save(datastream);
+
+            Assertions.assertThat(
+                    datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isPresent()
                 .get()
                 .extracting(Datastream::deriveDatastreamId)
                 .isEqualTo(datastream.deriveDatastreamId()
-        );
-        // clean up and check if successfully deleted
-        datastreamRepository.delete(datastream);
-        Assertions.assertThat(
-                datastreamRepository.findById(datastream.deriveDatastreamId()))
+                );
+            // clean up and check if successfully deleted
+            datastreamRepository.delete(datastream);
+            Assertions.assertThat(
+                    datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isNotPresent();
 
+        }
+
+        @Test
+        public void savingOfDatastreamShouldReturnExpectedProperties(){
+
+            Datastream datastream = TestDatastream.generate(testDigitalObject);
+
+            Datastream savedDatastream = datastreamRepository.save(datastream);
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getDsid)
+                .isEqualTo(datastream.getDsid());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getDigitalObject)
+                .isEqualTo(datastream.getDigitalObject());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getBaseMetadata)
+                .isEqualTo(datastream.getBaseMetadata());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getTags)
+                .isEqualTo(datastream.getTags());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getSize)
+                .isEqualTo(datastream.getSize());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getMimeType)
+                .isEqualTo(datastream.getMimeType());
+
+            Assertions.assertThat(savedDatastream)
+                .isNotNull()
+                .extracting(Datastream::getLang)
+                .isEqualTo(datastream.getLang());
+
+            // clean up
+            datastreamRepository.delete(savedDatastream);
+
+        }
+
     }
 
-    /**
-     * Tests if the datastream with the expected globalID was deleted.
-     */
-    @Test
-    public void deleteDatastreamRemovesDatastream() {
-        Datastream datastream = datastreamRepository.save(
-            TestDatastream.generate(testDigitalObject, "RANDOM2.ttl")
-        );
-        Assertions.assertThat(
-                        datastreamRepository.findById(datastream.deriveDatastreamId()))
+    @Nested
+    public class DeleteDatastreams {
+
+        /**
+         * Tests if the datastream with the expected globalID was deleted.
+         */
+        @Test
+        public void deleteDatastreamRemovesDatastream() {
+            Datastream datastream = datastreamRepository.save(
+                TestDatastream.generate(testDigitalObject, "RANDOM2.ttl")
+            );
+            Assertions.assertThat(
+                    datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isPresent();
 
-        datastreamRepository.delete(datastream);
-        Assertions.assertThat(
-                datastreamRepository.findById(datastream.deriveDatastreamId()))
+            datastreamRepository.delete(datastream);
+            Assertions.assertThat(
+                    datastreamRepository.findById(datastream.deriveDatastreamId()))
                 .isNotNull()
                 .isNotPresent();
 
-    }
-
-
-    /**
-     * Tests if a datastream that does not exist returns an empty optional.
-     */
-    @Test
-    public void findByIdReturnsEmptyOptionalIfDatastreamDoesNotExist() {
-
-        DatastreamId datastreamId = DatastreamId.builder()
-            .dsid("NOT_THERE")
-            .digitalObject("NOT_THERE")
-            .build();
-
-        Assertions.assertThat(
-                datastreamRepository.findById(datastreamId))
-                .isNotNull()
-                .isNotPresent();
-
-    }
-
-
-    /**
-     * Tests against delete cascading.
-     */
-    @Nested
-    public class TestCascadingDelete {
-
-        @Test
-        public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
-
-            DigitalObject toBeDeleted = TestDigitalObject.generate();
-
-            digitalObjectRepository.save(toBeDeleted);
-            Datastream savedDatastream = datastreamRepository.save(
-                TestDatastream.generate(toBeDeleted)
-            );
-
-            // try to delete the object if datastream is still available
-            org.junit.jupiter.api.Assertions.assertThrows(
-                DataIntegrityViolationException.class,
-                () -> digitalObjectRepository.delete(toBeDeleted)
-            );
-
-
-            // verify deletion is not cascaded
-            Assertions.assertThat(
-                datastreamRepository.findById(savedDatastream.deriveDatastreamId())
-            ).isPresent();
-
-
         }
 
+        /**
+         * Tests against delete cascading.
+         */
+        @Nested
+        public class TestCascadingDelete {
 
-        @Test
-        public void datastreamDoesNotCascadeDeletedFromProject(){
-            // because the testdatastream should still exist
-            org.junit.jupiter.api.Assertions.assertThrows(
-                DataIntegrityViolationException.class,
-                () -> projectRepository.delete(testProject)
-            );
-        }
+            @Test
+            public void digitalObjectWithSavedDatastreamsCannotBeDeleted(){
 
-        @Test
-        public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
+                DigitalObject toBeDeleted = TestDigitalObject.generate();
 
-            DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), TestProject.PROJECT_ABBR.getValue() + ".an.object");
+                digitalObjectRepository.save(toBeDeleted);
+                Datastream savedDatastream = datastreamRepository.save(
+                    TestDatastream.generate(toBeDeleted)
+                );
 
-            digitalObjectRepository.save(digitalObject);
+                // try to delete the object if datastream is still available
+                org.junit.jupiter.api.Assertions.assertThrows(
+                    DataIntegrityViolationException.class,
+                    () -> digitalObjectRepository.delete(toBeDeleted)
+                );
 
-            Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "rand5.txt");
 
-            datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
+                // verify deletion is not cascaded
+                Assertions.assertThat(
+                    datastreamRepository.findById(savedDatastream.deriveDatastreamId())
+                ).isPresent();
 
-            // saved datastream should exist
-            Assertions.assertThat(
-                datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
+
+            }
+
+
+            @Test
+            public void datastreamDoesNotCascadeDeletedFromProject(){
+                // because the testdatastream should still exist
+                org.junit.jupiter.api.Assertions.assertThrows(
+                    DataIntegrityViolationException.class,
+                    () -> projectRepository.delete(testProject)
+                );
+            }
+
+            @Test
+            public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
+
+                DigitalObject digitalObject = TestDigitalObject.generate(TestProject.PROJECT_ABBR.getValue(), TestProject.PROJECT_ABBR.getValue() + ".an.object");
+
+                digitalObjectRepository.save(digitalObject);
+
+                Datastream datastreamToBeDeleted = TestDatastream.generate(digitalObject, "rand5.txt");
+
+                datastreamToBeDeleted = datastreamRepository.save(datastreamToBeDeleted);
+
+                // saved datastream should exist
+                Assertions.assertThat(
+                        datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
                     .isNotNull()
                     .isPresent();
 
 
-            // delete datastream
-            datastreamRepository.delete(datastreamToBeDeleted);
-            digitalObjectRepository.delete(digitalObject);
+                // delete datastream
+                datastreamRepository.delete(datastreamToBeDeleted);
+                digitalObjectRepository.delete(digitalObject);
 
-            // datastream deleted
-            Assertions.assertThat(
+                // datastream deleted
+                Assertions.assertThat(
                         datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId()))
                     .isNotNull()
                     .isNotPresent();
 
-            // object + project still available!
-            Assertions.assertThat(
+                // object + project still available!
+                Assertions.assertThat(
                         digitalObjectRepository.findById(testDigitalObject.getId()))
                     .isNotNull()
                     .isPresent();
 
-            // additionally check if project is still available
-            Assertions.assertThat(projectRepository.findById(testProject.getProjectAbbr()))
+                // additionally check if project is still available
+                Assertions.assertThat(projectRepository.findById(testProject.getProjectAbbr()))
                     .isNotNull()
                     .isPresent();
 
+
+            }
+
+            @Test
+            @Transactional
+            public void deleteByDigitalObjectAndDsidDeletesDatastream(){
+
+                Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject);
+                datastreamRepository.save(datastreamToBeDeleted);
+
+                Assertions.assertThat(
+                    datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
+                ).isNotNull().isPresent();
+
+                datastreamRepository.delete(datastreamToBeDeleted);
+
+                Assertions.assertThat(
+                    datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
+                ).isNotNull().isNotPresent();
+
+
+            }
+
+            @Test
+            public void deleteAllRemovesTestDatastream(){
+
+                // first test datastream is available
+                Assertions.assertThat(
+                        datastreamRepository.findById(testDatastream.deriveDatastreamId()))
+                    .isNotNull()
+                    .isPresent();
+
+                datastreamRepository.deleteAll();
+
+                // test datastream is not available anymore
+                Assertions.assertThat(
+                        datastreamRepository.findById(testDatastream.deriveDatastreamId()))
+                    .isNotNull()
+                    .isNotPresent();
+
+            }
 
         }
 
     }
 
-
     @Nested
-    public class TestCustomRepositoryMethods {
+    public class FindDatastreams {
+
+        /**
+         * Tests if a datastream that does not exist returns an empty optional.
+         */
+        @Test
+        public void findByIdReturnsEmptyOptionalIfDatastreamDoesNotExist() {
+
+            DatastreamId datastreamId = DatastreamId.builder()
+                .dsid("NOT_THERE")
+                .digitalObject("NOT_THERE")
+                .build();
+
+            Assertions.assertThat(
+                    datastreamRepository.findById(datastreamId))
+                .isNotNull()
+                .isNotPresent();
+
+        }
 
         @Test
         @Transactional
@@ -244,8 +354,8 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             String foundDigitalObjectId = foundDatastream.getDigitalObject().getId();
 
             Assertions.assertThat(foundDsid)
-                    .isNotEmpty()
-                    .isEqualTo(foundDatastream.getDsid());
+                .isNotEmpty()
+                .isEqualTo(foundDatastream.getDsid());
 
             Assertions.assertThat(foundDigitalObjectId)
                 .isNotEmpty()
@@ -255,54 +365,17 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
         }
 
-        @Test
-        @Transactional
-        public void deleteByDigitalObjectAndDsidDeletesDatastream(){
 
-            Datastream datastreamToBeDeleted = TestDatastream.generate(testDigitalObject);
-            datastreamRepository.save(datastreamToBeDeleted);
-
-            Assertions.assertThat(
-                datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
-            ).isNotNull().isPresent();
-
-            datastreamRepository.delete(datastreamToBeDeleted);
-
-            Assertions.assertThat(
-                datastreamRepository.findById(datastreamToBeDeleted.deriveDatastreamId())
-            ).isNotNull().isNotPresent();
-
-
-        }
-
-        @Test
-        public void deleteAllRemovesTestDatastream(){
-
-            // first test datastream is available
-            Assertions.assertThat(
-                    datastreamRepository.findById(testDatastream.deriveDatastreamId()))
-                    .isNotNull()
-                    .isPresent();
-
-            datastreamRepository.deleteAll();
-
-            // test datastream is not available anymore
-            Assertions.assertThat(
-                    datastreamRepository.findById(testDatastream.deriveDatastreamId()))
-                    .isNotNull()
-                    .isNotPresent();
-
-        }
 
         @Test
         public void findAllByDigitalObjectIdReturnsDatastreamDetailsViewWithSameDsid(){
             datastreamRepository.findAllByDigitalObjectId(testDigitalObject.getId())
-                    .forEach(datastreamDetailsView -> {
-                        Assertions.assertThat(datastreamDetailsView)
-                                .isNotNull()
-                                .extracting(IDatastreamDetailsView::getDsid)
-                                .isEqualTo(testDatastream.getDsid());
-                    });
+                .forEach(datastreamDetailsView -> {
+                    Assertions.assertThat(datastreamDetailsView)
+                        .isNotNull()
+                        .extracting(IDatastreamDetailsView::getDsid)
+                        .isEqualTo(testDatastream.getDsid());
+                });
         }
 
         @Test
@@ -314,18 +387,16 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .build();
 
             datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid())
-                    .ifPresentOrElse(
-                            datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
-                                    .isNotNull()
-                                    .extracting(IDatastreamDetailsView::getDsid)
-                                    .isEqualTo(testDatastream.getDsid()),
-                            () -> Assertions.fail("Datastream not found")
-                    );
+                .ifPresentOrElse(
+                    datastreamDetailsView -> Assertions.assertThat(datastreamDetailsView)
+                        .isNotNull()
+                        .extracting(IDatastreamDetailsView::getDsid)
+                        .isEqualTo(testDatastream.getDsid()),
+                    () -> Assertions.fail("Datastream not found")
+                );
         }
 
-
     }
-
 
     @Nested
     public class Constraints {
@@ -429,22 +500,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         }
     }
 
-    @Test
-    public void throwsIfObjectIsNotSaved(){
-
-        DigitalObject unsavedObject = TestDigitalObject.generate();
-        unsavedObject.setId("NOT_SAVED_OBJECT_923");
-
-        Datastream aDatastream = TestDatastream.generate(unsavedObject, "rand3.xml");
-
-
-        org.junit.jupiter.api.Assertions.assertThrows(
-            DataIntegrityViolationException.class,
-            () -> datastreamRepository.save(aDatastream)
-        );
-
-    }
-
     @Nested
     public class FindMaxLastModifiedDateByProjectAbbr {
 
@@ -514,7 +569,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         }
 
     }
-
 
     /**
      * Tests for time based modification auditing properties of the datastream entity.
@@ -587,56 +641,4 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
     }
 
-
-    @Nested
-    public class Save {
-
-        @Test
-        public void savingOfDatastreamShouldReturnExpectedProperties(){
-
-            Datastream datastream = TestDatastream.generate(testDigitalObject);
-
-            Datastream savedDatastream = datastreamRepository.save(datastream);
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getDsid)
-                .isEqualTo(datastream.getDsid());
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getDigitalObject)
-                .isEqualTo(datastream.getDigitalObject());
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getBaseMetadata)
-                .isEqualTo(datastream.getBaseMetadata());
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getTags)
-                .isEqualTo(datastream.getTags());
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getSize)
-                .isEqualTo(datastream.getSize());
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getMimeType)
-                .isEqualTo(datastream.getMimeType());
-
-            Assertions.assertThat(savedDatastream)
-                .isNotNull()
-                .extracting(Datastream::getLang)
-                .isEqualTo(datastream.getLang());
-
-            // clean up
-            datastreamRepository.delete(savedDatastream);
-
-        }
-
-    }
 }
