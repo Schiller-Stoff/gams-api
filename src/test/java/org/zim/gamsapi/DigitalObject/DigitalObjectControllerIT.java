@@ -597,17 +597,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
 
-    // TODO refactor test dataset on multiple digital objects
-
-    final DigitalObject digitalObject1 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), testDataSet.project().getProjectAbbr() +  ".8d7");
-    digitalObjectRepository.save(
-        digitalObject1
-    );
-
-    final DigitalObject digitalObject2 = TestDigitalObject.generate(testDataSet.project().getProjectAbbr(), digitalObject1.getId() +  ".123");
-    digitalObjectRepository.save(
-        digitalObject2
-    );
+    final DigitalObject additionalDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
@@ -615,7 +605,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         .andReturn();
 
     org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-        .contains(digitalObject1.getId(), digitalObject2.getId());
+        .contains(testDataSet.digitalObject().getId(), additionalDigitalObject.getId());
 
 
   }
