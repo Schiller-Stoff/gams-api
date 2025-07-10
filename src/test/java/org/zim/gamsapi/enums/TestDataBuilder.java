@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
@@ -43,6 +44,38 @@ public class TestDataBuilder {
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
     digitalObjectRepository.delete(testDataSet.digitalObject());
+  }
+
+  /**
+   * Adds a random datastream to the already existing data in the database.
+   * @param testDataSet the test data set to which the datastream will be added
+   * @return the saved datastream
+   */
+  public Datastream addRandomDatastream(TestDataSet testDataSet) {
+
+    // create a random datastream id
+    var randomDatastreamId = System.currentTimeMillis() + TestDatastream.DSID.getValue();
+
+    // check if the id already exists
+    var existingIds = datastreamRepository.findAllByDigitalObjectId(testDataSet.digitalObject().getId());
+    if (existingIds.stream().anyMatch(datastream -> datastream.getDsid().equals(randomDatastreamId))) {
+      String msg = String.format("Trying to save random datastream but calculated duplicated ids: %s", randomDatastreamId);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    var datastreamToBeSaved = DatastreamBuilder.builder()
+        .dsid(randomDatastreamId)
+        .digitalObject(testDataSet.digitalObject())
+        .tags(TestDatastream.DATASTREAM_TAGS)
+        .baseMetadata(TestDatastream.METADATA_BASE_ENTITY)
+        .size( (long) TestDatastreamContent.CONTENT.getValue().length())
+        .mimeType(TestDatastream.MIME_TYPE.getValue())
+        .fileName(TestDatastream.FILE_NAME.getValue())
+        .lang(TestDatastream.DATASTREAM_LANG)
+        .build();
+
+    return datastreamRepository.save(datastreamToBeSaved);
   }
 
   /**
@@ -121,7 +154,7 @@ public class TestDataBuilder {
 
     var persistedDatastream = datastreamRepository.save(datastreamToBeSaved);
 
-    // TODO Save the datastream content?
+    // save the content of the datastream
     datastreamContentRepository.save(
         TestDatastreamContent.CONTENT.getValue().getBytes()
         , persistedDatastream.deriveDatastreamId()
