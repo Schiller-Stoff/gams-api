@@ -157,6 +157,32 @@ public class SearchControllerIT extends IntegrationTest {
         }
 
         @Test
+        public void returnedSearchJsonContainsExpectedMainResourceMetadata() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MediaType.APPLICATION_JSON)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          System.out.println("Response: " + response);
+
+          Assertions.assertThat(response)
+              .contains(
+                  testDataSet.mainDatastream().getMimeType(),
+                  testDataSet.mainDatastream().getDsid(),
+                  testDataSet.mainDatastream().getBaseMetadata().getDescription(),
+                  testDataSet.mainDatastream().getBaseMetadata().getTitle()
+              );
+
+          Assertions.assertThat(response).contains(testDataSet.mainDatastream().getTags());
+          Assertions.assertThat(response).contains(testDataSet.mainDatastream().getLang());
+
+        }
+
+        @Test
         public void projectsUrlParamMightNotBeEmpty() throws Exception {
 
           final String TEST_DC_SEARCH_REQUEST_URL_EMPTY_PROJECTS = String.format(
