@@ -19,7 +19,7 @@
           <li class="breadcrumb-item" th:text="${project.projectAbbr}"></li>
         </ol>
       </nav>
-      <h2 class="mb-3" th:text="${project.projectAbbr}"></h2>
+      <h2 th:text="${project.projectAbbr}"></h2>
       <p><span>Projektbeschreibung: </span><span th:text="${project.getDescription()}"></span></p>
 
       <div class="border border-2 card">
