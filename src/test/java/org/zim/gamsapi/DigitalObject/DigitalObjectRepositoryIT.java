@@ -17,10 +17,7 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDataBuilder;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestGAMSCollection;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.enums.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,9 +26,6 @@ import java.util.List;
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DigitalObjectRepositoryIT extends IntegrationTest {
-
-    private final static String PID = "testPid";
-
 
     @Autowired
     IDigitalObjectRepository digitalObjectRepository;
@@ -164,34 +158,31 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     @Nested
     public class FindingObjects {
 
+        private TestDataSet testDataSet;
+
+        @BeforeEach
+        public void setup(){
+            testDataSet = testDataBuilder.buildTestDataSet();
+        }
+
         @Test
         public void testFindByPid() {
-
-            final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
-
-            digitalObjectRepository.save(digitalObject);
-
-            Assertions.assertThat(digitalObjectRepository.findById(digitalObject.getId()))
+            Assertions.assertThat(digitalObjectRepository.findById(testDataSet.digitalObject().getId()))
                 .isNotNull()
                 .isPresent();
-
         }
 
         @Test
         public void testFindByProjectAbbr() {
 
-            final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
-
-            digitalObjectRepository.save(digitalObject);
-
-            List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(testProject.getProjectAbbr());
+            List<DigitalObject> digitalObjects = digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(testDataSet.project().getProjectAbbr());
 
             Assertions.assertThat(digitalObjects)
                 .isNotNull()
                 .isExactlyInstanceOf(ArrayList.class)
                 .first()
                 .extracting(DigitalObject::getId)
-                .isEqualTo(digitalObject.getId());
+                .isEqualTo(testDataSet.digitalObject().getId());
 
         }
 
@@ -205,38 +196,26 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
             @Test
             public void returnsExpectedModifiedDate(){
-
-                final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
-
-                DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
-
                 Assertions.assertThat(
                     digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get()
-                ).hasSameTimeAs(savedDigitalObject.getModified());
-
-
+                ).hasSameTimeAs(testDataSet.digitalObject().getModified());
             }
 
             @Test
             public void returnsExpectedNewestModificationTimestamp(){
-
-                final DigitalObject digitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
-                DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
-
                 // object that was created later on
-                final DigitalObject laterDigitalObject = TestDigitalObject.generate(testProject.getProjectAbbr());
-                DigitalObject savedLaterDigitalObject = digitalObjectRepository.save(laterDigitalObject);
+                final DigitalObject laterDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
                 // returns the singular last modified date over all digital objects in a project.
                 Date actualModfiedDate = digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
 
                 // the last modified date should be the same as the last saved digital object
                 Assertions.assertThat(actualModfiedDate)
-                    .hasSameTimeAs(savedLaterDigitalObject.getModified());
+                    .hasSameTimeAs(laterDigitalObject.getModified());
 
                 // the last modified date should not be the same as the first saved digital object
                 Assertions.assertThat(actualModfiedDate)
-                    .isNotEqualTo(savedDigitalObject.getModified());
+                    .isNotEqualTo(testDataSet.digitalObject().getModified());
 
             }
 
@@ -256,59 +235,45 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
              */
             @Test
             public void userAuditingFieldsShouldBeNull(){
-
-                DigitalObject savedObject = digitalObjectRepository.save(
-                    TestDigitalObject.generate(testProject.getProjectAbbr())
-                );
-
-                Assertions.assertThat(savedObject.getCreatedBy()).isNull();
-                Assertions.assertThat(savedObject.getModifiedBy()).isNull();
-
+                Assertions.assertThat(testDataSet.digitalObject().getCreatedBy()).isNull();
+                Assertions.assertThat(testDataSet.digitalObject().getModifiedBy()).isNull();
             }
 
             @Test
             public void modificationAuditingPropertiesAreNotNull(){
-
-                DigitalObject savedObject = digitalObjectRepository.save(
-                    TestDigitalObject.generate(testProject.getProjectAbbr())
-                );
-
                 // first some null assertions
-                Assertions.assertThat(savedObject.getCreated()).isNotNull();
-                Assertions.assertThat(savedObject.getModified()).isNotNull();
-
+                Assertions.assertThat(testDataSet.digitalObject().getCreated()).isNotNull();
+                Assertions.assertThat(testDataSet.digitalObject().getModified()).isNotNull();
             }
 
             @Test
             public void modificationAuditingPropertiesAreUpdated(){
 
-                DigitalObject savedObject = digitalObjectRepository.save(
-                    TestDigitalObject.generate(testProject.getProjectAbbr())
-                );
-
                 // save the last modified date
-                Date lastModified = savedObject.getModified();
+                Date lastModified = testDataSet.digitalObject().getModified();
 
                 // update the object
-                savedObject.setPublisher("new publisher");
-                savedObject = digitalObjectRepository.save(savedObject);
+                testDataSet.digitalObject().setPublisher("new publisher");
+                var updatedObject = digitalObjectRepository.save(testDataSet.digitalObject());
 
                 // the last modified date should be updated
-                Assertions.assertThat(savedObject.getModified())
+                Assertions.assertThat(updatedObject.getModified())
                     .isNotEqualTo(lastModified);
 
                 // the last modified date should be after the last modified date
-                Assertions.assertThat(savedObject.getModified())
+                Assertions.assertThat(updatedObject.getModified())
                     .isAfter(lastModified);
 
                 // the creation date should be before the last modified date
-                Assertions.assertThat(savedObject.getCreated())
-                    .isBefore(savedObject.getModified());
+                Assertions.assertThat(updatedObject.getCreated())
+                    .isBefore(updatedObject.getModified());
 
             }
 
 
         }
+
+        // TODO update collection section?
 
         @Nested
         public class FindObjectsByCollection {
