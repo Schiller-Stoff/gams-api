@@ -1,6 +1,5 @@
 package org.zim.gamsapi.DigitalObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,13 +10,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.enums.*;
+import org.zim.gamsapi.enums.TestDataBuilder;
+import org.zim.gamsapi.enums.TestDataSet;
+import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestGAMSCollection;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -38,9 +37,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   private IDigitalObjectRepository digitalObjectRepository;
 
   @Autowired
-  private IDatastreamRepository datastreamRepository;
-
-  @Autowired
   private IGAMSCollectionRepository collectionRepository;
 
   @MockitoBean
@@ -55,75 +51,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   public void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
   }
-
-  @Nested
-  @Disabled("Disabled because PUT requests for digital objects are not allowed in the current API version. Use ingest workflow instead.")
-  public class PUTRequests {
-
-    @Test
-    public void createsDigitalObjectWithExpectedId() throws Exception {
-      // Arrange
-      DigitalObject expectedDigitalObject = TestDigitalObject.generate();
-      ObjectMapper objectMapper = new ObjectMapper();
-      String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
-
-      // Act
-      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), expectedDigitalObject.getId())
-          .contentType(MediaType.APPLICATION_JSON)
-          .content(expectedDigitalObjectJson))
-          // PUT request will redirect to GET
-          .andExpect(status().is3xxRedirection());
-
-      // Assert - PUT digital object can be found via repository class
-      org.assertj.core.api.Assertions.assertThat(
-          digitalObjectRepository.findDigitalObjectById(expectedDigitalObject.getId()))
-            .isPresent()
-            .get()
-            .isNotNull()
-            .extracting(DigitalObjectDetailsView::getId)
-            .isEqualTo(expectedDigitalObject.getId()
-      );
-
-    }
-
-
-    @Test
-    public void createsDigitalObjectWithExpectedProperties() throws Exception {
-
-      // Arrange
-      DigitalObject expectedDigitalObject = TestDigitalObject.generate();
-
-      ObjectMapper objectMapper = new ObjectMapper();
-      String expectedDigitalObjectJson = objectMapper.writeValueAsString(expectedDigitalObject);
-
-      // Act
-      mockMvc.perform(MockMvcRequestBuilders.put("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), expectedDigitalObject.getId())
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(expectedDigitalObjectJson))
-          // PUT request will redirect to GET
-          .andExpect(status().is3xxRedirection());
-
-      DigitalObjectDetailsView foundObject = digitalObjectRepository
-          .findDigitalObjectById(expectedDigitalObject.getId()).orElseThrow(AssertionError::new);
-
-      org.assertj.core.api.Assertions.assertThat(foundObject.getId()).isEqualTo(expectedDigitalObject.getId());
-      org.assertj.core.api.Assertions.assertThat(foundObject.getMainResource()).isEqualTo(expectedDigitalObject.getMainResource());
-      org.assertj.core.api.Assertions.assertThat(foundObject.getFunder()).isEqualTo(expectedDigitalObject.getFunder());
-      org.assertj.core.api.Assertions.assertThat(foundObject.getPublisher()).isEqualTo(expectedDigitalObject.getPublisher());
-      org.assertj.core.api.Assertions.assertThat(foundObject.getObjectType()).isEqualTo(expectedDigitalObject.getObjectType());
-      org.assertj.core.api.Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(expectedDigitalObject.getBaseMetadata());
-
-      org.assertj.core.api.Assertions.assertThat(foundObject.getPublished()).isEqualTo(expectedDigitalObject.getPublished());
-
-
-    }
-
-
-
-
-
-  }
-
 
   @Nested
   public class DELETERequests {
@@ -446,19 +373,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
 
-      // TODO refactor: test with multiple datastreams
+      var additionalDatastream = testDataBuilder.addRandomDatastream(testDataSet);
 
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
-
-      Datastream datastream = TestDatastream.generate(digitalObject, "testDsId.xml");
-      Datastream datastream2 = TestDatastream.generate(digitalObject, "testDsId2.xml");
-
-      datastreamRepository.save(datastream);
-      datastreamRepository.save(datastream2);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), digitalObject.getId());
+      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
       MvcResult mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.get(url)
@@ -472,8 +389,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              datastream.getDsid(),
-              datastream2.getDsid()
+              testDataSet.mainDatastream().getDsid(),
+              additionalDatastream.getDsid()
           );
 
     }
