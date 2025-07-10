@@ -28,6 +28,7 @@ import org.zim.gamsapi.enums.TestProject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -83,7 +84,7 @@ public class IngestControllerIT extends IntegrationTest {
   }
 
   @Test
-  public void ingestFailsIfProjectAbbrDiffersFromBagitSipJSONProject() throws Exception {
+  public void ingestFailsIfProjectAbbrDiffersFromBagItSipJSONProject() throws Exception {
     final String MISMATCHING_PROJECT_ABBR = "different";
     // need to ensure that the different project is there (otherwise a 404 error will be thrown)
     projectRepository.save(TestProject.generate(MISMATCHING_PROJECT_ABBR));
@@ -212,7 +213,70 @@ public class IngestControllerIT extends IntegrationTest {
     }
 
 
+    @Nested
+    public class GETJSONAssertions {
 
+      private String response;
+
+      /**
+       * Ingests a bag and retrieves the view of the test digital object.
+       * @throws Exception If the test fails.
+       */
+      @BeforeEach
+      public void setup() throws Exception {
+        // check if the test response is already there
+        if(response != null){
+          if (response.length() > 10){
+            return;
+          }
+          String msg = String.format("Response was not null but too short. Got %s", response);
+          throw new IllegalStateException(msg);
+        }
+
+        final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(URL)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andReturn();
+
+        response = mvcResult.getResponse().getContentAsString();
+
+      }
+
+      @Test
+      @Transactional // ensures that mainDatastream tags / lang loading is working (Hibernate lazy loading)
+      public void responseContainsExpectedMainResourceMetadata(){
+
+        var mainDatastreams = datastreamRepository.findMainDatastreamsByDigitalObjectIds(
+            Set.of(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+        );
+
+        Assertions.assertThat(mainDatastreams)
+            .isNotNull()
+            .hasSize(1);
+
+        var mainDatastream = mainDatastreams.get(0);
+
+        Assertions.assertThat(response).contains(
+            mainDatastream.getDsid(),
+            mainDatastream.getMimeType(),
+            mainDatastream.getBaseMetadata().getCreator(),
+            mainDatastream.getBaseMetadata().getTitle(),
+            mainDatastream.getBaseMetadata().getDescription(),
+            mainDatastream.getBaseMetadata().getRights()
+        );
+
+        Assertions.assertThat(response).contains(mainDatastream.getTags());
+        Assertions.assertThat(response).contains(mainDatastream.getLang());
+
+      }
+
+    }
 
 
 
