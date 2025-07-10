@@ -1,11 +1,13 @@
 package org.zim.gamsapi.enums;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -17,6 +19,7 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
  * TestDataBuilder is a component that builds test data sets for testing.
  */
 @Component
+@Slf4j
 public class TestDataBuilder {
 
   @Autowired
@@ -40,6 +43,40 @@ public class TestDataBuilder {
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
     digitalObjectRepository.delete(testDataSet.digitalObject());
+  }
+
+  /**
+   * Adds a random digital object to the already existing data in the database
+   *
+   * @param testDataSet the test data set to which the digital object will be added
+   * @return the saved digital object
+   * @throws IllegalStateException if a digital object with the same id already exists
+   */
+  @Transactional
+  public DigitalObject addRandomObject(TestDataSet testDataSet) {
+
+    // create a random digital object id
+    var randomDigitalObjectId = TestDigitalObject.DIGITAL_OBJECT_ID.getValue() + System.currentTimeMillis();
+
+    // check if the id already exists
+    var existingIds = digitalObjectRepository.findAllByProject_ProjectAbbr(testDataSet.project().getProjectAbbr());
+    if (existingIds.stream().anyMatch(digitalObject -> digitalObject.getId().equals(randomDigitalObjectId))) {
+      String msg = String.format("Trying to save random digital object but calculated duplicated ids: %s", randomDigitalObjectId);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    var digitalObjectToBeSaved = DigitalObjectBuilder.builder()
+        .id(randomDigitalObjectId)
+        .project(testDataSet.project())
+        .publisher(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
+        .objectType(TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue())
+        .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
+        .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
+        .baseMetadata(TestMetadataBaseEntity.generate())
+        .build();
+
+    return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
 
   @Transactional
