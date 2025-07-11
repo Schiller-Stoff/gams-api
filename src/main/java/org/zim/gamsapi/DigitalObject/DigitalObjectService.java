@@ -189,21 +189,16 @@ public class DigitalObjectService implements IDigitalObjectService {
         throw new DigitalObjectConversionException(msg);
       }
 
-      // setting found datastreams
-      var foundDatastreams = datastreamRepository.findAllByDigitalObjectId(digitalObjectId);
-      Set<String> datastreamIds = new HashSet<>();
-      foundDatastreams.forEach(datastreamDetailsView -> {
-        datastreamIds.add(datastreamDetailsView.getDsid());
-        // set main resource if it exists
-        if (foundObject.getMainResource() != null && !foundObject.getMainResource().isEmpty()) {
-          if( datastreamDetailsView.getDsid().equals(foundObject.getMainResource())) {
-            digitalObjectCompactDTO.setMainResource(
-                conversionService.convert(datastreamDetailsView, DatastreamMainResourceDto.class)
-            );
-          }
-        }
-      });
-      digitalObjectCompactDTO.setDatastreams(datastreamIds);
+      // setting main resource if it exists
+      var mainDatastreams = datastreamRepository.findMainDatastreamsByDigitalObjectIds(
+          Set.of(digitalObjectId)
+      );
+      if (!mainDatastreams.isEmpty()) {
+        IDatastreamMainResourceView mainDatastream = mainDatastreams.get(0);
+        digitalObjectCompactDTO.setMainResource(
+            conversionService.convert(mainDatastream, DatastreamMainResourceDto.class)
+        );
+      }
 
       // setting found dublin core entries
       var foundDublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectId(digitalObjectId);

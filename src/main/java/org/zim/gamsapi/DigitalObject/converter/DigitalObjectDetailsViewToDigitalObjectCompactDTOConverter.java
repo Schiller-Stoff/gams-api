@@ -18,7 +18,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .created(source.getCreated())
                 .modified(source.getModified())
                 .published(source.getPublished())
-                .datastreams(new HashSet<>())
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())
                 .publisher(source.getPublisher())
