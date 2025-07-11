@@ -160,9 +160,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void throwsExceptionWhenDigitalObjectDoesNotExist() {
       String id = "nonExistentId";
-      org.junit.jupiter.api.Assertions.assertThrows(DigitalObjectNotFoundException.class, () -> {
-        digitalObjectService.findById(id);
-      });
+      org.junit.jupiter.api.Assertions.assertThrows(
+          DigitalObjectNotFoundException.class, () -> digitalObjectService.findById(id)
+      );
     }
 
     @Test
@@ -308,7 +308,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           TestDigitalObject.generate(additionalProject.getProjectAbbr(), additionalProject.getProjectAbbr() + ".peter")
       );
 
-      digitalObjects.forEach(digitalObjectRepository::save);
+      digitalObjectRepository.saveAll(digitalObjects);
 
       List<DublinCoreEntry> dublinCoreEntries = List.of(
           TestDublinCoreEntry.generate(digitalObjects.get(0).getId()),
@@ -317,7 +317,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           TestDublinCoreEntry.generate(additionalProject.getProjectAbbr(), digitalObjects.get(3).getId())
       );
 
-      dublinCoreEntries.forEach(dublinCoreEntryRepository::save);
+      dublinCoreEntryRepository.saveAll(dublinCoreEntries);
 
     }
 
