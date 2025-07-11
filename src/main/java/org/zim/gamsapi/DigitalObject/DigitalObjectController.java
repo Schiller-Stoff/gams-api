@@ -126,16 +126,6 @@ public class DigitalObjectController {
     // first query digital object projection dto
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
-    // TODO I do not understand why the next lines should be needed.
-    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
-        DigitalObjectCompactDTO.class);
-    if (digitalObjectCompactDTO == null) {
-      String msg = String.format(
-          "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s",
-          digitalObject, project);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
-    }
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
@@ -147,11 +137,10 @@ public class DigitalObjectController {
     model.addAttribute("sortDir", sortDir);
     model.addAttribute("sortBy", sortBy);
     model.addAttribute("searchDsid", searchDsid);
-
     model.addAttribute("pagedDatastreams", pagedDatastreams);
-    model.addAttribute("do", digitalObjectCompactDTO);
+    model.addAttribute("do", foundObject);
     model.addAttribute(project);
-    log.info("Found digital object {} for project {}", digitalObjectCompactDTO, project.getProjectAbbr());
+    log.info("Found digital object {} for project {}", foundObject, project.getProjectAbbr());
     return "DigitalObject/show";
   }
 
