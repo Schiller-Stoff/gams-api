@@ -7,9 +7,10 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
@@ -18,20 +19,18 @@ import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.enums.*;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DigitalObjectServiceIT extends IntegrationTest {
-
-  @Autowired
-  IProjectRepository projectRepository;
 
   @Autowired
   IDigitalObjectRepository digitalObjectRepository;
@@ -48,24 +47,20 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @Autowired
   IDublinCoreEntryRepository dublinCoreEntryRepository;
 
-  Project testProject;
-
   MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
-
 
   // Deactivates the auditing process.
   @MockitoBean
   private AuditingHandler auditingHandler;
 
+  private TestDataSet testDataSet;
+
+  @Autowired
+  private TestDataBuilder testDataBuilder;
+
   @BeforeEach
   public void setup(){
-    testProject = ProjectBuilder
-      .builder()
-      .projectAbbr(TestProject.PROJECT_ABBR.getValue())
-      .build();
-
-    projectRepository.save(testProject);
-
+    testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
@@ -75,16 +70,17 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void successFullySavesSimpleDigitalObject() {
       // given
+      DigitalObject digitalObject = TestDigitalObject.generate(
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.project().getProjectAbbr() + ".randomid"
+      );
 
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      // when
       DigitalObject savedDigitalObject = digitalObjectService.save(digitalObject);
 
       // then
       Assertions.assertThat(savedDigitalObject).isNotNull();
       Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
-      Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testProject);
+      Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testDataSet.project());
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
@@ -97,28 +93,28 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-      String projectAbbr = "nonexist";
-      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
-      projectRepository.save(project);
-
-      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr,Optional.empty(),  Pageable.unpaged());
-
+      testDataBuilder.removeAllExceptProjects(testDataSet);
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(
+          testDataSet.project().getProjectAbbr(),
+          Optional.empty(),
+          Pageable.unpaged()
+      );
       Assertions.assertThat(result.getContent()).isEmpty();
-
     }
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      Project project = TestProject.generate();
-      projectRepository.save(project);
 
-      DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
-      digitalObjectRepository.save(digitalObject);
-
-      var result = digitalObjectService.findAllByProjectAbbr(project.getProjectAbbr(), Optional.empty(), Pageable.unpaged());
+      var result = digitalObjectService.findAllByProjectAbbr(
+          testDataSet.project().getProjectAbbr(),
+          Optional.empty(),
+          Pageable.unpaged()
+      );
 
       Assertions.assertThat(result.getContent()).isNotEmpty();
-      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
+      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(
+          testDataSet.digitalObject().getId()
+      );
 
     }
 
@@ -131,16 +127,16 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void findsDigitalObjectViaContainedInId(){
-      // saves test object to test project
-      final DigitalObject TEST_SAVED_OBJECT = TestDigitalObject.generate();
-      digitalObjectRepository.save(TEST_SAVED_OBJECT);
 
-      digitalObjectService.findAllByProjectAbbr(testProject.getProjectAbbr(), TEST_SAVED_OBJECT.getId(), PageRequest.of(0,100))
-          .getContent()
-          .forEach(digitalObject -> {
-            Assertions.assertThat(digitalObject.getId()).isEqualTo(TEST_SAVED_OBJECT.getId());
-            Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testProject.getProjectAbbr());
-          });
+      digitalObjectService.findAllByProjectAbbr(
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          PageRequest.of(0,100))
+            .getContent()
+            .forEach(digitalObject -> {
+              Assertions.assertThat(digitalObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
+              Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
+            });
 
     }
 
@@ -152,18 +148,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsDigitalObjectWhenItExists() {
-
-      Project project = TestProject.generate();
-      projectRepository.save(project);
-
-      DigitalObject digitalObject = TestDigitalObject.generate(project.getProjectAbbr());
-
-      digitalObjectRepository.save(digitalObject);
-
-      DigitalObject result = digitalObjectService.findById(digitalObject.getId());
-
-      Assertions.assertThat(result).isEqualTo(digitalObject);
-
+      DigitalObject result = digitalObjectService.findById(
+          testDataSet.digitalObject().getId()
+      );
+      Assertions.assertThat(result).isEqualTo(testDataSet.digitalObject());
     }
 
     @Test
@@ -177,23 +165,18 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void returnsDigitalObjectWithExpectedProperties(){
 
-      Project project = TestProject.generate();
-      Project savedProject = projectRepository.save(project);
 
-      DigitalObject digitalObject = TestDigitalObject.generate(savedProject.getProjectAbbr());
-      DigitalObject savedDigitalObject = digitalObjectRepository.save(digitalObject);
-
-      DigitalObject foundObject = digitalObjectService.findById(savedDigitalObject.getId());
-      Assertions.assertThat(foundObject.getFunder()).isEqualTo(digitalObject.getFunder());
-      Assertions.assertThat(foundObject.getId()).isEqualTo(digitalObject.getId());
-      Assertions.assertThat(foundObject.getObjectType()).isEqualTo(digitalObject.getObjectType());
-      Assertions.assertThat(foundObject.getPublisher()).isEqualTo(digitalObject.getPublisher());
-      Assertions.assertThat(foundObject.getProject()).isEqualTo(digitalObject.getProject());
-      Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(digitalObject.getBaseMetadata());
-      Assertions.assertThat(foundObject.getMainResource()).isEqualTo(digitalObject.getMainResource());
+      DigitalObject foundObject = digitalObjectService.findById(testDataSet.digitalObject().getId());
+      Assertions.assertThat(foundObject.getFunder()).isEqualTo(testDataSet.digitalObject().getFunder());
+      Assertions.assertThat(foundObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
+      Assertions.assertThat(foundObject.getObjectType()).isEqualTo(testDataSet.digitalObject().getObjectType());
+      Assertions.assertThat(foundObject.getPublisher()).isEqualTo(testDataSet.digitalObject().getPublisher());
+      Assertions.assertThat(foundObject.getProject()).isEqualTo(testDataSet.digitalObject().getProject());
+      Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(testDataSet.digitalObject().getBaseMetadata());
+      Assertions.assertThat(foundObject.getMainResource()).isEqualTo(testDataSet.digitalObject().getMainResource());
       // cannot be equal is being assigned by the database
-      Assertions.assertThat(foundObject.getModified()).isNotEqualTo(digitalObject.getModified());
-      Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(digitalObject.getCreated());
+      Assertions.assertThat(foundObject.getModified()).isNotEqualTo(testDataSet.digitalObject().getModified());
+      Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(testDataSet.digitalObject().getCreated());
 
     }
 
@@ -204,33 +187,26 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
-      String projectAbbr = "nonexist";
-      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
-      projectRepository.save(project);
-      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged());
+      testDataBuilder.removeAllExceptProjects(testDataSet);
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(
+          testDataSet.project().getProjectAbbr(), Optional.empty(), Pageable.unpaged()
+      );
       Assertions.assertThat(result.getContent()).isEmpty();
-
     }
 
     @Test
     public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
-      String projectAbbr = "project";
-      Project project = ProjectBuilder.builder().projectAbbr(projectAbbr).build();
-      projectRepository.save(project);
 
-      DigitalObject digitalObject = new DigitalObjectBuilder()
-          .id(projectAbbr + ".testpid")
-          .project(project)
-          .publisher("testPublisher")
-          .objectType("testType")
-          .baseMetadata(testMetadataBaseEntity)
-          .build();
-      digitalObjectRepository.save(digitalObject);
-
-      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.of("testType"), Pageable.unpaged());
+      PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(
+          testDataSet.project().getProjectAbbr(),
+          Optional.of(testDataSet.digitalObject().getObjectType()),
+          Pageable.unpaged()
+      );
 
       Assertions.assertThat(result.getContent()).isNotEmpty();
-      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(digitalObject.getId());
+      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(
+          testDataSet.digitalObject().getId()
+      );
 
     }
 
@@ -249,49 +225,28 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void deletesDigitalObject() {
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-
-      digitalObjectService.delete(digitalObject);
-
-      Assertions.assertThatThrownBy(() -> digitalObjectService.findById(digitalObject.getId()))
+      digitalObjectService.delete(testDataSet.digitalObject());
+      Assertions.assertThatThrownBy(() -> digitalObjectService.findById(
+          testDataSet.digitalObject().getId())
+          )
           .isInstanceOf(DigitalObjectNotFoundException.class);
     }
 
     @Test
     public void deletesChildDatastreamsWithFileContent() {
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
-
-      final Datastream TEST_DATASTREAM = TestDatastream.generate(digitalObject);
-
-      datastreamRepository.save(TEST_DATASTREAM);
-      datastreamContentRepository.save(new byte[0], TEST_DATASTREAM.deriveDatastreamId());
-
-      digitalObjectService.delete(digitalObject);
-
-      Assertions.assertThat(datastreamRepository.existsById(TEST_DATASTREAM.deriveDatastreamId())).isFalse();
-      Assertions.assertThat(datastreamContentRepository.exists(TEST_DATASTREAM.deriveDatastreamId())).isFalse();
-
-
+      digitalObjectService.delete(testDataSet.digitalObject());
+      Assertions.assertThat(datastreamRepository.existsById(testDataSet.mainDatastream().deriveDatastreamId())).isFalse();
+      Assertions.assertThat(datastreamContentRepository.exists(testDataSet.mainDatastream().deriveDatastreamId())).isFalse();
     }
 
     @Test
     public void deletesReferencedDublinCoreEntries(){
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-
-      digitalObjectRepository.save(digitalObject);
-
-      final DublinCoreEntry TEST_DUBLIN_CORE_ENTRY = TestDublinCoreEntry.generate(digitalObject.getId());
-
-      dublinCoreEntryRepository.save(TEST_DUBLIN_CORE_ENTRY);
-
-      digitalObjectService.delete(digitalObject);
-
-      Assertions.assertThat(dublinCoreEntryRepository.existsById(TEST_DUBLIN_CORE_ENTRY.getId())).isFalse();
+      digitalObjectService.delete(
+          testDataSet.digitalObject()
+      );
+      Assertions.assertThat(
+          dublinCoreEntryRepository.existsById(testDataSet.dublinCoreEntry().getId())
+      ).isFalse();
 
     }
 
@@ -301,19 +256,13 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @Nested
   public class FindDigitalObjectCompactDTOById {
 
-    private final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
-    private final DublinCoreEntry TEST_DUBLIN_CORE_ENTRY = TestDublinCoreEntry.generate(TEST_DIGITAL_OBJECT.getId());
-
-    @BeforeEach
-    public void setup(){
-      digitalObjectRepository.save(TEST_DIGITAL_OBJECT);
-      dublinCoreEntryRepository.save(TEST_DUBLIN_CORE_ENTRY);
-    }
-
     @Test
+    @Transactional
     public void containsExpectedDublinCoreEntry(){
 
-      var foundDigitalObject = digitalObjectService.findDigitalObjectCompactDTOById(TEST_DIGITAL_OBJECT.getId());
+      var foundDigitalObject = digitalObjectService.findDigitalObjectCompactDTOById(
+          testDataSet.digitalObject().getId()
+      );
 
       Assertions.assertThat(foundDigitalObject)
           .isNotNull();
@@ -323,13 +272,13 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(entries)
           .isNotEmpty()
           .hasSize(1)
-          .containsKey(TEST_DUBLIN_CORE_ENTRY.getName());
+          .containsKey(testDataSet.dublinCoreEntry().getName());
 
-      var testElementEntries = entries.get(TEST_DUBLIN_CORE_ENTRY.getName());
+      var testElementEntries = entries.get(testDataSet.dublinCoreEntry().getName());
       Assertions.assertThat(testElementEntries)
           .anySatisfy(entry -> {
-            Assertions.assertThat(entry.language()).isEqualTo(TEST_DUBLIN_CORE_ENTRY.getLanguage());
-            Assertions.assertThat(entry.value()).isEqualTo(TEST_DUBLIN_CORE_ENTRY.getValue());
+            Assertions.assertThat(entry.language()).isEqualTo(testDataSet.dublinCoreEntry().getLanguage());
+            Assertions.assertThat(entry.value()).isEqualTo(testDataSet.dublinCoreEntry().getValue());
           });
     }
 
@@ -339,13 +288,15 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @Nested
   public class DublinCoreFulltextSearch {
 
-    Project additionalProject = TestProject.generate("bar");
+    Project additionalProject;
 
     @BeforeEach
     public void setup(){
 
       // 1 object belongs to a different project
-      projectRepository.save(additionalProject);
+      additionalProject =  testDataBuilder.addRandomProject(testDataSet);
+
+      // TODO refactor from here? (using test data set?)
 
       List<DigitalObject> digitalObjects = List.of(
           TestDigitalObject.generate("test", "test.foo"),
@@ -373,20 +324,24 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     public void findsExpectedObjectCount(){
 
       // arbitrary fulltext-search query (based on test data)
-      final String TEST_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(0, 3);
+      final String TEST_SEARCH_VALUE = testDataSet.dublinCoreEntry().getValue().substring(0, 3);
 
       var foundDigitalObjects = digitalObjectService.searchByDCFulltext(
-          // only three objects assigned to this project
-          Set.of(testProject.getProjectAbbr()),
+          Set.of(testDataSet.project().getProjectAbbr()),
           // empty -> runs fulltext across all dc fields
           Set.of(),
           TEST_SEARCH_VALUE,
           Pageable.unpaged()
       );
+
+      long EXPECTED_OBJECT_COUNT = 4; // // only three objects assigned to this project (but one is already in test data set)
+
       Assertions.assertThat(foundDigitalObjects.getContent())
           .isNotEmpty()
       ;
-      Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(3);
+      Assertions.assertThat(
+          foundDigitalObjects.getPagination().getTotalElements()
+      ).isEqualTo(EXPECTED_OBJECT_COUNT);
     }
 
     @Test
@@ -398,7 +353,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       var foundDigitalObjects = digitalObjectService.searchByDCFulltext(
           // only three objects assigned to this project
-          Set.of(testProject.getProjectAbbr()),
+          Set.of(testDataSet.project().getProjectAbbr()),
           TEST_DC_FIELDS,
           TEST_SEARCH_VALUE,
           Pageable.unpaged()
@@ -413,23 +368,43 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   @Nested
+  public class SearchByDublinCoreCriteria {
+
+    @Test
+    @Disabled
+    public void demo(){
+
+      // TODO use test values?
+      var dcFilters = Map.of(
+          "subject", List.of("test"),
+          "creator", List.of("creator")
+      );
+
+
+      var foundObjects = digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
+          MultiValueMap.fromMultiValue(dcFilters),
+          Set.of(testDataSet.project().getProjectAbbr()),
+          DigitalObjectDublinCoreSpecification.SearchMode.FULLTEXT,
+          PageRequest.of(0,100)
+      );
+
+    }
+
+  }
+
+  @Nested
   public class FindAllIdsByProjectAbbr {
 
     @Test
     public void returnsExpectedDigitalObjectIds(){
 
-      final String TEST_OBJECT01_ID = String.format("%s.object1", testProject.getProjectAbbr());
-      final String TEST_OBJECT02_ID = String.format("%s.object2", testProject.getProjectAbbr());
-
-      DigitalObject digitalObject1 = TestDigitalObject.generate(
-          testProject.getProjectAbbr(), TEST_OBJECT01_ID);
-      DigitalObject digitalObject2 = TestDigitalObject.generate(testProject.getProjectAbbr(), TEST_OBJECT02_ID);
-
-      digitalObjectRepository.save(digitalObject1);
-      digitalObjectRepository.save(digitalObject2);
+      // adding two additional digital objects to the test data set
+      DigitalObject digitalObject1 = testDataBuilder.addRandomObject(testDataSet);
+      DigitalObject digitalObject2 = testDataBuilder.addRandomObject(testDataSet);
+      final int EXPECTED_OBJECT_COUNT = 3;
 
       var paginatedIds = digitalObjectService.findAllIdsByProjectAbbr(
-          testProject.getProjectAbbr(), PageRequest.of(0,1000)
+          testDataSet.project().getProjectAbbr(), PageRequest.of(0,1000)
       );
 
       Assertions
@@ -437,7 +412,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .isNotNull();
 
       Assertions.assertThat(paginatedIds.getContent())
-          .hasSize(2)
+          .hasSize(EXPECTED_OBJECT_COUNT)
           .contains(digitalObject1.getId(), digitalObject2.getId());
 
     }

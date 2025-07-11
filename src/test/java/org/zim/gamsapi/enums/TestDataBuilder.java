@@ -13,6 +13,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
@@ -39,7 +40,7 @@ public class TestDataBuilder {
   private DatastreamContentRepository datastreamContentRepository;
 
   @Transactional
-  public void removeAllExceptProjects(TestDataSet testDataSet) throws Exception {
+  public void removeAllExceptProjects(TestDataSet testDataSet) {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
@@ -47,10 +48,42 @@ public class TestDataBuilder {
   }
 
   /**
+   * Adds a random project to the already existing data in the database.
+   * @param testDataSet the test data set to which the project will be added
+   * @return the saved project
+   */
+  @Transactional
+  public Project addRandomProject(TestDataSet testDataSet) {
+
+    // create a random project id
+    // id must not be longer than 10 characters
+    var randomProjectId = TestProject.PROJECT_ABBR.getValue() + System.currentTimeMillis();
+    if (randomProjectId.length() > 10) {
+      randomProjectId = randomProjectId.substring(0, 10);
+    }
+
+    // check if the id already exists
+    if (projectRepository.existsById(randomProjectId)) {
+      String msg = String.format("Trying to save random project but calculated a duplicated id: %s", randomProjectId);
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    var projectToBeSaved = ProjectBuilder.builder()
+        .projectAbbr(randomProjectId)
+        .description(TestProject.PROJECT_DESCRIPTION.getValue())
+        .title(TestProject.PROJECT_TITLE.getValue())
+        .build();
+
+    return projectRepository.save(projectToBeSaved);
+  }
+
+  /**
    * Adds a random datastream to the already existing data in the database.
    * @param testDataSet the test data set to which the datastream will be added
    * @return the saved datastream
    */
+  @Transactional
   public Datastream addRandomDatastream(TestDataSet testDataSet) {
 
     // create a random datastream id
