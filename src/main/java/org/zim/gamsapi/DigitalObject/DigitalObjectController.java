@@ -103,6 +103,8 @@ public class DigitalObjectController {
   @Parameter(name = "projectAbbr", description = "The project abbreviation", required = true)
   @Parameter(name = "id", description = "The digital object ID", required = true)
   public DigitalObjectCompactDTO getJson(@PathVariable String id) {
+    // TODO here are only the datastream ids as string list returned, but not the full
+    // (in contrast to the HTML view)
     return digitalObjectService.findDigitalObjectCompactDTOById(id);
   }
 
@@ -123,7 +125,7 @@ public class DigitalObjectController {
     }
 
     // first query digital object projection dto
-    // TODO atm there is datastream data loaded on service level!
+    // TODO atm there is also datastream data loaded on service level!
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
