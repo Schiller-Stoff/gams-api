@@ -52,9 +52,8 @@
               <h2 class="h5">Datastreams</h2>
               <p>Displays all datastreams of a digital object</p>
               <ul class="list-group">
-                <li th:each="dsid : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item">
-
-                  <a th:text="${dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}"></a>
+                <li th:each="datastream : ${pagedDatastreams.getContent()}" class="d-flex justify-content-between align-items-center list-group-item">
+                  <a th:text="${datastream.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}"></a>
 
 <!--                  <div>-->
 <!--&lt;!&ndash;                    <span th:text="${dstream.globalId + ' (global datastream id)'}"> </span>&ndash;&gt;-->
@@ -80,6 +79,124 @@
 <!--                  </div>-->
                 </li>
               </ul>
+              <div class="d-flex justify-content-between align-items-center mt-4">
+
+                <!-- Results Info - Simple approach -->
+                <div class="text-muted">
+                  <span th:text="'Page ' + ${pageIndex + 1} + ' of ' + ${pagedDatastreams.getPagination().getTotalPages()} + ' (' + ${pagedDatastreams.getPagination().getTotalElements()} + ' total items)'"></span>
+                </div>
+
+                <!-- Enhanced Pagination Controls with Smart Page Numbers -->
+                <nav aria-label="Page navigation">
+                  <ul class="pagination pagination-sm mb-0">
+
+                    <!-- First Page -->
+                    <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=0&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        First
+                      </a>
+                    </li>
+
+                    <!-- Previous Page -->
+                    <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        Previous
+                      </a>
+                    </li>
+
+                    <!-- Smart Page Numbers -->
+                    <th:block th:if="${pagedDatastreams.pagination.getTotalPages() <= 7}">
+                      <!-- Show all pages if 7 or fewer -->
+                      <th:block th:each="i : ${#numbers.sequence(0, pagedDatastreams.getPagination().getTotalPages() - 1)}">
+                        <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                          <a class="page-link"
+                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:text="${i + 1}"></a>
+                        </li>
+                      </th:block>
+                    </th:block>
+
+                    <th:block th:if="${pagedDatastreams.getPagination().getTotalPages() > 7}">
+                      <!-- Show smart pagination for many pages -->
+
+                      <!-- First 3 pages (1, 2, 3) -->
+                      <th:block th:each="i : ${#numbers.sequence(0, 2)}">
+                        <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                          <a class="page-link"
+                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:text="${i + 1}"></a>
+                        </li>
+                      </th:block>
+
+                      <!-- Ellipsis after first pages (only if current page is far from start) -->
+                      <li th:if="${pageIndex > 4}" class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+
+                      <!-- Current page and neighbors (if not already shown) -->
+                      <th:block th:if="${pageIndex > 3 and pageIndex < pagedDatastreams.getPagination().getTotalPages() - 4}">
+                        <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
+                          <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                            <a class="page-link"
+                               th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                               th:text="${i + 1}"></a>
+                          </li>
+                        </th:block>
+                      </th:block>
+
+                      <!-- Ellipsis before last pages (only if current page is far from end) -->
+                      <li th:if="${pageIndex < pagedDatastreams.getPagination().getTotalPages() - 5}" class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+
+                      <!-- Last 3 pages -->
+                      <th:block th:each="i : ${#numbers.sequence(pagedDatastreams.getPagination().getTotalPages() - 3, pagedDatastreams.getPagination().getTotalPages() - 1)}">
+                        <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                          <a class="page-link"
+                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:text="${i + 1}"></a>
+                        </li>
+                      </th:block>
+
+                    </th:block>
+
+                    <!-- Next Page -->
+                    <li class="page-item" th:classappend="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        Next
+                      </a>
+                    </li>
+
+                    <!-- Last Page -->
+                    <li class="page-item" th:classappend="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pagedDatastreams.getPagination().getTotalPages() - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        Last
+                      </a>
+                    </li>
+
+                  </ul>
+                </nav>
+
+                <!-- Page Size Selector -->
+                <div>
+                  <form method="GET" class="d-inline">
+                    <select name="pageSize" class="form-select form-select-sm d-inline" style="width: auto;" onchange="this.form.submit()">
+                      <option value="10" th:selected="${pageSize == 10}">10 per page</option>
+                      <option value="25" th:selected="${pageSize == 25}">25 per page</option>
+                      <option value="50" th:selected="${pageSize == 50}">50 per page</option>
+                      <option value="100" th:selected="${pageSize == 100}">100 per page</option>
+                    </select>
+                    <input type="hidden" name="pageIndex" value="0">
+                    <input type="hidden" name="searchDsid" th:value="${searchDsid}">
+                    <input type="hidden" name="sortBy" th:value="${sortBy}">
+                  </form>
+                </div>
+
+              </div>
               <br/>
               <h2 class="h5">Metadata</h2>
               <p>Primary metadata derived from the GAMS-API</p>

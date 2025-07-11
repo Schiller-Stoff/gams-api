@@ -107,9 +107,26 @@ public class DigitalObjectController {
   }
 
   @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
-  public String getObject(DigitalObject digitalObject, Project project, Model model) {
+  public String getObject(
+      DigitalObject digitalObject,
+      Project project,
+      Model model,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "dsid") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir,
+      @RequestParam(defaultValue = "") String searchDsid
+  ) {
+
+    // TODO pagination max size etc.
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
     // first query digital object projection dto
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
+
+    // TODO I do not understand why the next lines should be needed.
     DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
         DigitalObjectCompactDTO.class);
     if (digitalObjectCompactDTO == null) {
@@ -120,11 +137,17 @@ public class DigitalObjectController {
       throw new DigitalObjectConversionException(msg);
     }
 
-    // then query datastreams projections and assign to dto
-    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toSet()));
+    PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
+        foundObject.getId(), PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
+    // TODO add sorting params
+    model.addAttribute("pageSize", pageSize);
+    model.addAttribute("pageIndex", pageIndex);
+    model.addAttribute("sortDir", sortDir);
+    model.addAttribute("sortBy", sortBy);
+    model.addAttribute("searchDsid", searchDsid);
 
+    model.addAttribute("pagedDatastreams", pagedDatastreams);
     model.addAttribute("do", digitalObjectCompactDTO);
     model.addAttribute(project);
     log.info("Found digital object {} for project {}", digitalObjectCompactDTO, project.getProjectAbbr());
