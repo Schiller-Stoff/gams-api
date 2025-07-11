@@ -1,7 +1,10 @@
 package org.zim.gamsapi.DigitalObject;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
@@ -17,11 +20,13 @@ import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
-import org.zim.gamsapi.enums.*;
+import org.zim.gamsapi.enums.TestDataBuilder;
+import org.zim.gamsapi.enums.TestDataSet;
+import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.enums.TestDublinCoreEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -46,8 +51,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IDublinCoreEntryRepository dublinCoreEntryRepository;
-
-  MetadataBaseEntity testMetadataBaseEntity = TestMetadataBaseEntity.generate();
 
   // Deactivates the auditing process.
   @MockitoBean
@@ -296,7 +299,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // 1 object belongs to a different project
       additionalProject =  testDataBuilder.addRandomProject(testDataSet);
 
-      // TODO refactor from here? (using test data set?)
 
       List<DigitalObject> digitalObjects = List.of(
           TestDigitalObject.generate("test", "test.foo"),
@@ -371,15 +373,13 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   public class SearchByDublinCoreCriteria {
 
     @Test
-    @Disabled
-    public void demo(){
+    @Transactional
+    public void findsExpectedDigitalObject(){
 
-      // TODO use test values?
       var dcFilters = Map.of(
-          "subject", List.of("test"),
-          "creator", List.of("creator")
+          testDataSet.dublinCoreEntry().getName(),
+          List.of(testDataSet.dublinCoreEntry().getValue())
       );
-
 
       var foundObjects = digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
           MultiValueMap.fromMultiValue(dcFilters),
@@ -388,8 +388,16 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           PageRequest.of(0,100)
       );
 
-    }
+      Assertions.assertThat(foundObjects.getContent())
+          .isNotNull()
+          .isNotEmpty()
+          .hasSize(1)
+          .allSatisfy(digitalObject -> {
+            Assertions.assertThat(digitalObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
+            Assertions.assertThat(digitalObject.getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
+          });
 
+    }
   }
 
   @Nested
