@@ -24,15 +24,6 @@ public class DigitalObjectCompactDTO {
 
     private String id;
 
-    /**
-     * List of datastream ids
-     * TODO this seems wrong here?
-     */
-    @Builder.Default
-    @JacksonXmlElementWrapper(localName = "datastreams")
-    @JacksonXmlProperty(localName = "dsid")
-    private Set<String> datastreams = new HashSet<>();
-
     private String objectType;
 
     private Date published;
