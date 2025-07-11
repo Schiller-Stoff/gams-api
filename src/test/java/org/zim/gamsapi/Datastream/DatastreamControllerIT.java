@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -20,11 +19,9 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDatastream;
+import org.zim.gamsapi.enums.TestDataBuilder;
+import org.zim.gamsapi.enums.TestDataSet;
 import org.zim.gamsapi.enums.TestDatastreamContent;
-import org.zim.gamsapi.enums.TestDigitalObject;
 
 import java.util.Set;
 
@@ -39,9 +36,6 @@ public class DatastreamControllerIT extends IntegrationTest {
   private MockMvc mockMvc;
 
   @Autowired
-  private IProjectRepository projectRepository;
-
-  @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
   @Autowired
@@ -53,20 +47,17 @@ public class DatastreamControllerIT extends IntegrationTest {
   @Autowired
   private IDatastreamContentRepository datastreamContentRepository;
 
-  private Project testProject;
-
-  private DigitalObject testDigitalObject;
-
   @MockitoBean
   private AuditingHandler auditingHandler;
 
+  @Autowired
+  private TestDataBuilder testDataBuilder;
+
+  private TestDataSet testDataSet;
 
   @BeforeEach
   public void setup() {
-    testDigitalObject = TestDigitalObject.generate();
-    testProject = testDigitalObject.getProject();
-    projectRepository.save(testProject);
-    digitalObjectRepository.save(testDigitalObject);
+    testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
@@ -76,11 +67,11 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Transactional
     public void getDatastreamRendersExpectedDsidInView() throws Exception {
 
-      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.txt");
-
-      datastreamRepository.save(datastream);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid());
 
       MvcResult mvcResult = mockMvc.perform(
           MockMvcRequestBuilders.get(url)
@@ -94,15 +85,10 @@ public class DatastreamControllerIT extends IntegrationTest {
 
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              datastream.getDsid(),
-              testDigitalObject.getId(),
-              testProject.getProjectAbbr()
+              testDataSet.mainDatastream().getDsid(),
+              testDataSet.digitalObject().getId(),
+              testDataSet.project().getProjectAbbr()
           );
-
-
-      // cleanup
-      datastreamRepository.delete(datastream);
-
 
     }
 
@@ -111,11 +97,12 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Transactional
     public void datastreamViewDisplaysExpectedMetadata() throws Exception {
 
-      Datastream datastream = TestDatastream.generate(testDigitalObject);
-
-      datastreamRepository.save(datastream);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(url)
@@ -131,23 +118,19 @@ public class DatastreamControllerIT extends IntegrationTest {
 
       Assertions.assertThat(responseContent)
           .contains(
-              datastream.getDsid(),
-              datastream.getMimeType(),
-              datastream.getFileName(),
-              datastream.getBaseMetadata().getTitle(),
-              datastream.getBaseMetadata().getDescription(),
-              datastream.getBaseMetadata().getCreator()
+              testDataSet.mainDatastream().getDsid(),
+              testDataSet.mainDatastream().getMimeType(),
+              testDataSet.mainDatastream().getFileName(),
+              testDataSet.mainDatastream().getBaseMetadata().getTitle(),
+              testDataSet.mainDatastream().getBaseMetadata().getDescription(),
+              testDataSet.mainDatastream().getBaseMetadata().getCreator()
           );
 
-      Assertions.assertThat(datastream.getTags()).isNotEmpty();
-      datastream.getTags().forEach(tag -> Assertions.assertThat(responseContent).contains(tag));
+      Assertions.assertThat(testDataSet.mainDatastream().getTags()).isNotEmpty();
+      testDataSet.mainDatastream().getTags().forEach(tag -> Assertions.assertThat(responseContent).contains(tag));
 
-      Assertions.assertThat(datastream.getLang()).isNotEmpty();
-      datastream.getLang().forEach(lang -> Assertions.assertThat(responseContent).contains(lang));
-
-
-      // cleanup
-      datastreamRepository.delete(datastream);
+      Assertions.assertThat(testDataSet.mainDatastream().getLang()).isNotEmpty();
+      testDataSet.mainDatastream().getLang().forEach(lang -> Assertions.assertThat(responseContent).contains(lang));
 
     }
 
@@ -161,30 +144,29 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void deleteDatastreamRemovesDatastreamFromDatabase() throws Exception {
 
-      Datastream testDatastream = TestDatastream.generate(testDigitalObject);
-
-      MockMultipartFile multipartFile = TestDatastreamContent.generate();
-      datastreamService.save(testDatastream, multipartFile);
-
       // DELETE request
-      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), testDatastream.getDsid());
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
       mockMvc.perform(
           MockMvcRequestBuilders.delete(url))
           .andExpect(status().is3xxRedirection());
 
       // assertions
-      org.junit.jupiter.api.Assertions.assertThrows(DatastreamNotFoundException.class, () -> datastreamService.findById(testDatastream.deriveDatastreamId()));
+      org.junit.jupiter.api.Assertions.assertThrows(
+            DatastreamNotFoundException.class,
+            () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId()
+          )
+      );
 
-      Assertions.assertThat(datastreamService.findAll(testDigitalObject))
+      Assertions.assertThat(datastreamService.findAll(testDataSet.digitalObject()))
           .isNotNull()
           .isEmpty();
 
-      // cleanup
-      datastreamRepository.deleteAll();
-
     }
-
-
   }
 
 
@@ -193,12 +175,13 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     public void getDatastreamJsonContainsExpectedValues() throws Exception {
-      // Arrange
-      Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.bla");
 
-      datastreamRepository.save(datastream);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
 
       // Act
       MvcResult mvcResult = mockMvc.perform(
@@ -213,15 +196,13 @@ public class DatastreamControllerIT extends IntegrationTest {
       // Assert
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              datastream.getDsid(),
-              testDigitalObject.getId(),
-              datastream.getBaseMetadata().getTitle(),
-              datastream.getBaseMetadata().getDescription(),
-              datastream.getBaseMetadata().getCreator()
+              testDataSet.mainDatastream().getDsid(),
+              testDataSet.digitalObject().getId(),
+              testDataSet.mainDatastream().getBaseMetadata().getTitle(),
+              testDataSet.mainDatastream().getBaseMetadata().getDescription(),
+              testDataSet.mainDatastream().getBaseMetadata().getCreator()
           );
 
-      // Cleanup
-      datastreamRepository.delete(datastream);
     }
 
 
@@ -234,13 +215,13 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     public void getDatastreamContentReturnsExpectedDatastreamContent() throws Exception {
-      // Arrange
-      Datastream datastream = TestDatastream.generate(testDigitalObject);
 
-      datastreamContentRepository.save(TestDatastreamContent.CONTENT.getValue().getBytes(), datastream.deriveDatastreamId());
-      datastreamRepository.save(datastream);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s/content", testProject.getProjectAbbr(), testDigitalObject.getId(), datastream.getDsid());
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
 
       // Act
       MvcResult mvcResult = mockMvc.perform(
@@ -253,8 +234,6 @@ public class DatastreamControllerIT extends IntegrationTest {
       Assertions.assertThat(mvcResult.getResponse()).isNotNull();
       Assertions.assertThat(mvcResult.getResponse().getContentAsString()).isEqualTo(TestDatastreamContent.CONTENT.getValue());
 
-      // Cleanup
-      datastreamRepository.delete(datastream);
     }
 
   }
@@ -272,20 +251,15 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void returnsErrorIfNoMainResourceIsSetOnTheDigitalObject() throws Exception {
 
-        // ensure that the digital object has no main resource set
+        DigitalObject testDigitalObject = testDataSet.mainDatastream().getDigitalObject();
+
+        // remove main resource from digital object
         testDigitalObject.setMainResource("");
         digitalObjectRepository.save(testDigitalObject);
 
-        Datastream datastream = TestDatastream.generate(
-            testDigitalObject,
-            "testDsid.txt"
-        );
-        datastreamRepository.save(datastream);
-
-
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream",
-            testProject.getProjectAbbr(),
+            testDataSet.project().getProjectAbbr(),
             testDigitalObject.getId()
         );
 
@@ -303,21 +277,14 @@ public class DatastreamControllerIT extends IntegrationTest {
       public void returnsClientErrorIfMainResourceIsNotFound() throws Exception {
 
         // set as main resource on digital object
-        testDigitalObject.setMainResource("nonExistingDsid");
-        digitalObjectRepository.save(testDigitalObject);
+        testDataSet.digitalObject().setMainResource("nonExistingDsid");
+        digitalObjectRepository.save(testDataSet.digitalObject());
 
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId()
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
         );
-
-        // saving an unrelated datastream
-        Datastream datastream = TestDatastream.generate(
-            testDigitalObject,
-            "testDsid.txt"
-        );
-        datastreamRepository.save(datastream);
 
         mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -332,17 +299,10 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void returnsExpectedMainDatastreamJSONByDefault() throws Exception {
 
-        Datastream datastream = TestDatastream.generate(testDigitalObject, "testDsid.txt");
-        datastreamRepository.save(datastream);
-
-        // set as main resource on digital object
-        testDigitalObject.setMainResource(datastream.getDsid());
-        digitalObjectRepository.save(testDigitalObject);
-
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId()
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
         );
 
         MvcResult mvcResult = mockMvc.perform(
@@ -355,12 +315,11 @@ public class DatastreamControllerIT extends IntegrationTest {
 
         Assertions.assertThat(mvcResult.getResponse().getContentAsString())
             .contains(
-                datastream.getDsid(),
-                testDigitalObject.getId(),
-                datastream.getSize().toString(),
-                datastream.getFileName()
+                testDataSet.mainDatastream().getDsid(),
+                testDataSet.digitalObject().getId(),
+                testDataSet.mainDatastream().getSize().toString(),
+                testDataSet.mainDatastream().getFileName()
             );
-
 
       }
 
@@ -372,20 +331,17 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void returnsExpectedSingularDatastreamsByTag() throws Exception {
 
-        // first datastream uses default test-tags
-        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
-        datastreamRepository.save(datastream1);
+        Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
 
-        // second datastream uses no tags
-        Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+        // set tags for datastream2 to 0
         datastream2.setTags(Set.of());
         datastreamRepository.save(datastream2);
 
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId(),
-            datastream1.getTags().iterator().next()
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId(),
+            testDataSet.mainDatastream().getTags().iterator().next()
         );
 
         // Act
@@ -400,10 +356,10 @@ public class DatastreamControllerIT extends IntegrationTest {
         // Assert
         Assertions.assertThat(mvcResult.getResponse().getContentAsString())
             .contains(
-                datastream1.getDsid(),
-                testDigitalObject.getId(),
-                datastream1.getSize().toString(),
-                datastream1.getFileName()
+                testDataSet.mainDatastream().getDsid(),
+                testDataSet.digitalObject().getId(),
+                testDataSet.mainDatastream().getSize().toString(),
+                testDataSet.mainDatastream().getFileName()
             )
             .doesNotContain(
                 datastream2.getDsid()
@@ -414,19 +370,17 @@ public class DatastreamControllerIT extends IntegrationTest {
       public void throwsIfNoSingularDatastreamWasMatched() throws Exception {
 
         // first datastream uses default test-tags
-        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
-        datastreamRepository.save(datastream1);
+        Datastream datastream1 = testDataBuilder.addRandomDatastream(testDataSet);
 
         // second datastream also uses default test-tags
-        Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
-        datastreamRepository.save(datastream2);
+        testDataBuilder.addRandomDatastream(testDataSet);
 
         final String TAG_MATCHES_BOTH_DATASTREAMS = datastream1.getTags().iterator().next();
 
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId(),
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId(),
             TAG_MATCHES_BOTH_DATASTREAMS
         );
 
@@ -443,16 +397,12 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void throwsIfNoDatastreamWasMatched() throws Exception {
 
-        // first datastream uses default test-tags
-        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
-        datastreamRepository.save(datastream1);
-
         final String NOT_DEFINED_TEST_TAG = "test-tag-not-defined";
 
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId(),
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId(),
             NOT_DEFINED_TEST_TAG
         );
 
@@ -469,14 +419,10 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void filtersAreCombinedWithAndLogic() throws Exception {
 
-        // first datastream uses default test-tags
-        Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
-        datastreamRepository.save(datastream1);
-
-        final String SHARED_TAG = datastream1.getTags().iterator().next();
+        // create additional datastream a shared tag as the main datastream
+        final String SHARED_TAG = testDataSet.mainDatastream().getTags().iterator().next();
         final String UNIQUE_TAG = "test-tag-unique";
-
-        Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+        Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
         datastream2.setTags(
             Set.of(
                 SHARED_TAG,
@@ -487,8 +433,8 @@ public class DatastreamControllerIT extends IntegrationTest {
 
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream?tag=%s&tag=%s",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId(),
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId(),
             SHARED_TAG,
             UNIQUE_TAG
         );
@@ -502,13 +448,15 @@ public class DatastreamControllerIT extends IntegrationTest {
             .andExpect(status().isOk())
             .andReturn();
 
+        final String NOT_CONTAINED_DSID_VALUE = "\"dsid\":" + "\"" + testDataSet.mainDatastream().getDsid() + "\"";
+
         Assertions.assertThat(mvcResult.getResponse().getContentAsString())
             .contains(
                 datastream2.getDsid(),
-                testDigitalObject.getId(),
+                testDataSet.digitalObject().getId(),
                 UNIQUE_TAG
             ).doesNotContain(
-                datastream1.getDsid()
+                NOT_CONTAINED_DSID_VALUE
             );
 
       }
@@ -522,22 +470,10 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void returnsExpectedMainDatastreamContent() throws Exception {
 
-        // Arrange
-        Datastream datastream = TestDatastream.generate(testDigitalObject);
-        datastreamContentRepository.save(
-            TestDatastreamContent.CONTENT.getValue().getBytes(),
-            datastream.deriveDatastreamId()
-        );
-        datastreamRepository.save(datastream);
-
-        // set datastream as main resource on digital object
-        testDigitalObject.setMainResource(datastream.getDsid());
-        digitalObjectRepository.save(testDigitalObject);
-
         final String URL = String.format(
             "/api/v1/projects/%s/objects/%s/datastream/content",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId()
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
         );
 
         // Act
@@ -558,22 +494,14 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void returnsErrorIfNoMainResourceWasSet() throws Exception {
 
-        // Arrange
-        Datastream datastream = TestDatastream.generate(testDigitalObject);
-        datastreamContentRepository.save(
-            TestDatastreamContent.CONTENT.getValue().getBytes(),
-            datastream.deriveDatastreamId()
-        );
-        datastreamRepository.save(datastream);
-
         // make sure that mein resource is not set
-        testDigitalObject.setMainResource(null);
-        digitalObjectRepository.save(testDigitalObject);
+        testDataSet.digitalObject().setMainResource(null);
+        digitalObjectRepository.save(testDataSet.digitalObject());
 
         final String URL = String.format(
             "/api/v1/projects/%s/objects/%s/datastream/content",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId()
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
         );
 
         // Act
@@ -586,23 +514,15 @@ public class DatastreamControllerIT extends IntegrationTest {
       @Test
       public void allowsToAccessSingularDatastreamContentViaTagFiltering() throws Exception {
 
-        final String TEST_DATASTREAM_CONTENT = TestDatastreamContent.CONTENT.getValue();
+        var TEST_DATASTREAM_CONTENT = "___DEMO_CONTENT___";
 
-        // Arrange
-        Datastream datastream = TestDatastream.generate(testDigitalObject);
-        datastreamRepository.save(datastream);
-        // save content for datastream
-        datastreamContentRepository.save(
-            "____SHOULD___NOT___MATCH__".getBytes(),
-            datastream.deriveDatastreamId()
-        );
-
-        final String SHARED_TAG = datastream.getTags().iterator().next();
+        final String SHARED_TAG = testDataSet.mainDatastream().getTags().iterator().next();
         final String UNIQUE_TAG = "test-tag-unique";
 
-        Datastream datastream2 = TestDatastream.generate(testDigitalObject);
+        Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
         datastream2.setTags(Set.of(UNIQUE_TAG, SHARED_TAG));
         datastreamRepository.save(datastream2);
+
         // save content for datastream2
         datastreamContentRepository.save(
             TEST_DATASTREAM_CONTENT.getBytes(),
@@ -612,8 +532,8 @@ public class DatastreamControllerIT extends IntegrationTest {
         // url
         final String URL = String.format(
             "/api/v1/projects/%s/objects/%s/datastream/content?tag=%s&tag=%s",
-            testProject.getProjectAbbr(),
-            testDigitalObject.getId(),
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId(),
             SHARED_TAG,
             UNIQUE_TAG
         );
@@ -634,8 +554,6 @@ public class DatastreamControllerIT extends IntegrationTest {
             .isEqualTo(TEST_DATASTREAM_CONTENT);
 
       }
-
-
     }
 
 
@@ -653,16 +571,13 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void returnsAJSONListOfExpectedDatastreams() throws Exception {
 
-      Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
-      datastreamRepository.save(datastream1);
 
-      Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
-      datastreamRepository.save(datastream2);
+      Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams",
-          testProject.getProjectAbbr(),
-          testDigitalObject.getId()
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
       );
 
       // Act
@@ -678,14 +593,14 @@ public class DatastreamControllerIT extends IntegrationTest {
       // Assert
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              datastream1.getDsid(),
-              testDigitalObject.getId(),
-              datastream1.getSize().toString(),
-              datastream1.getFileName()
+              testDataSet.mainDatastream().getDsid(),
+              testDataSet.digitalObject().getId(),
+              testDataSet.mainDatastream().getSize().toString(),
+              testDataSet.mainDatastream().getFileName()
           )
           .contains(
               datastream2.getDsid(),
-              testDigitalObject.getId(),
+              testDataSet.digitalObject().getId(),
               datastream2.getSize().toString(),
               datastream2.getFileName()
           );
@@ -695,10 +610,13 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void returnsAnEmptyListOfNoDatastreamsWereFound() throws Exception {
 
+      // remove main datastream from test data set
+      datastreamRepository.delete(testDataSet.mainDatastream());
+
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams",
-          testProject.getProjectAbbr(),
-          testDigitalObject.getId()
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
       );
 
       // Act
@@ -715,7 +633,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .isNotNull()
           .doesNotContain(
-              testDigitalObject.getId(),
+              testDataSet.digitalObject().getId(),
               "fileName",
               "baseMetadata"
           );
@@ -725,13 +643,10 @@ public class DatastreamControllerIT extends IntegrationTest {
     @Test
     public void returnsExpectedDatastreamsIfMultipleTagsWereUsed() throws Exception {
 
-      Datastream datastream1 = TestDatastream.generate(testDigitalObject, "testDsid1.txt");
-      datastreamRepository.save(datastream1);
-
-      final String SHARED_TAG = datastream1.getTags().iterator().next();
+      final String SHARED_TAG = testDataSet.mainDatastream().getTags().iterator().next();
       final String UNIQUE_TAG = "test-tag-unique";
 
-      Datastream datastream2 = TestDatastream.generate(testDigitalObject, "testDsid2.txt");
+      Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
       datastream2.setTags(
           Set.of(
               UNIQUE_TAG,
@@ -743,8 +658,8 @@ public class DatastreamControllerIT extends IntegrationTest {
       // using both unique and shared tag -> should only return datastream2
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams?tag=%s&tag=%s&pageSize=100",
-          testProject.getProjectAbbr(),
-          testDigitalObject.getId(),
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
           SHARED_TAG,
           UNIQUE_TAG
       );
@@ -758,14 +673,16 @@ public class DatastreamControllerIT extends IntegrationTest {
           .andExpect(status().isOk())
           .andReturn();
 
+      final String EXPECTED_NOT_CONTAINED_DSID_VALUE = "\"dsid\":" + "\"" + testDataSet.mainDatastream().getDsid() + "\"";
+
       // Assert
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .doesNotContain(
-              datastream1.getDsid()
+              EXPECTED_NOT_CONTAINED_DSID_VALUE
           )
           .contains(
               datastream2.getDsid(),
-              testDigitalObject.getId(),
+              testDataSet.digitalObject().getId(),
               datastream2.getSize().toString(),
               datastream2.getFileName()
           );
