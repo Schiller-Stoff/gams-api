@@ -190,6 +190,38 @@
 
               </div>
               <br/>
+              <div th:if="${do.mainResource}">
+                <h2 class="h5">Main resource</h2>
+                <p>Metadata about the digital object's main resource (datastream)</p>
+                <ul class="list-group">
+                  <li class="list-group-item">
+                    <small>dsid</small>
+                    <p>
+                      <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
+                  </li>
+                    <li class="list-group-item">
+                      <small>title</small>
+                        <p th:text="${do.getMainResource()?.getTitle()}"></p>
+                    </li>
+                  <li class="list-group-item">
+                    <small>mimetype</small>
+                    <p th:text="${do.getMainResource()?.getMimeType()}"></p>
+                  </li>
+                  <li class="list-group-item">
+                    <small>description</small>
+                    <p th:text="${do.getMainResource()?.getDescription()}"></p>
+                  </li>
+                    <li class="list-group-item">
+                      <small>tags</small>
+                        <p th:text="${do.getMainResource()?.getTags()}"></p>
+                    </li>
+                  <li class="list-group-item">
+                    <small>lang</small>
+                    <p th:text="${do.getMainResource()?.getLang()}"></p>
+                  </li>
+                </ul>
+              </div>
+              <br/>
               <h2 class="h5">Metadata</h2>
               <p>Primary metadata derived from the GAMS-API</p>
               <ul class="list-group">
