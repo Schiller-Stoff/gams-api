@@ -64,7 +64,7 @@
                           style="color: black; font-weight: 600;"
                           class="text-decoration-none"
                           th:text="${datastream.getDsid()}"
-                          th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + 'datastreams/' + ${datastream.getDsid()}"
+                          th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}"
                   ></a></td>
                   <td><span th:title="${datastream.getBaseMetadata().getTitle()}" th:if="${datastream.baseMetadata}" th:text="${#strings.abbreviate(datastream.baseMetadata.title, 50)}"></span></td>
                   <td><span th:text="${datastream.getMimeType()}"></span></td>
