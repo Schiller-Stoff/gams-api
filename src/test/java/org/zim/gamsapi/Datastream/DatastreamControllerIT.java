@@ -169,6 +169,38 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
   }
 
+  @Nested
+  public class GETAllDatastreams {
+
+    @Test
+    public void findAllContainsExpectedDatastream() throws Exception {
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(
+              testDataSet.mainDatastream().getDsid(),
+              testDataSet.digitalObject().getId(),
+              testDataSet.mainDatastream().getSize().toString(),
+              testDataSet.mainDatastream().getFileName()
+          );
+    }
+  }
+
 
   @Nested
   public class GETDatastreamJSON {
