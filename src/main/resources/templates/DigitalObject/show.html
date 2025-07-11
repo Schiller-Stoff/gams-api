@@ -203,7 +203,9 @@
                 </li>
                   <li class="list-group-item">
                       <small>main resource</small>
-                      <p th:text="${do.mainResource?.getDsid()}"></p>
+                      <p>
+                        <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
+                      </p>
                   </li>
               </ul>
               <ul class="list-group mt-2" th:if="${do.baseMetadata}">
