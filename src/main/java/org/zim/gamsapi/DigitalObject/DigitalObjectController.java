@@ -118,7 +118,6 @@ public class DigitalObjectController {
       @RequestParam(defaultValue = "") String searchDsid
   ) {
 
-    // TODO pagination max size etc.
     if (pageSize >= 100) {
       pageSize = 100;
     }
@@ -126,12 +125,10 @@ public class DigitalObjectController {
     // first query digital object projection dto
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
-
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
         foundObject.getId(), PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
-    // TODO add sorting params
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("sortDir", sortDir);
