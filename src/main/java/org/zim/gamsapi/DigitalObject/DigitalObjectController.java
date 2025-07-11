@@ -1,6 +1,7 @@
 package org.zim.gamsapi.DigitalObject;
 
 import io.micrometer.common.lang.Nullable;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -103,11 +104,10 @@ public class DigitalObjectController {
   @Parameter(name = "projectAbbr", description = "The project abbreviation", required = true)
   @Parameter(name = "id", description = "The digital object ID", required = true)
   public DigitalObjectCompactDTO getJson(@PathVariable String id) {
-    // TODO here are only the datastream ids as string list returned, but not the full
-    // (in contrast to the HTML view)
     return digitalObjectService.findDigitalObjectCompactDTOById(id);
   }
 
+  @Hidden
   @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String getObject(
       DigitalObject digitalObject,
