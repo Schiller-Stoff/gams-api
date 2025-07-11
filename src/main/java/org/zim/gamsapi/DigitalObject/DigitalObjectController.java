@@ -137,6 +137,7 @@ public class DigitalObjectController {
       throw new DigitalObjectConversionException(msg);
     }
 
+    // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
         foundObject.getId(), PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
