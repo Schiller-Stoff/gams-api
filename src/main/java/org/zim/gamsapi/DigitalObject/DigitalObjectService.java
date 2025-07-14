@@ -193,6 +193,12 @@ public class DigitalObjectService implements IDigitalObjectService {
       var mainDatastreams = datastreamRepository.findMainDatastreamsByDigitalObjectIds(
           Set.of(digitalObjectId)
       );
+
+      if(mainDatastreams.size() > 1){
+        String msg = String.format("Found more than one main datastream for digital object %s. This is not expected!", digitalObjectId);
+        log.warn(msg);
+      }
+
       if (!mainDatastreams.isEmpty()) {
         IDatastreamMainResourceView mainDatastream = mainDatastreams.get(0);
         digitalObjectCompactDTO.setMainResource(
