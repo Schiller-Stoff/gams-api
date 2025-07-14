@@ -70,6 +70,13 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
   List<IDatastreamIdView> findAllDatastreamIdViewsByDigitalObject(DigitalObject digitalObject);
 
   /**
+   * Find all datastreams by digital object id.
+   * @param digitalObjectId digital object id
+   * @return list of datastream ids
+   */
+  Page<IDatastreamIdView> findAllDatastreamIdViewsByDigitalObjectId(String digitalObjectId, Pageable pageable);
+
+  /**
    * Find all datastreams by digital object
    * @param digitalObject digital object
    * @return view of datastreams containing dsid and mimetype

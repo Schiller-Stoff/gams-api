@@ -199,6 +199,31 @@ public class DatastreamControllerIT extends IntegrationTest {
               testDataSet.mainDatastream().getFileName()
           );
     }
+
+    @Test
+    public void findAllDsidsContainsExpectedDsid() throws Exception {
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/dsids",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      // Act
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      // Assert
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(testDataSet.mainDatastream().getDsid());
+
+    }
+
   }
 
 

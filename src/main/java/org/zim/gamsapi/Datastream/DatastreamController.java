@@ -297,4 +297,32 @@ public class DatastreamController {
         .body( inputStreamResource);
 
   }
+
+  @Operation(
+      summary = "Get all datastream dsids for a digital object",
+      description = "Retrieves a paginated list of all datastream dsids for a specific digital object"
+  )
+  @GetMapping(value = "/datastreams/dsids", produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  })
+  @ResponseBody
+  public PagedResponse<String> findAllIdsByDigitalObject(
+      @PathVariable String id,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10000") int pageSize,
+      @RequestParam(defaultValue = "dsid") String sortBy
+  ) {
+    // limit pageSize
+    if (pageSize >= 10000) {
+      pageSize = 10000;
+    }
+
+    return datastreamService.findAllIds(
+        id,
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
+  }
+
+
 }

@@ -7,11 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.zim.gamsapi.Datastream.exceptions.*;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamAmbiguousMatchException;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.interfaces.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
@@ -197,5 +196,30 @@ public class DatastreamService implements IDatastreamService {
     return PagedResponse.from(
         datastreamRepository.findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(digitalObjectId, tags, tags.size(), pageable)
     );
+  }
+
+  @Override
+  public PagedResponse<String> findAllIds(String digitalObjectId, Pageable pageable) throws DigitalObjectNotFoundException {
+
+    if(!digitalObjectRepository.existsById(digitalObjectId)){
+      String msg = String.format("Digital object with id %s does not exist. Cannot find datastreams.", digitalObjectId);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+
+    var foundDatastreamViews = datastreamRepository.findAllDatastreamIdViewsByDigitalObjectId(
+        digitalObjectId,
+        pageable
+    );
+
+    if (foundDatastreamViews.isEmpty()) {
+      String msg = String.format("No datastreams found for digital object with id %s (There should be at least one datastream)", digitalObjectId);
+      log.warn(msg);
+    }
+
+    return PagedResponse.from(
+        foundDatastreamViews.map(IDatastreamIdView::getDsid)
+    );
+
   }
 }
