@@ -125,7 +125,6 @@ public class DigitalObjectController {
     }
 
     // first query digital object projection dto
-    // TODO atm there is also datastream data loaded on service level!
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
