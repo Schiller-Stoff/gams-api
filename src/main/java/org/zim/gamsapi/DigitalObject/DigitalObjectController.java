@@ -266,7 +266,6 @@ public class DigitalObjectController {
         .description("")
         .build();
 
-    // TODO should return a paginated response
     return digitalObjectService.findAllIdsByProjectAbbr(
         project.getProjectAbbr(),
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
