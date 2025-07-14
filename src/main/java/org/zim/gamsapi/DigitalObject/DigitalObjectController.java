@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -23,8 +22,6 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
@@ -33,6 +30,7 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.System.utils.ControllerUtils;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -41,7 +39,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
@@ -53,7 +50,6 @@ public class DigitalObjectController {
   private final DigitalObjectService digitalObjectService;
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
-  private final ConversionService conversionService;
   private final IDigitalObjectModificationService digitalObjectModificationService;
 
 
