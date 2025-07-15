@@ -7,7 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
+import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailureRepository;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamAmbiguousMatchException;
+import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.*;
@@ -32,6 +35,8 @@ public class DatastreamService implements IDatastreamService {
 
   private final IDatastreamContentRepository datastreamContentRepository;
 
+  private final DatastreamContentDeletionFailureRepository datastreamContentDeletionFailureRepository;
+
   @Override
   @Transactional
   public void delete(Datastream datastream) {
@@ -49,9 +54,20 @@ public class DatastreamService implements IDatastreamService {
     }
 
     datastreamRepository.delete(datastream);
-    datastreamContentRepository.delete(
-      datastream.deriveDatastreamId()
-    );
+
+    try {
+      datastreamContentRepository.delete(
+          datastream.deriveDatastreamId()
+      );
+    } catch (DatastreamCannotDeleteFileException e){
+      datastreamContentDeletionFailureRepository.save(
+          DatastreamContentDeletionFailure.builder()
+              .digitalObjectId(datastream.getDigitalObject().getId())
+              .datastreamDsid(datastream.getDsid())
+              .build()
+      );
+    }
+
   }
 
 

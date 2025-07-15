@@ -9,7 +9,10 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailureCleanupJob;
+import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailureRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -32,7 +35,7 @@ public abstract class IntegrationTest {
   // required for the client registration for the oauth2 process
   // otherwise the application context won't start (will try to load the oauth2 config json file)
   // https://stackoverflow.com/questions/60778556/testing-spring-security-oauth2login-enabled-applications-throws-illegalargumente
-  @MockBean
+  @MockitoBean
   ClientRegistrationRepository clientRegistrationRepository;
 
   @Autowired
@@ -56,6 +59,8 @@ public abstract class IntegrationTest {
   @Autowired
   EventCaptureListener eventCaptureListener;
 
+  @Autowired
+  DatastreamContentDeletionFailureRepository datastreamContentDeletionFailureRepository;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
@@ -118,7 +123,7 @@ public abstract class IntegrationTest {
     collectionRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
-
+    datastreamContentDeletionFailureRepository.deleteAll();
   }
 
 
