@@ -34,9 +34,6 @@ import java.util.Objects;
 @Slf4j
 @ToString
 @JacksonXmlRootElement(localName = "digitalObject")
-// TODO use static final variable in this SQL statement
-@SQLDelete(sql = "UPDATE digital_object SET deleted = true WHERE id=?")
-@SQLRestriction("deleted=false")
 public class DigitalObject {
 
   public static final String ENTITY_TABLE_NAME = "digital_object";
