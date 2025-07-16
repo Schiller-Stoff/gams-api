@@ -11,7 +11,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
  * Pointing to the digital object it belongs to.
  */
 @Entity
-@Table( indexes = {
+@Table( name = DublinCoreEntry.ENTITY_TABLE_NAME, indexes = {
     @Index(name = "idx_dc_digital_object_id", columnList = "digital_object_id"),
     @Index(name = "idx_dc_name", columnList = "name"),
     @Index(name = "idx_dc_value", columnList = "value"),
@@ -23,6 +23,15 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DublinCoreEntry {
+
+  public static final String ENTITY_TABLE_NAME = "dublin_core_entry";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      ENTITY_TABLE_NAME
+  };
 
   /**
    * Generated unique identifier for the dublin core element
