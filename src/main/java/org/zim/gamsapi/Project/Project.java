@@ -28,6 +28,15 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 public class Project {
 
+  public static final String ENTITY_TABLE_NAME = "project";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      ENTITY_TABLE_NAME
+  };
+
   @NotBlank
   @Id
   @Column(name = "project_abbr")
