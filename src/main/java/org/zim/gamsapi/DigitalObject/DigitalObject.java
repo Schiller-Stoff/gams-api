@@ -128,7 +128,7 @@ public class DigitalObject {
   @Column(name = "main_resource")
   private String mainResource;
 
-
+  @Column(name = "deleted", nullable = false)
   private boolean deleted = false;
 
 
