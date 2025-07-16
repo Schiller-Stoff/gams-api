@@ -12,10 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -102,6 +101,24 @@ public class DigitalObjectService implements IDigitalObjectService {
     return foundObject;
   }
 
+  @Transactional
+  public boolean existsByIdSoftDeleteAware(String id) {
+
+    var result = digitalObjectRepository.findAllSoftDeleted(Pageable.unpaged());
+    System.out.println("FOUND SOFT DELETED: " + result.getTotalElements());
+
+    digitalObjectRepository.findSoftDeletedById(id).ifPresentOrElse(
+        digitalObject -> {
+          log.debug("Found soft-deleted digital object with id: {}", id);
+        },
+        () -> {
+          log.debug("No soft-deleted digital object found with id: {}", id);
+        }
+    );
+
+    return digitalObjectRepository.softDeletedExistsById(id);
+  }
+
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
@@ -116,6 +133,7 @@ public class DigitalObjectService implements IDigitalObjectService {
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
 
     // TODO missing transaction exception to be thrown?
+    // TODO needs refactoring using the failed delete event
     datastreams.forEach(datastream -> {
       fileSystemRepository.delete(datastream.deriveDatastreamId());
     });

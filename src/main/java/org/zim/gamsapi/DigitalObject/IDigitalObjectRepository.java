@@ -37,6 +37,27 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   void deleteAllByProject_ProjectAbbr(String projectAbbr);
 
   /**
+   * Find all soft-deleted digital objects (bypasses @Where clause)
+   */
+  @Query("SELECT d FROM DigitalObject d WHERE d.deleted = true")
+  Page<DigitalObject> findAllSoftDeleted(Pageable pageable);
+
+  /**
+   * Find a specific soft-deleted digital object by ID
+   */
+  @Query("SELECT d FROM DigitalObject d WHERE d.id = :id AND d.deleted = true")
+  Optional<DigitalObject> findSoftDeletedById(@Param("id") String id);
+
+  /**
+   * Check if a soft-deleted digital object exists by ID
+   * Returns true only if the object exists AND is soft-deleted
+   */
+  @Query("SELECT CASE WHEN COUNT(d) > 0 THEN true ELSE false END " +
+      "FROM DigitalObject d WHERE d.id = :id AND d.deleted = true")
+  boolean softDeletedExistsById(@Param("id") String id);
+
+
+  /**
    * Deletes all digital objects for a given project (with project abbreviation).
    * @param projectAbbr identifier of the project to be deleted
    */

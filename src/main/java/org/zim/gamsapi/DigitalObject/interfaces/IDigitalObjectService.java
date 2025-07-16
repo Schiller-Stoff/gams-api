@@ -15,6 +15,8 @@ public interface IDigitalObjectService {
 
   DigitalObject save(DigitalObject digitalObject);
 
+  boolean existsByIdSoftDeleteAware(String id);
+
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
@@ -44,7 +46,6 @@ public interface IDigitalObjectService {
   DigitalObject findById(String pid) throws DigitalObjectNotFoundException;
 
   void delete(DigitalObject digitalObject);
-
 
   /**
    * Find all digital objects for a given project (with project abbreviation) and just return their ids.
