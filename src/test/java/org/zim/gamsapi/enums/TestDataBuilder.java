@@ -13,6 +13,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
@@ -38,6 +39,9 @@ public class TestDataBuilder {
 
   @Autowired
   private DatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
+  private IGAMSCollectionRepository gamsCollectionRepository;
 
   @Transactional
   public void removeAllExceptProjects(TestDataSet testDataSet) {
@@ -201,7 +205,22 @@ public class TestDataBuilder {
 
     var persistedDublinCoreEntry = dublinCoreEntryRepository.save(dublinCoreEntryToBeSaved);
 
-    return new TestDataSet(persistedProject, persistedDigitalObject, persistedDatastream, persistedDublinCoreEntry);
+    var GAMSCollection = TestGAMSCollection.generate(
+        persistedProject.getProjectAbbr(),
+        persistedDigitalObject.getId(),
+        persistedDatastream.getDsid()
+    );
+
+    var persistedGAMSCollection =
+        gamsCollectionRepository.save(GAMSCollection);
+
+    return new TestDataSet(
+        persistedProject,
+        persistedDigitalObject,
+        persistedDatastream,
+        persistedDublinCoreEntry,
+        persistedGAMSCollection
+    );
   }
 
 
