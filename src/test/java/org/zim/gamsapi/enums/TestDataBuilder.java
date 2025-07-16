@@ -48,7 +48,6 @@ public class TestDataBuilder {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
-    gamsCollectionRepository.delete(testDataSet.gamsCollection());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 
@@ -151,11 +150,6 @@ public class TestDataBuilder {
   }
 
   @Transactional
-  public void removeTestCollection(TestDataSet testDataSet) {
-    gamsCollectionRepository.delete(testDataSet.gamsCollection());
-  }
-
-  @Transactional
   public TestDataSet buildTestDataSet() {
 
     var projectToBeSaved = ProjectBuilder.builder()
@@ -211,21 +205,11 @@ public class TestDataBuilder {
 
     var persistedDublinCoreEntry = dublinCoreEntryRepository.save(dublinCoreEntryToBeSaved);
 
-    var GAMSCollection = TestGAMSCollection.generate(
-        persistedProject.getProjectAbbr(),
-        persistedDigitalObject.getId(),
-        persistedDatastream.getDsid()
-    );
-
-    var persistedGAMSCollection =
-        gamsCollectionRepository.save(GAMSCollection);
-
     return new TestDataSet(
         persistedProject,
         persistedDigitalObject,
         persistedDatastream,
-        persistedDublinCoreEntry,
-        persistedGAMSCollection
+        persistedDublinCoreEntry
     );
   }
 

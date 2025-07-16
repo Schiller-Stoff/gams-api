@@ -17,7 +17,6 @@ public record TestDataSet(
     Project project,
     DigitalObject digitalObject,
     Datastream mainDatastream,
-    DublinCoreEntry dublinCoreEntry,
-    GAMSCollection gamsCollection
+    DublinCoreEntry dublinCoreEntry
 ) {
 }
