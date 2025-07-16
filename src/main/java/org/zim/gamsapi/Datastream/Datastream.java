@@ -42,9 +42,9 @@ import java.util.Set;
 public class Datastream {
 
   public static final String ENTITY_TABLE_NAME = "datastream";
-  public static final String LANG_TABLE_NAME = "lang";
-  public static final String TAGS_TABLE_NAME = "tags";
-  public static final String CONTENT_RESTRICTIONS_TABLE_NAME = "tags";
+  public static final String LANG_TABLE_NAME = "datastream_lang";
+  public static final String TAGS_TABLE_NAME = "datastream_tags";
+  public static final String CONTENT_RESTRICTIONS_TABLE_NAME = "datastream_content_restrictions";
 
   /**
    * Contains all table names in the order they should be deleted / created.
