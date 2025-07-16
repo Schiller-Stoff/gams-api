@@ -8,6 +8,8 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
@@ -25,7 +27,7 @@ import java.util.Objects;
  * Domain object representing a digital object in sense of OAIS.
  */
 @Entity
-@Table(name = "digital_object")
+@Table(name = DigitalObject.ENTITY_TABLE_NAME)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -34,7 +36,19 @@ import java.util.Objects;
 @Slf4j
 @ToString
 @JacksonXmlRootElement(localName = "digitalObject")
+// TODO use static final variable in this SQL statement
+@SQLDelete(sql = "UPDATE digital_object SET deleted = true WHERE id=?")
+@SQLRestriction("deleted=false")
 public class DigitalObject {
+
+  public static final String ENTITY_TABLE_NAME = "digital_object";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      ENTITY_TABLE_NAME,
+  };
 
   /**
    * ID of the digital object (= old PID of digital object)
@@ -115,6 +129,9 @@ public class DigitalObject {
    */
   @Column(name = "main_resource")
   private String mainResource;
+
+
+  private boolean deleted = Boolean.FALSE;
 
 
   /**
