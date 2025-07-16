@@ -16,6 +16,23 @@ import java.util.Optional;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String>, JpaSpecificationExecutor<DigitalObject> {
 
+  /**
+   * Hard delete all digital objects - for testing purposes only
+   * The flushAutomatically and clearAutomatically flags ensure proper transaction handling
+   */
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Query("DELETE FROM DigitalObject")
+  void hardDeleteAll();
+
+  /**
+   * Hard delete a digital object - for testing purposes only
+   * The flushAutomatically flag ensures proper transaction handling
+   * @param digitalObject the digital object to be deleted
+   */
+  @Query("DELETE FROM DigitalObject d WHERE d = :digitalObject")
+  @Modifying(flushAutomatically = true)
+  void hardDelete(DigitalObject digitalObject);
+
   @Modifying(flushAutomatically = true)
   void deleteAllByProject_ProjectAbbr(String projectAbbr);
 
