@@ -15,8 +15,12 @@ public interface IDigitalObjectService {
 
   DigitalObject save(DigitalObject digitalObject);
 
-  boolean existsByIdSoftDeleteAware(String id);
-
+  /**
+   * Check if a digital object with the given id is soft-deleted.
+   * @param id the id of the digital object
+   * @return true if the digital object is soft-deleted, false otherwise (object does not exist or is not soft-deleted)
+   */
+  boolean isSoftDeleted(String id);
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.

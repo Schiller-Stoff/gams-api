@@ -222,6 +222,36 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
   }
 
+  @Nested
+  public class SoftDeletions {
+
+    @Nested
+    public class IsSoftDeleted {
+
+      @Test
+      public void returnsFallseWhenDigitalObjectDoesNotExist() {
+        String nonExistentId = "nonExistentId";
+        Assertions.assertThat(digitalObjectService.isSoftDeleted(nonExistentId)).isFalse();
+      }
+
+      @Test
+      public void returnsFalseWhenDigitalObjectExists() {
+        Assertions.assertThat(digitalObjectService.isSoftDeleted(testDataSet.digitalObject().getId()))
+            .isFalse();
+      }
+
+      @Test
+      @Transactional
+      public void returnsTrueWhenDigitalObjectIsSoftDeleted() {
+        digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId());
+        Assertions.assertThat(digitalObjectService.isSoftDeleted(testDataSet.digitalObject().getId())).isTrue();
+      }
+
+    }
+
+
+
+  }
 
   @Nested
   public class Delete {

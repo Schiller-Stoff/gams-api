@@ -102,20 +102,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Transactional
-  public boolean existsByIdSoftDeleteAware(String id) {
-
-    var result = digitalObjectRepository.findAllSoftDeleted(Pageable.unpaged());
-    System.out.println("FOUND SOFT DELETED: " + result.getTotalElements());
-
-    digitalObjectRepository.findSoftDeletedById(id).ifPresentOrElse(
-        digitalObject -> {
-          log.debug("Found soft-deleted digital object with id: {}", id);
-        },
-        () -> {
-          log.debug("No soft-deleted digital object found with id: {}", id);
-        }
-    );
-
+  public boolean isSoftDeleted(String id) {
     return digitalObjectRepository.softDeletedExistsById(id);
   }
 
@@ -140,8 +127,10 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     dublinCoreEntryRepository.deleteAllByDigitalObject(digitalObject);
 
+    // TODO system entry is wrong here, should be the user who deleted the object
+    //digitalObjectRepository.softDeleteById(digitalObject.getId(), new Date(), "system");
     digitalObjectRepository.delete(digitalObject);
-    log.info("Successfully deleted digital object {}", digitalObject);
+    log.info("Successfully deleted digital object {}", digitalObject.getId());
   }
 
 
