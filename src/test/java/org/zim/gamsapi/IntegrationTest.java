@@ -87,7 +87,7 @@ public abstract class IntegrationTest {
    */
   @AfterEach
   public void tearDown() {
-    testCleanupService.cleanupAllTestDataSafe();
+    testCleanupService.cleanup();
   }
 
 

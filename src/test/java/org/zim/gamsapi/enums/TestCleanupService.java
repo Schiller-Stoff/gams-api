@@ -3,16 +3,23 @@ package org.zim.gamsapi.enums;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
 import org.zim.gamsapi.Datastream.DatastreamContentRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Project.Project;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 @Service
 @Transactional
@@ -23,15 +30,48 @@ public class TestCleanupService {
   @PersistenceContext
   private EntityManager entityManager;
 
+  @Autowired
+  private EventCaptureListener eventCaptureListener;
+
+  @Autowired
+  private IDigitalObjectRepository digitalObjectRepository;
+
+  @Autowired
+  private IDublinCoreEntryRepository dublinCoreElementRepository;
+
+  @Autowired
+  private IDatastreamRepository datastreamRepository;
+  @Autowired
+  private IProjectRepository projectRepository;
+  @Autowired
+  private IGAMSCollectionRepository collectionRepository;
+
   public TestCleanupService(DatastreamContentRepository datastreamContentRepository) {
     this.datastreamContentRepository = datastreamContentRepository;
+  }
+
+  /**
+   * Main method cleans up all test data using the repository layer of the
+   * gams-api.
+   */
+  @Transactional
+  public void cleanup(){
+    eventCaptureListener.clearEvents();
+    datastreamContentRepository.deleteAll();
+    dublinCoreElementRepository.deleteAll();
+    datastreamRepository.deleteAll();
+    collectionRepository.deleteAll();
+    digitalObjectRepository.deleteAll();
+    projectRepository.deleteAll();
   }
 
   /**
    * Clean up using EntityManager native queries - no custom repository methods needed
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void cleanupAllTestData() {
+  public void cleanupAllTestDataViaNativeQueries() {
+
+    eventCaptureListener.clearEvents();
 
     // delete all data from the filesystem
     datastreamContentRepository.deleteAll();
@@ -39,19 +79,16 @@ public class TestCleanupService {
     try {
       log.debug("Starting test data cleanup using EntityManager");
 
-      // TODO refactor whole method (use deleteAllQuery method)
-
-      // Disable foreign key checks for PostgreSQL
+      // Disable foreign key checks for PostgresSQL
       entityManager.createNativeQuery("SET session_replication_role = replica").executeUpdate();
 
       // Delete in any order since FK checks are disabled
-      executeCleanupQuery("DELETE FROM datastream_content_deletion_failure");
-      executeCleanupQuery("DELETE FROM dublin_core_entry");
-      executeCleanupQuery("DELETE FROM collection_digital_object");
-      executeCleanupQuery("DELETE FROM datastream");
-      executeCleanupQuery("DELETE FROM collection");
-      executeCleanupQuery("DELETE FROM digital_object");
-      executeCleanupQuery("DELETE FROM project");
+      executeDeleteAllQuery(DatastreamContentDeletionFailure.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(DublinCoreEntry.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(GAMSCollection.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(Datastream.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(DigitalObject.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(Project.ORDERED_MANAGED_TABLES);
 
       // Re-enable foreign key checks
       entityManager.createNativeQuery("SET session_replication_role = DEFAULT").executeUpdate();
@@ -72,19 +109,20 @@ public class TestCleanupService {
   }
 
   /**
-   * TODO jdoc
-   * Alternative cleanup respecting foreign keys (slower but safer)
+   * Cleans up all test data in a safe manner using ordered managed tables.
+   * This method ensures that all deletions are performed in the correct order
    */
   @Transactional(propagation = Propagation.REQUIRES_NEW)
-  public void cleanupAllTestDataSafe() {
+  public void cleanupAllTestDataSafeViaNativeQueries() {
+
+    // clear all events
+    eventCaptureListener.clearEvents();
 
     // delete all data from the filesystem
     datastreamContentRepository.deleteAll();
 
     try {
-      // TODO redo log statement
       log.debug("Starting safe test data cleanup");
-
       executeDeleteAllQuery(DatastreamContentDeletionFailure.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DublinCoreEntry.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(GAMSCollection.ORDERED_MANAGED_TABLES);
@@ -145,29 +183,6 @@ public class TestCleanupService {
     }
   }
 
-  /**
-   * Verify cleanup was successful
-   */
-  @Transactional(readOnly = true)
-  public boolean verifyCleanupSuccess() {
-    try {
-      // Check if any data remains
-      Long totalCount = (Long) entityManager.createNativeQuery(
-          "SELECT " +
-              "(SELECT COUNT(*) FROM project) + " +
-              "(SELECT COUNT(*) FROM digital_object) + " +
-              "(SELECT COUNT(*) FROM datastream) + " +
-              "(SELECT COUNT(*) FROM gams_collection) + " +
-              "(SELECT COUNT(*) FROM dublin_core_entry)"
-      ).getSingleResult();
-
-      return totalCount == 0;
-
-    } catch (Exception e) {
-      log.error("Error verifying cleanup", e);
-      return false;
-    }
-  }
 }
 
 
