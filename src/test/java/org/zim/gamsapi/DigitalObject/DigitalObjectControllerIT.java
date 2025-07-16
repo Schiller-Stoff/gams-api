@@ -65,7 +65,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       // Assert
       org.assertj.core.api.Assertions.assertThat(
-          digitalObjectRepository.findDigitalObjectById(testDataSet.digitalObject().getId()))
+          digitalObjectRepository.findDigitalObjectById(
+              testDataSet.digitalObject().getId())
+          )
             .isNotPresent();
 
     }
@@ -88,7 +90,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
                   testDataSet.project().getProjectAbbr(),
                   digitalObject.getId())
               .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is3xxRedirection());
+          .andExpect(status().is4xxClientError());
 
     }
 

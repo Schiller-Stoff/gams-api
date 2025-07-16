@@ -15,6 +15,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.enums.TestDataBuilder;
 import org.zim.gamsapi.enums.TestDataSet;
+import org.zim.gamsapi.enums.TestGAMSCollection;
 
 /**
  * Integration test for the GAMSCollectionRepository.
@@ -34,6 +35,8 @@ public class GAMSCollectionRepositoryIT extends IntegrationTest {
   private TestDataBuilder  testDataBuilder;
 
   private TestDataSet testDataSet;
+  @Autowired
+  private IGAMSCollectionRepository iGAMSCollectionRepository;
 
   @BeforeEach
   public void setUp() {
@@ -44,16 +47,18 @@ public class GAMSCollectionRepositoryIT extends IntegrationTest {
   public class CASCADING {
 
     @Test
+    @Transactional
     public void softDeletionOfADigitalObjectStillReferencedByACollectionDoesNotThrow(){
       Assertions.assertThatNoException().isThrownBy(
-        () -> digitalObjectRepository.delete(testDataSet.digitalObject())
+        () -> digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId())
       );
     }
 
     @Test
-    @Transactional
     public void hardDeletionOfADigitalObjectStillReferencedByACollectionThrows(){
-      Assertions.assertThatThrownBy(() -> digitalObjectRepository.hardDelete(testDataSet.digitalObject()))
+      // saves a test collection with reference to the test object in the test dataset
+      iGAMSCollectionRepository.save(TestGAMSCollection.generate());
+      Assertions.assertThatThrownBy(() -> digitalObjectRepository.delete(testDataSet.digitalObject()))
           .isInstanceOf(DataIntegrityViolationException.class);
     }
 

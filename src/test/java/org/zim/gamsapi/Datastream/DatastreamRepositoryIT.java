@@ -168,12 +168,11 @@ public class DatastreamRepositoryIT extends IntegrationTest {
         public class TestCascadingDelete {
 
             @Test
-            @Transactional
             public void digitalObjectWithSavedDatastreamsCannotBeHardDeleted(){
                 // try to delete the object if datastream is still available
                 org.junit.jupiter.api.Assertions.assertThrows(
                     DataIntegrityViolationException.class,
-                    () -> digitalObjectRepository.hardDelete(testDataSet.digitalObject())
+                    () -> digitalObjectRepository.delete(testDataSet.digitalObject())
                 );
 
                 // verify deletion is not cascaded
@@ -184,9 +183,10 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             }
 
             @Test
+            @Transactional
             public void digitalObjectWithSavedDatastreamsCanBeSoftDeleted(){
                 // try to delete the object if datastream is still available
-                org.junit.jupiter.api.Assertions.assertDoesNotThrow(() ->  digitalObjectRepository.delete(testDataSet.digitalObject()));
+                org.junit.jupiter.api.Assertions.assertDoesNotThrow(() ->  digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId()));
 
                 // verify deletion is not cascaded
                 Assertions.assertThat(
@@ -206,7 +206,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
 
             @Test
             public void deletionOfDatastreamDoesNotDeleteParentDigitalObject(){
-
 
                 // delete datastream
                 datastreamRepository.delete(testDataSet.mainDatastream());

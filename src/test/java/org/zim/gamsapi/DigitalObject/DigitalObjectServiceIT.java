@@ -227,28 +227,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   public class Delete {
 
     @Test
-    public void onlySoftDeletesDigitalObject() {
-
-      var found = digitalObjectService.findById(testDataSet.digitalObject().getId());
-      System.out.println("**** Found digital object: " + found);
-
-      digitalObjectService.delete(testDataSet.digitalObject());
-
-      Assertions.assertThatThrownBy(() -> digitalObjectService.findById(
-          testDataSet.digitalObject().getId())
-      ).isInstanceOf(DigitalObjectNotFoundException.class);
-
-      // This is a soft delete, so the object should still be found
-      Assertions.assertThat(
-          digitalObjectService.existsByIdSoftDeleteAware(
-              testDataSet.digitalObject().getId()
-          )
-      ).isTrue();
-
-    }
-
-
-    @Test
     public void deletesDigitalObject() {
       digitalObjectService.delete(testDataSet.digitalObject());
       Assertions.assertThatThrownBy(() -> digitalObjectService.findById(
