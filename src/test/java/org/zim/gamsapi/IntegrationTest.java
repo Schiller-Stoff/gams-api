@@ -4,21 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailureCleanupJob;
-import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailureRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.enums.TestCleanupService;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -39,28 +31,7 @@ public abstract class IntegrationTest {
   ClientRegistrationRepository clientRegistrationRepository;
 
   @Autowired
-  IProjectRepository projectRepository;
-
-  @Autowired
-  IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  IDatastreamRepository datastreamRepository;
-
-  @Autowired
-  IDatastreamContentRepository datastreamContentRepository;;
-
-  @Autowired
-  IDublinCoreEntryRepository dublinCoreElementRepository;
-
-  @Autowired
-  IGAMSCollectionRepository collectionRepository;
-
-  @Autowired
-  EventCaptureListener eventCaptureListener;
-
-  @Autowired
-  DatastreamContentDeletionFailureRepository datastreamContentDeletionFailureRepository;
+  private TestCleanupService testCleanupService;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
@@ -115,15 +86,8 @@ public abstract class IntegrationTest {
    * After each test, performs a system wipe so that the next test can start with a clean slate.
    */
   @AfterEach
-  public void tearDown() throws InterruptedException {
-    eventCaptureListener.clearEvents();
-    datastreamContentRepository.deleteAll();
-    dublinCoreElementRepository.deleteAll();
-    datastreamRepository.deleteAll();
-    collectionRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-    datastreamContentDeletionFailureRepository.deleteAll();
+  public void tearDown() {
+    testCleanupService.cleanupAllTestDataSafe();
   }
 
 
