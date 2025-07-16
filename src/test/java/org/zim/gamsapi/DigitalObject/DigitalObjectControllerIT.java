@@ -71,7 +71,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void mayNotDeleteADigitalObjectReferencedByAGamsCollection() throws Exception {
+    public void mayDeleteADigitalObjectReferencedByAGamsCollection() throws Exception {
 
       // Arrange
       DigitalObject digitalObject = TestDigitalObject.generate();
@@ -88,7 +88,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
                   testDataSet.project().getProjectAbbr(),
                   digitalObject.getId())
               .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is4xxClientError());
+          .andExpect(status().is3xxRedirection());
 
     }
 
