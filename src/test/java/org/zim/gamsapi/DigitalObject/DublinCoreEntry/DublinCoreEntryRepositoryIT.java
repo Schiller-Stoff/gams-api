@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -18,6 +18,7 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
 import org.zim.gamsapi.enums.TestDublinCoreEntry;
 import org.zim.gamsapi.enums.TestProject;
+
 import java.util.Set;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,7 +33,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
   @Autowired
   private IProjectRepository projectRepository;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @BeforeEach
@@ -76,7 +77,7 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void deletionOfdigitalObjectThrowsExceptionIfDublinCoreEntryStillExists(){
+    public void hardDeletionOfDigitalObjectDoesThrowExceptionIfDublinCoreEntryStillExists(){
 
       DigitalObject digitalObject = TestDigitalObject.generate();
       digitalObjectRepository.save(digitalObject);
@@ -84,9 +85,20 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
       dublinCoreEntryRepository.save(dublinCoreEntry);
 
       org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
-        digitalObjectRepository.delete(digitalObject);
+        digitalObjectRepository.hardDelete(digitalObject);
       });
 
+    }
+
+    @Test
+    public void softDeletionOfDigitalObjectDoesThrowExceptionIfDublinCoreEntryStillExists(){
+      DigitalObject digitalObject = TestDigitalObject.generate();
+      digitalObjectRepository.save(digitalObject);
+      DublinCoreEntry dublinCoreEntry = TestDublinCoreEntry.generate(digitalObject.getId());
+      dublinCoreEntryRepository.save(dublinCoreEntry);
+      org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+        digitalObjectRepository.delete(digitalObject);
+      });
     }
 
     @Test
