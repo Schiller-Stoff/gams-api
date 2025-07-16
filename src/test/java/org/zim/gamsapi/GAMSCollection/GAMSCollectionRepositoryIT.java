@@ -7,17 +7,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestGAMSCollection;
-
+import org.zim.gamsapi.enums.TestDataBuilder;
+import org.zim.gamsapi.enums.TestDataSet;
 
 /**
  * Integration test for the GAMSCollectionRepository.
@@ -27,44 +24,37 @@ import org.zim.gamsapi.enums.TestGAMSCollection;
 public class GAMSCollectionRepositoryIT extends IntegrationTest {
 
   // deactivates auditing
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
-
-  @Autowired
-  private IGAMSCollectionRepository collectionRepository;
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
   @Autowired
-  private IProjectRepository projectRepository;
+  private TestDataBuilder  testDataBuilder;
 
-  private Project testProject;
-
-  private DigitalObject testDigitalObject;
+  private TestDataSet testDataSet;
 
   @BeforeEach
   public void setUp() {
-    testDigitalObject = TestDigitalObject.generate();
-    testProject = testDigitalObject.getProject();
-    projectRepository.save(testProject);
-    digitalObjectRepository.save(testDigitalObject);
-
+    testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
   public class CASCADING {
 
     @Test
-    public void deletionOfADigitalObjectStillReferencedByACollectionThrows(){
+    public void softDeletionOfADigitalObjectStillReferencedByACollectionDoesNotThrow(){
+      Assertions.assertThatNoException().isThrownBy(
+        () -> digitalObjectRepository.delete(testDataSet.digitalObject())
+      );
+    }
 
-      final GAMSCollection TEST_GAMS_COLLECTION = TestGAMSCollection
-          .generate();
-      collectionRepository.save(TEST_GAMS_COLLECTION);
-      Assertions.assertThatThrownBy(() -> {
-        digitalObjectRepository.delete(testDigitalObject);
-      }).isInstanceOf(DataIntegrityViolationException.class);
-
+    @Test
+    @Transactional
+    public void hardDeletionOfADigitalObjectStillReferencedByACollectionThrows(){
+      Assertions.assertThatThrownBy(() -> digitalObjectRepository.hardDelete(testDataSet.digitalObject()))
+          .isInstanceOf(DataIntegrityViolationException.class);
     }
 
 
