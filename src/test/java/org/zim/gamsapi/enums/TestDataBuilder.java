@@ -151,6 +151,11 @@ public class TestDataBuilder {
   }
 
   @Transactional
+  public void removeTestCollection(TestDataSet testDataSet) {
+    gamsCollectionRepository.delete(testDataSet.gamsCollection());
+  }
+
+  @Transactional
   public TestDataSet buildTestDataSet() {
 
     var projectToBeSaved = ProjectBuilder.builder()
