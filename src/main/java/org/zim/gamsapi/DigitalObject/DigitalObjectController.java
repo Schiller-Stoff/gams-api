@@ -55,7 +55,7 @@ public class DigitalObjectController {
 
   @Operation(
       summary = "Check if the digital object's sub resources have been modified since a given date",
-      description = "Checks if the digital object's sub resources have been modified since given date (E.g. digital objects and datastreams). Changes to the object's itself (id etc.) are not reflected in this modification date. If the object's content have not been modified, it returns a 304 Not Modified status.",
+      description = "Checks if the digital object's sub resources have been modified since given date (datastreams). Changes to the object's itself (id etc.) are not reflected in this modification date. If the object's content have not been modified, it returns a 304 Not Modified status.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Digital object sub resources have been modified",
               content = @Content),
@@ -66,7 +66,7 @@ public class DigitalObjectController {
       }
   )
   @RequestMapping(value = "/{id}/datastreams", method = RequestMethod.HEAD)
-  public ResponseEntity<Void> checkDigitalObjectModification(
+  public ResponseEntity<Void> checkDigitalObjectContentModification(
       @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
@@ -75,6 +75,57 @@ public class DigitalObjectController {
     // Get latest modification date across entire entity hierarchy
     DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
         findLatestModificationDate(projectAbbr, id);
+
+    LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
+
+    // Format for HTTP header
+    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
+
+    // Handle conditional request
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
+
+    return ResponseEntity.ok()
+        .lastModified(zonedDateTime)
+        .build();
+
+  }
+
+  @Operation(
+      summary = "Check if the digital object's metadata has been modified since a given date",
+      description = "Checks if the digital object's metadata has been modified since given date (datastreams). If the object's metadata has not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital object's metadata has been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Digital object's metadata has not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
+  @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkDigitalObjectModification(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
+  ) {
+
+    // Get latest modification date across entire entity hierarchy
+    DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
+        findLastModifiedDate(projectAbbr, id);
 
     LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
 

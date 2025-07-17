@@ -108,6 +108,74 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   public class HEADRequests {
 
     @Nested
+    public class DigitalObjectModification {
+
+
+      @Test
+      public void headDigitalObjectReturns200ifObjectExists() throws Exception {
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+      }
+
+      @Test
+      public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    "nonExistentId")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void headDigitalObjectReturnsLastModifiedDate() throws Exception {
+
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(MockMvcResultMatchers.header().exists("Last-Modified"));
+      }
+
+      @Test
+      public void headDigitalObjectReturnsExpectedLastModifiedDate() throws Exception {
+
+        // expected date
+        Date expectedLastModified = testDataSet.digitalObject().getModified();
+        // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
+        expectedLastModified.setTime(expectedLastModified.getTime() / 1000 * 1000);
+
+        // Act
+        String digitalObjectLastModified = mockMvc.perform(
+            MockMvcRequestBuilders.head(
+                "/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId()))
+            .andReturn().getResponse().getHeader("Last-Modified");
+
+        org.assertj.core.api.Assertions.assertThat(digitalObjectLastModified).isNotNull();
+
+        // parse lastModified to Date
+        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(digitalObjectLastModified, formatter);
+        ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
+        Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+
+        org.assertj.core.api.Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
+            .isNotNull()
+            .isEqualTo(expectedLastModified);
+
+      }
+
+    }
+
+
+    @Nested
     public class SubResourcesModified {
 
       @Test
