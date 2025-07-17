@@ -107,124 +107,131 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Nested
   public class HEADRequests {
 
-    @Test
-    public void headDigitalObjectReturns200ifObjectExists() throws Exception {
+    @Nested
+    public class SubResourcesModified {
 
-      // Act
-      mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testDataSet.project().getProjectAbbr(),
-                  testDataSet.digitalObject().getId())
-          .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isOk());
+      @Test
+      public void headDigitalObjectReturns200ifObjectExists() throws Exception {
+
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+
+      }
+
+      @Test
+      public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
+        // Act
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    "nonExistentId")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+
+      }
+
+      @Test
+      public void HEADDigitalObjectResponsesWithIncludedLastModifiedHeader() throws Exception {
+
+        // assert
+        mockMvc.perform(
+            MockMvcRequestBuilders.head(
+                "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+            )
+        ).andExpect(
+            MockMvcResultMatchers.header().exists("Last-Modified"));
+
+
+      }
+
+      /**
+       * Tests if the Last-Modified header of a HEAD request contains the expected date
+       * (of the saved digital object).
+       * @throws Exception if the test fails (mockMvc.perform)
+       */
+      @Test
+      public void HEADDigitalObjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
+
+        // Act
+        String lastModifiedHeaderValue = mockMvc.perform(
+            MockMvcRequestBuilders.head(
+                "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+            )
+        ).andReturn().getResponse().getHeader("Last-Modified");
+
+        // Assert
+        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
+
+        // parse lastModified to Date
+        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(lastModifiedHeaderValue, formatter);
+        ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
+        Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+
+        // expected date
+        Date expectedDate = testDataSet.digitalObject().getModified();
+        // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
+        expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
+
+        // assert same time
+        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValueAsDate).hasSameTimeAs(expectedDate);
+
+      }
+
+      /**
+       * If a client supplies an If-Modified-Since header wit an invalid date format,
+       * the server should respond with a 400 Bad Request status.
+       * @throws Exception if the test fails (mockMvc.perform)
+       */
+      @Test
+      public void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
+
+
+        final String MALFORMED_DATE = "PETER";
+
+        final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        mockMvc.perform(
+            MockMvcRequestBuilders
+                .head(URL)
+                .header("If-Modified-Since", MALFORMED_DATE)
+        ).andExpect(
+            status().isBadRequest()
+        );
+
+      }
+
+      /**
+       * If a client supplies an If-Modified-Since header with a date that is after the last modified date of the object,
+       * the server should respond with a 304 Not Modified status.
+       * @throws Exception if the test fails (mockMvc.perform)
+       */
+      @Test
+      public void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
+
+
+        // Create a date in the future that's properly formatted for HTTP headers
+        ZonedDateTime futureDate = ZonedDateTime.now(ZoneId.systemDefault()).plusYears(1);
+        String ifModifiedSinceHeader = DateTimeFormatter.RFC_1123_DATE_TIME.format(futureDate);
+
+        final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams", testDataSet.digitalObject().getProject().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        mockMvc.perform(
+            MockMvcRequestBuilders
+                .head(URL)
+                .header("If-Modified-Since", ifModifiedSinceHeader)
+        ).andExpect(
+            status().isNotModified()
+        );
+
+      }
 
     }
 
-    @Test
-    public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
-      // Act
-      mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testDataSet.project().getProjectAbbr(),
-                  "nonExistentId")
-          .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().isNotFound());
 
-    }
-
-    @Test
-    public void HEADDigitalObjectResponsesWithIncludedLastModifiedHeader() throws Exception {
-
-      // assert
-      mockMvc.perform(
-          MockMvcRequestBuilders.head(
-              "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
-          )
-      ).andExpect(
-          MockMvcResultMatchers.header().exists("Last-Modified"));
-
-
-    }
-
-    /**
-     * Tests if the Last-Modified header of a HEAD request contains the expected date
-     * (of the saved digital object).
-     * @throws Exception if the test fails (mockMvc.perform)
-     */
-    @Test
-    public void HEADDigitalObjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
-
-      // Act
-      String lastModifiedHeaderValue = mockMvc.perform(
-          MockMvcRequestBuilders.head(
-              "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
-          )
-      ).andReturn().getResponse().getHeader("Last-Modified");
-
-      // Assert
-      org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
-
-      // parse lastModified to Date
-      DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-      ZonedDateTime zonedDateTime = ZonedDateTime.parse(lastModifiedHeaderValue, formatter);
-      ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-      Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
-
-      // expected date
-      Date expectedDate = testDataSet.digitalObject().getModified();
-      // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-      expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
-
-      // assert same time
-      org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValueAsDate).hasSameTimeAs(expectedDate);
-
-    }
-
-    /**
-     * If a client supplies an If-Modified-Since header wit an invalid date format,
-     * the server should respond with a 400 Bad Request status.
-     * @throws Exception if the test fails (mockMvc.perform)
-     */
-    @Test
-    public void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
-
-
-      final String MALFORMED_DATE = "PETER";
-
-      final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
-
-      mockMvc.perform(
-          MockMvcRequestBuilders
-              .head(URL)
-              .header("If-Modified-Since", MALFORMED_DATE)
-      ).andExpect(
-          status().isBadRequest()
-      );
-
-    }
-
-    /**
-     * If a client supplies an If-Modified-Since header with a date that is after the last modified date of the object,
-     * the server should respond with a 304 Not Modified status.
-     * @throws Exception if the test fails (mockMvc.perform)
-     */
-    @Test
-    public void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
-
-
-      // Create a date in the future that's properly formatted for HTTP headers
-      ZonedDateTime futureDate = ZonedDateTime.now(ZoneId.systemDefault()).plusYears(1);
-      String ifModifiedSinceHeader = DateTimeFormatter.RFC_1123_DATE_TIME.format(futureDate);
-
-      final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams", testDataSet.digitalObject().getProject().getProjectAbbr(), testDataSet.digitalObject().getId());
-
-      mockMvc.perform(
-          MockMvcRequestBuilders
-              .head(URL)
-              .header("If-Modified-Since", ifModifiedSinceHeader)
-      ).andExpect(
-          status().isNotModified()
-      );
-
-    }
 
 
   }
