@@ -59,6 +59,41 @@ public class IngestServiceIT extends IntegrationTest {
   private AuditingHandler auditingHandler;
 
   @Nested
+  public class IngestUpdatesProjectContentLastModified {
+
+
+    @Test
+    public void ingestUpdatesProjectContentLastModified() throws IOException {
+
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // get the project before ingest
+      var project = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
+          .orElseThrow( () -> new RuntimeException("GAMS Project not found"));
+      var lastModifiedBeforeIngest = project.getContentLastModified();
+
+      bagFile = TestBag.loadFile();
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+      ingestService.ingest(ingest);
+
+      // get the project after ingest
+      var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
+          .orElseThrow();
+      var lastModifiedAfterIngest = updatedProject.getContentLastModified();
+
+      Assertions.assertThat(lastModifiedAfterIngest)
+          .isNotNull()
+          .isAfter(lastModifiedBeforeIngest);
+    }
+  }
+
+
+  @Nested
   public class IngestCreatesExpectedObjects {
     @BeforeEach
     public void setup() throws IOException {
@@ -122,6 +157,8 @@ public class IngestServiceIT extends IntegrationTest {
               "subject",
               "type");
     }
+
+
 
     @Nested
     public class DublinCoreEntries {

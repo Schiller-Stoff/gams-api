@@ -9,29 +9,30 @@ import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.GAMSDsid;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
-import org.zim.gamsapi.DigitalObject.DigitalObjectService;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
-import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
-import org.zim.gamsapi.Ingest.utils.*;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Date;
 
 @Service
 @Slf4j
@@ -45,7 +46,6 @@ public class IngestService implements IIngestService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
-  private final DigitalObjectService digitalObjectService;
 
   @Override
   @Transactional(rollbackFor = {
@@ -54,11 +54,13 @@ public class IngestService implements IIngestService {
   )
   public void ingest(Ingest ingest) {
 
-    if(!projectRepository.existsById(ingest.getProjectAbbr())){
-      String msg = String.format("Project defined for the ingest operation %s does not exist (defined in given request url - bag's sip.json was not analyzed). Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
-      log.warn(msg);
-      throw new ProjectNotFoundException(msg);
-    }
+    var foundProject = projectRepository.findById(ingest.getProjectAbbr()).orElseThrow(
+        () -> {
+          String msg = String.format("Project defined for the ingest operation %s does not exist (defined in given request url - bag's sip.json was not analyzed). Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
+          log.warn(msg);
+          return new ProjectNotFoundException(msg);
+        }
+    );
 
     // 01. unzip bagitinfo to temp
     Path bagDirPath;
@@ -162,6 +164,8 @@ public class IngestService implements IIngestService {
               }
             });
 
+      // tracks modification date of the content
+      foundProject.setContentLastModified(new Date());
       applicationEventPublisher.publishEvent(
           new DigitalObjectCreatedEvent(this, savedObject)
       );
