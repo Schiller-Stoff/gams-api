@@ -7,6 +7,9 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+
 import java.util.Date;
 import java.util.Optional;
 
@@ -17,8 +20,14 @@ public class DigitalObjectModificationService  implements IDigitalObjectModifica
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final IProjectRepository projectRepository;
 
-  public DigitalObjectModification findLatestModificationDate(String digitalObjectId) {
+  public DigitalObjectModification findLatestModificationDate(String projectAbbr, String digitalObjectId) {
+    if(!projectRepository.existsById(projectAbbr)){
+      String msg = String.format("Project with id %s does not exist", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
       String msg = String.format("DigitalObject with id %s does not exist", digitalObjectId);
@@ -28,6 +37,28 @@ public class DigitalObjectModificationService  implements IDigitalObjectModifica
 
     DigitalObjectModification digitalObjectModification = calculateLatestModificationDate(digitalObjectId);
     log.info("Calculated latest modification date for digital object {} as {}", digitalObjectId, digitalObjectModification);
+    return digitalObjectModification;
+  }
+
+  @Override
+  public DigitalObjectModification findLastModifiedDate(String projectAbbr, String digitalObjectId) {
+    if(!projectRepository.existsById(projectAbbr)){
+      String msg = String.format("Project with id %s does not exist", projectAbbr);
+      log.error(msg);
+      throw new ProjectNotFoundException(msg);
+    }
+
+    var foundDigitalObject = digitalObjectRepository.findDigitalObjectById(digitalObjectId)
+        .orElseThrow(() -> {
+          String msg = String.format("DigitalObject with id %s does not exist", digitalObjectId);
+          log.warn(msg);
+          return new DigitalObjectNotFoundException(msg);
+        });
+
+    DigitalObjectModification digitalObjectModification = new DigitalObjectModification();
+    digitalObjectModification.setId(digitalObjectId);
+    digitalObjectModification.setLatestModificationDate(foundDigitalObject.getModified());
+    log.info("Found last modified date for digital object {} as {}", digitalObjectId, digitalObjectModification.getLatestModificationDate());
     return digitalObjectModification;
   }
 
