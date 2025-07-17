@@ -48,7 +48,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public DigitalObject save(DigitalObject digitalObject) {
-    projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
             () -> {
               String msg = String.format("Aborting saving of digital object. Cannot find project %s for digital object %s",digitalObject.getProject().getProjectAbbr(), digitalObject );
               log.error(msg);
@@ -57,6 +57,7 @@ public class DigitalObjectService implements IDigitalObjectService {
     );
 
     DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
+    foundProject.setContentLastModified(new Date());
     applicationEventPublisher.publishEvent(
         new DigitalObjectCreatedEvent(this, savedObject)
     );
@@ -110,6 +111,14 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Transactional
   public void delete(DigitalObject digitalObject) {
 
+    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+        () -> {
+          String msg = String.format("Cannot delete digital object %s. Project %s does not exist!", digitalObject, digitalObject.getProject().getProjectAbbr());
+          log.error(msg);
+          return new ProjectNotFoundException(msg);
+        }
+    );
+
     if(!digitalObjectRepository.existsById(digitalObject.getId())){
       String msg = String.format("Failed to delete digital object with id %s. It does not exist!", digitalObject.getId());
       log.error(msg);
@@ -127,9 +136,10 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     dublinCoreEntryRepository.deleteAllByDigitalObject(digitalObject);
 
-    // TODO system entry is wrong here, should be the user who deleted the object
-    //digitalObjectRepository.softDeleteById(digitalObject.getId(), new Date(), "system");
     digitalObjectRepository.delete(digitalObject);
+
+    foundProject.setContentLastModified(new Date());
+
     log.info("Successfully deleted digital object {}", digitalObject.getId());
   }
 
