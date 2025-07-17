@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.enums.TestDigitalObject;
@@ -38,6 +39,9 @@ public class ProjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
+
+  @Autowired
+  private IDigitalObjectService digitalObjectService;
 
 
   // disables auditing
@@ -327,41 +331,79 @@ public class ProjectControllerIT extends IntegrationTest {
 
 
     @Test
-    public void HEADProjectRespondsWithLastModifiedOfLastDigitalObjectCreated() throws Exception {
+    public void HEADProjectRespondsWithExpectedLastModifiedValue() throws Exception {
 
       Project savedProject = projectRepository.save(TestProject.generate());
 
       // wait 1 second (the last modified date via controller is only seconds accurate)
       Thread.sleep(1000);
 
+      // save a digital object to the project
       DigitalObject savedDigitalObject = digitalObjectRepository.save(TestDigitalObject.generate());
 
-      String lastModifiedHeaderValue = mockMvc.perform(
+      String projectLastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
               String.format("/api/v1/projects/%s", savedProject.getProjectAbbr())
           )
       ).andReturn().getResponse().getHeader("Last-Modified");
 
-      Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
+      Assertions.assertThat(projectLastModifiedHeaderValue).isNotNull();
 
       // parse lastModified to Date
       DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-      ZonedDateTime zonedDateTime = ZonedDateTime.parse(lastModifiedHeaderValue, formatter);
+      ZonedDateTime zonedDateTime = ZonedDateTime.parse(projectLastModifiedHeaderValue, formatter);
       ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-      Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+      Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
 
       // expected date
       Date expectedDate = savedDigitalObject.getModified();
       // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
       expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
 
-      Assertions.assertThat(lastModifiedHeaderValueAsDate).hasSameTimeAs(expectedDate);
+      Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
+          .isBefore(expectedDate);
 
-      // assert that it is not the same as saved project modified (because the digital object was created after the project)
-      Date notExpectedDate = savedProject.getModified();
-      // remove milliseconds
-      notExpectedDate.setTime(notExpectedDate.getTime() / 1000 * 1000);
-      Assertions.assertThat(lastModifiedHeaderValueAsDate).doesNotHaveToString(notExpectedDate.toString());
+    }
+
+    @Test
+    public void HEADProjectObjectsRespondsWithExpectedLastModifiedValue() throws Exception {
+
+      // first save test project
+      projectRepository.save(TestProject.generate());
+
+      // wait 1 second (the last modified date via controller is only seconds accurate)
+      Thread.sleep(1000);
+
+      // save a digital object to the project
+      DigitalObject savedDigitalObject = digitalObjectService.save(TestDigitalObject.generate());
+
+      // get updated projcet from database
+      var foundProject = projectRepository.findById(savedDigitalObject.getProject().getProjectAbbr())
+          .orElseThrow();
+
+      // the contentLastModified date should be updated to the same date as the digital object modified date
+
+      String projectLastModifiedHeaderValue = mockMvc.perform(
+          MockMvcRequestBuilders.head(
+              String.format("/api/v1/projects/%s/objects", foundProject.getProjectAbbr())
+          )
+      ).andReturn().getResponse().getHeader("Last-Modified");
+
+      Assertions.assertThat(projectLastModifiedHeaderValue).isNotNull();
+
+      // parse lastModified to Date
+      DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+      ZonedDateTime zonedDateTime = ZonedDateTime.parse(projectLastModifiedHeaderValue, formatter);
+      ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
+      Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+
+      // expected date
+      Date expectedDate = savedDigitalObject.getModified();
+      // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
+      expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
+
+      Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
+          .hasSameTimeAs(expectedDate);
 
     }
 
