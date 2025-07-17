@@ -53,7 +53,19 @@ public class DigitalObjectController {
   private final IDigitalObjectModificationService digitalObjectModificationService;
 
 
-  @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
+  @Operation(
+      summary = "Check if the digital object's sub resources have been modified since a given date",
+      description = "Checks if the digital object's sub resources have been modified since given date (E.g. digital objects and datastreams). Changes to the object's itself (id etc.) are not reflected in this modification date. If the object's content have not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital object sub resources have been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Digital object sub resources have not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
+  @RequestMapping(value = "/{id}/datastreams", method = RequestMethod.HEAD)
   public ResponseEntity<Void> checkDigitalObjectModification(
       @PathVariable String id,
       @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
