@@ -67,13 +67,14 @@ public class DigitalObjectController {
   )
   @RequestMapping(value = "/{id}/datastreams", method = RequestMethod.HEAD)
   public ResponseEntity<Void> checkDigitalObjectModification(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
   ) {
 
     // Get latest modification date across entire entity hierarchy
     DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
-        findLatestModificationDate(id);
+        findLatestModificationDate(projectAbbr, id);
 
     LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
 
