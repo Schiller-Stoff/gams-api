@@ -140,21 +140,6 @@ public class TestCleanupService {
   }
 
   /**
-   * Execute a cleanup query with error handling
-   */
-  private void executeCleanupQuery(String sql) {
-    try {
-      int deletedRows = entityManager.createNativeQuery(sql).executeUpdate();
-      if (deletedRows > 0) {
-        log.trace("Deleted {} rows with query: {}", deletedRows, sql);
-      }
-    } catch (Exception e) {
-      log.warn("Failed to execute cleanup query: {} - Error: {}", sql, e.getMessage());
-      // Don't throw - continue with other cleanup operations
-    }
-  }
-
-  /**
    * Execute delete all queries for all managed tables in the given order
    * @param orderedTableNames Array of table names in the order they should be deleted
    */
