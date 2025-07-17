@@ -52,37 +52,6 @@ public abstract class IntegrationTest {
   }
 
   /**
-   * Checks if required web services are reachable, like fedora6.
-   */
-  static {
-    /*
-
-    TODO implement add logic to check for external services?
-
-    RestTemplate restTemplate = new RestTemplate();
-    String fooResourceUrl = "http://localhost:8082";
-
-    ResponseEntity<String> response;
-
-    try {
-      response = restTemplate.getForEntity(fooResourceUrl, String.class);
-    } catch( RestClientException e){
-      String msg = String.format("Fedora6 didn't reply with status 200 on integration test start! Aborting integration tests. Make sure to run required docker services via docker-compose start before running the integration tests!");
-      log.error(msg);
-      throw e;
-    }
-
-    HttpStatus responseStatus = response.getStatusCode();
-
-    if(responseStatus.value() != HttpStatus.OK.value()){
-      String msg = String.format("Fedora6 didn't reply with status 200 on integration test start. Got instead status code: %s - Make sure to run required docker services via docker-compose start before running the integration tests!", responseStatus);
-      log.error(msg);
-    }*/
-
-
-  }
-
-  /**
    * After each test, performs a system wipe so that the next test can start with a clean slate.
    */
   @AfterEach
