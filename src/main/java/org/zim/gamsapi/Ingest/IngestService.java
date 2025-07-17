@@ -159,7 +159,7 @@ public class IngestService implements IIngestService {
                   String msg = String.format("Failed to save datastream %s. For datastream file with name %s", datastream, datastream.deriveDatastreamId());
                   log.error(msg);
                   datastreamContentRepository.delete(datastream.deriveDatastreamId());
-                };
+                }
                 throw e;
               }
             });
