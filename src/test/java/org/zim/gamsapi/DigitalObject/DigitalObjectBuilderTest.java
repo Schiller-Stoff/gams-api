@@ -4,9 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
-
-import java.util.Set;
+import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
 
 public class DigitalObjectBuilderTest extends UnitTest {
 

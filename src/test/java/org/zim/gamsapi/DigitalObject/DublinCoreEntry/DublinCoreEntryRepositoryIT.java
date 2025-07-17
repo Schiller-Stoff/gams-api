@@ -15,7 +15,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.*;
+import org.zim.gamsapi.TestUtilities.*;
 
 import java.util.Set;
 

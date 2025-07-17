@@ -13,9 +13,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.enums.TestDataBuilder;
-import org.zim.gamsapi.enums.TestDataSet;
-import org.zim.gamsapi.enums.TestGAMSCollection;
+import org.zim.gamsapi.TestUtilities.TestDataBuilder;
+import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestGAMSCollection;
 
 /**
  * Integration test for the GAMSCollectionRepository.

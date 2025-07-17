@@ -19,8 +19,8 @@ import org.zim.gamsapi.GAMSCollection.exceptions.CollectionNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestGAMSCollection;
-import org.zim.gamsapi.enums.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestGAMSCollection;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

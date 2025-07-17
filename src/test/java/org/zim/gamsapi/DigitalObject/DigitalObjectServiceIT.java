@@ -24,10 +24,10 @@ import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.dto.PagedResponse;
-import org.zim.gamsapi.enums.TestDataBuilder;
-import org.zim.gamsapi.enums.TestDataSet;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestDublinCoreEntry;
+import org.zim.gamsapi.TestUtilities.TestDataBuilder;
+import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestDublinCoreEntry;
 
 import java.util.*;
 

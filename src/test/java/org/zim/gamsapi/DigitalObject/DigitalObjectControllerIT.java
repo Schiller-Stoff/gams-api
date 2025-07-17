@@ -13,10 +13,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.enums.TestDataBuilder;
-import org.zim.gamsapi.enums.TestDataSet;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestGAMSCollection;
+import org.zim.gamsapi.TestUtilities.TestDataBuilder;
+import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestGAMSCollection;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

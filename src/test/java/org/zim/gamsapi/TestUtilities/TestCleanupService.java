@@ -1,4 +1,4 @@
-package org.zim.gamsapi.enums;
+package org.zim.gamsapi.TestUtilities;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

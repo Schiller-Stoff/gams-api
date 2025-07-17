@@ -13,9 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.enums.TestDataBuilder;
-import org.zim.gamsapi.enums.TestDataSet;
-import org.zim.gamsapi.enums.TestDublinCoreEntry;
+import org.zim.gamsapi.TestUtilities.TestDataBuilder;
+import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestDublinCoreEntry;
 
 import java.util.Set;
 

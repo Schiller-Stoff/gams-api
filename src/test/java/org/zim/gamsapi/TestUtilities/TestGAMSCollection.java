@@ -1,4 +1,4 @@
-package org.zim.gamsapi.enums;
+package org.zim.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;

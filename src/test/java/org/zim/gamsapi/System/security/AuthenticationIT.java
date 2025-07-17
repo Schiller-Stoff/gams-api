@@ -9,7 +9,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.System.configproperties.GAMSAPIProperties;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.TestProject;
 
 
 /**

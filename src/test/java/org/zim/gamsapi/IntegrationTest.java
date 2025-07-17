@@ -10,7 +10,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.zim.gamsapi.enums.TestCleanupService;
+import org.zim.gamsapi.TestUtilities.TestCleanupService;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests

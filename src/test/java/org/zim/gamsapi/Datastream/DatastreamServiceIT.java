@@ -12,7 +12,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.enums.*;
+import org.zim.gamsapi.TestUtilities.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {

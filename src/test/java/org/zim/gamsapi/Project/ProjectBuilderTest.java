@@ -3,7 +3,7 @@ package org.zim.gamsapi.Project;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.TestProject;
 
 public class ProjectBuilderTest extends UnitTest {
 

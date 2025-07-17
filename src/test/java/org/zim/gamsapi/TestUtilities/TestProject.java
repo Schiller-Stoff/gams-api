@@ -1,4 +1,4 @@
-package org.zim.gamsapi.enums;
+package org.zim.gamsapi.TestUtilities;
 
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;

@@ -1,4 +1,4 @@
-package org.zim.gamsapi.enums;
+package org.zim.gamsapi.TestUtilities;
 
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
