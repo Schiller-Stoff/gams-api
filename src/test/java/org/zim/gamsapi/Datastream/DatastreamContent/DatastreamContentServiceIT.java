@@ -1,10 +1,11 @@
-package org.zim.gamsapi.Datastream;
+package org.zim.gamsapi.Datastream.DatastreamContent;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentService;
 import org.zim.gamsapi.IntegrationTest;

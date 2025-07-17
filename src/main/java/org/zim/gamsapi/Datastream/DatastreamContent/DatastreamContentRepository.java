@@ -1,9 +1,10 @@
-package org.zim.gamsapi.Datastream;
+package org.zim.gamsapi.Datastream.DatastreamContent;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Repository;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotWriteFileException;
