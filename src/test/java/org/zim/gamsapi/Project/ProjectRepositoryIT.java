@@ -11,8 +11,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestProject;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

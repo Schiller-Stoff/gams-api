@@ -6,18 +6,17 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestDublinCoreEntry;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.*;
+
 import java.util.Set;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,12 +31,17 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
   @Autowired
   private IProjectRepository projectRepository;
 
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
+
+  private TestDataSet testDataSet;
+
+  @Autowired
+  private TestDataBuilder testDataBuilder;
 
   @BeforeEach
   public void setup() {
-    projectRepository.save(TestProject.generate());
+    testDataSet = testDataBuilder.buildTestDataSet();
   }
 
 
@@ -46,64 +50,40 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
     @Test
     public void deleteAllWorksAsExpected_dublinCoreEntryShouldBeEmpty(){
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-
-      Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
-
       dublinCoreEntryRepository.deleteAll();
-
       Assertions.assertThat(dublinCoreEntryRepository.count()).isEqualTo(0);
-
     }
 
     @Test
     public void deletionOfDublinCoreEntryWorksAsExpected_dublinCoreEntryShouldBeEmpty(){
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      DublinCoreEntry dublinCoreEntry = TestDublinCoreEntry.generate(digitalObject.getId());
-      dublinCoreEntryRepository.save(dublinCoreEntry);
-
       Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
-
-      dublinCoreEntryRepository.delete(dublinCoreEntry);
-
+      dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
       Assertions.assertThat(dublinCoreEntryRepository.count()).isEqualTo(0);
-
     }
 
     @Test
-    public void deletionOfdigitalObjectThrowsExceptionIfDublinCoreEntryStillExists(){
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      DublinCoreEntry dublinCoreEntry = TestDublinCoreEntry.generate(digitalObject.getId());
-      dublinCoreEntryRepository.save(dublinCoreEntry);
-
+    public void hardDeletionOfDigitalObjectDoesThrowExceptionIfDublinCoreEntryStillExists(){
       org.junit.jupiter.api.Assertions.assertThrows(Exception.class, () -> {
-        digitalObjectRepository.delete(digitalObject);
+        digitalObjectRepository.delete(testDataSet.digitalObject());
       });
 
     }
 
     @Test
     @Transactional
+    public void softDeletionOfDigitalObjectDoesNotThrowExceptionIfDublinCoreEntryStillExists(){
+      org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
+        digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId());
+      });
+    }
+
+    @Test
+    @Transactional
     public void deletionOfAllDublinCoreEntriesForObjectDeletesCreatedEntry(){
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      DigitalObject savedObject =  digitalObjectRepository.save(digitalObject);
-      DublinCoreEntry dublinCoreEntry = TestDublinCoreEntry.generate(savedObject);
-      dublinCoreEntryRepository.save(dublinCoreEntry);
-
       Assertions.assertThat(digitalObjectRepository.count()).isGreaterThan(0);
       Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
-
-      dublinCoreEntryRepository.deleteAllByDigitalObject(savedObject);
+      dublinCoreEntryRepository.deleteAllByDigitalObject(testDataSet.digitalObject());
       Assertions.assertThat(dublinCoreEntryRepository.count()).isEqualTo(0);
-
     }
 
   }
@@ -114,14 +94,14 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
   @Nested
   public class Save {
 
-    final DigitalObject TEST_OBJECT = TestDigitalObject.generate();
-    final DublinCoreEntry TEST_DC_ENTRY = TestDublinCoreEntry.generate(TEST_OBJECT.getId());
+    final DublinCoreEntry TEST_DC_ENTRY = TestDublinCoreEntry.generate(
+        testDataSet.digitalObject().getId()
+    );
 
     @Test
     public void afterSavingThereAreMoreThan0DublinCoreEntries() {
       // need to first save the digital object
-      digitalObjectRepository.save(TEST_OBJECT);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(TEST_OBJECT.getId()));
+      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(testDataSet.digitalObject().getId()));
       Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
     }
 
@@ -134,7 +114,6 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
     @Test
     public void savesEntryWithExpectedLanguage() {
-      digitalObjectRepository.save(TEST_OBJECT);
       dublinCoreEntryRepository.save(TEST_DC_ENTRY);
 
       var foundDcEntry = dublinCoreEntryRepository.findById(TEST_DC_ENTRY.getId());
@@ -148,7 +127,6 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
     @Test
     public void savesDublinCoreEntryWithLanguageNull(){
       TEST_DC_ENTRY.setLanguage(null);
-      digitalObjectRepository.save(TEST_OBJECT);
       dublinCoreEntryRepository.save(TEST_DC_ENTRY);
       var foundDcEntry = dublinCoreEntryRepository.findById(TEST_DC_ENTRY.getId());
       Assertions.assertThat(foundDcEntry).isPresent();
@@ -164,13 +142,10 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
     @Test
     public void findDigitalObjectsByDublinCoreElementValueIsNotEmpty() {
 
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-
-      Assertions.assertThat(dublinCoreEntryRepository.findDigitalObjectsByDublinCoreElementValue(
-          TestDublinCoreEntry.NAME.getValue(),
-          TestDublinCoreEntry.VALUE.getValue()
+      Assertions.assertThat(dublinCoreEntryRepository.
+          findDigitalObjectsByDublinCoreElementValue(
+              testDataSet.dublinCoreEntry().getName(),
+              testDataSet.dublinCoreEntry().getValue()
       )).isNotEmpty();
 
 
@@ -180,28 +155,18 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
     public void returnsEmptyListIfNoDigitalObjectsMatch() {
       Assertions.assertThat(dublinCoreEntryRepository.findDigitalObjectsByDublinCoreElementValue(
           "foo",
-          TestDublinCoreEntry.VALUE.getValue()
+          testDataSet.dublinCoreEntry().getValue()
       )).isEmpty();
     }
 
     @Test
     public void mayFindExpectedDublinCoreTitlesForGivenDigitalObject(){
-
-      final String DC_TITLE = TestDublinCoreEntry.NAME.getValue();
-
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-      dublinCoreEntryRepository.save(TestDublinCoreEntry.generate(digitalObject.getId()));
-
       var dublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectAndName(
-          digitalObject, DC_TITLE
+          testDataSet.digitalObject(), testDataSet.dublinCoreEntry().getName()
       );
-
       Assertions.assertThat(dublinCoreEntries)
           .isNotEmpty()
-          // test data contains two subject entries
           .hasSize(1);
-
     }
 
 

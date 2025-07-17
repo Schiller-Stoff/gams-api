@@ -17,7 +17,7 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.*;
+import org.zim.gamsapi.TestUtilities.*;
 
 import java.util.ArrayList;
 import java.util.Date;

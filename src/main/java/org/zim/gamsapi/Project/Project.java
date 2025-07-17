@@ -28,6 +28,15 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 public class Project {
 
+  public static final String ENTITY_TABLE_NAME = "project";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      ENTITY_TABLE_NAME
+  };
+
   @NotBlank
   @Id
   @Column(name = "project_abbr")
@@ -68,6 +77,12 @@ public class Project {
   @Column(name = "modified_by")
   @LastModifiedBy
   private String modifiedBy;
+
+  /**
+   * Date when the content of the project was last modified
+   */
+  @Column(name = "content_last_modified")
+  private Date contentLastModified = new Date();
 
 
   @Override

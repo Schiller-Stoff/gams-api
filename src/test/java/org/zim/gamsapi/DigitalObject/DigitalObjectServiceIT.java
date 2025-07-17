@@ -22,16 +22,14 @@ import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.dto.PagedResponse;
-import org.zim.gamsapi.enums.TestDataBuilder;
-import org.zim.gamsapi.enums.TestDataSet;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestDublinCoreEntry;
+import org.zim.gamsapi.TestUtilities.TestDataBuilder;
+import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestDublinCoreEntry;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,6 +43,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
+  IProjectRepository projectRepository;
 
   @Autowired
   IDigitalObjectService digitalObjectService;
@@ -222,6 +223,36 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
   }
 
+  @Nested
+  public class SoftDeletions {
+
+    @Nested
+    public class IsSoftDeleted {
+
+      @Test
+      public void returnsFallseWhenDigitalObjectDoesNotExist() {
+        String nonExistentId = "nonExistentId";
+        Assertions.assertThat(digitalObjectService.isSoftDeleted(nonExistentId)).isFalse();
+      }
+
+      @Test
+      public void returnsFalseWhenDigitalObjectExists() {
+        Assertions.assertThat(digitalObjectService.isSoftDeleted(testDataSet.digitalObject().getId()))
+            .isFalse();
+      }
+
+      @Test
+      @Transactional
+      public void returnsTrueWhenDigitalObjectIsSoftDeleted() {
+        digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId());
+        Assertions.assertThat(digitalObjectService.isSoftDeleted(testDataSet.digitalObject().getId())).isTrue();
+      }
+
+    }
+
+
+
+  }
 
   @Nested
   public class Delete {
@@ -250,6 +281,25 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(
           dublinCoreEntryRepository.existsById(testDataSet.dublinCoreEntry().getId())
       ).isFalse();
+
+    }
+
+    @Test
+    public void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
+
+      Date projectContentLastModifiedBeforeDelete = testDataSet.project().getContentLastModified();
+
+      // this is a side effect of the delete operation, but we want to ensure that it works
+      digitalObjectService.delete(testDataSet.digitalObject());
+
+      var updatedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
+          .orElseThrow(() ->  new ProjectNotFoundException(testDataSet.project().getProjectAbbr()));
+
+      Date projectContentLastModifedAfterDelete = updatedProject.getContentLastModified();
+
+      Assertions.assertThat(projectContentLastModifedAfterDelete)
+          .isNotNull()
+          .isAfter(projectContentLastModifiedBeforeDelete);
 
     }
 

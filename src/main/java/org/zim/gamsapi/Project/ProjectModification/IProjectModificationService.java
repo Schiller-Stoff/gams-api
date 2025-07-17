@@ -10,11 +10,10 @@ public interface IProjectModificationService {
   ProjectModification findLatestModificationDate(String projectAbbr);
 
   /**
-   * Calculates the latest modification date of a project by comparing the last modified dates of the project itself,
-   * it's digital objects and it's datastreams.
+   * Finds the latest modification date of a project's content.
    * @param projectAbbr The project abbreviation.
-   * @return The latest modification date.
+   * @return The latest modification date of the content.
    */
-  ProjectModification calculateLatestModificationDate(String projectAbbr);
+  ProjectModification findContentLatestModificationDate(String projectAbbr);
 
 }

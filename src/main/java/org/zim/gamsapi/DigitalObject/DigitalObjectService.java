@@ -12,10 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -49,7 +48,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public DigitalObject save(DigitalObject digitalObject) {
-    projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
             () -> {
               String msg = String.format("Aborting saving of digital object. Cannot find project %s for digital object %s",digitalObject.getProject().getProjectAbbr(), digitalObject );
               log.error(msg);
@@ -58,6 +57,7 @@ public class DigitalObjectService implements IDigitalObjectService {
     );
 
     DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
+    foundProject.setContentLastModified(new Date());
     applicationEventPublisher.publishEvent(
         new DigitalObjectCreatedEvent(this, savedObject)
     );
@@ -102,9 +102,22 @@ public class DigitalObjectService implements IDigitalObjectService {
     return foundObject;
   }
 
+  @Transactional
+  public boolean isSoftDeleted(String id) {
+    return digitalObjectRepository.softDeletedExistsById(id);
+  }
+
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
+
+    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+        () -> {
+          String msg = String.format("Cannot delete digital object %s. Project %s does not exist!", digitalObject, digitalObject.getProject().getProjectAbbr());
+          log.error(msg);
+          return new ProjectNotFoundException(msg);
+        }
+    );
 
     if(!digitalObjectRepository.existsById(digitalObject.getId())){
       String msg = String.format("Failed to delete digital object with id %s. It does not exist!", digitalObject.getId());
@@ -116,6 +129,7 @@ public class DigitalObjectService implements IDigitalObjectService {
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
 
     // TODO missing transaction exception to be thrown?
+    // TODO needs refactoring using the failed delete event
     datastreams.forEach(datastream -> {
       fileSystemRepository.delete(datastream.deriveDatastreamId());
     });
@@ -123,7 +137,10 @@ public class DigitalObjectService implements IDigitalObjectService {
     dublinCoreEntryRepository.deleteAllByDigitalObject(digitalObject);
 
     digitalObjectRepository.delete(digitalObject);
-    log.info("Successfully deleted digital object {}", digitalObject);
+
+    foundProject.setContentLastModified(new Date());
+
+    log.info("Successfully deleted digital object {}", digitalObject.getId());
   }
 
 

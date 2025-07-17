@@ -3,21 +3,22 @@ package org.zim.gamsapi.Datastream;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.jena.util.FileUtils;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.MetadataBaseEntity;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -28,7 +29,7 @@ import java.util.Set;
  */
 @Entity
 @Table(
-        name = "datastream",
+        name = Datastream.ENTITY_TABLE_NAME,
         // this will guarantee that the dsid field is unique per referenced digital object!
         uniqueConstraints = {@UniqueConstraint(name = "DatastreamNameUniquePerObject", columnNames = { "digital_object_id", "dsid" })})
 @Data
@@ -40,6 +41,20 @@ import java.util.Set;
 @JacksonXmlRootElement(localName = "datastream")
 public class Datastream {
 
+  public static final String ENTITY_TABLE_NAME = "datastream";
+  public static final String LANG_TABLE_NAME = "datastream_lang";
+  public static final String TAGS_TABLE_NAME = "datastream_tags";
+  public static final String CONTENT_RESTRICTIONS_TABLE_NAME = "datastream_content_restrictions";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+          LANG_TABLE_NAME,
+          TAGS_TABLE_NAME,
+          CONTENT_RESTRICTIONS_TABLE_NAME,
+          ENTITY_TABLE_NAME
+  };
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @NotNull
@@ -113,6 +128,7 @@ public class Datastream {
    */
   @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
+  @Column(name = Datastream.CONTENT_RESTRICTIONS_TABLE_NAME)
   private Set<String> contentRestrictions = new HashSet<>();
 
   /**
@@ -120,6 +136,7 @@ public class Datastream {
    */
   @ElementCollection
   @NotNull
+  @Column(name = Datastream.TAGS_TABLE_NAME)
   private Set<String> tags = new HashSet<>();
 
   /**
@@ -127,6 +144,7 @@ public class Datastream {
    */
   @ElementCollection
   @NotNull
+  @Column(name = Datastream.LANG_TABLE_NAME)
   private Set<String> lang;
 
   /**

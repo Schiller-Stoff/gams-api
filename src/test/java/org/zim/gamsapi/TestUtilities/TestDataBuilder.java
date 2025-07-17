@@ -1,4 +1,4 @@
-package org.zim.gamsapi.enums;
+package org.zim.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
-import org.zim.gamsapi.Datastream.DatastreamContentRepository;
+import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
@@ -38,6 +39,9 @@ public class TestDataBuilder {
 
   @Autowired
   private DatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
+  private IGAMSCollectionRepository gamsCollectionRepository;
 
   @Transactional
   public void removeAllExceptProjects(TestDataSet testDataSet) {
@@ -201,7 +205,12 @@ public class TestDataBuilder {
 
     var persistedDublinCoreEntry = dublinCoreEntryRepository.save(dublinCoreEntryToBeSaved);
 
-    return new TestDataSet(persistedProject, persistedDigitalObject, persistedDatastream, persistedDublinCoreEntry);
+    return new TestDataSet(
+        persistedProject,
+        persistedDigitalObject,
+        persistedDatastream,
+        persistedDublinCoreEntry
+    );
   }
 
 

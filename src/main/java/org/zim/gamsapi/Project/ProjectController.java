@@ -26,7 +26,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -176,8 +175,8 @@ public class ProjectController {
   }
 
   @Operation(
-      summary = "Check if a project has been modified since a given date",
-      description = "Checks if a project has been modified since a given date. If the project has not been modified, it returns a 304 Not Modified status.",
+      summary = "Check if the project's metadata has been modified since a given date",
+      description = "Checks if the project's metadata has been modified since a given date (E.g. the project description). Changes to sub resources like digital objects and datastreams are not reflected in this modification date. If the project has not been modified, it returns a 304 Not Modified status.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Project has been modified",
               content = @Content),
@@ -196,6 +195,53 @@ public class ProjectController {
     // Get latest modification date across entire entity hierarchy
     ProjectModification projectModification = projectModificationService.
         findLatestModificationDate(projectAbbr);
+    LocalDateTime lastModified = projectModification.getLastModificationDateAsLocalDateTime();
+    // Format for HTTP header
+    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
+
+    // Handle conditional request
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
+
+    return ResponseEntity.ok()
+        .lastModified(zonedDateTime)
+        .build();
+  }
+
+  @Operation(
+      summary = "Check if the project's sub resources have been modified since a given date",
+      description = "Checks if the project's sub resources have been modified since a given date (E.g. digital objects and datastreams). Changes to the project metadata itself (project description or abbreviation) are not reflected in this modification date. If the project's content have not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project has been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Project has not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
+  @RequestMapping(value = "/{projectAbbr}/objects", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkProjectContentModification(
+      @PathVariable String projectAbbr,
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
+  ) {
+
+    // Get latest content modification date
+    ProjectModification projectModification = projectModificationService.
+        findContentLatestModificationDate(projectAbbr);
     LocalDateTime lastModified = projectModification.getLastModificationDateAsLocalDateTime();
     // Format for HTTP header
     ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());

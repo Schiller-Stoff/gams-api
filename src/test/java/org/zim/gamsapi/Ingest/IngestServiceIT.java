@@ -20,9 +20,9 @@ import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestBag;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.TestBag;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestProject;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +57,41 @@ public class IngestServiceIT extends IntegrationTest {
   // disables auditing
   @MockitoBean
   private AuditingHandler auditingHandler;
+
+  @Nested
+  public class IngestUpdatesProjectContentLastModified {
+
+
+    @Test
+    public void ingestUpdatesProjectContentLastModified() throws IOException {
+
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // get the project before ingest
+      var project = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
+          .orElseThrow( () -> new RuntimeException("GAMS Project not found"));
+      var lastModifiedBeforeIngest = project.getContentLastModified();
+
+      bagFile = TestBag.loadFile();
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+      ingestService.ingest(ingest);
+
+      // get the project after ingest
+      var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
+          .orElseThrow();
+      var lastModifiedAfterIngest = updatedProject.getContentLastModified();
+
+      Assertions.assertThat(lastModifiedAfterIngest)
+          .isNotNull()
+          .isAfter(lastModifiedBeforeIngest);
+    }
+  }
+
 
   @Nested
   public class IngestCreatesExpectedObjects {
@@ -122,6 +157,8 @@ public class IngestServiceIT extends IntegrationTest {
               "subject",
               "type");
     }
+
+
 
     @Nested
     public class DublinCoreEntries {
