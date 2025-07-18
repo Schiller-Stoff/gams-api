@@ -24,7 +24,7 @@
                     <li class="breadcrumb-item"><a th:text="${datastream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a></li>
                 </ol>
             </nav>
-            <h2 th:text="${datastream.dsid}"></h2>
+            <h2 class="display-6 fw-bold text-primary mb-3" th:text="${datastream.dsid}"></h2>
             <p>
                 Overview over a singular datastream
             </p>
