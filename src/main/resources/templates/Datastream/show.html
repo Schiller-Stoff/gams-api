@@ -32,15 +32,24 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h3 class="mb-0 h5">
-                        <i class="ti ti-book me-2"></i>Datastream details
+                        <i class="ti ti-id me-2"></i>Identifier(s)
                     </h3>
-                    <div>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
-                    </div>
                 </div>
                 <div class="card-body">
-                    <h4 class="h5">Stored file</h4>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>Dsid: </b><span th:text="${datastream.getDsid()}"></span></li>
+                        <li class="list-group-item"><b>Digital object id: </b><span th:text="${datastream.getDigitalObject().getId()}"></span></li>
+                        <li class="list-group-item"><b>Owning project: </b><span th:text="${project.getProjectAbbr()}"></span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0 h5">
+                        <i class="ti ti-database-export me-2"></i>Content
+                    </h3>
+                </div>
+                <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
                         <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.fileName}"></span></li>
@@ -50,7 +59,20 @@
             <div class="mt-2">
                 <a target="_blank" class="btn btn-light-primary mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
             </div>
+                </div>
+            </div>
 
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0 h5">
+                        <i class="ti ti-database me-2"></i>Metadata
+                    </h3>
+                    <div>
+                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
+                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
+                    </div>
+                </div>
+                <div class="card-body">
             <h4 class="h5 mt-1">Metadata</h4>
             <ul class="list-group" th:if="${datastream.baseMetadata}">
                 <li class="list-group-item">
@@ -114,6 +136,8 @@
                 <!--            <p th:text="${datastream.baseMetadata.rights}"></p>-->
                 <!--        </li>-->
             </ul>
+            </div>
+            </div>
             <br/>
 <!--            <h4>Content preview</h4>-->
 <!--            <div class="border border-2">-->
@@ -131,8 +155,7 @@
         <footer th:replace="~{fragments/general.html :: footer}"></footer>
     </div>
 </div>
-</div>
-</div>
+
 <script src="/assets/libs/jquery/dist/jquery.min.js"></script>
 <script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/js/sidebarmenu.js"></script>
