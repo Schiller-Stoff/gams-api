@@ -28,15 +28,10 @@
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h5">
-              <i class="ti ti-book me-2"></i>Object details
+              <i class="ti ti-book me-2"></i>Referenced resources
             </h3>
-            <div>
-              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
-              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
-            </div>
           </div>
             <div class="card-body">
-
                 <ul class="list-group">
                     <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
                     <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
@@ -189,12 +184,21 @@
                 </div>
 
               </div>
+            </div>
+        </div>
               <br/>
-
-
-              <br/>
-              <h2 class="h5">Metadata</h2>
-              <p>Primary metadata derived from the GAMS-API</p>
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-database me-2"></i>Metadata
+            </h3>
+            <div>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
+            </div>
+          </div>
+          <div class="card-body">
+            <p>Technical and administrative metadata managed by the GAMS-API</p>
               <div th:if="${do.mainResource}" class="accordion mb-2" id="accordionExample">
                 <div class="accordion-item">
                   <h2 class="accordion-header">
@@ -315,9 +319,12 @@
               </li>
               </ul>
               <br/>
-                </div>
-
+          </div>
         </div>
+
+
+
+
       </div>
     <footer th:replace="~{fragments/general.html :: footer}"></footer>
   </div>
