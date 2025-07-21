@@ -47,14 +47,6 @@ public class GAMSCollectionRepositoryIT extends IntegrationTest {
   public class CASCADING {
 
     @Test
-    @Transactional
-    public void softDeletionOfADigitalObjectStillReferencedByACollectionDoesNotThrow(){
-      Assertions.assertThatNoException().isThrownBy(
-        () -> digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId())
-      );
-    }
-
-    @Test
     public void hardDeletionOfADigitalObjectStillReferencedByACollectionThrows(){
       // saves a test collection with reference to the test object in the test dataset
       iGAMSCollectionRepository.save(TestGAMSCollection.generate());

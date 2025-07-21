@@ -183,19 +183,6 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             }
 
             @Test
-            @Transactional
-            public void digitalObjectWithSavedDatastreamsCanBeSoftDeleted(){
-                // try to delete the object if datastream is still available
-                org.junit.jupiter.api.Assertions.assertDoesNotThrow(() ->  digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId()));
-
-                // verify deletion is not cascaded
-                Assertions.assertThat(
-                    datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId())
-                ).isPresent();
-            }
-
-
-            @Test
             public void datastreamDoesNotCascadeDeletedFromProject(){
                 // because the test datastream should still exist
                 org.junit.jupiter.api.Assertions.assertThrows(

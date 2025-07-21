@@ -102,11 +102,6 @@ public class DigitalObjectService implements IDigitalObjectService {
     return foundObject;
   }
 
-  @Transactional
-  public boolean isSoftDeleted(String id) {
-    return digitalObjectRepository.softDeletedExistsById(id);
-  }
-
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {

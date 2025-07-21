@@ -71,14 +71,6 @@ public class DublinCoreEntryRepositoryIT extends IntegrationTest {
 
     @Test
     @Transactional
-    public void softDeletionOfDigitalObjectDoesNotThrowExceptionIfDublinCoreEntryStillExists(){
-      org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> {
-        digitalObjectRepository.softDeleteById(testDataSet.digitalObject().getId());
-      });
-    }
-
-    @Test
-    @Transactional
     public void deletionOfAllDublinCoreEntriesForObjectDeletesCreatedEntry(){
       Assertions.assertThat(digitalObjectRepository.count()).isGreaterThan(0);
       Assertions.assertThat(dublinCoreEntryRepository.count()).isGreaterThan(0);
