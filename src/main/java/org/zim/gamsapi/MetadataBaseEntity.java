@@ -44,39 +44,10 @@ public class MetadataBaseEntity {
   @Size(max = 2000)
   private String description;
 
+  @NotEmpty
+  private String md5Checksum;
 
-  /**
-   * Arbitrarily associated format with the digital object / datastream
-   * e.g. datastream --> book-page
-   * e.g. digital object --> book
-   */
-  //private String format;
-
-
-  /**
-   * Arbitrarily associated subjects with the digital object / datastreams
-   */
-  //private Set<String> subject;
-
-  /**
-   * Arbitrarily associated contributor
-   */
-  //private String contributor;
-
-  /**
-   * Arbitrarily associated date with the digital object / datastream.
-   */
-  //private String date;
-
-  //private String type;
-
-  //private String source;
-
-  // system controlled - always english?
-  //private String language;
-
-  //private String relation;
-
-  //private String coverage;
+  @NotEmpty
+  private String sha512Checksum;
 
 }
