@@ -1,1 +1,5 @@
-data/content/TEI_SOURCE.xml HASH
+740193d9633d8449ee1bff28030fe045  data/content/DC.xml
+740193d9633d8449ee1bff28030fe045  data/content/test.txt
+740193d9633d8449ee1bff28030fe045  data/content/manifest.json
+740193d9633d8449ee1bff28030fe045  data/content/search.json
+740193d9633d8449ee1bff28030fe045  data/meta/sip.json
