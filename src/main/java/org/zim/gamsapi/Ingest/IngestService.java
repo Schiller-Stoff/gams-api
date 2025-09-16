@@ -62,12 +62,11 @@ public class IngestService implements IIngestService {
         }
     );
 
-    // 01. unzip bagitinfo to temp
+    // 01. unzip bag to temp
     Path bagDirPath;
     try {
       bagDirPath = ZipUtils.unzipToTempDir(ingest.getZippedBagItFolder());
     } catch (IngestProcessingException e){
-      // provide more context information for the logging and user.
       String msg = String.format("Failed to ingest given ingest operation %s. Original error: %s", ingest, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
