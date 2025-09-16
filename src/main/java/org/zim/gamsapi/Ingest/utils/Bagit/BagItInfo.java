@@ -10,13 +10,9 @@ import lombok.Data;
 @Builder
 public class BagItInfo {
 
-  private String id;
-  private String title;
+  private String date;
+  private String time;
+  private String payloadOxum;
   private String contactMail;
-  private String type;
   private String externalDescription;
-  private String publisher;
-  private String rights;
-  private String creator;
-  private String childObjectIds;
 }
