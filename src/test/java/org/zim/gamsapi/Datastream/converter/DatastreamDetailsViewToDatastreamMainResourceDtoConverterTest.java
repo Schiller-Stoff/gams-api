@@ -99,7 +99,7 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
 
     @Override
     public MetadataBaseEntity getBaseMetadata() {
-      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description");
+      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description", "md5", "sha512");
     }
 
     @Override
