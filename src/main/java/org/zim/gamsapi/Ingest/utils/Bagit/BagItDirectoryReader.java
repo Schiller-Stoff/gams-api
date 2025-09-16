@@ -43,6 +43,7 @@ public class BagItDirectoryReader {
   public static BagItInfo extractBagItInfo(Path bagItDirPath) throws IngestProcessingException {
 
     // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
+    // TODO solve todos
 
     String pathToBagInfoFile = bagItDirPath.resolve(BagItFilePaths.BAG_INFO_FILE_PATH.name).toString();
     Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
@@ -50,15 +51,11 @@ public class BagItDirectoryReader {
     try {
       //TODO validation of baginfo is missing!
       return  BagItInfo.builder()
-              .id(fileValues.get("Id"))
-              .title(fileValues.get("Title"))
-              .contactMail(fileValues.get("Contact-Email"))
-              .type(fileValues.get("Type"))
+              .date(fileValues.get("Bagging-Date"))
+              .time(fileValues.get("Bagging-Time"))
+              .payloadOxum(fileValues.get("Payload-Oxum"))
               .externalDescription(fileValues.get("External-Description"))
-              .publisher(fileValues.get("Publisher"))
-              .rights(fileValues.get("Rights"))
-              .creator(fileValues.get("Creator"))
-              .childObjectIds(fileValues.get("Child-Object-Ids"))
+              .contactMail(fileValues.get("Contact-Email"))
               .build();
     } catch(NullPointerException e){
       String msg = String.format("Failed to extract a required key from %s to intern BagItInfo class. Original error: %s", BagItFilePaths.BAG_INFO_FILE_PATH.name, e);
