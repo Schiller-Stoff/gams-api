@@ -42,7 +42,7 @@ public class BagItDirectoryReader {
    * @return
    * @throws IngestProcessingException
    */
-  public static Map<String, String> extractFilenameSha512Map(Path bagItDirPath) throws IngestProcessingException {
+  public static Map<String, String> extractBagPathSha512Map(Path bagItDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
     // return a map of dsid to sha512 checksum
 
@@ -51,22 +51,17 @@ public class BagItDirectoryReader {
 
     checksumPathsMap.forEach(
         (sha512Checksum, bagPath) -> {
-           // from bagPath take value after last '/'
-           String dsid = bagPath.trim().substring(bagPath.trim().lastIndexOf('/') + 1);
-
-           if(dsidChecksumMap.containsKey(dsid)){
-            String msg = String.format("Encountered duplicate dsid %s in sha512 manifest file %s. Original checksum: %s, new checksum: %s", dsid, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name, dsidChecksumMap.get(dsid), sha512Checksum);
+           if(dsidChecksumMap.containsValue(sha512Checksum)){
+            String msg = String.format("Encountered duplicate checksum %s in sha512 manifest file %s.", sha512Checksum, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
            }
-
            if(sha512Checksum.length() != 128) {
-            String msg = String.format("Encountered invalid sha512 checksum for dsid %s in sha512 manifest file %s. Checksum must be 128 characters long. Checksum: %s", dsid, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name, sha512Checksum);
+            String msg = String.format("Encountered invalid sha512 checksum for dsid %s in sha512 manifest file %s. Checksum must be 128 characters long.", sha512Checksum, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
            }
-
-           dsidChecksumMap.put(dsid, sha512Checksum);
+           dsidChecksumMap.put(bagPath, sha512Checksum);
         }
     );
 
@@ -76,11 +71,12 @@ public class BagItDirectoryReader {
   /**
    * TODO jdoc
    * TODO test
+   * TODO somewaht duplicated with sha-512 logic
    * @param bagItDirPath
    * @return
    * @throws IngestProcessingException
    */
-  public static Map<String,String> extractFileNameMd5Map(Path bagItDirPath) throws IngestProcessingException {
+  public static Map<String,String> extractBagPathMd5Map(Path bagItDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
 
     // return a map of dsid to md5 checksum
@@ -89,25 +85,19 @@ public class BagItDirectoryReader {
 
     checksumPathsMap.forEach(
         (checksum, bagPath) -> {
-          // from bagPath take value after last '/'
-          String dsid = bagPath.trim().substring(bagPath.trim().lastIndexOf('/') + 1);
-
-          if(dsidChecksumMap.containsKey(dsid)){
-            String msg = String.format("Encountered duplicate dsid %s in md5 manifest file %s. Original checksum: %s, new checksum: %s", dsid, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name, dsidChecksumMap.get(dsid), checksum);
+          if(dsidChecksumMap.containsKey(checksum)){
+            String msg = String.format("Encountered duplicate checksum %s in md5 manifest file %s.", checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
           }
-
           if(checksum.length() != 32) {
-            String msg = String.format("Encountered invalid md5 checksum for dsid %s in md5 manifest file %s. Checksum must be 32 characters long. Checksum: %s", dsid, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name, checksum);
+            String msg = String.format("Encountered invalid md5 checksum %s in md5 manifest file %s. Checksum must be 32 characters long.", checksum, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
           }
-
-          dsidChecksumMap.put(dsid, checksum);
+          dsidChecksumMap.put(bagPath, checksum);
         }
     );
-
     return dsidChecksumMap;
   }
 

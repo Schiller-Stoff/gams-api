@@ -22,6 +22,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagItFilePaths;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
@@ -81,8 +82,8 @@ public class IngestService implements IIngestService {
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
-      var dsidSha512Map = BagItDirectoryReader.extractFilenameSha512Map(bagDirPath);
-      var dsidMd5Map = BagItDirectoryReader.extractFileNameMd5Map(bagDirPath);
+      var dsidSha512Map = BagItDirectoryReader.extractBagPathSha512Map(bagDirPath);
+      var dsidMd5Map = BagItDirectoryReader.extractBagPathMd5Map(bagDirPath);
 
 
       // 02. build and save digital object from bag-info.txt
@@ -102,8 +103,8 @@ public class IngestService implements IIngestService {
 
       // assign digital object checksums from sip.json
       // TODO this is quite intransparent - because the mapping is done by dsid (and the sip.json is not a dsid)
-      String objectMd5 = dsidMd5Map.get("sip.json");
-      String objectSha512 = dsidSha512Map.get("sip.json");
+      String objectMd5 = dsidMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
+      String objectSha512 = dsidSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
 
       if(objectMd5 == null || objectMd5.isEmpty()){
         String msg  = String.format("Failed to find md5 checksum for digital object %s in manifest-md5.txt %s. Cannot continue ingest operation %s", digitalObject, dsidMd5Map, ingest);
@@ -151,17 +152,17 @@ public class IngestService implements IIngestService {
               datastream.setMimeType(contentFile.getMimetype());
 
               // set sha512 from manifest-sha512.txt
-              String sha512 = dsidSha512Map.get(contentFile.getDsid());
-              String md5 = dsidMd5Map.get(contentFile.getDsid());
+              String sha512 = dsidSha512Map.get(contentFile.getBagpath());
+              String md5 = dsidMd5Map.get(contentFile.getBagpath());
 
               if(sha512 == null || sha512.isEmpty()){
-                String msg  = String.format("Failed to find sha512 checksum for datastream %s in manifest-sha512.txt %s for given ingest %s", datastream, dsidSha512Map, ingest);
+                String msg  = String.format("Failed to find sha512 checksum for datastream content file %s in manifest-sha512.txt %s for given ingest %s", contentFile.getBagpath(), dsidSha512Map, ingest);
                 log.error(msg);
                 throw new IngestProcessingException(msg);
               }
 
               if(md5 == null || md5.isEmpty()){
-                String msg  = String.format("Failed to find md5 checksum for datastream %s in manifest-md5.txt %s for given ingest %s", datastream, dsidMd5Map, ingest);
+                String msg  = String.format("Failed to find md5 checksum for datastream content file %s in manifest-md5.txt %s for given ingest %s", contentFile.getBagpath(), dsidMd5Map, ingest);
                 log.error(msg);
                 throw new IngestProcessingException(msg);
               }
