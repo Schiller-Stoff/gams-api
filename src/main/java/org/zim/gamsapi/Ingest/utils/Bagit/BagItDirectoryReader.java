@@ -46,7 +46,7 @@ public class BagItDirectoryReader {
     String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
     // return a map of dsid to sha512 checksum
 
-    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, "  ");
+    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
     var dsidChecksumMap = new HashMap<String, String>();
 
     checksumPathsMap.forEach(
@@ -85,7 +85,7 @@ public class BagItDirectoryReader {
 
     // return a map of dsid to md5 checksum
     var dsidChecksumMap = new HashMap<String, String>();
-    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, "  ");
+    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
 
     checksumPathsMap.forEach(
         (checksum, bagPath) -> {
