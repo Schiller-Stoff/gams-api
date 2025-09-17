@@ -61,6 +61,21 @@ public class BagItDirectoryReader {
             log.error(msg);
             throw new IngestProcessingException(msg);
            }
+
+          if(bagPath == null){
+            String msg = String.format("Encountered null bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            log.error(msg);
+            // TODO different exception?
+            throw new IngestProcessingException(msg);
+          }
+
+          if(bagPath.isBlank()){
+            String msg = String.format("Encountered empty bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            log.error(msg);
+            // TODO different exception?
+            throw new IngestProcessingException(msg);
+          }
+
            dsidChecksumMap.put(bagPath, sha512Checksum);
         }
     );
@@ -95,6 +110,21 @@ public class BagItDirectoryReader {
             log.error(msg);
             throw new IngestProcessingException(msg);
           }
+
+          if(bagPath == null){
+            String msg = String.format("Encountered null bag path for checksum %s in md5 manifest file %s.", checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            log.error(msg);
+            // TODO different exception?
+            throw new IngestProcessingException(msg);
+          }
+
+          if(bagPath.isBlank()){
+            String msg = String.format("Encountered empty bag path for checksum %s in md5 manifest file %s.", checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            log.error(msg);
+            // TODO different exception?
+            throw new IngestProcessingException(msg);
+          }
+
           dsidChecksumMap.put(bagPath, checksum);
         }
     );
