@@ -25,8 +25,6 @@ import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
-import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
@@ -83,8 +81,8 @@ public class IngestService implements IIngestService {
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
-      var dsidSha512Map = BagItDirectoryReader.extractDsidSha512Map(bagDirPath);
-      var dsidMd5Map = BagItDirectoryReader.extractDsidMd5Map(bagDirPath);
+      var dsidSha512Map = BagItDirectoryReader.extractFilenameSha512Map(bagDirPath);
+      var dsidMd5Map = BagItDirectoryReader.extractFileMapMd5Map(bagDirPath);
 
 
       // 02. build and save digital object from bag-info.txt

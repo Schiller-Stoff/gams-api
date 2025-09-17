@@ -42,7 +42,7 @@ public class BagItDirectoryReader {
    * @return
    * @throws IngestProcessingException
    */
-  public static Map<String, String> extractDsidSha512Map(Path bagItDirPath) throws IngestProcessingException {
+  public static Map<String, String> extractFilenameSha512Map(Path bagItDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
     // return a map of dsid to sha512 checksum
 
@@ -80,7 +80,7 @@ public class BagItDirectoryReader {
    * @return
    * @throws IngestProcessingException
    */
-  public static Map<String,String> extractDsidMd5Map(Path bagItDirPath) throws IngestProcessingException {
+  public static Map<String,String> extractFileMapMd5Map(Path bagItDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
 
     // return a map of dsid to md5 checksum
