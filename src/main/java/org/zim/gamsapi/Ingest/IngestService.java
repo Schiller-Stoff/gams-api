@@ -82,7 +82,7 @@ public class IngestService implements IIngestService {
       }
 
       var dsidSha512Map = BagItDirectoryReader.extractFilenameSha512Map(bagDirPath);
-      var dsidMd5Map = BagItDirectoryReader.extractFileMapMd5Map(bagDirPath);
+      var dsidMd5Map = BagItDirectoryReader.extractFileNameMd5Map(bagDirPath);
 
 
       // 02. build and save digital object from bag-info.txt
