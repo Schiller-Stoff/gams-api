@@ -25,6 +25,8 @@ import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
+import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
@@ -81,6 +83,10 @@ public class IngestService implements IIngestService {
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
+      var dsidSha512Map = BagItDirectoryReader.extractDsidSha512Map(bagDirPath);
+      var dsidMd5Map = BagItDirectoryReader.extractDsidMd5Map(bagDirPath);
+
+
       // 02. build and save digital object from bag-info.txt
       DigitalObject digitalObject = conversionService.convert(bagitSipJson, DigitalObject.class);
       if(digitalObject == null){
@@ -95,6 +101,26 @@ public class IngestService implements IIngestService {
         log.error(msg);
         throw new IngestObjectAlreadyExistsException(msg);
       }
+
+      // assign digital object checksums from sip.json
+      // TODO this is quite intransparent - because the mapping is done by dsid (and the sip.json is not a dsid)
+      String objectMd5 = dsidMd5Map.get("sip.json");
+      String objectSha512 = dsidSha512Map.get("sip.json");
+
+      if(objectMd5 == null || objectMd5.isEmpty()){
+        String msg  = String.format("Failed to find md5 checksum for digital object %s in manifest-md5.txt %s. Cannot continue ingest operation %s", digitalObject, dsidMd5Map, ingest);
+        log.error(msg);
+        throw new IngestProcessingException(msg);
+      }
+
+      if(objectSha512 == null || objectSha512.isEmpty()){
+        String msg  = String.format("Failed to find sha512 checksum for digital object %s in manifest-sha512.txt %s. Cannot continue ingest operation %s", dsidSha512Map, objectSha512, ingest);
+        log.error(msg);
+        throw new IngestProcessingException(msg);
+      }
+
+      digitalObject.getBaseMetadata().setMd5Checksum(objectMd5);
+      digitalObject.getBaseMetadata().setSha512Checksum(objectSha512);
 
       final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
@@ -126,12 +152,32 @@ public class IngestService implements IIngestService {
               datastream.setSize((long) datastreamContent.length);
               datastream.setMimeType(contentFile.getMimetype());
 
+              // set sha512 from manifest-sha512.txt
+              String sha512 = dsidSha512Map.get(contentFile.getDsid());
+              String md5 = dsidMd5Map.get(contentFile.getDsid());
+
+              if(sha512 == null || sha512.isEmpty()){
+                String msg  = String.format("Failed to find sha512 checksum for datastream %s in manifest-sha512.txt %s for given ingest %s", datastream, dsidSha512Map, ingest);
+                log.error(msg);
+                throw new IngestProcessingException(msg);
+              }
+
+              if(md5 == null || md5.isEmpty()){
+                String msg  = String.format("Failed to find md5 checksum for datastream %s in manifest-md5.txt %s for given ingest %s", datastream, dsidMd5Map, ingest);
+                log.error(msg);
+                throw new IngestProcessingException(msg);
+              }
+
+              datastream.getBaseMetadata().setMd5Checksum(md5);
+              datastream.getBaseMetadata().setSha512Checksum(sha512);
+
               // saving the datastream content to the filesystem
               datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
                 datastreamRepository.save(datastream);
+                log.info("Successfully saved datastream {}", datastream);
 
                 // also save dublin core metadata
                 if(contentFile.getDsid().equals(GAMSDsid.DC.getValue())){

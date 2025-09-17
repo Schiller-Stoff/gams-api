@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,6 +34,82 @@ public class BagItDirectoryReader {
 
   // TODO atm e.g. bagSipJson is being validated BUT not the bagit as a whole -- would need to check certain file conventions etc.?
   // (if checksums are available etc)
+
+  /**
+   * TODO Jdoc
+   * TODO test
+   * @param bagItDirPath
+   * @return
+   * @throws IngestProcessingException
+   */
+  public static Map<String, String> extractDsidSha512Map(Path bagItDirPath) throws IngestProcessingException {
+    String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
+    // return a map of dsid to sha512 checksum
+
+    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, "  ");
+    var dsidChecksumMap = new HashMap<String, String>();
+
+    checksumPathsMap.forEach(
+        (sha512Checksum, bagPath) -> {
+           // from bagPath take value after last '/'
+           String dsid = bagPath.trim().substring(bagPath.trim().lastIndexOf('/') + 1);
+
+           if(dsidChecksumMap.containsKey(dsid)){
+            String msg = String.format("Encountered duplicate dsid %s in sha512 manifest file %s. Original checksum: %s, new checksum: %s", dsid, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name, dsidChecksumMap.get(dsid), sha512Checksum);
+            log.error(msg);
+            throw new IngestProcessingException(msg);
+           }
+
+           if(sha512Checksum.length() != 128) {
+            String msg = String.format("Encountered invalid sha512 checksum for dsid %s in sha512 manifest file %s. Checksum must be 128 characters long. Checksum: %s", dsid, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name, sha512Checksum);
+            log.error(msg);
+            throw new IngestProcessingException(msg);
+           }
+
+           dsidChecksumMap.put(dsid, sha512Checksum);
+        }
+    );
+
+    return dsidChecksumMap;
+  }
+
+  /**
+   * TODO jdoc
+   * TODO test
+   * @param bagItDirPath
+   * @return
+   * @throws IngestProcessingException
+   */
+  public static Map<String,String> extractDsidMd5Map(Path bagItDirPath) throws IngestProcessingException {
+    String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
+
+    // return a map of dsid to md5 checksum
+    var dsidChecksumMap = new HashMap<String, String>();
+    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, "  ");
+
+    checksumPathsMap.forEach(
+        (checksum, bagPath) -> {
+          // from bagPath take value after last '/'
+          String dsid = bagPath.trim().substring(bagPath.trim().lastIndexOf('/') + 1);
+
+          if(dsidChecksumMap.containsKey(dsid)){
+            String msg = String.format("Encountered duplicate dsid %s in md5 manifest file %s. Original checksum: %s, new checksum: %s", dsid, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name, dsidChecksumMap.get(dsid), checksum);
+            log.error(msg);
+            throw new IngestProcessingException(msg);
+          }
+
+          if(checksum.length() != 32) {
+            String msg = String.format("Encountered invalid md5 checksum for dsid %s in md5 manifest file %s. Checksum must be 32 characters long. Checksum: %s", dsid, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name, checksum);
+            log.error(msg);
+            throw new IngestProcessingException(msg);
+          }
+
+          dsidChecksumMap.put(dsid, checksum);
+        }
+    );
+
+    return dsidChecksumMap;
+  }
 
   /**
    * Maps the key value pairs in the bag-info.txt file to a BagItInfo object.
@@ -65,28 +142,54 @@ public class BagItDirectoryReader {
 
   }
 
-
+  /**
+   * TODO jdoc
+   * @param filePath
+   * @return
+   * @throws IngestProcessingException
+   */
+  private static Map<String, String> mapKeyValueTextFile(String filePath) throws IngestProcessingException {
+    return mapKeyValueTextFile(filePath, ":");
+  }
 
   /**
    * Maps the key value pairs in defined text file to a map.
    * @param filePath The path to the text file.
    * @return A map of the key value pairs in the text file.
    */
-  private static Map<String, String> mapKeyValueTextFile(String filePath) throws IngestProcessingException {
+  private static Map<String, String> mapKeyValueTextFile(String filePath, String delimiter) throws IngestProcessingException {
     Map<String, String> map = new HashMap<>();
     try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
-      lines.filter(line -> line.contains(":"))
+      AtomicInteger lineCount = new AtomicInteger();
+      lines.filter(line -> line.contains(delimiter))
               .forEach(line -> {
-                String[] keyValuePair = line.split(":", 2);
+                String[] keyValuePair = line.split(delimiter, 2);
                 String key = keyValuePair[0];
                 String value = keyValuePair[1];
                 map.put(key, value);
+                lineCount.getAndIncrement();
               });
+
+      if(lineCount.get() != map.size()){
+        String msg = String.format("Failed to map key value pairs in file %s to map. The number of lines containing the delimiter (%s) does not match the number of entries in the resulting map.", filePath, delimiter);
+        log.error(msg);
+        // TODO better exception e.g. IO exception
+        throw new IngestProcessingException(msg);
+      }
+
     } catch (IOException e) {
       String msg = String.format("Failed to map key value pairs in file %s to map. Original error: %s", filePath, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
+
+    if(map.isEmpty()){
+      String msg = String.format("Failed to map key value pairs in file %s to map. The resulting map is empty.", filePath);
+      log.error(msg);
+      // TODO use different - best a checked exception? (IOException e.g.?)
+      throw new IngestProcessingException(msg);
+    }
+
     return map;
   }
 
