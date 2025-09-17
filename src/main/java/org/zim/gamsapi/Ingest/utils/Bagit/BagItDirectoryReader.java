@@ -186,6 +186,9 @@ public class BagItDirectoryReader {
                 String[] keyValuePair = line.split(delimiter, 2);
                 String key = keyValuePair[0];
                 String value = keyValuePair[1];
+                // remove possible ending and leading whitespaces
+                key = key.trim();
+                value = value.trim();
                 map.put(key, value);
                 lineCount.getAndIncrement();
               });
