@@ -2,9 +2,11 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
+import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.UnitTest;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BagTest extends UnitTest {
@@ -15,6 +17,25 @@ public class BagTest extends UnitTest {
   public void setup() throws IOException {
     var testBag = TestBag.loadFile();
     bag = new Bag(testBag.toPath());
+  }
+
+  @Nested
+  public class FindContentFileByDsid {
+    @Test
+    public void findContentFileByDsidReturnsExpectedDsid() {
+      var dsid = GAMSDsid.DC.getValue();
+      var bagFile = bag.findContentFileByDsid(dsid);
+      Assertions.assertThat(bagFile).isNotNull();
+      Assertions.assertThat(bagFile.getDsid()).isEqualTo(dsid);
+    }
+
+    @Test
+    public void findContentFileByDsidThrowsNoSuchElementExceptionIfNotFound() {
+      var dsid = "non-existing-dsid";
+      Assertions.assertThatThrownBy(() -> bag.findContentFileByDsid(dsid)).isInstanceOf(
+          NoSuchElementException.class
+      );
+    }
   }
 
   @Nested
@@ -157,36 +178,36 @@ public class BagTest extends UnitTest {
 
       @Test
       public void bagFilesAreNotNull() {
-        Assertions.assertThat(bag.getBagFiles()).isNotNull();
+        Assertions.assertThat(bag.getContentFiles()).isNotNull();
       }
 
       @Test
       public void bagFilesAreNotEmpty() {
-        Assertions.assertThat(bag.getBagFiles()).isNotEmpty();
+        Assertions.assertThat(bag.getContentFiles()).isNotEmpty();
       }
 
       @Test
       public void bagFilesHaveExpectedSize() {
-        Assertions.assertThat(bag.getBagFiles().size()).isEqualTo(5);
+        Assertions.assertThat(bag.getContentFiles().size()).isEqualTo(5);
       }
 
       @Test
       public void thereAreSameCountOfBagFilesAsContentFilesInSipJson() {
         final var CONTENT_FILES_COUNT = bag.getBagitSipJson().getContentFiles().size();
-        final var BAG_FILES_COUNT = bag.getBagFiles().size();;
+        final var BAG_FILES_COUNT = bag.getContentFiles().size();;
         Assertions.assertThat(BAG_FILES_COUNT).isEqualTo(CONTENT_FILES_COUNT);
       }
 
       @Test
       public void bagFilesHaveExactlySameDsidsAsContentFilesInSipJson() {
         var expectedDsids = bag.getBagitSipJson().getContentFiles().stream().map(cf -> cf.getDsid()).toList();
-        var actualDsids = bag.getBagFiles().stream().map(BagFile::getDsid).toList();
+        var actualDsids = bag.getContentFiles().stream().map(BagFile::getDsid).toList();
         Assertions.assertThat(actualDsids).containsExactlyInAnyOrderElementsOf(expectedDsids);
       }
 
       @Test
       public void bagFilesHaveNonNullAndNonEmptyProperties() {
-        for(var bagFile : bag.getBagFiles()) {
+        for(var bagFile : bag.getContentFiles()) {
           Assertions.assertThat(bagFile.getBagpath()).isNotNull().isNotEmpty();
           Assertions.assertThat(bagFile.getDsid()).isNotNull().isNotEmpty();
           Assertions.assertThat(bagFile.getMimetype()).isNotNull().isNotEmpty();
@@ -204,65 +225,58 @@ public class BagTest extends UnitTest {
 
       @Test
       public void contentFilesHaveChecksumsOfExpectedLength(){
-        for(var bagFile : bag.getBagFiles()) {
+        for(var bagFile : bag.getContentFiles()) {
           Assertions.assertThat(bagFile.getMd5Checksum()).isNotNull().isNotEmpty().hasSize(32);
           Assertions.assertThat(bagFile.getSha512Checksum()).isNotNull().isNotEmpty().hasSize(128);
         }
       }
 
       @Test
-      public void firstBagFileHasExpectedDsid(){
-        var firstBagFile = bag.getBagFiles().get(0);
-        var firstSipJsonContentFile = bag.getBagitSipJson().getContentFiles().iterator().next();
-        Assertions.assertThat(firstBagFile.getDsid()).isEqualTo(firstSipJsonContentFile.getDsid());
-      }
-
-      @Test
       public void bagFilesAndSipJsonContentFilesHaveExpectedSameProperties(){
-        int index = 0;
-        for (var bagContentFile : bag.getBagitSipJson().getContentFiles()) {
+        for (var sipJsonContentFile : bag.getBagitSipJson().getContentFiles()) {
 
-          var expectedDsid = bagContentFile.getDsid();
-          var actualDsid = bag.getBagFiles().get(index).getDsid();
+          var currentBagFile = bag.findContentFileByDsid(sipJsonContentFile.getDsid());
+
+          var expectedDsid = sipJsonContentFile.getDsid();
+          var actualDsid = currentBagFile.getDsid();
           Assertions.assertThat(actualDsid).isEqualTo(expectedDsid);
 
-          var expectedTitle = bagContentFile.getTitle();
-          var actualTitle = bag.getBagFiles().get(index).getTitle();
+          var expectedTitle = sipJsonContentFile.getTitle();
+          var actualTitle = currentBagFile.getTitle();
           Assertions.assertThat(actualTitle).isEqualTo(expectedTitle);
 
-          var expectedDescription = bagContentFile.getDescription();
-          var actualDescription = bag.getBagFiles().get(index).getDescription();
+          var expectedDescription = sipJsonContentFile.getDescription();
+          var actualDescription = currentBagFile.getDescription();
           Assertions.assertThat(actualDescription).isEqualTo(expectedDescription);
 
-          var expectedCreator = bagContentFile.getCreator();
-          var actualCreator = bag.getBagFiles().get(index).getCreator();
+          var expectedCreator = sipJsonContentFile.getCreator();
+          var actualCreator = currentBagFile.getCreator();
           Assertions.assertThat(actualCreator).isEqualTo(expectedCreator);
 
-          var expectedRights = bagContentFile.getRights();
-          var actualRights = bag.getBagFiles().get(index).getRights();
+          var expectedRights = sipJsonContentFile.getRights();
+          var actualRights = currentBagFile.getRights();
           Assertions.assertThat(actualRights).isEqualTo(expectedRights);
 
-          var expectedSize = bagContentFile.getSize();
-          var actualSize = bag.getBagFiles().get(index).getSize();
+          var expectedSize = sipJsonContentFile.getSize();
+          var actualSize = currentBagFile.getSize();
           Assertions.assertThat(actualSize).isEqualTo(expectedSize);
 
-          var expectedMimetype = bagContentFile.getMimetype();
-          var actualMimetype = bag.getBagFiles().get(index).getMimetype();
+          var expectedMimetype = sipJsonContentFile.getMimetype();
+          var actualMimetype = currentBagFile.getMimetype();
           Assertions.assertThat(actualMimetype).isEqualTo(expectedMimetype);
 
-          var expectedBagpath = bagContentFile.getBagpath();
-          var actualBagpath = bag.getBagFiles().get(index).getBagpath();
+          var expectedBagpath = sipJsonContentFile.getBagpath();
+          var actualBagpath = currentBagFile.getBagpath();
           Assertions.assertThat(actualBagpath).isEqualTo(expectedBagpath);
 
-          var expectedTags = bagContentFile.getTags();
-          var actualTags = bag.getBagFiles().get(index).getTags();
+          var expectedTags = sipJsonContentFile.getTags();
+          var actualTags = currentBagFile.getTags();
           Assertions.assertThat(actualTags).containsExactlyInAnyOrderElementsOf(expectedTags);
 
-          var expectedLang = bagContentFile.getLang();
-          var actualLang = bag.getBagFiles().get(index).getLang();
+          var expectedLang = sipJsonContentFile.getLang();
+          var actualLang = currentBagFile.getLang();
           Assertions.assertThat(actualLang).containsExactlyInAnyOrderElementsOf(expectedLang);
 
-          index++;
         }
       }
 
