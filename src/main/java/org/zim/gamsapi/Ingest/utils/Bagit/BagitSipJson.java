@@ -17,6 +17,7 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BagitSipJson {
 
+    // TODO rename to recid for consistency - this class is only needed for json mapping
     @JsonProperty("recid")
     @NotEmpty
     private String id;
