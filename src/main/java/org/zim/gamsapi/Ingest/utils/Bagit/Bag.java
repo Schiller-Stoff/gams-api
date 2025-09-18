@@ -86,8 +86,11 @@ public class Bag {
           .mimetype(contentFile.getMimetype())
           .size(contentFile.getSize())
           .title(contentFile.getTitle())
+          .rights(contentFile.getRights())
           .md5Checksum(md5)
           .sha512Checksum(sha512)
+          .tags(contentFile.getTags())
+          .lang(contentFile.getLang())
           .build();
 
 
