@@ -10,7 +10,11 @@ import java.io.IOException;
  */
 public class TestBag {
 
-  public static final String FOLDER_LOCATION = "testfiles/ingest/test-bag";
+  /**
+   * Location of the test bag folder in the resources' folder.
+   * Not meant to be used outside.
+   */
+  private static final String FOLDER_LOCATION = "testfiles/ingest/test-bag";
 
   private TestBag() {
     throw new IllegalStateException("Utility class");
