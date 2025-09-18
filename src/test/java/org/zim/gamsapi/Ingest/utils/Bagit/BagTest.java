@@ -76,58 +76,58 @@ public class BagTest extends UnitTest {
     }
 
     @Nested
-    public class BagitSipJson {
+    public class BagData {
       @Test
       public void bagitSipJsonIsNotNull() {
-        Assertions.assertThat(bag.getBagitSipJson()).isNotNull();
+        Assertions.assertThat(bag.getBagData()).isNotNull();
       }
 
       @Test
       public void bagitSipJsonHasExpectedNumberOfContentFiles() {
-        Assertions.assertThat(bag.getBagitSipJson().getContentFiles()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getContentFiles().size()).isEqualTo(5);
+        Assertions.assertThat(bag.getBagData().getContentFiles()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getContentFiles().size()).isEqualTo(5);
       }
 
       @Test
       public void bagitSipJsonHasExpectedId() {
-        Assertions.assertThat(bag.getBagitSipJson().getId()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getId()).isEqualTo(TestBag.TestBagSipJson.REC_ID);
+        Assertions.assertThat(bag.getBagData().getId()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getId()).isEqualTo(TestBag.TestBagSipJson.REC_ID);
       }
 
       @Test
       public void bagitSipJsonHasExpectedTitle() {
-        Assertions.assertThat(bag.getBagitSipJson().getTitle()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getTitle()).isEqualTo(TestBag.TestBagSipJson.TITLE);
+        Assertions.assertThat(bag.getBagData().getTitle()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getTitle()).isEqualTo(TestBag.TestBagSipJson.TITLE);
       }
 
       @Test
       public void bagitSipJsonHasExpectedDescription() {
-        Assertions.assertThat(bag.getBagitSipJson().getDescription()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getDescription()).isEqualTo(TestBag.TestBagSipJson.DESCRIPTION);
+        Assertions.assertThat(bag.getBagData().getDescription()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getDescription()).isEqualTo(TestBag.TestBagSipJson.DESCRIPTION);
       }
 
       @Test
       public void bagitSipJsonHasExepectedCreator() {
-        Assertions.assertThat(bag.getBagitSipJson().getCreator()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getCreator()).isEqualTo(TestBag.TestBagSipJson.CREATOR);
+        Assertions.assertThat(bag.getBagData().getCreator()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getCreator()).isEqualTo(TestBag.TestBagSipJson.CREATOR);
       }
 
       @Test
       public void bagitSipJsonHasExpectedRights() {
-        Assertions.assertThat(bag.getBagitSipJson().getRights()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getRights()).isEqualTo(TestBag.TestBagSipJson.RIGHTS);
+        Assertions.assertThat(bag.getBagData().getRights()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getRights()).isEqualTo(TestBag.TestBagSipJson.RIGHTS);
       }
 
       @Test
       public void bagitSipJsonHasExpectedPublisher() {
-        Assertions.assertThat(bag.getBagitSipJson().getPublisher()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getPublisher()).isEqualTo(TestBag.TestBagSipJson.PUBLISHER);
+        Assertions.assertThat(bag.getBagData().getPublisher()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getPublisher()).isEqualTo(TestBag.TestBagSipJson.PUBLISHER);
       }
 
       @Test
       public void bagitSipJsonHasExpectedMainResource() {
-        Assertions.assertThat(bag.getBagitSipJson().getMainResource()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getMainResource()).isEqualTo(TestBag.TestBagSipJson.MAIN_RESOURCE);
+        Assertions.assertThat(bag.getBagData().getMainResource()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getMainResource()).isEqualTo(TestBag.TestBagSipJson.MAIN_RESOURCE);
       }
 
       // TODO add createdBy test!
@@ -155,20 +155,20 @@ public class BagTest extends UnitTest {
 
       @Test
       public void bagitSipJsonHasExpectedProject() {
-        Assertions.assertThat(bag.getBagitSipJson().getProject()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getProject()).isEqualTo(TestBag.TestBagSipJson.PROJECT);
+        Assertions.assertThat(bag.getBagData().getProject()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getProject()).isEqualTo(TestBag.TestBagSipJson.PROJECT);
       }
 
       @Test
       public void bagitSipJsonHasExpectedObjectType() {
-        Assertions.assertThat(bag.getBagitSipJson().getObjectType()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getObjectType()).isEqualTo(TestBag.TestBagSipJson.OBJECT_TYPE);
+        Assertions.assertThat(bag.getBagData().getObjectType()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getObjectType()).isEqualTo(TestBag.TestBagSipJson.OBJECT_TYPE);
       }
 
       @Test
       public void bagitSipJsonHasExpectedFunder() {
-        Assertions.assertThat(bag.getBagitSipJson().getFunder()).isNotNull();
-        Assertions.assertThat(bag.getBagitSipJson().getFunder()).isEqualTo(TestBag.TestBagSipJson.FUNDER);
+        Assertions.assertThat(bag.getBagData().getFunder()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getFunder()).isEqualTo(TestBag.TestBagSipJson.FUNDER);
       }
 
     }
@@ -193,14 +193,14 @@ public class BagTest extends UnitTest {
 
       @Test
       public void thereAreSameCountOfBagFilesAsContentFilesInSipJson() {
-        final var CONTENT_FILES_COUNT = bag.getBagitSipJson().getContentFiles().size();
+        final var CONTENT_FILES_COUNT = bag.getBagData().getContentFiles().size();
         final var BAG_FILES_COUNT = bag.getContentFiles().size();;
         Assertions.assertThat(BAG_FILES_COUNT).isEqualTo(CONTENT_FILES_COUNT);
       }
 
       @Test
       public void bagFilesHaveExactlySameDsidsAsContentFilesInSipJson() {
-        var expectedDsids = bag.getBagitSipJson().getContentFiles().stream().map(cf -> cf.getDsid()).toList();
+        var expectedDsids = bag.getBagData().getContentFiles().stream().map(cf -> cf.getDsid()).toList();
         var actualDsids = bag.getContentFiles().stream().map(BagFile::getDsid).toList();
         Assertions.assertThat(actualDsids).containsExactlyInAnyOrderElementsOf(expectedDsids);
       }
@@ -233,7 +233,8 @@ public class BagTest extends UnitTest {
 
       @Test
       public void bagFilesAndSipJsonContentFilesHaveExpectedSameProperties(){
-        for (var sipJsonContentFile : bag.getBagitSipJson().getContentFiles()) {
+        var sipJson = BagItDirectoryReader.extractAndValidateSipJson(bag.getBagitDirPath());
+        for (var sipJsonContentFile : sipJson.getContentFiles()) {
 
           var currentBagFile = bag.findContentFileByDsid(sipJsonContentFile.getDsid());
 

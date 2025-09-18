@@ -20,9 +20,6 @@ public class Bag {
   // read and validate
   private BagItInfo bagItInfo;
 
-  // do i need this sipjson?
-  private BagitSipJson bagitSipJson;
-
   private BagData bagData;
 
   /**
@@ -50,7 +47,6 @@ public class Bag {
 
     // handle sip json
     BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(this.bagitDirPath);
-    this.bagitSipJson = bagitSipJson;
 
     String sipJsonMd5 = bagPathMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
