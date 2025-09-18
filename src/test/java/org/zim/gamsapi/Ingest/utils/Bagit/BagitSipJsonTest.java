@@ -3,7 +3,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 import jakarta.validation.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJsonContentFile;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 import org.zim.gamsapi.UnitTest;
 
@@ -80,17 +80,17 @@ public class BagitSipJsonTest extends UnitTest {
     public void containsThreeConstraintViolationsIfContainedBagitContentFileMissesThreeRequiredProperties(){
 
       // given
-      BagitContentFile bagitContentFile = new BagitContentFile();
+      BagitSipJsonContentFile bagitSipJsonContentFile = new BagitSipJsonContentFile();
       // the three missing required properties
       //bagitContentFile.setDsid("dsid");
       //bagitContentFile.setTitle("title");
-      bagitContentFile.setMimetype("mimetype");
-      bagitContentFile.setBagpath("path");
-      bagitContentFile.setRights("rights");
-      bagitContentFile.setSize(0L);
-      bagitContentFile.setCreator("creator");
+      bagitSipJsonContentFile.setMimetype("mimetype");
+      bagitSipJsonContentFile.setBagpath("path");
+      bagitSipJsonContentFile.setRights("rights");
+      bagitSipJsonContentFile.setSize(0L);
+      bagitSipJsonContentFile.setCreator("creator");
 
-      bagitSipJson.getContentFiles().add(bagitContentFile);
+      bagitSipJson.getContentFiles().add(bagitSipJsonContentFile);
 
       // when
       var violations = validator.validate(bagitSipJson);

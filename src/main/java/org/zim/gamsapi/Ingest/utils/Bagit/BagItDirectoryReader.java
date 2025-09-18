@@ -10,7 +10,7 @@ import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJsonContentFile;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 
 import java.io.IOException;
@@ -250,7 +250,7 @@ public class BagItDirectoryReader {
     }
 
     // check if dsids are unique
-    Set<String> containedDsids = bagitSipJson.getContentFiles().stream().map(BagitContentFile::getDsid).collect(Collectors.toSet());
+    Set<String> containedDsids = bagitSipJson.getContentFiles().stream().map(BagitSipJsonContentFile::getDsid).collect(Collectors.toSet());
     if(containedDsids.size() != bagitSipJson.getContentFiles().size()){
       String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagItFilePaths.BAG_SIP_JSON.name, bagitSipJson);
       log.error(msg);

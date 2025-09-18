@@ -11,7 +11,7 @@ import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-public class BagitContentFile {
+public class BagitSipJsonContentFile {
 
     /**
      * Size of the file in bytes.

@@ -55,7 +55,7 @@ public class BagitSipJson {
     /**
      * TODO write tests if validation of bagit-content file works as expected!
      */
-    private Set<@Valid BagitContentFile> contentFiles = new HashSet<>();
+    private Set<@Valid BagitSipJsonContentFile> contentFiles = new HashSet<>();
 
     private Set<String> types = new HashSet<>();
 
