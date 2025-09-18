@@ -31,4 +31,21 @@ public class TestBag {
     public static final String CONTACT_EMAIL = "dh@uni-graz.at";
     public static final String EXTERNAL_DESCRIPTION = "Test bag for gamsapi tests";
   }
+
+  public static class TestBagSipJson {
+    public static final String REC_ID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+    public static final String TITLE = TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue();
+    public static final String DESCRIPTION = TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue();
+    public static final String CREATOR = TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue();
+    public static final String RIGHTS = TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue();
+    public static final String PUBLISHER = TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue();
+    public static final String MAIN_RESOURCE = TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue();
+    public static final String SCHEMA = "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json";
+    public static final String CREATED_BY = "Pyrilo";
+    public static final String SOURCE = "local";
+    public static final String PROJECT = TestProject.PROJECT_ABBR.getValue();
+    public static final String OBJECT_TYPE = TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue();
+    public static final String FUNDER = TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue();
+  }
+
 }
