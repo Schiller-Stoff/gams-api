@@ -3,7 +3,7 @@ package org.zim.gamsapi.Ingest.utils.converter;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 import org.zim.gamsapi.UnitTest;
 import java.util.Set;
 

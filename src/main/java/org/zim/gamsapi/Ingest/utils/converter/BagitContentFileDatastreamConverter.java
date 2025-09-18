@@ -5,7 +5,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagitContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitContentFile;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 
 

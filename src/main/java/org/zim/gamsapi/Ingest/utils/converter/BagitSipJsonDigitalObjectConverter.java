@@ -4,7 +4,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 
 /**

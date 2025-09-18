@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Ingest.utils.Bagit;
+package org.zim.gamsapi.Ingest.utils.Bagit.mapping;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotEmpty;

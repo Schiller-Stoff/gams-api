@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagitContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitContentFile;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.TestUtilities.TestDatastream;
 

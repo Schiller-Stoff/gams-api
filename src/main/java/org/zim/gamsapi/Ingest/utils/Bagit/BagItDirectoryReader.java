@@ -10,6 +10,8 @@ import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 
 import java.io.IOException;
 import java.nio.file.Files;

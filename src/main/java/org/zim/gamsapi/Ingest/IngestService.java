@@ -23,7 +23,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItFilePaths;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;

@@ -3,6 +3,8 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 import jakarta.validation.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 import org.zim.gamsapi.UnitTest;
 
 

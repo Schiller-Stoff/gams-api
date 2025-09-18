@@ -2,6 +2,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
 
 import java.io.IOException;
 import java.nio.file.Path;
