@@ -1,0 +1,549 @@
+<?xml version="1.0" ?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+   <teiHeader xml:lang="de">
+      <fileDesc>
+          
+         <titleStmt>
+             
+            <title>Gedenktafel Seekapelle Bregenz</title>
+             
+            <respStmt ana="marcrelator:mrk">
+                 
+               <resp>Erfassung der geografischen und historischen Daten</resp>
+                 
+               <persName>
+                    
+                  <forename>Lukas</forename>
+                    
+                  <surname>Niehvoll</surname>
+                    
+               </persName>
+                   
+               <persName>
+                    
+                  <forename>Victoria</forename>
+                    
+                  <surname>Kuhmar</surname>
+                    
+               </persName>
+                 
+               <persName>
+                    
+                  <forename>Heimo</forename>
+                    
+                  <surname>Halbrainer</surname>
+                    
+               </persName>
+                
+            </respStmt>
+             
+            <respStmt ana="marcrelator:mrk">
+                 
+               <resp>Daten- und Informationsmodellierung</resp>
+                 
+               <persName>
+                    
+                  <forename>Sebastian</forename>
+                    
+                  <surname>Stoff</surname>
+                    
+                  <idno type="orcid">0000-0001-6941-113X</idno>
+                    
+               </persName>
+                
+            </respStmt>
+             
+            <respStmt>
+                 
+               <resp>Didaktische Aufarbeitung</resp>
+                 
+               <persName>
+                    
+                  <forename>Georg</forename>
+                    
+                  <surname>Marschnig</surname>
+                    
+               </persName>
+                 
+               <persName>
+                    
+                  <forename>Grid</forename>
+                    
+                  <surname>Oelschlegel</surname>
+                    
+               </persName>
+                
+            </respStmt>
+               
+            <funder ana="marcrelator:fnd">
+                 
+               <orgName ref="https://www.zukunftsfonds.steiermark.at/">Land Steiermark: Zukunftsfonds Steiermark</orgName>
+                 
+               <address>
+                    
+                  <addName>Friedrichgasse 9 8010 Graz</addName>
+                    
+               </address>
+                
+            </funder>
+             
+            <funder ana="marcrelator:fnd">
+                 
+               <orgName ref="https://www.nationalfonds.org/startseite">Nationalfonds der Repuplik Österreich für Opfer des Nationalsozialismus</orgName>
+                 
+               <idno type="wikidata">Q27949109</idno>
+                
+            </funder>
+             
+            <funder ana="marcrelator:fnd">
+                 
+               <orgName ref="http://www.zukunftsfonds-austria.at/">Zukunftsfonds der Republik Österreich</orgName>
+                 
+               <idno type="wikidata">Q228721</idno>
+                
+            </funder>
+             
+            <funder ana="marcrelator:fnd">
+                 
+               <orgName ref="https://www.graz.at/">Stadt Graz</orgName>
+                 
+               <idno type="wikidata">Q13298</idno>
+                
+            </funder>
+             
+            <funder ana="marcrelator:fnd">
+                 
+               <orgName ref="https://vorarlberg.at/">Land Vorarlberg</orgName>
+                 
+               <idno type="wikidata">Q38981</idno>
+                
+            </funder>
+              
+         </titleStmt>
+          
+         <publicationStmt>
+             
+            <publisher>
+                 
+               <link target="https://juedischestudien.uni-graz.at/"/>
+                 
+               <orgName ref="https://d-nb.info/gnd/10034042-8">Centrum für Jüdische Studien,    Karl-Franzens-Universität Graz</orgName>
+                
+            </publisher>
+             
+            <authority ana="marcrelator:his">
+                 
+               <link target="https://informationsmodellierung.uni-graz.at"/>
+                 
+               <orgName ref="http://d-nb.info/gnd/1137284463">Zentrum für Informationsmodellierung    - Austrian Centre for Digital Humanities, Karl-Franzens-Universität Graz   </orgName>
+                
+            </authority>
+             
+            <distributor ana="marcrelator:rps">
+                 
+               <link target="https://gams.uni-graz.at"/>
+                 
+               <orgName>GAMS - Geisteswissenschaftliches Asset Management System</orgName>
+                
+            </distributor>
+             
+            <date when="2019" ana="dcterms:issued">2019</date>
+             
+            <pubPlace ana="marcrelator:pup">Graz</pubPlace>
+              
+            <idno type="PID">o:derla.vor3</idno>
+             
+            <availability>
+                 
+               <licence target="https://creativecommons.org/licenses/by-nc/4.0">Creative Commons    BY-NC 4.0</licence>
+                
+            </availability>
+             
+         </publicationStmt>
+          
+         <seriesStmt>
+             
+            <title ref="https://gams.uni-graz.at/derla">DERLA: Digitale Erinnerungslandschaften</title>
+             
+            <respStmt ana="marcrelator:pdr">
+                 
+               <resp>Projektleitung</resp>
+                 
+               <persName>
+                    
+                  <forename>Gerald</forename>
+                    
+                  <surname>Lamprecht</surname>
+                    
+               </persName>
+                
+            </respStmt>
+             
+            <respStmt ana="marcrelator:rth">
+                 
+               <resp>ZIM Forschungsleiter</resp>
+                 
+               <persName>
+                    
+                  <forename>Georg</forename>
+                    
+                  <surname>Vogeler</surname>
+                    
+                  <idno type="orcid">0000-0002-1726-1712</idno>
+                    
+               </persName>
+                
+            </respStmt>
+             
+            <respStmt ana="marcrelator:res">
+                 
+               <resp>ZIM Mitarbeiter</resp>
+                 
+               <persName>
+                    
+                  <forename>Sebastian</forename>
+                    
+                  <surname>Stoff</surname>
+                     
+                  <idno type="orcid">0000-0001-6941-113X</idno>
+                    
+               </persName>
+                
+            </respStmt>
+                
+         </seriesStmt>
+          
+         <sourceDesc>
+              
+            <listBibl>
+                 
+               <bibl>Halbrainer / Lamprecht / Rigerl, Orte und Zeichen der Erinnerung, Graz 2018.</bibl>
+                
+            </listBibl>
+             
+         </sourceDesc>
+      </fileDesc>
+      <profileDesc>
+          
+         <langUsage>
+             
+            <language ident="German"/>
+             
+         </langUsage>
+              
+         <settingDesc>
+             
+            <place>
+                  
+               <location>
+                                
+                  <geogFeat type="point" ref="https://gams.uni-graz.at/archive/objects/o:derla.vor#vor3">
+                            
+                     <objectType>
+                                 
+                        <term ref="https://gams.uni-graz.at/o:derla.keywords#keyword14">Gedenktafel</term>
+                     </objectType>
+                                    
+                     <geo>47.503146</geo>
+                        
+                     <geo>9.747139</geo>
+                       
+                     <date type="creation">1988</date>
+                  </geogFeat>
+                        
+                  <address>
+                        
+                     <country>Österreich</country>
+                                          
+                     <addName>Rathausplatz 4, 6900 Bregenz</addName>
+                     <region>Vorarlberg</region>
+                  </address>
+                      
+                  <desc>
+                     <term ref="https://gams.uni-graz.at/o:derla.keywords#keyword42">Öffentlich zugänglich</term>
+                  </desc>
+               </location>
+                   
+               <idno type="osm-number">way 118759683</idno>
+                
+            </place>
+             
+         </settingDesc>
+            
+         <textClass>
+              
+            <keywords>
+                      
+               <term ref="https://gams.uni-graz.at/o:derla.keywords#keyword35">Kollektiv</term>
+               <term ref="https://gams.uni-graz.at/o:derla.keywords#keyword9">Frauen explizit erwähnt</term>
+               <term ref="https://gams.uni-graz.at/o:derla.keywords#keyword25">Jugendliche explizit erwähnt</term>
+            </keywords>
+             
+         </textClass>
+         <particDesc>
+            <listPerson type="creators">
+               <person role="initiator">
+                  <name>Stadt Bregenz</name>
+               </person>
+            </listPerson>
+         </particDesc>
+         <particDesc>
+            <listPerson type="victims">
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor3">
+                     <surname>Bachner</surname>
+                     <forename>Julius</forename>
+                  </persName>
+                  <birth>
+                     <date>19.9.1881</date>
+                  </birth>
+                  <death>
+                     <date>18.1.1942</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor4">
+                     <surname>Baldauf</surname>
+                     <forename>Hans</forename>
+                  </persName>
+                  <birth>
+                     <date>31.1.1918</date>
+                  </birth>
+                  <death>
+                     <date>11.9.1943</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor5">
+                     <surname>Bauer</surname>
+                     <forename>Elsa</forename>
+                     <addName>Matzer</addName>
+                  </persName>
+                  <birth>
+                     <date>3.6.1904</date>
+                  </birth>
+                  <death>
+                     <date>1942</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor6">
+                     <surname>Bonat</surname>
+                     <forename>Max</forename>
+                  </persName>
+                  <birth>
+                     <date>12.5.1912</date>
+                  </birth>
+                  <death>
+                     <date>2.2.1945</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor7">
+                     <surname>Guttenberger</surname>
+                     <forename>Anna</forename>
+                  </persName>
+                  <birth>
+                     <date>3.3.1902</date>
+                  </birth>
+                  <death>
+                     <date>27.2.1942</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor8">
+                     <surname>Ibele</surname>
+                     <forename>Max</forename>
+                  </persName>
+                  <birth>
+                     <date>15.2.1921</date>
+                  </birth>
+                  <death>
+                     <date>9.5.1945</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor9">
+                     <surname>Karg</surname>
+                     <forename>Gebhard Gallus</forename>
+                  </persName>
+                  <birth>
+                     <date>10.9.1885</date>
+                  </birth>
+                  <death>
+                     <date>30.5.1944</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor10">
+                     <surname>Kraner</surname>
+                     <forename>Franz</forename>
+                  </persName>
+                  <birth>
+                     <date>3.3.1897</date>
+                  </birth>
+                  <death>
+                     <date>31.10.1942</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor11">
+                     <surname>Lang</surname>
+                     <forename>Rudolf</forename>
+                  </persName>
+                  <birth>
+                     <date>18.12.1903</date>
+                  </birth>
+                  <death>
+                     <date>19.1.1940</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor12">
+                     <surname>Matzer</surname>
+                     <forename>Sophie</forename>
+                     <addName type="alternative_surname">Mazer</addName>
+                  </persName>
+                  <birth>
+                     <date>27.9.1874</date>
+                  </birth>
+                  <death>
+                     <date>20.6.1944</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor13">
+                     <surname>Schad</surname>
+                     <forename>Werner</forename>
+                  </persName>
+                  <birth>
+                     <date>11.1.1914</date>
+                  </birth>
+                  <death>
+                     <date>28.9.1944</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor14">
+                     <surname>Sinz</surname>
+                     <forename>Hermann</forename>
+                  </persName>
+                  <birth>
+                     <date>4.5.1912</date>
+                  </birth>
+                  <death>
+                     <date>15.3.1944</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor15">
+                     <surname>Spindler</surname>
+                     <forename>Samuel</forename>
+                  </persName>
+                  <birth>
+                     <date>21.4.1882</date>
+                  </birth>
+                  <death>
+                     <date>11.11.1942</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor16">
+                     <surname>Volkmann </surname>
+                     <forename>Ernst</forename>
+                  </persName>
+                  <birth>
+                     <date>3.3.1902</date>
+                  </birth>
+                  <death>
+                     <date>9.8.1941</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor17">
+                     <surname>Redler</surname>
+                     <forename>Karoline</forename>
+                     <addName>Schwärzler</addName>
+                  </persName>
+                  <birth>
+                     <date>16.2.1883</date>
+                  </birth>
+                  <death>
+                     <date>8.11.1944</date>
+                  </death>
+               </person>
+               <person>
+                  <persName ref="https://gams.uni-graz.at/o:derla.persvor#persvor18">
+                     <surname>Renz</surname>
+                     <forename>Anton</forename>
+                  </persName>
+                  <birth>
+                     <date>18.5.1924</date>
+                  </birth>
+                  <death>
+                     <date>1.5.1945</date>
+                  </death>
+               </person>
+            </listPerson>
+         </particDesc>
+      </profileDesc>
+      <encodingDesc>
+          
+         <geoDecl datum="WGS84" xml:id="WGS">World Geodetic System</geoDecl>
+          
+         <editorialDecl>
+             
+            <p>Born digital TEI Dokument zur Beschreibung eines Erinnerungsortes bzw. Erinnerungszeichens.</p>
+             
+            <p>Erinnerungszeichen markieren Erinnerungsorte und machen sie in der Öffentlichkeit sichtbar.   Sie sind ein sichtbarer Verweis auf Ereignisse, Erfahrungen und Verbrechen, die der Nationalsozialismus   und Faschismus zu verantworten haben und sind intentionaler Ausdruck der   Erinnerungskultur einer bestimmten Gruppe.   Sie können physische oder virtuelle Manifestationen sein. Zur genaueren Bestimmung und Analyse   werden die einzelnen Erinnerungsorte/Erinnerungszeichen durch spezifische Kriterien genauer   klassifiziert und mit Information angereichert. Hierbei kann es zu   Überlappungen und in manchen Fällen zu Unschärfen kommen,   weshalb teils Mehrfachzuordnungen in den einzelnen Kategorien vorgenommen werden.</p>
+             
+         </editorialDecl>
+          
+         <projectDesc>
+              
+            <p>Die digitale Erinnerungslandkarte Österreichs (DERLA) ist ein Dokumentations- und     Vermittlungsprojekt. Es dokumentiert die Erinnerungsorte und -zeichen an die     Opfer sowie die Orte des Terrors des Nationalsozialismus in Österreich und setzt     sich die kritische Auseinandersetzung mit Nationalsozialismus und Faschismus und     der Erinnerung daran zum Ziel. Die ständig neu zu stellenden Fragen, was, wann,     wo und von wem wie erinnert wurde und wird, geben Einblicke in die     Transformationen der Auseinandersetzungen mit dem Nationalsozialismus und sind     Ausdruck unseres politischen und gesellschaftlichen Selbstverständnisses in der     Gegenwart. „Gedächtnisorte“, Denk- und Mahnmäler, Gedenktafeln, Gedenkstätten     sowie Straßenbezeichnungen nach WiderstandskämpferInnen und Opfern des     NS-Regimes sind die Materialisationen des Geschichtsbewusstseins im Alltag. Der     Blick auf die Erinnerungslandschaft in der Gegenwart gibt daher zum einen     Einblick in das kollektive Gedächtnis der österreichischen Gesellschaft und zum     anderen legt die Beschäftigung mit ihrer Entstehungsgeschichte die Konjunkturen     dieser Beschäftigung offen.</p>
+             
+         </projectDesc>
+          
+         <listPrefixDef>
+             
+            <prefixDef ident="marcrelator" matchPattern="([a-z]+)" replacementPattern="http://id.loc.gov/vocabulary/relators/$1">
+               <p>Institutionelle und Personale Rollen taxonomie</p>
+            </prefixDef>
+             
+            <prefixDef ident="dcterms" matchPattern="([a-z]+)" replacementPattern="http://purl.org/dc/terms/$1">
+               <p>Datums Taxonomie</p>
+            </prefixDef>
+             
+         </listPrefixDef>
+      </encodingDesc>
+   </teiHeader>
+   <facsimile>
+      <graphic mimeType="image/jpeg" url="file:///1.JPG" xml:id="IMAGE.1" style="Hochformat">
+         <desc>Gedenktafel Seekapelle Bregenz, 2020 (© _erinnern.at_)</desc>
+      </graphic>
+      <graphic mimeType="image/jpeg" url="file:///2.JPG" xml:id="IMAGE.2" style="Hochformat">
+         <desc>Gedenktafel Seekapelle Bregenz, 2020 (© _erinnern.at_)</desc>
+      </graphic>
+   </facsimile>
+   <text>
+      <body>
+           
+         <ab>
+             
+            <ref target="context:derla" type="context">DERLA</ref>
+             
+         </ab>
+            
+         <div type="maintext">
+             
+            <p>Am 11. März 1988, 50 Jahre nach dem &quot;Anschluss&quot; Österreichs an das Deutsche Reich, wurde im Rahmen einer Gedenkfeier der Stadt Bregenz in der Nische des Turmsockels der Seekapelle eine Gedenktafel errichtet, die an die Opfer der nationalsozialistischen Gewaltherrschaft erinnern soll. Diese Tafel enthält die Namen jener 16 Bregenzerinnen und Bregenzer, von denen bekannt ist, dass sie zwischen 1938 und 1945 von den Nationalsozialisten ermordet wurden.</p>
+             
+         </div>
+             
+         <div type="inscription">
+            <p>Zum Gedenken an unsere Bregenzer Mitbürgerinnen und Mitbürger, die in den Jahren 1938-1945 als Opfer der nationalsozialistischen Gewaltherrschaft um ihr Leben gebracht wurden. Julius Bachner, Rudolf Lang, Hans Baldauf, Sophie Mazer, Elsa Bauer, Karoline Redler, Max Bonat, Anton Renz, Max Ibele, Dr. Hermann Sinz, Anna Guttenberger, Werner Schad, Gebhard Gallus Karg, Samuel Spindler, Franz Kraner, Ernst Volkmann und namenlose Euthanasieopfer. Im Gedenkjahr 1988 gewidmet von der Landeshauptstadt Bregenz.</p>
+         </div>
+      </body>
+   </text>
+</TEI>
