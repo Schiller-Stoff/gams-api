@@ -56,30 +56,30 @@ public class Bag {
     var bagPathMd5Map = BagDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
 
     // handle sip json
-    BagSipJson bagitSipJson = BagDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
+    BagSipJson bagSipJson = BagDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
 
     String sipJsonMd5 = bagPathMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
 
     BagData bagData = BagData.builder()
-        .id(bagitSipJson.getId())
-        .project(bagitSipJson.getProject())
-        .title(bagitSipJson.getTitle())
-        .objectType(bagitSipJson.getObjectType())
-        .description(bagitSipJson.getDescription())
-        .creator(bagitSipJson.getCreator())
-        .rights(bagitSipJson.getRights())
-        .publisher(bagitSipJson.getPublisher())
-        .funder(bagitSipJson.getFunder())
-        .mainResource(bagitSipJson.getMainResource())
+        .id(bagSipJson.getId())
+        .project(bagSipJson.getProject())
+        .title(bagSipJson.getTitle())
+        .objectType(bagSipJson.getObjectType())
+        .description(bagSipJson.getDescription())
+        .creator(bagSipJson.getCreator())
+        .rights(bagSipJson.getRights())
+        .publisher(bagSipJson.getPublisher())
+        .funder(bagSipJson.getFunder())
+        .mainResource(bagSipJson.getMainResource())
         .contentFiles(new HashSet<>())  // this is being populated below
-        .types(bagitSipJson.getTypes())
+        .types(bagSipJson.getTypes())
         .md5Checksum(sipJsonMd5)
         .sha512Checksum(sipJsonSHA512)
         .build();
 
     // sipjson content files
-    for(var contentFile : bagitSipJson.getContentFiles()){
+    for(var contentFile : bagSipJson.getContentFiles()){
       var dsid = contentFile.getDsid();
 
       // extract checksums for this content file from the maps read from the manifests
