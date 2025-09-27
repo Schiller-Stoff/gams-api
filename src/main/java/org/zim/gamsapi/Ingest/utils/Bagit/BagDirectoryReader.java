@@ -28,7 +28,7 @@ import java.util.stream.Stream;
  * Utility class for BagIt related operations.
  */
 @Slf4j
-public class BagItDirectoryReader {
+public class BagDirectoryReader {
 
   // TODO maybe better to solve this with a constructor - bagitPath as parameter?
   // TODO want to test methods that get the extracted bagit as argument and not the path to the bagit?

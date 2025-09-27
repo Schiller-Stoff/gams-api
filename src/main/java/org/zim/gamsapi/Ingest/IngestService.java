@@ -21,7 +21,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagDirectoryReader;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItFilePaths;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -74,7 +74,7 @@ public class IngestService implements IIngestService {
     }
 
     try {
-      BagSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(bagDirPath);
+      BagSipJson bagitSipJson = BagDirectoryReader.extractAndValidateSipJson(bagDirPath);
       log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
       if(!bagitSipJson.getProject().equals(ingest.getProjectAbbr())){
         String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bagit sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bagitSipJson.getProject(), ingest, bagitSipJson);
@@ -82,8 +82,8 @@ public class IngestService implements IIngestService {
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
-      var dsidSha512Map = BagItDirectoryReader.extractBagPathSha512Map(bagDirPath);
-      var dsidMd5Map = BagItDirectoryReader.extractBagPathMd5Map(bagDirPath);
+      var dsidSha512Map = BagDirectoryReader.extractBagPathSha512Map(bagDirPath);
+      var dsidMd5Map = BagDirectoryReader.extractBagPathMd5Map(bagDirPath);
 
 
       // 02. build and save digital object from bag-info.txt

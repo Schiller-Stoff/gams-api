@@ -49,14 +49,14 @@ public class Bag {
   private void readBag() throws IOException {
 
     // read and validate bagit structure
-    this.bagInfo = BagItDirectoryReader.extractBagItInfo(this.BAG_DIR_PATH);
+    this.bagInfo = BagDirectoryReader.extractBagItInfo(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
-    var bagPathSha512Map = BagItDirectoryReader.extractBagPathSha512Map(this.BAG_DIR_PATH);
-    var bagPathMd5Map = BagItDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
+    var bagPathSha512Map = BagDirectoryReader.extractBagPathSha512Map(this.BAG_DIR_PATH);
+    var bagPathMd5Map = BagDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
 
     // handle sip json
-    BagSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
+    BagSipJson bagitSipJson = BagDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
 
     String sipJsonMd5 = bagPathMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
