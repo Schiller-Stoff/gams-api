@@ -16,7 +16,7 @@ import java.util.Set;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BagitSipJson {
+public class BagSipJson {
 
     // TODO rename to recid for consistency - this class is only needed for json mapping
     @JsonProperty("recid")

@@ -10,7 +10,7 @@ import org.zim.gamsapi.TestUtilities.TestDatastream;
 
 import java.util.Set;
 
-public class BagitSipJsonContentFileDatastreamConverterTest extends UnitTest {
+public class BagSipJsonContentFileDatastreamConverterTest extends UnitTest {
 
 
   BagitSipJsonContentFile bagitSipJsonContentFile;

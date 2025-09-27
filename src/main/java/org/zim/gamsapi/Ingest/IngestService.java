@@ -23,7 +23,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItDirectoryReader;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagItFilePaths;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -74,7 +74,7 @@ public class IngestService implements IIngestService {
     }
 
     try {
-      BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(bagDirPath);
+      BagSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(bagDirPath);
       log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
       if(!bagitSipJson.getProject().equals(ingest.getProjectAbbr())){
         String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bagit sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bagitSipJson.getProject(), ingest, bagitSipJson);

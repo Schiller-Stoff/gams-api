@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJsonContentFile;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -222,7 +222,7 @@ public class BagItDirectoryReader {
    * Maps the sip.json file to a BagitSipJson object.
    * @param bagitDirPath The path to the bagit directory.
    */
-  public static BagitSipJson extractAndValidateSipJson(Path bagitDirPath){
+  public static BagSipJson extractAndValidateSipJson(Path bagitDirPath){
 
     Path pathToBagInfoFile = bagitDirPath.resolve(BagItFilePaths.BAG_SIP_JSON.name);
 
@@ -236,13 +236,13 @@ public class BagItDirectoryReader {
       throw new IngestProcessingException(msg);
     }
 
-    BagitSipJson bagitSipJson;
+    BagSipJson bagitSipJson;
     try {
       // TODO instantiation of own object mapper might be just a waste of resources. (inject object mapper instead)
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      bagitSipJson = new ObjectMapper().readValue(jsonContent, BagitSipJson.class);
+      bagitSipJson = new ObjectMapper().readValue(jsonContent, BagSipJson.class);
     } catch (IOException e){
       String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, e);
       log.error(msg);
@@ -267,7 +267,7 @@ public class BagItDirectoryReader {
     // validate sip.json mapping
     try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()){
       Validator validator = factory.getValidator();
-      Set<ConstraintViolation<BagitSipJson>> violations = validator.validate(bagitSipJson);
+      Set<ConstraintViolation<BagSipJson>> violations = validator.validate(bagitSipJson);
         if(!violations.isEmpty()){
             String msg = String.format("Failed to validate sip.json from %s. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, violations);
             log.error(msg);

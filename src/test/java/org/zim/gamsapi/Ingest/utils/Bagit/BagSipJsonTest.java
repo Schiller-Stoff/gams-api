@@ -4,28 +4,28 @@ import jakarta.validation.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJsonContentFile;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.UnitTest;
 
 
-public class BagitSipJsonTest extends UnitTest {
+public class BagSipJsonTest extends UnitTest {
 
-  BagitSipJson bagitSipJson;
+  BagSipJson bagSipJson;
 
   ValidatorFactory validatorFactory;
   Validator validator;
 
   @BeforeEach
   public void setUp() {
-    bagitSipJson = new BagitSipJson();
-    bagitSipJson.setId("id");
-    bagitSipJson.setProject("project");
-    bagitSipJson.setTitle("title");
-    bagitSipJson.setObjectType("objectType");
-    bagitSipJson.setDescription("description");
-    bagitSipJson.setCreator("creator");
-    bagitSipJson.setRights("rights");
-    bagitSipJson.setPublisher("publisher");
+    bagSipJson = new BagSipJson();
+    bagSipJson.setId("id");
+    bagSipJson.setProject("project");
+    bagSipJson.setTitle("title");
+    bagSipJson.setObjectType("objectType");
+    bagSipJson.setDescription("description");
+    bagSipJson.setCreator("creator");
+    bagSipJson.setRights("rights");
+    bagSipJson.setPublisher("publisher");
 
     // instantiate validator per test
     validatorFactory = jakarta.validation.Validation.buildDefaultValidatorFactory();
@@ -45,7 +45,7 @@ public class BagitSipJsonTest extends UnitTest {
     @Test
     public void testBagitIsValid() {
       // when
-      var violations = validator.validate(bagitSipJson);
+      var violations = validator.validate(bagSipJson);
       // then
       Assertions.assertThat(violations).isEmpty();
     }
@@ -53,9 +53,9 @@ public class BagitSipJsonTest extends UnitTest {
     @Test
     public void containsOneConstraintViolationIfPublisherIsNull() {
       // given
-      bagitSipJson.setPublisher(null);
+      bagSipJson.setPublisher(null);
       // when
-      var violations = validator.validate(bagitSipJson);
+      var violations = validator.validate(bagSipJson);
       // then
       Assertions.assertThat(violations)
           .isNotEmpty()
@@ -65,10 +65,10 @@ public class BagitSipJsonTest extends UnitTest {
     @Test
     public void containsTwoConstraintViolationsIfRightsAndPublisherAreEmpty() {
       // given
-      bagitSipJson.setPublisher("");
-      bagitSipJson.setRights("");
+      bagSipJson.setPublisher("");
+      bagSipJson.setRights("");
       // when
-      var violations = validator.validate(bagitSipJson);
+      var violations = validator.validate(bagSipJson);
       // then
       Assertions.assertThat(violations)
           .isNotEmpty()
@@ -90,10 +90,10 @@ public class BagitSipJsonTest extends UnitTest {
       bagitSipJsonContentFile.setSize(0L);
       bagitSipJsonContentFile.setCreator("creator");
 
-      bagitSipJson.getContentFiles().add(bagitSipJsonContentFile);
+      bagSipJson.getContentFiles().add(bagitSipJsonContentFile);
 
       // when
-      var violations = validator.validate(bagitSipJson);
+      var violations = validator.validate(bagSipJson);
       // then
       Assertions.assertThat(violations)
           .isNotEmpty()

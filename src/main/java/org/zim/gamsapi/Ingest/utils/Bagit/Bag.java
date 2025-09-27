@@ -2,7 +2,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -56,7 +56,7 @@ public class Bag {
     var bagPathMd5Map = BagItDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
 
     // handle sip json
-    BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
+    BagSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
 
     String sipJsonMd5 = bagPathMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
