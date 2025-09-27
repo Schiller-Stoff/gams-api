@@ -3,7 +3,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 /**
  * Represents the different files that are required to be present in a valid BagIt archive.
  */
-public enum BagItFilePaths {
+public enum BagFilePaths {
 
   /**
    * The bag-info.txt file is a tag file that contains metadata about the bag as a whole.
@@ -47,7 +47,7 @@ public enum BagItFilePaths {
 
 
   public final String name;
-  BagItFilePaths(String name){
+  BagFilePaths(String name){
     this.name = name;
   }
 

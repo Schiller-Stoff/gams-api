@@ -22,7 +22,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.BagDirectoryReader;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagItFilePaths;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
@@ -103,8 +103,8 @@ public class IngestService implements IIngestService {
 
       // assign digital object checksums from sip.json
       // TODO this is quite intransparent - because the mapping is done by dsid (and the sip.json is not a dsid)
-      String objectMd5 = dsidMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
-      String objectSha512 = dsidSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
+      String objectMd5 = dsidMd5Map.get(BagFilePaths.BAG_SIP_JSON.name);
+      String objectSha512 = dsidSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
 
       if(objectMd5 == null || objectMd5.isEmpty()){
         String msg  = String.format("Failed to find md5 checksum for digital object %s in manifest-md5.txt %s. Cannot continue ingest operation %s", digitalObject, dsidMd5Map, ingest);

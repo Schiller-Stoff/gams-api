@@ -45,7 +45,7 @@ public class BagDirectoryReader {
    * @throws IngestProcessingException
    */
   public static Map<String, String> extractBagPathSha512Map(Path bagItDirPath) throws IngestProcessingException {
-    String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
+    String pathToManifestFile = bagItDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
     // return a map of dsid to sha512 checksum
 
     var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
@@ -54,25 +54,25 @@ public class BagDirectoryReader {
     checksumPathsMap.forEach(
         (sha512Checksum, bagPath) -> {
            if(dsidChecksumMap.containsValue(sha512Checksum)){
-            String msg = String.format("Encountered duplicate checksum %s in sha512 manifest file %s.", sha512Checksum, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name);
+            String msg = String.format("Encountered duplicate checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
            }
            if(sha512Checksum.length() != 128) {
-            String msg = String.format("Encountered invalid sha512 checksum for dsid %s in sha512 manifest file %s. Checksum must be 128 characters long.", sha512Checksum, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name);
+            String msg = String.format("Encountered invalid sha512 checksum for dsid %s in sha512 manifest file %s. Checksum must be 128 characters long.", sha512Checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
            }
 
           if(bagPath == null){
-            String msg = String.format("Encountered null bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            String msg = String.format("Encountered null bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             // TODO different exception?
             throw new IngestProcessingException(msg);
           }
 
           if(bagPath.isBlank()){
-            String msg = String.format("Encountered empty bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            String msg = String.format("Encountered empty bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             // TODO different exception?
             throw new IngestProcessingException(msg);
@@ -94,7 +94,7 @@ public class BagDirectoryReader {
    * @throws IngestProcessingException
    */
   public static Map<String,String> extractBagPathMd5Map(Path bagItDirPath) throws IngestProcessingException {
-    String pathToManifestFile = bagItDirPath.resolve(BagItFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
+    String pathToManifestFile = bagItDirPath.resolve(BagFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
 
     // return a map of dsid to md5 checksum
     var dsidChecksumMap = new HashMap<String, String>();
@@ -103,25 +103,25 @@ public class BagDirectoryReader {
     checksumPathsMap.forEach(
         (checksum, bagPath) -> {
           if(dsidChecksumMap.containsKey(checksum)){
-            String msg = String.format("Encountered duplicate checksum %s in md5 manifest file %s.", checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            String msg = String.format("Encountered duplicate checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
           }
           if(checksum.length() != 32) {
-            String msg = String.format("Encountered invalid md5 checksum %s in md5 manifest file %s. Checksum must be 32 characters long.", checksum, BagItFilePaths.MANIFEST_SHA512_FILE_PATH.name);
+            String msg = String.format("Encountered invalid md5 checksum %s in md5 manifest file %s. Checksum must be 32 characters long.", checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
           }
 
           if(bagPath == null){
-            String msg = String.format("Encountered null bag path for checksum %s in md5 manifest file %s.", checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            String msg = String.format("Encountered null bag path for checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             // TODO different exception?
             throw new IngestProcessingException(msg);
           }
 
           if(bagPath.isBlank()){
-            String msg = String.format("Encountered empty bag path for checksum %s in md5 manifest file %s.", checksum, BagItFilePaths.MANIFEST_MD5_FILE_PATH.name);
+            String msg = String.format("Encountered empty bag path for checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             // TODO different exception?
             throw new IngestProcessingException(msg);
@@ -144,7 +144,7 @@ public class BagDirectoryReader {
     // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
     // TODO solve todos
 
-    String pathToBagInfoFile = bagItDirPath.resolve(BagItFilePaths.BAG_INFO_FILE_PATH.name).toString();
+    String pathToBagInfoFile = bagItDirPath.resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString();
     Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
 
     try {
@@ -157,7 +157,7 @@ public class BagDirectoryReader {
               .contactMail(fileValues.get("Contact-Email"))
               .build();
     } catch(NullPointerException e){
-      String msg = String.format("Failed to extract a required key from %s to intern BagItInfo class. Original error: %s", BagItFilePaths.BAG_INFO_FILE_PATH.name, e);
+      String msg = String.format("Failed to extract a required key from %s to intern BagItInfo class. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
@@ -224,14 +224,14 @@ public class BagDirectoryReader {
    */
   public static BagSipJson extractAndValidateSipJson(Path bagitDirPath){
 
-    Path pathToBagInfoFile = bagitDirPath.resolve(BagItFilePaths.BAG_SIP_JSON.name);
+    Path pathToBagInfoFile = bagitDirPath.resolve(BagFilePaths.BAG_SIP_JSON.name);
 
     byte[] jsonContent;
     try {
       jsonContent = Files.readAllBytes(pathToBagInfoFile);
 
     } catch (IOException e){
-      String msg = String.format("Failed to read out sip.json from %s. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, e);
+      String msg = String.format("Failed to read out sip.json from %s. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
@@ -244,7 +244,7 @@ public class BagDirectoryReader {
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       bagitSipJson = new ObjectMapper().readValue(jsonContent, BagSipJson.class);
     } catch (IOException e){
-      String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, e);
+      String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
@@ -252,13 +252,13 @@ public class BagDirectoryReader {
     // check if dsids are unique
     Set<String> containedDsids = bagitSipJson.getContentFiles().stream().map(BagSipJsonContentFile::getDsid).collect(Collectors.toSet());
     if(containedDsids.size() != bagitSipJson.getContentFiles().size()){
-      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagItFilePaths.BAG_SIP_JSON.name, bagitSipJson);
+      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagFilePaths.BAG_SIP_JSON.name, bagitSipJson);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
     // check if DC dsid is present - or more in future
     if(!containedDsids.contains(GAMSDsid.DC.getValue())){
-      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json. %s",  BagItFilePaths.BAG_SIP_JSON.name, GAMSDsid.DC.getValue(), bagitSipJson);
+      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json. %s",  BagFilePaths.BAG_SIP_JSON.name, GAMSDsid.DC.getValue(), bagitSipJson);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
@@ -269,7 +269,7 @@ public class BagDirectoryReader {
       Validator validator = factory.getValidator();
       Set<ConstraintViolation<BagSipJson>> violations = validator.validate(bagitSipJson);
         if(!violations.isEmpty()){
-            String msg = String.format("Failed to validate sip.json from %s. Original error: %s", BagItFilePaths.BAG_SIP_JSON.name, violations);
+            String msg = String.format("Failed to validate sip.json from %s. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, violations);
             log.error(msg);
             throw new IngestProcessingException(msg);
         }

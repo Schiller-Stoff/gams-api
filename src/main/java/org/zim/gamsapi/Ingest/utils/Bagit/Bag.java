@@ -58,8 +58,8 @@ public class Bag {
     // handle sip json
     BagSipJson bagSipJson = BagDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
 
-    String sipJsonMd5 = bagPathMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
-    String sipJsonSHA512 = bagPathSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
+    String sipJsonMd5 = bagPathMd5Map.get(BagFilePaths.BAG_SIP_JSON.name);
+    String sipJsonSHA512 = bagPathSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
 
     BagData bagData = BagData.builder()
         .id(bagSipJson.getId())
