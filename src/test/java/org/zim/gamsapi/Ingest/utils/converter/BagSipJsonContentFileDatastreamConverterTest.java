@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJsonContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJsonContentFile;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.TestUtilities.TestDatastream;
 
@@ -13,52 +13,52 @@ import java.util.Set;
 public class BagSipJsonContentFileDatastreamConverterTest extends UnitTest {
 
 
-  BagitSipJsonContentFile bagitSipJsonContentFile;
+  BagSipJsonContentFile bagSipJsonContentFile;
   BagitSipJsonContentFileDatastreamConverter converter = new BagitSipJsonContentFileDatastreamConverter();
 
   @BeforeEach
   public void setUp(){
-    bagitSipJsonContentFile = new BagitSipJsonContentFile();
-    bagitSipJsonContentFile.setDsid("dsid");
-    bagitSipJsonContentFile.setMimetype("mimetype");
-    bagitSipJsonContentFile.setSize(1L);
-    bagitSipJsonContentFile.setTitle("title");
-    bagitSipJsonContentFile.setCreator("creator");
-    bagitSipJsonContentFile.setDescription("description");
-    bagitSipJsonContentFile.setRights("rights");
-    bagitSipJsonContentFile.setTags(Set.of("tag1", "tag2"));
-    bagitSipJsonContentFile.setLang(Set.of("lang1", "lang2"));
+    bagSipJsonContentFile = new BagSipJsonContentFile();
+    bagSipJsonContentFile.setDsid("dsid");
+    bagSipJsonContentFile.setMimetype("mimetype");
+    bagSipJsonContentFile.setSize(1L);
+    bagSipJsonContentFile.setTitle("title");
+    bagSipJsonContentFile.setCreator("creator");
+    bagSipJsonContentFile.setDescription("description");
+    bagSipJsonContentFile.setRights("rights");
+    bagSipJsonContentFile.setTags(Set.of("tag1", "tag2"));
+    bagSipJsonContentFile.setLang(Set.of("lang1", "lang2"));
   }
 
 
   @Test
   public void convertsExpectedBagitContentFileToDatastream() {
 
-    bagitSipJsonContentFile.setTags(TestDatastream.DATASTREAM_TAGS);
-    Datastream datastream = converter.convert(bagitSipJsonContentFile);
+    bagSipJsonContentFile.setTags(TestDatastream.DATASTREAM_TAGS);
+    Datastream datastream = converter.convert(bagSipJsonContentFile);
     Assertions.assertNotNull(datastream);
-    Assertions.assertEquals(bagitSipJsonContentFile.getDsid(), datastream.getDsid());
-    Assertions.assertEquals(bagitSipJsonContentFile.getMimetype(), datastream.getMimeType());
-    Assertions.assertEquals(bagitSipJsonContentFile.getSize(), datastream.getSize());
-    Assertions.assertEquals(bagitSipJsonContentFile.getTitle(), datastream.getBaseMetadata().getTitle());
-    Assertions.assertEquals(bagitSipJsonContentFile.getCreator(), datastream.getBaseMetadata().getCreator());
-    Assertions.assertEquals(bagitSipJsonContentFile.getDescription(), datastream.getBaseMetadata().getDescription());
-    Assertions.assertEquals(bagitSipJsonContentFile.getRights(), datastream.getBaseMetadata().getRights());
-    Assertions.assertEquals(bagitSipJsonContentFile.getTags(), datastream.getTags());
-    Assertions.assertEquals(bagitSipJsonContentFile.getLang(), datastream.getLang());
+    Assertions.assertEquals(bagSipJsonContentFile.getDsid(), datastream.getDsid());
+    Assertions.assertEquals(bagSipJsonContentFile.getMimetype(), datastream.getMimeType());
+    Assertions.assertEquals(bagSipJsonContentFile.getSize(), datastream.getSize());
+    Assertions.assertEquals(bagSipJsonContentFile.getTitle(), datastream.getBaseMetadata().getTitle());
+    Assertions.assertEquals(bagSipJsonContentFile.getCreator(), datastream.getBaseMetadata().getCreator());
+    Assertions.assertEquals(bagSipJsonContentFile.getDescription(), datastream.getBaseMetadata().getDescription());
+    Assertions.assertEquals(bagSipJsonContentFile.getRights(), datastream.getBaseMetadata().getRights());
+    Assertions.assertEquals(bagSipJsonContentFile.getTags(), datastream.getTags());
+    Assertions.assertEquals(bagSipJsonContentFile.getLang(), datastream.getLang());
 
   }
 
   @Test
   public void convertedBagContainsExpectedTags(){
-    Datastream datastream = converter.convert(bagitSipJsonContentFile);
-    Assertions.assertEquals(bagitSipJsonContentFile.getTags(), datastream.getTags());
+    Datastream datastream = converter.convert(bagSipJsonContentFile);
+    Assertions.assertEquals(bagSipJsonContentFile.getTags(), datastream.getTags());
   }
 
   @Test
   public void convertedBagContainsExpectedLang(){
-    Datastream datastream = converter.convert(bagitSipJsonContentFile);
-    Assertions.assertEquals(bagitSipJsonContentFile.getLang(), datastream.getLang());
+    Datastream datastream = converter.convert(bagSipJsonContentFile);
+    Assertions.assertEquals(bagSipJsonContentFile.getLang(), datastream.getLang());
   }
 
 }

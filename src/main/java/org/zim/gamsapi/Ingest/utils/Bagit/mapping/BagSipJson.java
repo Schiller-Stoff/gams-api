@@ -55,7 +55,7 @@ public class BagSipJson {
     /**
      * TODO write tests if validation of bagit-content file works as expected!
      */
-    private Set<@Valid BagitSipJsonContentFile> contentFiles = new HashSet<>();
+    private Set<@Valid BagSipJsonContentFile> contentFiles = new HashSet<>();
 
     private Set<String> types = new HashSet<>();
 

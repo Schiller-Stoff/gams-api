@@ -5,7 +5,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamBuilder;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagitSipJsonContentFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJsonContentFile;
 import org.zim.gamsapi.MetadataBaseEntityBuilder;
 
 
@@ -15,11 +15,11 @@ import org.zim.gamsapi.MetadataBaseEntityBuilder;
  */
 @Slf4j
 @Component
-public class BagitSipJsonContentFileDatastreamConverter implements Converter<BagitSipJsonContentFile, Datastream>{
+public class BagitSipJsonContentFileDatastreamConverter implements Converter<BagSipJsonContentFile, Datastream>{
 
 
   @Override
-  public Datastream convert(BagitSipJsonContentFile source) {
+  public Datastream convert(BagSipJsonContentFile source) {
     return new DatastreamBuilder()
         .dsid(source.getDsid())
         .mimeType(source.getMimetype())
