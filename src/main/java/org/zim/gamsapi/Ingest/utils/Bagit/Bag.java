@@ -17,13 +17,21 @@ import java.util.*;
 @Getter
 public class Bag {
 
-  // read and validate
+  /**
+   * Metadata obtained from bag-info file.
+   */
   private BagItInfo bagItInfo;
 
+  /**
+   * Encapsules data obtained from sip.json + checksum read from
+   * checksum files.
+   * (carries the checksum of the sip.json itself)
+   */
   private BagData bagData;
 
   /**
    * Path to the bagit directory (where bagit.txt etc. are located)
+   * on the local filesystem
    */
   private Path bagitDirPath;
 
@@ -34,7 +42,7 @@ public class Bag {
 
 
   /**
-   * Read and validate the bagit structure including the sip.json file.
+   * TODO javadoc
    */
   private void readBag() throws IOException {
 
