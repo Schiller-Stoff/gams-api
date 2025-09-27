@@ -233,7 +233,7 @@ public class BagTest extends UnitTest {
 
       @Test
       public void bagFilesAndSipJsonContentFilesHaveExpectedSameProperties(){
-        var sipJson = BagItDirectoryReader.extractAndValidateSipJson(bag.getBagitDirPath());
+        var sipJson = BagItDirectoryReader.extractAndValidateSipJson(bag.getBAG_DIR_PATH());
         for (var sipJsonContentFile : sipJson.getContentFiles()) {
 
           var currentBagFile = bag.findContentFileByDsid(sipJsonContentFile.getDsid());

@@ -9,7 +9,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * TODO jdoc
+ * Abstraction around incoming GAMS5-bags during ingest.
+ * Represents bags on the local file-system.
  * TODO test
  *
  */
@@ -30,31 +31,32 @@ public class Bag {
   private BagData bagData;
 
   /**
-   * Path to the bagit directory (where bagit.txt etc. are located)
+   * Path to the bag directory (where bag-info.txt etc. are located)
    * on the local filesystem
    */
-  private Path bagitDirPath;
+  final private Path BAG_DIR_PATH;
 
-  public Bag(Path bagitDirPath) throws IOException {
-    this.bagitDirPath = bagitDirPath;
+  public Bag(Path BAG_DIR_PATH) throws IOException {
+    this.BAG_DIR_PATH = BAG_DIR_PATH;
     readBag();
   }
 
 
   /**
-   * TODO javadoc
+   * Reads bag from the local bag directory path defined via constructor and
+   * instantiates representing objects accordingly.
    */
   private void readBag() throws IOException {
 
     // read and validate bagit structure
-    this.bagItInfo = BagItDirectoryReader.extractBagItInfo(this.bagitDirPath);
+    this.bagItInfo = BagItDirectoryReader.extractBagItInfo(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
-    var bagPathSha512Map = BagItDirectoryReader.extractBagPathSha512Map(this.bagitDirPath);
-    var bagPathMd5Map = BagItDirectoryReader.extractBagPathMd5Map(this.bagitDirPath);
+    var bagPathSha512Map = BagItDirectoryReader.extractBagPathSha512Map(this.BAG_DIR_PATH);
+    var bagPathMd5Map = BagItDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
 
     // handle sip json
-    BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(this.bagitDirPath);
+    BagitSipJson bagitSipJson = BagItDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
 
     String sipJsonMd5 = bagPathMd5Map.get(BagItFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagItFilePaths.BAG_SIP_JSON.name);
