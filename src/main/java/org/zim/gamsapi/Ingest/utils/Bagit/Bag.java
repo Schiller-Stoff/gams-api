@@ -21,7 +21,7 @@ public class Bag {
   /**
    * Metadata obtained from bag-info file.
    */
-  private BagItInfo bagItInfo;
+  private BagInfo bagInfo;
 
   /**
    * Encapsules data obtained from sip.json + checksum read from
@@ -49,7 +49,7 @@ public class Bag {
   private void readBag() throws IOException {
 
     // read and validate bagit structure
-    this.bagItInfo = BagItDirectoryReader.extractBagItInfo(this.BAG_DIR_PATH);
+    this.bagInfo = BagItDirectoryReader.extractBagItInfo(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
     var bagPathSha512Map = BagItDirectoryReader.extractBagPathSha512Map(this.BAG_DIR_PATH);

@@ -45,32 +45,32 @@ public class BagTest extends UnitTest {
     public class BagInfo {
       @Test
       public void bagInfoHasExpectedPayloadOxum() {
-        Assertions.assertThat(bag.getBagItInfo().getPayloadOxum()).isNotNull();
-        Assertions.assertThat(bag.getBagItInfo().getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+        Assertions.assertThat(bag.getBagInfo().getPayloadOxum()).isNotNull();
+        Assertions.assertThat(bag.getBagInfo().getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
       }
 
       @Test
       public void bagInfoHasExpectedContactEmail() {
-        Assertions.assertThat(bag.getBagItInfo().getContactMail()).isNotNull();
-        Assertions.assertThat(bag.getBagItInfo().getContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+        Assertions.assertThat(bag.getBagInfo().getContactMail()).isNotNull();
+        Assertions.assertThat(bag.getBagInfo().getContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
       }
 
       @Test
       public void bagInfoHasExpectedBaggingDate() {
-        Assertions.assertThat(bag.getBagItInfo().getDate()).isNotNull();
-        Assertions.assertThat(bag.getBagItInfo().getDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
+        Assertions.assertThat(bag.getBagInfo().getDate()).isNotNull();
+        Assertions.assertThat(bag.getBagInfo().getDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
       }
 
       @Test
       public void bagInfoHasExpectedBaggingTime() {
-        Assertions.assertThat(bag.getBagItInfo().getTime()).isNotNull();
-        Assertions.assertThat(bag.getBagItInfo().getTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
+        Assertions.assertThat(bag.getBagInfo().getTime()).isNotNull();
+        Assertions.assertThat(bag.getBagInfo().getTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
       }
 
       @Test
       public void bagInfoHasExpectedExternalDescription() {
-        Assertions.assertThat(bag.getBagItInfo().getExternalDescription()).isNotNull();
-        Assertions.assertThat(bag.getBagItInfo().getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+        Assertions.assertThat(bag.getBagInfo().getExternalDescription()).isNotNull();
+        Assertions.assertThat(bag.getBagInfo().getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
       }
 
     }

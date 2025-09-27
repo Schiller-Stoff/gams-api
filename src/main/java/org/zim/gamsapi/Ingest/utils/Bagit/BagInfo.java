@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class BagItInfo {
+public class BagInfo {
 
   private String date;
   private String time;

@@ -139,7 +139,7 @@ public class BagItDirectoryReader {
    * @return A BagItInfo object.
    * @throws IngestProcessingException If the bag-info.txt file is missing or if a required key is missing.
    */
-  public static BagItInfo extractBagItInfo(Path bagItDirPath) throws IngestProcessingException {
+  public static BagInfo extractBagItInfo(Path bagItDirPath) throws IngestProcessingException {
 
     // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
     // TODO solve todos
@@ -149,7 +149,7 @@ public class BagItDirectoryReader {
 
     try {
       //TODO validation of baginfo is missing!
-      return  BagItInfo.builder()
+      return  BagInfo.builder()
               .date(fileValues.get("Bagging-Date"))
               .time(fileValues.get("Bagging-Time"))
               .payloadOxum(fileValues.get("Payload-Oxum"))
