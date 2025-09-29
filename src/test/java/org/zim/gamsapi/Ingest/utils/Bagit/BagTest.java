@@ -130,27 +130,26 @@ public class BagTest extends UnitTest {
         Assertions.assertThat(bag.getBagData().getMainResource()).isEqualTo(TestBag.TestBagSipJson.MAIN_RESOURCE);
       }
 
-      // TODO add createdBy test!
       @Test
       @Disabled("Property missing on sip json java class")
       public void bagitSipJsonHasExpectedCreatedBy() {
-        //Assertions.assertThat(bag.getBagitSipJson().getCreatedBy()).isNotNull();
-        //Assertions.assertThat(bag.getBagitSipJson().getCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
+        Assertions.assertThat(bag.getBagData().getCreatedBy()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
       }
 
       // TODO add schema test!
       @Test
       @Disabled("Property missing on sip json java class")
       public void bagitSipJsonHasExpectedSchema() {
-        //Assertions.assertThat(bag.getBagitSipJson().getSchema()).isNotNull();
-        //Assertions.assertThat(bag.getBagitSipJson().getSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
+        Assertions.assertThat(bag.getBagData().getSchema()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
       }
 
       @Test
       @Disabled("Property missing on sip json java class")
       public void bagitSipJsonHasExpectedSource() {
-        //Assertions.assertThat(bag.getBagitSipJson().getSource()).isNotNull();
-        //Assertions.assertThat(bag.getBagitSipJson().getSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
+        Assertions.assertThat(bag.getBagData().getSource()).isNotNull();
+        Assertions.assertThat(bag.getBagData().getSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
       }
 
       @Test

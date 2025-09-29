@@ -1,6 +1,7 @@
 package org.zim.gamsapi.Ingest.utils.Bagit.mapping;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -54,5 +55,15 @@ public class BagSipJson {
     private Set<@Valid BagSipJsonContentFile> contentFiles = new HashSet<>();
 
     private Set<String> types = new HashSet<>();
+
+    @JsonProperty("$schema")
+    @NotEmpty
+    private String schema;
+
+    @NotEmpty
+    private String created_by;
+
+    @NotEmpty
+    private String source;
 
 }

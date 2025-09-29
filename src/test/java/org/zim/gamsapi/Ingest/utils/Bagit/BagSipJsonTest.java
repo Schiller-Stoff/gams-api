@@ -26,6 +26,9 @@ public class BagSipJsonTest extends UnitTest {
     bagSipJson.setCreator("creator");
     bagSipJson.setRights("rights");
     bagSipJson.setPublisher("publisher");
+    bagSipJson.setSource("source");
+    bagSipJson.setSchema("schema");
+    bagSipJson.setCreated_by("created_by");
 
     // instantiate validator per test
     validatorFactory = jakarta.validation.Validation.buildDefaultValidatorFactory();

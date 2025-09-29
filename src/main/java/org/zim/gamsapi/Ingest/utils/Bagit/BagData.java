@@ -50,8 +50,19 @@ public class BagData {
 
   private Set<String> types = new HashSet<>();
 
+  @NotEmpty
   private String md5Checksum;
 
+  @NotEmpty
   private String sha512Checksum;
+
+  @NotEmpty
+  private String schema;
+
+  @NotEmpty
+  private String createdBy;
+
+  @NotEmpty
+  private String source;
 
 }
