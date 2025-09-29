@@ -235,12 +235,12 @@ public class BagDirectoryReader {
       throw new IngestProcessingException(msg);
     }
 
-    BagSipJson bagitSipJson;
+    BagSipJson bagSipJson;
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-      bagitSipJson = new ObjectMapper().readValue(jsonContent, BagSipJson.class);
+      bagSipJson = new ObjectMapper().readValue(jsonContent, BagSipJson.class);
     } catch (IOException e){
       String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, e);
       log.error(msg);
@@ -248,15 +248,15 @@ public class BagDirectoryReader {
     }
 
     // check if dsids are unique
-    Set<String> containedDsids = bagitSipJson.getContentFiles().stream().map(BagSipJsonContentFile::getDsid).collect(Collectors.toSet());
-    if(containedDsids.size() != bagitSipJson.getContentFiles().size()){
-      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagFilePaths.BAG_SIP_JSON.name, bagitSipJson);
+    Set<String> containedDsids = bagSipJson.getContentFiles().stream().map(BagSipJsonContentFile::getDsid).collect(Collectors.toSet());
+    if(containedDsids.size() != bagSipJson.getContentFiles().size()){
+      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagFilePaths.BAG_SIP_JSON.name, bagSipJson);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
     // check if DC dsid is present - or more in future
     if(!containedDsids.contains(GAMSDsid.DC.getValue())){
-      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json. %s",  BagFilePaths.BAG_SIP_JSON.name, GAMSDsid.DC.getValue(), bagitSipJson);
+      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json. %s",  BagFilePaths.BAG_SIP_JSON.name, GAMSDsid.DC.getValue(), bagSipJson);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }
@@ -264,7 +264,7 @@ public class BagDirectoryReader {
     // validate sip.json mapping
     try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()){
       Validator validator = factory.getValidator();
-      Set<ConstraintViolation<BagSipJson>> violations = validator.validate(bagitSipJson);
+      Set<ConstraintViolation<BagSipJson>> violations = validator.validate(bagSipJson);
         if(!violations.isEmpty()){
             String msg = String.format("Failed to validate sip.json from %s. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, violations);
             log.error(msg);
@@ -272,7 +272,7 @@ public class BagDirectoryReader {
         }
     }
 
-    return bagitSipJson;
+    return bagSipJson;
    }
 
 }
