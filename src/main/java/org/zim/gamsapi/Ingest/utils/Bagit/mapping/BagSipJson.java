@@ -1,7 +1,6 @@
 package org.zim.gamsapi.Ingest.utils.Bagit.mapping;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -11,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Container for the bagit sip.json file defined by invenio / CERN.
+ * Container for the bag sip.json file defined by CERN.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -25,11 +24,10 @@ public class BagSipJson {
     private String recid;
 
     /**
-     * Abbreviation of the GAMS project.
-     * TODO missing in test data atm?
+     * Abbreviation of the GAMS project the object belongs to.
      */
     @NotEmpty
-    @Size(min = 1, max = 10)
+    @Size(min = 1, max = 50)
     private String project;
 
     @NotEmpty
