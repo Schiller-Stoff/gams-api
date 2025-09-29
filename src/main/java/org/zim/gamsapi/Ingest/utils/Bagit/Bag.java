@@ -52,7 +52,7 @@ public class Bag {
     this.bagInfo = BagDirectoryReader.readBagInfoFile(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
-    var bagPathSha512Map = BagDirectoryReader.extractBagPathSha512Map(this.BAG_DIR_PATH);
+    var bagPathSha512Map = BagDirectoryReader.readSha512ManifestFile(this.BAG_DIR_PATH);
     var bagPathMd5Map = BagDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
 
     // handle sip json

@@ -82,7 +82,7 @@ public class IngestService implements IIngestService {
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
-      var dsidSha512Map = BagDirectoryReader.extractBagPathSha512Map(bagDirPath);
+      var dsidSha512Map = BagDirectoryReader.readSha512ManifestFile(bagDirPath);
       var dsidMd5Map = BagDirectoryReader.extractBagPathMd5Map(bagDirPath);
 
 

@@ -40,11 +40,11 @@ public class BagDirectoryReader {
   /**
    * TODO Jdoc
    * TODO test
-   * @param bagItDirPath
-   * @return
+   * @param bagItDirPath path to the bag directory
+   * @return Map of bagpaths (keys) to sha512 checksums (values)
    * @throws IngestProcessingException
    */
-  public static Map<String, String> extractBagPathSha512Map(Path bagItDirPath) throws IngestProcessingException {
+  public static Map<String, String> readSha512ManifestFile(Path bagItDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagItDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
     // return a map of dsid to sha512 checksum
 
