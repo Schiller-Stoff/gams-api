@@ -7,13 +7,9 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.UnitTest;
-
 import java.io.IOException;
 import java.nio.file.Path;
 
-/**
- * TODO check BagTest
- */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BagDirectoryReaderTest extends UnitTest {
 

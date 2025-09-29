@@ -30,8 +30,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class BagDirectoryReader {
 
-  // TODO maybe better to solve this with a constructor - bagitPath as parameter?
-
   /**
    * Reads the sha512 manifest file and returns a map of bag paths to sha512 checksums.
    * @param bagDirPath path to the bag directory
