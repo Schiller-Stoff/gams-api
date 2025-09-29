@@ -21,9 +21,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagDirectoryReader;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
-import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
+import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -74,22 +72,20 @@ public class IngestService implements IIngestService {
     }
 
     try {
-      BagSipJson bagitSipJson = BagDirectoryReader.readSipJson(bagDirPath);
-      log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
-      if(!bagitSipJson.getProject().equals(ingest.getProjectAbbr())){
-        String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bagit sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bagitSipJson.getProject(), ingest, bagitSipJson);
+      // 02. Bag processing
+      Bag bag = new Bag(bagDirPath);
+
+      log.info("Successfully extracted bag: {}", bag.getBAG_DIR_PATH());
+      if(!bag.getBagData().getProject().equals(ingest.getProjectAbbr())){
+        String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bag sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bag.getBagData().getProject(), ingest, bag.getBagData());
         log.error(msg);
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
-      var dsidSha512Map = BagDirectoryReader.readSha512ManifestFile(bagDirPath);
-      var dsidMd5Map = BagDirectoryReader.readMd5ManifestFile(bagDirPath);
-
-
-      // 02. build and save digital object from bag-info.txt
-      DigitalObject digitalObject = conversionService.convert(bagitSipJson, DigitalObject.class);
+      // 03. build and save digital object from bag-info.txt
+      DigitalObject digitalObject = conversionService.convert(bag.getBagData(), DigitalObject.class);
       if(digitalObject == null){
-        String msg = String.format("Digital object is unexpectedly null. Failed to convert bagitSipJson %s to digital object for given ingest %s", bagitSipJson, ingest);
+        String msg = String.format("Digital object is unexpectedly null. Failed to convert bag data %s to digital object for given ingest %s", bag.getBagData(), ingest);
         log.error(msg);
         throw new IngestTypeConversionException(msg);
       }
@@ -101,31 +97,11 @@ public class IngestService implements IIngestService {
         throw new IngestObjectAlreadyExistsException(msg);
       }
 
-      // assign digital object checksums from sip.json
-      // TODO this is quite intransparent - because the mapping is done by dsid (and the sip.json is not a dsid)
-      String objectMd5 = dsidMd5Map.get(BagFilePaths.BAG_SIP_JSON.name);
-      String objectSha512 = dsidSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
-
-      if(objectMd5 == null || objectMd5.isEmpty()){
-        String msg  = String.format("Failed to find md5 checksum for digital object %s in manifest-md5.txt %s. Cannot continue ingest operation %s", digitalObject, dsidMd5Map, ingest);
-        log.error(msg);
-        throw new IngestProcessingException(msg);
-      }
-
-      if(objectSha512 == null || objectSha512.isEmpty()){
-        String msg  = String.format("Failed to find sha512 checksum for digital object %s in manifest-sha512.txt %s. Cannot continue ingest operation %s", dsidSha512Map, objectSha512, ingest);
-        log.error(msg);
-        throw new IngestProcessingException(msg);
-      }
-
-      digitalObject.getBaseMetadata().setMd5Checksum(objectMd5);
-      digitalObject.getBaseMetadata().setSha512Checksum(objectSha512);
-
       final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
-      // 03. build and save datastreams from sip.json in the bagit payload
-      bagitSipJson.getContentFiles()
+      // 04. build and save datastreams from the bag data
+      bag.getBagData().getContentFiles()
             .forEach(contentFile -> {
               Datastream datastream = conversionService.convert(contentFile, Datastream.class);
               if(datastream == null){
@@ -150,25 +126,6 @@ public class IngestService implements IIngestService {
               datastream.setFileName(contentFilePath.getFileName().toString());
               datastream.setSize((long) datastreamContent.length);
               datastream.setMimeType(contentFile.getMimetype());
-
-              // set sha512 from manifest-sha512.txt
-              String sha512 = dsidSha512Map.get(contentFile.getBagpath());
-              String md5 = dsidMd5Map.get(contentFile.getBagpath());
-
-              if(sha512 == null || sha512.isEmpty()){
-                String msg  = String.format("Failed to find sha512 checksum for datastream content file %s in manifest-sha512.txt %s for given ingest %s", contentFile.getBagpath(), dsidSha512Map, ingest);
-                log.error(msg);
-                throw new IngestProcessingException(msg);
-              }
-
-              if(md5 == null || md5.isEmpty()){
-                String msg  = String.format("Failed to find md5 checksum for datastream content file %s in manifest-md5.txt %s for given ingest %s", contentFile.getBagpath(), dsidMd5Map, ingest);
-                log.error(msg);
-                throw new IngestProcessingException(msg);
-              }
-
-              datastream.getBaseMetadata().setMd5Checksum(md5);
-              datastream.getBaseMetadata().setSha512Checksum(sha512);
 
               // saving the datastream content to the filesystem
               datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());

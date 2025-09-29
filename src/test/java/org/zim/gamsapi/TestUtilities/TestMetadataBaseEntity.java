@@ -13,8 +13,8 @@ public class TestMetadataBaseEntity {
   public static final String DESCRIPTION = "test-description";
   public static final String RIGHTS = "test-rights";
   public static final String CREATOR = "test-creator";
-  public static final String MD5_CHECKSUM = "d41d8cd98f00b204e9800998ecf8427e";
-  public static final String SHA512_CHECKSUM = "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d14b2b0b822cd15d6c15b0f00a083e9b0c4b1d6f0b6bd6f0a2c4e6f7a5a6e0e5f8f5be5f";
+  public static final String MD5_CHECKSUM = "540193d9633d8449ee1bff28030fe045";
+  public static final String SHA512_CHECKSUM = "61eb68db4754a8349405f9355e86a72f32b00e17b747662c06c1c3027997d26d3cb1907e5f3ee3ec8299d67d97dc7c7ff4844dc70db8c5226666faf121540009";
 
   /**
    * Generates a MetadataBaseEntity with hardcoded test values.

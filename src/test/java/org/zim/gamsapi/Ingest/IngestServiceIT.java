@@ -22,6 +22,7 @@ import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
 import org.zim.gamsapi.TestUtilities.TestProject;
 
 import java.io.File;
@@ -130,6 +131,20 @@ public class IngestServiceIT extends IntegrationTest {
           .isNotNull()
           .isNotEqualTo(0)
           .isGreaterThan(2);
+
+    }
+
+    @Test
+    public void createsDigitalObjectWithExpectedChecksums(){
+
+        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+
+        Assertions.assertThat(digitalObject.getBaseMetadata().getMd5Checksum())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
+
+        Assertions.assertThat(digitalObject.getBaseMetadata().getSha512Checksum())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
 
     }
 

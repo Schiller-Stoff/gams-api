@@ -2,6 +2,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class Bag {
    */
   final private Path BAG_DIR_PATH;
 
-  public Bag(Path BAG_DIR_PATH) throws IOException {
+  public Bag(Path BAG_DIR_PATH) {
     this.BAG_DIR_PATH = BAG_DIR_PATH;
     readBag();
   }
@@ -45,10 +46,11 @@ public class Bag {
   /**
    * Reads bag from the local bag directory path defined via constructor and
    * instantiates representing objects accordingly.
+   * Throws IngestProcessingException in case of any problems (if checksums don't have the required length / are empty).
    */
-  private void readBag() throws IOException {
+  private void readBag() {
 
-    // read and validate bagit structure
+    // read and validate bag structure
     this.bagInfo = BagDirectoryReader.readBagInfoFile(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
@@ -86,18 +88,16 @@ public class Bag {
       String md5 = bagPathMd5Map.get(contentFile.getBagpath());
       String sha512 = bagPathSha512Map.get(contentFile.getBagpath());
 
-      // TODO test IOException?
       if(md5.length() != 32){
         String msg = String.format("MD5 checksum for file %s is unexpectedly not valid: %s", contentFile.getBagpath(), md5);
         log.error(msg);
-        throw new IOException(msg);
+        throw new IngestProcessingException(msg);
       }
 
-      // TODO test IOException?
       if(sha512.length() != 128){
         String msg = String.format("SHA512 checksum for file %s is unexpectedly not valid: %s", contentFile.getBagpath(), sha512);
         log.error(msg);
-        throw new IOException(msg);
+        throw new IngestProcessingException(msg);
       }
 
       BagFile bagFile = BagFile.builder()
@@ -144,12 +144,6 @@ public class Bag {
     log.error(msg);
     throw new NoSuchElementException(msg);
   }
-
-
-  public void loopContentFiles(){
-
-  }
-
 
 
 }
