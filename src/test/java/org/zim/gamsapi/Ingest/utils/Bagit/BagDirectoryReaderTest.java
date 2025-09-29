@@ -158,6 +158,25 @@ public class BagDirectoryReaderTest extends UnitTest {
   @Nested
   public class ReadMd5ManifestFile {
 
+    @Test
+    public void notFoundManifestThrowsIngestPreprocessingException(){
+        Assertions.assertThatThrownBy(() -> BagDirectoryReader.readMd5ManifestFile(Path.of("notExist")))
+                .isInstanceOf(IngestProcessingException.class);
+    }
+
+    @Test
+    public void returnsNonNullManifestObject(){
+        var md5Manifest = BagDirectoryReader.readMd5ManifestFile(bag.getBAG_DIR_PATH());
+        Assertions.assertThat(md5Manifest).isNotNull();
+    }
+
+    @Test
+    public void createsExpectedMd5ManifestObject() {
+        var md5Manifest = BagDirectoryReader.readMd5ManifestFile(bag.getBAG_DIR_PATH());
+        Assertions.assertThat(md5Manifest.size()).isEqualTo(6);
+        Assertions.assertThat(md5Manifest.get("data/content/DC.xml")).isEqualTo("140193d9633d8449ee1bff28030fe045");
+    }
+
 
 
   }
