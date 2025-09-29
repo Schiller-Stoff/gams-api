@@ -155,4 +155,11 @@ public class BagDirectoryReaderTest extends UnitTest {
 
   }
 
+  @Nested
+  public class ReadMd5ManifestFile {
+
+
+
+  }
+
 }

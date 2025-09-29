@@ -85,7 +85,7 @@ public class BagDirectoryReader {
    * @return
    * @throws IngestProcessingException
    */
-  public static Map<String,String> extractBagPathMd5Map(Path bagItDirPath) throws IngestProcessingException {
+  public static Map<String,String> readMd5ManifestFile(Path bagItDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagItDirPath.resolve(BagFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
 
     // return a map of dsid to md5 checksum
@@ -108,14 +108,12 @@ public class BagDirectoryReader {
           if(bagPath == null){
             String msg = String.format("Encountered null bag path for checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
-            // TODO different exception?
             throw new IngestProcessingException(msg);
           }
 
           if(bagPath.isBlank()){
             String msg = String.format("Encountered empty bag path for checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
-            // TODO different exception?
             throw new IngestProcessingException(msg);
           }
 
