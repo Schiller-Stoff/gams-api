@@ -139,7 +139,7 @@ public class BagDirectoryReader {
    * @return A BagItInfo object.
    * @throws IngestProcessingException If the bag-info.txt file is missing or if a required key is missing.
    */
-  public static BagInfo extractBagItInfo(Path bagItDirPath) throws IngestProcessingException {
+  public static BagInfo readBagInfoFile(Path bagItDirPath) throws IngestProcessingException {
 
     // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
     // TODO solve todos

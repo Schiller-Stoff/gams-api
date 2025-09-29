@@ -112,7 +112,7 @@ public class BagDirectoryReaderTest extends UnitTest {
   public class ReadBagInfo {
       @Test
       public void createsExpectedBagInfoObject(){
-          var bagInfo = BagDirectoryReader.extractBagItInfo(bag.getBAG_DIR_PATH());
+          var bagInfo = BagDirectoryReader.readBagInfoFile(bag.getBAG_DIR_PATH());
           Assertions.assertThat(bagInfo).isNotNull();
           Assertions.assertThat(bagInfo.getTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
           Assertions.assertThat(bagInfo.getDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);

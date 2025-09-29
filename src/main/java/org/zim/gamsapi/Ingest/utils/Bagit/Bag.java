@@ -49,7 +49,7 @@ public class Bag {
   private void readBag() throws IOException {
 
     // read and validate bagit structure
-    this.bagInfo = BagDirectoryReader.extractBagItInfo(this.BAG_DIR_PATH);
+    this.bagInfo = BagDirectoryReader.readBagInfoFile(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
     var bagPathSha512Map = BagDirectoryReader.extractBagPathSha512Map(this.BAG_DIR_PATH);
