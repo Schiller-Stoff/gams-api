@@ -157,7 +157,7 @@ public class BagDirectoryReader {
               .contactMail(fileValues.get("Contact-Email"))
               .build();
     } catch(NullPointerException e){
-      String msg = String.format("Failed to extract a required key from %s to intern BagItInfo class. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, e);
+      String msg = String.format("Failed to extract a required key from %s to intern BagInfo class. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, e);
       log.error(msg);
       throw new IngestProcessingException(msg);
     }

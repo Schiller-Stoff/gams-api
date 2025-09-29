@@ -120,6 +120,14 @@ public class BagDirectoryReaderTest extends UnitTest {
           Assertions.assertThat(bagInfo.getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
           Assertions.assertThat(bagInfo.getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
       }
+
+      @Test
+      public void notFoundBagInfoThrowsIngestPreprocessingException(){
+          Assertions.assertThatThrownBy(() -> BagDirectoryReader.readBagInfoFile(Path.of("notExist")))
+                  .isInstanceOf(IngestProcessingException.class);
+      }
+
+
   }
 
 }
