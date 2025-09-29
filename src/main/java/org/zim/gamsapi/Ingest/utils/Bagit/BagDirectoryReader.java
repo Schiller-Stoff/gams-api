@@ -41,7 +41,7 @@ public class BagDirectoryReader {
   public static Map<String, String> readSha512ManifestFile(Path bagDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
 
-    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
+    var checksumPathsMap = readKeyValueTxtFile(pathToManifestFile, " ");
 
     var bagPathChecksumMap = new HashMap<String, String>();
     checksumPathsMap.forEach(
@@ -85,7 +85,7 @@ public class BagDirectoryReader {
   public static Map<String,String> readMd5ManifestFile(Path bagDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagDirPath.resolve(BagFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
 
-    var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
+    var checksumPathsMap = readKeyValueTxtFile(pathToManifestFile, " ");
 
     var bagPathChecksumMap = new HashMap<String, String>();
     checksumPathsMap.forEach(
@@ -128,7 +128,7 @@ public class BagDirectoryReader {
   public static BagInfo readBagInfoFile(Path bagDirPath) throws IngestProcessingException {
 
     String pathToBagInfoFile = bagDirPath.resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString();
-    Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
+    Map<String, String> fileValues = readKeyValueTxtFile(pathToBagInfoFile);
 
     BagInfo bagInfo;
 
@@ -166,8 +166,8 @@ public class BagDirectoryReader {
    * @return
    * @throws IngestProcessingException
    */
-  private static Map<String, String> mapKeyValueTextFile(String filePath) throws IngestProcessingException {
-    return mapKeyValueTextFile(filePath, ":");
+  private static Map<String, String> readKeyValueTxtFile(String filePath) throws IngestProcessingException {
+    return readKeyValueTxtFile(filePath, ":");
   }
 
   /**
@@ -175,7 +175,7 @@ public class BagDirectoryReader {
    * @param filePath The path to the text file.
    * @return A map of the key value pairs in the text file.
    */
-  private static Map<String, String> mapKeyValueTextFile(String filePath, String delimiter) throws IngestProcessingException {
+  private static Map<String, String> readKeyValueTxtFile(String filePath, String delimiter) throws IngestProcessingException {
     Map<String, String> map = new HashMap<>();
     try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
       AtomicInteger lineCount = new AtomicInteger();
