@@ -177,7 +177,40 @@ public class BagDirectoryReaderTest extends UnitTest {
         Assertions.assertThat(md5Manifest.get("data/content/DC.xml")).isEqualTo("140193d9633d8449ee1bff28030fe045");
     }
 
+  }
 
+  @Nested
+  public class ReadKeyValueTxtFile {
+
+      @Test
+      public void notFoundKeyValueTxtThrowsIngestPreprocessingException(){
+          Assertions.assertThatThrownBy(() -> BagDirectoryReader.readKeyValueTxtFile("notExist"))
+                  .isInstanceOf(IngestProcessingException.class);
+      }
+
+      @Test
+      public void returnsNonNullKeyValueMap(){
+          var keyValueMap = BagDirectoryReader.readKeyValueTxtFile(
+                  bag.getBAG_DIR_PATH().resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString()
+          );
+          Assertions.assertThat(keyValueMap).isNotNull();
+      }
+
+      @Test
+      public void createsExpectedKeyValueMapSizeFromBagInfo() {
+          var keyValueMap = BagDirectoryReader.readKeyValueTxtFile(
+                  bag.getBAG_DIR_PATH().resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString()
+          );
+          Assertions.assertThat(keyValueMap.size()).isEqualTo(5);
+      }
+
+      @Test
+      public void createsExpectedKeyValueMapSizeFromBagitTxt() {
+          var keyValueMap = BagDirectoryReader.readKeyValueTxtFile(
+                  bag.getBAG_DIR_PATH().resolve(BagFilePaths.BAG_TXT_FILE_PATH.name).toString()
+          );
+          Assertions.assertThat(keyValueMap.size()).isEqualTo(2);
+      }
 
   }
 

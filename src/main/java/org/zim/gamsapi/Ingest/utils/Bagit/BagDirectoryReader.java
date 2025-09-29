@@ -161,12 +161,12 @@ public class BagDirectoryReader {
   }
 
   /**
-   * TODO jdoc
-   * @param filePath
-   * @return
-   * @throws IngestProcessingException
+   * Maps the key value pairs in defined text file to a map.
+   * @param filePath The path to the text file.
+   * @return A map of the key value pairs in the text file.
+   * @throws IngestProcessingException If the file is missing or if the file is malformed (e.g. expected line count not reached or if extracted map is empty).
    */
-  private static Map<String, String> readKeyValueTxtFile(String filePath) throws IngestProcessingException {
+  static Map<String, String> readKeyValueTxtFile(String filePath) throws IngestProcessingException {
     return readKeyValueTxtFile(filePath, ":");
   }
 
@@ -174,8 +174,9 @@ public class BagDirectoryReader {
    * Maps the key value pairs in defined text file to a map.
    * @param filePath The path to the text file.
    * @return A map of the key value pairs in the text file.
+   * @throws IngestProcessingException If the file is missing or if the file is malformed (e.g. expected line count not reached or if extracted map is empty).
    */
-  private static Map<String, String> readKeyValueTxtFile(String filePath, String delimiter) throws IngestProcessingException {
+  static Map<String, String> readKeyValueTxtFile(String filePath, String delimiter) throws IngestProcessingException {
     Map<String, String> map = new HashMap<>();
     try (Stream<String> lines = Files.lines(Paths.get(filePath))) {
       AtomicInteger lineCount = new AtomicInteger();
@@ -194,7 +195,6 @@ public class BagDirectoryReader {
       if(lineCount.get() != map.size()){
         String msg = String.format("Failed to map key value pairs in file %s to map. The number of lines containing the delimiter (%s) does not match the number of entries in the resulting map.", filePath, delimiter);
         log.error(msg);
-        // TODO better exception e.g. IO exception
         throw new IngestProcessingException(msg);
       }
 
@@ -207,7 +207,6 @@ public class BagDirectoryReader {
     if(map.isEmpty()){
       String msg = String.format("Failed to map key value pairs in file %s to map. The resulting map is empty.", filePath);
       log.error(msg);
-      // TODO use different - best a checked exception? (IOException e.g.?)
       throw new IngestProcessingException(msg);
     }
 
