@@ -134,17 +134,17 @@ public class BagDirectoryReader {
   }
 
   /**
-   * Maps the key value pairs in the bag-info.txt file to a BagItInfo object.
-   * @param bagItDirPath The path to the bagit directory.
+   * Maps the key value pairs in the bag-info.txt file to a BagInfo object.
+   * @param bagDirPath path to the bag directory.
    * @return A BagItInfo object.
    * @throws IngestProcessingException If the bag-info.txt file is missing or if a required key is missing.
    */
-  public static BagInfo readBagInfoFile(Path bagItDirPath) throws IngestProcessingException {
+  public static BagInfo readBagInfoFile(Path bagDirPath) throws IngestProcessingException {
 
     // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
     // TODO solve todos
 
-    String pathToBagInfoFile = bagItDirPath.resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString();
+    String pathToBagInfoFile = bagDirPath.resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString();
     Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
 
     try {
