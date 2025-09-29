@@ -108,4 +108,18 @@ public class BagDirectoryReaderTest extends UnitTest {
 
   }
 
+  @Nested
+  public class ReadBagInfo {
+      @Test
+      public void createsExpectedBagInfoObject(){
+          var bagInfo = BagDirectoryReader.extractBagItInfo(bag.getBAG_DIR_PATH());
+          Assertions.assertThat(bagInfo).isNotNull();
+          Assertions.assertThat(bagInfo.getTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
+          Assertions.assertThat(bagInfo.getDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
+          Assertions.assertThat(bagInfo.getContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+          Assertions.assertThat(bagInfo.getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+          Assertions.assertThat(bagInfo.getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+      }
+  }
+
 }
