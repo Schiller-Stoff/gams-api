@@ -14,7 +14,7 @@ public class BagSipJsonDigitalObjectConverterTest extends UnitTest {
   public void convertsExpectedBagitSipJson(){
 
     BagSipJson bagSipJson = new BagSipJson();
-    bagSipJson.setId("testId");
+    bagSipJson.setRecid("testId");
     bagSipJson.setProject("testProject");
     bagSipJson.setObjectType("testObjectType");
     bagSipJson.setTypes(Set.of("testTypes"));
@@ -30,7 +30,7 @@ public class BagSipJsonDigitalObjectConverterTest extends UnitTest {
     DigitalObject convertedDigitalObject = bagitSipJsonDigitalObjectConverter.convert(bagSipJson);
 
     Assertions.assertThat(convertedDigitalObject).isNotNull();
-    Assertions.assertThat(convertedDigitalObject.getId()).isEqualTo(bagSipJson.getId());
+    Assertions.assertThat(convertedDigitalObject.getId()).isEqualTo(bagSipJson.getRecid());
     Assertions.assertThat(convertedDigitalObject.getProject().getProjectAbbr()).isEqualTo(bagSipJson.getProject());
     Assertions.assertThat(convertedDigitalObject.getObjectType()).isEqualTo(bagSipJson.getObjectType());
     Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getTitle()).isEqualTo(bagSipJson.getTitle());

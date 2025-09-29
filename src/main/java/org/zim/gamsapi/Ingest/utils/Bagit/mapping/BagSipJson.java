@@ -17,10 +17,12 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BagSipJson {
 
-    // TODO rename to recid for consistency - this class is only needed for json mapping
-    @JsonProperty("recid")
+    /**
+     * Record ID of the object in GAMS.
+     * Corresponds to the digital object id in GAMS.
+     */
     @NotEmpty
-    private String id;
+    private String recid;
 
     /**
      * Abbreviation of the GAMS project.

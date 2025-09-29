@@ -18,7 +18,7 @@ public class BagSipJsonTest extends UnitTest {
   @BeforeEach
   public void setUp() {
     bagSipJson = new BagSipJson();
-    bagSipJson.setId("id");
+    bagSipJson.setRecid("id");
     bagSipJson.setProject("project");
     bagSipJson.setTitle("title");
     bagSipJson.setObjectType("objectType");

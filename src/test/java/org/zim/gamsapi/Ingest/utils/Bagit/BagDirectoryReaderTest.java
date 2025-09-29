@@ -60,7 +60,7 @@ public class BagDirectoryReaderTest extends UnitTest {
           Assertions.assertThat(bagSipJson.getCreator())
                   .isEqualTo(TestBag.TestBagSipJson.CREATOR);
 
-          Assertions.assertThat(bagSipJson.getId())
+          Assertions.assertThat(bagSipJson.getRecid())
                   .isEqualTo(TestBag.TestBagSipJson.REC_ID);
 
           Assertions.assertThat(bagSipJson.getFunder())

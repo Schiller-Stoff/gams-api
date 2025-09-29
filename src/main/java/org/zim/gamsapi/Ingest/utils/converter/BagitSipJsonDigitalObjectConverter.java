@@ -18,7 +18,7 @@ public class BagitSipJsonDigitalObjectConverter implements Converter<BagSipJson,
     public DigitalObject convert(BagSipJson source) {
 
         DigitalObjectBuilder digitalObjectBuilder = new DigitalObjectBuilder()
-            .id(source.getId())
+            .id(source.getRecid())
             .project(source.getProject())
             .objectType(source.getObjectType())
             .publisher(source.getPublisher())

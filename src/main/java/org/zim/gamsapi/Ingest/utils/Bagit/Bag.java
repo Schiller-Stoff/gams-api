@@ -62,7 +62,7 @@ public class Bag {
     String sipJsonSHA512 = bagPathSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
 
     BagData bagData = BagData.builder()
-        .id(bagSipJson.getId())
+        .id(bagSipJson.getRecid())
         .project(bagSipJson.getProject())
         .title(bagSipJson.getTitle())
         .objectType(bagSipJson.getObjectType())
