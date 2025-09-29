@@ -40,11 +40,10 @@ public class BagDirectoryReader {
    */
   public static Map<String, String> readSha512ManifestFile(Path bagDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
-    // return a map of dsid to sha512 checksum
 
     var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
-    var bagPathChecksumMap = new HashMap<String, String>();
 
+    var bagPathChecksumMap = new HashMap<String, String>();
     checksumPathsMap.forEach(
         (sha512Checksum, bagPath) -> {
            if(bagPathChecksumMap.containsValue(sha512Checksum)){
@@ -78,23 +77,20 @@ public class BagDirectoryReader {
   }
 
   /**
-   * TODO jdoc
-   * TODO test
-   * TODO somewaht duplicated with sha-512 logic
-   * @param bagItDirPath
-   * @return
-   * @throws IngestProcessingException
+   * Reads the md5 manifest file and returns a map of bag paths to md5 checksums.
+   * @param bagDirPath path to the bag directory
+   * @return Map of bagPaths (keys) to md5 checksums (values)
+   * @throws IngestProcessingException if the manifest file is missing or malformed (checksums not 32 characters long, duplicate checksums, empty bag paths)
    */
-  public static Map<String,String> readMd5ManifestFile(Path bagItDirPath) throws IngestProcessingException {
-    String pathToManifestFile = bagItDirPath.resolve(BagFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
+  public static Map<String,String> readMd5ManifestFile(Path bagDirPath) throws IngestProcessingException {
+    String pathToManifestFile = bagDirPath.resolve(BagFilePaths.MANIFEST_MD5_FILE_PATH.name).toString();
 
-    // return a map of dsid to md5 checksum
-    var dsidChecksumMap = new HashMap<String, String>();
     var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
 
+    var bagPathChecksumMap = new HashMap<String, String>();
     checksumPathsMap.forEach(
         (checksum, bagPath) -> {
-          if(dsidChecksumMap.containsKey(checksum)){
+          if(bagPathChecksumMap.containsKey(checksum)){
             String msg = String.format("Encountered duplicate checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
@@ -117,10 +113,10 @@ public class BagDirectoryReader {
             throw new IngestProcessingException(msg);
           }
 
-          dsidChecksumMap.put(bagPath, checksum);
+          bagPathChecksumMap.put(bagPath, checksum);
         }
     );
-    return dsidChecksumMap;
+    return bagPathChecksumMap;
   }
 
   /**
