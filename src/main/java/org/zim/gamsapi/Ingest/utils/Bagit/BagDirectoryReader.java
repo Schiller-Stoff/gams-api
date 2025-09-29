@@ -141,15 +141,13 @@ public class BagDirectoryReader {
    */
   public static BagInfo readBagInfoFile(Path bagDirPath) throws IngestProcessingException {
 
-    // TODO do I really need to check the bag-info.txt file? (if it is missing, the whole bag is invalid)
-    // TODO solve todos
-
     String pathToBagInfoFile = bagDirPath.resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString();
     Map<String, String> fileValues = mapKeyValueTextFile(pathToBagInfoFile);
 
+    BagInfo bagInfo;
+
     try {
-      //TODO validation of baginfo is missing!
-      return  BagInfo.builder()
+      bagInfo = BagInfo.builder()
               .date(fileValues.get("Bagging-Date"))
               .time(fileValues.get("Bagging-Time"))
               .payloadOxum(fileValues.get("Payload-Oxum"))
@@ -162,6 +160,18 @@ public class BagDirectoryReader {
       throw new IngestProcessingException(msg);
     }
 
+    // validate sip.json mapping
+    try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()){
+      Validator validator = factory.getValidator();
+      Set<ConstraintViolation<BagInfo>> violations = validator.validate(bagInfo);
+      if(!violations.isEmpty()){
+          String msg = String.format("Failed to validate bag info file from %s. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, violations);
+          log.error(msg);
+          throw new IngestProcessingException(msg);
+      }
+    }
+
+    return  bagInfo;
   }
 
   /**
