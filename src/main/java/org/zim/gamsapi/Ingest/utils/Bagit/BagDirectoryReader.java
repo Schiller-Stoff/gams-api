@@ -31,18 +31,12 @@ import java.util.stream.Stream;
 public class BagDirectoryReader {
 
   // TODO maybe better to solve this with a constructor - bagitPath as parameter?
-  // TODO want to test methods that get the extracted bagit as argument and not the path to the bagit?
-  // (would be easier to test)
-
-  // TODO atm e.g. bagSipJson is being validated BUT not the bagit as a whole -- would need to check certain file conventions etc.?
-  // (if checksums are available etc)
 
   /**
-   * TODO Jdoc
-   * TODO test
+   * Reads the sha512 manifest file and returns a map of bag paths to sha512 checksums.
    * @param bagDirPath path to the bag directory
-   * @return Map of bagpaths (keys) to sha512 checksums (values)
-   * @throws IngestProcessingException
+   * @return Map of bagPaths (keys) to sha512 checksums (values)
+   * @throws IngestProcessingException if the manifest file is missing or malformed (checksums not 128 characters long, duplicate checksums, empty bag paths)
    */
   public static Map<String, String> readSha512ManifestFile(Path bagDirPath) throws IngestProcessingException {
     String pathToManifestFile = bagDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
@@ -67,14 +61,12 @@ public class BagDirectoryReader {
           if(bagPath == null){
             String msg = String.format("Encountered null bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
-            // TODO different exception?
             throw new IngestProcessingException(msg);
           }
 
           if(bagPath.isBlank()){
             String msg = String.format("Encountered empty bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
             log.error(msg);
-            // TODO different exception?
             throw new IngestProcessingException(msg);
           }
 

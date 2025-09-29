@@ -130,4 +130,29 @@ public class BagDirectoryReaderTest extends UnitTest {
 
   }
 
+  @Nested
+  public class ReadSha512ManifestFile {
+
+      @Test
+      public void notFoundManifestThrowsIngestPreprocessingException(){
+          Assertions.assertThatThrownBy(() -> BagDirectoryReader.readSha512ManifestFile(Path.of("notExist")))
+                  .isInstanceOf(IngestProcessingException.class);
+      }
+
+      @Test
+      public void returnsNonNullManifestObject(){
+          var sha512Manifest = BagDirectoryReader.readSha512ManifestFile(bag.getBAG_DIR_PATH());
+          Assertions.assertThat(sha512Manifest).isNotNull();
+      }
+
+      @Test
+      public void createsExpectedSha512ManifestObject() {
+          var sha512Manifest = BagDirectoryReader.readSha512ManifestFile(bag.getBAG_DIR_PATH());
+          Assertions.assertThat(sha512Manifest.size()).isEqualTo(6);
+          Assertions.assertThat(sha512Manifest.get("data/content/DC.xml")).isEqualTo("16e0517a67c3b8c65b4d6fa159236a1cb005d278a9af6de829c8b69ff74c83c9d2848911db607b9a51d205b0dcd98495b4aee8dd107afa35aa1e8d8226c1b259");
+      }
+
+
+  }
+
 }
