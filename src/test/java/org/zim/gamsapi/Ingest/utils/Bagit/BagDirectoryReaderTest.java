@@ -89,6 +89,22 @@ public class BagDirectoryReaderTest extends UnitTest {
 
       }
 
+      @Test
+      public void createsExpectedContentFiles(){
+          bagSipJson.getContentFiles().forEach(bagSipJsonContentFile -> {
+             Assertions.assertThat(bagSipJsonContentFile.getBagpath()).contains("data/content/");
+             Assertions.assertThat(bagSipJsonContentFile.getSize()).isGreaterThan(0);
+             Assertions.assertThat(bagSipJsonContentFile.getTitle().length()).isGreaterThan(3);
+             Assertions.assertThat(bagSipJsonContentFile.getDescription().length()).isGreaterThan(3);
+             Assertions.assertThat(bagSipJsonContentFile.getMimetype()).contains("/");
+             Assertions.assertThat(bagSipJsonContentFile.getLang().size()).isEqualTo(3);
+             Assertions.assertThat(bagSipJsonContentFile.getTags().size()).isEqualTo(3);
+             Assertions.assertThat(bagSipJsonContentFile.getCreator().length()).isGreaterThan(1);
+             Assertions.assertThat(bagSipJsonContentFile.getRights().length()).isGreaterThan(5);
+          });
+
+      }
+
 
   }
 
