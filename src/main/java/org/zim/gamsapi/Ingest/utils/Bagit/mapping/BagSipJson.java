@@ -12,7 +12,6 @@ import java.util.Set;
 
 /**
  * Container for the bagit sip.json file defined by invenio / CERN.
- * TODO improve validation e.g add @NotEmpty etc.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
