@@ -40,20 +40,20 @@ public class BagDirectoryReader {
   /**
    * TODO Jdoc
    * TODO test
-   * @param bagItDirPath path to the bag directory
+   * @param bagDirPath path to the bag directory
    * @return Map of bagpaths (keys) to sha512 checksums (values)
    * @throws IngestProcessingException
    */
-  public static Map<String, String> readSha512ManifestFile(Path bagItDirPath) throws IngestProcessingException {
-    String pathToManifestFile = bagItDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
+  public static Map<String, String> readSha512ManifestFile(Path bagDirPath) throws IngestProcessingException {
+    String pathToManifestFile = bagDirPath.resolve(BagFilePaths.MANIFEST_SHA512_FILE_PATH.name).toString();
     // return a map of dsid to sha512 checksum
 
     var checksumPathsMap = mapKeyValueTextFile(pathToManifestFile, " ");
-    var dsidChecksumMap = new HashMap<String, String>();
+    var bagPathChecksumMap = new HashMap<String, String>();
 
     checksumPathsMap.forEach(
         (sha512Checksum, bagPath) -> {
-           if(dsidChecksumMap.containsValue(sha512Checksum)){
+           if(bagPathChecksumMap.containsValue(sha512Checksum)){
             String msg = String.format("Encountered duplicate checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
             log.error(msg);
             throw new IngestProcessingException(msg);
@@ -78,11 +78,11 @@ public class BagDirectoryReader {
             throw new IngestProcessingException(msg);
           }
 
-           dsidChecksumMap.put(bagPath, sha512Checksum);
+           bagPathChecksumMap.put(bagPath, sha512Checksum);
         }
     );
 
-    return dsidChecksumMap;
+    return bagPathChecksumMap;
   }
 
   /**
