@@ -3,11 +3,13 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
+import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.UnitTest;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * TODO check BagTest
@@ -31,6 +33,12 @@ public class BagDirectoryReaderTest extends UnitTest {
       @BeforeEach
       public void setup(){
           bagSipJson = BagDirectoryReader.extractAndValidateSipJson(bag.getBAG_DIR_PATH());
+      }
+
+      @Test
+      public void notFoundSipJsonThrowsIngestPreprocessingException(){
+          Assertions.assertThatThrownBy(() -> BagDirectoryReader.extractAndValidateSipJson(Path.of("notExist")))
+                  .isInstanceOf(IngestProcessingException.class);
       }
 
       @Test

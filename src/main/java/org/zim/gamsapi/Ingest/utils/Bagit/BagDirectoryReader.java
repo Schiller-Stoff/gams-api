@@ -238,7 +238,6 @@ public class BagDirectoryReader {
 
     BagSipJson bagitSipJson;
     try {
-      // TODO instantiation of own object mapper might be just a waste of resources. (inject object mapper instead)
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -263,7 +262,6 @@ public class BagDirectoryReader {
       throw new IngestProcessingException(msg);
     }
 
-    // TODO maybe inject instead of creating new validator factory every time?
     // validate sip.json mapping
     try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()){
       Validator validator = factory.getValidator();
