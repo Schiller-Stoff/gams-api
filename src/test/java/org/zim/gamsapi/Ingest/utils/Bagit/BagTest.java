@@ -193,7 +193,7 @@ public class BagTest extends UnitTest {
       @Test
       public void thereAreSameCountOfBagFilesAsContentFilesInSipJson() {
         final var CONTENT_FILES_COUNT = bag.getBagData().getContentFiles().size();
-        final var BAG_FILES_COUNT = bag.getContentFiles().size();;
+        final var BAG_FILES_COUNT = bag.getContentFiles().size();
         Assertions.assertThat(BAG_FILES_COUNT).isEqualTo(CONTENT_FILES_COUNT);
       }
 
