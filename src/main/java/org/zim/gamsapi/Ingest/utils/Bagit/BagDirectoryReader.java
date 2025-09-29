@@ -219,17 +219,16 @@ public class BagDirectoryReader {
   }
 
   /**
-   * Maps the sip.json file to a BagitSipJson object.
-   * @param bagitDirPath The path to the bagit directory.
+   * Maps the sip.json file to a BagSipJson object.
+   * @param bagDirPath The path to the bag root directory.
    */
-  public static BagSipJson extractAndValidateSipJson(Path bagitDirPath){
+  public static BagSipJson extractAndValidateSipJson(Path bagDirPath) throws IngestProcessingException {
 
-    Path pathToBagInfoFile = bagitDirPath.resolve(BagFilePaths.BAG_SIP_JSON.name);
+    Path pathToBagInfoFile = bagDirPath.resolve(BagFilePaths.BAG_SIP_JSON.name);
 
     byte[] jsonContent;
     try {
       jsonContent = Files.readAllBytes(pathToBagInfoFile);
-
     } catch (IOException e){
       String msg = String.format("Failed to read out sip.json from %s. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, e);
       log.error(msg);
