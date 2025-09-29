@@ -32,12 +32,12 @@ public class BagDirectoryReaderTest extends UnitTest {
 
       @BeforeEach
       public void setup(){
-          bagSipJson = BagDirectoryReader.extractAndValidateSipJson(bag.getBAG_DIR_PATH());
+          bagSipJson = BagDirectoryReader.readSipJson(bag.getBAG_DIR_PATH());
       }
 
       @Test
       public void notFoundSipJsonThrowsIngestPreprocessingException(){
-          Assertions.assertThatThrownBy(() -> BagDirectoryReader.extractAndValidateSipJson(Path.of("notExist")))
+          Assertions.assertThatThrownBy(() -> BagDirectoryReader.readSipJson(Path.of("notExist")))
                   .isInstanceOf(IngestProcessingException.class);
       }
 
@@ -55,7 +55,7 @@ public class BagDirectoryReaderTest extends UnitTest {
       @Test
       public void createsExpectedBagSipJsonObject(){
 
-          var bagSipJson = BagDirectoryReader.extractAndValidateSipJson(bag.getBAG_DIR_PATH());
+          var bagSipJson = BagDirectoryReader.readSipJson(bag.getBAG_DIR_PATH());
 
           Assertions.assertThat(bagSipJson.getCreator())
                   .isEqualTo(TestBag.TestBagSipJson.CREATOR);

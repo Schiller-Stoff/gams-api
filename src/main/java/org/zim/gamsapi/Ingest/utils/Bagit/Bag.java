@@ -56,7 +56,7 @@ public class Bag {
     var bagPathMd5Map = BagDirectoryReader.extractBagPathMd5Map(this.BAG_DIR_PATH);
 
     // handle sip json
-    BagSipJson bagSipJson = BagDirectoryReader.extractAndValidateSipJson(this.BAG_DIR_PATH);
+    BagSipJson bagSipJson = BagDirectoryReader.readSipJson(this.BAG_DIR_PATH);
 
     String sipJsonMd5 = bagPathMd5Map.get(BagFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);

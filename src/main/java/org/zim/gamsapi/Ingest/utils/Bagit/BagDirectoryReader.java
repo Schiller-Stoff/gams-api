@@ -222,7 +222,7 @@ public class BagDirectoryReader {
    * Maps the sip.json file to a BagSipJson object.
    * @param bagDirPath The path to the bag root directory.
    */
-  public static BagSipJson extractAndValidateSipJson(Path bagDirPath) throws IngestProcessingException {
+  public static BagSipJson readSipJson(Path bagDirPath) throws IngestProcessingException {
 
     Path pathToBagInfoFile = bagDirPath.resolve(BagFilePaths.BAG_SIP_JSON.name);
 

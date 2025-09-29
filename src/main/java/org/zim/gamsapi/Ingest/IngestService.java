@@ -74,7 +74,7 @@ public class IngestService implements IIngestService {
     }
 
     try {
-      BagSipJson bagitSipJson = BagDirectoryReader.extractAndValidateSipJson(bagDirPath);
+      BagSipJson bagitSipJson = BagDirectoryReader.readSipJson(bagDirPath);
       log.info("Successfully extracted bagit sip.json: {}", bagitSipJson);
       if(!bagitSipJson.getProject().equals(ingest.getProjectAbbr())){
         String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bagit sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bagitSipJson.getProject(), ingest, bagitSipJson);
