@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
-
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -127,7 +125,7 @@ public class Bag {
 
   /**
    * Allows to quickly access all content files in the bag.
-   * @return
+   * @return set of BagFiles representing the content files in the bag
    */
   public Set<BagFile> getContentFiles(){
     return this.bagData.getContentFiles();
