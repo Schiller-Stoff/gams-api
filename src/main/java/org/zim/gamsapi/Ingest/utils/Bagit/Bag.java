@@ -78,6 +78,10 @@ public class Bag {
         .types(bagSipJson.getTypes())
         .md5Checksum(sipJsonMd5)
         .sha512Checksum(sipJsonSHA512)
+        // bag related fields
+        .schema(bagSipJson.getSchema())
+        .createdBy(bagSipJson.getCreated_by())
+        .source(bagSipJson.getSource())
         .build();
 
     // sipjson content files

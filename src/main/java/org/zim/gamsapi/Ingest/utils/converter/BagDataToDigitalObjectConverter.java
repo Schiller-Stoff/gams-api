@@ -27,7 +27,10 @@ public class BagDataToDigitalObjectConverter implements Converter<BagData, Digit
                         .rights(source.getRights())
                         .sha512Checksum(source.getSha512Checksum())
                         .md5Checksum(source.getMd5Checksum())
-                        .build());
+                        .build())
+                .bagSchema(source.getSchema())
+                .bagCreatedBy(source.getCreatedBy())
+                .bagSource(source.getSource());
 
         return digitalObjectBuilder.build();
     }

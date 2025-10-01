@@ -43,6 +43,12 @@ public class BagTest extends UnitTest {
 
     @Nested
     public class BagInfo {
+
+      @Test
+      public void bagInfoHasNoNullValues() {
+        Assertions.assertThat(bag.getBagInfo()).hasNoNullFieldsOrProperties();
+      }
+
       @Test
       public void bagInfoHasExpectedPayloadOxum() {
         Assertions.assertThat(bag.getBagInfo().getPayloadOxum()).isNotNull();
@@ -77,6 +83,11 @@ public class BagTest extends UnitTest {
 
     @Nested
     public class BagData {
+      @Test
+      public void bagSipJsonContainsNoNullValues() {
+        Assertions.assertThat(bag.getBagData()).hasNoNullFieldsOrProperties();
+      }
+
       @Test
       public void bagitSipJsonIsNotNull() {
         Assertions.assertThat(bag.getBagData()).isNotNull();
@@ -131,22 +142,18 @@ public class BagTest extends UnitTest {
       }
 
       @Test
-      @Disabled("Property missing on sip json java class")
       public void bagitSipJsonHasExpectedCreatedBy() {
         Assertions.assertThat(bag.getBagData().getCreatedBy()).isNotNull();
         Assertions.assertThat(bag.getBagData().getCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
       }
 
-      // TODO add schema test!
       @Test
-      @Disabled("Property missing on sip json java class")
       public void bagitSipJsonHasExpectedSchema() {
         Assertions.assertThat(bag.getBagData().getSchema()).isNotNull();
         Assertions.assertThat(bag.getBagData().getSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
       }
 
       @Test
-      @Disabled("Property missing on sip json java class")
       public void bagitSipJsonHasExpectedSource() {
         Assertions.assertThat(bag.getBagData().getSource()).isNotNull();
         Assertions.assertThat(bag.getBagData().getSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);

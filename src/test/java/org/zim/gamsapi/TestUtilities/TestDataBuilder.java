@@ -9,7 +9,6 @@ import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
@@ -136,15 +135,9 @@ public class TestDataBuilder {
       throw new IllegalStateException(msg);
     }
 
-    var digitalObjectToBeSaved = DigitalObjectBuilder.builder()
-        .id(randomDigitalObjectId)
-        .project(testDataSet.project())
-        .publisher(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
-        .objectType(TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue())
-        .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
-        .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-        .baseMetadata(TestMetadataBaseEntity.generate())
-        .build();
+    var digitalObjectToBeSaved = TestDigitalObject.generate(
+            testDataSet.project().getProjectAbbr(), randomDigitalObjectId
+    );
 
     return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
@@ -166,15 +159,8 @@ public class TestDataBuilder {
 
     var persistedProject = projectRepository.save(projectToBeSaved);
 
-    var digitalObjectToBeSaved = DigitalObjectBuilder.builder()
-        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .project(persistedProject)
-        .publisher(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
-        .objectType(TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue())
-        .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
-        .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-        .baseMetadata(TestMetadataBaseEntity.generate())
-        .build();
+    var digitalObjectToBeSaved =
+            TestDigitalObject.generate(persistedProject.getProjectAbbr());
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
