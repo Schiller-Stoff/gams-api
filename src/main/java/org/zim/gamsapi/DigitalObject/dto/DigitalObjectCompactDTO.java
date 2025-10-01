@@ -46,6 +46,12 @@ public class DigitalObjectCompactDTO {
 
     private DatastreamMainResourceDto mainResource;
 
+    private String bagSchema;
+
+    private String bagSource;
+
+    private String bagCreatedBy;
+
     /**
      * Map of Dublin Core entries, where the key is the name of the entry and the value is a list of
      * DublinCoreEntrySummaryView objects.
