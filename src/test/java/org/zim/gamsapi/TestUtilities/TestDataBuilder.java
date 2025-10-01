@@ -58,7 +58,7 @@ public class TestDataBuilder {
   @Transactional
   public Project addRandomProject(TestDataSet testDataSet) {
 
-    // create a random project id
+    // create a random project
     // id must not be longer than 10 characters
     var randomProjectId = TestProject.PROJECT_ABBR.getValue() + System.currentTimeMillis();
     if (randomProjectId.length() > 10) {
@@ -100,16 +100,8 @@ public class TestDataBuilder {
       throw new IllegalStateException(msg);
     }
 
-    var datastreamToBeSaved = DatastreamBuilder.builder()
-        .dsid(randomDatastreamId)
-        .digitalObject(testDataSet.digitalObject())
-        .tags(TestDatastream.DATASTREAM_TAGS)
-        .baseMetadata(TestDatastream.METADATA_BASE_ENTITY)
-        .size( (long) TestDatastreamContent.CONTENT.getValue().length())
-        .mimeType(TestDatastream.MIME_TYPE.getValue())
-        .fileName(TestDatastream.FILE_NAME.getValue())
-        .lang(TestDatastream.DATASTREAM_LANG)
-        .build();
+    var datastreamToBeSaved = TestDatastream.generate(
+            testDataSet.digitalObject(),randomDatastreamId);
 
     return datastreamRepository.save(datastreamToBeSaved);
   }
@@ -149,7 +141,7 @@ public class TestDataBuilder {
         .projectAbbr(TestProject.PROJECT_ABBR.getValue())
         .description(TestProject.PROJECT_DESCRIPTION.getValue())
         .title(TestProject.PROJECT_TITLE.getValue())
-        // following fields are supplied by the database / spring security worflows
+        // following fields are supplied by the database / spring security workflows
         //.createdBy(TestUser.USERNAME.getValue())
         //.modifiedBy(TestUser.USERNAME.getValue())
         //.created(new Date())
@@ -164,16 +156,7 @@ public class TestDataBuilder {
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
-    var datastreamToBeSaved = DatastreamBuilder.builder()
-        .dsid(TestDatastream.DSID.getValue())
-        .digitalObject(persistedDigitalObject)
-        .tags(TestDatastream.DATASTREAM_TAGS)
-        .baseMetadata(TestDatastream.METADATA_BASE_ENTITY)
-        .size( (long) TestDatastreamContent.CONTENT.getValue().length())
-        .mimeType(TestDatastream.MIME_TYPE.getValue())
-        .fileName(TestDatastream.FILE_NAME.getValue())
-        .lang(TestDatastream.DATASTREAM_LANG)
-        .build();
+    var datastreamToBeSaved = TestDatastream.generate(persistedDigitalObject);
 
     var persistedDatastream = datastreamRepository.save(datastreamToBeSaved);
 
