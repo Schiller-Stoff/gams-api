@@ -20,6 +20,8 @@ public class DatastreamMainResourceViewToDatastreamMainResourceDtoConverterTest 
 
     Assertions.assertThat(convertedDatastreamMainResourceDto).isNotNull();
 
+    Assertions.assertThat(convertedDatastreamMainResourceDto).hasNoNullFieldsOrProperties();
+
     Assertions.assertThat(convertedDatastreamMainResourceDto.getCreator())
         .isEqualTo(toBeConverted.getBaseMetadata().getCreator());
 
