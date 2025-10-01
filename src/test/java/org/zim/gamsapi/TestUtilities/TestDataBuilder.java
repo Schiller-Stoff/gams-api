@@ -72,11 +72,7 @@ public class TestDataBuilder {
       throw new IllegalStateException(msg);
     }
 
-    var projectToBeSaved = ProjectBuilder.builder()
-        .projectAbbr(randomProjectId)
-        .description(TestProject.PROJECT_DESCRIPTION.getValue())
-        .title(TestProject.PROJECT_TITLE.getValue())
-        .build();
+    var projectToBeSaved = TestProject.generate(randomProjectId);
 
     return projectRepository.save(projectToBeSaved);
   }
@@ -137,17 +133,7 @@ public class TestDataBuilder {
   @Transactional
   public TestDataSet buildTestDataSet() {
 
-    var projectToBeSaved = ProjectBuilder.builder()
-        .projectAbbr(TestProject.PROJECT_ABBR.getValue())
-        .description(TestProject.PROJECT_DESCRIPTION.getValue())
-        .title(TestProject.PROJECT_TITLE.getValue())
-        // following fields are supplied by the database / spring security workflows
-        //.createdBy(TestUser.USERNAME.getValue())
-        //.modifiedBy(TestUser.USERNAME.getValue())
-        //.created(new Date())
-        //.modified(new Date())
-        //.published(new Date())
-        .build();
+    var projectToBeSaved = TestProject.generate();
 
     var persistedProject = projectRepository.save(projectToBeSaved);
 
@@ -166,11 +152,7 @@ public class TestDataBuilder {
         , persistedDatastream.deriveDatastreamId()
     );
 
-    var dublinCoreEntryToBeSaved = DublinCoreEntry.builder()
-        .name(TestDublinCoreEntry.NAME.getValue())
-        .value(TestDublinCoreEntry.VALUE.getValue())
-        .language(TestDublinCoreEntry.LANGUAGE.getValue())
-        .digitalObject(persistedDigitalObject).build();
+    var dublinCoreEntryToBeSaved = TestDublinCoreEntry.generate(persistedDigitalObject);
 
     var persistedDublinCoreEntry = dublinCoreEntryRepository.save(dublinCoreEntryToBeSaved);
 
