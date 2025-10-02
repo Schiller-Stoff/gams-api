@@ -81,6 +81,14 @@ public class BagEntity {
     @Min(1)
     private Float payloadOxum;
 
+    @Column
+    @NotEmpty
+    private String bagVersion;
+
+    @Column
+    @NotEmpty
+    private String tagFileCharacterEncoding;
+
 
     /**
      * Proper equals/hashCode for entities with assigned IDs.
