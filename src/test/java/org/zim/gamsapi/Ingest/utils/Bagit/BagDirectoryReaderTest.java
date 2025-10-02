@@ -210,4 +210,35 @@ public class BagDirectoryReaderTest extends UnitTest {
 
   }
 
+  @Nested
+  public class ReadBagItTxt {
+
+      @Test
+      public void notFoundBagItTxtThrowsIngestPreprocessingException(){
+          Assertions.assertThatThrownBy(() -> BagDirectoryReader.readBagItTxtFile(Path.of("notExist")))
+                  .isInstanceOf(IngestProcessingException.class);
+      }
+
+      @Test
+      public void returnsNonNullBagMetaObject(){
+          var bagMeta = BagDirectoryReader.readBagItTxtFile(bag.getBAG_DIR_PATH());
+          Assertions.assertThat(bagMeta).isNotNull();
+      }
+
+      @Test
+      public void readInBagMetaObjectHasNoNullFields(){
+          var bagMeta = BagDirectoryReader.readBagItTxtFile(bag.getBAG_DIR_PATH());
+          Assertions.assertThat(bagMeta).hasNoNullFieldsOrProperties();
+      }
+
+      @Test
+      public void createsExpectedBagMetaObject(){
+          var bagMeta = BagDirectoryReader.readBagItTxtFile(bag.getBAG_DIR_PATH());
+          Assertions.assertThat(bagMeta).isNotNull();
+          Assertions.assertThat(bagMeta.getBagItVersion()).isEqualTo(TestBag.BagitTxt.BAGIT_VERSION);
+          Assertions.assertThat(bagMeta.getTagFileCharacterEncoding()).isEqualTo(TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING);
+      }
+
+  }
+
 }

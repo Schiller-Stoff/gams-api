@@ -36,6 +36,11 @@ public class TestBag {
     public static final String EXTERNAL_DESCRIPTION = "Test bag for gamsapi tests";
   }
 
+  public static class BagitTxt {
+    public static final String BAGIT_VERSION = "1.0";
+    public static final String TAG_FILE_CHARACTER_ENCODING = "UTF-8";
+  }
+
   public static class TestBagSipJson {
     public static final String REC_ID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
     public static final String TITLE = TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue();

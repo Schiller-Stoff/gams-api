@@ -29,6 +29,12 @@ public class Bag {
    */
   private BagData bagData;
 
+    /**
+     * Metadata obtained from bagit.txt file.
+     * Bag version + encoding of tag files.
+     */
+  private BagMeta bagMeta;
+
   /**
    * Path to the bag directory (where bag-info.txt etc. are located)
    * on the local filesystem
@@ -48,8 +54,8 @@ public class Bag {
    */
   private void readBag() {
 
-    // read and validate bag structure
     this.bagInfo = BagDirectoryReader.readBagInfoFile(this.BAG_DIR_PATH);
+    this.bagMeta = BagDirectoryReader.readBagItTxtFile(this.BAG_DIR_PATH);
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
     var bagPathSha512Map = BagDirectoryReader.readSha512ManifestFile(this.BAG_DIR_PATH);
@@ -60,6 +66,18 @@ public class Bag {
 
     String sipJsonMd5 = bagPathMd5Map.get(BagFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
+
+    if(sipJsonMd5 == null || sipJsonMd5.length() != 32){
+      String msg = String.format("MD5 checksum for sip.json is unexpectedly not valid - Got value %s for bag: %s", sipJsonMd5, bagSipJson);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+
+    if(sipJsonSHA512 == null || sipJsonSHA512.length() != 128){
+      String msg = String.format("SHA512 checksum for sip.json is unexpectedly not valid - Got value %s for bag: %s", sipJsonSHA512, bagSipJson);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
 
     BagData bagData = BagData.builder()
         .id(bagSipJson.getRecid())

@@ -167,6 +167,43 @@ public class BagDirectoryReader {
     return  bagInfo;
   }
 
+    /**
+     * Maps the key value pairs in the bagit.txt file to a BagMeta object.
+     * @param bagDirPath path to the bag directory.
+     * @return A BagMeta object.
+     * @throws IngestProcessingException If the bagit.txt file is missing or if a required key is missing / validation fails.
+     */
+  public static BagMeta readBagItTxtFile(Path bagDirPath) throws IngestProcessingException {
+    String pathToBagMetaFile = bagDirPath.resolve(BagFilePaths.BAG_TXT_FILE_PATH.name).toString();
+    Map<String, String> fileValues = readKeyValueTxtFile(pathToBagMetaFile);
+
+    BagMeta bagMeta;
+
+    try {
+      bagMeta = BagMeta.builder()
+              .bagItVersion(fileValues.get("BagIt-Version"))
+              .tagFileCharacterEncoding(fileValues.get("Tag-File-Character-Encoding"))
+              .build();
+    } catch(NullPointerException e){
+      String msg = String.format("Failed to extract a required key from %s to intern BagMeta class. Original error: %s", BagFilePaths.BAG_METADATA_DIR.name, e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+
+    // bagIt.txt mapping
+    try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()){
+      Validator validator = factory.getValidator();
+      Set<ConstraintViolation<BagMeta>> violations = validator.validate(bagMeta);
+      if(!violations.isEmpty()){
+          String msg = String.format("Failed to validate bag meta file from %s. Original error: %s", BagFilePaths.BAG_METADATA_DIR.name, violations);
+          log.error(msg);
+          throw new IngestProcessingException(msg);
+      }
+    }
+
+    return  bagMeta;
+  }
+
   /**
    * Maps the key value pairs in defined text file to a map.
    * @param filePath The path to the text file.
