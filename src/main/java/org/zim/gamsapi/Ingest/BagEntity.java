@@ -51,40 +51,68 @@ public class BagEntity {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private DigitalObject digitalObject;
 
+    /**
+     * Schema used by the bag
+     */
     @Column
     @NotEmpty
     private String schema;
 
+    /**
+     * The user / program that created the bag.
+     */
     @Column
     @NotEmpty
     private String createdBy;
 
+    /**
+     * The source system or application that produced the bag.
+     */
     @Column
     @NotEmpty
     private String source;
 
+    /**
+     * Timestamp when the bag was created.
+     * In universal time (UTC).
+     */
     @Column(name = "bagging_timestamp")
     @NotNull
     private Instant baggingTimeStamp;
 
+    /**
+     * Contact email for the bag creator or responsible party.
+     */
     @Column
     @NotEmpty
     @Email
     private String contactMail;
 
+    /**
+     * Description of the bag's contents or purpose.
+     */
     @Column
     @NotEmpty
     private String externalDescription;
 
+    /**
+     * Total size of the payload in bytes.
+     */
     @Column
     @NotNull
     @Min(1)
     private Float payloadOxum;
 
+    /**
+     * Version of the BagIt specification used.
+     */
     @Column
     @NotEmpty
     private String bagVersion;
 
+    /**
+     * Character encoding used in tag files.
+     */
     @Column
     @NotEmpty
     private String tagFileCharacterEncoding;
