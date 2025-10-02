@@ -117,20 +117,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
       return "test-mainresource";
     }
 
-    @Override
-    public String getBagSchema() {
-      return "test-schema";
-    }
-
-    @Override
-    public String getBagSource() {
-      return "test-bag-source";
-    }
-
-    @Override
-    public String getBagCreatedBy() {
-      return "test-bag-created-by";
-    }
   }
 
 

@@ -20,10 +20,7 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_RIGHTS(TestMetadataBaseEntity.RIGHTS),
     DIGITAL_OBJECT_MAIN_RESOURCE(TestDatastream.DSID.getValue()),
     DIGITAL_OBJECT_MD5_CHECKSUM(TestMetadataBaseEntity.MD5_CHECKSUM),
-    DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM),
-    DIGITAL_OBJECT_BAG_SCHEMA("https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json"),
-    DIGITAL_OBJECT_BAG_CREATED_BY("test-gams-tool"),
-    DIGITAL_OBJECT_BAG_SOURCE("test-bag-source");
+    DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM);
 
 
     private final String value;
@@ -77,9 +74,6 @@ public enum TestDigitalObject {
             .funder(DIGITAL_OBJECT_FUNDER.getValue())
             .mainResource(DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
             .baseMetadata(TestMetadataBaseEntity.generate())
-            .bagCreatedBy(TestDigitalObject.DIGITAL_OBJECT_BAG_CREATED_BY.getValue())
-            .bagSchema(TestDigitalObject.DIGITAL_OBJECT_BAG_SCHEMA.getValue())
-            .bagSource(TestDigitalObject.DIGITAL_OBJECT_BAG_SOURCE.getValue())
             .build();
 
     }

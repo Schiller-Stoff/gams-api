@@ -120,9 +120,6 @@ public class DigitalObjectBuilderTest extends UnitTest {
               .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
               .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
               .published(new Date())
-              .bagSource(TestDigitalObject.DIGITAL_OBJECT_BAG_SOURCE.getValue())
-              .bagSchema(TestDigitalObject.DIGITAL_OBJECT_BAG_SCHEMA.getValue())
-              .bagCreatedBy(TestDigitalObject.DIGITAL_OBJECT_BAG_SCHEMA.getValue())
               .build();
 
       org.assertj.core.api.Assertions.assertThat(digitalObject).hasNoNullFieldsOrPropertiesExcept(

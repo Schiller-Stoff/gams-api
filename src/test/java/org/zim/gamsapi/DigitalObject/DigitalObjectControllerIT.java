@@ -415,14 +415,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contains(testDataSet.digitalObject().getBaseMetadata().getSha512Checksum());
       }
 
-      @Test
-      public void getDigitalObjectJSONContainsExpectedBagFields(){
-        org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
-            .contains(testDataSet.digitalObject().getBagCreatedBy())
-            .contains(testDataSet.digitalObject().getBagSchema())
-            .contains(testDataSet.digitalObject().getBagSource());
-      }
-
     }
 
 

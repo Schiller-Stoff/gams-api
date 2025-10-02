@@ -55,21 +55,6 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder bagCreatedBy(String bagCreatedBy) {
-    digitalObject.setBagCreatedBy(bagCreatedBy);
-    return this;
-  }
-
-  public DigitalObjectBuilder bagSource(String bagSource) {
-      digitalObject.setBagSource(bagSource);
-      return this;
-  }
-
-  public DigitalObjectBuilder bagSchema(String bagSchema) {
-      digitalObject.setBagSchema(bagSchema);
-      return this;
-  }
-
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
       String msg = String.format("Digital object ID must not be null or empty! Happened at class %s", this.getClass().getName());

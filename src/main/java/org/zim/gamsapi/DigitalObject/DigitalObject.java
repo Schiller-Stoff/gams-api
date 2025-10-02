@@ -125,18 +125,6 @@ public class DigitalObject {
   @Column(name = "main_resource")
   private String mainResource;
 
-  @Column
-  @NotEmpty
-  private String bagSchema;
-
-  @Column
-  @NotEmpty
-  private String bagCreatedBy;
-
-  @Column
-  @NotEmpty
-  private String bagSource;
-
   /**
    * equals and hashCode for JPA entities with DB-generated IDs
    * https://jpa-buddy.com/blog/hopefully-the-final-article-about-equals-and-hashcode-for-jpa-entities-with-db-generated-ids/

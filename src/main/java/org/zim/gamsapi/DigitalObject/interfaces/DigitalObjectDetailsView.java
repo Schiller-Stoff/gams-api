@@ -37,12 +37,6 @@ public interface DigitalObjectDetailsView {
 
     String getMainResource();
 
-    String getBagSchema();
-
-    String getBagSource();
-
-    String getBagCreatedBy();
-
     interface ProjectView {
         String getProjectAbbr();
     }
