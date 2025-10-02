@@ -105,13 +105,15 @@ public class IngestService implements IIngestService {
       // logic to save the related BagEntities
       var bagEntity = BagEntity.builder()
               .digitalObject(savedObject)
-              .contactMail(bag.getBagInfo().getContactMail())
               .createdBy(bag.getBagData().getCreatedBy())
               .source(bag.getBagData().getSource())
               .schema(bag.getBagData().getSchema())
+              .contactMail(bag.getBagInfo().getContactMail())
               .baggingTimeStamp(bag.getBagInfo().getBaggingTimeStamp())
               .externalDescription(bag.getBagInfo().getExternalDescription())
               .payloadOxum(bag.getBagInfo().getPayloadOxum())
+              .bagVersion(bag.getBagMeta().getBagItVersion())
+              .tagFileCharacterEncoding(bag.getBagMeta().getTagFileCharacterEncoding())
               .build();
 
       bagEntityRepository.save(bagEntity);
