@@ -48,6 +48,16 @@ public class BagEntityBuilder {
         return this;
     }
 
+    public BagEntityBuilder bagVersion(String bagVersion) {
+        bagEntity.setBagVersion(bagVersion);
+        return this;
+    }
+
+    public BagEntityBuilder tagFileCharacterEncoding(String tagFileCharacterEncoding) {
+        bagEntity.setTagFileCharacterEncoding(tagFileCharacterEncoding);
+        return this;
+    }
+
     public BagEntity build() {
         if(bagEntity.getDigitalObject() == null){
             String msg = String.format("Failed to build BagEntity: DigitalObject is null and must be set. BagEntity: %s", bagEntity);
