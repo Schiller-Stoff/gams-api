@@ -1,8 +1,6 @@
 package org.zim.gamsapi.Ingest.utils.Bagit;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,9 +16,9 @@ public class BagInfo {
     @NotEmpty
     @Size(min = 12, max = 12)
   private String time;
-  @NotEmpty
-  @Size(min = 5)
-  private String payloadOxum;
+  @NotNull
+  @Min(1)
+  private Float payloadOxum;
   @NotEmpty
   @Email
   private String contactMail;

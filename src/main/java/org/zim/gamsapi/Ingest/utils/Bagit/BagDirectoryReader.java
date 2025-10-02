@@ -130,11 +130,20 @@ public class BagDirectoryReader {
 
     BagInfo bagInfo;
 
+    float payloadOxum;
+    try {
+      payloadOxum = Float.parseFloat(fileValues.get("Payload-Oxum"));
+    } catch (NumberFormatException e){
+      String msg = String.format("Failed to parse Payload-Oxum value from bag %s to Float. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+
     try {
       bagInfo = BagInfo.builder()
               .date(fileValues.get("Bagging-Date"))
               .time(fileValues.get("Bagging-Time"))
-              .payloadOxum(fileValues.get("Payload-Oxum"))
+              .payloadOxum(payloadOxum)
               .externalDescription(fileValues.get("External-Description"))
               .contactMail(fileValues.get("Contact-Email"))
               .build();
