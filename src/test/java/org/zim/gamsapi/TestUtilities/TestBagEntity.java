@@ -22,6 +22,8 @@ public class TestBagEntity {
                 .baggingTimeStamp(TestBag.TestBagInfo.BAGGING_TIMESTAMP)
                 .contactMail(TestBag.TestBagInfo.CONTACT_EMAIL)
                 .payloadOxum(TestBag.TestBagInfo.PAYLOAD_OXUM)
+                .bagVersion(TestBag.BagitTxt.BAGIT_VERSION)
+                .tagFileCharacterEncoding(TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING)
                 .build();
     }
 
