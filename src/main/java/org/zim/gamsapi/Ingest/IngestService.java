@@ -20,6 +20,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
+import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -45,6 +46,7 @@ public class IngestService implements IIngestService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final IBagEntityRepository bagEntityRepository;
 
   @Override
   @Transactional(rollbackFor = {
@@ -99,6 +101,21 @@ public class IngestService implements IIngestService {
 
       final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
+
+      // logic to save the related BagEntities
+      var bagEntity = BagEntity.builder()
+              .digitalObject(savedObject)
+              .contactMail(bag.getBagInfo().getContactMail())
+              .createdBy(bag.getBagData().getCreatedBy())
+              .source(bag.getBagData().getSource())
+              .schema(bag.getBagData().getSchema())
+              .baggingTimeStamp(bag.getBagInfo().getBaggingTimeStamp())
+              .externalDescription(bag.getBagInfo().getExternalDescription())
+              .payloadOxum(bag.getBagInfo().getPayloadOxum())
+              .build();
+
+      bagEntityRepository.save(bagEntity);
+      log.info("****** Successfully saved bag entity: {} for ingest operation {}", bagEntity, ingest);
 
       // 04. build and save datastreams from the bag data
       bag.getBagData().getContentFiles()

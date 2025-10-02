@@ -16,14 +16,12 @@ import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
+import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.TestUtilities.TestBag;
-import org.zim.gamsapi.TestUtilities.TestDigitalObject;
-import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
-import org.zim.gamsapi.TestUtilities.TestProject;
+import org.zim.gamsapi.TestUtilities.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +44,9 @@ public class IngestServiceIT extends IntegrationTest {
 
   @Autowired
   IDublinCoreEntryRepository dublinCoreElementRepository;
+
+  @Autowired
+  IBagEntityRepository bagEntityRepository;
 
   @Autowired
   IngestService ingestService;
@@ -173,7 +174,34 @@ public class IngestServiceIT extends IntegrationTest {
               "type");
     }
 
+    @Test
+    public void ingestCreatesExpectedBagEntityWithNoNullProperties(){
+        var bagEntity = bagEntityRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        Assertions.assertThat(bagEntity)
+            .isPresent();
 
+        Assertions.assertThat(bagEntity.get())
+                .hasNoNullFieldsOrProperties();
+
+    }
+
+    @Test
+    public void ingestCreatesExpectedMetadataBaseEntity(){
+        var bagEntity = bagEntityRepository.findById(TestBagEntity.ID);
+        Assertions.assertThat(bagEntity)
+            .isPresent();
+        var foundBagEntity = bagEntity.get();
+
+        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestBagEntity.ID);
+        Assertions.assertThat(foundBagEntity.getCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
+        Assertions.assertThat(foundBagEntity.getSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
+        Assertions.assertThat(foundBagEntity.getSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
+        Assertions.assertThat(foundBagEntity.getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+        Assertions.assertThat(foundBagEntity.getBaggingTimeStamp()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
+        Assertions.assertThat(foundBagEntity.getContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+        Assertions.assertThat(foundBagEntity.getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+
+    }
 
     @Nested
     public class DublinCoreEntries {

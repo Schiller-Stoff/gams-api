@@ -4,6 +4,9 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.Ingest.BagEntity;
 
 public class TestBagEntity {
+
+    public static final String ID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+
     /**
      * Generates a BagEntity for testing purposes.
      * @param digitalObject The DigitalObject to associate with the BagEntity.
