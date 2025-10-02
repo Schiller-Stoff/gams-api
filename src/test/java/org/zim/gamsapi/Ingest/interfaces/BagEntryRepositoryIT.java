@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +70,13 @@ public class BagEntryRepositoryIT extends IntegrationTest {
     public void findsExpectedBagEntityById() {
         var foundBagEntity = bagEntityRepository.findById(testDataSet.bagEntity().getId());
         Assertions.assertThat(foundBagEntity).isPresent();
+    }
+
+    @Test
+    public void deletionOfDigitalObjectThrowsIfBagEntityExists(){
+        Assertions.assertThatThrownBy(() -> {
+            digitalObjectRepository.delete(testDataSet.digitalObject());
+        }).isInstanceOf(DataIntegrityViolationException.class);
     }
 
 }
