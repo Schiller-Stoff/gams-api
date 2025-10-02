@@ -16,5 +16,5 @@ public class BagMeta {
     @Size(min = 1, max = 100)
     private String  bagItVersion;
     @NotEmpty
-    public  String tagFileCharacterEncoding;
+    public String tagFileCharacterEncoding;
 }
