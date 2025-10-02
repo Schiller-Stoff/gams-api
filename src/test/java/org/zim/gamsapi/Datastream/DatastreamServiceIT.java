@@ -185,7 +185,7 @@ public class DatastreamServiceIT extends IntegrationTest {
       org.assertj.core.api.Assertions.assertThat(
           datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId()))
             .isNotNull()
-            .isEqualTo(testDataBuilder.buildTestDataSet().mainDatastream());
+            .isEqualTo(testDataSet.mainDatastream());
     }
 
     @Test

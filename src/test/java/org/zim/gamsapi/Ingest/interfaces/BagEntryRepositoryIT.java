@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestBagEntity;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -29,32 +31,44 @@ public class BagEntryRepositoryIT extends IntegrationTest {
     private IBagEntityRepository bagEntityRepository;
 
     @Autowired
+    private IDigitalObjectRepository digitalObjectRepository;
+
+    @Autowired
     private TestDataBuilder testDataBuilder;
 
     private TestDataSet testDataSet;
 
     @BeforeEach
     public void setup(){
-        if(testDataSet == null){
-            testDataSet = testDataBuilder.buildTestDataSet();
-        }
+        testDataSet = testDataBuilder.buildTestDataSet();
     }
-
 
     @Test
     @Transactional
     public void savedBagEntityPointsToExpectedDigitalObject(){
 
-        var bagEntity = TestBagEntity.generate(testDataSet.digitalObject());
-
+        var savedObject = digitalObjectRepository.save(
+                TestDigitalObject.generate(
+                    testDataSet.project().getProjectAbbr(),
+                 testDataSet.project().getProjectAbbr() +".12345"
+                )
+        );
+        var bagEntity = TestBagEntity.generate(savedObject);
         var savedBagEntity = bagEntityRepository.save(bagEntity);
 
         Assertions.assertThat(savedBagEntity).isNotNull();
-        Assertions.assertThat(savedBagEntity.getId()).isEqualTo(testDataSet.digitalObject().getId());
+        Assertions.assertThat(savedBagEntity.getId()).isEqualTo(savedObject.getId());
 
         Assertions.assertThat(savedBagEntity.getDigitalObject()).isNotNull();
-        Assertions.assertThat(savedBagEntity.getDigitalObject().getId()).isEqualTo(testDataSet.digitalObject().getId());
+        Assertions.assertThat(bagEntity.getDigitalObject()).isEqualTo(savedObject);
+        Assertions.assertThat(savedBagEntity.getDigitalObject().getId()).isEqualTo(savedObject.getId());
     }
 
+    @Test
+    @Transactional
+    public void findsExpectedBagEntityById() {
+        var foundBagEntity = bagEntityRepository.findById(testDataSet.bagEntity().getId());
+        Assertions.assertThat(foundBagEntity).isPresent();
+    }
 
 }

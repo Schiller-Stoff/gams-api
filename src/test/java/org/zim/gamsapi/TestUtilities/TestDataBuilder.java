@@ -5,16 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 /**
@@ -40,6 +38,9 @@ public class TestDataBuilder {
   private DatastreamContentRepository datastreamContentRepository;
 
   @Autowired
+  private IBagEntityRepository bagEntityRepository;
+
+  @Autowired
   private IGAMSCollectionRepository gamsCollectionRepository;
 
   @Transactional
@@ -47,6 +48,7 @@ public class TestDataBuilder {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
+    bagEntityRepository.delete(testDataSet.bagEntity());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 
@@ -127,6 +129,8 @@ public class TestDataBuilder {
             testDataSet.project().getProjectAbbr(), randomDigitalObjectId
     );
 
+    bagEntityRepository.save(TestBagEntity.generate(digitalObjectToBeSaved));
+
     return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
 
@@ -141,6 +145,10 @@ public class TestDataBuilder {
             TestDigitalObject.generate(persistedProject.getProjectAbbr());
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
+
+    var bagEntityToBeSaved = TestBagEntity.generate(persistedDigitalObject);
+
+    var persistedBagEntity = bagEntityRepository.save(bagEntityToBeSaved);
 
     var datastreamToBeSaved = TestDatastream.generate(persistedDigitalObject);
 
@@ -159,6 +167,7 @@ public class TestDataBuilder {
     return new TestDataSet(
         persistedProject,
         persistedDigitalObject,
+        persistedBagEntity,
         persistedDatastream,
         persistedDublinCoreEntry
     );
