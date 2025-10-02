@@ -76,7 +76,7 @@ public class BagEntity {
      * Timestamp when the bag was created.
      * In universal time (UTC).
      */
-    @Column(name = "bagging_timestamp")
+    @Column
     @NotNull
     private Instant baggingTimeStamp;
 
