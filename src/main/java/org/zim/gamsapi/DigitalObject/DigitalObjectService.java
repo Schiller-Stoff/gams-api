@@ -25,6 +25,7 @@ import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
+import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.dto.PagedResponse;
@@ -44,6 +45,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ConversionService conversionService;
+  private final IBagEntityRepository bagEntityRepository;
 
   @Override
   @Transactional
@@ -119,6 +121,8 @@ public class DigitalObjectService implements IDigitalObjectService {
       log.error(msg);
       throw new DigitalObjectNotFoundException(msg);
     }
+
+    bagEntityRepository.deleteById(digitalObject.getId());
 
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
