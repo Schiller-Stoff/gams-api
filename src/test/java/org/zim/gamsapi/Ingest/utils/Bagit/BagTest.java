@@ -118,7 +118,7 @@ public class BagTest extends UnitTest {
       }
 
       @Test
-      public void bagitSipJsonHasExepectedCreator() {
+      public void bagitSipJsonHasExpectedCreator() {
         Assertions.assertThat(bag.getBagData().getCreator()).isNotNull();
         Assertions.assertThat(bag.getBagData().getCreator()).isEqualTo(TestBag.TestBagSipJson.CREATOR);
       }
@@ -285,6 +285,32 @@ public class BagTest extends UnitTest {
           Assertions.assertThat(actualLang).containsExactlyInAnyOrderElementsOf(expectedLang);
 
         }
+      }
+
+    }
+
+    @Nested
+    public class BagMeta {
+      @Test
+      public void bagMetaIsNotNull() {
+        Assertions.assertThat(bag.getBagMeta()).isNotNull();
+      }
+
+      @Test
+      public void bagMetaHasNoNullValues() {
+        Assertions.assertThat(bag.getBagMeta()).hasNoNullFieldsOrProperties();
+      }
+
+      @Test
+      public void bagMetaHasExpectedBagitVersion() {
+        Assertions.assertThat(bag.getBagMeta().getBagItVersion()).isNotNull();
+        Assertions.assertThat(bag.getBagMeta().getBagItVersion()).isEqualTo(TestBag.BagitTxt.BAGIT_VERSION);
+      }
+
+      @Test
+      public void bagMetaHasExpectedTagFileCharacterEncoding() {
+        Assertions.assertThat(bag.getBagMeta().getTagFileCharacterEncoding()).isNotNull();
+        Assertions.assertThat(bag.getBagMeta().getTagFileCharacterEncoding()).isEqualTo(TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING);
       }
 
     }
