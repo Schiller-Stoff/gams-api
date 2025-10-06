@@ -16,13 +16,12 @@ import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.TestUtilities.TestBag;
-import org.zim.gamsapi.TestUtilities.TestDigitalObject;
-import org.zim.gamsapi.TestUtilities.TestProject;
+import org.zim.gamsapi.TestUtilities.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +44,9 @@ public class IngestServiceIT extends IntegrationTest {
 
   @Autowired
   IDublinCoreEntryRepository dublinCoreElementRepository;
+
+  @Autowired
+  IIngestRecordRepository bagEntityRepository;
 
   @Autowired
   IngestService ingestService;
@@ -134,6 +136,20 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
+    public void createsDigitalObjectWithExpectedChecksums(){
+
+        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+
+        Assertions.assertThat(digitalObject.getBaseMetadata().getMd5Checksum())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
+
+        Assertions.assertThat(digitalObject.getBaseMetadata().getSha512Checksum())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
+
+    }
+
+    @Test
     public void createsExpectedDublinCoreEntryNamesForTestDigitalObject() {
 
       var dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(TestDigitalObject.generate());
@@ -158,7 +174,34 @@ public class IngestServiceIT extends IntegrationTest {
               "type");
     }
 
+    @Test
+    public void ingestCreatesExpectedBagEntityWithNoNullProperties(){
+        var bagEntity = bagEntityRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        Assertions.assertThat(bagEntity)
+            .isPresent();
 
+        Assertions.assertThat(bagEntity.get())
+                .hasNoNullFieldsOrProperties();
+
+    }
+
+    @Test
+    public void ingestCreatesExpectedMetadataBaseEntity(){
+        var bagEntity = bagEntityRepository.findById(TestBagEntity.ID);
+        Assertions.assertThat(bagEntity)
+            .isPresent();
+        var foundBagEntity = bagEntity.get();
+
+        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestBagEntity.ID);
+        Assertions.assertThat(foundBagEntity.getBagCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
+        Assertions.assertThat(foundBagEntity.getBagSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
+        Assertions.assertThat(foundBagEntity.getBagSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
+        Assertions.assertThat(foundBagEntity.getBagExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+        Assertions.assertThat(foundBagEntity.getBaggingTimeStamp()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
+        Assertions.assertThat(foundBagEntity.getBagContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+        Assertions.assertThat(foundBagEntity.getBagPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+
+    }
 
     @Nested
     public class DublinCoreEntries {

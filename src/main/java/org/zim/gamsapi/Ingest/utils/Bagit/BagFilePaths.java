@@ -3,7 +3,7 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 /**
  * Represents the different files that are required to be present in a valid BagIt archive.
  */
-public enum BagItFilePaths {
+public enum BagFilePaths {
 
   /**
    * The bag-info.txt file is a tag file that contains metadata about the bag as a whole.
@@ -33,11 +33,21 @@ public enum BagItFilePaths {
   /**
    * Path to the bagit metadata directory.
    */
-  BAG_METADATA_DIR("data/meta");
+  BAG_METADATA_DIR("data/meta"),
+
+  /**
+   * The manifest-sha512.txt file is a manifest file that contains the SHA-512 checksums of the files in the bag's payload directory.
+   */
+  MANIFEST_SHA512_FILE_PATH("manifest-sha512.txt"),
+
+  /**
+   * The manifest-md5.txt file is a manifest file that contains the MD5 checksums of the files in the bag's payload directory.
+   */
+  MANIFEST_MD5_FILE_PATH("manifest-md5.txt");
 
 
   public final String name;
-  BagItFilePaths(String name){
+  BagFilePaths(String name){
     this.name = name;
   }
 

@@ -17,7 +17,6 @@ import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestGAMSCollection;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -409,6 +408,13 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contains(testDataSet.digitalObject().getId(), additionalDigitalObject.getId());
       }
 
+      @Test
+      public void getDigitalObjectContainsExpectedChecksums(){
+        org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
+            .contains(testDataSet.digitalObject().getBaseMetadata().getMd5Checksum())
+            .contains(testDataSet.digitalObject().getBaseMetadata().getSha512Checksum());
+      }
+
     }
 
 
@@ -529,6 +535,27 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void getDigitalDigitalObjectContainsExpectedChecksums() throws Exception {
+        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        MvcResult mvcResult = mockMvc.perform(
+                        MockMvcRequestBuilders.get(url)
+                                .accept(MediaType.TEXT_HTML)
+                                .contentType(MediaType.TEXT_HTML)
+                )
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+                .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+                .andReturn();
+
+        // both checksums should be present in returned view
+        org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+                .contains(
+                        testDataSet.digitalObject().getBaseMetadata().getMd5Checksum(),
+                        testDataSet.digitalObject().getBaseMetadata().getSha512Checksum()
+                );
+    }
 
   }
 

@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Ingest.utils.Bagit;
+package org.zim.gamsapi.Ingest.utils.Bagit.mapping;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,27 +6,29 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Container for the bagit sip.json file defined by invenio / CERN.
- * TODO improve validation e.g add @NotEmpty etc.
+ * Container for the bag sip.json file defined by CERN.
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BagitSipJson {
-
-    @JsonProperty("recid")
-    @NotEmpty
-    private String id;
+public class BagSipJson {
 
     /**
-     * Abbreviation of the GAMS project.
-     * TODO missing in test data atm?
+     * Record ID of the object in GAMS.
+     * Corresponds to the digital object id in GAMS.
      */
     @NotEmpty
-    @Size(min = 1, max = 10)
+    private String recid;
+
+    /**
+     * Abbreviation of the GAMS project the object belongs to.
+     */
+    @NotEmpty
+    @Size(min = 1, max = 50)
     private String project;
 
     @NotEmpty
@@ -50,11 +52,18 @@ public class BagitSipJson {
 
     private String mainResource;
 
-    /**
-     * TODO write tests if validation of bagit-content file works as expected!
-     */
-    private Set<@Valid BagitContentFile> contentFiles = new HashSet<>();
+    private Set<@Valid BagSipJsonContentFile> contentFiles = new HashSet<>();
 
     private Set<String> types = new HashSet<>();
+
+    @JsonProperty("$schema")
+    @NotEmpty
+    private String schema;
+
+    @NotEmpty
+    private String created_by;
+
+    @NotEmpty
+    private String source;
 
 }

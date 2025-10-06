@@ -21,6 +21,8 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
 
     Assertions.assertThat(convertedDatastreamMainResourceDto).isNotNull();
 
+    Assertions.assertThat(convertedDatastreamMainResourceDto).hasNoNullFieldsOrProperties();
+
     Assertions.assertThat(convertedDatastreamMainResourceDto.getCreator())
         .isEqualTo(toBeConverted.getBaseMetadata().getCreator());
 
@@ -99,7 +101,7 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
 
     @Override
     public MetadataBaseEntity getBaseMetadata() {
-      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description");
+      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description", "md5", "sha512");
     }
 
     @Override

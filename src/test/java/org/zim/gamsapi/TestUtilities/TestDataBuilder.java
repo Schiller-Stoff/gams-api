@@ -5,17 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 /**
@@ -41,6 +38,9 @@ public class TestDataBuilder {
   private DatastreamContentRepository datastreamContentRepository;
 
   @Autowired
+  private IIngestRecordRepository bagEntityRepository;
+
+  @Autowired
   private IGAMSCollectionRepository gamsCollectionRepository;
 
   @Transactional
@@ -48,6 +48,7 @@ public class TestDataBuilder {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
+    bagEntityRepository.delete(testDataSet.ingestRecord());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 
@@ -59,7 +60,7 @@ public class TestDataBuilder {
   @Transactional
   public Project addRandomProject(TestDataSet testDataSet) {
 
-    // create a random project id
+    // create a random project
     // id must not be longer than 10 characters
     var randomProjectId = TestProject.PROJECT_ABBR.getValue() + System.currentTimeMillis();
     if (randomProjectId.length() > 10) {
@@ -73,11 +74,7 @@ public class TestDataBuilder {
       throw new IllegalStateException(msg);
     }
 
-    var projectToBeSaved = ProjectBuilder.builder()
-        .projectAbbr(randomProjectId)
-        .description(TestProject.PROJECT_DESCRIPTION.getValue())
-        .title(TestProject.PROJECT_TITLE.getValue())
-        .build();
+    var projectToBeSaved = TestProject.generate(randomProjectId);
 
     return projectRepository.save(projectToBeSaved);
   }
@@ -101,16 +98,8 @@ public class TestDataBuilder {
       throw new IllegalStateException(msg);
     }
 
-    var datastreamToBeSaved = DatastreamBuilder.builder()
-        .dsid(randomDatastreamId)
-        .digitalObject(testDataSet.digitalObject())
-        .tags(TestDatastream.DATASTREAM_TAGS)
-        .baseMetadata(TestDatastream.METADATA_BASE_ENTITY)
-        .size( (long) TestDatastreamContent.CONTENT.getValue().length())
-        .mimeType(TestDatastream.MIME_TYPE.getValue())
-        .fileName(TestDatastream.FILE_NAME.getValue())
-        .lang(TestDatastream.DATASTREAM_LANG)
-        .build();
+    var datastreamToBeSaved = TestDatastream.generate(
+            testDataSet.digitalObject(),randomDatastreamId);
 
     return datastreamRepository.save(datastreamToBeSaved);
   }
@@ -136,15 +125,11 @@ public class TestDataBuilder {
       throw new IllegalStateException(msg);
     }
 
-    var digitalObjectToBeSaved = DigitalObjectBuilder.builder()
-        .id(randomDigitalObjectId)
-        .project(testDataSet.project())
-        .publisher(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
-        .objectType(TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue())
-        .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
-        .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-        .baseMetadata(TestMetadataBaseEntity.generate())
-        .build();
+    var digitalObjectToBeSaved = TestDigitalObject.generate(
+            testDataSet.project().getProjectAbbr(), randomDigitalObjectId
+    );
+
+    bagEntityRepository.save(TestBagEntity.generate(digitalObjectToBeSaved));
 
     return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
@@ -152,42 +137,20 @@ public class TestDataBuilder {
   @Transactional
   public TestDataSet buildTestDataSet() {
 
-    var projectToBeSaved = ProjectBuilder.builder()
-        .projectAbbr(TestProject.PROJECT_ABBR.getValue())
-        .description(TestProject.PROJECT_DESCRIPTION.getValue())
-        .title(TestProject.PROJECT_TITLE.getValue())
-        // following fields are supplied by the database / spring security worflows
-        //.createdBy(TestUser.USERNAME.getValue())
-        //.modifiedBy(TestUser.USERNAME.getValue())
-        //.created(new Date())
-        //.modified(new Date())
-        //.published(new Date())
-        .build();
+    var projectToBeSaved = TestProject.generate();
 
     var persistedProject = projectRepository.save(projectToBeSaved);
 
-    var digitalObjectToBeSaved = DigitalObjectBuilder.builder()
-        .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        .project(persistedProject)
-        .publisher(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
-        .objectType(TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue())
-        .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
-        .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-        .baseMetadata(TestMetadataBaseEntity.generate())
-        .build();
+    var digitalObjectToBeSaved =
+            TestDigitalObject.generate(persistedProject.getProjectAbbr());
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
-    var datastreamToBeSaved = DatastreamBuilder.builder()
-        .dsid(TestDatastream.DSID.getValue())
-        .digitalObject(persistedDigitalObject)
-        .tags(TestDatastream.DATASTREAM_TAGS)
-        .baseMetadata(TestDatastream.METADATA_BASE_ENTITY)
-        .size( (long) TestDatastreamContent.CONTENT.getValue().length())
-        .mimeType(TestDatastream.MIME_TYPE.getValue())
-        .fileName(TestDatastream.FILE_NAME.getValue())
-        .lang(TestDatastream.DATASTREAM_LANG)
-        .build();
+    var bagEntityToBeSaved = TestBagEntity.generate(persistedDigitalObject);
+
+    var persistedBagEntity = bagEntityRepository.save(bagEntityToBeSaved);
+
+    var datastreamToBeSaved = TestDatastream.generate(persistedDigitalObject);
 
     var persistedDatastream = datastreamRepository.save(datastreamToBeSaved);
 
@@ -197,17 +160,14 @@ public class TestDataBuilder {
         , persistedDatastream.deriveDatastreamId()
     );
 
-    var dublinCoreEntryToBeSaved = DublinCoreEntry.builder()
-        .name(TestDublinCoreEntry.NAME.getValue())
-        .value(TestDublinCoreEntry.VALUE.getValue())
-        .language(TestDublinCoreEntry.LANGUAGE.getValue())
-        .digitalObject(persistedDigitalObject).build();
+    var dublinCoreEntryToBeSaved = TestDublinCoreEntry.generate(persistedDigitalObject);
 
     var persistedDublinCoreEntry = dublinCoreEntryRepository.save(dublinCoreEntryToBeSaved);
 
     return new TestDataSet(
         persistedProject,
         persistedDigitalObject,
+        persistedBagEntity,
         persistedDatastream,
         persistedDublinCoreEntry
     );

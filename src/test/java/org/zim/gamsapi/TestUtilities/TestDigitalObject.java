@@ -11,14 +11,16 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_ID("test.test"),
     DIGITAL_OBJECT_PROJECT_ABBR(TestProject.PROJECT_ABBR.getValue()),
     DIGITAL_OBJECT_NAME("test-digital-object"),
-    DIGITAL_OBJECT_TYPE("test-digital-object-type"),
+    DIGITAL_OBJECT_TYPE("TEI"),
     DIGITAL_OBJECT_PUBLISHER("test-publisher"),
     DIGITAL_OBJECT_FUNDER("test-funder"),
     DIGITAL_OBJECT_TITLE(TestMetadataBaseEntity.TITLE),
     DIGITAL_OBJECT_DESCRIPTION(TestMetadataBaseEntity.DESCRIPTION),
     DIGITAL_OBJECT_CREATOR(TestMetadataBaseEntity.CREATOR),
     DIGITAL_OBJECT_RIGHTS(TestMetadataBaseEntity.RIGHTS),
-    DIGITAL_OBJECT_MAIN_RESOURCE(TestDatastream.DSID.getValue());
+    DIGITAL_OBJECT_MAIN_RESOURCE(TestDatastream.DSID.getValue()),
+    DIGITAL_OBJECT_MD5_CHECKSUM(TestMetadataBaseEntity.MD5_CHECKSUM),
+    DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM);
 
 
     private final String value;

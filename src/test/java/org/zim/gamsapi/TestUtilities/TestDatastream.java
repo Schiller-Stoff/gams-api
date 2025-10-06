@@ -65,7 +65,7 @@ public enum TestDatastream {
             .baseMetadata(METADATA_BASE_ENTITY)
             .size( (long) TestDatastreamContent.CONTENT.getValue().length())
             .mimeType(MIME_TYPE.getValue())
-            .fileName(FILE_NAME.getValue())
+            .bagPath(FILE_NAME.getValue())
             .lang(DATASTREAM_LANG)
             .build();
     }
