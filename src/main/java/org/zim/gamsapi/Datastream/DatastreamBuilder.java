@@ -37,8 +37,8 @@ public class DatastreamBuilder {
     return this;
   }
 
-  public DatastreamBuilder fileName(String fileName) {
-    datastream.setFileName(fileName);
+  public DatastreamBuilder bagPath(String bagPath) {
+    datastream.setBagPath(bagPath);
     return this;
   }
 

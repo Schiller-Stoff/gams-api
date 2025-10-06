@@ -18,6 +18,7 @@ public class BagFileToDatastreamConverter implements Converter<BagFile, Datastre
                 .size(source.getSize())
                 .tags(source.getTags())
                 .lang(source.getLang())
+                .bagPath(source.getBagpath())
                 // omitted fields - because not available in a BagitContentFile
                 //.fileName()
                 //.data()

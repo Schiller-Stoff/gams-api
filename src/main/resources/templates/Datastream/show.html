@@ -52,7 +52,7 @@
                 <div class="card-body">
                     <ul class="list-group">
                         <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
-                        <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.fileName}"></span></li>
+                        <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
                         <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
                     </ul>
 
