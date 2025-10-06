@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = BagEntity.ENTITY_TABLE_NAME)
+@Table(name = IngestRecord.ENTITY_TABLE_NAME)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,9 +23,9 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
 @ToString(exclude = "digitalObject") // Prevent circular reference in toString
-public class BagEntity {
+public class IngestRecord {
 
-    public static final String ENTITY_TABLE_NAME = "bag_entity";
+    public static final String ENTITY_TABLE_NAME = "ingest_record";
 
     public static final String[] ORDERED_MANAGED_TABLES = new String[]{
             ENTITY_TABLE_NAME
@@ -56,21 +56,21 @@ public class BagEntity {
      */
     @Column
     @NotEmpty
-    private String schema;
+    private String bagSchema;
 
     /**
      * The user / program that created the bag.
      */
     @Column
     @NotEmpty
-    private String createdBy;
+    private String bagCreatedBy;
 
     /**
      * The source system or application that produced the bag.
      */
     @Column
     @NotEmpty
-    private String source;
+    private String bagSource;
 
     /**
      * Timestamp when the bag was created.
@@ -86,14 +86,14 @@ public class BagEntity {
     @Column
     @NotEmpty
     @Email
-    private String contactMail;
+    private String bagContactMail;
 
     /**
      * Description of the bag's contents or purpose.
      */
     @Column
     @NotEmpty
-    private String externalDescription;
+    private String bagExternalDescription;
 
     /**
      * Total size of the payload in bytes.
@@ -101,7 +101,7 @@ public class BagEntity {
     @Column
     @NotNull
     @Min(1)
-    private Float payloadOxum;
+    private Float bagPayloadOxum;
 
     /**
      * Version of the BagIt specification used.
@@ -115,7 +115,7 @@ public class BagEntity {
      */
     @Column
     @NotEmpty
-    private String tagFileCharacterEncoding;
+    private String bagTagFileCharacterEncoding;
 
 
     /**
@@ -133,7 +133,7 @@ public class BagEntity {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        BagEntity that = (BagEntity) o;
+        IngestRecord that = (IngestRecord) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 
@@ -144,8 +144,8 @@ public class BagEntity {
                 : getClass().hashCode();
     }
 
-    public static org.zim.gamsapi.Ingest.BagEntityBuilder builder(){
-        return new org.zim.gamsapi.Ingest.BagEntityBuilder();
+    public static IngestRecordBuilder builder(){
+        return new IngestRecordBuilder();
     }
 
 }

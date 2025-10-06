@@ -103,7 +103,7 @@ public class IngestService implements IIngestService {
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
       // logic to save the related BagEntities
-      var bagEntity = BagEntity.builder()
+      var bagEntity = IngestRecord.builder()
               .digitalObject(savedObject)
               .createdBy(bag.getBagData().getCreatedBy())
               .source(bag.getBagData().getSource())

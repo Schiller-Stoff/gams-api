@@ -68,7 +68,7 @@ public class BagEntryRepositoryIT extends IntegrationTest {
     @Test
     @Transactional
     public void findsExpectedBagEntityById() {
-        var foundBagEntity = bagEntityRepository.findById(testDataSet.bagEntity().getId());
+        var foundBagEntity = bagEntityRepository.findById(testDataSet.ingestRecord().getId());
         Assertions.assertThat(foundBagEntity).isPresent();
     }
 

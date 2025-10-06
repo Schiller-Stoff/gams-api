@@ -6,11 +6,11 @@ import org.zim.gamsapi.TestUtilities.TestBagEntity;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.UnitTest;
 
-public class BagEntityBuilderTest extends UnitTest {
+public class IngestRecordBuilderTest extends UnitTest {
 
     @Test
     public void createsExpectedBagEntity(){
-        BagEntity TEST_BAG_ENTITY = BagEntity.builder()
+        IngestRecord TEST_BAG_ENTITY = IngestRecord.builder()
                 .createdBy(TestBagEntity.CREATED_BY)
                 .schema(TestBagEntity.SCHEMA)
                 .source(TestBagEntity.SOURCE)
@@ -26,15 +26,15 @@ public class BagEntityBuilderTest extends UnitTest {
         Assertions.assertThat(TEST_BAG_ENTITY).isNotNull();
         Assertions.assertThat(TEST_BAG_ENTITY).hasNoNullFieldsOrPropertiesExcept("id");
 
-        Assertions.assertThat(TEST_BAG_ENTITY.getCreatedBy()).isEqualTo(TestBagEntity.CREATED_BY);
-        Assertions.assertThat(TEST_BAG_ENTITY.getSchema()).isEqualTo(TestBagEntity.SCHEMA);
-        Assertions.assertThat(TEST_BAG_ENTITY.getSource()).isEqualTo(TestBagEntity.SOURCE);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagCreatedBy()).isEqualTo(TestBagEntity.CREATED_BY);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagSchema()).isEqualTo(TestBagEntity.SCHEMA);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagSource()).isEqualTo(TestBagEntity.SOURCE);
         Assertions.assertThat(TEST_BAG_ENTITY.getBaggingTimeStamp()).isEqualTo(TestBagEntity.BAGGING_TIMESTAMP);
-        Assertions.assertThat(TEST_BAG_ENTITY.getContactMail()).isEqualTo(TestBagEntity.CONTACT_EMAIL);
-        Assertions.assertThat(TEST_BAG_ENTITY.getExternalDescription()).isEqualTo(TestBagEntity.EXTERNAL_DESCRIPTION);
-        Assertions.assertThat(TEST_BAG_ENTITY.getPayloadOxum()).isEqualTo(TestBagEntity.PAYLOAD_OXUM);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagContactMail()).isEqualTo(TestBagEntity.CONTACT_EMAIL);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagExternalDescription()).isEqualTo(TestBagEntity.EXTERNAL_DESCRIPTION);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagPayloadOxum()).isEqualTo(TestBagEntity.PAYLOAD_OXUM);
         Assertions.assertThat(TEST_BAG_ENTITY.getBagVersion()).isEqualTo(TestBagEntity.BAG_VERSION);
-        Assertions.assertThat(TEST_BAG_ENTITY.getTagFileCharacterEncoding()).isEqualTo(TestBagEntity.TAG_FILE_CHARACTER_ENCODING);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBagTagFileCharacterEncoding()).isEqualTo(TestBagEntity.TAG_FILE_CHARACTER_ENCODING);
         Assertions.assertThat(TEST_BAG_ENTITY.getDigitalObject().getId()).isEqualTo(TestDigitalObject.generate().getId());
         Assertions.assertThat(TEST_BAG_ENTITY.getDigitalObject().getId()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
 
@@ -43,7 +43,7 @@ public class BagEntityBuilderTest extends UnitTest {
     @Test
     public void throwsIllegalStateExceptionIfDigitalObjectIsNotSet(){
         Assertions.assertThatThrownBy(()->{
-            BagEntity.builder()
+            IngestRecord.builder()
                     .createdBy(TestBagEntity.CREATED_BY)
                     .schema(TestBagEntity.SCHEMA)
                     .source(TestBagEntity.SOURCE)

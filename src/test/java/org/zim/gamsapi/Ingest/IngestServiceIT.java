@@ -193,13 +193,13 @@ public class IngestServiceIT extends IntegrationTest {
         var foundBagEntity = bagEntity.get();
 
         Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestBagEntity.ID);
-        Assertions.assertThat(foundBagEntity.getCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
-        Assertions.assertThat(foundBagEntity.getSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
-        Assertions.assertThat(foundBagEntity.getSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
-        Assertions.assertThat(foundBagEntity.getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+        Assertions.assertThat(foundBagEntity.getBagCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
+        Assertions.assertThat(foundBagEntity.getBagSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
+        Assertions.assertThat(foundBagEntity.getBagSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
+        Assertions.assertThat(foundBagEntity.getBagExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
         Assertions.assertThat(foundBagEntity.getBaggingTimeStamp()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
-        Assertions.assertThat(foundBagEntity.getContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
-        Assertions.assertThat(foundBagEntity.getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+        Assertions.assertThat(foundBagEntity.getBagContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+        Assertions.assertThat(foundBagEntity.getBagPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
 
     }
 

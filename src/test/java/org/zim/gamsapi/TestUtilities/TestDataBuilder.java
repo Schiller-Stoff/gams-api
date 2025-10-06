@@ -48,7 +48,7 @@ public class TestDataBuilder {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
-    bagEntityRepository.delete(testDataSet.bagEntity());
+    bagEntityRepository.delete(testDataSet.ingestRecord());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 
