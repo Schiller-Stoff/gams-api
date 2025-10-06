@@ -20,7 +20,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
-import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
@@ -46,7 +46,7 @@ public class IngestService implements IIngestService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
-  private final IBagEntityRepository bagEntityRepository;
+  private final IIngestRecordRepository bagEntityRepository;
 
   @Override
   @Transactional(rollbackFor = {

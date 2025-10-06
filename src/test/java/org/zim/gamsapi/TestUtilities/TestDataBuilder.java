@@ -11,7 +11,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
@@ -38,7 +38,7 @@ public class TestDataBuilder {
   private DatastreamContentRepository datastreamContentRepository;
 
   @Autowired
-  private IBagEntityRepository bagEntityRepository;
+  private IIngestRecordRepository bagEntityRepository;
 
   @Autowired
   private IGAMSCollectionRepository gamsCollectionRepository;

@@ -16,7 +16,7 @@ import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
-import org.zim.gamsapi.Ingest.interfaces.IBagEntityRepository;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
@@ -46,7 +46,7 @@ public class IngestServiceIT extends IntegrationTest {
   IDublinCoreEntryRepository dublinCoreElementRepository;
 
   @Autowired
-  IBagEntityRepository bagEntityRepository;
+  IIngestRecordRepository bagEntityRepository;
 
   @Autowired
   IngestService ingestService;

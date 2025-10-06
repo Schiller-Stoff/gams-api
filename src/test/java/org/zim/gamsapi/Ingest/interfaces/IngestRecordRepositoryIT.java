@@ -19,7 +19,7 @@ import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class BagEntryRepositoryIT extends IntegrationTest {
+public class IngestRecordRepositoryIT extends IntegrationTest {
 
     /**
      * Mocks the auditing behavior of the app.
@@ -29,7 +29,7 @@ public class BagEntryRepositoryIT extends IntegrationTest {
     private AuditingHandler auditingHandler;
 
     @Autowired
-    private IBagEntityRepository bagEntityRepository;
+    private IIngestRecordRepository bagEntityRepository;
 
     @Autowired
     private IDigitalObjectRepository digitalObjectRepository;
