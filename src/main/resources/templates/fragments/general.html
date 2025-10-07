@@ -15,7 +15,7 @@
   </head>
 
   <body>
-    <header th:fragment="header" class="app-header">
+    <header th:fragment="header" class="app-header bg-light">
       <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
           <li class="nav-item d-block d-xl-none">
@@ -32,7 +32,8 @@
         </ul>
         <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
           <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-            <li class="nav-item"><a href="/api/v1/userinfo"><i class="ti ti-user fs-6 rounded-circle text-black"></i></a></li>
+<!--            <li class="nav-item"><a href="/api/v1/userinfo"><i class="ti ti-user fs-6 rounded-circle text-black"></i></a></li>-->
+            <li class="nav-item"><a href="/api/v1/search/dc?projects=none"><i class="ti ti-search fs-6 rounded-circle text-black"></i></a></li>
 
 <!--            <a href="/api/v1" class="btn btn-outline-primary">Home</a>-->
 <!--            <li class="nav-item dropdown">-->
@@ -63,7 +64,7 @@
       </nav>
     </header>
 
-    <aside th:fragment="aside" class="left-sidebar">
+    <aside th:fragment="aside" class="left-sidebar bg-light border-0">
       <!-- Sidebar scroll-->
       <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
@@ -95,20 +96,20 @@
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Digital Objects</span>
             </li>
-<!--            <li class="sidebar-item">-->
-<!--              <a class="sidebar-link" href="/api/v1/objects" aria-expanded="false">-->
-<!--                <span>-->
-<!--                  <i class="ti ti-search"></i>-->
-<!--                </span>-->
-<!--                <span class="hide-menu">Search</span>-->
-<!--              </a>-->
-<!--            </li>-->
             <li class="sidebar-item">
               <a class="sidebar-link" href="/api/v1/projects" aria-expanded="false">
                 <span>
                   <i class="ti ti-folder"></i>
                 </span>
-                <span class="hide-menu">Project objects</span>
+                <span class="hide-menu">Projects</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/api/v1/search/dc?projects=none" aria-expanded="false">
+                <span>
+                  <i class="ti ti-search"></i>
+                </span>
+                <span class="hide-menu">Search</span>
               </a>
             </li>
 <!--            <li class="nav-small-cap">-->

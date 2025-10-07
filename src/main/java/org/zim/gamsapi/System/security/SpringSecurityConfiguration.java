@@ -59,7 +59,7 @@ public class SpringSecurityConfiguration {
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();
               return switch (requestMethod) {
-                case "GET", "HEAD" -> true;
+                case "GET", "HEAD", "OPTIONS" -> true;
                 default -> false;
               };
             })

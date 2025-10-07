@@ -15,6 +15,11 @@ public class ProjectBuilder {
     return this;
   }
 
+  public ProjectBuilder title(String title) {
+    project.setTitle(title);
+    return this;
+  }
+
   public ProjectBuilder description(String description) {
     project.setDescription(description);
     return this;

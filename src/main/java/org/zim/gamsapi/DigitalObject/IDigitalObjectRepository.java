@@ -16,8 +16,10 @@ import java.util.Optional;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String>, JpaSpecificationExecutor<DigitalObject> {
 
+
   @Modifying(flushAutomatically = true)
   void deleteAllByProject_ProjectAbbr(String projectAbbr);
+
 
   /**
    * Deletes all digital objects for a given project (with project abbreviation).
@@ -66,6 +68,14 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return a digital object as projection
    */
   Optional<DigitalObjectDetailsView> findDigitalObjectById(String id);
+
+  /**
+   * Find all digital objects for a given project (via project abbreviation) as projection.
+   * @param projectAbbr identifier of the project
+   * @param pageable pagination
+   * @return a list of digital object ids
+   */
+  Page<DigitalObjectIdView> findAllByProject_ProjectAbbr(String projectAbbr, Pageable pageable);
 
   /**
    * Find all digital objects for a given project (via project abbreviation) as projection.

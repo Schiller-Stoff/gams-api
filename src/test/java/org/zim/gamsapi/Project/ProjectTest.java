@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.TestProject;
 import java.util.Set;
 
 public class ProjectTest extends UnitTest {

@@ -4,18 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.TestUtilities.TestCleanupService;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -32,30 +28,11 @@ public abstract class IntegrationTest {
   // required for the client registration for the oauth2 process
   // otherwise the application context won't start (will try to load the oauth2 config json file)
   // https://stackoverflow.com/questions/60778556/testing-spring-security-oauth2login-enabled-applications-throws-illegalargumente
-  @MockBean
+  @MockitoBean
   ClientRegistrationRepository clientRegistrationRepository;
 
   @Autowired
-  IProjectRepository projectRepository;
-
-  @Autowired
-  IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  IDatastreamRepository datastreamRepository;
-
-  @Autowired
-  IDatastreamContentRepository datastreamContentRepository;;
-
-  @Autowired
-  IDublinCoreEntryRepository dublinCoreElementRepository;
-
-  @Autowired
-  IGAMSCollectionRepository collectionRepository;
-
-  @Autowired
-  EventCaptureListener eventCaptureListener;
-
+  private TestCleanupService testCleanupService;
 
   // First launch postgres for all integration tests
   static final PostgreSQLContainer<?> postgres;
@@ -76,49 +53,11 @@ public abstract class IntegrationTest {
   }
 
   /**
-   * Checks if required web services are reachable, like fedora6.
-   */
-  static {
-    /*
-
-    TODO implement add logic to check for external services?
-
-    RestTemplate restTemplate = new RestTemplate();
-    String fooResourceUrl = "http://localhost:8082";
-
-    ResponseEntity<String> response;
-
-    try {
-      response = restTemplate.getForEntity(fooResourceUrl, String.class);
-    } catch( RestClientException e){
-      String msg = String.format("Fedora6 didn't reply with status 200 on integration test start! Aborting integration tests. Make sure to run required docker services via docker-compose start before running the integration tests!");
-      log.error(msg);
-      throw e;
-    }
-
-    HttpStatus responseStatus = response.getStatusCode();
-
-    if(responseStatus.value() != HttpStatus.OK.value()){
-      String msg = String.format("Fedora6 didn't reply with status 200 on integration test start. Got instead status code: %s - Make sure to run required docker services via docker-compose start before running the integration tests!", responseStatus);
-      log.error(msg);
-    }*/
-
-
-  }
-
-  /**
    * After each test, performs a system wipe so that the next test can start with a clean slate.
    */
   @AfterEach
-  public void tearDown() throws InterruptedException {
-    eventCaptureListener.clearEvents();
-    datastreamContentRepository.deleteAll();
-    dublinCoreElementRepository.deleteAll();
-    datastreamRepository.deleteAll();
-    collectionRepository.deleteAll();
-    digitalObjectRepository.deleteAll();
-    projectRepository.deleteAll();
-
+  public void tearDown() {
+    testCleanupService.cleanup();
   }
 
 

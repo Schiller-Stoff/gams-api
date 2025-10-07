@@ -5,11 +5,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
 import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -45,7 +44,7 @@ public class ConstraintViolationTest extends UnitTest {
     public void shouldRaiseConstraintViolationIfMetadataIsEmpty() {
         MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(3));
+        assertThat(violationSet.size(), is(5));
     }
 
     @Test

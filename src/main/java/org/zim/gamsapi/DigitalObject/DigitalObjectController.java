@@ -1,6 +1,7 @@
 package org.zim.gamsapi.DigitalObject;
 
 import io.micrometer.common.lang.Nullable;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,8 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -23,8 +22,6 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
@@ -33,16 +30,15 @@ import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.System.utils.ControllerUtils;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
@@ -54,19 +50,82 @@ public class DigitalObjectController {
   private final DigitalObjectService digitalObjectService;
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
-  private final ConversionService conversionService;
   private final IDigitalObjectModificationService digitalObjectModificationService;
 
 
-  @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
-  public ResponseEntity<Void> checkDigitalObjectModification(
+  @Operation(
+      summary = "Check if the digital object's sub resources have been modified since a given date",
+      description = "Checks if the digital object's sub resources have been modified since given date (datastreams). Changes to the object's itself (id etc.) are not reflected in this modification date. If the object's content have not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital object sub resources have been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Digital object sub resources have not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
+  @RequestMapping(value = "/{id}/datastreams", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkDigitalObjectContentModification(
+      @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
   ) {
 
     // Get latest modification date across entire entity hierarchy
     DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
-        findLatestModificationDate(id);
+        findLatestModificationDate(projectAbbr, id);
+
+    LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
+
+    // Format for HTTP header
+    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
+
+    // Handle conditional request
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
+
+    return ResponseEntity.ok()
+        .lastModified(zonedDateTime)
+        .build();
+
+  }
+
+  @Operation(
+      summary = "Check if the digital object's metadata has been modified since a given date",
+      description = "Checks if the digital object's metadata has been modified since given date (datastreams). If the object's metadata has not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital object's metadata has been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Digital object's metadata has not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
+  @RequestMapping(value = "/{id}", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkDigitalObjectModification(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
+  ) {
+
+    // Get latest modification date across entire entity hierarchy
+    DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
+        findLastModifiedDate(projectAbbr, id);
 
     LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
 
@@ -108,28 +167,39 @@ public class DigitalObjectController {
     return digitalObjectService.findDigitalObjectCompactDTOById(id);
   }
 
+  @Hidden
   @GetMapping(value = { "/{id}" }, produces = MimeTypeUtils.TEXT_HTML_VALUE)
-  public String getObject(DigitalObject digitalObject, Project project, Model model) {
-    // first query digital object projection dto
-    DigitalObjectDetailsView foundObject = digitalObjectService.findDigitalObjectDetailsViewById(digitalObject.getId());
-    DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
-        DigitalObjectCompactDTO.class);
-    if (digitalObjectCompactDTO == null) {
-      String msg = String.format(
-          "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s for project %s",
-          digitalObject, project);
-      log.error(msg);
-      throw new DigitalObjectConversionException(msg);
+  public String getObject(
+      DigitalObject digitalObject,
+      Project project,
+      Model model,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "dsid") String sortBy,
+      @RequestParam(defaultValue = "asc") String sortDir,
+      @RequestParam(defaultValue = "") String searchDsid
+  ) {
+
+    if (pageSize >= 100) {
+      pageSize = 100;
     }
 
-    // then query datastreams projections and assign to dto
-    var datastreamDetailsViews = datastreamService.findAll(digitalObject);
-    digitalObjectCompactDTO.setDatastreams(
-        datastreamDetailsViews.stream().map(IDatastreamDetailsView::getDsid).collect(Collectors.toList()));
+    // first query digital object projection dto
+    var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
-    model.addAttribute("do", digitalObjectCompactDTO);
+    // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
+    PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
+        foundObject.getId(), PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
+    model.addAttribute("pageSize", pageSize);
+    model.addAttribute("pageIndex", pageIndex);
+    model.addAttribute("sortDir", sortDir);
+    model.addAttribute("sortBy", sortBy);
+    model.addAttribute("searchDsid", searchDsid);
+    model.addAttribute("pagedDatastreams", pagedDatastreams);
+    model.addAttribute("do", foundObject);
     model.addAttribute(project);
-    log.info("Found digital object {} for project {}", digitalObjectCompactDTO, project.getProjectAbbr());
+    log.info("Found digital object {} for project {}", foundObject, project.getProjectAbbr());
     return "DigitalObject/show";
   }
 
@@ -181,7 +251,7 @@ public class DigitalObjectController {
       Project project,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
-      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "25") int pageSize,
       @RequestParam(defaultValue = "") String id,
       @RequestParam(defaultValue = "id") String sortBy
 
@@ -243,15 +313,27 @@ public class DigitalObjectController {
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
   @ResponseBody
-  public List<String> findAllIdsByProjectAbbr(@PathVariable String projectAbbr) {
+  public PagedResponse<String> findAllIdsByProjectAbbr(
+      @PathVariable String projectAbbr,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10000") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy
+  ) {
+    // limit pageSize
+    if (pageSize >= 10000) {
+      pageSize = 10000;
+    }
+
     Project project = ProjectBuilder
         .builder()
         .projectAbbr(projectAbbr)
         .description("")
         .build();
 
-    // TODO should return a paginated response
-    return digitalObjectService.findAllIdsByProjectAbbr(project.getProjectAbbr());
+    return digitalObjectService.findAllIdsByProjectAbbr(
+        project.getProjectAbbr(),
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
 }

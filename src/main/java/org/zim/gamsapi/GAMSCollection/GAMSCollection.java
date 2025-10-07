@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "collection")
+@Table(name = GAMSCollection.ENTITY_TABLE_NAME)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,6 +27,17 @@ import java.util.Set;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class GAMSCollection {
+
+  public static final String ENTITY_TABLE_NAME = "collection";
+  public static final String DIGITAL_OBJECTS_TABLE_NAME = "collection_digital_object";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      DIGITAL_OBJECTS_TABLE_NAME,
+      ENTITY_TABLE_NAME
+  };
 
   @Id
   @NotEmpty
@@ -49,7 +60,7 @@ public class GAMSCollection {
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
-      name = "collection_digital_object",
+      name = GAMSCollection.DIGITAL_OBJECTS_TABLE_NAME,
       joinColumns = @JoinColumn(name = "collection_id"),
       inverseJoinColumns = @JoinColumn(name = "digital_object_id")
   )

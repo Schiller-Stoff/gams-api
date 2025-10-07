@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,12 +19,13 @@ import org.zim.gamsapi.Project.ProjectModification.ProjectModification;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
+import org.zim.gamsapi.System.dto.PagedResponse;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -57,19 +60,19 @@ public class ProjectController {
   }
 
   @PutMapping(path = "/{projectAbbr}")
+  @ResponseBody
   @Operation(
       summary = "Create a GAMS project",
       description = "Allows to create a GAMS project by providing the project abbreviation in the path variable and the project data in the request body.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Project successfully created",
-              content = @Content(mediaType = MimeTypeUtils.TEXT_HTML_VALUE))
+              content = @Content)
       }
   )
-  public String createProject(
+  public void createProject(
       @PathVariable String projectAbbr,
       // read out description argument from given json
-      @RequestBody Optional<Project> projectToBeSaved,
-      Model model
+      @RequestBody Optional<Project> projectToBeSaved
   ){
 
     projectToBeSaved.ifPresentOrElse(
@@ -87,9 +90,6 @@ public class ProjectController {
           );
     });
 
-    List<Project> projects = projectService.findAll();
-    model.addAttribute("projects", projects);
-    return "Project/show_all";
   }
 
   @DeleteMapping(path = "/{projectAbbr}")
@@ -121,9 +121,19 @@ public class ProjectController {
               content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
       }
   )
-  public List<Project> showProjects(){
-    // TODO needs pagination
-    return projectService.findAll();
+  public PagedResponse<Project> showProjects(
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize,
+      @RequestParam(defaultValue = "projectAbbr") String sortBy
+  ){
+    // limit pageSize to max 100
+    if (pageSize >= 100) {
+      pageSize = 100;
+    }
+
+    return projectService.findAllPaged(
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
   }
 
   @GetMapping(path = "/{projectAbbr}")
@@ -144,15 +154,29 @@ public class ProjectController {
 
   @Operation(hidden = true)
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
-  public String showProjectsViaWebClient(Model model){
-    List<Project> projects = projectService.findAll();
-    model.addAttribute("projects", projects);
+  public String showProjectsViaWebClient(
+      Model model,
+      // for pagination
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "10") int pageSize,
+      @RequestParam(defaultValue = "projectAbbr") String sortBy
+  ){
+    var projects = projectService.findAllPaged(
+        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
+    );
+    model.addAttribute("projects", projects.getContent());
+    model.addAttribute("pageSize", pageSize);
+    model.addAttribute("pageIndex", pageIndex);
+    model.addAttribute("totalItems", projects.getPagination().getTotalElements());
+    model.addAttribute("totalPages", projects.getPagination().getTotalPages());
+    model.addAttribute("sortBy", sortBy);
+
     return "Project/show_all";
   }
 
   @Operation(
-      summary = "Check if a project has been modified since a given date",
-      description = "Checks if a project has been modified since a given date. If the project has not been modified, it returns a 304 Not Modified status.",
+      summary = "Check if the project's metadata has been modified since a given date",
+      description = "Checks if the project's metadata has been modified since a given date (E.g. the project description). Changes to sub resources like digital objects and datastreams are not reflected in this modification date. If the project has not been modified, it returns a 304 Not Modified status.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Project has been modified",
               content = @Content),
@@ -171,6 +195,53 @@ public class ProjectController {
     // Get latest modification date across entire entity hierarchy
     ProjectModification projectModification = projectModificationService.
         findLatestModificationDate(projectAbbr);
+    LocalDateTime lastModified = projectModification.getLastModificationDateAsLocalDateTime();
+    // Format for HTTP header
+    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
+
+    // Handle conditional request
+    if (ifModifiedSince.isPresent()) {
+      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
+      try {
+        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
+            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
+
+        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
+          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
+        }
+      } catch (DateTimeParseException e) {
+        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
+        log.error(msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+      }
+    }
+
+    return ResponseEntity.ok()
+        .lastModified(zonedDateTime)
+        .build();
+  }
+
+  @Operation(
+      summary = "Check if the project's sub resources have been modified since a given date",
+      description = "Checks if the project's sub resources have been modified since a given date (E.g. digital objects and datastreams). Changes to the project metadata itself (project description or abbreviation) are not reflected in this modification date. If the project's content have not been modified, it returns a 304 Not Modified status.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project has been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "304", description = "Project has not been modified",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
+              content = @Content)
+      }
+  )
+  @RequestMapping(value = "/{projectAbbr}/objects", method = RequestMethod.HEAD)
+  public ResponseEntity<Void> checkProjectContentModification(
+      @PathVariable String projectAbbr,
+      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
+  ) {
+
+    // Get latest content modification date
+    ProjectModification projectModification = projectModificationService.
+        findContentLatestModificationDate(projectAbbr);
     LocalDateTime lastModified = projectModification.getLastModificationDateAsLocalDateTime();
     // Format for HTTP header
     ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());

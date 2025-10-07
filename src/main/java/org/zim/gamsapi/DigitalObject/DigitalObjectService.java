@@ -11,9 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -21,10 +22,10 @@ import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectConversionException;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.dto.PagedResponse;
@@ -44,11 +45,12 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ConversionService conversionService;
+  private final IIngestRecordRepository bagEntityRepository;
 
   @Override
   @Transactional
   public DigitalObject save(DigitalObject digitalObject) {
-    projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
             () -> {
               String msg = String.format("Aborting saving of digital object. Cannot find project %s for digital object %s",digitalObject.getProject().getProjectAbbr(), digitalObject );
               log.error(msg);
@@ -57,18 +59,11 @@ public class DigitalObjectService implements IDigitalObjectService {
     );
 
     DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
+    foundProject.setContentLastModified(new Date());
     applicationEventPublisher.publishEvent(
         new DigitalObjectCreatedEvent(this, savedObject)
     );
     return savedObject;
-  }
-
-  @Override
-  @Transactional
-  public List<DigitalObject> findAll() {
-    List<DigitalObject> digitalObjects = new ArrayList<>();
-    digitalObjectRepository.findAll().forEach(digitalObjects::add);
-    return digitalObjects;
   }
 
   @Override
@@ -88,12 +83,13 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
   @Override
-  public List<String> findAllIdsByProjectAbbr(String projectAbbr) {
-    return digitalObjectRepository
-        .findAllByProject_ProjectAbbr(projectAbbr)
-        .stream()
-        .map(DigitalObjectIdView::getId)
-        .toList();
+  public PagedResponse<String> findAllIdsByProjectAbbr(String projectAbbr, Pageable pageable) {
+
+    var mappedIdsPaginated = digitalObjectRepository
+        .findAllByProject_ProjectAbbr(projectAbbr, pageable)
+        .map(DigitalObjectIdView::getId);
+
+    return PagedResponse.from(mappedIdsPaginated);
   }
 
   @Override
@@ -111,10 +107,28 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public void delete(DigitalObject digitalObject) {
+
+    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
+        () -> {
+          String msg = String.format("Cannot delete digital object %s. Project %s does not exist!", digitalObject, digitalObject.getProject().getProjectAbbr());
+          log.error(msg);
+          return new ProjectNotFoundException(msg);
+        }
+    );
+
+    if(!digitalObjectRepository.existsById(digitalObject.getId())){
+      String msg = String.format("Failed to delete digital object with id %s. It does not exist!", digitalObject.getId());
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+
+    bagEntityRepository.deleteById(digitalObject.getId());
+
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
 
     // TODO missing transaction exception to be thrown?
+    // TODO needs refactoring using the failed delete event
     datastreams.forEach(datastream -> {
       fileSystemRepository.delete(datastream.deriveDatastreamId());
     });
@@ -122,7 +136,10 @@ public class DigitalObjectService implements IDigitalObjectService {
     dublinCoreEntryRepository.deleteAllByDigitalObject(digitalObject);
 
     digitalObjectRepository.delete(digitalObject);
-    log.info("Successfully deleted digital object {}", digitalObject);
+
+    foundProject.setContentLastModified(new Date());
+
+    log.info("Successfully deleted digital object {}", digitalObject.getId());
   }
 
 
@@ -149,17 +166,6 @@ public class DigitalObjectService implements IDigitalObjectService {
             digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndObjectType(projectAbbr, objectType.get(), pageable)
         );
 
-    }
-
-    @Override
-    @Transactional
-    public DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id) {
-        return digitalObjectRepository.findDigitalObjectById(id).orElseThrow(
-                () -> {
-                    String msg = String.format("Cannot find digital object via id: %s", id);
-                    log.info(msg);
-                    return new DigitalObjectNotFoundException(msg);
-                });
     }
 
     @Override
@@ -199,15 +205,22 @@ public class DigitalObjectService implements IDigitalObjectService {
         throw new DigitalObjectConversionException(msg);
       }
 
-      // setting found datastreams
-      var foundDatastreams = datastreamRepository.findAllByDigitalObjectId(digitalObjectId);
-      digitalObjectCompactDTO.setDatastreams(
-          foundDatastreams
-              .stream()
-              .map(
-                  IDatastreamDetailsView::getDsid)
-              .collect(Collectors.toList())
+      // setting main resource if it exists
+      var mainDatastreams = datastreamRepository.findMainDatastreamsByDigitalObjectIds(
+          Set.of(digitalObjectId)
       );
+
+      if(mainDatastreams.size() > 1){
+        String msg = String.format("Found more than one main datastream for digital object %s. This is not expected!", digitalObjectId);
+        log.warn(msg);
+      }
+
+      if (!mainDatastreams.isEmpty()) {
+        IDatastreamMainResourceView mainDatastream = mainDatastreams.get(0);
+        digitalObjectCompactDTO.setMainResource(
+            conversionService.convert(mainDatastream, DatastreamMainResourceDto.class)
+        );
+      }
 
       // setting found dublin core entries
       var foundDublinCoreEntries = dublinCoreEntryRepository.findByDigitalObjectId(digitalObjectId);
@@ -251,9 +264,24 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     Specification<DigitalObject> spec = new DigitalObjectDublinCoreSpecification(
         dublinCoreFilters, projectAbbrs, searchMode);
-
-    // Convert to projection for consistent API
     Page<DigitalObject> digitalObjects = digitalObjectRepository.findAll(spec, pageable);
+
+    // Additionally fetch dublin core entries and the main datastreams
+
+    // Extract IDs for batch fetching
+    Set<String> digitalObjectIds = digitalObjects.getContent()
+        .stream()
+        .map(DigitalObject::getId)
+        .collect(Collectors.toSet());
+
+    Map<String, IDatastreamMainResourceView> mainDatastreams = datastreamRepository
+        .findMainDatastreamsByDigitalObjectIds(digitalObjectIds)
+        .stream()
+        .collect(Collectors.toMap(
+            ds -> ds.getDigitalObject().getId(),
+            ds -> ds
+        ));
+
 
     var mappedObjects = digitalObjects.map(digitalObject -> {
       // Convert to DTO
@@ -273,8 +301,21 @@ public class DigitalObjectService implements IDigitalObjectService {
           });
       dto.setDublinCore(dcMap);
 
+      var foundMainDatastream = mainDatastreams
+          .getOrDefault(digitalObject.getId(), null);
+      if (foundMainDatastream != null) {
+        // Set main resource if available
+        dto.setMainResource(
+            conversionService.convert(foundMainDatastream, DatastreamMainResourceDto.class)
+        );
+      }
+
+
       return dto;
     });
+
+
+
 
     return PagedResponse.from(mappedObjects);
   }

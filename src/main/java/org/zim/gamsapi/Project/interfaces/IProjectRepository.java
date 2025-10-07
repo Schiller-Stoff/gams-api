@@ -1,11 +1,11 @@
 package org.zim.gamsapi.Project.interfaces;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.zim.gamsapi.Project.Project;
-
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Optional;
 
@@ -19,6 +19,8 @@ public interface IProjectRepository extends CrudRepository<Project, String> {
    */
   @Query("SELECT p.modified FROM Project p WHERE p.projectAbbr = :projectAbbr")
   Optional<Date> findLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+
+  Page<Project> findAll(Pageable pageable);
 
 }
 

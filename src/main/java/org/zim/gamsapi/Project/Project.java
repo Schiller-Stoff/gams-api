@@ -28,12 +28,27 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 public class Project {
 
+  public static final String ENTITY_TABLE_NAME = "project";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      ENTITY_TABLE_NAME
+  };
+
   @NotBlank
   @Id
   @Column(name = "project_abbr")
   @Size(min = 2, max = 10)
   @Pattern(regexp = "^[a-z0-9]*$")
   private String projectAbbr;
+
+  /**
+   * Title of the GAMS project
+   */
+  @Column(name = "title", length = 255)
+  private String title;
 
   /**
    * Description of the GAMS project
@@ -62,6 +77,12 @@ public class Project {
   @Column(name = "modified_by")
   @LastModifiedBy
   private String modifiedBy;
+
+  /**
+   * Date when the content of the project was last modified
+   */
+  @Column(name = "content_last_modified")
+  private Date contentLastModified = new Date();
 
 
   @Override

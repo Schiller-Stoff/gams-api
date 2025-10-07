@@ -20,6 +20,9 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
 
     DigitalObjectCompactDTO digitalObjectCompactDTO =  new DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter().convert(testObjectDetailsView);
 
+    org.assertj.core.api.Assertions.assertThat(digitalObjectCompactDTO).isNotNull();
+    org.assertj.core.api.Assertions.assertThat(digitalObjectCompactDTO).hasNoNullFieldsOrPropertiesExcept("mainResource","dublinCore");
+
     //
     Assertions.assertEquals(digitalObjectCompactDTO.getId(),testObjectDetailsView.getId());
     Assertions.assertEquals(digitalObjectCompactDTO.getProjectAbbr(), testObjectDetailsView.getProject().getProjectAbbr());
@@ -37,7 +40,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     Assertions.assertEquals(digitalObjectCompactDTO.getPublished(), testObjectDetailsView.getPublished());
 
     Assertions.assertEquals(digitalObjectCompactDTO.getFunder(), testObjectDetailsView.getFunder());
-    Assertions.assertEquals(digitalObjectCompactDTO.getMainResource(), testObjectDetailsView.getMainResource());
 
   }
 
@@ -114,6 +116,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     public String getMainResource() {
       return "test-mainresource";
     }
+
   }
 
 

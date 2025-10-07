@@ -7,19 +7,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.springframework.util.MimeTypeUtils;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestDublinCoreEntry;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.TestDataBuilder;
+import org.zim.gamsapi.TestUtilities.TestDataSet;
+import org.zim.gamsapi.TestUtilities.TestDublinCoreEntry;
 
 import java.util.Set;
 
@@ -32,35 +28,24 @@ public class SearchControllerIT extends IntegrationTest {
   @Autowired
   private MockMvc mockMvc;
 
-  @Autowired
-  private IProjectRepository projectRepository;
-
-  @Autowired
-  private IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  private IDublinCoreEntryRepository dublinCoreEntryRepository;
-
   // disables auditing
   // (necessary -> otherwise the createdBy fields etc. from Project need to be filled)
   // this auditing / security test is done in a separate test
   @MockitoBean
   private AuditingHandler auditingHandler;
 
+  private TestDataSet testDataSet;
+
+  @Autowired
+  private TestDataBuilder testDataBuilder;
+
   @Nested
   public class DublinCoreSearch {
 
-    Project testProject = TestProject.generate();
-    DigitalObject testDigitalObject = TestDigitalObject.generate();
-    DublinCoreEntry testDublinCoreEntry = TestDublinCoreEntry.generate(testDigitalObject.getId());
-
-    final String SEARCH_URL_TEMPLATE = "/api/v1/search/dc?projectAbbrs=%s&dcField=%s&search=%s";
 
     @BeforeEach
     public void setup() {
-      projectRepository.save(testProject);
-      digitalObjectRepository.save(testDigitalObject);
-      dublinCoreEntryRepository.save(testDublinCoreEntry);
+      testDataSet = testDataBuilder.buildTestDataSet();
     }
 
     @Nested
@@ -76,7 +61,7 @@ public class SearchControllerIT extends IntegrationTest {
 
         String requestUrl = String.format(
             FULLTEXT_SEARCH_URL_TEMPLATE,
-            testProject.getProjectAbbr(),
+            testDataSet.project().getProjectAbbr(),
             TEST_FULLTEXT_QUERY
         );
         String response = mockMvc.perform(
@@ -90,10 +75,10 @@ public class SearchControllerIT extends IntegrationTest {
 
         Assertions.assertThat(response)
             .contains(
-                testDigitalObject.getId(),
-                testDigitalObject.getProject().getProjectAbbr(),
-                testDigitalObject.getBaseMetadata().getTitle(),
-                testDigitalObject.getBaseMetadata().getDescription()
+                testDataSet.digitalObject().getId(),
+                testDataSet.digitalObject().getProject().getProjectAbbr(),
+                testDataSet.digitalObject().getBaseMetadata().getTitle(),
+                testDataSet.digitalObject().getBaseMetadata().getDescription()
             );
 
       }
@@ -107,7 +92,7 @@ public class SearchControllerIT extends IntegrationTest {
 
         String REQUEST_URL = String.format(
             "/api/v1/search/dc/fulltext?projects=%s&search=%s",
-            testProject.getProjectAbbr(),
+            testDataSet.project().getProjectAbbr(),
             TEST_FULLTEXT_QUERY
         );
 
@@ -126,13 +111,153 @@ public class SearchControllerIT extends IntegrationTest {
 
         Assertions.assertThat(response)
             .doesNotContain(
-                testDigitalObject.getId(),
-                testDigitalObject.getProject().getProjectAbbr(),
-                testDigitalObject.getBaseMetadata().getTitle(),
-                testDigitalObject.getBaseMetadata().getDescription()
+                testDataSet.digitalObject().getId(),
+                testDataSet.digitalObject().getProject().getProjectAbbr(),
+                testDataSet.digitalObject().getBaseMetadata().getTitle(),
+                testDataSet.digitalObject().getBaseMetadata().getDescription()
             );
 
       }
+
+    }
+
+    @Nested
+    public class DublinCoreFieldSearch {
+
+      final String DC_SEARCH_BASE_URL = "/api/v1/search/dc";
+      String TEST_DC_URL_QUERY;
+      String TEST_DC_SEARCH_REQUEST_URL;
+
+      @BeforeEach
+      public void setup() {
+        TEST_DC_URL_QUERY = "dc." + testDataSet.dublinCoreEntry().getName() + "=" + testDataSet.dublinCoreEntry().getValue();
+        TEST_DC_SEARCH_REQUEST_URL = String.format("%s?projects=%s&%s",
+            DC_SEARCH_BASE_URL,
+            testDataSet.project().getProjectAbbr(),
+            TEST_DC_URL_QUERY
+        );
+      }
+
+      @Nested
+      public class ResponseBodyTests {
+
+        @Test
+        public void returnedSearchJsonContainsExpectedDCValues() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MediaType.APPLICATION_JSON)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue());
+        }
+
+        @Test
+        public void returnedSearchJsonContainsExpectedMainResourceMetadata() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MediaType.APPLICATION_JSON)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(
+                  testDataSet.mainDatastream().getMimeType(),
+                  testDataSet.mainDatastream().getDsid(),
+                  testDataSet.mainDatastream().getBaseMetadata().getDescription(),
+                  testDataSet.mainDatastream().getBaseMetadata().getTitle()
+              );
+
+          Assertions.assertThat(response).contains(testDataSet.mainDatastream().getTags());
+          Assertions.assertThat(response).contains(testDataSet.mainDatastream().getLang());
+
+        }
+
+        @Test
+        public void projectsUrlParamMightNotBeEmpty() throws Exception {
+
+          final String TEST_DC_SEARCH_REQUEST_URL_EMPTY_PROJECTS = String.format(
+              "%s?%s",
+              DC_SEARCH_BASE_URL,
+              TEST_DC_URL_QUERY
+          );
+
+          mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL_EMPTY_PROJECTS)
+                      .accept(MediaType.APPLICATION_JSON)
+              )
+              .andExpect(status().is4xxClientError());
+        }
+
+        @Test
+        public void acceptXmlWillReturnExpectedDcSearchValues() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MimeTypeUtils.APPLICATION_XML_VALUE)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue());
+        }
+
+        @Test
+        public void formatXmlWillReturnExpectedDcSearchValues() throws Exception {
+          // append format=xml to request url
+          final String TEST_DC_SEARCH_REQUEST_URL_XML_FORMAT = String.format(
+              "%s&format=xml",
+              TEST_DC_SEARCH_REQUEST_URL
+          );
+
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL_XML_FORMAT)
+              )
+              .andExpect(status().isOk())
+              .andExpect(
+                  result -> result.getResponse().getContentType()
+                      .equals(MimeTypeUtils.APPLICATION_XML_VALUE)
+              )
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue(), "<", ">");
+        }
+
+      }
+
+      @Nested
+      public class Webclient {
+
+        @Test
+        public void webclientContainsExpectedDcSearchValues() throws Exception {
+          String response = mockMvc.perform(
+                  MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                      .accept(MimeTypeUtils.TEXT_HTML_VALUE)
+              )
+              .andExpect(status().isOk())
+              .andReturn()
+              .getResponse()
+              .getContentAsString();
+
+          Assertions.assertThat(response)
+              .contains(testDataSet.dublinCoreEntry().getName(), testDataSet.dublinCoreEntry().getValue());
+
+        }
+
+      }
+
 
     }
 

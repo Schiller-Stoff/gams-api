@@ -2,6 +2,7 @@ package org.zim.gamsapi.Project;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Project.exceptions.ProjectAlreadyExistsException;
@@ -9,6 +10,7 @@ import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.exceptions.ProjectObjectMismatchException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.Project.interfaces.IProjectService;
+import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.*;
 
@@ -98,5 +100,12 @@ public class ProjectService implements IProjectService {
       log.error(msg);
       throw new ProjectObjectMismatchException(msg);
     }
+  }
+
+  @Override
+  public PagedResponse<Project> findAllPaged(Pageable pageable) {
+    return PagedResponse.from(
+        projectRepository.findAll(pageable)
+    );
   }
 }

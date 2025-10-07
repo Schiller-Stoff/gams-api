@@ -1,18 +1,21 @@
 <!doctype html>
 <html lang="en">
 
-<head th:replace="fragments/general.html :: headtemplate" />
+<head th:replace="~{fragments/general.html :: headtemplate}" />
 
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
-  <aside th:replace="fragments/general.html :: aside"></aside>
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
 
   <div class="body-wrapper">
-    <header th:replace="fragments/general.html :: header"></header>
-      <div class="container-fluid" style="min-height: 100vh">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+      <div class="p-md-5 p-3" style="min-height: 100vh">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
@@ -21,83 +24,258 @@
             <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
           </ol>
         </nav>
-        <h2 th:text="${do.id}" class="mb-3"></h2>
+        <h2 class="display-6 fw-bold text-primary mb-3" th:text="${do.id}"></h2>
         <p>
           Overview over a singular digital object
         </p>
-        <div>
-          <a class="btn btn-outline-dark mb-3" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-id me-2"></i>Identifiers
+            </h3>
+          </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
+                    <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
+                </ul>
+                <br/>
+            </div>
         </div>
-        <div class="bg-light p-2">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-list-details me-2"></i>Datastreams
+            </h3>
+          </div>
+          <div class="card-body">
+              <table class="table table-hover border border-2">
+                <thead class="">
+                <tr>
+                  <th scope="col">
+                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?searchDsid=' + ${searchDsid} + '&sortBy=dsid'">dsid</a>
+                  </th>
+                  <th scope="col">
+                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=baseMetadata.title'">title</a>
+                  </th>
+                  <th scope="col">
+                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=mimeType'">mimetype</a>
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="datastream : ${pagedDatastreams.getContent()}">
+                  <td><a
+                          style="color: black; font-weight: 600;"
+                          class="text-decoration-none"
+                          th:text="${datastream.getDsid()}"
+                          th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}"
+                  ></a></td>
+                  <td><span th:title="${datastream.getBaseMetadata().getTitle()}" th:if="${datastream.baseMetadata}" th:text="${#strings.abbreviate(datastream.baseMetadata.title, 50)}"></span></td>
+                  <td><span th:text="${datastream.getMimeType()}"></span></td>
+                </tr>
+                </tbody>
+              </table>
+              <div class="d-flex justify-content-between align-items-center mt-4">
 
-          <p><b>Id:</b> <span th:text="${do.id}"></span></p>
-          <p><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></p>
-          <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
-          <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'"></a></p> -->
-        </div>
+                <!-- Results Info - Simple approach -->
+                <div class="text-muted">
+                  <span th:text="'Page ' + ${pageIndex + 1} + ' of ' + ${pagedDatastreams.getPagination().getTotalPages()} + ' (' + ${pagedDatastreams.getPagination().getTotalElements()} + ' total items)'"></span>
+                </div>
 
-            <br/>
-            <br/>
+                <!-- Enhanced Pagination Controls with Smart Page Numbers -->
+                <nav aria-label="Page navigation">
+                  <ul class="pagination pagination-sm mb-0">
 
-              <h2 class="h4">Datastreams</h2>
-              <p>Displays all datastreams of a digital object</p>
-              <p></p>
-              <ul class="list-group p-0">
-                <li th:each="dsid : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item bg-light">
+                    <!-- First Page -->
+                    <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=0&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        First
+                      </a>
+                    </li>
 
-                  <a style="color:black" th:text="${dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}"></a>
+                    <!-- Previous Page -->
+                    <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        Previous
+                      </a>
+                    </li>
 
-<!--                  <div>-->
-<!--&lt;!&ndash;                    <span th:text="${dstream.globalId + ' (global datastream id)'}"> </span>&ndash;&gt;-->
-<!--                    &lt;!&ndash; <span th:text="${dstream.mimeType}"></span> &ndash;&gt;-->
-<!--                    &lt;!&ndash;-->
-<!--                    <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>-->
-<!--                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>-->
-<!--                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>-->
-<!--                    &ndash;&gt;-->
-<!--                    <form-->
-<!--                            onsubmit="return confirm('Are you sure you want to delete this datastream?');"-->
-<!--                            action="#"-->
-<!--                            th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}}"-->
-<!--                            th:object="${do}"-->
-<!--                            method="delete"-->
-<!--                            th:method="DELETE"-->
-<!--                            class="d-inline"-->
-<!--                    >-->
-<!--                      &lt;!&ndash; <input type="hidden" name="id" th:field="*{id}"/> &ndash;&gt;-->
-<!--                      &lt;!&ndash; <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> &ndash;&gt;-->
-<!--                      <input type="submit" class="btn btn-outline-dark" value="Delete"/>-->
-<!--                    </form>-->
-<!--                  </div>-->
-                </li>
-              </ul>
-              <br/>
-              <h2 class="h4">Metadata</h2>
-              <p>Primary metadata derived from the GAMS-API</p>
-              <ul class="list-group-flush p-0">
-                <li class="list-group-item bg-light">
+                    <!-- Smart Page Numbers -->
+                    <th:block th:if="${pagedDatastreams.pagination.getTotalPages() <= 7}">
+                      <!-- Show all pages if 7 or fewer -->
+                      <th:block th:each="i : ${#numbers.sequence(0, pagedDatastreams.getPagination().getTotalPages() - 1)}">
+                        <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                          <a class="page-link"
+                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:text="${i + 1}"></a>
+                        </li>
+                      </th:block>
+                    </th:block>
+
+                    <th:block th:if="${pagedDatastreams.getPagination().getTotalPages() > 7}">
+                      <!-- Show smart pagination for many pages -->
+
+                      <!-- First 3 pages (1, 2, 3) -->
+                      <th:block th:each="i : ${#numbers.sequence(0, 2)}">
+                        <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                          <a class="page-link"
+                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:text="${i + 1}"></a>
+                        </li>
+                      </th:block>
+
+                      <!-- Ellipsis after first pages (only if current page is far from start) -->
+                      <li th:if="${pageIndex > 4}" class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+
+                      <!-- Current page and neighbors (if not already shown) -->
+                      <th:block th:if="${pageIndex > 3 and pageIndex < pagedDatastreams.getPagination().getTotalPages() - 4}">
+                        <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
+                          <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                            <a class="page-link"
+                               th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                               th:text="${i + 1}"></a>
+                          </li>
+                        </th:block>
+                      </th:block>
+
+                      <!-- Ellipsis before last pages (only if current page is far from end) -->
+                      <li th:if="${pageIndex < pagedDatastreams.getPagination().getTotalPages() - 5}" class="page-item disabled">
+                        <span class="page-link">...</span>
+                      </li>
+
+                      <!-- Last 3 pages -->
+                      <th:block th:each="i : ${#numbers.sequence(pagedDatastreams.getPagination().getTotalPages() - 3, pagedDatastreams.getPagination().getTotalPages() - 1)}">
+                        <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                          <a class="page-link"
+                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:text="${i + 1}"></a>
+                        </li>
+                      </th:block>
+
+                    </th:block>
+
+                    <!-- Next Page -->
+                    <li class="page-item" th:classappend="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        Next
+                      </a>
+                    </li>
+
+                    <!-- Last Page -->
+                    <li class="page-item" th:classappend="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pagedDatastreams.getPagination().getTotalPages() - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                        Last
+                      </a>
+                    </li>
+
+                  </ul>
+                </nav>
+
+                <!-- Page Size Selector -->
+                <div>
+                  <form method="GET" class="d-inline">
+                    <select name="pageSize" class="form-select form-select-sm d-inline" style="width: auto;" onchange="this.form.submit()">
+                      <option value="10" th:selected="${pageSize == 10}">10 per page</option>
+                      <option value="25" th:selected="${pageSize == 25}">25 per page</option>
+                      <option value="50" th:selected="${pageSize == 50}">50 per page</option>
+                      <option value="100" th:selected="${pageSize == 100}">100 per page</option>
+                    </select>
+                    <input type="hidden" name="pageIndex" value="0">
+                    <input type="hidden" name="searchDsid" th:value="${searchDsid}">
+                    <input type="hidden" name="sortBy" th:value="${sortBy}">
+                  </form>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <br/>
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-database me-2"></i>Technical &amp; administrative metadata
+            </h3>
+            <div>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
+            </div>
+          </div>
+          <div class="card-body">
+              <div th:if="${do.mainResource}" class="accordion mb-2" id="accordionExample">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                      Main resource
+                    </button>
+                  </h2>
+                  <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+
+                      <ul>
+                        <li>
+                          <small>dsid</small>
+                          <p>
+                            <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
+                        </li>
+                        <li>
+                          <small>title</small>
+                          <p th:text="${do.getMainResource()?.getTitle()}"></p>
+                        </li>
+                        <li>
+                          <small>mimetype</small>
+                          <p th:text="${do.getMainResource()?.getMimeType()}"></p>
+                        </li>
+                        <li>
+                          <small>description</small>
+                          <p th:text="${do.getMainResource()?.getDescription()}"></p>
+                        </li>
+                        <li>
+                          <small>tags</small>
+                          <p th:text="${do.getMainResource()?.getTags()}"></p>
+                        </li>
+                        <li>
+                          <small>lang</small>
+                          <p th:text="${do.getMainResource()?.getLang()}"></p>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ul class="list-group">
+                <li class="list-group-item">
                   <small>identifier</small>
                   <p th:text="${do.id}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>object type</small>
                   <p th:text="${do.objectType}"></p>
                 </li>
-                  <li class="list-group-item bg-light">
+                  <li class="list-group-item">
                       <small>main resource</small>
-                      <p th:text="${do.mainResource}"></p>
+                      <p>
+                        <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
+                      </p>
                   </li>
               </ul>
-              <ul class="list-group-flush p-0" th:if="${do.baseMetadata}">
-                <li class="list-group-item bg-light">
+              <ul class="list-group mt-2" th:if="${do.baseMetadata}">
+                <li class="list-group-item">
                   <small>title</small>
                   <p th:text="${do.baseMetadata.title}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>creator</small>
                   <p th:text="${do.baseMetadata.creator}"></p>
                 </li>
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>description</small>
                   <p th:text="${do.baseMetadata.description}"></p>
                 </li>
@@ -105,7 +283,7 @@
                 <!--            <small>dc:subject</small>-->
                 <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
                 <!--          </li>-->
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>publisher</small>
                   <p th:text="${do.publisher}"></p>
                 </li>
@@ -141,34 +319,32 @@
                 <!--            <small>dc:coverage</small>-->
                 <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
                 <!--          </li>-->
-                <li class="list-group-item bg-light">
+                <li class="list-group-item">
                   <small>rights</small>
                   <p th:text="${do.baseMetadata.rights}"></p>
                 </li>
-              <li class="list-group-item bg-light">
-                  <small>funder</small>
-                  <p th:text="${do.funder}"></p>
-              </li>
+                <li class="list-group-item">
+                    <small>funder</small>
+                    <p th:text="${do.funder}"></p>
+                </li>
+                <li class="list-group-item">
+                  <small>md5 checksum</small>
+                  <p th:text="${do.getBaseMetadata().getMd5Checksum()}"></p>
+                </li>
+                <li class="list-group-item">
+                  <small>sha-512 checksum</small>
+                  <p th:text="${do.getBaseMetadata().getSha512Checksum()}"></p>
+                </li>
               </ul>
+              <br/>
+          </div>
+        </div>
 
-              <br/>
-              <h2 class="h4">Danger zone</h2>
-              <p>Permanent deletion of the digital object</p>
-              <form
-                      onsubmit="return confirm('Are you sure you want to delete this digital object?');"
-                      action="#"
-                      th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
-                      method="delete"
-                      th:method="DELETE"
-                      class="d-inline"
-              >
-                <input type="submit" class="btn btn-outline-danger" value="Delete object"/>
-              </form>
-              <br/>
+
 
 
       </div>
-    <footer th:replace="fragments/general.html :: footer"></footer>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
   </div>
 </div>
 </div>

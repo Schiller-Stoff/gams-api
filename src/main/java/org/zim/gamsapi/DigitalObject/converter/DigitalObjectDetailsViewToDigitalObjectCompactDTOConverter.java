@@ -4,7 +4,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
-import java.util.ArrayList;
+import java.util.HashSet;
 
 @Component
 public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implements Converter<DigitalObjectDetailsView, DigitalObjectCompactDTO> {
@@ -18,12 +18,10 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .created(source.getCreated())
                 .modified(source.getModified())
                 .published(source.getPublished())
-                .datastreams(new ArrayList<>())
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())
                 .publisher(source.getPublisher())
                 .funder(source.getFunder())
-                .mainResource(source.getMainResource())
                 .build();
     }
 }

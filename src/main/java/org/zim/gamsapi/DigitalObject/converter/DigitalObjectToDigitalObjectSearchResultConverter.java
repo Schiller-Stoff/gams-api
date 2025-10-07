@@ -21,7 +21,6 @@ public class DigitalObjectToDigitalObjectSearchResultConverter implements Conver
         .description(source.getBaseMetadata().getDescription())
         .objectType(source.getObjectType())
         .projectAbbr(source.getProject().getProjectAbbr())
-        .mainResource(source.getMainResource())
         .build();
 
 

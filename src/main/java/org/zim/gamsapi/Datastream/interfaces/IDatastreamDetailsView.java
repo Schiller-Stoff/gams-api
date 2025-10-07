@@ -20,13 +20,6 @@ public interface IDatastreamDetailsView {
 
     String getDsid();
 
-    /**
-     * EXCLUDED when fetching datastreams (to decrease load size from the persistence layer)
-     * actual binary data
-     * @return
-     */
-   //byte[] getData();
-
     String getMimeType();
 
    String getFileName();

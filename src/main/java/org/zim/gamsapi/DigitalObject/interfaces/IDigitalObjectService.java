@@ -8,8 +8,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,11 +15,6 @@ public interface IDigitalObjectService {
 
   DigitalObject save(DigitalObject digitalObject);
 
-  /**
-   * Find all digital objects.
-   * @return list of digital objects
-   */
-  List<DigitalObject> findAll();
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
@@ -53,23 +46,16 @@ public interface IDigitalObjectService {
   void delete(DigitalObject digitalObject);
 
   /**
-   * Find a digital object by its id.
-   * @param id the id of the digital object
-   * @return a digital object as projection
-   */
-  DigitalObjectDetailsView findDigitalObjectDetailsViewById(String id);
-
-
-  /**
    * Find all digital objects for a given project (with project abbreviation) and just return their ids.
    * @param projectAbbr identifier of the project
+   * @param pageable pagination
    * @return a list of digital object ids
    */
-  List<String> findAllIdsByProjectAbbr(String projectAbbr);
+  PagedResponse<String> findAllIdsByProjectAbbr(String projectAbbr, Pageable pageable);
 
 
   /**
-   * Fulltext search over objects of defined project. Searches for string occurence in defined dublin core fields.
+   * Fulltext search over objects of defined project. Searches for string occurrence in defined dublin core fields.
    * The object is being returned when one value in the value list matches exactly.
    * @param projectAbbrs list of project abbreviations
    * @param dcEntries list of DublinCoreElement names. If empty all dublin core fields will be searched

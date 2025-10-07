@@ -10,25 +10,29 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
+import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Controller for searching digital objects.
@@ -43,6 +47,12 @@ public class SearchController {
    * Service for searching digital objects.
    */
   private final IDigitalObjectService digitalObjectService;
+  private final IProjectService projectService;
+
+  /**
+   * Endpoint for searching digital objects via Dublin Core fulltext.
+   */
+  private final String DC_SEARCH_ENDPOINT = "/dc";
 
   /**
    * Fulltext search over all dublin core fields of a digital object.
@@ -102,7 +112,7 @@ public class SearchController {
     );
   }
 
-  @GetMapping(path = "/dc", produces = {
+  @GetMapping(path = DC_SEARCH_ENDPOINT, produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
@@ -166,6 +176,157 @@ public class SearchController {
 
     return digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
         MultiValueMap.fromMultiValue(filteredDcFields), projects, searchMode, PageRequest.of(pageIndex, pageSize));
+  }
+
+  /**
+   * Display the Dublin Core search form and results.
+   *
+   * @param projects Selected project abbreviations
+   * @param searchMode Search mode (EXACT_MATCH, CONTAINS, FULLTEXT)
+   * @param allParams All request parameters (including dynamic DC criteria)
+   * @param pageIndex Current page index
+   * @param pageSize Number of results per page
+   * @param model Spring MVC model
+   * @return Thymeleaf template name
+   */
+  @GetMapping(value = DC_SEARCH_ENDPOINT, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String searchView(
+      @RequestParam Set<String> projects,
+      @RequestParam(defaultValue = "EXACT_MATCH") DigitalObjectDublinCoreSpecification.SearchMode searchMode,
+      @RequestParam MultiValueMap<String, String> allParams,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "20") int pageSize,
+      Model model) {
+
+    log.debug("DC Search View - projects: {}, searchMode: {}, pageIndex: {}, pageSize: {}",
+        projects, searchMode, pageIndex, pageSize);
+
+    // Add available projects to model for form population
+    model.addAttribute("projects", projectService.findAll());
+    model.addAttribute("selectedProjects", projects);
+    model.addAttribute("searchMode", searchMode);
+    model.addAttribute("pageSize", pageSize);
+
+    // extract dublin core criteria from request parameters
+    // only keep parameters keys that start with "dc."
+    var filteredDcFields = new HashMap<String, List<String>>();
+    allParams.forEach((key, values) -> {
+      if (key.startsWith("dc.")) {
+        String newKey = key.substring(3); // Remove "dc." prefix
+        filteredDcFields.put(newKey, values);
+      }
+    });
+    var filteredDcAsMultivalueMap = MultiValueMap.fromMultiValue(filteredDcFields);
+
+    model.addAttribute("dcCriteria", filteredDcFields);
+
+    // Limit page size to prevent excessive load
+    pageSize = Math.min(pageSize, 20);
+
+    PagedResponse<DigitalObjectSearchResultDTO> searchResults = digitalObjectService
+        .searchDigitalObjectsByDublinCoreCriteria(
+            filteredDcAsMultivalueMap,
+            projects,
+            searchMode,
+            PageRequest.of(pageIndex, pageSize)
+        );
+
+    model.addAttribute("searchResults", searchResults);
+
+    // Build current query string for pagination
+    String currentQuery = buildQueryString(
+        projects,
+        searchMode,
+        filteredDcAsMultivalueMap,
+        pageSize
+    );
+
+    model.addAttribute("currentQuery", currentQuery);
+    log.debug("Search completed - found {} results", searchResults.getPagination().getTotalElements());
+    return "search/dublin-core-search";
+  }
+
+  /**
+   * Extract Dublin Core search criteria from all request parameters.
+   * Filters out system parameters and organizes DC field-value pairs.
+   *
+   * @param allParams All request parameters
+   * @return Cleaned Dublin Core criteria
+   */
+  private MultiValueMap<String, String> extractDublinCoreCriteria(MultiValueMap<String, String> allParams) {
+    MultiValueMap<String, String> dcCriteria = new LinkedMultiValueMap<>();
+
+    // System parameters to exclude from DC criteria
+    Set<String> systemParams = Set.of(
+        "projects", "searchMode", "pageIndex", "pageSize",
+        "dcField", "dcValue" // form helper fields
+    );
+
+    // Standard Dublin Core elements we support
+    Set<String> supportedDcFields = Set.of(
+        "title", "creator", "subject", "description", "publisher",
+        "contributor", "date", "type", "format", "identifier",
+        "source", "language", "relation", "coverage", "rights"
+    );
+
+    allParams.forEach((key, values) -> {
+      if (!systemParams.contains(key) && supportedDcFields.contains(key)) {
+        // Filter out empty values
+        List<String> nonEmptyValues = values.stream()
+            .filter(value -> value != null && !value.trim().isEmpty())
+            .collect(Collectors.toList());
+
+        if (!nonEmptyValues.isEmpty()) {
+          dcCriteria.put(key, nonEmptyValues);
+        }
+      }
+    });
+
+    log.debug("Extracted DC criteria: {}", dcCriteria);
+    return dcCriteria;
+  }
+
+  /**
+   * Build query string for pagination links.
+   * Preserves all current search parameters.
+   *
+   * @param projects Selected projects
+   * @param searchMode Current search mode
+   * @param dcCriteria Dublin Core search criteria
+   * @param pageSize Current page size
+   * @return URL-encoded query string
+   */
+  private String buildQueryString(Set<String> projects,
+                                  DigitalObjectDublinCoreSpecification.SearchMode searchMode,
+                                  MultiValueMap<String, String> dcCriteria,
+                                  int pageSize) {
+
+    UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
+
+    // Add projects
+    if (projects != null) {
+      projects.forEach(project -> builder.queryParam("projects", project));
+    }
+
+    // Add search mode
+    builder.queryParam("searchMode", searchMode.name());
+    builder.queryParam("pageSize", pageSize);
+
+    // Add Dublin Core criteria
+    dcCriteria.forEach((dcField, values) -> {
+      values.forEach(value -> builder.queryParam(dcField, value));
+    });
+
+    return builder.build().getQuery();
+  }
+
+  /**
+   * Redirect endpoint for backward compatibility.
+   * Redirects old search URLs to the new view endpoint.
+   */
+  @GetMapping
+  public String redirectToView() {
+    return "redirect:/api/v1/search/dc/view";
   }
 
 }

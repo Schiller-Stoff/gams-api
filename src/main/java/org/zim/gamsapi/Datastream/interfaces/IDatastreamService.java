@@ -69,4 +69,14 @@ public interface IDatastreamService {
    */
   PagedResponse<IDatastreamDetailsView> findAll(String digitalObjectId, Set<String> tags, Pageable pageable);
 
+
+  /**
+   * Finds all datastream ids for a given digital object id.
+   * @param digitalObjectId the id of the digital object
+   * @param pageable pagination information
+   * @return a page of datastream ids
+   * @throws DigitalObjectNotFoundException if the digital object does not exist
+   */
+  PagedResponse<String> findAllIds(String digitalObjectId, Pageable pageable) throws DigitalObjectNotFoundException;
+
 }

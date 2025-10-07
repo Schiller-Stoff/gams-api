@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
@@ -15,13 +15,13 @@ import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
+import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
+import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.enums.TestBag;
-import org.zim.gamsapi.enums.TestDigitalObject;
-import org.zim.gamsapi.enums.TestProject;
+import org.zim.gamsapi.TestUtilities.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +46,9 @@ public class IngestServiceIT extends IntegrationTest {
   IDublinCoreEntryRepository dublinCoreElementRepository;
 
   @Autowired
+  IIngestRecordRepository bagEntityRepository;
+
+  @Autowired
   IngestService ingestService;
 
   @Autowired
@@ -54,8 +57,43 @@ public class IngestServiceIT extends IntegrationTest {
   File bagFile;
 
   // disables auditing
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
+
+  @Nested
+  public class IngestUpdatesProjectContentLastModified {
+
+
+    @Test
+    public void ingestUpdatesProjectContentLastModified() throws IOException {
+
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // get the project before ingest
+      var project = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
+          .orElseThrow( () -> new RuntimeException("GAMS Project not found"));
+      var lastModifiedBeforeIngest = project.getContentLastModified();
+
+      bagFile = TestBag.loadFile();
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+      ingestService.ingest(ingest);
+
+      // get the project after ingest
+      var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
+          .orElseThrow();
+      var lastModifiedAfterIngest = updatedProject.getContentLastModified();
+
+      Assertions.assertThat(lastModifiedAfterIngest)
+          .isNotNull()
+          .isAfter(lastModifiedBeforeIngest);
+    }
+  }
+
 
   @Nested
   public class IngestCreatesExpectedObjects {
@@ -98,6 +136,20 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
+    public void createsDigitalObjectWithExpectedChecksums(){
+
+        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+
+        Assertions.assertThat(digitalObject.getBaseMetadata().getMd5Checksum())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
+
+        Assertions.assertThat(digitalObject.getBaseMetadata().getSha512Checksum())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
+
+    }
+
+    @Test
     public void createsExpectedDublinCoreEntryNamesForTestDigitalObject() {
 
       var dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(TestDigitalObject.generate());
@@ -120,6 +172,35 @@ public class IngestServiceIT extends IntegrationTest {
               "source",
               "subject",
               "type");
+    }
+
+    @Test
+    public void ingestCreatesExpectedBagEntityWithNoNullProperties(){
+        var bagEntity = bagEntityRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        Assertions.assertThat(bagEntity)
+            .isPresent();
+
+        Assertions.assertThat(bagEntity.get())
+                .hasNoNullFieldsOrProperties();
+
+    }
+
+    @Test
+    public void ingestCreatesExpectedMetadataBaseEntity(){
+        var bagEntity = bagEntityRepository.findById(TestBagEntity.ID);
+        Assertions.assertThat(bagEntity)
+            .isPresent();
+        var foundBagEntity = bagEntity.get();
+
+        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestBagEntity.ID);
+        Assertions.assertThat(foundBagEntity.getBagCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
+        Assertions.assertThat(foundBagEntity.getBagSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
+        Assertions.assertThat(foundBagEntity.getBagSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
+        Assertions.assertThat(foundBagEntity.getBagExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+        Assertions.assertThat(foundBagEntity.getBaggingTimeStamp()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
+        Assertions.assertThat(foundBagEntity.getBagContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+        Assertions.assertThat(foundBagEntity.getBagPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+
     }
 
     @Nested
@@ -172,7 +253,31 @@ public class IngestServiceIT extends IntegrationTest {
 
     }
 
+  }
 
+  @Nested
+  public class IngestErrors {
+
+    @Test
+    public void ingestThrowsIfDigitalObjectAlreadyExists() throws IOException {
+
+      bagFile = TestBag.loadFile();
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // save object first (should result in conflict)
+      digitalObjectRepository.save(TestDigitalObject.generate());
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+
+      Assertions.assertThatThrownBy(
+          () -> ingestService.ingest(ingest)
+      ).isInstanceOf(IngestObjectAlreadyExistsException.class);
+
+    }
 
 
   }

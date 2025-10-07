@@ -3,10 +3,11 @@ package org.zim.gamsapi.DigitalObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.UnitTest;
-import org.zim.gamsapi.enums.TestMetadataBaseEntity;
+import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
 
-import java.util.Set;
+import java.util.Date;
 
 public class DigitalObjectBuilderTest extends UnitTest {
 
@@ -105,6 +106,25 @@ public class DigitalObjectBuilderTest extends UnitTest {
         .build();
 
     Assertions.assertEquals(MAIN_RESOURCE, digitalObject.getMainResource());
+
+  }
+
+  @Test
+  public void buildsDigitalObjectWithExpectedNullValues(){
+      var digitalObject = new DigitalObjectBuilder()
+              .id(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+              .project(TestDigitalObject.DIGITAL_OBJECT_PROJECT_ABBR.getValue())
+              .publisher(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
+              .baseMetadata(testMetadataBaseEntity)
+              .objectType(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+              .funder(TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue())
+              .mainResource(TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
+              .published(new Date())
+              .build();
+
+      org.assertj.core.api.Assertions.assertThat(digitalObject).hasNoNullFieldsOrPropertiesExcept(
+              "created", "modified", "createdBy", "modifiedBy"
+      );
 
   }
 

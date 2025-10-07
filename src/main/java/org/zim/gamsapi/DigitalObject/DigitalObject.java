@@ -3,12 +3,12 @@ package org.zim.gamsapi.DigitalObject;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -25,7 +25,7 @@ import java.util.Objects;
  * Domain object representing a digital object in sense of OAIS.
  */
 @Entity
-@Table(name = "digital_object")
+@Table(name = DigitalObject.ENTITY_TABLE_NAME)
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -35,6 +35,15 @@ import java.util.Objects;
 @ToString
 @JacksonXmlRootElement(localName = "digitalObject")
 public class DigitalObject {
+
+  public static final String ENTITY_TABLE_NAME = "digital_object";
+
+  /**
+   * Contains all table names in the order they should be deleted / created.
+   */
+  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+      ENTITY_TABLE_NAME,
+  };
 
   /**
    * ID of the digital object (= old PID of digital object)
@@ -115,7 +124,6 @@ public class DigitalObject {
    */
   @Column(name = "main_resource")
   private String mainResource;
-
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

@@ -3,6 +3,9 @@ package org.zim.gamsapi.DigitalObject.dto;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
+import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 
 import java.util.List;
@@ -17,6 +20,6 @@ public class DigitalObjectSearchResultDTO {
   private String description;
   private String objectType;
   private String projectAbbr;
-  private String mainResource;
+  private DatastreamMainResourceDto mainResource;
   private Map<String, List<DublinCoreEntryCompactDTO>> dublinCore;
 }

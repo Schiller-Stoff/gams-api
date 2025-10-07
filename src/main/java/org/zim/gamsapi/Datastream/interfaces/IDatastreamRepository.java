@@ -70,6 +70,13 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
   List<IDatastreamIdView> findAllDatastreamIdViewsByDigitalObject(DigitalObject digitalObject);
 
   /**
+   * Find all datastreams by digital object id.
+   * @param digitalObjectId digital object id
+   * @return list of datastream ids
+   */
+  Page<IDatastreamIdView> findAllDatastreamIdViewsByDigitalObjectId(String digitalObjectId, Pageable pageable);
+
+  /**
    * Find all datastreams by digital object
    * @param digitalObject digital object
    * @return view of datastreams containing dsid and mimetype
@@ -120,5 +127,13 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    */
   @Query("SELECT MAX(ds.modified) FROM Datastream ds JOIN ds.digitalObject do WHERE do.id = :digitalObjectId")
   Optional<Date> findMaxLastModifiedDateByDigitalObjectId(String digitalObjectId);
+
+
+  @Query("SELECT ds FROM Datastream ds " +
+      "WHERE ds.digitalObject.id IN :digitalObjectIds " +
+      "AND ds.dsid IN (SELECT do.mainResource FROM DigitalObject do WHERE do.id = ds.digitalObject.id)")
+  List<IDatastreamMainResourceView> findMainDatastreamsByDigitalObjectIds(
+      @Param("digitalObjectIds") Set<String> digitalObjectIds
+  );
 
 }

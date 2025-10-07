@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.*;
+import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.*;
@@ -22,15 +23,6 @@ import java.util.*;
 public class DigitalObjectCompactDTO {
 
     private String id;
-
-    /**
-     * List of datastream ids
-     * TODO this seems wrong here?
-     */
-    @Builder.Default
-    @JacksonXmlElementWrapper(localName = "datastreams")
-    @JacksonXmlProperty(localName = "dsid")
-    private List<String> datastreams = new ArrayList<>();
 
     private String objectType;
 
@@ -52,7 +44,7 @@ public class DigitalObjectCompactDTO {
 
     private String funder;
 
-    private String mainResource;
+    private DatastreamMainResourceDto mainResource;
 
     /**
      * Map of Dublin Core entries, where the key is the name of the entry and the value is a list of
