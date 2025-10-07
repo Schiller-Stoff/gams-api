@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.Ingest.IngestRecord;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 
 import java.time.*;
@@ -49,6 +50,17 @@ public class BagInfo {
       return LocalDateTime
               .of(LocalDate.parse(date), LocalTime.parse(timeWithoutZone))
               .toInstant(ZoneOffset.UTC);
+  }
+
+  public static BagInfo from(IngestRecord ingestRecord) {
+      return BagInfo.builder()
+              .date(ingestRecord.getBaggingDate())
+              .time(ingestRecord.getBaggingTime())
+              // TODO this needs to be regenerated
+              .payloadOxum(ingestRecord.getBagPayloadOxum())
+              .contactMail(ingestRecord.getBagContactMail())
+              .externalDescription(ingestRecord.getBagExternalDescription())
+              .build();
   }
 
 }
