@@ -187,12 +187,12 @@ public class IngestServiceIT extends IntegrationTest {
 
     @Test
     public void ingestCreatesExpectedMetadataBaseEntity(){
-        var bagEntity = bagEntityRepository.findById(TestBagEntity.ID);
+        var bagEntity = bagEntityRepository.findById(TestIngestRecord.ID);
         Assertions.assertThat(bagEntity)
             .isPresent();
         var foundBagEntity = bagEntity.get();
 
-        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestBagEntity.ID);
+        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestIngestRecord.ID);
         Assertions.assertThat(foundBagEntity.getBagCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
         Assertions.assertThat(foundBagEntity.getBagSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
         Assertions.assertThat(foundBagEntity.getBagSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);

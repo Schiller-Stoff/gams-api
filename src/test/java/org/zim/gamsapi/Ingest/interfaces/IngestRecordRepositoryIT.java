@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.TestUtilities.TestBagEntity;
+import org.zim.gamsapi.TestUtilities.TestIngestRecord;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
@@ -54,7 +54,7 @@ public class IngestRecordRepositoryIT extends IntegrationTest {
                  testDataSet.project().getProjectAbbr() +".12345"
                 )
         );
-        var bagEntity = TestBagEntity.generate(savedObject);
+        var bagEntity = TestIngestRecord.generate(savedObject);
         var savedBagEntity = bagEntityRepository.save(bagEntity);
 
         Assertions.assertThat(savedBagEntity).isNotNull();

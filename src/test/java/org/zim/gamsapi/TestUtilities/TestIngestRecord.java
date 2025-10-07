@@ -5,7 +5,7 @@ import org.zim.gamsapi.Ingest.IngestRecord;
 
 import java.time.Instant;
 
-public class TestBagEntity {
+public class TestIngestRecord {
 
     public static final String ID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
     public static final String CREATED_BY = TestBag.TestBagSipJson.CREATED_BY;
@@ -26,15 +26,15 @@ public class TestBagEntity {
     public static IngestRecord generate(DigitalObject digitalObject){
         return IngestRecord.builder()
                 .digitalObject(digitalObject)
-                .createdBy(TestBagEntity.CREATED_BY)
-                .schema(TestBagEntity.SCHEMA)
-                .source(TestBagEntity.SOURCE)
-                .externalDescription(TestBagEntity.EXTERNAL_DESCRIPTION)
-                .baggingTimeStamp(TestBagEntity.BAGGING_TIMESTAMP)
-                .contactMail(TestBagEntity.CONTACT_EMAIL)
-                .payloadOxum(TestBagEntity.PAYLOAD_OXUM)
-                .bagVersion(TestBagEntity.BAG_VERSION)
-                .tagFileCharacterEncoding(TestBagEntity.TAG_FILE_CHARACTER_ENCODING)
+                .createdBy(TestIngestRecord.CREATED_BY)
+                .schema(TestIngestRecord.SCHEMA)
+                .source(TestIngestRecord.SOURCE)
+                .externalDescription(TestIngestRecord.EXTERNAL_DESCRIPTION)
+                .baggingTimeStamp(TestIngestRecord.BAGGING_TIMESTAMP)
+                .contactMail(TestIngestRecord.CONTACT_EMAIL)
+                .payloadOxum(TestIngestRecord.PAYLOAD_OXUM)
+                .bagVersion(TestIngestRecord.BAG_VERSION)
+                .tagFileCharacterEncoding(TestIngestRecord.TAG_FILE_CHARACTER_ENCODING)
                 .build();
     }
 

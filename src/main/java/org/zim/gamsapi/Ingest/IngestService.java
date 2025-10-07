@@ -16,6 +16,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
@@ -23,6 +24,8 @@ import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagData;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagFile;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -30,9 +33,12 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -195,6 +201,42 @@ public class IngestService implements IIngestService {
       ZipUtils.deleteDir(bagDirPath);
       throw e;
     }
+
+  }
+
+  @Transactional
+  public OutputStream export(String objectId){
+
+    var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
+        () -> {
+          String msg = String.format("Digital object with id %s does not exist. Cannot export non-existing object.", objectId);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        }
+    );
+
+    var ingestRecord = bagEntityRepository.findById(objectId).orElseThrow(
+        () -> {
+          String msg = String.format("Ingest record for digital object with id %s does not exist. Cannot export non-existing object.", objectId);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        }
+    );
+
+    var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
+
+    Set<BagFile> contentFiles = new HashSet<>();
+    datastreams.forEach(datastream -> {
+        BagFile bagFile = BagFile.from(datastream);
+        contentFiles.add(bagFile);
+    });
+
+    // TODO rewrite with converter?
+    BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
+
+
+
+    return null;
 
   }
 
