@@ -117,7 +117,6 @@ public class IngestRecord {
     @NotEmpty
     private String bagTagFileCharacterEncoding;
 
-
     /**
      * Proper equals/hashCode for entities with assigned IDs.
      * Based on the pattern you use in your codebase.
@@ -146,6 +145,16 @@ public class IngestRecord {
 
     public static IngestRecordBuilder builder(){
         return new IngestRecordBuilder();
+    }
+
+    public String getBaggingDate() {
+        // TODO rethink string index access
+        return baggingTimeStamp.toString().substring(0, 10);
+    }
+
+    public String getBaggingTime() {
+        // TODO rethink string index access
+        return baggingTimeStamp.toString().substring(11, 19) + " UTC";
     }
 
 }
