@@ -1,0 +1,82 @@
+{
+  "title": "test-title",
+  "description": "test-description",
+  "creator": "test-creator",
+  "rights": "test-rights",
+  "publisher": "test-publisher",
+  "mainResource": "test.txt",
+  "contentFiles": [
+    {
+      "size": 498,
+      "bagpath": "/data/content/manifest.json",
+      "dsid": "manifest.json",
+      "mimetype": "application/json",
+      "title": "Datastream containing the manifest.json file",
+      "description": "Datastream for GAMS project demo.",
+      "creator": "demo",
+      "rights": "CC BY 4.0",
+      "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "dsid": "DC.xml",
+      "mimetype": "text/xml",
+      "title": "Dublin Core Metadata",
+      "description": "DC Metadata describing the data stream",
+      "creator": "Gams HSA Project",
+      "rights": "Creative Commons Attribution-NonCommercial 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)",
+      "publisher": "Gams",
+      "size": 1107,
+      "bagpath": "/data/content/DC.xml",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "size": 193,
+      "bagpath": "/data/content/search.json",
+      "dsid": "search.json",
+      "mimetype": "application/json",
+      "title": "Datastream containing the search.json file",
+      "description": "Datastream for GAMS project demo.",
+      "creator": "demo",
+      "rights": "CC BY 4.0",
+      "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "size": 22226,
+      "bagpath": "/data/content/test.xml",
+      "dsid": "test.xml",
+      "mimetype": "application/xml",
+      "title": "Datastream containing the test.xml file",
+      "description": "Datastream for GAMS project demo.",
+      "creator": "demo",
+      "rights": "CC BY 4.0",
+      "publisher": "demo GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "size": 1000,
+      "bagpath": "/data/content/test.txt",
+      "dsid": "test.txt",
+      "mimetype": "text/plain",
+      "title": "test-title",
+      "description": "test-description",
+      "creator": "test-creator",
+      "rights": "test-rights",
+      "publisher": "test GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    }
+  ],
+  "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",
+  "created_by": "Pyrilo",
+  "source": "local",
+  "recid": "test.test",
+  "project": "test",
+  "objectType": "TEI",
+  "funder": "test-funder"
+}

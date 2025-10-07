@@ -1,178 +1,183 @@
-<!DOCTYPE html>
-<!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
-<html lang="en" xmlns:th="http://thymeleaf.org">
-  <head th:replace="fragments/general.html :: head"/>
-  <body>
+<!doctype html>
+<html lang="en">
+
+<head th:replace="fragments/general.html :: headtemplate" />
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+  <aside th:replace="fragments/general.html :: aside"></aside>
+
+  <div class="body-wrapper">
     <header th:replace="fragments/general.html :: header"></header>
-    <nav th:replace="fragments/general.html :: nav"></nav>
-    
-    <main class="container">
-      <br/>
-      <h1 th:text="${do.pid}" class="mb-3"></h1>
-      <p>
-        Overview over a singular digital object
-      </p>
-      <div>
-        <a class="btn btn-outline-success mb-3" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>
-      </div>
-      <div class="bg-light p-2">
-      
-      <p><b>Pid:</b> <span th:text="${do.pid}"></span></p>
-      <p><b>Owned by project:</b> <span th:text="${do.projectAbbr}"></span></p>
-      <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
-      <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'" th:text="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/audittrail'"></a></p> -->
-    </div>
-      <br/>
-      <h2 class="h4">Datastreams</h2>
-      <p>Displays all datastreams of a digital object</p>
-      <p></p>
-      <ul class="list-group-flush p-0">
-        <li th:each="dstream : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item bg-light">
-          
-          <a style="color:black" th:text="${dstream.dsid}" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}"></a>
-
-          <div>
-            <span th:text="${dstream.id + ' (global datastream id)'}"> </span>
-            <!-- <span th:text="${dstream.mimeType}"></span> -->
-            <!--
-            <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>
-            <a target="_blank" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>
-            <a target="_blank" th:href="'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>
-            -->
-            <form
-              onsubmit="return confirm('Are you sure you want to delete this datastream?');"
-              action="#"
-              th:action="@{'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/' + ${dstream.dsid}}"
-              th:object="${do}"
-              method="delete"
-              th:method="DELETE"
-              class="d-inline"
-            >
-              <!-- <input type="hidden" name="pid" th:field="*{pid}"/> -->
-              <!-- <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> -->
-              <input type="submit" class="btn btn-outline-dark" value="Delete"/>
-            </form>
-          </div>
-        </li>
-      </ul>
-      <br/>
-      <form
-        onsubmit="return webCirilo.appendFormSubmitPath('add_datastream_form', 'datastream_id_input')"
-        id="add_datastream_form"
-        action="#"
-        th:action="@{'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid} + '/datastreams/'}"
-        th:object="${do}"
-        method="put"
-        th:method="PUT"
-        enctype="multipart/form-data"
-        class="w-25"
-      >
-        <div class="form-group">
-          <!-- <input class="form-control" id="pid" type="hidden" th:field="*{pid}"/> -->
-          <p><b>New datastream</b> (via datastream-id) <input required class="form-control" type="text" id="datastream_id_input"/></p>
-          <input class="form-control" type="file" id="file" name="file" value="Upload file" required/>
-      </div>
-      <script>
-        webCirilo.addChecksumRequestParam("file","add_datastream_form");
-      </script>
-        <!-- <label for="fname">First name:</label> -->
-        <!-- <input type="text" id="lname" name="lname"><br><br> -->
-        <br/>
+      <div class="container-fluid" style="min-height: 100vh">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
+            <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
+            <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
+          </ol>
+        </nav>
+        <h2 th:text="${do.id}" class="mb-3"></h2>
         <p>
-          <input class="btn btn-light" type="submit" value="Submit"/>
-          <input class="btn btn-light" type="reset" value="Reset" />
+          Overview over a singular digital object
         </p>
-      </form>
-      <br/>
-      <h2 class="h4">Dublin Core</h2>
-      <p>Primary Dublin Core metadata derived from the GAMS-API</p>
-      <ul class="list-group-flush p-0">
-        <li class="list-group-item bg-light">
-          <small>dc:identifier</small>
-          <p th:text="${do.pid}"></p>
-        </li>
-      </ul>
-      <p>Auxiliary metadata as dublin core</p>
-      <ul class="list-group-flush p-0" th:if="${do.dublinCore}">
-          <li class="list-group-item bg-light">
-            <small>dc:title</small>
-            <p th:text="${do.dublinCore.title}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:creator</small>
-            <p th:text="${do.dublinCore.creator}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:description</small>
-            <p th:text="${do.dublinCore.description}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:subject</small>
-            <p th:text="${do.dublinCore.subject}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:publisher</small>
-            <p th:text="${do.dublinCore.publisher}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:contributor</small>
-            <p th:text="${do.dublinCore.contributor}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:date</small>
-            <p th:text="${do.dublinCore.date}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:type</small>
-            <p th:text="${do.dublinCore.type}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:format</small>
-            <p th:text="${do.dublinCore.format}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:source</small>
-            <p th:text="${do.dublinCore.source}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:language</small>
-            <p th:text="${do.dublinCore.language}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:relation</small>
-            <p th:text="${do.dublinCore.relation}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:coverage</small>
-            <p th:text="${do.dublinCore.coverage}"></p>
-          </li>
-          <li class="list-group-item bg-light">
-            <small>dc:rights</small>
-            <p th:text="${do.dublinCore.rights}"></p>
-          </li>
-      </ul>
+        <div>
+          <a class="btn btn-outline-dark mb-3" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="'Back to overview (' + ${project.projectAbbr} + ')'"></a>
+        </div>
+        <div class="bg-light p-2">
 
-      <br/>
-      <h2 class="h4">Danger zone</h2>
-      <p>Permanent deletion of the digital object</p>
-      <form
-        onsubmit="return confirm('Are you sure you want to delete this digital object?');"
-        action="#"
-        th:action="@{'/api/v1/management/projects/' + ${project.projectAbbr} + '/objects/' + ${do.pid}}"
-        method="delete"
-        th:method="DELETE"
-        class="d-inline"
-      >
-        <input type="submit" class="btn btn-outline-danger" value="Delete object"/>
-      </form>
-      <br/>
-    
-    </main>
+          <p><b>Id:</b> <span th:text="${do.id}"></span></p>
+          <p><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></p>
+          <!-- <p><b>Linked resource path: </b><a target="_blank" th:href="${do.metaAddress}" th:text="${do.metaAddress}"></a></p> -->
+          <!-- <p><b>Audittrail: </b><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'" th:text="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/audittrail'"></a></p> -->
+        </div>
 
+            <br/>
+            <br/>
+
+              <h2 class="h4">Datastreams</h2>
+              <p>Displays all datastreams of a digital object</p>
+              <p></p>
+              <ul class="list-group p-0">
+                <li th:each="dsid : ${do.datastreams}" class="d-flex justify-content-between align-items-center list-group-item bg-light">
+
+                  <a style="color:black" th:text="${dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}"></a>
+
+<!--                  <div>-->
+<!--&lt;!&ndash;                    <span th:text="${dstream.globalId + ' (global datastream id)'}"> </span>&ndash;&gt;-->
+<!--                    &lt;!&ndash; <span th:text="${dstream.mimeType}"></span> &ndash;&gt;-->
+<!--                    &lt;!&ndash;-->
+<!--                    <a target="_blank" th:href="${dstream.metaAddress} + '/fcr:metadata'">Fedora resource</a>-->
+<!--                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/fixity'">Fixity report</a>-->
+<!--                    <a target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dstream.dsid} + '/audittrail'">Audittrail</a>-->
+<!--                    &ndash;&gt;-->
+<!--                    <form-->
+<!--                            onsubmit="return confirm('Are you sure you want to delete this datastream?');"-->
+<!--                            action="#"-->
+<!--                            th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${dsid}}"-->
+<!--                            th:object="${do}"-->
+<!--                            method="delete"-->
+<!--                            th:method="DELETE"-->
+<!--                            class="d-inline"-->
+<!--                    >-->
+<!--                      &lt;!&ndash; <input type="hidden" name="id" th:field="*{id}"/> &ndash;&gt;-->
+<!--                      &lt;!&ndash; <input type="hidden" name="dsid" th:value="${#strings.substringAfter(dstream.ldpResource.path,'/datastream/')}"/> &ndash;&gt;-->
+<!--                      <input type="submit" class="btn btn-outline-dark" value="Delete"/>-->
+<!--                    </form>-->
+<!--                  </div>-->
+                </li>
+              </ul>
+              <br/>
+              <h2 class="h4">Metadata</h2>
+              <p>Primary metadata derived from the GAMS-API</p>
+              <ul class="list-group-flush p-0">
+                <li class="list-group-item bg-light">
+                  <small>identifier</small>
+                  <p th:text="${do.id}"></p>
+                </li>
+                <li class="list-group-item bg-light">
+                  <small>object type</small>
+                  <p th:text="${do.objectType}"></p>
+                </li>
+                  <li class="list-group-item bg-light">
+                      <small>main resource</small>
+                      <p th:text="${do.mainResource}"></p>
+                  </li>
+              </ul>
+              <ul class="list-group-flush p-0" th:if="${do.baseMetadata}">
+                <li class="list-group-item bg-light">
+                  <small>title</small>
+                  <p th:text="${do.baseMetadata.title}"></p>
+                </li>
+                <li class="list-group-item bg-light">
+                  <small>creator</small>
+                  <p th:text="${do.baseMetadata.creator}"></p>
+                </li>
+                <li class="list-group-item bg-light">
+                  <small>description</small>
+                  <p th:text="${do.baseMetadata.description}"></p>
+                </li>
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:subject</small>-->
+                <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
+                <!--          </li>-->
+                <li class="list-group-item bg-light">
+                  <small>publisher</small>
+                  <p th:text="${do.publisher}"></p>
+                </li>
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:contributor</small>-->
+                <!--            <p th:text="${do.baseMetadata.contributor}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:date</small>-->
+                <!--            <p th:text="${do.baseMetadata.date}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:type</small>-->
+                <!--            <p th:text="${do.baseMetadata.type}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:format</small>-->
+                <!--            <p th:text="${do.baseMetadata.format}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:source</small>-->
+                <!--            <p th:text="${do.baseMetadata.source}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:language</small>-->
+                <!--            <p th:text="${do.baseMetadata.language}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:relation</small>-->
+                <!--            <p th:text="${do.baseMetadata.relation}"></p>-->
+                <!--          </li>-->
+                <!--          <li class="list-group-item bg-light">-->
+                <!--            <small>dc:coverage</small>-->
+                <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
+                <!--          </li>-->
+                <li class="list-group-item bg-light">
+                  <small>rights</small>
+                  <p th:text="${do.baseMetadata.rights}"></p>
+                </li>
+              <li class="list-group-item bg-light">
+                  <small>funder</small>
+                  <p th:text="${do.funder}"></p>
+              </li>
+              </ul>
+
+              <br/>
+              <h2 class="h4">Danger zone</h2>
+              <p>Permanent deletion of the digital object</p>
+              <form
+                      onsubmit="return confirm('Are you sure you want to delete this digital object?');"
+                      action="#"
+                      th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                      method="delete"
+                      th:method="DELETE"
+                      class="d-inline"
+              >
+                <input type="submit" class="btn btn-outline-danger" value="Delete object"/>
+              </form>
+              <br/>
+
+
+      </div>
     <footer th:replace="fragments/general.html :: footer"></footer>
+  </div>
+</div>
+</div>
+</div>
+<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/sidebarmenu.js"></script>
+<script src="/assets/js/app.min.js"></script>
+<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+</body>
 
-    <script>
-      webCirilo.applySubmitObjectMetaPropertiesListener("object_create");
-    </script>
-  </body>
 </html>

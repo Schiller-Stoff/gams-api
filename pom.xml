@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.6</version>
+		<version>3.4.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.zim</groupId>
@@ -50,6 +50,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-xml</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
 		</dependency>
@@ -57,7 +61,11 @@
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.8.9</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -95,6 +103,26 @@
 			<version>1.18.1</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>solr</artifactId>
+			<version>1.20.6</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-core -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-core</artifactId>
+			<version>4.9.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-rdfconnection -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-rdfconnection</artifactId>
+			<version>4.9.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -109,9 +137,38 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+					<!-- Name of docker image to be built by build-packs (calling e.g. spring-boot:build-image) -->
+					<image>
+						<name>${project.artifactId}</name>
+						<tags>${project.artifactId}:${project.version}</tags>
+					</image>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.graalvm.buildtools</groupId>
+				<artifactId>native-maven-plugin</artifactId>
+				<version>0.9.23</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.1.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+						<configuration>
+							<includes>
+								<include>**/*IT.java</include>
+							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+		<finalName>${project.artifactId}-${project.version}</finalName>
 	</build>
 
 </project>

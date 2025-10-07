@@ -2,21 +2,41 @@ package org.zim.gamsapi.Project.interfaces;
 
 import org.zim.gamsapi.Project.Project;
 
+import java.util.List;
+
 public interface IProjectService {
 
   /**
-   * Returns given Project as ProjectViewModel. Just contains
-   * information about project name (contained digital object whatsoever is omitted)
-   * @param project Project domain object
-   * @return Project view model
+   * Checks if a project with the given abbreviation exists AND
+   * if the given digital object ID is contained in the projectAbbr.
+   *
+   * @param projectAbbr The abbreviation of the project to check.
+   * @return true if matches, else false.
    */
-  Project findPlain(Project project);
+  boolean exists(String projectAbbr);
 
   /**
-   * Returns a GAMS project.
-   * @param project project to be returned
-   * @return current project
+   * Verifies that the project abbreviation matches the digital object ID.
+   * @param projectAbbr The abbreviation of the project to check.
+   * @param digitalObjectId The ID of the digital object to check against the project abbreviation.
    */
-  public Project getUserProjectByEntity(Project project);
+  void verifyProjectAbbrMatchesObjectId(String projectAbbr, String digitalObjectId);
+
+  Project save(Project project);
+
+  void deleteProject(Project project);
+
+  Project findProject(String projectAbbr);
+
+  List<Project> findAll();
+
+  Project findByAbbr(String projectAbbr);
+
+  /**
+   * Allows to update a project. Usually used in conjunction with PATCH requests.
+   * @param project New project information.
+   * @return updated project
+   */
+  Project updateProject(Project project);
 
 }

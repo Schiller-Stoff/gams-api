@@ -5,16 +5,34 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5431/gams
-    username: admin
-    password: admin
+    url: ${POSTGRES_JDBC_URL:jdbc:postgresql://relationalDB:5432/gams}
+    username: ${POSTGRES_USERNAME:admin}
+    # postgres password is set via docker secrets
+    password: ${POSTGRES_PW:admin}
   jpa:
     hibernate:
-      #drop n create table again, good for testing, comment this in production
-      ddl-auto: create
+      # set to create if you want to drop existing data on app startup
+      # value "none" would require to initialize a schema via SQL via extra file
+      ddl-auto: update
       properties:
         hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
         hibernate.jdbc.lob.non_contextual_creation: true
+  # oauth2 integration with keycloak
+  security:
+    oauth2:
+      client:
+        registration:
+          gams-realm:
+            # will be set by docker secrets - and if not applied for local dev
+            client-id: ${GAMSAPI_CLIENT_ID:gams-client}
+            client-secret: ${GAMSAPI_CLIENT_SECRET:MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
+            scope: ${OAUTH2_SCOPE:openid,profile,email}
+            authorization-grant-type: authorization_code
+            redirect-uri: ${GAMSAPI_REDIRECT_URI:http://localhost:18085/login/oauth2/code/gams-client}
+        provider:
+          gams-realm:
+            issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
+
 
   #####
   # Thymeleaf config
@@ -24,16 +42,18 @@ spring:
     hiddenmethod:
       filter.enabled: "true"
 
+  # solves a bug where the thymeleaf template is not created correctly
+  # https://stackoverflow.com/questions/52982246/spring-thymeleaf-throws-cannot-create-a-session-after-the-response-has-been-com
+  thymeleaf:
+    servlet:
+      produce-partial-output-while-processing: "false"
+
   # sets the limit for multi-part files send via requests
   servlet:
     multipart:
       max-file-size: 10GB
       max-request-size: 10GB
 
-  # spring profiles
-  # profiles:
-    # Override with  -Dspring-boot.run.profiles=<prod,stage,test>
-    # active: ${SPRING_PROFILE:dev}
 
 ########
 # Logging
@@ -42,12 +62,22 @@ logging:
   file:
     name: ${LOG_FILE:log/app.log}
   level:
-    org.zim.gamsapi: TRACE
+    org.zim.gamsapi: ${LOG_LEVEL:WARN}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:
   error:
     # includes stacktrace on error ( devtools will include it in dev)
     include-stacktrace: always
+  # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
+  # Needed to consider reverse-proxy / api-gateway in front
+  forward-headers-strategy: framework
+  # sets application port https://www.baeldung.com/spring-boot-change-port
+  port: 18085
+  # sets the max size of a http form post for tomcat (additional to other config that sets the limit for spring)
+  # https://stackoverflow.com/questions/33232849/increase-http-post-maxpostsize-in-spring-boot
+  tomcat:
+    max-http-form-post-size: 10000000000
 
 
 #####
@@ -55,13 +85,44 @@ server:
 #
 gams:
   docker:
-    # fedora6
-    repository-dns: "localhost:8082"
-    #
-    gateway-dns: "localhost:8087"
-    #
-    solr: "localhost:8983"
-    # fileserver
-    apache: "localhost:4585"
-    # system triplestoree
-    systemTriplestore: "localhost:3030"
+    # postgres
+    relational-db: "relationalDB:5432"
+    # TODO remove solr endpoint
+    baseSearchUrl: ${BASE_SEARCH_URL:http://baseSearch:8983}
+    # TODO remove hardcoded gams core
+    triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
+    # elasticsearch
+    elasticsearchUrl: ${ELASTICSEARCH_URL:http://elasticsearch:9200}
+  storage:
+    # root of GAMS files (datastreams) to be stored.
+    rootPath: ${GAMS_FILES_ROOT_PATH:gams}
+
+# swagger ui base path
+springdoc:
+  swagger-ui:
+    path: "/api/v1/openapi"
+    operationsSorter: "method"
+    tagsSorter: "alpha"
+    docExpansion: "none"
+    displayRequestDuration: true
+    showExtensions: true
+    showCommonExtensions: true
+    defaultModelsExpandDepth: 1
+    defaultModelExpandDepth: 1
+    # Performance optimization for large APIs
+    syntaxHighlight:
+      theme: "nord"
+    tryItOutEnabled: true
+    filter: true
+    persistAuthorization: true
+  api-docs:
+    path: "/api/v1/api-docs"
+    enabled: true
+  cache:
+    disabled: false
+  # Performance optimization
+  model-and-view-allowed: false
+  # Security
+  show-actuator: false
+
+

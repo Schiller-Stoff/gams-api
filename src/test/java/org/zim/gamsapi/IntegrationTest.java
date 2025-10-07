@@ -1,12 +1,21 @@
 package org.zim.gamsapi;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 /**
  * Base integration-tet superclass. Must be extended by all sub integration tests
@@ -19,7 +28,53 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public abstract class IntegrationTest {
- 
+
+  // required for the client registration for the oauth2 process
+  // otherwise the application context won't start (will try to load the oauth2 config json file)
+  // https://stackoverflow.com/questions/60778556/testing-spring-security-oauth2login-enabled-applications-throws-illegalargumente
+  @MockBean
+  ClientRegistrationRepository clientRegistrationRepository;
+
+  @Autowired
+  IProjectRepository projectRepository;
+
+  @Autowired
+  IDigitalObjectRepository digitalObjectRepository;
+
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDatastreamContentRepository datastreamContentRepository;;
+
+  @Autowired
+  IDublinCoreEntryRepository dublinCoreElementRepository;
+
+  @Autowired
+  IGAMSCollectionRepository collectionRepository;
+
+  @Autowired
+  EventCaptureListener eventCaptureListener;
+
+
+  // First launch postgres for all integration tests
+  static final PostgreSQLContainer<?> postgres;
+
+  // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
+  static {
+    postgres = new PostgreSQLContainer<>("postgres:13-alpine");
+    postgres.start();
+  }
+
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    // dynamic postgres configuration
+    registry.add("spring.datasource.url", postgres::getJdbcUrl);
+    registry.add("spring.datasource.username", postgres::getUsername);
+    registry.add("spring.datasource.password", postgres::getPassword);
+
+  }
+
   /**
    * Checks if required web services are reachable, like fedora6.
    */
@@ -50,5 +105,21 @@ public abstract class IntegrationTest {
 
 
   }
+
+  /**
+   * After each test, performs a system wipe so that the next test can start with a clean slate.
+   */
+  @AfterEach
+  public void tearDown() throws InterruptedException {
+    eventCaptureListener.clearEvents();
+    datastreamContentRepository.deleteAll();
+    dublinCoreElementRepository.deleteAll();
+    datastreamRepository.deleteAll();
+    collectionRepository.deleteAll();
+    digitalObjectRepository.deleteAll();
+    projectRepository.deleteAll();
+
+  }
+
 
 }

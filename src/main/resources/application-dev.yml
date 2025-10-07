@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gams
+    username: admin
+    password: admin
+  # shows hibernate sql statements in console
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+
+#####
+# Custom properties for GAMS
+#
+gams:
+  docker:
+    # postgres
+    relational-db: "localhost:5432"
+    # from integration-api
+    # TODO: problem - there is the gams core hardcoded
+    baseSearchUrl: ${BASE_SEARCH_URL:http://localhost:8983}
+    # TODO remove hardcoded gams database?
+    triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}
+    # elasticsearch
+    elasticsearchUrl: ${ELASTICSEARCH_URL:http://localhost:9200}

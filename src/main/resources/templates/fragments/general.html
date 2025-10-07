@@ -1,90 +1,235 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-  <head th:fragment="head">
-    <!-- Required meta tags -->
+
+  <head th:fragment="headtemplate">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>Web Cirilo</title>
-
+    <title>GAMS</title>
     <link rel="icon" type="image/x-icon" href="http://gams.uni-graz.at/favicon.ico">
+    <link rel="shortcut icon" type="image/png" href="/assets/images/logos/favicon.png" />
+    <link rel="stylesheet" href="/assets/css/styles.min.css" />
 
-    <!-- <link th:href="@{/css/styles.css}" rel="stylesheet" /> -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    
     <script type="text/javascript" src="/web_cirilo/js/spark-md5.min.js"></script>
     <script type="text/javascript" src="/web_cirilo/js/jszip.min.js"></script>
     <script type="text/javascript" src="/web_cirilo/js/web_cirilo.js"></script>
-
-
-
   </head>
+
   <body>
-    <header th:fragment="header"></header>
-    <nav th:fragment="nav" class="navbar navbar-expand-lg navbar-light border-bottom sticky-top bg-white">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="/api/v1/management"><img style="width:30px;" src="https://gams.uni-graz.at/templates/img/gams_solo.png"/></a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/api/v1/management">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/api/v1/management/projects">Manage projects</a>
-            </li>
-            
-            <!-- <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled">Disabled</a>
-            </li> -->
-          </ul>
-<!--          <ul class="navbar-nav ms-2 mb-2 mb-lg-0">-->
-<!--            <li class="nav-item" >-->
-<!--              <a th:text="${user.name}" href="/api/v1/management/user/profile"></a>-->
+    <header th:fragment="header" class="app-header">
+      <nav class="navbar navbar-expand-lg navbar-light">
+        <ul class="navbar-nav">
+          <li class="nav-item d-block d-xl-none">
+            <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+              <i class="ti ti-menu-2"></i>
+            </a>
+          </li>
+<!--          <li class="nav-item">-->
+<!--            <a class="nav-link nav-icon-hover" href="javascript:void(0)">-->
+<!--              <i class="ti ti-bell-ringing"></i>-->
+<!--              <div class="notification bg-primary rounded-circle"></div>-->
+<!--            </a>-->
+<!--          </li>-->
+        </ul>
+        <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+          <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+            <li class="nav-item"><a href="/api/v1/userinfo"><i class="ti ti-user fs-6 rounded-circle text-black"></i></a></li>
+
+<!--            <a href="/api/v1" class="btn btn-outline-primary">Home</a>-->
+<!--            <li class="nav-item dropdown">-->
+<!--              <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"-->
+<!--                 aria-expanded="false">-->
+<!--                <i class="ti ti-user fs-6 rounded-circle"></i>-->
+<!--              </a>-->
+<!--              <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">-->
+<!--                <div class="message-body">-->
+<!--                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">-->
+<!--                    <i class="ti ti-user fs-6"></i>-->
+<!--                    <p class="mb-0 fs-3">My Profile</p>-->
+<!--                  </a>-->
+<!--                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">-->
+<!--                    <i class="ti ti-mail fs-6"></i>-->
+<!--                    <p class="mb-0 fs-3">My Account</p>-->
+<!--                  </a>-->
+<!--                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">-->
+<!--                    <i class="ti ti-list-check fs-6"></i>-->
+<!--                    <p class="mb-0 fs-3">My Task</p>-->
+<!--                  </a>-->
+<!--                  <a href="./authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>-->
+<!--                </div>-->
+<!--              </div>-->
 <!--            </li>-->
-<!--          </ul>-->
+          </ul>
         </div>
+      </nav>
+    </header>
+
+    <aside th:fragment="aside" class="left-sidebar">
+      <!-- Sidebar scroll-->
+      <div>
+        <div class="brand-logo d-flex align-items-center justify-content-between">
+          <a href="/api/v1" class="text-nowrap logo-img">
+            <img src="https://gams.uni-graz.at/templates/img/gams_solo.png" width="40" alt="" />
+            <span class="text-black">GAMS</span>
+          </a>
+          <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
+            <i class="ti ti-x fs-8"></i>
+          </div>
+        </div>
+        <!-- Sidebar navigation-->
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+          <ul id="sidebarnav">
+<!--            <li class="nav-small-cap">-->
+<!--              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>-->
+<!--              <span class="hide-menu">Home</span>-->
+<!--            </li>-->
+            <br/>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/api/v1" aria-expanded="false">
+                <span>
+                  <i class="ti ti-layout-dashboard"></i>
+                </span>
+                <span class="hide-menu">Home</span>
+              </a>
+            </li>
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Digital Objects</span>
+            </li>
+<!--            <li class="sidebar-item">-->
+<!--              <a class="sidebar-link" href="/api/v1/objects" aria-expanded="false">-->
+<!--                <span>-->
+<!--                  <i class="ti ti-search"></i>-->
+<!--                </span>-->
+<!--                <span class="hide-menu">Search</span>-->
+<!--              </a>-->
+<!--            </li>-->
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/api/v1/projects" aria-expanded="false">
+                <span>
+                  <i class="ti ti-folder"></i>
+                </span>
+                <span class="hide-menu">Project objects</span>
+              </a>
+            </li>
+<!--            <li class="nav-small-cap">-->
+<!--              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>-->
+<!--              <span class="hide-menu">Files / Datastreams</span>-->
+<!--            </li>-->
+<!--            <li class="sidebar-item">-->
+<!--              <a class="sidebar-link" href="/api/v1/datastreams" aria-expanded="false">-->
+<!--                <span>-->
+<!--                  <i class="ti ti-search"></i>-->
+<!--                </span>-->
+<!--                <span class="hide-menu">Search</span>-->
+<!--              </a>-->
+<!--            </li>-->
+<!--            <li class="nav-small-cap">-->
+<!--              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>-->
+<!--              <span class="hide-menu">Projects</span>-->
+<!--            </li>-->
+<!--            <li class="sidebar-item">-->
+<!--              <a class="sidebar-link" href="/api/v1/projects/DUMMY" aria-expanded="false">-->
+<!--                <span>-->
+<!--                  <i class="ti ti-list"></i>-->
+<!--                </span>-->
+<!--                <span class="hide-menu">Overview</span>-->
+<!--              </a>-->
+<!--            </li>-->
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Users</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/api/v1/userinfo" aria-expanded="false">
+                <span>
+                  <i class="ti ti-list"></i>
+                </span>
+                <span class="hide-menu">User info</span>
+              </a>
+            </li>
+            <!--          <li class="sidebar-item">-->
+            <!--            <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">-->
+            <!--                <span>-->
+            <!--                  <i class="ti ti-user-plus"></i>-->
+            <!--                </span>-->
+            <!--              <span class="hide-menu">Register</span>-->
+            <!--            </a>-->
+            <!--          </li>-->
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">EXTRA</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link external" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" target="_blank" aria-expanded="false">
+                <span>
+                  <i class="ti ti-book"></i>
+                </span>
+                <span class="hide-menu">Documentation</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link external" href="/api/v1/swagger-ui/index.html" target="_blank" aria-expanded="false">
+                <span>
+                  <i class="ti ti-api"></i>
+                </span>
+                <span class="hide-menu">REST-API</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link external" href="https://zimlab.uni-graz.at/gams5/production/issue-backlog/-/issues" target="_blank" aria-expanded="false">
+                <span>
+                  <i class="ti ti-file-broken"></i>
+                </span>
+                <span class="hide-menu">Issues</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link external" href="https://zimlab.uni-graz.at/gams5" target="_blank" aria-expanded="false">
+                <span>
+                  <i class="ti ti-code"></i>
+                </span>
+                <span class="hide-menu">Code</span>
+              </a>
+            </li>
+          </ul>
+          <!--        <div class="unlimited-access hide-menu bg-light-primary position-relative mb-7 mt-5 rounded">-->
+          <!--          <div class="d-flex">-->
+          <!--            <div class="unlimited-access-title me-3">-->
+          <!--              <h6 class="fw-semibold fs-4 mb-6 text-dark w-85">Upgrade to pro</h6>-->
+          <!--              <a href="https://adminmart.com/product/modernize-bootstrap-5-admin-template/" target="_blank" class="btn btn-primary fs-2 fw-semibold lh-sm">Buy Pro</a>-->
+          <!--            </div>-->
+          <!--            <div class="unlimited-access-img">-->
+          <!--              <img src="/assets/images/backgrounds/rocket.png" alt="" class="img-fluid">-->
+          <!--            </div>-->
+          <!--          </div>-->
+          <!--        </div>-->
+        </nav>
+        <!-- End Sidebar navigation -->
       </div>
-    </nav>
-    <header th:fragment="header"></header>
-    
-    <p>Go to the next page to see fragments in action</p>
-    <aside>
-      <div>This is a sidebar</div>
+      <!-- End Sidebar scroll-->
     </aside>
-    <div class="another">This is another sidebar</div>
 
     <footer th:fragment="footer" class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top p-2">
-      <p class="col-md-4 mb-0 text-muted">&copy; 2021 Company, Inc</p>
-  
-      <a href="/static" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-        <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
-      </a>
-  
-      <ul class="nav col-md-4 justify-content-end">
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Home</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Features</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">Pricing</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">FAQs</a></li>
-        <li class="nav-item"><a href="#" class="nav-link px-2 text-muted">About</a></li>
-      </ul>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6">
+            <p>Further Informationen</p>
+            <p><a href="https://gams.uni-graz.at/archive/objects/context:gams/methods/sdef:Context/get?mode=imprint&locale=en" target="_blank">Imprint</a></p>
+            <p><a href="https://gams.uni-graz.at/archive/objects/context:gams/methods/sdef:Context/get?mode=dataprotection&locale=en" target="_blank">Data protection</a></p>
+          </div>
+          <div class="col-md-6">
+            <p>Contact</p>
+            <p>Zentrum für Informationsmodellierung -
+              Austrian Centre for Digital Humanities
+              Karl-Franzens-Universität Graz</p>
+            <p>zim@uni-graz.at</p>
+            <p><a href="http://informationsmodellierung.uni-graz.at" target="_blank">http://informationsmodellierung.uni-graz.at</a></p>
+            <p>Theme designed and developed by <a href="https://adminmart.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">AdminMart.com</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a></p>
+          </div>
+        </div>
+
+
+      </div>
     </footer>
   </body>
 </html>

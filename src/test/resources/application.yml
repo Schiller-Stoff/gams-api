@@ -1,0 +1,40 @@
+spring:
+  profiles:
+    # loads tests in dev profile.
+    active: dev
+  jpa:
+    hibernate:
+      # delete database on application startup during tests
+      ddl-auto: create
+    # format SQL statements
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
+# ensures that testcontainers reuses started containers
+# (not sure if properties actually do something)
+testcontainers:
+  reuse:
+    enable: true
+
+
+gams:
+  storage:
+    rootPath: ${GAMS_FILES_ROOT_PATH:gams-test}
+
+
+########
+# Logging
+# (handled in different profiles)
+logging:
+  file:
+    name: ${LOG_FILE:log/test.log}
+  level:
+    org.zim.gamsapi: ${LOG_LEVEL:DEBUG}
+    org.zim.gamsapi.System.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
+  logback:
+    # cleans log file on startup
+    rollingpolicy:
+      clean-history-on-start: true

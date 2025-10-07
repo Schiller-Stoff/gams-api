@@ -1,0 +1,29 @@
+package org.zim.gamsapi.DigitalObject.converter;
+
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
+import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
+import java.util.ArrayList;
+
+@Component
+public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implements Converter<DigitalObjectDetailsView, DigitalObjectCompactDTO> {
+    @Override
+    public DigitalObjectCompactDTO convert(DigitalObjectDetailsView source) {
+        return DigitalObjectCompactDTO.builder()
+                .id(source.getId())
+                .objectType(source.getObjectType())
+                .projectAbbr(source.getProject().getProjectAbbr())
+                .baseMetadata(source.getBaseMetadata())
+                .created(source.getCreated())
+                .modified(source.getModified())
+                .published(source.getPublished())
+                .datastreams(new ArrayList<>())
+                .createdBy(source.getCreatedBy())
+                .modifiedBy(source.getModifiedBy())
+                .publisher(source.getPublisher())
+                .funder(source.getFunder())
+                .mainResource(source.getMainResource())
+                .build();
+    }
+}

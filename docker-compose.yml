@@ -10,33 +10,78 @@ networks:
     name: gams-api-dev
 
 services:
-
   relationalDB:
-    image: postgres:12.3
+    image: postgres:15.3
     container_name: relationalDB
+    hostname: relationalDB
     ports:
-      - "5431:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=gams
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    # optional: persist postgres data via volume
     # volumes:
-      # - local_pgdata:/var/lib/postgresql/data
+      # needs additional wsl config to work if under wsl and bug occurs: https://stackoverflow.com/questions/65582382/wsl2-docker-linux-permission-issue-with-volumes
+     # - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
+
+#  elasticsearch:
+#    image: elasticsearch:9.0.1
+#    container_name: elasticsearch
+#    hostname: elasticsearch
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    environment:
+#      # disable security features for development
+#      - discovery.type=single-node
+#      - xpack.security.enabled=false
+
+  baseSearch:
+    container_name: baseSearch
+    hostname: baseSearch
+    image: solr:9.2.1
+    volumes:
+      - ${PWD}/docker/apps/solr/solr/:/var/solr
+    ports:
+      - "8983"
+      - "8983:8983"
+    environment:
+      - SOLR_HEAP=4g
+    command:
+      # - mkdir /var/solr
+      # - bash -c "chown -R 8983:8983 /var/solr && runuser -u solr -- solr-precreate default-core"
+      - solr-precreate
+      - gams
+
+  triplestore:
+    container_name: triplestore
+    hostname: triplestore
+    image: stain/jena-fuseki:4.8.0
+    ports:
+      - "3030:3030"
+    environment:
+      - "FUSEKI_DATASET_1=gams"
 
   pgadmin:
-    image: dpage/pgadmin4
+    user: root
+    image: dpage/pgadmin4:7.8
     container_name: pgadmin4_container
     restart: always
     ports:
-      - "5050:80"
+      - "8888:80"
     environment:
-      - PGADMIN_DEFAULT_EMAIL=SebastianStoff@gmx.at
-      - PGADMIN_DEFAULT_PASSWORD=admin
-#    volumes:
-#      - ${PWD}/docker/apps/pgadmin:/var/lib/pgadmin
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - ${PWD}/docker/apps/pgadmin:/var/lib/pgadmin
 
+  # TODO think about parameters controlled by docker compose, like issuer uri
+  # TODO think about secrets workflow etc.
+  # TODO think about production setup?
   keycloak:
-    image: quay.io/keycloak/keycloak:18.0.0
+    image: keycloak/keycloak:24.0.4-0
     container_name: keycloak
     ports:
       - "8182:8182"
@@ -49,43 +94,5 @@ services:
       # - KEYCLOAK_FRONTEND_URL=http://localhost:8087/auth
     # imports mounted realm.json on startup (as required from keycloak 18.x)
     command: start-dev --import-realm --http-port=8182
-
-  fcrepo:
-    image: docker.io/zimgraz/fcrepo-java:6.2.0.2-slim
-    container_name: fcrepo
-    ports:
-      - "8082:8080"
-    volumes:
-      - ${PWD}/docker/apps/fedora/fcrepo-home:/fcrepo-home
-    environment:
-      - FCREPO_AUTH=${FCREPO_AUTH:-false}
-      - FCREPO_METRICS=${FCREPO_METRICS:-false}
-      - FCREPO_REBUILD=${FCREPO_REBUILD:-false}
-      - FCREPO_STORAGE=${FCREPO_STORAGE:-ocfl-fs}
-      - FCREPO_VERSIONING=${FCREPO_VERSIONING:-false}
-    depends_on:
-      - fedora_postgres
-
-  fedora_postgres:
-    image: postgres:12.3
-    container_name: fedora_postgres
-    ports: 
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=fcrepo-user
-      - POSTGRES_PASSWORD=fcrepo-pw
-      - POSTGRES_DB=fcrepo
-
-  activemq:
-    image: zimgraz/activemq:5.15.9.1
-    container_name: activemq
-    ports:
-      # - "61616:61616"
-      - "4051:8161"
-    environment:
-      - ACTIVEMQ_CONF=/opt/activemq/conf
-    volumes:
-      - ./docker/apps/activemq/activemq/activemq.xml:/opt/activemq/conf/activemq.xml
-      - ./docker/apps/activemq/activemq/log4j.properties:/opt/activemq/conf/log4j.properties
 
 

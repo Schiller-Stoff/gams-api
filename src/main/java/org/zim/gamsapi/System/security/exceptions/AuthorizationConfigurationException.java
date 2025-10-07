@@ -1,0 +1,13 @@
+package org.zim.gamsapi.System.security.exceptions;
+
+import org.springframework.http.HttpStatus;
+
+/**
+ * Authorization configuration exception.
+ * This exception is thrown when the authorization configuration is not correct.
+ */
+public class AuthorizationConfigurationException extends SecurityException {
+  public AuthorizationConfigurationException( String reason) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
+  }
+}
