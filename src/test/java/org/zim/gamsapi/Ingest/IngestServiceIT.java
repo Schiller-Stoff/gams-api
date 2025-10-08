@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
@@ -23,9 +24,14 @@ import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.TestUtilities.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IngestServiceIT extends IntegrationTest {
@@ -282,6 +288,122 @@ public class IngestServiceIT extends IntegrationTest {
 
   }
 
+
+  @Nested
+  public class Export {
+
+    @BeforeEach
+    public void setup() throws IOException {
+      bagFile = TestBag.loadFile();
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+      // ingest the bag
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      Ingest ingest = new Ingest();
+      ingest.setZippedBagItFolder(zippedBag);
+      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+      ingestService.ingest(ingest);
+
+      // TODO move following assertion to own test
+      Assertions.assertThat(
+          datastreamContentRepository.exists(
+              DatastreamId.builder().digitalObject(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).dsid("test.xml").build())
+      ).isTrue();
+
+
+    }
+
+    @Test
+    public void exportedBagHasExpectedStructure() throws IOException {
+      // TODO rename?
+
+      // create an output stream and check content
+
+
+      try (
+          var outputStream = new ByteArrayOutputStream();
+          ) {
+        ingestService.exportBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
+
+        // read output stream as zip and check structure
+        var zipBytes = outputStream.toByteArray();
+
+        List<String> entryNames = new ArrayList<>();
+
+        ZipUtils.walkZippedDir(zipBytes, (zipEntry, byteArrayOutputStream) -> {
+          System.out.println("Found zip entry: " + zipEntry.getName());
+          Assertions.assertThat(zipEntry.getName()).isNotBlank();
+          Assertions.assertThat(byteArrayOutputStream.size()).isGreaterThan(0);
+          entryNames.add(zipEntry.getName());
+
+          // read content of some expected files
+          // zipEntry is a path -> only take filename for switch
+          // TODO extraction of filename is error prone and instransparent (maybe use Path class?)
+          String fileName = zipEntry.getName().contains("/") ?
+              zipEntry.getName().substring(zipEntry.getName().lastIndexOf("/") + 1) :
+              zipEntry.getName();
+
+          switch (fileName) {
+            case "bagit.txt" -> {
+              String bagitTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagitTxtContent).contains(TestBag.BagitTxt.BAGIT_VERSION);
+              Assertions.assertThat(bagitTxtContent).contains(TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING);
+            }
+            case "bag-info.txt" -> {
+              String bagInfoTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
+              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.BAGGING_DATE);
+              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.BAGGING_TIME);
+              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.CONTACT_EMAIL);
+              // TODO payload-oxum makes no sense here?
+              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.PAYLOAD_OXUM.toString());
+            }
+            case "sip.json" -> {
+              String sipJsonContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATED_BY);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SCHEMA);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SOURCE);
+              // TODO add more assertions?
+            }
+            case "manifest-md5.txt" -> {
+              // TODO think about are those good assertions?
+              String manifestMd5Content = byteArrayOutputStream.toString();
+              // Assertions.assertThat(manifestMd5Content).contains(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
+              // Assertions.assertThat(manifestMd5Content).contains("data/meta/sip.json");
+              Assertions.assertThat(manifestMd5Content).contains("data/content/DC.xml");
+              Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
+            }
+            case "manifest-sha512.txt" -> {
+              // TODO think about are those good assertions?
+              String manifestSha512Content = byteArrayOutputStream.toString();
+              Assertions.assertThat(manifestSha512Content).contains(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
+              Assertions.assertThat(manifestSha512Content).contains("data/meta/sip.json");
+            }
+
+            default -> {
+              // do nothing
+            }
+          }
+        });
+
+
+        Assertions.assertThat(entryNames.size()).isEqualTo(10);
+
+        Assertions.assertThat(entryNames).contains(
+            String.format("%s/bagit.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/bag-info.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/manifest-md5.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/manifest-sha512.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/data/meta/sip.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+        );
+
+
+      }
+
+
+    }
+
+  }
 
 
 }

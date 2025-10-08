@@ -2,10 +2,23 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.Ingest.IngestRecord;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Abstraction around incoming GAMS5-bags during ingest.
@@ -44,6 +57,13 @@ public class Bag {
   public Bag(Path BAG_DIR_PATH) {
     this.BAG_DIR_PATH = BAG_DIR_PATH;
     readBag();
+  }
+
+  public Bag(BagInfo bagInfo, BagMeta bagMeta, BagData bagData) {
+    this.BAG_DIR_PATH = null;
+    this.bagInfo = bagInfo;
+    this.bagMeta = bagMeta;
+    this.bagData = bagData;
   }
 
 
@@ -163,6 +183,212 @@ public class Bag {
     String msg = String.format("No content file with dsid %s found in bag %s", dsid, this.bagData.getId());
     log.error(msg);
     throw new NoSuchElementException(msg);
+  }
+
+  /**
+   * TODO jdoc
+   * TODO test?
+   * @param zipOutputStream
+   */
+  public void writeToZip(ZipOutputStream zipOutputStream, String bagName) {
+
+    // TODO bagname is not necessary! remove method parameter (is the same as digital object id)
+
+    try {
+      //1. write bagit.txt
+      writeBagitTxt(zipOutputStream, bagName);
+      writeBagInfo(zipOutputStream);
+      writeSipJson(zipOutputStream);
+      writeManifests(zipOutputStream);
+    } catch (IOException e) {
+      // TODO better error message
+      String msg = String.format("Error writing bag %s to zip output stream. Original error: %s", bagName, e);
+      log.error(msg);
+      // TODO different exception!
+      throw new IngestProcessingException(msg);
+    }
+
+
+  }
+
+
+  private void writeBagitTxt(ZipOutputStream zipOut, String bagName) throws IOException {
+    String BAG_VERSION = this.bagMeta.getBagItVersion();
+    String TAG_FILE_ENCODING = this.bagMeta.getTagFileCharacterEncoding();
+    String content = String.format("BagIt-Version: %s%nTag-File-Character-Encoding: %s%n",
+        BAG_VERSION, TAG_FILE_ENCODING);
+
+    writeTextEntry(zipOut, bagName + "/bagit.txt", content);
+  }
+
+  private void writeBagInfo(ZipOutputStream zipOut) throws IOException {
+    Instant timestamp = bagInfo.getBaggingTimeStamp();
+    String date = timestamp.atZone(ZoneOffset.UTC)
+        .format(DateTimeFormatter.ISO_LOCAL_DATE);
+    String time = timestamp.atZone(ZoneOffset.UTC)
+        .format(DateTimeFormatter.ISO_LOCAL_TIME) + " UTC";
+
+    String content = String.format(
+        "Bagging-Date: %s%n" +
+            "Bagging-Time: %s%n" +
+            "Contact-Email: %s%n" +
+            "External-Description: %s%n" +
+            "Payload-Oxum: %s%n",
+        date,
+        time,
+        bagInfo.getContactMail(),
+        bagInfo.getExternalDescription(),
+        bagInfo.getPayloadOxum()
+    );
+
+    writeTextEntry(zipOut, bagData.getId() + "/bag-info.txt", content);
+  }
+
+  /**
+   * TODO implement - needs all checksums?
+   * @param zipOut
+   * @throws IOException
+   */
+  private void writeManifests(ZipOutputStream zipOut) throws IOException {
+
+    // Manifest builders - accumulate during streaming
+    final StringBuilder md5Manifest = new StringBuilder();
+    final StringBuilder sha512Manifest = new StringBuilder();
+
+    bagData.getContentFiles().forEach(contentFile -> {
+      md5Manifest.append(contentFile.getMd5Checksum())
+          .append(" ")
+          .append(contentFile.getBagpath())
+          .append("\n");
+
+      sha512Manifest.append(contentFile.getSha512Checksum())
+          .append(" ")
+          .append(contentFile.getBagpath())
+          .append("\n");
+    });
+
+    writeTextEntry(zipOut, bagData.getId() + "/manifest-md5.txt", md5Manifest.toString());
+    writeTextEntry(zipOut, bagData.getId() + "/manifest-sha512.txt", sha512Manifest.toString());
+
+  }
+
+  /**
+   * TODO jdoc
+   * @param zipOut
+   * @throws IOException
+   */
+  private void writeSipJson(ZipOutputStream zipOut) throws IOException {
+    // Build sip.json from digital object metadata
+    Map<String, Object> sipJson = new LinkedHashMap<>();
+    sipJson.put("recid", bagData.getId());
+    sipJson.put("project", bagData.getProject());
+    sipJson.put("title", bagData.getTitle());
+    sipJson.put("objectType", bagData.getObjectType());
+    sipJson.put("description", bagData.getDescription());
+    sipJson.put("creator", bagData.getCreator());
+    sipJson.put("rights", bagData.getRights());
+    sipJson.put("publisher", bagData.getPublisher());
+
+    if (bagData.getFunder() != null) {
+      sipJson.put("funder", bagData.getFunder());
+    }
+
+    if (bagData.getMainResource() != null) {
+      sipJson.put("mainResource", bagData.getMainResource());
+    }
+
+    List<Map<String, Object>> contentFiles = bagData.getContentFiles().stream().map(contentFile -> {
+      Map<String, Object> fileMap = new LinkedHashMap<>();
+      fileMap.put("dsid", contentFile.getDsid());
+      fileMap.put("filename", contentFile.getBagpath());
+      fileMap.put("mimetype", contentFile.getMimetype());
+      fileMap.put("title", contentFile.getTitle());
+      fileMap.put("description", contentFile.getDescription());
+      fileMap.put("creator", contentFile.getCreator());
+      fileMap.put("rights", contentFile.getRights());
+      fileMap.put("size", contentFile.getSize());
+      fileMap.put("tags", new ArrayList<>(contentFile.getTags()));
+      fileMap.put("lang", new ArrayList<>(contentFile.getLang()));
+      return fileMap;
+    }).collect(Collectors.toList());
+
+
+    sipJson.put("contentFiles", contentFiles);
+    sipJson.put("$schema", bagData.getSchema());
+    sipJson.put("created_by", bagData.getCreatedBy());
+    sipJson.put("source", bagData.getSource());
+
+    // Convert to JSON
+    String jsonContent = toJson(sipJson);
+
+    String sipPath = "data/meta/sip.json";
+    writeTextEntry(zipOut, bagData.getId() + "/" + sipPath, jsonContent);
+
+    // Calculate checksums for sip.json and add to manifests
+    // TODO?
+    // addToManifests(sipPath, jsonContent.getBytes(StandardCharsets.UTF_8));
+  }
+
+
+  /**
+   * Writes file-content as string to a ZipOutputStream.
+   * @param zipOut the zip to which the file should be written to
+   * @param path the path (including filename) within the zip
+   * @param content the content of the file (as string)
+   * @throws IOException in case of any problems
+   */
+  private void writeTextEntry(ZipOutputStream zipOut, String path, String content) throws IOException {
+    byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+    ZipEntry entry = new ZipEntry(path);
+    entry.setSize(bytes.length);
+    zipOut.putNextEntry(entry);
+    zipOut.write(bytes);
+    zipOut.closeEntry();
+  }
+
+
+  private String toJson(Map<String, Object> map) {
+    // Simple JSON serialization - you should use Jackson in production
+    StringBuilder json = new StringBuilder("{\n");
+    Iterator<Map.Entry<String, Object>> iter = map.entrySet().iterator();
+    while (iter.hasNext()) {
+      Map.Entry<String, Object> entry = iter.next();
+      json.append("  \"").append(entry.getKey()).append("\": ");
+      json.append(toJsonValue(entry.getValue()));
+      if (iter.hasNext()) {
+        json.append(",");
+      }
+      json.append("\n");
+    }
+    json.append("}");
+    return json.toString();
+  }
+
+  @SuppressWarnings("unchecked")
+  private String toJsonValue(Object value) {
+    if (value == null) {
+      return "null";
+    } else if (value instanceof String) {
+      return "\"" + escapeJson((String) value) + "\"";
+    } else if (value instanceof Number) {
+      return value.toString();
+    } else if (value instanceof List) {
+      List<?> list = (List<?>) value;
+      return "[" + list.stream()
+          .map(this::toJsonValue)
+          .collect(Collectors.joining(", ")) + "]";
+    } else if (value instanceof Map) {
+      return toJson((Map<String, Object>) value);
+    }
+    return "\"" + value.toString() + "\"";
+  }
+
+  private String escapeJson(String str) {
+    return str.replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+        .replace("\n", "\\n")
+        .replace("\r", "\\r")
+        .replace("\t", "\\t");
   }
 
 

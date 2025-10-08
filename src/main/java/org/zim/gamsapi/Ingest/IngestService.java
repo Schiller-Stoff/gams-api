@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.zim.gamsapi.Datastream.Datastream;
+import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
@@ -23,9 +24,7 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
-import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagData;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagFile;
+import org.zim.gamsapi.Ingest.utils.Bagit.*;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -33,12 +32,15 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -205,8 +207,11 @@ public class IngestService implements IIngestService {
   }
 
   @Transactional
-  public OutputStream export(String objectId){
+  public void exportBag(String objectId, OutputStream outputStream) throws IOException {
 
+    String bagName = objectId;
+
+    // 01. fetch data from database
     var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
         () -> {
           String msg = String.format("Digital object with id %s does not exist. Cannot export non-existing object.", objectId);
@@ -225,18 +230,71 @@ public class IngestService implements IIngestService {
 
     var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
 
-    Set<BagFile> contentFiles = new HashSet<>();
-    datastreams.forEach(datastream -> {
-        BagFile bagFile = BagFile.from(datastream);
-        contentFiles.add(bagFile);
-    });
+    if(datastreams.isEmpty()){
+      String msg = String.format("Digital object with id %s has no datastreams. Cannot export object without datastreams.", objectId);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
 
-    // TODO rewrite with converter?
+    // 02. Map data to bag entities
     BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
+    BagMeta bagMeta =  BagMeta.from(ingestRecord);
+    BagInfo bagInfo = BagInfo.from(ingestRecord);
+
+    // create bag from database entities
+    Bag bag = new Bag(bagInfo, bagMeta, bagData);
+
+    // 03. WRITE BAG
+
+    // 03a. write bag metadata to output stream
+    // also open zip here?
+
+    // TODO better handle IOException
+    try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
+      bag.writeToZip(zipOut, bagName);
+
+      // 03b add datastream content
+      // TODO what is with the datastream content?
+      // TODO maybe i can load - because i have the content files available in the bag! (method would only need the datastreamContentRepository as argument!)
+      // loop through datastreams and then fetch content from filesystem repository
+      int BUFFER_SIZE = 8192;
+      byte[] buffer = new byte[BUFFER_SIZE];
+      for(Datastream datastream : datastreams){
+
+        // TODO hardcoded path
+        String relativePath = "data/content/" + datastream.getBagPath();
+        String fullPath = bagName + "/" + relativePath;
+
+        log.debug("Writing datastream content: {}", relativePath);
+
+        ZipEntry entry = new ZipEntry(fullPath);
+        entry.setSize(datastream.getSize());
+        zipOut.putNextEntry(entry);
+
+        DatastreamId datastreamId = datastream.deriveDatastreamId();
+
+        // Stream content with checksum calculation
+        try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
+
+          int bytesRead;
+          while ((bytesRead = contentStream.read(buffer)) != -1) {
+            zipOut.write(buffer, 0, bytesRead);
+          }
+          zipOut.closeEntry();
+          log.debug("Finished writing datastream content: {}", relativePath);
+        } catch (Exception e) {
+          // TODO rethink exception
+          String msg = String.format("Failed to stream datastream content for %s", datastreamId);
+          log.error(msg, e);
+          throw new IOException(msg, e);
+        }
+
+      }
+    }
 
 
 
-    return null;
+
 
   }
 
