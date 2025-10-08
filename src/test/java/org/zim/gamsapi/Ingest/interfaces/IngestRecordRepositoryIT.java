@@ -12,10 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.TestUtilities.TestIngestRecord;
-import org.zim.gamsapi.TestUtilities.TestDataBuilder;
-import org.zim.gamsapi.TestUtilities.TestDataSet;
-import org.zim.gamsapi.TestUtilities.TestDigitalObject;
+import org.zim.gamsapi.TestUtilities.*;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -70,6 +67,7 @@ public class IngestRecordRepositoryIT extends IntegrationTest {
     public void findsExpectedBagEntityById() {
         var foundBagEntity = bagEntityRepository.findById(testDataSet.ingestRecord().getId());
         Assertions.assertThat(foundBagEntity).isPresent();
+        Assertions.assertThat(foundBagEntity.get()).hasNoNullFieldsOrProperties();
     }
 
     @Test
@@ -77,6 +75,46 @@ public class IngestRecordRepositoryIT extends IntegrationTest {
         Assertions.assertThatThrownBy(() -> {
             digitalObjectRepository.delete(testDataSet.digitalObject());
         }).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+  /**
+   * Tests if the values saved in the database are the same as in the test files in this code project.
+   * (Static test classes e.g. TestDigitalObject.ID)
+   */
+  @Test
+    public void testIngestRecordHasSameValuesAsTestBagValues(){
+
+      var ingestRecordOptional = bagEntityRepository.findById(testDataSet.ingestRecord().getId());
+
+      Assertions.assertThat(ingestRecordOptional).isPresent();
+
+      var foundIngestRecord = ingestRecordOptional.get();
+
+      Assertions.assertThat(foundIngestRecord)
+          .hasNoNullFieldsOrProperties();
+
+      Assertions.assertThat(foundIngestRecord.getId())
+          .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+      Assertions.assertThat(foundIngestRecord.getBagContactMail())
+          .isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
+
+      Assertions.assertThat(foundIngestRecord.getBagCreatedBy())
+          .isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
+
+      Assertions.assertThat(foundIngestRecord.getBagSchema())
+          .isEqualTo(TestBag.TestBagSipJson.SCHEMA);
+
+      Assertions.assertThat(foundIngestRecord.getBagSource())
+          .isEqualTo(TestBag.TestBagSipJson.SOURCE);
+
+      Assertions.assertThat(foundIngestRecord.getBaggingTimeStamp())
+          .isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
+
+      Assertions.assertThat(foundIngestRecord.getBagPayloadOxum())
+          .isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
+
+
     }
 
 }
