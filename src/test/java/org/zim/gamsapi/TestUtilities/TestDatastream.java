@@ -16,7 +16,8 @@ public enum TestDatastream {
     DSID("test.txt"),
     DATASTREAM_NAME("test-datastream"),
     FILE_NAME(TestDatastreamContent.ORIGINAL_FILENAME.getValue()),
-    MIME_TYPE(TestDatastreamContent.CONTENT_TYPE.getValue())
+    MIME_TYPE(TestDatastreamContent.CONTENT_TYPE.getValue()),
+    BAG_PATH(TestDatastreamContent.BAG_PATH.getValue()),
 
     ;
 

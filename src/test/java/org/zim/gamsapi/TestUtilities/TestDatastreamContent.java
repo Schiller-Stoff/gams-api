@@ -11,6 +11,8 @@ public enum TestDatastreamContent {
 
   ORIGINAL_FILENAME("test.txt"),
 
+  BAG_PATH("data/content/" + TestDatastreamContent.ORIGINAL_FILENAME.getValue()),
+
   CONTENT_TYPE("text/plain"),
 
   CONTENT("test-content");
