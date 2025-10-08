@@ -387,7 +387,6 @@ public class IngestServiceIT extends IntegrationTest {
         List<String> entryNames = new ArrayList<>();
 
         ZipUtils.walkZippedDir(zipBytes, (zipEntry, byteArrayOutputStream) -> {
-          System.out.println("Found zip entry: " + zipEntry.getName());
           Assertions.assertThat(zipEntry.getName()).isNotBlank();
           Assertions.assertThat(byteArrayOutputStream.size()).isGreaterThan(0);
           entryNames.add(zipEntry.getName());
