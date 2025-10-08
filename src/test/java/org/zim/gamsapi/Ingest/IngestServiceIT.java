@@ -8,10 +8,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -29,10 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IngestServiceIT extends IntegrationTest {
@@ -255,10 +251,6 @@ public class IngestServiceIT extends IntegrationTest {
       Assertions.assertThat(foundDatastream.getBagPath())
           .isEqualTo(TestDatastream.BAG_PATH.getValue());
 
-      // TODO reenable?
-      //Assertions.assertThat(foundDatastream.getLang().size()).isEqualTo(TestDatastream.DATASTREAM_LANG.size());
-      //Assertions.assertThat(foundDatastream.getTags().size()).isEqualTo(TestDatastream.DATASTREAM_TAGS.size());
-
       Assertions.assertThat(foundDatastream.getBaseMetadata().getMd5Checksum())
           .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getMd5Checksum());
 
@@ -380,7 +372,7 @@ public class IngestServiceIT extends IntegrationTest {
 
 
       try (
-          var outputStream = new ByteArrayOutputStream();
+          var outputStream = new ByteArrayOutputStream()
           ) {
         ingestService.exportBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
 
