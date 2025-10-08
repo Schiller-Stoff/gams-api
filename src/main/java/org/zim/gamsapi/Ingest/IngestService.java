@@ -206,8 +206,6 @@ public class IngestService implements IIngestService {
   @Transactional
   public void exportBag(String objectId, OutputStream outputStream) throws IOException {
 
-    String bagName = objectId;
-
     // 01. fetch data from database
     var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
         () -> {
@@ -246,47 +244,9 @@ public class IngestService implements IIngestService {
     // 03a. write bag metadata to output stream
     // also open zip here?
 
-    // TODO better handle IOException
+    // TODO also move ZIP/Output stream logic?
     try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
-      bag.writeToZip(zipOut);
-
-      // 03b add datastream content
-      // TODO what is with the datastream content?
-      // TODO maybe i can load - because i have the content files available in the bag! (method would only need the datastreamContentRepository as argument!)
-      // loop through datastreams and then fetch content from filesystem repository
-      int BUFFER_SIZE = 8192;
-      byte[] buffer = new byte[BUFFER_SIZE];
-      for(Datastream datastream : datastreams){
-
-        // TODO werid variable name
-        String fullPath = bagName + "/" + datastream.getBagPath();
-
-        // TODO think about log msg
-        log.debug("Writing datastream content to bag path: {}", fullPath);
-
-        ZipEntry entry = new ZipEntry(fullPath);
-        entry.setSize(datastream.getSize());
-        zipOut.putNextEntry(entry);
-
-        DatastreamId datastreamId = datastream.deriveDatastreamId();
-
-        // Stream content with checksum calculation
-        try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
-
-          int bytesRead;
-          while ((bytesRead = contentStream.read(buffer)) != -1) {
-            zipOut.write(buffer, 0, bytesRead);
-          }
-          zipOut.closeEntry();
-          log.debug("Finished writing datastream content: {}", fullPath);
-        } catch (Exception e) {
-          // TODO rethink exception
-          String msg = String.format("Failed to stream datastream content for %s", datastreamId);
-          log.error(msg, e);
-          throw new IOException(msg, e);
-        }
-
-      }
+      bag.writeToZip(zipOut, datastreamContentRepository);
     }
 
 
