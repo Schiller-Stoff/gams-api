@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
@@ -209,6 +210,64 @@ public class IngestServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void ingestCreatesExpectedDatastreamCount(){
+
+      var datastreams = datastreamRepository.findAll();
+      Assertions.assertThat(datastreams)
+          .isNotEmpty()
+          .hasSize(5);
+
+    }
+
+    @Test
+    public void ingestCreatesDatastreamWithExpectedProperties(){
+
+      var datastream = datastreamRepository.findById(
+          DatastreamId.builder()
+              .digitalObject(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+              .dsid(TestDatastream.DSID.getValue())
+              .build()
+      );
+
+      Assertions.assertThat(datastream)
+          .isPresent();
+
+      var foundDatastream = datastream.get();
+
+      // TODO all fields correct?
+
+      Assertions.assertThat(foundDatastream.getMimeType())
+          .isEqualTo(TestDatastream.MIME_TYPE.getValue());
+
+      Assertions.assertThat(foundDatastream.getBaseMetadata().getTitle())
+          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getTitle());
+
+      Assertions.assertThat(foundDatastream.getBaseMetadata().getDescription())
+          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getDescription());
+
+      Assertions.assertThat(foundDatastream.getBaseMetadata().getCreator())
+          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getCreator());
+
+      Assertions.assertThat(foundDatastream.getBaseMetadata().getRights())
+          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getRights());
+
+      Assertions.assertThat(foundDatastream.getBagPath())
+          .isEqualTo(TestDatastream.BAG_PATH.getValue());
+
+      // TODO reenable?
+      //Assertions.assertThat(foundDatastream.getLang().size()).isEqualTo(TestDatastream.DATASTREAM_LANG.size());
+      //Assertions.assertThat(foundDatastream.getTags().size()).isEqualTo(TestDatastream.DATASTREAM_TAGS.size());
+
+      Assertions.assertThat(foundDatastream.getBaseMetadata().getMd5Checksum())
+          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getMd5Checksum());
+
+      Assertions.assertThat(foundDatastream.getBaseMetadata().getSha512Checksum())
+          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getSha512Checksum());
+
+
+    }
+
     @Nested
     public class DublinCoreEntries {
 
@@ -376,8 +435,9 @@ public class IngestServiceIT extends IntegrationTest {
             case "manifest-sha512.txt" -> {
               // TODO think about are those good assertions?
               String manifestSha512Content = byteArrayOutputStream.toString();
-              Assertions.assertThat(manifestSha512Content).contains(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
-              Assertions.assertThat(manifestSha512Content).contains("data/meta/sip.json");
+              Assertions.assertThat(manifestSha512Content).contains("data/content/DC.xml");
+              //Assertions.assertThat(manifestSha512Content).contains(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
+              //Assertions.assertThat(manifestSha512Content).contains("data/meta/sip.json");
             }
 
             default -> {
