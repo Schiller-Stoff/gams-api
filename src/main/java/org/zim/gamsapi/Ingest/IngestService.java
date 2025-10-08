@@ -248,7 +248,7 @@ public class IngestService implements IIngestService {
 
     // TODO better handle IOException
     try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
-      bag.writeToZip(zipOut, bagName);
+      bag.writeToZip(zipOut);
 
       // 03b add datastream content
       // TODO what is with the datastream content?
