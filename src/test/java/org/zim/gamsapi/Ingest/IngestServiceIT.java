@@ -8,6 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
@@ -217,6 +218,7 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
+    @Transactional
     public void ingestCreatesDatastreamWithExpectedProperties(){
 
       var datastream = datastreamRepository.findById(
@@ -250,6 +252,9 @@ public class IngestServiceIT extends IntegrationTest {
 
       Assertions.assertThat(foundDatastream.getBagPath())
           .isEqualTo(TestDatastream.BAG_PATH.getValue());
+
+      Assertions.assertThat(foundDatastream.getLang().size()).isEqualTo(TestDatastream.DATASTREAM_LANG.size());
+      Assertions.assertThat(foundDatastream.getTags().size()).isEqualTo(TestDatastream.DATASTREAM_TAGS.size());
 
       Assertions.assertThat(foundDatastream.getBaseMetadata().getMd5Checksum())
           .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getMd5Checksum());
