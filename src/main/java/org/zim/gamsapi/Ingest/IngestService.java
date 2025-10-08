@@ -258,11 +258,11 @@ public class IngestService implements IIngestService {
       byte[] buffer = new byte[BUFFER_SIZE];
       for(Datastream datastream : datastreams){
 
-        // TODO hardcoded path
-        String relativePath = "data/content/" + datastream.getBagPath();
-        String fullPath = bagName + "/" + relativePath;
+        // TODO werid variable name
+        String fullPath = bagName + "/" + datastream.getBagPath();
 
-        log.debug("Writing datastream content: {}", relativePath);
+        // TODO think about log msg
+        log.debug("Writing datastream content to bag path: {}", fullPath);
 
         ZipEntry entry = new ZipEntry(fullPath);
         entry.setSize(datastream.getSize());
@@ -278,7 +278,7 @@ public class IngestService implements IIngestService {
             zipOut.write(buffer, 0, bytesRead);
           }
           zipOut.closeEntry();
-          log.debug("Finished writing datastream content: {}", relativePath);
+          log.debug("Finished writing datastream content: {}", fullPath);
         } catch (Exception e) {
           // TODO rethink exception
           String msg = String.format("Failed to stream datastream content for %s", datastreamId);

@@ -445,13 +445,25 @@ public class IngestServiceIT extends IntegrationTest {
 
         Assertions.assertThat(entryNames.size()).isEqualTo(10);
 
+        // Assert presence of generated files
         Assertions.assertThat(entryNames).contains(
             String.format("%s/bagit.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/bag-info.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/manifest-md5.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/manifest-sha512.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/data/meta/sip.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+
         );
+
+        // Assert presence of datastream files
+        Assertions.assertThat(entryNames).contains(
+            String.format("%s/data/content/DC.xml", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/data/content/test.xml", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/data/content/test.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/data/content/manifest.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/data/content/search.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+        );
+
 
 
       }
