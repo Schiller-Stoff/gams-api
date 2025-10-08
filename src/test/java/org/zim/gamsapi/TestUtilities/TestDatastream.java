@@ -23,7 +23,7 @@ public enum TestDatastream {
 
     public static final Set<String> DATASTREAM_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
     public static final Set<String> DATASTREAM_LANG = Set.of("test-lang1", "test-lang2", "test-lang3");
-    public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestMetadataBaseEntity.generate();
+    public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestDatastreamMetadataBaseEntity.generate();
 
     private final String value;
 
@@ -70,4 +70,18 @@ public enum TestDatastream {
             .lang(DATASTREAM_LANG)
             .build();
     }
+
+    public static class TestDatastreamMetadataBaseEntity {
+      public static final String MD5_CHECKSUM = "240193d9633d8449ee1bff28030fe045";
+      public static final String SHA512_CHECKSUM = "31eb68db4754a8349405f9355e86a72f32b00e17b747662c06c1c3027997d26d3cb1907e5f3ee3ec8299d67d97dc7c7ff4844dc70db8c5226666faf121540009";
+
+      public static MetadataBaseEntity generate(){
+        var entity = TestMetadataBaseEntity.generate();
+        entity.setMd5Checksum(MD5_CHECKSUM);
+        entity.setSha512Checksum(SHA512_CHECKSUM);
+        return entity;
+      }
+
+    }
+
 }
