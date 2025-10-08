@@ -150,9 +150,6 @@ public class IngestService implements IIngestService {
               }
 
               datastream.setDigitalObject(savedObject);
-              datastream.setBagPath(contentFilePath.getFileName().toString());
-              datastream.setSize((long) datastreamContent.length);
-              datastream.setMimeType(contentFile.getMimetype());
 
               // saving the datastream content to the filesystem
               datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());
