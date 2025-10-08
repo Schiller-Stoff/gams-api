@@ -190,19 +190,16 @@ public class Bag {
    * TODO test?
    * @param zipOutputStream
    */
-  public void writeToZip(ZipOutputStream zipOutputStream, String bagName) {
-
-    // TODO bagname is not necessary! remove method parameter (is the same as digital object id)
-
+  public void writeToZip(ZipOutputStream zipOutputStream) {
     try {
       //1. write bagit.txt
-      writeBagitTxt(zipOutputStream, bagName);
+      writeBagitTxt(zipOutputStream);
       writeBagInfo(zipOutputStream);
       writeSipJson(zipOutputStream);
       writeManifests(zipOutputStream);
     } catch (IOException e) {
       // TODO better error message
-      String msg = String.format("Error writing bag %s to zip output stream. Original error: %s", bagName, e);
+      String msg = String.format("Error writing bag %s to zip output stream. Original error: %s", bagData.getId(), e);
       log.error(msg);
       // TODO different exception!
       throw new IngestProcessingException(msg);
@@ -212,13 +209,13 @@ public class Bag {
   }
 
 
-  private void writeBagitTxt(ZipOutputStream zipOut, String bagName) throws IOException {
+  private void writeBagitTxt(ZipOutputStream zipOut) throws IOException {
     String BAG_VERSION = this.bagMeta.getBagItVersion();
     String TAG_FILE_ENCODING = this.bagMeta.getTagFileCharacterEncoding();
     String content = String.format("BagIt-Version: %s%nTag-File-Character-Encoding: %s%n",
         BAG_VERSION, TAG_FILE_ENCODING);
 
-    writeTextEntry(zipOut, bagName + "/bagit.txt", content);
+    writeTextEntry(zipOut, bagData.getId() + "/bagit.txt", content);
   }
 
   private void writeBagInfo(ZipOutputStream zipOut) throws IOException {
