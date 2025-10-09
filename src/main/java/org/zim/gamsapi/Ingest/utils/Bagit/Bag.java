@@ -2,15 +2,10 @@ package org.zim.gamsapi.Ingest.utils.Bagit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.Ingest.IngestRecord;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.utils.Bagit.mapping.BagSipJson;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -192,56 +187,59 @@ public class Bag {
   /**
    * TODO jdoc
    * TODO test?
-   * @param zipOutputStream
+   * @param outputStream
    */
-  public void writeToZip(ZipOutputStream zipOutputStream, IDatastreamContentRepository datastreamContentRepository) {
+  public void writeAsZipToStream(OutputStream outputStream, IDatastreamContentRepository datastreamContentRepository) {
     try {
-      //1. write bagit.txt
-      writeBagitTxt(zipOutputStream);
-      writeBagInfo(zipOutputStream);
-      writeSipJson(zipOutputStream);
-      writeManifests(zipOutputStream);
+      // TODO statement block looks weird - should be refactored
+      try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+        //1. write bagit.txt
+        writeBagitTxt(zipOutputStream);
+        writeBagInfo(zipOutputStream);
+        writeSipJson(zipOutputStream);
+        writeManifests(zipOutputStream);
 
-      // 03b add datastream content
-      // TODO what is with the datastream content?
-      // TODO maybe i can load - because i have the content files available in the bag! (method would only need the datastreamContentRepository as argument!)
-      // loop through datastreams and then fetch content from filesystem repository
-      int BUFFER_SIZE = 8192;
-      byte[] buffer = new byte[BUFFER_SIZE];
-      for(BagFile bagFile : bagData.getContentFiles()){
+        // 03b add datastream content
+        // TODO what is with the datastream content?
+        // TODO maybe i can load - because i have the content files available in the bag! (method would only need the datastreamContentRepository as argument!)
+        // loop through datastreams and then fetch content from filesystem repository
+        int BUFFER_SIZE = 8192;
+        byte[] buffer = new byte[BUFFER_SIZE];
+        for(BagFile bagFile : bagData.getContentFiles()){
 
-        // TODO werid variable name
-        String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
+          // TODO weird variable name
+          String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
 
-        // TODO think about log msg
-        log.debug("Writing datastream content to bag path: {}", fullPath);
+          // TODO think about log msg
+          log.debug("Writing datastream content to bag path: {}", fullPath);
 
-        ZipEntry entry = new ZipEntry(fullPath);
-        entry.setSize(bagFile.getSize());
-        zipOutputStream.putNextEntry(entry);
+          ZipEntry entry = new ZipEntry(fullPath);
+          entry.setSize(bagFile.getSize());
+          zipOutputStream.putNextEntry(entry);
 
-        DatastreamId datastreamId = DatastreamId.builder()
-            .dsid(bagFile.getDsid())
-            .digitalObject(bagData.getId())
-            .build();
+          DatastreamId datastreamId = DatastreamId.builder()
+              .dsid(bagFile.getDsid())
+              .digitalObject(bagData.getId())
+              .build();
 
-        // Stream content with checksum calculation
-        try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
+          // Stream content with checksum calculation
+          try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
 
-          int bytesRead;
-          while ((bytesRead = contentStream.read(buffer)) != -1) {
-            zipOutputStream.write(buffer, 0, bytesRead);
+            int bytesRead;
+            while ((bytesRead = contentStream.read(buffer)) != -1) {
+              zipOutputStream.write(buffer, 0, bytesRead);
+            }
+            zipOutputStream.closeEntry();
+            log.debug("Finished writing datastream content: {}", fullPath);
+          } catch (Exception e) {
+            // TODO rethink exception
+            String msg = String.format("Failed to stream datastream content for %s", datastreamId);
+            log.error(msg, e);
+            throw new IOException(msg, e);
           }
-          zipOutputStream.closeEntry();
-          log.debug("Finished writing datastream content: {}", fullPath);
-        } catch (Exception e) {
-          // TODO rethink exception
-          String msg = String.format("Failed to stream datastream content for %s", datastreamId);
-          log.error(msg, e);
-          throw new IOException(msg, e);
         }
-      }
 
+      }
 
     } catch (IOException e) {
       // TODO better error message

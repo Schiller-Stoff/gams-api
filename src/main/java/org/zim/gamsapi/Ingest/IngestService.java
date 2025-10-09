@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.GAMSDsid;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
@@ -24,7 +23,10 @@ import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
-import org.zim.gamsapi.Ingest.utils.Bagit.*;
+import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagData;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagInfo;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagMeta;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -32,15 +34,10 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -204,7 +201,7 @@ public class IngestService implements IIngestService {
   }
 
   @Transactional
-  public void exportBag(String objectId, OutputStream outputStream) throws IOException {
+  public void exportBag(String objectId, OutputStream outputStream) {
 
     // 01. fetch data from database
     var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
@@ -239,18 +236,8 @@ public class IngestService implements IIngestService {
     // create bag from database entities
     Bag bag = new Bag(bagInfo, bagMeta, bagData);
 
-    // 03. WRITE BAG
-
-    // 03a. write bag metadata to output stream
-    // also open zip here?
-
-    // TODO also move ZIP/Output stream logic?
-    try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
-      bag.writeToZip(zipOut, datastreamContentRepository);
-    }
-
-
-
+    // 03. write bag
+    bag.writeAsZipToStream(outputStream, datastreamContentRepository);
 
 
   }
