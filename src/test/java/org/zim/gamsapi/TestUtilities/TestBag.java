@@ -31,7 +31,7 @@ public class TestBag {
     public static final Instant BAGGING_TIMESTAMP = LocalDateTime
             .of(LocalDate.parse(BAGGING_DATE), LocalTime.parse(BAGGING_TIME.replace(" UTC", "")))
             .toInstant(ZoneOffset.UTC);
-    public static final Float PAYLOAD_OXUM = 1140704.5f;
+    public static final Float PAYLOAD_OXUM = 27387.0f;
     public static final String CONTACT_EMAIL = "dh@uni-graz.at";
     public static final String EXTERNAL_DESCRIPTION = "Test bag for gamsapi tests";
   }
