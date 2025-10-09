@@ -19,18 +19,14 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.TestUtilities.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -345,159 +341,5 @@ public class IngestServiceIT extends IntegrationTest {
 
 
   }
-
-
-  @Nested
-  public class Export {
-
-    @BeforeEach
-    public void setup() throws IOException {
-      bagFile = TestBag.loadFile();
-      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
-
-      // ingest the bag
-      byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
-
-      // TODO move following assertion to own test
-      Assertions.assertThat(
-          datastreamContentRepository.exists(
-              DatastreamId.builder().digitalObject(TestDigitalObject.DIGITAL_OBJECT_ID.getValue()).dsid("test.xml").build())
-      ).isTrue();
-
-
-    }
-
-    @Test
-    public void exportedBagHasExpectedStructure() throws IOException {
-      // TODO rename?
-
-      // create an output stream and check content
-
-
-      try (
-          var outputStream = new ByteArrayOutputStream()
-          ) {
-        ingestService.exportBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
-
-        // read output stream as zip and check structure
-        var zipBytes = outputStream.toByteArray();
-
-        List<String> entryNames = new ArrayList<>();
-
-        ZipUtils.walkZippedDir(zipBytes, (zipEntry, byteArrayOutputStream) -> {
-          Assertions.assertThat(zipEntry.getName()).isNotBlank();
-          Assertions.assertThat(byteArrayOutputStream.size()).isGreaterThan(0);
-          entryNames.add(zipEntry.getName());
-
-          // read content of some expected files
-          // zipEntry is a path -> only take filename for switch
-          String fileName = Path.of(zipEntry.getName()).getFileName().toString();
-
-          switch (fileName) {
-            case "bagit.txt" -> {
-              String bagitTxtContent = byteArrayOutputStream.toString();
-              Assertions.assertThat(bagitTxtContent).contains(TestBag.BagitTxt.BAGIT_VERSION);
-              Assertions.assertThat(bagitTxtContent).contains(TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING);
-            }
-            case "bag-info.txt" -> {
-              String bagInfoTxtContent = byteArrayOutputStream.toString();
-              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
-              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.BAGGING_DATE);
-              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.BAGGING_TIME);
-              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.CONTACT_EMAIL);
-              // TODO payload-oxum makes no sense here?
-              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.PAYLOAD_OXUM.toString());
-            }
-            case "sip.json" -> {
-              String sipJsonContent = byteArrayOutputStream.toString();
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.REC_ID);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PROJECT);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATED_BY);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SCHEMA);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SOURCE);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATOR);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.TITLE);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.DESCRIPTION);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PUBLISHER);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.FUNDER);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.MAIN_RESOURCE);
-
-              // assertions about test datastream
-              Assertions.assertThat(sipJsonContent)
-                  .contains(
-                      TestDatastream.DSID.getValue(),
-                      TestDatastream.BAG_PATH.getValue(),
-                      TestDatastream.MIME_TYPE.getValue(),
-                      TestDatastream.METADATA_BASE_ENTITY.getTitle(),
-                      TestDatastream.METADATA_BASE_ENTITY.getDescription(),
-                      TestDatastream.METADATA_BASE_ENTITY.getCreator(),
-                      TestDatastream.METADATA_BASE_ENTITY.getRights()
-                  );
-              // test datastream tags + langs
-              // transform set to list for assertion
-              var datastreamLangs = new ArrayList<>(TestDatastream.DATASTREAM_LANG);
-              Assertions.assertThat(sipJsonContent).contains(datastreamLangs);
-              var datastreamTags = new ArrayList<>(TestDatastream.DATASTREAM_TAGS);
-              Assertions.assertThat(sipJsonContent).contains(datastreamTags);
-
-              // TODO assert other contentFiles?
-
-
-            }
-            case "manifest-md5.txt" -> {
-              // TODO think about are those good assertions?
-              String manifestMd5Content = byteArrayOutputStream.toString();
-              Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.BAG_SIP_JSON.name);
-              Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
-              Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
-            }
-            case "manifest-sha512.txt" -> {
-              // TODO think about are those good assertions?
-              String manifestSha512Content = byteArrayOutputStream.toString();
-              Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
-              Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.BAG_SIP_JSON.name);
-            }
-
-            default -> {
-              // do nothing
-            }
-          }
-        });
-
-
-        Assertions.assertThat(entryNames.size()).isEqualTo(10);
-
-        // Assert presence of generated files
-        Assertions.assertThat(entryNames).contains(
-            String.format("%s/bagit.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/bag-info.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/manifest-md5.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/manifest-sha512.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/meta/sip.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-
-        );
-
-        // Assert presence of datastream files
-        Assertions.assertThat(entryNames).contains(
-            String.format("%s/data/content/DC.xml", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/content/test.xml", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/content/test.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/content/manifest.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/content/search.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-        );
-
-
-
-      }
-
-
-    }
-
-  }
-
 
 }

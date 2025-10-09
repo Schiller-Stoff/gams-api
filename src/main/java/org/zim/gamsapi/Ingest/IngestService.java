@@ -16,7 +16,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
@@ -24,9 +23,6 @@ import org.zim.gamsapi.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagData;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagInfo;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagMeta;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.Integration.Common.utils.XMLUtils;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
@@ -34,7 +30,6 @@ import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
@@ -197,48 +192,6 @@ public class IngestService implements IIngestService {
       ZipUtils.deleteDir(bagDirPath);
       throw e;
     }
-
-  }
-
-  @Transactional
-  public void exportBag(String objectId, OutputStream outputStream) {
-
-    // 01. fetch data from database
-    var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
-        () -> {
-          String msg = String.format("Digital object with id %s does not exist. Cannot export non-existing object.", objectId);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
-        }
-    );
-
-    var ingestRecord = bagEntityRepository.findById(objectId).orElseThrow(
-        () -> {
-          String msg = String.format("Ingest record for digital object with id %s does not exist. Cannot export non-existing object.", objectId);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
-        }
-    );
-
-    var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
-
-    if(datastreams.isEmpty()){
-      String msg = String.format("Digital object with id %s has no datastreams. Cannot export object without datastreams.", objectId);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
-    }
-
-    // 02. Map data to bag entities
-    BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
-    BagMeta bagMeta =  BagMeta.from(ingestRecord);
-    BagInfo bagInfo = BagInfo.from(ingestRecord);
-
-    // create bag from database entities
-    Bag bag = new Bag(bagInfo, bagMeta, bagData);
-
-    // 03. write bag
-    bag.writeAsZipToStream(outputStream, datastreamContentRepository);
-
 
   }
 

@@ -365,7 +365,7 @@ public class DigitalObjectController {
     response.setBufferSize(8192);
 
     try {
-      ingestService.exportBag(id, response.getOutputStream());
+      digitalObjectService.exportAsBag(id, response.getOutputStream());
       response.flushBuffer();
     } catch (IOException e) {
       String msg = String.format("I/O error during bag export for object %s in project %s. Original error: %s", id, projectAbbr, e);

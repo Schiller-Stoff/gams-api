@@ -26,10 +26,15 @@ import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.Ingest.utils.Bagit.Bag;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagData;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagInfo;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagMeta;
 import org.zim.gamsapi.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
+import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +51,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ConversionService conversionService;
   private final IIngestRecordRepository bagEntityRepository;
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
   @Transactional
@@ -320,4 +326,47 @@ public class DigitalObjectService implements IDigitalObjectService {
     return PagedResponse.from(mappedObjects);
   }
 
+
+  @Override
+  @Transactional
+  public void exportAsBag(String objectId, OutputStream outputStream) {
+
+    // 01. fetch data from database
+    var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
+        () -> {
+          String msg = String.format("Digital object with id %s does not exist. Cannot export non-existing object.", objectId);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        }
+    );
+
+    var ingestRecord = bagEntityRepository.findById(objectId).orElseThrow(
+        () -> {
+          String msg = String.format("Ingest record for digital object with id %s does not exist. Cannot export non-existing object.", objectId);
+          log.error(msg);
+          return new DigitalObjectNotFoundException(msg);
+        }
+    );
+
+    var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
+
+    if(datastreams.isEmpty()){
+      String msg = String.format("Digital object with id %s has no datastreams. Cannot export object without datastreams.", objectId);
+      log.error(msg);
+      throw new DigitalObjectNotFoundException(msg);
+    }
+
+    // 02. Map data to bag entities
+    BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
+    BagMeta bagMeta =  BagMeta.from(ingestRecord);
+    BagInfo bagInfo = BagInfo.from(ingestRecord);
+
+    // create bag from database entities
+    Bag bag = new Bag(bagInfo, bagMeta, bagData);
+
+    // 03. write bag
+    bag.writeAsZipToStream(outputStream, datastreamContentRepository);
+
+
+  }
 }

@@ -8,6 +8,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
+
+import java.io.OutputStream;
 import java.util.Optional;
 import java.util.Set;
 
@@ -85,4 +87,12 @@ public interface IDigitalObjectService {
       Set<String> projectAbbrs,
       DigitalObjectDublinCoreSpecification.SearchMode searchMode,
       Pageable pageable);
+
+  /**
+   * Export a digital object as a zipped BagIt package and write it to the provided OutputStream.
+   * @param objectId the id of the digital object to export
+   * @param outputStream the OutputStream to write the zipped BagIt package to
+   */
+  void exportAsBag(String objectId, OutputStream outputStream);
+
 }
