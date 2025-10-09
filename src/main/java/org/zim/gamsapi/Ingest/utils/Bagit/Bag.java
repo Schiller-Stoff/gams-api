@@ -185,60 +185,56 @@ public class Bag {
   }
 
   /**
+   *
    * TODO jdoc
    * TODO test?
    * @param outputStream
    */
   public void writeAsZipToStream(OutputStream outputStream, IDatastreamContentRepository datastreamContentRepository) {
-    try {
-      // TODO statement block looks weird - should be refactored
-      try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
-        //1. write bagit.txt
-        writeBagitTxt(zipOutputStream);
-        writeBagInfo(zipOutputStream);
-        writeSipJson(zipOutputStream);
-        writeManifests(zipOutputStream);
+    try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
-        // 03b add datastream content
-        // TODO what is with the datastream content?
-        // TODO maybe i can load - because i have the content files available in the bag! (method would only need the datastreamContentRepository as argument!)
-        // loop through datastreams and then fetch content from filesystem repository
-        int BUFFER_SIZE = 8192;
-        byte[] buffer = new byte[BUFFER_SIZE];
-        for(BagFile bagFile : bagData.getContentFiles()){
+      //1. write bagit.txt
+      writeBagitTxt(zipOutputStream);
+      writeBagInfo(zipOutputStream);
+      writeSipJson(zipOutputStream);
+      writeManifests(zipOutputStream);
 
-          // TODO weird variable name
-          String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
+      // 03b add datastream content
+      // loop through datastreams and then fetch content from filesystem repository
+      // TODO hardcoded BUFFER_SIZE?
+      int BUFFER_SIZE = 8192;
+      byte[] buffer = new byte[BUFFER_SIZE];
+      for(BagFile bagFile : bagData.getContentFiles()){
 
-          // TODO think about log msg
-          log.debug("Writing datastream content to bag path: {}", fullPath);
+        // TODO weird variable name
+        String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
 
-          ZipEntry entry = new ZipEntry(fullPath);
-          entry.setSize(bagFile.getSize());
-          zipOutputStream.putNextEntry(entry);
+        // TODO think about log msg
+        log.debug("Writing datastream content to bag path: {}", fullPath);
 
-          DatastreamId datastreamId = DatastreamId.builder()
-              .dsid(bagFile.getDsid())
-              .digitalObject(bagData.getId())
-              .build();
+        ZipEntry entry = new ZipEntry(fullPath);
+        entry.setSize(bagFile.getSize());
+        zipOutputStream.putNextEntry(entry);
 
-          // Stream content with checksum calculation
-          try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
+        DatastreamId datastreamId = DatastreamId.builder()
+            .dsid(bagFile.getDsid())
+            .digitalObject(bagData.getId())
+            .build();
 
-            int bytesRead;
-            while ((bytesRead = contentStream.read(buffer)) != -1) {
-              zipOutputStream.write(buffer, 0, bytesRead);
-            }
-            zipOutputStream.closeEntry();
-            log.debug("Finished writing datastream content: {}", fullPath);
-          } catch (Exception e) {
-            // TODO rethink exception
-            String msg = String.format("Failed to stream datastream content for %s", datastreamId);
-            log.error(msg, e);
-            throw new IOException(msg, e);
+        // Stream content with checksum calculation
+        try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
+          int bytesRead;
+          while ((bytesRead = contentStream.read(buffer)) != -1) {
+            zipOutputStream.write(buffer, 0, bytesRead);
           }
+          zipOutputStream.closeEntry();
+          log.debug("Finished writing datastream content: {}", fullPath);
+        } catch (Exception e) {
+          // TODO rethink exception
+          String msg = String.format("Failed to stream datastream content for %s", datastreamId);
+          log.error(msg, e);
+          throw new IOException(msg, e);
         }
-
       }
 
     } catch (IOException e) {
