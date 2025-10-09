@@ -425,7 +425,27 @@ public class IngestServiceIT extends IntegrationTest {
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.FUNDER);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.MAIN_RESOURCE);
 
-              // TODO add assertions about the content files!
+              // assertions about test datastream
+              Assertions.assertThat(sipJsonContent)
+                  .contains(
+                      TestDatastream.DSID.getValue(),
+                      TestDatastream.BAG_PATH.getValue(),
+                      TestDatastream.MIME_TYPE.getValue(),
+                      TestDatastream.METADATA_BASE_ENTITY.getTitle(),
+                      TestDatastream.METADATA_BASE_ENTITY.getDescription(),
+                      TestDatastream.METADATA_BASE_ENTITY.getCreator(),
+                      TestDatastream.METADATA_BASE_ENTITY.getRights()
+                  );
+              // test datastream tags + langs
+              // transform set to list for assertion
+              var datastreamLangs = new ArrayList<>(TestDatastream.DATASTREAM_LANG);
+              Assertions.assertThat(sipJsonContent).contains(datastreamLangs);
+              var datastreamTags = new ArrayList<>(TestDatastream.DATASTREAM_TAGS);
+              Assertions.assertThat(sipJsonContent).contains(datastreamTags);
+
+              // TODO assert other contentFiles?
+
+
             }
             case "manifest-md5.txt" -> {
               // TODO think about are those good assertions?
