@@ -413,10 +413,19 @@ public class IngestServiceIT extends IntegrationTest {
             }
             case "sip.json" -> {
               String sipJsonContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.REC_ID);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PROJECT);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATED_BY);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SCHEMA);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SOURCE);
-              // TODO add more assertions?
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATOR);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.TITLE);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.DESCRIPTION);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PUBLISHER);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.FUNDER);
+              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.MAIN_RESOURCE);
+
+              // TODO add assertions about the content files!
             }
             case "manifest-md5.txt" -> {
               // TODO think about are those good assertions?
