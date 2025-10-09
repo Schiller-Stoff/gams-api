@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
@@ -433,13 +434,17 @@ public class DigitalObjectControllerIT extends IntegrationTest {
                 String manifestMd5Txt = bos.toString();
                 org.assertj.core.api.Assertions.assertThat(manifestMd5Txt)
                     .contains(testDataSet.mainDatastream().getBaseMetadata().getMd5Checksum())
-                    .contains(testDataSet.mainDatastream().getDsid());
+                    .contains(testDataSet.mainDatastream().getDsid())
+                    .contains(BagFilePaths.BAG_SIP_JSON.name)
+                ;
               }
               case "manifest-sha512.txt" -> {
                 String manifestSha512Txt = bos.toString();
                 org.assertj.core.api.Assertions.assertThat(manifestSha512Txt)
                     .contains(testDataSet.mainDatastream().getBaseMetadata().getSha512Checksum())
-                    .contains(testDataSet.mainDatastream().getDsid());
+                    .contains(testDataSet.mainDatastream().getDsid())
+                    .contains(BagFilePaths.BAG_SIP_JSON.name)
+                ;
               }
               case "sip.json" -> {
                 String sipJson = bos.toString();

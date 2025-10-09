@@ -19,6 +19,7 @@ import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.ProjectBuilder;
@@ -450,17 +451,15 @@ public class IngestServiceIT extends IntegrationTest {
             case "manifest-md5.txt" -> {
               // TODO think about are those good assertions?
               String manifestMd5Content = byteArrayOutputStream.toString();
-              // Assertions.assertThat(manifestMd5Content).contains(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
-              // Assertions.assertThat(manifestMd5Content).contains("data/meta/sip.json");
-              Assertions.assertThat(manifestMd5Content).contains("data/content/DC.xml");
+              Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.BAG_SIP_JSON.name);
+              Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
               Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
             }
             case "manifest-sha512.txt" -> {
               // TODO think about are those good assertions?
               String manifestSha512Content = byteArrayOutputStream.toString();
-              Assertions.assertThat(manifestSha512Content).contains("data/content/DC.xml");
-              //Assertions.assertThat(manifestSha512Content).contains(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
-              //Assertions.assertThat(manifestSha512Content).contains("data/meta/sip.json");
+              Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
+              Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.BAG_SIP_JSON.name);
             }
 
             default -> {

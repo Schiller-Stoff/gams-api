@@ -11,6 +11,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -196,8 +198,8 @@ public class Bag {
       //1. write bagit.txt
       writeBagitTxt(zipOutputStream);
       writeBagInfo(zipOutputStream);
-      writeSipJson(zipOutputStream);
-      writeManifests(zipOutputStream);
+      String sipJsonContent =  writeSipJson(zipOutputStream);
+      writeManifests(zipOutputStream, sipJsonContent);
 
       // 03b add datastream content
       // loop through datastreams and then fetch content from filesystem repository
@@ -285,15 +287,57 @@ public class Bag {
 
   /**
    * TODO implement - needs all checksums?
+   * TODO jdoc
+   * TODO tests
    * @param zipOut
+   * @param  sipJson
    * @throws IOException
    */
-  private void writeManifests(ZipOutputStream zipOut) throws IOException {
+  private void writeManifests(ZipOutputStream zipOut, String sipJson) throws IOException {
 
     // Manifest builders - accumulate during streaming
     final StringBuilder md5Manifest = new StringBuilder();
     final StringBuilder sha512Manifest = new StringBuilder();
 
+    String sha512Checksum = "";
+    String md5Checksum = "";
+
+    //calculacte sha-256 and md5 for sip.json
+    try {
+      var sipJsonBytes = sipJson.getBytes(StandardCharsets.UTF_8);
+      // calc checksum for sha-512
+      var sha512Digest = MessageDigest.getInstance("SHA-512");
+      sha512Digest.update(sipJsonBytes);
+      byte[] sha512ChecksumBytes = sha512Digest.digest();
+      sha512Checksum = bytesToHex(sha512ChecksumBytes);
+      // calc md5 checksum for sip.json
+      var md5Digest = MessageDigest.getInstance("MD5");
+      md5Digest.update(sipJsonBytes);
+      byte[] md5ChecksumBytes = md5Digest.digest();
+      md5Checksum = bytesToHex(md5ChecksumBytes);
+    } catch (NoSuchAlgorithmException e) {
+      String msg = String.format("Error calculating SHA-512 checksum for sip.json in bag %s. Original error: %s", bagData.getId(), e);
+      log.error(msg);
+      throw new IngestProcessingException(msg);
+    }
+
+    // TODO own method for writing manifest entries?
+
+    // sip.json manifest entry
+    sha512Manifest
+        .append(sha512Checksum)
+        .append(" ")
+        .append(BagFilePaths.BAG_SIP_JSON.name)
+        .append("\n");
+
+    // add md5 manifest entry
+    md5Manifest
+        .append(md5Checksum)
+        .append(" ")
+        .append(BagFilePaths.BAG_SIP_JSON.name)
+        .append("\n");
+
+    // add manifest entries for content files
     bagData.getContentFiles().forEach(contentFile -> {
       md5Manifest.append(contentFile.getMd5Checksum())
           .append(" ")
@@ -314,9 +358,10 @@ public class Bag {
   /**
    * TODO jdoc
    * @param zipOut
+   * @return sip.json content as string
    * @throws IOException
    */
-  private void writeSipJson(ZipOutputStream zipOut) throws IOException {
+  private String writeSipJson(ZipOutputStream zipOut) throws IOException {
     // TODO serialization should be done in BagData class?
 
     // Build sip.json from digital object metadata
@@ -364,6 +409,8 @@ public class Bag {
 
     String sipPath = "data/meta/sip.json";
     writeTextEntry(zipOut, bagData.getId() + "/" + sipPath, jsonContent);
+
+    return jsonContent;
 
     // Calculate checksums for sip.json and add to manifests
     // TODO?
@@ -432,5 +479,13 @@ public class Bag {
         .replace("\t", "\\t");
   }
 
+
+  private String bytesToHex(byte[] bytes) {
+    StringBuilder result = new StringBuilder();
+    for (byte b : bytes) {
+      result.append(String.format("%02x", b));
+    }
+    return result.toString();
+  }
 
 }
