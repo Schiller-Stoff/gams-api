@@ -48,7 +48,7 @@ public enum BagFilePaths {
   /**
    * Path to the dublin core xml file.
    */
-  DUBLIN_CORE_XML("data/meta/DC.xml");
+  DUBLIN_CORE_XML("data/content/DC.xml");
 
 
   public final String name;
