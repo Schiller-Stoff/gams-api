@@ -28,6 +28,7 @@ import org.zim.gamsapi.TestUtilities.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -393,10 +394,7 @@ public class IngestServiceIT extends IntegrationTest {
 
           // read content of some expected files
           // zipEntry is a path -> only take filename for switch
-          // TODO extraction of filename is error prone and instransparent (maybe use Path class?)
-          String fileName = zipEntry.getName().contains("/") ?
-              zipEntry.getName().substring(zipEntry.getName().lastIndexOf("/") + 1) :
-              zipEntry.getName();
+          String fileName = Path.of(zipEntry.getName()).getFileName().toString();
 
           switch (fileName) {
             case "bagit.txt" -> {
