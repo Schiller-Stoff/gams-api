@@ -252,6 +252,7 @@ public class Bag {
   private void writeBagitTxt(ZipOutputStream zipOut) throws IOException {
     String BAG_VERSION = this.bagMeta.getBagItVersion();
     String TAG_FILE_ENCODING = this.bagMeta.getTagFileCharacterEncoding();
+    // TODO serialization should be done in BagMeta class
     String content = String.format("BagIt-Version: %s%nTag-File-Character-Encoding: %s%n",
         BAG_VERSION, TAG_FILE_ENCODING);
 
@@ -265,6 +266,7 @@ public class Bag {
     String time = timestamp.atZone(ZoneOffset.UTC)
         .format(DateTimeFormatter.ISO_LOCAL_TIME) + " UTC";
 
+    // TODO serialization should be done in BagInfo class
     String content = String.format(
         "Bagging-Date: %s%n" +
             "Bagging-Time: %s%n" +
@@ -315,6 +317,8 @@ public class Bag {
    * @throws IOException
    */
   private void writeSipJson(ZipOutputStream zipOut) throws IOException {
+    // TODO serialization should be done in BagData class?
+
     // Build sip.json from digital object metadata
     Map<String, Object> sipJson = new LinkedHashMap<>();
     sipJson.put("recid", bagData.getId());
