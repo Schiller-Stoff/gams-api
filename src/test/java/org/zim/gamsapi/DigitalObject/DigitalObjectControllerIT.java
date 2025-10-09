@@ -12,15 +12,21 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestGAMSCollection;
+
+import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.zip.ZipEntry;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -309,10 +315,15 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Nested
     public class GETAllDigitalObjects {
 
-      final String REQUEST_URL = String.format(
-          "/api/v1/projects/%s/objects",
-          testDataSet.project().getProjectAbbr()
-      );
+      String REQUEST_URL = "";
+
+      @BeforeEach
+      public void setup() {
+          REQUEST_URL = String.format(
+              "/api/v1/projects/%s/objects",
+              testDataSet.project().getProjectAbbr()
+          );
+      }
 
       @Test
       public void formatXmlReturnsExpectedDigitalObjectId() throws Exception {
@@ -354,6 +365,137 @@ public class DigitalObjectControllerIT extends IntegrationTest {
                 MockMvcRequestBuilders.get(TRAILING_SLASH_REQUEST_URL)
             )
             .andExpect(status().isNotFound());
+      }
+
+      @Nested
+      public class ExportBag {
+
+        @Test
+        public void exportedBagIsNotNullOrEmpty() throws Exception {
+
+          MvcResult result = mockMvc.perform(
+                  MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+                      testDataSet.project().getProjectAbbr(),
+                      testDataSet.digitalObject().getId())
+                      .accept("application/zip")
+              )
+              .andExpect(status().isOk())
+              .andExpect(MockMvcResultMatchers.header().string("Content-Type", "application/zip"))
+              .andExpect(MockMvcResultMatchers.header().exists("Content-Disposition"))
+              .andReturn();
+
+          byte[] exportedZip = result.getResponse().getContentAsByteArray();
+          org.assertj.core.api.Assertions.assertThat(exportedZip).isNotEmpty();
+
+        }
+
+        @Test
+        public void exportedBagContainsExpectedValues() throws Exception {
+
+          MvcResult result = mockMvc.perform(
+                  MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+                          testDataSet.project().getProjectAbbr(),
+                          testDataSet.digitalObject().getId())
+                      .accept("application/zip")
+              )
+              .andExpect(status().isOk())
+              .andExpect(MockMvcResultMatchers.header().string("Content-Type", "application/zip"))
+              .andExpect(MockMvcResultMatchers.header().exists("Content-Disposition"))
+              .andReturn();
+
+          byte[] exportedZip = result.getResponse().getContentAsByteArray();
+          org.assertj.core.api.Assertions.assertThat(exportedZip).isNotEmpty();
+
+
+          List<String> containedFileNames = new ArrayList<>();
+
+          ZipUtils.walkZippedDir(exportedZip, (zipEntry, bos) -> {
+            String fileName = Path.of(zipEntry.getName()).getFileName().toString();
+            containedFileNames.add(fileName);
+
+            switch (fileName){
+              case "bagit.txt" -> {
+                String bagitTxt = bos.toString();
+                org.assertj.core.api.Assertions.assertThat(bagitTxt)
+                    .contains(testDataSet.ingestRecord().getBagVersion())
+                    .contains(testDataSet.ingestRecord().getBagTagFileCharacterEncoding());
+              }
+              case "bag-info.txt" -> {
+                String bagInfoTxt = bos.toString();
+                org.assertj.core.api.Assertions.assertThat(bagInfoTxt)
+                    .contains(testDataSet.ingestRecord().getBagExternalDescription())
+                    .contains(testDataSet.ingestRecord().getBaggingDate())
+                    .contains(testDataSet.ingestRecord().getBaggingTime())
+                    .contains(testDataSet.ingestRecord().getBagContactMail())
+                ;
+              }
+              case "manifest-md5.txt" -> {
+                String manifestMd5Txt = bos.toString();
+                org.assertj.core.api.Assertions.assertThat(manifestMd5Txt)
+                    .contains(testDataSet.mainDatastream().getBaseMetadata().getMd5Checksum())
+                    .contains(testDataSet.mainDatastream().getDsid());
+              }
+              case "manifest-sha512.txt" -> {
+                String manifestSha512Txt = bos.toString();
+                org.assertj.core.api.Assertions.assertThat(manifestSha512Txt)
+                    .contains(testDataSet.mainDatastream().getBaseMetadata().getSha512Checksum())
+                    .contains(testDataSet.mainDatastream().getDsid());
+              }
+              case "sip.json" -> {
+                String sipJson = bos.toString();
+                org.assertj.core.api.Assertions.assertThat(sipJson)
+                    .contains(testDataSet.digitalObject().getId())
+                    .contains(testDataSet.digitalObject().getProject().getProjectAbbr())
+                    .contains(testDataSet.digitalObject().getObjectType())
+                    .contains(testDataSet.digitalObject().getFunder())
+                    .contains(testDataSet.digitalObject().getMainResource())
+                    // base metadata
+                    .contains(testDataSet.digitalObject().getBaseMetadata().getTitle())
+                    .contains(testDataSet.digitalObject().getBaseMetadata().getDescription())
+                    .contains(testDataSet.digitalObject().getBaseMetadata().getCreator())
+                    .contains(testDataSet.digitalObject().getBaseMetadata().getRights())
+                    .contains(testDataSet.digitalObject().getPublisher())
+                    // assertions from ingestRecord
+                    .contains(testDataSet.ingestRecord().getBagSource())
+                    .contains(testDataSet.ingestRecord().getBagSchema())
+                    .contains(testDataSet.ingestRecord().getBagCreatedBy());
+
+                    // assertions for content files
+                org.assertj.core.api.Assertions.assertThat(sipJson)
+                    .contains(testDataSet.mainDatastream().getDsid())
+                    .contains(testDataSet.mainDatastream().getTags())
+                    .contains(testDataSet.mainDatastream().getLang())
+                    .contains(testDataSet.mainDatastream().getMimeType())
+                    .contains(testDataSet.mainDatastream().getSize().toString())
+                    .contains(testDataSet.mainDatastream().getBagPath());
+
+                var datastreamLang = testDataSet.mainDatastream().getLang();
+                for (String lang : datastreamLang) {
+                  org.assertj.core.api.Assertions.assertThat(sipJson).contains(lang);
+                }
+                var datastreamTags = testDataSet.mainDatastream().getTags();
+                for (String tag : datastreamTags) {
+                  org.assertj.core.api.Assertions.assertThat(sipJson).contains(tag);
+                }
+
+              }
+              default -> {
+                // other files are the datastreams - no content check here
+              }
+
+            }
+
+          });
+
+
+          org.assertj.core.api.Assertions.assertThat(containedFileNames)
+              .isNotEmpty()
+              .contains("bagit.txt", "bag-info.txt", "manifest-md5.txt", "sip.json", "manifest-sha512.txt")
+              .contains(testDataSet.mainDatastream().getDsid());
+
+        }
+
+
       }
 
     }
@@ -416,7 +558,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
     }
-
 
   }
 
