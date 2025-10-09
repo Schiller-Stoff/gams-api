@@ -428,6 +428,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
                     .contains(testDataSet.ingestRecord().getBaggingDate())
                     .contains(testDataSet.ingestRecord().getBaggingTime())
                     .contains(testDataSet.ingestRecord().getBagContactMail())
+                    .contains("Payload-Oxum: ")
+                    // Payload oxum cannot be the same because the test data ingest not the complete bag
+                    //.contains(testDataSet.ingestRecord().getBagPayloadOxum().toString())
                 ;
               }
               case "manifest-md5.txt" -> {

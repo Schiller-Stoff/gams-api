@@ -24,7 +24,6 @@ import java.util.zip.ZipOutputStream;
 /**
  * Abstraction around incoming GAMS5-bags during ingest.
  * Represents bags on the local file-system.
- * TODO test
  *
  */
 @Slf4j
@@ -55,18 +54,30 @@ public class Bag {
    */
   final private Path BAG_DIR_PATH;
 
+  /**
+   * Constructor that takes the path to a local bag directory.
+   * Reads the bag from the filesystem and instantiates representing objects accordingly.
+   * @param BAG_DIR_PATH path to the local bag directory
+   *                     (where bag-info.txt etc. are located)
+   */
   public Bag(Path BAG_DIR_PATH) {
     this.BAG_DIR_PATH = BAG_DIR_PATH;
     readBag();
   }
 
+  /**
+   * Constructor that takes already instantiated bag components.
+   * Mainly meant for testing purposes AND exporting.
+   * @param bagInfo the bag info
+   * @param bagMeta the bag meta
+   * @param bagData the bag data
+   */
   public Bag(BagInfo bagInfo, BagMeta bagMeta, BagData bagData) {
     this.BAG_DIR_PATH = null;
     this.bagInfo = bagInfo;
     this.bagMeta = bagMeta;
     this.bagData = bagData;
   }
-
 
   /**
    * Reads bag from the local bag directory path defined via constructor and
@@ -187,26 +198,26 @@ public class Bag {
   }
 
   /**
-   *
-   * TODO jdoc
-   * TODO test?
-   * @param outputStream
+   * Writes a bag as a zip to the given output stream.
+   * Streams the datastream content from the given datastream content repository to the output stream.
+   * @param outputStream the output stream to write the bag zip to
+   * @param datastreamContentRepository needed to stream the datastream content to the output stream.
    */
   public void writeAsZipToStream(OutputStream outputStream, IDatastreamContentRepository datastreamContentRepository) {
     try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
-      //1. write bagit.txt
-      writeBagitTxt(zipOutputStream);
-      writeBagInfo(zipOutputStream);
       String sipJsonContent =  writeSipJson(zipOutputStream);
       writeManifests(zipOutputStream, sipJsonContent);
 
-      // 03b add datastream content
-      // loop through datastreams and then fetch content from filesystem repository
+      long payloadOxum = sipJsonContent.getBytes(StandardCharsets.UTF_8).length;
+
+      // 03b add datastream content to bag-zip
       // TODO hardcoded BUFFER_SIZE?
+      // TODO move to own method?
       int BUFFER_SIZE = 8192;
       byte[] buffer = new byte[BUFFER_SIZE];
       for(BagFile bagFile : bagData.getContentFiles()){
+        payloadOxum += bagFile.getSize();
 
         // TODO weird variable name
         String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
@@ -239,6 +250,11 @@ public class Bag {
         }
       }
 
+      // write bagit.txt
+      writeBagitTxt(zipOutputStream);
+      // write bag-info.txt
+      writeBagInfo(zipOutputStream, payloadOxum);
+
     } catch (IOException e) {
       // TODO better error message
       String msg = String.format("Error writing bag %s to zip output stream. Original error: %s", bagData.getId(), e);
@@ -246,7 +262,6 @@ public class Bag {
       // TODO different exception!
       throw new IngestProcessingException(msg);
     }
-
 
   }
 
@@ -261,14 +276,22 @@ public class Bag {
     writeTextEntry(zipOut, bagData.getId() + "/bagit.txt", content);
   }
 
-  private void writeBagInfo(ZipOutputStream zipOut) throws IOException {
+  /**
+   * Writes bag-info.txt to the given ZipOutputStream.
+   * Adds given payload oxum to the bag-info.txt.
+   *
+   * @param zipOut the zip output stream to write to
+   * @param payloadOxum the payload oxum to write
+   * @throws IOException in case of any problems
+   */
+  private void writeBagInfo(ZipOutputStream zipOut, float payloadOxum) throws IOException {
     Instant timestamp = bagInfo.getBaggingTimeStamp();
     String date = timestamp.atZone(ZoneOffset.UTC)
         .format(DateTimeFormatter.ISO_LOCAL_DATE);
     String time = timestamp.atZone(ZoneOffset.UTC)
         .format(DateTimeFormatter.ISO_LOCAL_TIME) + " UTC";
 
-    // TODO serialization should be done in BagInfo class
+    // TODO serialization should be done in BagInfo class?
     String content = String.format(
         "Bagging-Date: %s%n" +
             "Bagging-Time: %s%n" +
@@ -279,19 +302,18 @@ public class Bag {
         time,
         bagInfo.getContactMail(),
         bagInfo.getExternalDescription(),
-        bagInfo.getPayloadOxum()
+        payloadOxum
     );
 
     writeTextEntry(zipOut, bagData.getId() + "/bag-info.txt", content);
   }
 
   /**
-   * TODO implement - needs all checksums?
-   * TODO jdoc
-   * TODO tests
-   * @param zipOut
-   * @param  sipJson
-   * @throws IOException
+   * Writes manifest files to the given ZipOutputStream.
+   * Calculates checksums for given sip.json and adds them to the manifests.
+   * @param zipOut the zip output stream to write to
+   * @param  sipJson the content of the sip.json file (to calculate checksums for)
+   * @throws IOException in case of any problems
    */
   private void writeManifests(ZipOutputStream zipOut, String sipJson) throws IOException {
 
@@ -356,10 +378,10 @@ public class Bag {
   }
 
   /**
-   * TODO jdoc
-   * @param zipOut
+   * Writes the sip.json file to the given ZipOutputStream.
+   * @param zipOut the zip output stream to write to
    * @return sip.json content as string
-   * @throws IOException
+   * @throws IOException in case of any problems
    */
   private String writeSipJson(ZipOutputStream zipOut) throws IOException {
     // TODO serialization should be done in BagData class?
@@ -412,9 +434,6 @@ public class Bag {
 
     return jsonContent;
 
-    // Calculate checksums for sip.json and add to manifests
-    // TODO?
-    // addToManifests(sipPath, jsonContent.getBytes(StandardCharsets.UTF_8));
   }
 
 
@@ -435,6 +454,11 @@ public class Bag {
   }
 
 
+  /**
+   * TODO jdoc
+   * @param map
+   * @return
+   */
   private String toJson(Map<String, Object> map) {
     // Simple JSON serialization - you should use Jackson in production
     StringBuilder json = new StringBuilder("{\n");
@@ -452,6 +476,11 @@ public class Bag {
     return json.toString();
   }
 
+  /**
+   * TODO jdoc
+   * @param value
+   * @return
+   */
   @SuppressWarnings("unchecked")
   private String toJsonValue(Object value) {
     if (value == null) {
@@ -471,6 +500,11 @@ public class Bag {
     return "\"" + value.toString() + "\"";
   }
 
+  /**
+   * TODO jdoc
+   * @param str
+   * @return
+   */
   private String escapeJson(String str) {
     return str.replace("\\", "\\\\")
         .replace("\"", "\\\"")
@@ -480,6 +514,11 @@ public class Bag {
   }
 
 
+  /**
+   * Converts byte array to hex string.
+   * @param bytes the byte array to convert
+   * @return the hex string
+   */
   private String bytesToHex(byte[] bytes) {
     StringBuilder result = new StringBuilder();
     for (byte b : bytes) {
