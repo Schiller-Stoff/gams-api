@@ -206,54 +206,22 @@ public class Bag {
   public void writeAsZipToStream(OutputStream outputStream, IDatastreamContentRepository datastreamContentRepository) {
     try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
 
+      // 01. write sip.json
       String sipJsonContent =  writeSipJson(zipOutputStream);
+      // 02. write manifests (with checksums for sip.json)
       writeManifests(zipOutputStream, sipJsonContent);
 
-      long payloadOxum = sipJsonContent.getBytes(StandardCharsets.UTF_8).length;
+      long payloadSize = 0;
+      payloadSize += sipJsonContent.getBytes(StandardCharsets.UTF_8).length;
+      // 03. write bag content
+      payloadSize += writeBagContent(zipOutputStream, datastreamContentRepository);
 
-      // 03b add datastream content to bag-zip
-      // TODO hardcoded BUFFER_SIZE?
-      // TODO move to own method?
-      int BUFFER_SIZE = 8192;
-      byte[] buffer = new byte[BUFFER_SIZE];
-      for(BagFile bagFile : bagData.getContentFiles()){
-        payloadOxum += bagFile.getSize();
-
-        // TODO weird variable name
-        String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
-
-        // TODO think about log msg
-        log.debug("Writing datastream content to bag path: {}", fullPath);
-
-        ZipEntry entry = new ZipEntry(fullPath);
-        entry.setSize(bagFile.getSize());
-        zipOutputStream.putNextEntry(entry);
-
-        DatastreamId datastreamId = DatastreamId.builder()
-            .dsid(bagFile.getDsid())
-            .digitalObject(bagData.getId())
-            .build();
-
-        // Stream content with checksum calculation
-        try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
-          int bytesRead;
-          while ((bytesRead = contentStream.read(buffer)) != -1) {
-            zipOutputStream.write(buffer, 0, bytesRead);
-          }
-          zipOutputStream.closeEntry();
-          log.debug("Finished writing datastream content: {}", fullPath);
-        } catch (Exception e) {
-          // TODO rethink exception
-          String msg = String.format("Failed to stream datastream content for %s", datastreamId);
-          log.error(msg, e);
-          throw new IOException(msg, e);
-        }
-      }
+      // 04. write bag-info.txt (with payload size)
+      writeBagInfo(zipOutputStream, payloadSize);
 
       // write bagit.txt
       writeBagitTxt(zipOutputStream);
-      // write bag-info.txt
-      writeBagInfo(zipOutputStream, payloadOxum);
+
 
     } catch (IOException e) {
       // TODO better error message
@@ -309,6 +277,64 @@ public class Bag {
   }
 
   /**
+   * Writes the datastream content to the given ZipOutputStream.
+   * Streams the datastream content from the given datastream content repository to the output stream.
+   * @param zipOutputStream the zip output stream to write to
+   * @param datastreamContentRepository needed to stream the datastream content to the output stream.
+   * @return the total number of bytes written
+   */
+  private long writeBagContent(ZipOutputStream zipOutputStream, IDatastreamContentRepository datastreamContentRepository) {
+
+    long writtenBytesCount = 0;
+
+    // 03b add datastream content to bag-zip
+    // TODO hardcoded BUFFER_SIZE?
+    int BUFFER_SIZE = 8192;
+    byte[] buffer = new byte[BUFFER_SIZE];
+    for (BagFile bagFile : bagData.getContentFiles()) {
+      writtenBytesCount += bagFile.getSize();
+
+      // TODO weird variable name
+      String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
+      log.trace("Writing datastream content to bag path: {}", fullPath);
+
+      ZipEntry entry = new ZipEntry(fullPath);
+      entry.setSize(bagFile.getSize());
+      try {
+        zipOutputStream.putNextEntry(entry);
+      } catch (IOException e) {
+        String msg = String.format("Error creating zip entry for %s in bag %s. Original error: %s", fullPath, bagData.getId(), e);
+        log.error(msg);
+        // TODO use BagExportException!
+        throw new IngestProcessingException(msg);
+      }
+
+      DatastreamId datastreamId = DatastreamId.builder()
+          .dsid(bagFile.getDsid())
+          .digitalObject(bagData.getId())
+          .build();
+
+      // Stream content with checksum calculation
+      try (InputStream contentStream = datastreamContentRepository.findById(datastreamId).getInputStream()) {
+        int bytesRead;
+        while ((bytesRead = contentStream.read(buffer)) != -1) {
+          zipOutputStream.write(buffer, 0, bytesRead);
+        }
+        zipOutputStream.closeEntry();
+        log.debug("Finished writing datastream content: {}", fullPath);
+      } catch (Exception e) {
+        String msg = String.format("Failed to stream datastream content for %s", datastreamId);
+        log.error(msg, e);
+        // TODO different exception!
+        throw new IngestProcessingException(msg);
+      }
+    }
+
+    return writtenBytesCount;
+
+  }
+
+  /**
    * Writes manifest files to the given ZipOutputStream.
    * Calculates checksums for given sip.json and adds them to the manifests.
    * @param zipOut the zip output stream to write to
@@ -321,8 +347,8 @@ public class Bag {
     final StringBuilder md5Manifest = new StringBuilder();
     final StringBuilder sha512Manifest = new StringBuilder();
 
-    String sha512Checksum = "";
-    String md5Checksum = "";
+    String sha512Checksum;
+    String md5Checksum;
 
     //calculacte sha-256 and md5 for sip.json
     try {
