@@ -43,7 +43,12 @@ public enum BagFilePaths {
   /**
    * The manifest-md5.txt file is a manifest file that contains the MD5 checksums of the files in the bag's payload directory.
    */
-  MANIFEST_MD5_FILE_PATH("manifest-md5.txt");
+  MANIFEST_MD5_FILE_PATH("manifest-md5.txt"),
+
+  /**
+   * Path to the dublin core xml file.
+   */
+  DUBLIN_CORE_XML("data/meta/DC.xml");
 
 
   public final String name;
