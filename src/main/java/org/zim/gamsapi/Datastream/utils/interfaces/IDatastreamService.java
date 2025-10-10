@@ -1,11 +1,11 @@
-package org.zim.gamsapi.Datastream.interfaces;
+package org.zim.gamsapi.Datastream.utils.interfaces;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamAmbiguousMatchException;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamAmbiguousMatchException;
+import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;

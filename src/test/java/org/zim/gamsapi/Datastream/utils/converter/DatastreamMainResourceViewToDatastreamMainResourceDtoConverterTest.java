@@ -1,23 +1,23 @@
-package org.zim.gamsapi.Datastream.converter;
+package org.zim.gamsapi.Datastream.utils.converter;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.utils.converter.DatastreamMainResourceViewToDatastreamMainResourceDtoConverter;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 
-import java.time.Instant;
-import java.util.Date;
 import java.util.Set;
 
-public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest extends UnitTest {
+public class DatastreamMainResourceViewToDatastreamMainResourceDtoConverterTest extends UnitTest {
 
   @Test
   public void convertsToExpectedDatastreamMainResourceDto() {
-    DatastreamDetailsViewToDatastreamMainResourceDtoConverter converter = new DatastreamDetailsViewToDatastreamMainResourceDtoConverter();
-    var toBeConverted = new DatastreamDetailsViewToDatastreamMainResourceDtoConverterImpl();
 
-    DatastreamMainResourceDto convertedDatastreamMainResourceDto = converter.convert(toBeConverted);
+    DatastreamMainResourceViewToDatastreamMainResourceDtoConverter converter = new DatastreamMainResourceViewToDatastreamMainResourceDtoConverter();
+    var toBeConverted = new DatastreamMainResourceViewToDatastreamMainResourceDtoConverterImpl();
+
+    var convertedDatastreamMainResourceDto = converter.convert(toBeConverted);
 
     Assertions.assertThat(convertedDatastreamMainResourceDto).isNotNull();
 
@@ -50,9 +50,12 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
   }
 
 
+  public static class DatastreamMainResourceViewToDatastreamMainResourceDtoConverterImpl implements IDatastreamMainResourceView {
 
-
-  private static class DatastreamDetailsViewToDatastreamMainResourceDtoConverterImpl implements org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView {
+    @Override
+    public String getDsid() {
+      return "demo.dsid";
+    }
 
     @Override
     public DigitalObjectView getDigitalObject() {
@@ -65,63 +68,43 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
     }
 
     @Override
-    public String getDsid() {
-      return "test-dsid";
-    }
-
-    @Override
     public String getMimeType() {
-      return "application/json";
-    }
-
-    @Override
-    public String getFileName() {
-      return "demo.txt";
-    }
-
-    @Override
-    public Long getSize() {
-      return 0L;
-    }
-
-    @Override
-    public String getType() {
-      return "random";
-    }
-
-    @Override
-    public Date getCreated() {
-      return Date.from(Instant.parse("2023-10-01T00:00:00Z"));
-    }
-
-    @Override
-    public Date getModified() {
-      return Date.from(Instant.parse("2023-10-01T00:00:00Z"));
+      return "application/xml";
     }
 
     @Override
     public MetadataBaseEntity getBaseMetadata() {
-      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description", "md5", "sha512");
-    }
+      return new MetadataBaseEntity() {
+        @Override
+        public String getTitle() {
+          return "Demo Title";
+        }
 
-    @Override
-    public String getCreatedBy() {
-      return "foo";
-    }
+        @Override
+        public String getRights() {
+          return "Demo Rights";
+        }
 
-    @Override
-    public String getModifiedBy() {
-      return "foo";
+        @Override
+        public String getCreator() {
+          return "Demo Creator";
+        }
+
+        @Override
+        public String getDescription() {
+          return "Demo Description";
+        }
+      };
     }
 
     @Override
     public Set<String> getTags() {
-      return Set.of("test-tag");
+      return Set.of("bla");
     }
 
     @Override
     public Set<String> getLang() {
-      return Set.of("en");
+      return Set.of("en", "de");
     }
   }
 

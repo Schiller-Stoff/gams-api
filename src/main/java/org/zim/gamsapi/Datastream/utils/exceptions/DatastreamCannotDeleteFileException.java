@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Datastream.exceptions;
+package org.zim.gamsapi.Datastream.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.TransactionSystemException;

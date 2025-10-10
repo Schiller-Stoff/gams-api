@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamContentRepository;
 
 @Component
 @RequiredArgsConstructor

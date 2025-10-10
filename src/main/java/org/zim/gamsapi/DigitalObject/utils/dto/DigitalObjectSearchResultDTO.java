@@ -3,9 +3,7 @@ package org.zim.gamsapi.DigitalObject.utils.dto;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
-import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
+import org.zim.gamsapi.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 
 import java.util.List;

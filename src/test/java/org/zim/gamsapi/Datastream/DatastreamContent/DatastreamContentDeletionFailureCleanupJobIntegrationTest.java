@@ -8,7 +8,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;

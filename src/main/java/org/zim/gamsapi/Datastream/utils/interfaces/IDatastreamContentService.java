@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Datastream.interfaces;
+package org.zim.gamsapi.Datastream.utils.interfaces;
 
 import org.springframework.core.io.InputStreamResource;
 import org.zim.gamsapi.Datastream.DatastreamId;

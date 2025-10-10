@@ -1,9 +1,9 @@
-package org.zim.gamsapi.Datastream.converter;
+package org.zim.gamsapi.Datastream.utils.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
+import org.zim.gamsapi.Datastream.utils.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamMainResourceView;
 import java.util.HashSet;
 
 @Component

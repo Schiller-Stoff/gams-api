@@ -2,10 +2,7 @@ package org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
-import org.zim.gamsapi.Datastream.GAMSDsid;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.Bag;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.BagDirectoryReader;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.BagFile;
+import org.zim.gamsapi.Datastream.utils.GAMSDsid;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.UnitTest;
 import java.io.IOException;

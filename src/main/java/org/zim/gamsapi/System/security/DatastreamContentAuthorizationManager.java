@@ -11,8 +11,8 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;
 import org.zim.gamsapi.System.security.exceptions.UserNotAuthorizedException;
 import java.util.List;

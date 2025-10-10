@@ -8,7 +8,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.Datastream.GAMSDsid;
+import org.zim.gamsapi.Datastream.utils.GAMSDsid;
 import org.zim.gamsapi.DigitalObject.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.mapping.BagSipJsonContentFile;
 import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.mapping.BagSipJson;

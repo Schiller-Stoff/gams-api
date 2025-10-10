@@ -11,7 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.Ingest.utils.IngestStatics;

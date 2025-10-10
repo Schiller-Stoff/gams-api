@@ -1,8 +1,8 @@
-package org.zim.gamsapi.Datastream.interfaces;
+package org.zim.gamsapi.Datastream.utils.interfaces;
 
 import org.springframework.core.io.InputStreamResource;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotDeleteFileException;
+import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamCannotDeleteFileException;
 import java.nio.file.Path;
 
 /**

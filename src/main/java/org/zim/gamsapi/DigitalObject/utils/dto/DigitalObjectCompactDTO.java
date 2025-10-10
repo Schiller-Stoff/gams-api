@@ -2,7 +2,7 @@ package org.zim.gamsapi.DigitalObject.utils.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.*;
-import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.*;

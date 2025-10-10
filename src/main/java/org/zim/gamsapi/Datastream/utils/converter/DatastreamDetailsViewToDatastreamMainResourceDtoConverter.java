@@ -1,9 +1,9 @@
-package org.zim.gamsapi.Datastream.converter;
+package org.zim.gamsapi.Datastream.utils.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.utils.dto.DatastreamMainResourceDto;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamDetailsView;
 
 @Component
 public class DatastreamDetailsViewToDatastreamMainResourceDtoConverter implements Converter<IDatastreamDetailsView, DatastreamMainResourceDto> {

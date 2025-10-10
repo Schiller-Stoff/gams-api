@@ -19,7 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Datastream.DatastreamService;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectCompactDTO;

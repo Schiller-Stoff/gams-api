@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.Datastream;
 import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
 import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;

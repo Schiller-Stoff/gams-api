@@ -3,14 +3,8 @@ package org.zim.gamsapi.Datastream;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.codec.Hex;
-import org.zim.gamsapi.Datastream.exceptions.DatastreamIdHashingException;
 
 import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 @AllArgsConstructor
 @NoArgsConstructor

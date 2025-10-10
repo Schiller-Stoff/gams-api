@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Datastream;
+package org.zim.gamsapi.Datastream.utils;
 
 /**
  * Enum for test datastream.

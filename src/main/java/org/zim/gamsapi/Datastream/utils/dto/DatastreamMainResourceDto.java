@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Datastream.dto;
+package org.zim.gamsapi.Datastream.utils.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;

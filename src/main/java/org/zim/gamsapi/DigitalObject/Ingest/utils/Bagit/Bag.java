@@ -3,7 +3,7 @@ package org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.mapping.BagSipJson;
 import java.io.IOException;

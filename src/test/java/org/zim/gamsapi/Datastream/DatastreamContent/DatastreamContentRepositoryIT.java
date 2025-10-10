@@ -3,7 +3,7 @@ package org.zim.gamsapi.Datastream.DatastreamContent;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zim.gamsapi.Datastream.DatastreamId;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.System.configproperties.GAMSStorageProperties;
 

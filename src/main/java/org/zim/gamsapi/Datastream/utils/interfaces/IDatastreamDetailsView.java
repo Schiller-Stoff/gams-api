@@ -1,4 +1,4 @@
-package org.zim.gamsapi.Datastream.interfaces;
+package org.zim.gamsapi.Datastream.utils.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.zim.gamsapi.MetadataBaseEntity;
