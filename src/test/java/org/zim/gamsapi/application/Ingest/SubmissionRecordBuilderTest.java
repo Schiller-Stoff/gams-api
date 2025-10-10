@@ -2,16 +2,15 @@ package org.zim.gamsapi.application.Ingest;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
 import org.zim.gamsapi.TestUtilities.TestIngestRecord;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.UnitTest;
 
-public class IngestRecordBuilderTest extends UnitTest {
+public class SubmissionRecordBuilderTest extends UnitTest {
 
     @Test
     public void createsExpectedBagEntity(){
-        IngestRecord TEST_BAG_ENTITY = IngestRecord.builder()
+        SubmissionRecord TEST_BAG_ENTITY = SubmissionRecord.builder()
                 .createdBy(TestIngestRecord.CREATED_BY)
                 .schema(TestIngestRecord.SCHEMA)
                 .source(TestIngestRecord.SOURCE)
@@ -44,7 +43,7 @@ public class IngestRecordBuilderTest extends UnitTest {
     @Test
     public void throwsIllegalStateExceptionIfDigitalObjectIsNotSet(){
         Assertions.assertThatThrownBy(()->{
-            IngestRecord.builder()
+            SubmissionRecord.builder()
                     .createdBy(TestIngestRecord.CREATED_BY)
                     .schema(TestIngestRecord.SCHEMA)
                     .source(TestIngestRecord.SOURCE)

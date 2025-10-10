@@ -11,7 +11,7 @@ import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 
@@ -38,7 +38,7 @@ public class TestDataBuilder {
   private DatastreamContentRepository datastreamContentRepository;
 
   @Autowired
-  private IIngestRecordRepository bagEntityRepository;
+  private ISubmissionRecordRepository bagEntityRepository;
 
   @Autowired
   private IGAMSCollectionRepository gamsCollectionRepository;
@@ -48,7 +48,7 @@ public class TestDataBuilder {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
-    bagEntityRepository.delete(testDataSet.ingestRecord());
+    bagEntityRepository.delete(testDataSet.submissionRecord());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 

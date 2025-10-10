@@ -3,10 +3,9 @@ package org.zim.gamsapi.application.Ingest.utils.Bagit;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.application.Ingest.utils.Bagit.BagData;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
 import org.zim.gamsapi.TestUtilities.TestDatastream;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestIngestRecord;
@@ -18,7 +17,7 @@ public class BagDataTest {
     public class From {
 
         final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
-        final IngestRecord TEST_INGEST_RECORD = TestIngestRecord.generate(TEST_DIGITAL_OBJECT);
+        final SubmissionRecord TEST_INGEST_RECORD = TestIngestRecord.generate(TEST_DIGITAL_OBJECT);
         final Datastream TEST_DATASTREAM = TestDatastream.generate(TEST_DIGITAL_OBJECT);
 
         @Test

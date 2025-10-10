@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
 
 import java.time.Instant;
 
@@ -23,8 +23,8 @@ public class TestIngestRecord {
      * @param digitalObject The DigitalObject to associate with the BagEntity.
      * @return A BagEntity instance populated with test data.
      */
-    public static IngestRecord generate(DigitalObject digitalObject){
-        return IngestRecord.builder()
+    public static SubmissionRecord generate(DigitalObject digitalObject){
+        return SubmissionRecord.builder()
                 .digitalObject(digitalObject)
                 .createdBy(TestIngestRecord.CREATED_BY)
                 .schema(TestIngestRecord.SCHEMA)

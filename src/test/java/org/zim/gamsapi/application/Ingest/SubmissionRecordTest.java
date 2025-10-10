@@ -7,7 +7,7 @@ import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestIngestRecord;
 import org.zim.gamsapi.UnitTest;
 
-public class IngestRecordTest extends UnitTest {
+public class SubmissionRecordTest extends UnitTest {
 
     @Test
     public void getBaggingDateReturnsExpectedValue(){

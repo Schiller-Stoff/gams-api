@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -69,7 +69,7 @@ public class BagData {
   @NotEmpty
   private String source;
 
-  public static BagData from(DigitalObject digitalObject, Set<Datastream> datastreams, IngestRecord ingestRecord){
+  public static BagData from(DigitalObject digitalObject, Set<Datastream> datastreams, SubmissionRecord submissionRecord){
 
       Set<BagFile> contentFiles = new HashSet<>();
       datastreams.forEach(datastream -> {
@@ -93,9 +93,9 @@ public class BagData {
               .types(new HashSet<>())
               .md5Checksum(digitalObject.getBaseMetadata().getMd5Checksum())
               .sha512Checksum(digitalObject.getBaseMetadata().getSha512Checksum())
-              .schema(ingestRecord.getBagSchema())
-              .createdBy(ingestRecord.getBagCreatedBy())
-              .source(ingestRecord.getBagSource())
+              .schema(submissionRecord.getBagSchema())
+              .createdBy(submissionRecord.getBagCreatedBy())
+              .source(submissionRecord.getBagSource())
               .build();
 
   }

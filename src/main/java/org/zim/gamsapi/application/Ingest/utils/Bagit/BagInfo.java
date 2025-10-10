@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 
 import java.time.*;
@@ -52,14 +52,14 @@ public class BagInfo {
               .toInstant(ZoneOffset.UTC);
   }
 
-  public static BagInfo from(IngestRecord ingestRecord) {
+  public static BagInfo from(SubmissionRecord submissionRecord) {
       return BagInfo.builder()
-              .date(ingestRecord.getBaggingDate())
-              .time(ingestRecord.getBaggingTime())
+              .date(submissionRecord.getBaggingDate())
+              .time(submissionRecord.getBaggingTime())
               // TODO this needs to be regenerated
-              .payloadOxum(ingestRecord.getBagPayloadOxum())
-              .contactMail(ingestRecord.getBagContactMail())
-              .externalDescription(ingestRecord.getBagExternalDescription())
+              .payloadOxum(submissionRecord.getBagPayloadOxum())
+              .contactMail(submissionRecord.getBagContactMail())
+              .externalDescription(submissionRecord.getBagExternalDescription())
               .build();
   }
 

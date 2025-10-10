@@ -13,8 +13,8 @@ import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentRepository;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
-import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
+import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,7 +34,7 @@ public class BagExportService {
 
     private final IDigitalObjectRepository digitalObjectRepository;
     private final IDatastreamRepository datastreamRepository;
-    private final IIngestRecordRepository ingestRecordRepository;
+    private final ISubmissionRecordRepository ingestRecordRepository;
     private final IDublinCoreEntryRepository dublinCoreEntryRepository;
     private final DatastreamContentRepository datastreamContentRepository;
 
@@ -63,7 +63,7 @@ public class BagExportService {
                     return new DigitalObjectNotFoundException(msg);
                 });
 
-        IngestRecord ingestRecord = ingestRecordRepository.findById(digitalObjectId)
+        SubmissionRecord submissionRecord = ingestRecordRepository.findById(digitalObjectId)
                 .orElseThrow(() -> {
                     String msg = String.format("Ingest record for digital object %s not found", digitalObjectId);
                     log.error(msg);
@@ -84,7 +84,7 @@ public class BagExportService {
         // 2. Return a writer that will perform streaming export
         return new BagExportStreamWriter(
                 digitalObject,
-                ingestRecord,
+            submissionRecord,
                 datastreams,
                 dublinCoreEntries,
                 datastreamContentRepository
@@ -98,7 +98,7 @@ public class BagExportService {
     public static class BagExportStreamWriter {
 
         private final DigitalObject digitalObject;
-        private final IngestRecord ingestRecord;
+        private final SubmissionRecord submissionRecord;
         private final Set<Datastream> datastreams;
         private final List<DublinCoreEntry> dublinCoreEntries;
         private final DatastreamContentRepository datastreamContentRepository;
@@ -109,12 +109,12 @@ public class BagExportService {
 
         public BagExportStreamWriter(
                 DigitalObject digitalObject,
-                IngestRecord ingestRecord,
+                SubmissionRecord submissionRecord,
                 Set<Datastream> datastreams,
                 List<DublinCoreEntry> dublinCoreEntries,
                 DatastreamContentRepository datastreamContentRepository) {
             this.digitalObject = digitalObject;
-            this.ingestRecord = ingestRecord;
+            this.submissionRecord = submissionRecord;
             this.datastreams = datastreams;
             this.dublinCoreEntries = dublinCoreEntries;
             this.datastreamContentRepository = datastreamContentRepository;
@@ -137,7 +137,7 @@ public class BagExportService {
                 writeBagitTxt(zipOut, bagName);
 
                 // 2. Write bag-info.txt
-                writeBagInfo(zipOut, bagName, ingestRecord);
+                writeBagInfo(zipOut, bagName, submissionRecord);
 
                 // 3. Write sip.json
                 writeSipJson(zipOut, bagName);
@@ -166,7 +166,7 @@ public class BagExportService {
             writeTextEntry(zipOut, bagName + "/bagit.txt", content);
         }
 
-        private void writeBagInfo(ZipOutputStream zipOut, String bagName, IngestRecord record) throws IOException {
+        private void writeBagInfo(ZipOutputStream zipOut, String bagName, SubmissionRecord record) throws IOException {
             Instant timestamp = record.getBaggingTimeStamp();
             String date = timestamp.atZone(ZoneOffset.UTC)
                     .format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -228,9 +228,9 @@ public class BagExportService {
                     .collect(Collectors.toList());
 
             sipJson.put("contentFiles", contentFiles);
-            sipJson.put("$schema", ingestRecord.getBagSchema());
-            sipJson.put("created_by", ingestRecord.getBagCreatedBy());
-            sipJson.put("source", ingestRecord.getBagSource());
+            sipJson.put("$schema", submissionRecord.getBagSchema());
+            sipJson.put("created_by", submissionRecord.getBagCreatedBy());
+            sipJson.put("source", submissionRecord.getBagSource());
 
             // Convert to JSON
             String jsonContent = toJson(sipJson);

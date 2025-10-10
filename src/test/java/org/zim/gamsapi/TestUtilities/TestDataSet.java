@@ -3,7 +3,7 @@ package org.zim.gamsapi.TestUtilities;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
 import org.zim.gamsapi.domain.Project.Project;
 
 /**
@@ -11,13 +11,13 @@ import org.zim.gamsapi.domain.Project.Project;
  * @param project
  * @param digitalObject
  * @param mainDatastream
- * @param ingestRecord
+ * @param submissionRecord
  * @param dublinCoreEntry
  */
 public record TestDataSet(
     Project project,
     DigitalObject digitalObject,
-    IngestRecord ingestRecord,
+    SubmissionRecord submissionRecord,
     Datastream mainDatastream,
     DublinCoreEntry dublinCoreEntry
 ) {

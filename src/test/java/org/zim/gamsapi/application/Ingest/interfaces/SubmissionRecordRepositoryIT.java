@@ -10,14 +10,13 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.*;
 
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class IngestRecordRepositoryIT extends IntegrationTest {
+public class SubmissionRecordRepositoryIT extends IntegrationTest {
 
     /**
      * Mocks the auditing behavior of the app.
@@ -27,7 +26,7 @@ public class IngestRecordRepositoryIT extends IntegrationTest {
     private AuditingHandler auditingHandler;
 
     @Autowired
-    private IIngestRecordRepository bagEntityRepository;
+    private ISubmissionRecordRepository bagEntityRepository;
 
     @Autowired
     private IDigitalObjectRepository digitalObjectRepository;
@@ -66,7 +65,7 @@ public class IngestRecordRepositoryIT extends IntegrationTest {
     @Test
     @Transactional
     public void findsExpectedBagEntityById() {
-        var foundBagEntity = bagEntityRepository.findById(testDataSet.ingestRecord().getId());
+        var foundBagEntity = bagEntityRepository.findById(testDataSet.submissionRecord().getId());
         Assertions.assertThat(foundBagEntity).isPresent();
         Assertions.assertThat(foundBagEntity.get()).hasNoNullFieldsOrProperties();
     }
@@ -85,7 +84,7 @@ public class IngestRecordRepositoryIT extends IntegrationTest {
   @Test
     public void testIngestRecordHasSameValuesAsTestBagValues(){
 
-      var ingestRecordOptional = bagEntityRepository.findById(testDataSet.ingestRecord().getId());
+      var ingestRecordOptional = bagEntityRepository.findById(testDataSet.submissionRecord().getId());
 
       Assertions.assertThat(ingestRecordOptional).isPresent();
 

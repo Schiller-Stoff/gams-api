@@ -15,7 +15,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 @Entity
-@Table(name = IngestRecord.ENTITY_TABLE_NAME)
+@Table(name = SubmissionRecord.ENTITY_TABLE_NAME)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,9 +23,9 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
 @ToString(exclude = "digitalObject") // Prevent circular reference in toString
-public class IngestRecord {
+public class SubmissionRecord {
 
-    public static final String ENTITY_TABLE_NAME = "ingest_record";
+    public static final String ENTITY_TABLE_NAME = "submission_record";
 
     public static final String[] ORDERED_MANAGED_TABLES = new String[]{
             ENTITY_TABLE_NAME
@@ -132,7 +132,7 @@ public class IngestRecord {
                 ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass()
                 : this.getClass();
         if (thisEffectiveClass != oEffectiveClass) return false;
-        IngestRecord that = (IngestRecord) o;
+        SubmissionRecord that = (SubmissionRecord) o;
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 
@@ -143,8 +143,8 @@ public class IngestRecord {
                 : getClass().hashCode();
     }
 
-    public static IngestRecordBuilder builder(){
-        return new IngestRecordBuilder();
+    public static SubmissionRecordBuilder builder(){
+        return new SubmissionRecordBuilder();
     }
 
     public String getBaggingDate() {

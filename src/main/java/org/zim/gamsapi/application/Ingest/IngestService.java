@@ -21,7 +21,7 @@ import org.zim.gamsapi.application.Ingest.exceptions.IngestAgainstDifferentProje
 import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestTypeConversionException;
-import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
 import org.zim.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.Bag;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.BagData;
@@ -51,7 +51,7 @@ public class IngestService implements IIngestService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
-  private final IIngestRecordRepository bagEntityRepository;
+  private final ISubmissionRecordRepository bagEntityRepository;
 
   @Override
   @Transactional(rollbackFor = {
@@ -108,7 +108,7 @@ public class IngestService implements IIngestService {
       log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
 
       // logic to save the related BagEntities
-      var bagEntity = IngestRecord.builder()
+      var bagEntity = SubmissionRecord.builder()
               .digitalObject(savedObject)
               .createdBy(bag.getBagData().getCreatedBy())
               .source(bag.getBagData().getSource())

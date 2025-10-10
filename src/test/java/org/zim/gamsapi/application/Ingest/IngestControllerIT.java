@@ -487,16 +487,16 @@ public class IngestControllerIT extends IntegrationTest {
           case "bagit.txt" -> {
             String bagitTxt = bos.toString();
             org.assertj.core.api.Assertions.assertThat(bagitTxt)
-                .contains(testDataSet.ingestRecord().getBagVersion())
-                .contains(testDataSet.ingestRecord().getBagTagFileCharacterEncoding());
+                .contains(testDataSet.submissionRecord().getBagVersion())
+                .contains(testDataSet.submissionRecord().getBagTagFileCharacterEncoding());
           }
           case "bag-info.txt" -> {
             String bagInfoTxt = bos.toString();
             org.assertj.core.api.Assertions.assertThat(bagInfoTxt)
-                .contains(testDataSet.ingestRecord().getBagExternalDescription())
-                .contains(testDataSet.ingestRecord().getBaggingDate())
-                .contains(testDataSet.ingestRecord().getBaggingTime())
-                .contains(testDataSet.ingestRecord().getBagContactMail())
+                .contains(testDataSet.submissionRecord().getBagExternalDescription())
+                .contains(testDataSet.submissionRecord().getBaggingDate())
+                .contains(testDataSet.submissionRecord().getBaggingTime())
+                .contains(testDataSet.submissionRecord().getBagContactMail())
                 .contains("Payload-Oxum: ")
             // Payload oxum cannot be the same because the test data ingest not the complete bag
             //.contains(testDataSet.ingestRecord().getBagPayloadOxum().toString())
@@ -533,9 +533,9 @@ public class IngestControllerIT extends IntegrationTest {
                 .contains(testDataSet.digitalObject().getBaseMetadata().getRights())
                 .contains(testDataSet.digitalObject().getPublisher())
                 // assertions from ingestRecord
-                .contains(testDataSet.ingestRecord().getBagSource())
-                .contains(testDataSet.ingestRecord().getBagSchema())
-                .contains(testDataSet.ingestRecord().getBagCreatedBy());
+                .contains(testDataSet.submissionRecord().getBagSource())
+                .contains(testDataSet.submissionRecord().getBagSchema())
+                .contains(testDataSet.submissionRecord().getBagCreatedBy());
 
             // assertions for content files
             org.assertj.core.api.Assertions.assertThat(sipJson)

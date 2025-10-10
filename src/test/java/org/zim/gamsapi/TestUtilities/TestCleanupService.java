@@ -18,7 +18,7 @@ import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 
@@ -47,7 +47,7 @@ public class TestCleanupService {
   @Autowired
   private IGAMSCollectionRepository collectionRepostory;
   @Autowired
-  private IIngestRecordRepository bagEntityRepository;
+  private ISubmissionRecordRepository bagEntityRepository;
 
   public TestCleanupService(DatastreamContentRepository datastreamContentRepository) {
     this.datastreamContentRepository = datastreamContentRepository;

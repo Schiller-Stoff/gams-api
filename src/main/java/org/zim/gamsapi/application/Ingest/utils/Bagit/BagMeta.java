@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
-import org.zim.gamsapi.application.Ingest.IngestRecord;
+import org.zim.gamsapi.application.Ingest.SubmissionRecord;
 
 /**
  * Metadata obtained from bagit.txt file.
@@ -19,10 +19,10 @@ public class BagMeta {
     @NotEmpty
     public String tagFileCharacterEncoding;
 
-    public static BagMeta from(IngestRecord ingestRecord){
+    public static BagMeta from(SubmissionRecord submissionRecord){
         return BagMeta.builder()
-                .bagItVersion(ingestRecord.getBagVersion())
-                .tagFileCharacterEncoding(ingestRecord.getBagTagFileCharacterEncoding())
+                .bagItVersion(submissionRecord.getBagVersion())
+                .tagFileCharacterEncoding(submissionRecord.getBagTagFileCharacterEncoding())
                 .build();
     }
 }

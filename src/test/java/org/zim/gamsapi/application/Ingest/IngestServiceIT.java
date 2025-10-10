@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.application.Ingest.Ingest;
-import org.zim.gamsapi.application.Ingest.IngestService;
 import org.zim.gamsapi.domain.Datastream.DatastreamId;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
@@ -20,7 +18,7 @@ import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
-import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.application.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
@@ -54,7 +52,7 @@ public class IngestServiceIT extends IntegrationTest {
   IDublinCoreEntryRepository dublinCoreElementRepository;
 
   @Autowired
-  IIngestRecordRepository bagEntityRepository;
+  ISubmissionRecordRepository bagEntityRepository;
 
   @Autowired
   IngestService ingestService;
