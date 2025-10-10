@@ -463,8 +463,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
-
-  // TODO maybe create own class for system test? ingest / export
   @Nested
   public class IngestTests {
 
