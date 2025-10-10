@@ -7,6 +7,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
+import org.zim.gamsapi.application.Ingest.exceptions.*;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
@@ -18,10 +19,6 @@ import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.zim.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.zim.gamsapi.application.Ingest.exceptions.IngestAgainstDifferentProjectException;
-import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
-import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
-import org.zim.gamsapi.application.Ingest.exceptions.IngestTypeConversionException;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.zim.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.Bag;
@@ -231,7 +228,7 @@ public class IngestService implements IIngestService {
     if(datastreams.isEmpty()){
       String msg = String.format("Digital object with id %s has no datastreams. Cannot export object without datastreams.", objectId);
       log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      throw new ExportUnexpectedObjectStateException(msg);
     }
 
     // 02. Map data to bag entities

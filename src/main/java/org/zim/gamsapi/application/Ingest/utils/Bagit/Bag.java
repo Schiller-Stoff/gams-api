@@ -2,10 +2,11 @@ package org.zim.gamsapi.application.Ingest.utils.Bagit;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.domain.Datastream.DatastreamId;
-import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
+import org.zim.gamsapi.application.Ingest.exceptions.ExportProcessingException;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
+import org.zim.gamsapi.domain.Datastream.DatastreamId;
+import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -224,11 +225,9 @@ public class Bag {
 
 
     } catch (IOException e) {
-      // TODO better error message
       String msg = String.format("Error writing bag %s to zip output stream. Original error: %s", bagData.getId(), e);
       log.error(msg);
-      // TODO different exception!
-      throw new IngestProcessingException(msg);
+      throw new ExportProcessingException(msg);
     }
 
   }
@@ -305,8 +304,7 @@ public class Bag {
       } catch (IOException e) {
         String msg = String.format("Error creating zip entry for %s in bag %s. Original error: %s", fullPath, bagData.getId(), e);
         log.error(msg);
-        // TODO use BagExportException!
-        throw new IngestProcessingException(msg);
+        throw new ExportProcessingException(msg);
       }
 
       DatastreamId datastreamId = DatastreamId.builder()
@@ -325,8 +323,7 @@ public class Bag {
       } catch (Exception e) {
         String msg = String.format("Failed to stream datastream content for %s", datastreamId);
         log.error(msg, e);
-        // TODO different exception!
-        throw new IngestProcessingException(msg);
+        throw new ExportProcessingException(msg);
       }
     }
 
@@ -366,7 +363,7 @@ public class Bag {
     } catch (NoSuchAlgorithmException e) {
       String msg = String.format("Error calculating SHA-512 checksum for sip.json in bag %s. Original error: %s", bagData.getId(), e);
       log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new ExportProcessingException(msg);
     }
 
     // TODO own method for writing manifest entries?
