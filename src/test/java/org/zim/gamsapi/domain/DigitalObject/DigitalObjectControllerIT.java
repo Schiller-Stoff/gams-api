@@ -10,10 +10,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
+import org.zim.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
@@ -39,7 +38,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   private IDigitalObjectRepository digitalObjectRepository;
 
   @Autowired
-  private IGAMSCollectionRepository collectionRepository;
+  private IDigitalObjectCollectionRepository collectionRepository;
 
   @MockitoBean
   private AuditingHandler auditingHandler;
@@ -82,8 +81,8 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       digitalObjectRepository.save(digitalObject);
 
       // test collection references the test object automatically
-      GAMSCollection gamsCollection = TestGAMSCollection.generate();
-      collectionRepository.save(gamsCollection);
+      DigitalObjectCollection digitalObjectCollection = TestGAMSCollection.generate();
+      collectionRepository.save(digitalObjectCollection);
 
       // Act
       mockMvc.perform(

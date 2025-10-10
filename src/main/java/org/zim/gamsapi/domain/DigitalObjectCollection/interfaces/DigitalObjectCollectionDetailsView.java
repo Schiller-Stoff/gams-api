@@ -1,11 +1,11 @@
-package org.zim.gamsapi.domain.GAMSCollection.interfaces;
+package org.zim.gamsapi.domain.DigitalObjectCollection.interfaces;
 
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.domain.Project.interfaces.ProjectIdView;
 
 import java.util.Set;
 
-public interface GAMSCollectionDetailsView {
+public interface DigitalObjectCollectionDetailsView {
 
   String getId();
 

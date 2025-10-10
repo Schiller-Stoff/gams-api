@@ -1,4 +1,4 @@
-package org.zim.gamsapi.domain.GAMSCollection;
+package org.zim.gamsapi.domain.DigitalObjectCollection;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,8 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
-import org.zim.gamsapi.domain.GAMSCollection.interfaces.GAMSCollectionDetailsView;
-import org.zim.gamsapi.domain.GAMSCollection.interfaces.GamsCollectionCompactView;
+import org.zim.gamsapi.domain.DigitalObjectCollection.interfaces.DigitalObjectCollectionDetailsView;
+import org.zim.gamsapi.domain.DigitalObjectCollection.interfaces.DigitalObjectCollectionCompactView;
 import org.zim.gamsapi.domain.Project.ProjectBuilder;
 import org.zim.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.zim.gamsapi.infrastructure.System.dto.PagedResponse;
@@ -23,9 +23,9 @@ import org.zim.gamsapi.infrastructure.System.dto.PagedResponse;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.GAMS_COLLECTIONS_TAG, description = OpenAPIConfig.GAMS_COLLECTIONS_TAG_DESCRIPTION)
-public class GAMSCollectionController {
+public class DigitalObjectCollectionController {
 
-  private final IGAMSCollectionService collectionService;
+  private final IDigitalObjectCollectionService collectionService;
 
   @GetMapping(produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
@@ -33,7 +33,7 @@ public class GAMSCollectionController {
   }, value = {"/collections" })
   @ResponseBody
   @Operation(summary = "Get all collections")
-  public PagedResponse<GamsCollectionCompactView> getAllCollections(
+  public PagedResponse<DigitalObjectCollectionCompactView> getAllCollections(
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "100") int pageSize,
@@ -55,7 +55,7 @@ public class GAMSCollectionController {
   })
   @ResponseBody
   @Operation(summary = "Get a collection by ID")
-  public GAMSCollectionDetailsView getCollection(@PathVariable String id) {
+  public DigitalObjectCollectionDetailsView getCollection(@PathVariable String id) {
     return collectionService.findById(id);
   }
 
@@ -64,16 +64,16 @@ public class GAMSCollectionController {
   @Operation(summary = "Create a GAMS collection")
   public void createCollection(
       @PathVariable String id,
-      @RequestBody CreateGAMSCollectionDTO createGAMSCollectionDTO
+      @RequestBody CreateDigitalObjectCollectionDTO createDigitalObjectCollectionDTO
   ) {
-    GAMSCollection gamsCollection = GAMSCollection.builder()
+    DigitalObjectCollection digitalObjectCollection = DigitalObjectCollection.builder()
         .id(id)
-        .project(ProjectBuilder.builder().projectAbbr(createGAMSCollectionDTO.getProjectAbbr()).build())
-        .title(createGAMSCollectionDTO.getTitle())
-        .description(createGAMSCollectionDTO.getDescription())
+        .project(ProjectBuilder.builder().projectAbbr(createDigitalObjectCollectionDTO.getProjectAbbr()).build())
+        .title(createDigitalObjectCollectionDTO.getTitle())
+        .description(createDigitalObjectCollectionDTO.getDescription())
         .build();
 
-    collectionService.save(gamsCollection);
+    collectionService.save(digitalObjectCollection);
   }
 
   @PatchMapping(value = "/projects/{projectAbbr}/collections/{id}")
@@ -81,15 +81,15 @@ public class GAMSCollectionController {
   @Operation(summary = "Update basic metadata of a gams collection like title or description")
   public void updateCollection(
       @PathVariable String id,
-      @RequestBody CreateGAMSCollectionDTO createGAMSCollectionDTO
+      @RequestBody CreateDigitalObjectCollectionDTO createDigitalObjectCollectionDTO
   ) {
-    GAMSCollection gamsCollection = GAMSCollection.builder()
+    DigitalObjectCollection digitalObjectCollection = DigitalObjectCollection.builder()
         .id(id)
-        .project(ProjectBuilder.builder().projectAbbr(createGAMSCollectionDTO.getProjectAbbr()).build())
-        .title(createGAMSCollectionDTO.getTitle())
-        .description(createGAMSCollectionDTO.getDescription())
+        .project(ProjectBuilder.builder().projectAbbr(createDigitalObjectCollectionDTO.getProjectAbbr()).build())
+        .title(createDigitalObjectCollectionDTO.getTitle())
+        .description(createDigitalObjectCollectionDTO.getDescription())
         .build();
-    collectionService.updateMetadata(gamsCollection);
+    collectionService.updateMetadata(digitalObjectCollection);
   }
 
   @DeleteMapping(value = "/projects/{projectAbbr}/collections/{id}")
@@ -141,7 +141,7 @@ public class GAMSCollectionController {
   })
   @ResponseBody
   @Operation(summary = "Get all collections owned by a project")
-  public PagedResponse<GamsCollectionCompactView> getCollectionsByProject(
+  public PagedResponse<DigitalObjectCollectionCompactView> getCollectionsByProject(
       @PathVariable String projectAbbr,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
@@ -165,7 +165,7 @@ public class GAMSCollectionController {
   })
   @ResponseBody
   @Operation(summary = "Get all collections containing a specific digital object")
-  public PagedResponse<GamsCollectionCompactView> getCollectionsByDigitalObject(
+  public PagedResponse<DigitalObjectCollectionCompactView> getCollectionsByDigitalObject(
       @PathVariable String id,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,

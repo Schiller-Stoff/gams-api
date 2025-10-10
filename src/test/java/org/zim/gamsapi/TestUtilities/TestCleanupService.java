@@ -16,8 +16,8 @@ import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
-import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
+import org.zim.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -45,7 +45,7 @@ public class TestCleanupService {
   @Autowired
   private IProjectRepository projectRepository;
   @Autowired
-  private IGAMSCollectionRepository collectionRepostory;
+  private IDigitalObjectCollectionRepository collectionRepostory;
   @Autowired
   private ISubmissionRecordRepository bagEntityRepository;
 
@@ -89,7 +89,7 @@ public class TestCleanupService {
       // Delete in any order since FK checks are disabled
       executeDeleteAllQuery(DatastreamContentDeletionFailure.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DublinCoreEntry.ORDERED_MANAGED_TABLES);
-      executeDeleteAllQuery(GAMSCollection.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(DigitalObjectCollection.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Datastream.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DigitalObject.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Project.ORDERED_MANAGED_TABLES);
@@ -129,7 +129,7 @@ public class TestCleanupService {
       log.debug("Starting safe test data cleanup");
       executeDeleteAllQuery(DatastreamContentDeletionFailure.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DublinCoreEntry.ORDERED_MANAGED_TABLES);
-      executeDeleteAllQuery(GAMSCollection.ORDERED_MANAGED_TABLES);
+      executeDeleteAllQuery(DigitalObjectCollection.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Datastream.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DigitalObject.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Project.ORDERED_MANAGED_TABLES);

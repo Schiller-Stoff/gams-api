@@ -98,7 +98,7 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @param pageable pagination
    * @return a page of digital objects as projection
    */
-  @Query("SELECT do FROM GAMSCollection c JOIN c.digitalObjects do WHERE c.id = :collectionId")
+  @Query("SELECT do FROM DigitalObjectCollection c JOIN c.digitalObjects do WHERE c.id = :collectionId")
   Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(
       @Param("collectionId") String collectionId,
       Pageable pageable

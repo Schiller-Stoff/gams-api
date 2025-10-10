@@ -1,4 +1,4 @@
-package org.zim.gamsapi.domain.GAMSCollection;
+package org.zim.gamsapi.domain.DigitalObjectCollection;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -15,14 +15,13 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
 import org.zim.gamsapi.TestUtilities.TestGAMSCollection;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
 
 /**
  * Integration test for the GAMSCollectionRepository.
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class GAMSCollectionRepositoryIT extends IntegrationTest {
+public class DigitalObjectCollectionRepositoryIT extends IntegrationTest {
 
   // deactivates auditing
   @MockitoBean
@@ -36,7 +35,7 @@ public class GAMSCollectionRepositoryIT extends IntegrationTest {
 
   private TestDataSet testDataSet;
   @Autowired
-  private IGAMSCollectionRepository iGAMSCollectionRepository;
+  private IDigitalObjectCollectionRepository iGAMSCollectionRepository;
 
   @BeforeEach
   public void setUp() {

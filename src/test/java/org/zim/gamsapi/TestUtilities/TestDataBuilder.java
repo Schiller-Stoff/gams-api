@@ -10,7 +10,7 @@ import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -41,7 +41,7 @@ public class TestDataBuilder {
   private ISubmissionRecordRepository bagEntityRepository;
 
   @Autowired
-  private IGAMSCollectionRepository gamsCollectionRepository;
+  private IDigitalObjectCollectionRepository gamsCollectionRepository;
 
   @Transactional
   public void removeAllExceptProjects(TestDataSet testDataSet) {

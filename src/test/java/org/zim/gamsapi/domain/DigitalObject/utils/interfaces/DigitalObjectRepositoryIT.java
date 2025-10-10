@@ -12,14 +12,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
+import org.zim.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.ProjectBuilder;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.TestUtilities.*;
-import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +35,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
     IProjectRepository projectRepository;
 
     @Autowired
-    IGAMSCollectionRepository collectionRepository;
+    IDigitalObjectCollectionRepository collectionRepository;
 
     @Autowired
     private TestDataBuilder testDataBuilder;
@@ -281,20 +280,20 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
         public class FindObjectsByCollection {
 
             DigitalObject testObject;
-            GAMSCollection testGAMSCollection;
+            DigitalObjectCollection testDigitalObjectCollection;
 
             @BeforeEach
             public void setup() {
                 testObject = TestDigitalObject.generate();
                 digitalObjectRepository.save(testObject);
-                testGAMSCollection = TestGAMSCollection.generate();
-                collectionRepository.save(testGAMSCollection);
+                testDigitalObjectCollection = TestGAMSCollection.generate();
+                collectionRepository.save(testDigitalObjectCollection);
             }
 
             @Test
             public void findsExpectedGamsCollectionObjectCount(){
                 var foundObjects = digitalObjectRepository.findDigitalObjectsByCollectionId(
-                    testGAMSCollection.getId(),
+                    testDigitalObjectCollection.getId(),
                     PageRequest.of(0,1000)
                 );
 
@@ -306,7 +305,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             @Transactional
             public void findsExpectedGamsCollectionObject(){
                 var foundObjects = digitalObjectRepository.findDigitalObjectsByCollectionId(
-                    testGAMSCollection.getId(),
+                    testDigitalObjectCollection.getId(),
                     PageRequest.of(0,1000)
                 );
 
@@ -315,7 +314,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
                 Assertions.assertThat(foundObject.getId())
                     .isEqualTo(
                         // object in the test-collection
-                        testGAMSCollection.getDigitalObjects().iterator().next().getId()
+                        testDigitalObjectCollection.getDigitalObjects().iterator().next().getId()
                     );
             }
 

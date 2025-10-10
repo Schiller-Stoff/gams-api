@@ -1,4 +1,4 @@
-package org.zim.gamsapi.domain.GAMSCollection;
+package org.zim.gamsapi.domain.DigitalObjectCollection;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
@@ -15,10 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionService;
-import org.zim.gamsapi.domain.GAMSCollection.exceptions.CollectionNotFoundException;
+import org.zim.gamsapi.domain.DigitalObjectCollection.exceptions.DigitalObjectCollectionNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -29,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates security filters
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class GAMSCollectionControllerIT extends IntegrationTest {
+public class DigitalObjectCollectionControllerIT extends IntegrationTest {
 
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -40,10 +37,10 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private IGAMSCollectionRepository collectionRepository;
+  private IDigitalObjectCollectionRepository collectionRepository;
 
   @Autowired
-  private IGAMSCollectionService collectionService;
+  private IDigitalObjectCollectionService collectionService;
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
@@ -68,12 +65,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
   @Nested
   public class GETGAMSCollection {
 
-    GAMSCollection testGAMSCollection;
+    DigitalObjectCollection testDigitalObjectCollection;
 
     @BeforeEach
     public void setup() {
-      testGAMSCollection = TestGAMSCollection.generate();
-      collectionRepository.save(testGAMSCollection);
+      testDigitalObjectCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testDigitalObjectCollection);
     }
 
 
@@ -93,11 +90,11 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              testGAMSCollection.getId(),
-              testGAMSCollection.getTitle(),
-              testGAMSCollection.getDescription(),
-              testGAMSCollection.getDigitalObjects().iterator().next().getId(),
-              testGAMSCollection.getProject().getProjectAbbr()
+              testDigitalObjectCollection.getId(),
+              testDigitalObjectCollection.getTitle(),
+              testDigitalObjectCollection.getDescription(),
+              testDigitalObjectCollection.getDigitalObjects().iterator().next().getId(),
+              testDigitalObjectCollection.getProject().getProjectAbbr()
           );
 
     }
@@ -105,7 +102,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
     @Test
     public void GETSingularCollectionContainsExpectedJsonValues() throws Exception {
 
-      final String URL = "/api/v1/collections/" + testGAMSCollection.getId();
+      final String URL = "/api/v1/collections/" + testDigitalObjectCollection.getId();
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(URL)
@@ -118,11 +115,11 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              testGAMSCollection.getId(),
-              testGAMSCollection.getTitle(),
-              testGAMSCollection.getDescription(),
-              testGAMSCollection.getDigitalObjects().iterator().next().getId(),
-              testGAMSCollection.getProject().getProjectAbbr()
+              testDigitalObjectCollection.getId(),
+              testDigitalObjectCollection.getTitle(),
+              testDigitalObjectCollection.getDescription(),
+              testDigitalObjectCollection.getDigitalObjects().iterator().next().getId(),
+              testDigitalObjectCollection.getProject().getProjectAbbr()
           );
 
     }
@@ -142,18 +139,18 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
-              testGAMSCollection.getId(),
-              testGAMSCollection.getTitle(),
-              testGAMSCollection.getDescription(),
-              testGAMSCollection.getDigitalObjects().iterator().next().getId(),
-              testGAMSCollection.getProject().getProjectAbbr()
+              testDigitalObjectCollection.getId(),
+              testDigitalObjectCollection.getTitle(),
+              testDigitalObjectCollection.getDescription(),
+              testDigitalObjectCollection.getDigitalObjects().iterator().next().getId(),
+              testDigitalObjectCollection.getProject().getProjectAbbr()
           );
 
     }
 
     @Test
     public void GETObjectsInCollectionContainsExpectedJsonValues() throws Exception {
-      final String URL = String.format("/api/v1/collections/%s/objects", testGAMSCollection.getId());
+      final String URL = String.format("/api/v1/collections/%s/objects", testDigitalObjectCollection.getId());
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(URL)
@@ -164,7 +161,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
           .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
           .andReturn();
 
-      DigitalObject expectedDigitalObject = testGAMSCollection.getDigitalObjects().iterator().next();
+      DigitalObject expectedDigitalObject = testDigitalObjectCollection.getDigitalObjects().iterator().next();
 
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
@@ -178,7 +175,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       // saving a second collection to be found
       final String SECOND_COLLECTION_ID = "test-collection-id-2";
-      final GAMSCollection SECOND_TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
+      final DigitalObjectCollection SECOND_TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
           testProject.getProjectAbbr(),
           testDigitalObject.getId(),
           SECOND_COLLECTION_ID
@@ -203,11 +200,11 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       Assertions.assertThat(mvcResult.getResponse().getContentAsString())
           .contains(
               // response contains first collection data
-              testGAMSCollection.getId(),
-              testGAMSCollection.getTitle(),
-              testGAMSCollection.getDescription(),
-              testGAMSCollection.getDigitalObjects().iterator().next().getId(),
-              testGAMSCollection.getProject().getProjectAbbr(),
+              testDigitalObjectCollection.getId(),
+              testDigitalObjectCollection.getTitle(),
+              testDigitalObjectCollection.getDescription(),
+              testDigitalObjectCollection.getDigitalObjects().iterator().next().getId(),
+              testDigitalObjectCollection.getProject().getProjectAbbr(),
               // response contains second collection data
               SECOND_TEST_GAMS_COLLECTION.getId(),
               SECOND_TEST_GAMS_COLLECTION.getTitle(),
@@ -223,12 +220,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
   @Nested
   public class PUTGAMSCollection {
 
-    GAMSCollection testGAMSCollection;
+    DigitalObjectCollection testDigitalObjectCollection;
 
     @BeforeEach
     public void setup() {
-      testGAMSCollection = TestGAMSCollection.generate();
-      collectionRepository.save(testGAMSCollection);
+      testDigitalObjectCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testDigitalObjectCollection);
     }
 
     @Test
@@ -242,7 +239,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
           GAMS_COLLECTION_ID
       );
 
-      GAMSCollection gamsCollection = TestGAMSCollection.generate(
+      DigitalObjectCollection digitalObjectCollection = TestGAMSCollection.generate(
           testProject.getProjectAbbr(),
           testDigitalObject.getId(),
           GAMS_COLLECTION_ID
@@ -255,9 +252,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
             "projectAbbr": "%s"
           }
           """.formatted(
-              gamsCollection.getTitle(),
-              gamsCollection.getDescription(),
-              gamsCollection.getProject().getProjectAbbr()
+              digitalObjectCollection.getTitle(),
+              digitalObjectCollection.getDescription(),
+              digitalObjectCollection.getProject().getProjectAbbr()
           );
 
       mockMvc.perform(
@@ -282,12 +279,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
   @Nested
   public class POSTGAMSCollection {
 
-    GAMSCollection testGAMSCollection;
+    DigitalObjectCollection testDigitalObjectCollection;
 
     @BeforeEach
     public void setup() {
-      testGAMSCollection = TestGAMSCollection.generate();
-      collectionRepository.save(testGAMSCollection);
+      testDigitalObjectCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testDigitalObjectCollection);
     }
 
     @Test
@@ -296,7 +293,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       // save an additional gams collection
       final String GAMS_COLLECTION_ID = "test-collection-id-random";
-      final GAMSCollection TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
+      final DigitalObjectCollection TEST_GAMS_COLLECTION = TestGAMSCollection.generate(
           testProject.getProjectAbbr(),
           testDigitalObject.getId(),
           GAMS_COLLECTION_ID
@@ -336,12 +333,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
   @Nested
   public class PATCHGAMSCollection {
 
-    GAMSCollection testGAMSCollection;
+    DigitalObjectCollection testDigitalObjectCollection;
 
     @BeforeEach
     public void setup() {
-      testGAMSCollection = TestGAMSCollection.generate();
-      collectionRepository.save(testGAMSCollection);
+      testDigitalObjectCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testDigitalObjectCollection);
     }
 
     @Test
@@ -350,7 +347,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       final String URL = String.format(
           "/api/v1/projects/%s/collections/%s",
           testProject.getProjectAbbr(),
-          testGAMSCollection.getId()
+          testDigitalObjectCollection.getId()
       );
 
       final String TEST_COLLECTION_CHANGED_TITLE = "changed-title";
@@ -365,7 +362,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
           """.formatted(
               TEST_COLLECTION_CHANGED_TITLE,
               TEST_COLLECTION_CHANGED_DESCRIPTION,
-              testGAMSCollection.getProject().getProjectAbbr()
+              testDigitalObjectCollection.getProject().getProjectAbbr()
           );
 
       mockMvc.perform(
@@ -376,9 +373,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
           )
           .andExpect(status().isOk());
 
-      GAMSCollection foundCollection = collectionRepository.findById(testGAMSCollection.getId())
+      DigitalObjectCollection foundCollection = collectionRepository.findById(testDigitalObjectCollection.getId())
           .orElseThrow(() -> {
-            String msg = String.format("Collection with id %s not found", testGAMSCollection.getId());
+            String msg = String.format("Collection with id %s not found", testDigitalObjectCollection.getId());
             return new AssertionError(msg);
           });
 
@@ -390,9 +387,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       // assert that the collection does not have the old values
       Assertions.assertThat(foundCollection.getTitle())
-          .isNotEqualTo(testGAMSCollection.getTitle());
+          .isNotEqualTo(testDigitalObjectCollection.getTitle());
       Assertions.assertThat(foundCollection.getDescription())
-          .isNotEqualTo(testGAMSCollection.getDescription());
+          .isNotEqualTo(testDigitalObjectCollection.getDescription());
 
 
     }
@@ -415,9 +412,9 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
             "projectAbbr": "%s"
           }
           """.formatted(
-          testGAMSCollection.getId(),
-          testGAMSCollection.getTitle(),
-          testGAMSCollection.getProject().getProjectAbbr()
+          testDigitalObjectCollection.getId(),
+          testDigitalObjectCollection.getTitle(),
+          testDigitalObjectCollection.getProject().getProjectAbbr()
       );
 
       mockMvc.perform(
@@ -436,12 +433,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
   @Nested
   public class DELETEGAMSCollection {
 
-    GAMSCollection testGAMSCollection;
+    DigitalObjectCollection testDigitalObjectCollection;
 
     @BeforeEach
     public void setup() {
-      testGAMSCollection = TestGAMSCollection.generate();
-      collectionRepository.save(testGAMSCollection);
+      testDigitalObjectCollection = TestGAMSCollection.generate();
+      collectionRepository.save(testDigitalObjectCollection);
     }
 
     @Test
@@ -450,7 +447,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       final String URL = String.format(
           "/api/v1/projects/%s/collections/%s",
           testProject.getProjectAbbr(),
-          testGAMSCollection.getId()
+          testDigitalObjectCollection.getId()
       );
 
       mockMvc.perform(
@@ -462,7 +459,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       // assert that the collection does not exist in the database
       Assertions.assertThat(
-          collectionRepository.existsById(testGAMSCollection.getId())
+          collectionRepository.existsById(testDigitalObjectCollection.getId())
       ).isFalse();
 
     }
@@ -472,12 +469,12 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       // try to delete a collection that still references a digital object
       collectionService.addDigitalObjectToCollection(
-          testGAMSCollection.getId(),
+          testDigitalObjectCollection.getId(),
           testDigitalObject.getId()
       );
 
       var foundObjects = collectionService.findDigitalObjectsByCollectionId(
-          testGAMSCollection.getId(), PageRequest.of(0, 100)
+          testDigitalObjectCollection.getId(), PageRequest.of(0, 100)
       );
 
       Assertions.assertThat(foundObjects.getContent())
@@ -486,7 +483,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       final String URL = String.format(
           "/api/v1/projects/%s/collections/%s",
           testProject.getProjectAbbr(),
-          testGAMSCollection.getId()
+          testDigitalObjectCollection.getId()
       );
 
       mockMvc.perform(
@@ -498,13 +495,13 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
       // assert that the collection does not exist in the database
       Assertions.assertThat(
-          collectionRepository.existsById(testGAMSCollection.getId())
+          collectionRepository.existsById(testDigitalObjectCollection.getId())
       ).isFalse();
 
       // assert that now finding digital objects by the defined collection id throws an exception
       Assertions.assertThatThrownBy(() -> collectionService.findDigitalObjectsByCollectionId(
-          testGAMSCollection.getId(), PageRequest.of(0, 100)
-      )).isInstanceOf(CollectionNotFoundException.class);
+          testDigitalObjectCollection.getId(), PageRequest.of(0, 100)
+      )).isInstanceOf(DigitalObjectCollectionNotFoundException.class);
 
     }
 
@@ -515,18 +512,18 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
       public void removesExpectedDigitalObjectFromCollection() throws Exception {
 
         collectionService.addDigitalObjectToCollection(
-            testGAMSCollection.getId(),
+            testDigitalObjectCollection.getId(),
             testDigitalObject.getId()
         );
 
         // assert that both exist
-        Assertions.assertThat(collectionRepository.existsById(testGAMSCollection.getId()))
+        Assertions.assertThat(collectionRepository.existsById(testDigitalObjectCollection.getId()))
             .isTrue();
         Assertions.assertThat(digitalObjectRepository.existsById(testDigitalObject.getId()))
             .isTrue();
 
         var foundObjectsInTestCollection = digitalObjectRepository.findDigitalObjectsByCollectionId(
-            testGAMSCollection.getId(),
+            testDigitalObjectCollection.getId(),
             PageRequest.of(0, 100)
         );
 
@@ -536,7 +533,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
         final String URL = String.format(
             "/api/v1/projects/%s/collections/%s/objects/%s",
             testProject.getProjectAbbr(),
-            testGAMSCollection.getId(),
+            testDigitalObjectCollection.getId(),
             testDigitalObject.getId()
         );
 
@@ -549,7 +546,7 @@ public class GAMSCollectionControllerIT extends IntegrationTest {
 
         // assert that the collection is now empty
         var foundObjectsInTestCollectionAfterDeletion = digitalObjectRepository.findDigitalObjectsByCollectionId(
-            testGAMSCollection.getId(), PageRequest.of(0, 100)
+            testDigitalObjectCollection.getId(), PageRequest.of(0, 100)
         );
 
         Assertions.assertThat(foundObjectsInTestCollectionAfterDeletion.getContent()).hasSize(0);

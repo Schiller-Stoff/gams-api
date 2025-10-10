@@ -1,4 +1,4 @@
-package org.zim.gamsapi.domain.GAMSCollection;
+package org.zim.gamsapi.domain.DigitalObjectCollection;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -19,14 +19,14 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = GAMSCollection.ENTITY_TABLE_NAME)
+@Table(name = DigitalObjectCollection.ENTITY_TABLE_NAME)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class GAMSCollection {
+public class DigitalObjectCollection {
 
   public static final String ENTITY_TABLE_NAME = "collection";
   public static final String DIGITAL_OBJECTS_TABLE_NAME = "collection_digital_object";
@@ -60,7 +60,7 @@ public class GAMSCollection {
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(
-      name = GAMSCollection.DIGITAL_OBJECTS_TABLE_NAME,
+      name = DigitalObjectCollection.DIGITAL_OBJECTS_TABLE_NAME,
       joinColumns = @JoinColumn(name = "collection_id"),
       inverseJoinColumns = @JoinColumn(name = "digital_object_id")
   )
@@ -82,7 +82,7 @@ public class GAMSCollection {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    GAMSCollection that = (GAMSCollection) o;
+    DigitalObjectCollection that = (DigitalObjectCollection) o;
     return Objects.equals(id, that.id);
   }
 

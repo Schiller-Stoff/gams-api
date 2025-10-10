@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
+import org.zim.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 
 import java.util.Set;
@@ -26,7 +26,7 @@ public enum TestGAMSCollection {
     return value;
   }
 
-  public static GAMSCollection generate(String projectAbbr, String digitalObjectId, String collectionId){
+  public static DigitalObjectCollection generate(String projectAbbr, String digitalObjectId, String collectionId){
 
     if(!digitalObjectId.contains(projectAbbr)){
       String msg = String.format("Digital object ID %s must contain the project abbreviation %s", digitalObjectId, projectAbbr);
@@ -34,7 +34,7 @@ public enum TestGAMSCollection {
       throw new IllegalArgumentException(msg);
     }
 
-    return GAMSCollection.builder()
+    return DigitalObjectCollection.builder()
         .id(collectionId)
         .title(TITLE.getValue())
         .description(DESCRIPTION.getValue())
@@ -45,8 +45,8 @@ public enum TestGAMSCollection {
         .build();
   }
 
-  public static GAMSCollection generate(){
-    return GAMSCollection.builder()
+  public static DigitalObjectCollection generate(){
+    return DigitalObjectCollection.builder()
         .id(ID.getValue())
         .title(TITLE.getValue())
         .description(DESCRIPTION.getValue())

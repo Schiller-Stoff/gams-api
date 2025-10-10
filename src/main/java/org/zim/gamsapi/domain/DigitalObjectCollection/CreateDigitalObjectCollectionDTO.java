@@ -1,4 +1,4 @@
-package org.zim.gamsapi.domain.GAMSCollection;
+package org.zim.gamsapi.domain.DigitalObjectCollection;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class CreateGAMSCollectionDTO {
+public class CreateDigitalObjectCollectionDTO {
   private String projectAbbr;
   private String title;
   private String description;
