@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.Ingest.IngestRecord;
+import org.zim.gamsapi.DigitalObject.Ingest.IngestRecord;
 
 import java.time.Instant;
 

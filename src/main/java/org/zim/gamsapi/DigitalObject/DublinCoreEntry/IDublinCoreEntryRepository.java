@@ -28,6 +28,13 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    */
   List<DublinCoreEntrySummaryView> findByDigitalObjectAndName(DigitalObject digitalObject, String name);
 
+    /**
+     * Find DublinCoreEntries by digital object id.
+     * @param digitalObjectId
+     * @return
+     */
+  List<DublinCoreEntry> findEntriesByDigitalObjectId(String digitalObjectId);
+
   /**
    * Find DublinCoreEntries by digital object.
    * @param digitalObject digital object

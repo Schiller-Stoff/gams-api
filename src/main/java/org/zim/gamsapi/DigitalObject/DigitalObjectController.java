@@ -24,8 +24,8 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModi
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
-import org.zim.gamsapi.Ingest.IngestService;
-import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
+import org.zim.gamsapi.DigitalObject.Ingest.IngestService;
+import org.zim.gamsapi.DigitalObject.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectException;

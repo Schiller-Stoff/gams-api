@@ -12,8 +12,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
-import org.zim.gamsapi.Ingest.utils.ZipUtils;
+import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.BagFilePaths;
+import org.zim.gamsapi.DigitalObject.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.TestDataBuilder;
 import org.zim.gamsapi.TestUtilities.TestDataSet;
@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
