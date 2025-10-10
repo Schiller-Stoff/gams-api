@@ -10,7 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.IngestStatics;
+import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.System.security.exceptions.UserNotAssignedToProjectException;

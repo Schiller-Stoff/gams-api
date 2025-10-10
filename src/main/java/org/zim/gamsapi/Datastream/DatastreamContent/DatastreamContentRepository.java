@@ -10,7 +10,7 @@ import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamCannotLoadFileExcep
 import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamCannotWriteFileException;
 import org.zim.gamsapi.Datastream.utils.exceptions.DatastreamIdHashingException;
 import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.ZipUtils;
+import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.System.configproperties.GAMSStorageProperties;
 import org.zim.gamsapi.System.utils.FileUtils;
 

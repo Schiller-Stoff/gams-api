@@ -20,10 +20,10 @@ import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundExcep
 import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectService;
-import org.zim.gamsapi.DigitalObject.Ingest.Ingest;
-import org.zim.gamsapi.DigitalObject.Ingest.IngestService;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.Bagit.BagFilePaths;
-import org.zim.gamsapi.DigitalObject.Ingest.utils.ZipUtils;
+import org.zim.gamsapi.Ingest.Ingest;
+import org.zim.gamsapi.Ingest.IngestService;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
+import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
