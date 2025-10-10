@@ -56,7 +56,6 @@ public class BagInfo {
       return BagInfo.builder()
               .date(submissionRecord.getBaggingDate())
               .time(submissionRecord.getBaggingTime())
-              // TODO this needs to be regenerated
               .payloadOxum(submissionRecord.getBagPayloadOxum())
               .contactMail(submissionRecord.getBagContactMail())
               .externalDescription(submissionRecord.getBagExternalDescription())
