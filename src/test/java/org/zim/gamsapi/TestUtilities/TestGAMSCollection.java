@@ -1,8 +1,8 @@
 package org.zim.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.GAMSCollection.GAMSCollection;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
+import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 
 import java.util.Set;
 

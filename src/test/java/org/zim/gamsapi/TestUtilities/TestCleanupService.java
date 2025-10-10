@@ -7,20 +7,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
-import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
-import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.zim.gamsapi.domain.Datastream.Datastream;
+import org.zim.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
+import org.zim.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentRepository;
+import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
+import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
-import org.zim.gamsapi.GAMSCollection.GAMSCollection;
-import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.domain.GAMSCollection.GAMSCollection;
+import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
+import org.zim.gamsapi.application.Ingest.interfaces.IIngestRecordRepository;
+import org.zim.gamsapi.domain.Project.Project;
+import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 
 @Service
 @Transactional

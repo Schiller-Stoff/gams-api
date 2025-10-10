@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.ProjectBuilder;
+import org.zim.gamsapi.domain.Project.Project;
+import org.zim.gamsapi.domain.Project.ProjectBuilder;
 
 /**
  * Enum for test project credentials.
