@@ -3,9 +3,8 @@ package org.zim.gamsapi.domain.Datastream.utils.converter;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
-import org.zim.gamsapi.domain.Datastream.utils.converter.DatastreamDetailsViewToDatastreamMainResourceDtoConverter;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 
 import java.time.Instant;

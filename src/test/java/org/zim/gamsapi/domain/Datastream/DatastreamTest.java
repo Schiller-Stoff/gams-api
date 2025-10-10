@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.TestUtilities.TestDatastream;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
-import org.zim.gamsapi.domain.Datastream.Datastream;
-import org.zim.gamsapi.domain.Datastream.DatastreamId;
 
 import java.util.Set;
 

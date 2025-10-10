@@ -1,6 +1,6 @@
 package org.zim.gamsapi.domain.Datastream.utils.interfaces;
 
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import java.util.Set;
 
 /**

@@ -4,13 +4,11 @@ import jakarta.validation.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.domain.Project.ProjectBuilder;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 
 import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;

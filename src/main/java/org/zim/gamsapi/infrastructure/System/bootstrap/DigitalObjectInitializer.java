@@ -12,7 +12,7 @@ import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
+import org.zim.gamsapi.domain.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.infrastructure.System.configproperties.GAMSAPIProperties;

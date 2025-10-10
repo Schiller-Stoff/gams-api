@@ -2,8 +2,6 @@ package org.zim.gamsapi.domain;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
 import org.zim.gamsapi.UnitTest;
 
 public class MetadataBaseEntityBuilderTest extends UnitTest {

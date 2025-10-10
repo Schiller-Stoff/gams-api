@@ -2,9 +2,8 @@ package org.zim.gamsapi.domain.Datastream.utils.converter;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.domain.Datastream.utils.converter.DatastreamMainResourceViewToDatastreamMainResourceDtoConverter;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMainResourceView;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 
 import java.util.Set;

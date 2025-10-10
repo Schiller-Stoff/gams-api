@@ -9,15 +9,12 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.domain.Datastream.Datastream;
-import org.zim.gamsapi.domain.Datastream.DatastreamBuilder;
-import org.zim.gamsapi.domain.Datastream.DatastreamId;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.TestUtilities.*;
 

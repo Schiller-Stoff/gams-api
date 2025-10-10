@@ -15,7 +15,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.http.HttpStatus;
 import org.zim.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectException;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.domain.Project.Project;
 
 import java.util.Date;

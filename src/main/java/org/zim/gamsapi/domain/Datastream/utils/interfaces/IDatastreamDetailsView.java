@@ -1,7 +1,7 @@
 package org.zim.gamsapi.domain.Datastream.utils.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import java.util.Date;
 import java.util.Set;
 

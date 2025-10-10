@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.BagData;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
+import org.zim.gamsapi.domain.MetadataBaseEntityBuilder;
 
 @Component
 public class BagDataToDigitalObjectConverter implements Converter<BagData, DigitalObject> {

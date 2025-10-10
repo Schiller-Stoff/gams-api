@@ -3,7 +3,7 @@ package org.zim.gamsapi.TestUtilities;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 
 import java.util.Set;
 

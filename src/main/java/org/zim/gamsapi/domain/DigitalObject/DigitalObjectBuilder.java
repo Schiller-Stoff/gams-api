@@ -1,6 +1,7 @@
 package org.zim.gamsapi.domain.DigitalObject;
 
 import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.ProjectBuilder;
 
@@ -35,7 +36,7 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder baseMetadata(org.zim.gamsapi.MetadataBaseEntity baseMetadata) {
+  public DigitalObjectBuilder baseMetadata(MetadataBaseEntity baseMetadata) {
     digitalObject.setBaseMetadata(baseMetadata);
     return this;
   }

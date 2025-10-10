@@ -4,7 +4,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.*;
 import org.zim.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import java.util.*;
 
 /**

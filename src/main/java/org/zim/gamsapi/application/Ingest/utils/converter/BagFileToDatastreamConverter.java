@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.Datastream.DatastreamBuilder;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.BagFile;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
+import org.zim.gamsapi.domain.MetadataBaseEntityBuilder;
 
 @Component
 public class BagFileToDatastreamConverter implements Converter<BagFile, Datastream> {

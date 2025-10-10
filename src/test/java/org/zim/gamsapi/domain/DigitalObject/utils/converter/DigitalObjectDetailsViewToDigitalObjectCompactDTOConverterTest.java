@@ -2,10 +2,9 @@ package org.zim.gamsapi.domain.DigitalObject.utils.converter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.domain.DigitalObject.utils.converter.DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter;
 import org.zim.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 import java.util.Date;
 

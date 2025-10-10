@@ -3,7 +3,7 @@ package org.zim.gamsapi.domain.Datastream;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 
 import java.util.HashSet;
 import java.util.Set;

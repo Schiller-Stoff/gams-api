@@ -2,12 +2,10 @@ package org.zim.gamsapi.domain.DigitalObject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 
 import java.util.Date;
 

@@ -1,8 +1,7 @@
 package org.zim.gamsapi.domain.DigitalObject.utils.interfaces;
 
-import org.zim.gamsapi.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
 import java.util.Date;
-import java.util.Set;
 
 /**
  * Spring Data JPA Projection Interface for a singular DigitalObject.

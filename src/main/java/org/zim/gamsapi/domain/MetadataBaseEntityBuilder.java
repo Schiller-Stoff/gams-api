@@ -1,4 +1,4 @@
-package org.zim.gamsapi;
+package org.zim.gamsapi.domain;
 
 import lombok.extern.slf4j.Slf4j;
 
