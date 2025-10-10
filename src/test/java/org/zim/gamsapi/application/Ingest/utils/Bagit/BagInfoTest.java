@@ -3,6 +3,7 @@ package org.zim.gamsapi.application.Ingest.utils.Bagit;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestIngestRecord;
@@ -38,6 +39,37 @@ public class BagInfoTest extends UnitTest {
             Assertions.assertThat(bagInfo.getContactMail()).isEqualTo(TEST_INGEST_RECORD.getBagContactMail());
             Assertions.assertThat(bagInfo.getExternalDescription()).isEqualTo(TEST_INGEST_RECORD.getBagExternalDescription());
         }
+
+
+    }
+
+    @Nested
+    public class ToBagInfoContent {
+
+      @Test
+      public void toBagInfoContentReturnsNonNullOrEmptyString(){
+        var bagInfo = TestBag.TestBagInfo.generate();
+        var content = bagInfo.toBagInfoContent();
+        Assertions.assertThat(content)
+            .isNotNull()
+            .isNotEmpty();
+
+      }
+
+      @Test
+      public void containsExpectedValues(){
+        var bagInfo = TestBag.TestBagInfo.generate();
+        var content = bagInfo.toBagInfoContent();
+
+        Assertions.assertThat(content).contains(
+            TestBag.TestBagInfo.BAGGING_TIME,
+            TestBag.TestBagInfo.BAGGING_DATE,
+            TestBag.TestBagInfo.CONTACT_EMAIL,
+            TestBag.TestBagInfo.EXTERNAL_DESCRIPTION,
+            TestBag.TestBagInfo.PAYLOAD_OXUM.toString()
+        );
+
+      }
 
 
     }

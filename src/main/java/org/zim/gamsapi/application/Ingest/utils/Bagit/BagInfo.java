@@ -62,4 +62,32 @@ public class BagInfo {
               .build();
   }
 
+  /**
+   * Generates the content of the bag-info.txt file based on the fields of this BagInfo object.
+   * @param payloadOxum the payload oxum to use in the bag-info content
+   * @return content of bag-info.txt
+   */
+  public String toBagInfoContent(float payloadOxum){
+    return String.format(
+        "Bagging-Date: %s%n" +
+            "Bagging-Time: %s%n" +
+            "Contact-Email: %s%n" +
+            "External-Description: %s%n" +
+            "Payload-Oxum: %s%n",
+        date,
+        time,
+        contactMail,
+        externalDescription,
+        payloadOxum
+    );
+  }
+
+  /**
+   * Generates the content of the bag-info.txt file based on the fields of this BagInfo object.
+   * @return content of bag-info.txt
+   */
+  public String toBagInfoContent(){
+    return toBagInfoContent(this.payloadOxum);
+  }
+
 }

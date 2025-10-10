@@ -1,6 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
 import org.springframework.core.io.ClassPathResource;
+import org.zim.gamsapi.application.Ingest.utils.Bagit.BagInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,17 @@ public class TestBag {
     public static final Float PAYLOAD_OXUM = 27387.0f;
     public static final String CONTACT_EMAIL = "dh@uni-graz.at";
     public static final String EXTERNAL_DESCRIPTION = "Test bag for gamsapi tests";
+
+    public static BagInfo generate(){
+      return BagInfo.builder()
+          .payloadOxum(PAYLOAD_OXUM)
+          .date(BAGGING_DATE)
+          .time(BAGGING_TIME)
+          .contactMail(CONTACT_EMAIL)
+          .externalDescription(EXTERNAL_DESCRIPTION)
+          .build();
+    }
+
   }
 
   public static class BagitTxt {

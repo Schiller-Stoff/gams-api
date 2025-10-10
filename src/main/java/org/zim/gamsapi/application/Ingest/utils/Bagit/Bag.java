@@ -252,27 +252,9 @@ public class Bag {
    * @throws IOException in case of any problems
    */
   private void writeBagInfo(ZipOutputStream zipOut, float payloadOxum) throws IOException {
-    Instant timestamp = bagInfo.getBaggingTimeStamp();
-    String date = timestamp.atZone(ZoneOffset.UTC)
-        .format(DateTimeFormatter.ISO_LOCAL_DATE);
-    String time = timestamp.atZone(ZoneOffset.UTC)
-        .format(DateTimeFormatter.ISO_LOCAL_TIME) + " UTC";
-
-    // TODO serialization should be done in BagInfo class?
-    String content = String.format(
-        "Bagging-Date: %s%n" +
-            "Bagging-Time: %s%n" +
-            "Contact-Email: %s%n" +
-            "External-Description: %s%n" +
-            "Payload-Oxum: %s%n",
-        date,
-        time,
-        bagInfo.getContactMail(),
-        bagInfo.getExternalDescription(),
-        payloadOxum
-    );
-
-    writeTextEntry(zipOut, bagData.getId() + "/bag-info.txt", content);
+    // TODO do i still need a seperate method for this?
+    var bagInfoAsTxt = bagInfo.toBagInfoContent(payloadOxum);
+    writeTextEntry(zipOut, bagData.getId() + "/bag-info.txt", bagInfoAsTxt);
   }
 
   /**
