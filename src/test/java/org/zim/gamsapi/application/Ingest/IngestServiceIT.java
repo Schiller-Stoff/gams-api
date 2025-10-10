@@ -18,7 +18,7 @@ import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.EventCaptureListener;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
-import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.application.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;

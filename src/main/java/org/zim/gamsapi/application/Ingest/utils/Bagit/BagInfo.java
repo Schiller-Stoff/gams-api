@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.zim.gamsapi.application.Ingest.SubmissionRecord;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 
 import java.time.*;

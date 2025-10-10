@@ -1,4 +1,4 @@
-package org.zim.gamsapi.application.Ingest;
+package org.zim.gamsapi.domain.DigitalObject.SubmissionRecord;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

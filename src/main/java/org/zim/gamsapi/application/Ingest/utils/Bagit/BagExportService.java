@@ -13,8 +13,8 @@ import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentRepository;
-import org.zim.gamsapi.application.Ingest.SubmissionRecord;
-import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

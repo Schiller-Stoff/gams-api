@@ -1,4 +1,4 @@
-package org.zim.gamsapi.application.Ingest;
+package org.zim.gamsapi.domain.DigitalObject.SubmissionRecord;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;

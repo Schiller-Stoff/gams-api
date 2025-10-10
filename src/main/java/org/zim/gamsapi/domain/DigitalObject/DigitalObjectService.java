@@ -26,7 +26,7 @@ import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectService;
-import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.zim.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.zim.gamsapi.infrastructure.System.dto.PagedResponse;

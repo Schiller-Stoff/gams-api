@@ -3,7 +3,7 @@ package org.zim.gamsapi.application.Ingest.utils.Bagit;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.application.Ingest.SubmissionRecord;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestIngestRecord;
 import org.zim.gamsapi.UnitTest;

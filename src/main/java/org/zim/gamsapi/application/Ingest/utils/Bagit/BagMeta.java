@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
-import org.zim.gamsapi.application.Ingest.SubmissionRecord;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 
 /**
  * Metadata obtained from bagit.txt file.

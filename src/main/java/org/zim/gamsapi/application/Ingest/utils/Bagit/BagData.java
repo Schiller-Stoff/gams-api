@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.application.Ingest.SubmissionRecord;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 
 import java.util.HashSet;
 import java.util.Set;

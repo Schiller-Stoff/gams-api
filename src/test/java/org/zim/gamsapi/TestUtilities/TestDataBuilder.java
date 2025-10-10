@@ -11,7 +11,7 @@ import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.domain.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.application.Ingest.interfaces.ISubmissionRecordRepository;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.zim.gamsapi.domain.Project.Project;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 
