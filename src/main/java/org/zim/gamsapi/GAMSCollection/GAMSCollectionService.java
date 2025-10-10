@@ -5,13 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.exceptions.CollectionNotFoundException;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.HashSet;

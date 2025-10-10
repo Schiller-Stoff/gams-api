@@ -1,12 +1,12 @@
-package org.zim.gamsapi.DigitalObject.interfaces;
+package org.zim.gamsapi.DigitalObject.utils.interfaces;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
-import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.io.OutputStream;

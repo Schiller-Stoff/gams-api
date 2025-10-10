@@ -1,7 +1,6 @@
-package org.zim.gamsapi.DigitalObject.exceptions;
+package org.zim.gamsapi.DigitalObject.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectException;
 
 /**
  * Digital object not found representing status 404

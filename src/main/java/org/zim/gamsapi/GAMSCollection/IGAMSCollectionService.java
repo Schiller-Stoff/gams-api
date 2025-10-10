@@ -1,7 +1,7 @@
 package org.zim.gamsapi.GAMSCollection;
 
 import org.springframework.data.domain.Pageable;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.System.dto.PagedResponse;

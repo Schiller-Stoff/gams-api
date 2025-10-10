@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject;
+package org.zim.gamsapi.DigitalObject.utils.interfaces;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -11,6 +11,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.GAMSCollection.GAMSCollection;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.IntegrationTest;

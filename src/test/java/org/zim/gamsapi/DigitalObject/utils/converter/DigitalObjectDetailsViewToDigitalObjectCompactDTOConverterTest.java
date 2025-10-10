@@ -1,9 +1,9 @@
-package org.zim.gamsapi.DigitalObject.converter;
+package org.zim.gamsapi.DigitalObject.utils.converter;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.DigitalObject.dto.DigitalObjectCompactDTO;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
+import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectCompactDTO;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.UnitTest;
 import java.util.Date;
@@ -46,7 +46,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
   /**
    * Test implementation of the *DetailsView - just needed to test the conversion process.
    */
-  private static class DigitalObjectDetailsViewImpl implements org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView {
+  private static class DigitalObjectDetailsViewImpl implements DigitalObjectDetailsView {
 
     private final Date created = new Date();
     private final Date modified = new Date();

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.MetadataBaseEntity;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;

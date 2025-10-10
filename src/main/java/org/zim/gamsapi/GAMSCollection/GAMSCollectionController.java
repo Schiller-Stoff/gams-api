@@ -11,7 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GAMSCollectionDetailsView;
 import org.zim.gamsapi.GAMSCollection.interfaces.GamsCollectionCompactView;
 import org.zim.gamsapi.Project.ProjectBuilder;

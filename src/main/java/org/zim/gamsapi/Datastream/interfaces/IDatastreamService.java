@@ -7,7 +7,8 @@ import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamAmbiguousMatchException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public interface IDatastreamService {
    * @param digitalObjectId digital object that defines it's main datastream
    * @throws DigitalObjectNotFoundException (unchecked) if the digital object does not exist
    * @throws DatastreamNotFoundException (unchecked) if the main datastream does not exist
-   * @throws org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException (unchecked) if the digital object has no mainResource datastream defined.
+   * @throws DigitalObjectNoMainResourceDatastreamDefinedException (unchecked) if the digital object has no mainResource datastream defined.
    * @return found mainResource datastream projection
    */
   IDatastreamDetailsView findMainDatastreamByDigitalObjectId(String digitalObjectId);

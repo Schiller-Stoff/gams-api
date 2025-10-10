@@ -9,10 +9,9 @@ import org.springframework.util.MultiValueMap;
 import org.zim.gamsapi.Datastream.dto.DatastreamMainResourceDto;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamMainResourceView;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectDublinCoreSpecification;
-import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
-import org.zim.gamsapi.DigitalObject.interfaces.IDigitalObjectService;
+import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectService;
 
 import java.util.List;
 import java.util.Map;

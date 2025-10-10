@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.UnitTest;
 
 public class DublinCoreEntrySummaryViewToDublinCoreCompactDTOConverterTest extends UnitTest {

@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject.interfaces;
+package org.zim.gamsapi.DigitalObject.utils.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 

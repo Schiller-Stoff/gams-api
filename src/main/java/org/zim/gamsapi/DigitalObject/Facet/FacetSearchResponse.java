@@ -5,8 +5,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.domain.Page;
-import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
+import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.util.List;

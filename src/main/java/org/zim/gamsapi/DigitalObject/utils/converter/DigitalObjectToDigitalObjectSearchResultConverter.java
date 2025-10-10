@@ -1,9 +1,9 @@
-package org.zim.gamsapi.DigitalObject.converter;
+package org.zim.gamsapi.DigitalObject.utils.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.dto.DigitalObjectSearchResultDTO;
+import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
 
 
 /**

@@ -9,7 +9,7 @@ import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
 import org.zim.gamsapi.DigitalObject.Ingest.interfaces.IIngestRecordRepository;
 import org.zim.gamsapi.Project.Project;

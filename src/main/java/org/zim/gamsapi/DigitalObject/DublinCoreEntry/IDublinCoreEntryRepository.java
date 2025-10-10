@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import java.util.List;
 import java.util.Set;
 import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;

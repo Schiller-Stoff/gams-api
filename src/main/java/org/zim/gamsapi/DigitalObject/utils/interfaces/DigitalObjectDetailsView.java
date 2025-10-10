@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject.interfaces;
+package org.zim.gamsapi.DigitalObject.utils.interfaces;
 
 import org.zim.gamsapi.MetadataBaseEntity;
 import java.util.Date;

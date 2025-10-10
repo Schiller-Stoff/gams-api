@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.DigitalObject.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;

@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject.dto;
+package org.zim.gamsapi.DigitalObject.utils.dto;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Builder;

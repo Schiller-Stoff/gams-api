@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject;
+package org.zim.gamsapi.DigitalObject.utils.interfaces;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -7,9 +7,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectListItemView;
+import org.zim.gamsapi.DigitalObject.DigitalObject;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;

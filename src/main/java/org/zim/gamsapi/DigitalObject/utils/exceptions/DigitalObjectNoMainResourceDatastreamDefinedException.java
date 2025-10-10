@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject.exceptions;
+package org.zim.gamsapi.DigitalObject.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
 

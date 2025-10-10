@@ -1,4 +1,4 @@
-package org.zim.gamsapi.DigitalObject.interfaces;
+package org.zim.gamsapi.DigitalObject.utils.interfaces;
 
 /**
  * Interface for a view of a digital object's id.

@@ -15,9 +15,9 @@ import org.zim.gamsapi.Datastream.exceptions.DatastreamCannotLoadFileException;
 import org.zim.gamsapi.Datastream.exceptions.DatastreamNotFoundException;
 import org.zim.gamsapi.Datastream.interfaces.*;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.System.dto.PagedResponse;
 
 import java.io.IOException;

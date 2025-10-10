@@ -15,7 +15,7 @@ import org.zim.gamsapi.DigitalObject.DigitalObject;
 import org.zim.gamsapi.DigitalObject.DigitalObjectCreatedEvent;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.DigitalObject.Ingest.exceptions.IngestAgainstDifferentProjectException;
 import org.zim.gamsapi.DigitalObject.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.DigitalObject.Ingest.exceptions.IngestProcessingException;

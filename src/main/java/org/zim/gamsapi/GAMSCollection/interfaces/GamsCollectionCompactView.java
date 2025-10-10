@@ -1,7 +1,7 @@
 package org.zim.gamsapi.GAMSCollection.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.zim.gamsapi.Project.interfaces.ProjectIdView;
 
 import java.util.Set;

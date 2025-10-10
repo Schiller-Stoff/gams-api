@@ -10,7 +10,7 @@ import org.zim.gamsapi.Datastream.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.interfaces.IDatastreamService;
 import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.exceptions.DigitalObjectNotFoundException;
+import org.zim.gamsapi.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.*;
 

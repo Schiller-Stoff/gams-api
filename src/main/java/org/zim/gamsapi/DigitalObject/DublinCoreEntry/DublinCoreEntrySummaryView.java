@@ -1,6 +1,6 @@
 package org.zim.gamsapi.DigitalObject.DublinCoreEntry;
 
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectIdView;
 
 /**
  * View for a DublinCoreEntry summary.

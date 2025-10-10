@@ -1,7 +1,6 @@
 package org.zim.gamsapi.GAMSCollection.interfaces;
 
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectDetailsView;
-import org.zim.gamsapi.DigitalObject.interfaces.DigitalObjectIdView;
+import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 import org.zim.gamsapi.Project.interfaces.ProjectIdView;
 
 import java.util.Set;
