@@ -1,10 +1,12 @@
 package org.zim.gamsapi.Ingest;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
+import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.System.config.OpenAPIConfig;
 
 import java.io.IOException;
@@ -25,6 +28,7 @@ import java.io.IOException;
 public class IngestController {
 
   private final IIngestService ingestService;
+  private final IProjectService projectService;
 
   @PostMapping(produces = "application/json", path = { "/api/v1/projects/{projectAbbr}/objects"})
   @ResponseBody
@@ -76,6 +80,42 @@ public class IngestController {
 
     // TODO need to return meaningful information about the ingest (e.g. like a status or a reference to the created object?)
     // return ingest;
+  }
+
+
+  @GetMapping(produces = "application/zip", path = { "/api/v1/projects/{projectAbbr}/objects/{id}/export"})
+  @ResponseBody
+  @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
+  @Parameter(name = "id", description = "Digital object ID", required = true)
+  public void exportBag(@PathVariable String projectAbbr,
+                        @PathVariable String id,
+                        HttpServletResponse response) {
+
+
+    log.info("Export request for object {} in project {}", id, projectAbbr);
+
+    // Verify project exists and matches object
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    // Set response headers
+    String filename = id + "-bag.zip";
+    response.setContentType("application/zip");
+    response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
+    // TODO Disable buffering for large files?
+    // TODO if object is big different procedure?
+    response.setBufferSize(8192);
+
+    try {
+      ingestService.exportAsBag(id, response.getOutputStream());
+      response.flushBuffer();
+    } catch (IOException e) {
+      String msg = String.format("I/O error during bag export for object %s in project %s. Original error: %s", id, projectAbbr, e);
+      log.error(msg);
+      // TODO NEEDS A DIFFERENT EXCEPTION!
+      throw new IngestProcessingException(msg);
+    }
+
   }
 
 

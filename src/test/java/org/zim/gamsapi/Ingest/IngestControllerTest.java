@@ -3,12 +3,12 @@ package org.zim.gamsapi.Ingest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.zim.gamsapi.Ingest.Ingest;
-import org.zim.gamsapi.Ingest.IngestController;
 import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
+import org.zim.gamsapi.Project.interfaces.IProjectService;
 import org.zim.gamsapi.UnitTest;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +20,7 @@ public class IngestControllerTest extends UnitTest {
     HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     when(request.getPart(IngestStatics.FORM_PART_NAME.name)).thenReturn(null);
 
-    IngestController controller = new IngestController(Mockito.mock(IIngestService.class));
+    IngestController controller = new IngestController(Mockito.mock(IIngestService.class), Mockito.mock(IProjectService.class));
 
     // Act and Assert
     assertThrows(IngestProcessingException.class, () -> {

@@ -17,17 +17,17 @@ import org.zim.gamsapi.Datastream.DatastreamId;
 import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.zim.gamsapi.Ingest.utils.Bagit.BagFilePaths;
 import org.zim.gamsapi.Ingest.utils.IngestStatics;
 import org.zim.gamsapi.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.TestUtilities.TestBag;
-import org.zim.gamsapi.TestUtilities.TestDatastream;
-import org.zim.gamsapi.TestUtilities.TestDigitalObject;
-import org.zim.gamsapi.TestUtilities.TestProject;
-
+import org.zim.gamsapi.TestUtilities.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -53,10 +53,12 @@ public class IngestControllerIT extends IntegrationTest {
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;
 
+  @Autowired
+  private TestDataBuilder testDataBuilder;
+
   // disables auditing
   @MockitoBean
   private AuditingHandler auditingHandler;
-
 
   File bagFile;
 
@@ -66,38 +68,44 @@ public class IngestControllerIT extends IntegrationTest {
     projectRepository.save(TestProject.generate());
   }
 
-  @Test
-  public void ingestCreatesAtLeastOneObjectAndOneDatastream() throws Exception {
-    byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
-    mockMvc
-        .perform(
-            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
-            .part(mockPart)
-        )
-        .andExpect(status().isOk());
 
+  @Nested
+  public class IngestBaseSuccessTests {
 
-    Assertions.assertThat(datastreamRepository.findAll()).isNotEmpty();
-    Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
+    @Test
+    public void ingestCreatesAtLeastOneObjectAndOneDatastream() throws Exception {
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                  .part(mockPart)
+          )
+          .andExpect(status().isOk());
 
+      Assertions.assertThat(datastreamRepository.findAll()).isNotEmpty();
+      Assertions.assertThat(digitalObjectRepository.findAll()).isNotEmpty();
+
+    }
+
+    @Test
+    public void ingestFailsIfProjectAbbrDiffersFromBagItSipJSONProject() throws Exception {
+      final String MISMATCHING_PROJECT_ABBR = "different";
+      // need to ensure that the different project is there (otherwise a 404 error will be thrown)
+      projectRepository.save(TestProject.generate(MISMATCHING_PROJECT_ABBR));
+
+      byte[] zippedBag = ZipUtils.zipDir(bagFile);
+      MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+      mockMvc
+          .perform(
+              multipart("/api/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
+                  .part(mockPart)
+          )
+          .andExpect(status().isBadRequest());
+    }
   }
 
-  @Test
-  public void ingestFailsIfProjectAbbrDiffersFromBagItSipJSONProject() throws Exception {
-    final String MISMATCHING_PROJECT_ABBR = "different";
-    // need to ensure that the different project is there (otherwise a 404 error will be thrown)
-    projectRepository.save(TestProject.generate(MISMATCHING_PROJECT_ABBR));
 
-    byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
-    mockMvc
-        .perform(
-            multipart("/api/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
-            .part(mockPart)
-        )
-        .andExpect(status().isBadRequest());
-  }
 
   @Nested
   public class IngestDigitalObjectGETAssertions {
@@ -118,8 +126,6 @@ public class IngestControllerIT extends IntegrationTest {
           .andExpect(status().isOk());
 
     }
-
-
 
     @Nested
     public class WebViewAssertion{
@@ -424,4 +430,149 @@ public class IngestControllerIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class ExportBag {
+
+    private TestDataSet testDataSet;
+
+    @BeforeEach
+    public void setup() {
+      testDataSet = testDataBuilder.buildTestDataSet();
+    }
+
+    @Test
+    public void exportedBagIsNotNullOrEmpty() throws Exception {
+
+      MvcResult result = mockMvc.perform(
+              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+                      testDataSet.project().getProjectAbbr(),
+                      testDataSet.digitalObject().getId())
+                  .accept("application/zip")
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.header().string("Content-Type", "application/zip"))
+          .andExpect(MockMvcResultMatchers.header().exists("Content-Disposition"))
+          .andReturn();
+
+      byte[] exportedZip = result.getResponse().getContentAsByteArray();
+      org.assertj.core.api.Assertions.assertThat(exportedZip).isNotEmpty();
+
+    }
+
+    @Test
+    public void exportedBagContainsExpectedValues() throws Exception {
+
+      MvcResult result = mockMvc.perform(
+              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+                      testDataSet.project().getProjectAbbr(),
+                      testDataSet.digitalObject().getId())
+                  .accept("application/zip")
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.header().string("Content-Type", "application/zip"))
+          .andExpect(MockMvcResultMatchers.header().exists("Content-Disposition"))
+          .andReturn();
+
+      byte[] exportedZip = result.getResponse().getContentAsByteArray();
+      org.assertj.core.api.Assertions.assertThat(exportedZip).isNotEmpty();
+
+
+      List<String> containedFileNames = new ArrayList<>();
+
+      ZipUtils.walkZippedDir(exportedZip, (zipEntry, bos) -> {
+        String fileName = Path.of(zipEntry.getName()).getFileName().toString();
+        containedFileNames.add(fileName);
+
+        switch (fileName){
+          case "bagit.txt" -> {
+            String bagitTxt = bos.toString();
+            org.assertj.core.api.Assertions.assertThat(bagitTxt)
+                .contains(testDataSet.ingestRecord().getBagVersion())
+                .contains(testDataSet.ingestRecord().getBagTagFileCharacterEncoding());
+          }
+          case "bag-info.txt" -> {
+            String bagInfoTxt = bos.toString();
+            org.assertj.core.api.Assertions.assertThat(bagInfoTxt)
+                .contains(testDataSet.ingestRecord().getBagExternalDescription())
+                .contains(testDataSet.ingestRecord().getBaggingDate())
+                .contains(testDataSet.ingestRecord().getBaggingTime())
+                .contains(testDataSet.ingestRecord().getBagContactMail())
+                .contains("Payload-Oxum: ")
+            // Payload oxum cannot be the same because the test data ingest not the complete bag
+            //.contains(testDataSet.ingestRecord().getBagPayloadOxum().toString())
+            ;
+          }
+          case "manifest-md5.txt" -> {
+            String manifestMd5Txt = bos.toString();
+            org.assertj.core.api.Assertions.assertThat(manifestMd5Txt)
+                .contains(testDataSet.mainDatastream().getBaseMetadata().getMd5Checksum())
+                .contains(testDataSet.mainDatastream().getDsid())
+                .contains(BagFilePaths.BAG_SIP_JSON.name)
+            ;
+          }
+          case "manifest-sha512.txt" -> {
+            String manifestSha512Txt = bos.toString();
+            org.assertj.core.api.Assertions.assertThat(manifestSha512Txt)
+                .contains(testDataSet.mainDatastream().getBaseMetadata().getSha512Checksum())
+                .contains(testDataSet.mainDatastream().getDsid())
+                .contains(BagFilePaths.BAG_SIP_JSON.name)
+            ;
+          }
+          case "sip.json" -> {
+            String sipJson = bos.toString();
+            org.assertj.core.api.Assertions.assertThat(sipJson)
+                .contains(testDataSet.digitalObject().getId())
+                .contains(testDataSet.digitalObject().getProject().getProjectAbbr())
+                .contains(testDataSet.digitalObject().getObjectType())
+                .contains(testDataSet.digitalObject().getFunder())
+                .contains(testDataSet.digitalObject().getMainResource())
+                // base metadata
+                .contains(testDataSet.digitalObject().getBaseMetadata().getTitle())
+                .contains(testDataSet.digitalObject().getBaseMetadata().getDescription())
+                .contains(testDataSet.digitalObject().getBaseMetadata().getCreator())
+                .contains(testDataSet.digitalObject().getBaseMetadata().getRights())
+                .contains(testDataSet.digitalObject().getPublisher())
+                // assertions from ingestRecord
+                .contains(testDataSet.ingestRecord().getBagSource())
+                .contains(testDataSet.ingestRecord().getBagSchema())
+                .contains(testDataSet.ingestRecord().getBagCreatedBy());
+
+            // assertions for content files
+            org.assertj.core.api.Assertions.assertThat(sipJson)
+                .contains(testDataSet.mainDatastream().getDsid())
+                .contains(testDataSet.mainDatastream().getTags())
+                .contains(testDataSet.mainDatastream().getLang())
+                .contains(testDataSet.mainDatastream().getMimeType())
+                .contains(testDataSet.mainDatastream().getSize().toString())
+                .contains(testDataSet.mainDatastream().getBagPath());
+
+            var datastreamLang = testDataSet.mainDatastream().getLang();
+            for (String lang : datastreamLang) {
+              org.assertj.core.api.Assertions.assertThat(sipJson).contains(lang);
+            }
+            var datastreamTags = testDataSet.mainDatastream().getTags();
+            for (String tag : datastreamTags) {
+              org.assertj.core.api.Assertions.assertThat(sipJson).contains(tag);
+            }
+
+          }
+          default -> {
+            // other files are the datastreams - no content check here
+          }
+
+        }
+
+      });
+
+
+      org.assertj.core.api.Assertions.assertThat(containedFileNames)
+          .isNotEmpty()
+          .contains("bagit.txt", "bag-info.txt", "manifest-md5.txt", "sip.json", "manifest-sha512.txt")
+          .contains(testDataSet.mainDatastream().getDsid());
+
+    }
+
+
+
+  }
 }

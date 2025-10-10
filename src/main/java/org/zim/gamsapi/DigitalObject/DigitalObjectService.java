@@ -328,46 +328,5 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
 
-  @Override
-  @Transactional
-  public void exportAsBag(String objectId, OutputStream outputStream) {
 
-    // 01. fetch data from database
-    var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
-        () -> {
-          String msg = String.format("Digital object with id %s does not exist. Cannot export non-existing object.", objectId);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
-        }
-    );
-
-    var ingestRecord = bagEntityRepository.findById(objectId).orElseThrow(
-        () -> {
-          String msg = String.format("Ingest record for digital object with id %s does not exist. Cannot export non-existing object.", objectId);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
-        }
-    );
-
-    var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
-
-    if(datastreams.isEmpty()){
-      String msg = String.format("Digital object with id %s has no datastreams. Cannot export object without datastreams.", objectId);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
-    }
-
-    // 02. Map data to bag entities
-    BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
-    BagMeta bagMeta =  BagMeta.from(ingestRecord);
-    BagInfo bagInfo = BagInfo.from(ingestRecord);
-
-    // create bag from database entities
-    Bag bag = new Bag(bagInfo, bagMeta, bagData);
-
-    // 03. write bag
-    bag.writeAsZipToStream(outputStream, datastreamContentRepository);
-
-
-  }
 }

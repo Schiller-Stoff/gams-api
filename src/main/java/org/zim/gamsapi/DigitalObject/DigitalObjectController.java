@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -24,8 +23,6 @@ import org.zim.gamsapi.DigitalObject.DigitalObjectModification.DigitalObjectModi
 import org.zim.gamsapi.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.zim.gamsapi.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.DigitalObject.utils.interfaces.DigitalObjectListItemView;
-import org.zim.gamsapi.Ingest.IngestService;
-import org.zim.gamsapi.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.Project.Project;
 import org.zim.gamsapi.Project.ProjectBuilder;
 import org.zim.gamsapi.Project.exceptions.ProjectException;
@@ -34,7 +31,6 @@ import org.zim.gamsapi.System.config.OpenAPIConfig;
 import org.zim.gamsapi.System.dto.PagedResponse;
 import org.zim.gamsapi.System.utils.ControllerUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -55,7 +51,6 @@ public class DigitalObjectController {
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
   private final IDigitalObjectModificationService digitalObjectModificationService;
-  private final IngestService ingestService;
 
 
   @Operation(
@@ -341,40 +336,7 @@ public class DigitalObjectController {
     );
   }
 
-  @GetMapping(produces = "application/zip", path = { "/{id}/export"})
-  @ResponseBody
-  @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
-  @Parameter(name = "id", description = "Digital object ID", required = true)
-  public void exportBag(@PathVariable String projectAbbr,
-                        @PathVariable String id,
-                        HttpServletResponse response) {
 
-
-    log.info("Export request for object {} in project {}", id, projectAbbr);
-
-    // Verify project exists and matches object
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-
-    // Set response headers
-    String filename = id + "-bag.zip";
-    response.setContentType("application/zip");
-    response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-
-    // TODO Disable buffering for large files?
-    // TODO if object is big different procedure?
-    response.setBufferSize(8192);
-
-    try {
-      digitalObjectService.exportAsBag(id, response.getOutputStream());
-      response.flushBuffer();
-    } catch (IOException e) {
-      String msg = String.format("I/O error during bag export for object %s in project %s. Original error: %s", id, projectAbbr, e);
-      log.error(msg);
-      // TODO NEEDS A DIFFERENT EXCEPTION!
-      throw new IngestProcessingException(msg);
-    }
-
-  }
 
 
 }

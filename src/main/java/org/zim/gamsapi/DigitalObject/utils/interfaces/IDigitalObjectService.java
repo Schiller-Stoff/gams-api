@@ -88,11 +88,5 @@ public interface IDigitalObjectService {
       DigitalObjectDublinCoreSpecification.SearchMode searchMode,
       Pageable pageable);
 
-  /**
-   * Export a digital object as a zipped BagIt package and write it to the provided OutputStream.
-   * @param objectId the id of the digital object to export
-   * @param outputStream the OutputStream to write the zipped BagIt package to
-   */
-  void exportAsBag(String objectId, OutputStream outputStream);
 
 }
