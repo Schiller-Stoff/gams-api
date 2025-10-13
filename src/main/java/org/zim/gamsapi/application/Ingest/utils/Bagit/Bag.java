@@ -384,58 +384,10 @@ public class Bag {
    * @throws IOException in case of any problems
    */
   private String writeSipJson(ZipOutputStream zipOut) throws IOException {
-    // TODO serialization should be done in BagData class?
-
-    // Build sip.json from digital object metadata
-    Map<String, Object> sipJson = new LinkedHashMap<>();
-    sipJson.put("recid", bagData.getId());
-    sipJson.put("project", bagData.getProject());
-    sipJson.put("title", bagData.getTitle());
-    sipJson.put("objectType", bagData.getObjectType());
-    sipJson.put("description", bagData.getDescription());
-    sipJson.put("creator", bagData.getCreator());
-    sipJson.put("rights", bagData.getRights());
-    sipJson.put("publisher", bagData.getPublisher());
-
-    if (bagData.getFunder() != null) {
-      sipJson.put("funder", bagData.getFunder());
-    }
-
-    if (bagData.getMainResource() != null) {
-      sipJson.put("mainResource", bagData.getMainResource());
-    }
-
-    List<Map<String, Object>> contentFiles = bagData.getContentFiles().stream().map(contentFile -> {
-      Map<String, Object> fileMap = new LinkedHashMap<>();
-      fileMap.put("dsid", contentFile.getDsid());
-      fileMap.put("filename", contentFile.getBagpath());
-      fileMap.put("mimetype", contentFile.getMimetype());
-      fileMap.put("title", contentFile.getTitle());
-      fileMap.put("description", contentFile.getDescription());
-      fileMap.put("creator", contentFile.getCreator());
-      fileMap.put("rights", contentFile.getRights());
-      fileMap.put("size", contentFile.getSize());
-      fileMap.put("tags", new ArrayList<>(contentFile.getTags()));
-      fileMap.put("lang", new ArrayList<>(contentFile.getLang()));
-      return fileMap;
-    }).collect(Collectors.toList());
-
-
-    sipJson.put("contentFiles", contentFiles);
-    sipJson.put("$schema", bagData.getSchema());
-    sipJson.put("created_by", bagData.getCreatedBy());
-    sipJson.put("source", bagData.getSource());
-
-    // Convert to JSON
-    String jsonContent = toJson(sipJson);
-
-    String sipPath = "data/meta/sip.json";
-    writeTextEntry(zipOut, bagData.getId() + "/" + sipPath, jsonContent);
-
-    return jsonContent;
-
+    String sipJsonContent = bagData.toSipJsonContent();
+    writeTextEntry(zipOut, bagData.getId() + "/" + BagFilePaths.BAG_SIP_JSON.name, sipJsonContent);
+    return sipJsonContent;
   }
-
 
   /**
    * Writes file-content as string to a ZipOutputStream.
@@ -452,67 +404,6 @@ public class Bag {
     zipOut.write(bytes);
     zipOut.closeEntry();
   }
-
-
-  /**
-   * TODO jdoc
-   * @param map
-   * @return
-   */
-  private String toJson(Map<String, Object> map) {
-    // Simple JSON serialization - you should use Jackson in production
-    StringBuilder json = new StringBuilder("{\n");
-    Iterator<Map.Entry<String, Object>> iter = map.entrySet().iterator();
-    while (iter.hasNext()) {
-      Map.Entry<String, Object> entry = iter.next();
-      json.append("  \"").append(entry.getKey()).append("\": ");
-      json.append(toJsonValue(entry.getValue()));
-      if (iter.hasNext()) {
-        json.append(",");
-      }
-      json.append("\n");
-    }
-    json.append("}");
-    return json.toString();
-  }
-
-  /**
-   * TODO jdoc
-   * @param value
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  private String toJsonValue(Object value) {
-    if (value == null) {
-      return "null";
-    } else if (value instanceof String) {
-      return "\"" + escapeJson((String) value) + "\"";
-    } else if (value instanceof Number) {
-      return value.toString();
-    } else if (value instanceof List) {
-      List<?> list = (List<?>) value;
-      return "[" + list.stream()
-          .map(this::toJsonValue)
-          .collect(Collectors.joining(", ")) + "]";
-    } else if (value instanceof Map) {
-      return toJson((Map<String, Object>) value);
-    }
-    return "\"" + value.toString() + "\"";
-  }
-
-  /**
-   * TODO jdoc
-   * @param str
-   * @return
-   */
-  private String escapeJson(String str) {
-    return str.replace("\\", "\\\\")
-        .replace("\"", "\\\"")
-        .replace("\n", "\\n")
-        .replace("\r", "\\r")
-        .replace("\t", "\\t");
-  }
-
 
   /**
    * Converts byte array to hex string.

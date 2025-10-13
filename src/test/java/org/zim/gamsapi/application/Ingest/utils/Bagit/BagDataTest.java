@@ -1,8 +1,10 @@
 package org.zim.gamsapi.application.Ingest.utils.Bagit;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
@@ -53,6 +55,73 @@ public class BagDataTest {
             Assertions.assertThat(testBagdata.getCreatedBy()).isEqualTo(TEST_INGEST_RECORD.getBagCreatedBy());
             Assertions.assertThat(testBagdata.getSource()).isEqualTo(TEST_INGEST_RECORD.getBagSource());
         }
+
+    }
+
+    @Nested
+    public class ToSipJsonContent {
+      final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
+      final SubmissionRecord TEST_INGEST_RECORD = TestIngestRecord.generate(TEST_DIGITAL_OBJECT);
+      final Datastream TEST_DATASTREAM = TestDatastream.generate(TEST_DIGITAL_OBJECT);
+
+      BagData testBagdata;
+
+      @BeforeEach
+      public void beforeEach() {
+          // Nothing to set up before each test in this case
+          testBagdata = BagData.from(TEST_DIGITAL_OBJECT, Set.of(TEST_DATASTREAM), TEST_INGEST_RECORD);
+      }
+
+      @Test
+      public void createsNoNullString() {
+            var jsonString = testBagdata.toSipJsonContent();
+            Assertions.assertThat(jsonString).isNotNull();
+      }
+
+      @Test
+      public void createsNoEmptyString() {
+            var jsonString = testBagdata.toSipJsonContent();
+            Assertions.assertThat(jsonString).isNotEmpty();
+      }
+
+      @Test
+      public void createdStringContainsExpectedValues() {
+            var jsonString = testBagdata.toSipJsonContent();
+            Assertions.assertThat(jsonString)
+                .contains(
+                    testBagdata.getId(),
+                    testBagdata.getProject(),
+                    testBagdata.getTitle(),
+                    testBagdata.getObjectType(),
+                    testBagdata.getDescription(),
+                    testBagdata.getCreator(),
+                    testBagdata.getRights(),
+                    testBagdata.getPublisher(),
+                    testBagdata.getFunder(),
+                    testBagdata.getMainResource(),
+                    testBagdata.getSchema(),
+                    testBagdata.getCreatedBy(),
+                    testBagdata.getSource()
+                    );
+
+            // Assert existence of collection values
+            testBagdata.getContentFiles().forEach(bagFile -> {
+                Assertions.assertThat(jsonString).contains(bagFile.getDsid());
+            });
+            testBagdata.getTypes().forEach(type -> {
+                Assertions.assertThat(jsonString).contains(type);
+            });
+      }
+
+      @Test
+      public void createdStringDoesNotContainChecksums() {
+        var jsonString = testBagdata.toSipJsonContent();
+        Assertions.assertThat(jsonString)
+            .doesNotContain(
+                testBagdata.getMd5Checksum(),
+                testBagdata.getSha512Checksum()
+            );
+      }
 
     }
 
