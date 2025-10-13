@@ -270,16 +270,15 @@ public class Bag {
     for (BagFile bagFile : bagData.getContentFiles()) {
       writtenBytesCount += bagFile.getSize();
 
-      // TODO weird variable name
-      String fullPath = bagData.getId() + "/" + bagFile.getBagpath();
-      log.trace("Writing datastream content to bag path: {}", fullPath);
+      String bagDatastreamContentAbsolutePath = bagData.getId() + "/" + bagFile.getBagpath();
+      log.trace("Writing datastream content to bag path: {}", bagDatastreamContentAbsolutePath);
 
-      ZipEntry entry = new ZipEntry(fullPath);
+      ZipEntry entry = new ZipEntry(bagDatastreamContentAbsolutePath);
       entry.setSize(bagFile.getSize());
       try {
         zipOutputStream.putNextEntry(entry);
       } catch (IOException e) {
-        String msg = String.format("Error creating zip entry for %s in bag %s. Original error: %s", fullPath, bagData.getId(), e);
+        String msg = String.format("Error creating zip entry for %s in bag %s. Original error: %s", bagDatastreamContentAbsolutePath, bagData.getId(), e);
         log.error(msg);
         throw new ExportProcessingException(msg);
       }
@@ -296,7 +295,7 @@ public class Bag {
           zipOutputStream.write(buffer, 0, bytesRead);
         }
         zipOutputStream.closeEntry();
-        log.debug("Finished writing datastream content: {}", fullPath);
+        log.debug("Finished writing datastream content: {}", bagDatastreamContentAbsolutePath);
       } catch (Exception e) {
         String msg = String.format("Failed to stream datastream content for %s", datastreamId);
         log.error(msg, e);
