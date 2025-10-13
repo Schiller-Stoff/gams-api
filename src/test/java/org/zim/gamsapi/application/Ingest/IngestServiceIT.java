@@ -14,7 +14,6 @@ import org.zim.gamsapi.IntegrationTest;
 import org.zim.gamsapi.TestUtilities.*;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
-import org.zim.gamsapi.application.Ingest.utils.Bagit.BagInfo;
 import org.zim.gamsapi.application.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.domain.Datastream.DatastreamId;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
