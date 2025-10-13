@@ -7,6 +7,7 @@ import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.zim.gamsapi.domain.Datastream.DatastreamId;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -14,9 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -231,16 +229,14 @@ public class Bag {
     }
 
   }
-
-
+  /**
+   * Writes bagit.txt to the given ZipOutputStream.
+   * @param zipOut the zip output stream to write to
+   * @throws IOException in case of any problems
+   */
   private void writeBagitTxt(ZipOutputStream zipOut) throws IOException {
-    String BAG_VERSION = this.bagMeta.getBagItVersion();
-    String TAG_FILE_ENCODING = this.bagMeta.getTagFileCharacterEncoding();
-    // TODO serialization should be done in BagMeta class
-    String content = String.format("BagIt-Version: %s%nTag-File-Character-Encoding: %s%n",
-        BAG_VERSION, TAG_FILE_ENCODING);
-
-    writeTextEntry(zipOut, bagData.getId() + "/bagit.txt", content);
+    String bagItTxtContent = bagMeta.toBagItTxtContent();
+    writeTextEntry(zipOut, bagData.getId() + "/bagit.txt", bagItTxtContent);
   }
 
   /**
@@ -252,7 +248,6 @@ public class Bag {
    * @throws IOException in case of any problems
    */
   private void writeBagInfo(ZipOutputStream zipOut, float payloadOxum) throws IOException {
-    // TODO do i still need a seperate method for this?
     var bagInfoAsTxt = bagInfo.toBagInfoContent(payloadOxum);
     writeTextEntry(zipOut, bagData.getId() + "/bag-info.txt", bagInfoAsTxt);
   }

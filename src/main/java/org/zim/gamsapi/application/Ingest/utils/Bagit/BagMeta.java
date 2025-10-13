@@ -25,4 +25,15 @@ public class BagMeta {
                 .tagFileCharacterEncoding(submissionRecord.getBagTagFileCharacterEncoding())
                 .build();
     }
+
+
+  /**
+   * Generates the content of a bagit.txt file from the BagMeta object.
+   * @return String representing the content of a bagit.txt file.
+   */
+  public String toBagItTxtContent(){
+      return String.format("BagIt-Version: %s%nTag-File-Character-Encoding: %s%n",
+          bagItVersion, tagFileCharacterEncoding);
+    }
+
 }
