@@ -9,22 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
+import org.zim.gamsapi.EventCaptureListener;
+import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.TestUtilities.*;
+import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
+import org.zim.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
+import org.zim.gamsapi.application.Ingest.utils.ZipUtils;
 import org.zim.gamsapi.domain.Datastream.DatastreamId;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.zim.gamsapi.EventCaptureListener;
-import org.zim.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
-import org.zim.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
-import org.zim.gamsapi.application.Ingest.utils.ZipUtils;
-import org.zim.gamsapi.IntegrationTest;
+import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.zim.gamsapi.domain.Project.ProjectBuilder;
 import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.zim.gamsapi.TestUtilities.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -235,8 +235,6 @@ public class IngestServiceIT extends IntegrationTest {
 
       var foundDatastream = datastream.get();
 
-      // TODO all fields correct?
-
       Assertions.assertThat(foundDatastream.getMimeType())
           .isEqualTo(TestDatastream.MIME_TYPE.getValue());
 
@@ -434,19 +432,15 @@ public class IngestServiceIT extends IntegrationTest {
               var datastreamTags = new ArrayList<>(TestDatastream.DATASTREAM_TAGS);
               Assertions.assertThat(sipJsonContent).contains(datastreamTags);
 
-              // TODO assert other contentFiles?
-
 
             }
             case "manifest-md5.txt" -> {
-              // TODO think about are those good assertions?
               String manifestMd5Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.BAG_SIP_JSON.name);
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
               Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
             }
             case "manifest-sha512.txt" -> {
-              // TODO think about are those good assertions?
               String manifestSha512Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.BAG_SIP_JSON.name);
