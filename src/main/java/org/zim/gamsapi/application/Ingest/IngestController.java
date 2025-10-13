@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.zim.gamsapi.application.Ingest.exceptions.ExportProcessingException;
 import org.zim.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.zim.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.zim.gamsapi.application.Ingest.utils.IngestStatics;
@@ -101,9 +102,7 @@ public class IngestController {
     String filename = id + "-bag.zip";
     response.setContentType("application/zip");
     response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-
-    // TODO Disable buffering for large files?
-    // TODO if object is big different procedure?
+    // careful when dealing with large files!
     response.setBufferSize(8192);
 
     try {
@@ -112,8 +111,7 @@ public class IngestController {
     } catch (IOException e) {
       String msg = String.format("I/O error during bag export for object %s in project %s. Original error: %s", id, projectAbbr, e);
       log.error(msg);
-      // TODO NEEDS A DIFFERENT EXCEPTION!
-      throw new IngestProcessingException(msg);
+      throw new ExportProcessingException(msg);
     }
 
   }
