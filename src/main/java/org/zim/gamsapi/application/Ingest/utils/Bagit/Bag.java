@@ -30,6 +30,8 @@ import java.util.zip.ZipOutputStream;
 @Getter
 public class Bag {
 
+  final int BUFFER_SIZE = 8192;
+
   /**
    * Metadata obtained from bag-info file.
    */
@@ -264,8 +266,6 @@ public class Bag {
     long writtenBytesCount = 0;
 
     // 03b add datastream content to bag-zip
-    // TODO hardcoded BUFFER_SIZE?
-    int BUFFER_SIZE = 8192;
     byte[] buffer = new byte[BUFFER_SIZE];
     for (BagFile bagFile : bagData.getContentFiles()) {
       writtenBytesCount += bagFile.getSize();
