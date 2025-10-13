@@ -323,7 +323,7 @@ public class Bag {
     String sha512Checksum;
     String md5Checksum;
 
-    //calculacte sha-256 and md5 for sip.json
+    //calculate sha-256 and md5 for sip.json
     try {
       var sipJsonBytes = sipJson.getBytes(StandardCharsets.UTF_8);
       // calc checksum for sha-512
@@ -341,8 +341,6 @@ public class Bag {
       log.error(msg);
       throw new ExportProcessingException(msg);
     }
-
-    // TODO own method for writing manifest entries?
 
     // sip.json manifest entry
     sha512Manifest
