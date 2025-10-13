@@ -23,8 +23,8 @@ public class BagInfo {
     @Size(min = 12, max = 12)
   private String time;
   @NotNull
-  @Min(1)
-  private Float payloadOxum;
+  @NotEmpty
+  private String payloadOxum;
   @NotEmpty
   @Email
   private String contactMail;
@@ -67,7 +67,7 @@ public class BagInfo {
    * @param payloadOxum the payload oxum to use in the bag-info content
    * @return content of bag-info.txt
    */
-  public String toBagInfoContent(float payloadOxum){
+  public String toBagInfoContent(String payloadOxum){
     return String.format(
         "Bagging-Date: %s%n" +
             "Bagging-Time: %s%n" +

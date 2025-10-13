@@ -100,8 +100,8 @@ public class SubmissionRecord {
      */
     @Column
     @NotNull
-    @Min(1)
-    private Float bagPayloadOxum;
+    @NotEmpty
+    private String bagPayloadOxum;
 
     /**
      * Version of the BagIt specification used.

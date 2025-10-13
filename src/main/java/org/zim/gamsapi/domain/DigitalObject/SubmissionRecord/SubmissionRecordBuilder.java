@@ -38,7 +38,7 @@ public class SubmissionRecordBuilder {
         return this;
     }
 
-    public SubmissionRecordBuilder payloadOxum(Float payloadOxum) {
+    public SubmissionRecordBuilder payloadOxum(String payloadOxum) {
         submissionRecord.setBagPayloadOxum(payloadOxum);
         return this;
     }

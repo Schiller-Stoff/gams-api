@@ -217,8 +217,11 @@ public class Bag {
       // 03. write bag content
       payloadSize += writeBagContent(zipOutputStream, datastreamContentRepository);
 
+      int fileCount = this.bagData.getContentFiles().size() + 1; // +1 for sip.json
+      String calculatedPayloadOxum = String.format("%s.%s", payloadSize, fileCount);
+
       // 04. write bag-info.txt (with payload size)
-      writeBagInfo(zipOutputStream, payloadSize);
+      writeBagInfo(zipOutputStream, calculatedPayloadOxum);
 
       // write bagit.txt
       writeBagitTxt(zipOutputStream);
@@ -249,7 +252,7 @@ public class Bag {
    * @param payloadOxum the payload oxum to write
    * @throws IOException in case of any problems
    */
-  private void writeBagInfo(ZipOutputStream zipOut, float payloadOxum) throws IOException {
+  private void writeBagInfo(ZipOutputStream zipOut, String payloadOxum) throws IOException {
     var bagInfoAsTxt = bagInfo.toBagInfoContent(payloadOxum);
     writeTextEntry(zipOut, bagData.getId() + "/bag-info.txt", bagInfoAsTxt);
   }
