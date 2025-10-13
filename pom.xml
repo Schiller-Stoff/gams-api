@@ -143,6 +143,15 @@
 						<tags>${project.artifactId}:${project.version}</tags>
 					</image>
 				</configuration>
+                <!-- Build information like version etc. -->
+                <executions>
+                    <execution>
+                        <id>build-info</id>
+                        <goals>
+                            <goal>build-info</goal>
+                        </goals>
+                    </execution>
+                </executions>
 			</plugin>
 			<plugin>
 				<groupId>org.graalvm.buildtools</groupId>
