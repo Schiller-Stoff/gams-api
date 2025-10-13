@@ -432,6 +432,14 @@ public class IngestServiceIT extends IntegrationTest {
               var datastreamTags = new ArrayList<>(TestDatastream.DATASTREAM_TAGS);
               Assertions.assertThat(sipJsonContent).contains(datastreamTags);
 
+              Assertions.assertThat(sipJsonContent).doesNotContain(
+                  // sip json must not contain checksums
+                  "md5Checksum",
+                  "sha512Checksum:",
+                  // in the test data there should not be any escaped quotes
+                  "\\\""
+              );
+
 
             }
             case "manifest-md5.txt" -> {

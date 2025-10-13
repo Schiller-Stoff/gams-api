@@ -1,5 +1,6 @@
 package org.zim.gamsapi.application.Ingest.utils.Bagit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -86,12 +87,16 @@ public class BagFile {
    * Checksum of the file using md5 algorithm.
    */
   @NotEmpty
+  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String md5Checksum;
 
   /**
    * Checksum of the file using sha256 algorithm.
    */
   @NotEmpty
+  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String sha512Checksum;
 
     /**
