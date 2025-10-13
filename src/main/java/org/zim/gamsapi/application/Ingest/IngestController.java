@@ -88,6 +88,26 @@ public class IngestController {
   @ResponseBody
   @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
   @Parameter(name = "id", description = "Digital object ID", required = true)
+  @Operation(
+      summary = "Exports a digital object as a zipped BagIt folder",
+      description = "Exports the specified digital object as a zipped BagIt folder. " +
+          "The request must include the project abbreviation and the digital object ID in the URL path. " +
+          "The response will be a downloadable zip file.",
+      responses = {
+          @ApiResponse(
+              responseCode = "200",
+              description = "Export successful, returns a zipped BagIt folder."
+          ),
+          @ApiResponse(
+              responseCode = "400",
+              description = "Bad request, e.g. missing or invalid parameters."
+          ),
+          @ApiResponse(
+              responseCode = "500",
+              description = "Internal server error, e.g. processing failure."
+          )
+      }
+  )
   public void exportBag(@PathVariable String projectAbbr,
                         @PathVariable String id,
                         HttpServletResponse response) {
