@@ -212,7 +212,7 @@ public class Bag {
       // 02. write manifests (with checksums for sip.json)
       writeManifests(zipOutputStream, sipJsonContent);
 
-      float payloadSize = 0;
+      long payloadSize = 0;
       payloadSize += sipJsonContent.getBytes(StandardCharsets.UTF_8).length;
       // 03. write bag content
       payloadSize += writeBagContent(zipOutputStream, datastreamContentRepository);
@@ -266,7 +266,7 @@ public class Bag {
    */
   private float writeBagContent(ZipOutputStream zipOutputStream, IDatastreamContentRepository datastreamContentRepository) {
 
-    float writtenBytesCount = 0;
+    long writtenBytesCount = 0;
 
     // 03b add datastream content to bag-zip
     byte[] buffer = new byte[BUFFER_SIZE];
