@@ -2,6 +2,7 @@ package org.zim.gamsapi.application.Ingest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ public class IngestService implements IIngestService {
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ISubmissionRecordRepository bagEntityRepository;
+  private final BuildProperties buildProperties;
 
   @Override
   @Transactional(rollbackFor = {
@@ -238,6 +240,10 @@ public class IngestService implements IIngestService {
 
     // create bag from database entities
     Bag bag = new Bag(bagInfo, bagMeta, bagData);
+
+    // sert bag data entry to indicate that the bag was created by the gams-api
+    String createdBy = String.format("%s %s",buildProperties.getName(), buildProperties.getVersion());
+    bag.getBagData().setCreatedBy(createdBy);
 
     // 03. write bag
     bag.writeAsZipToStream(outputStream, datastreamContentRepository);
