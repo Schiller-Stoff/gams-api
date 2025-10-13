@@ -14,8 +14,8 @@ import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Container for the data defined related to bagit sip.json file defined by invenio / CERN.
@@ -59,8 +59,6 @@ public class BagData {
 
   private Set<BagFile> contentFiles = new HashSet<>();
 
-  private Set<String> types = new HashSet<>();
-
   @NotEmpty
   // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -100,8 +98,6 @@ public class BagData {
               .funder(digitalObject.getFunder())
               .mainResource(digitalObject.getMainResource())
               .contentFiles(contentFiles)
-              // TODO what is with this types?
-              .types(new HashSet<>())
               .md5Checksum(digitalObject.getBaseMetadata().getMd5Checksum())
               .sha512Checksum(digitalObject.getBaseMetadata().getSha512Checksum())
               .schema(submissionRecord.getBagSchema())

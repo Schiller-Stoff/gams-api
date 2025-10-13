@@ -4,13 +4,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.TestUtilities.TestBag;
-import org.zim.gamsapi.domain.Datastream.Datastream;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.zim.gamsapi.TestUtilities.TestDatastream;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestIngestRecord;
+import org.zim.gamsapi.domain.Datastream.Datastream;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
+
 import java.util.Set;
 
 public class BagDataTest {
@@ -107,9 +107,6 @@ public class BagDataTest {
             // Assert existence of collection values
             testBagdata.getContentFiles().forEach(bagFile -> {
                 Assertions.assertThat(jsonString).contains(bagFile.getDsid());
-            });
-            testBagdata.getTypes().forEach(type -> {
-                Assertions.assertThat(jsonString).contains(type);
             });
       }
 

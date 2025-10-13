@@ -15,8 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -122,7 +123,6 @@ public class Bag {
         .funder(bagSipJson.getFunder())
         .mainResource(bagSipJson.getMainResource())
         .contentFiles(new HashSet<>())  // this is being populated below
-        .types(bagSipJson.getTypes())
         .md5Checksum(sipJsonMd5)
         .sha512Checksum(sipJsonSHA512)
         // bag related fields

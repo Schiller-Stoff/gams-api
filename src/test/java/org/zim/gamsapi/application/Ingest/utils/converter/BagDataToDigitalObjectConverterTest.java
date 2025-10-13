@@ -2,12 +2,10 @@ package org.zim.gamsapi.application.Ingest.utils.converter;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.application.Ingest.utils.converter.BagDataToDigitalObjectConverter;
-import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
-import org.zim.gamsapi.application.Ingest.utils.Bagit.BagData;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.UnitTest;
-import java.util.Set;
+import org.zim.gamsapi.application.Ingest.utils.Bagit.BagData;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 
 public class BagDataToDigitalObjectConverterTest extends UnitTest {
 
@@ -16,7 +14,6 @@ public class BagDataToDigitalObjectConverterTest extends UnitTest {
             .project(TestBag.TestBagSipJson.PROJECT)
             .objectType(TestBag.TestBagSipJson.OBJECT_TYPE)
             .title(TestBag.TestBagSipJson.TITLE)
-            .types(Set.of("testTypes"))
             .creator(TestBag.TestBagSipJson.CREATOR)
             .description(TestBag.TestBagSipJson.DESCRIPTION)
             .rights(TestBag.TestBagSipJson.RIGHTS)
