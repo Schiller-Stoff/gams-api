@@ -1,9 +1,15 @@
 package org.zim.gamsapi.application.Ingest.utils.Bagit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.zim.gamsapi.application.Ingest.exceptions.ExportProcessingException;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
@@ -17,6 +23,7 @@ import java.util.stream.Collectors;
  */
 @Data
 @Builder
+@Slf4j
 public class BagData {
 
   @NotEmpty
@@ -55,9 +62,13 @@ public class BagData {
   private Set<String> types = new HashSet<>();
 
   @NotEmpty
+  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String md5Checksum;
 
   @NotEmpty
+  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String sha512Checksum;
 
   @NotEmpty
@@ -100,60 +111,43 @@ public class BagData {
 
   }
 
+  /**
+   * Creates and configures an ObjectMapper for sip.json serialization.
+   * Configuration matches the expected sip.json format.
+   *
+   * @return configured ObjectMapper instance
+   */
+  private ObjectMapper createObjectMapper() {
+    ObjectMapper mapper = new ObjectMapper();
+
+    // Pretty printing for human-readable output (CERN format uses indentation)
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+    // Don't include null values (aligns with your manual implementation)
+    // This is already handled by @JsonInclude if needed, but can be set globally
+    mapper.setSerializationInclusion(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
+
+    // Ensure consistent ordering (though @JsonPropertyOrder handles this)
+    mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, false);
+
+    return mapper;
+  }
+
 
   /**
    * Generates the content of a sip.json file from the BagData object.
    * @return String representing the content of a sip.json file.
    */
   public String toSipJsonContent(){
-
-    // Build sip.json from digital object metadata
-    Map<String, Object> sipJson = new LinkedHashMap<>();
-    sipJson.put("recid", this.getId());
-    sipJson.put("project", this.getProject());
-    sipJson.put("title", this.getTitle());
-    sipJson.put("objectType", this.getObjectType());
-    sipJson.put("description", this.getDescription());
-    sipJson.put("creator", this.getCreator());
-    sipJson.put("rights", this.getRights());
-    sipJson.put("publisher", this.getPublisher());
-
-    if (this.getFunder() != null) {
-      sipJson.put("funder", this.getFunder());
+    try {
+      ObjectMapper objectMapper = createObjectMapper();
+      return objectMapper.writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      String msg = String.format("Error creating Sip JSON content for BagData related to digital object %s. Original error: %s", this.id, e);
+      log.error(msg);
+      throw new ExportProcessingException(msg);
     }
-
-    if (this.getMainResource() != null) {
-      sipJson.put("mainResource", this.getMainResource());
-    }
-
-    List<Map<String, Object>> contentFiles = this.getContentFiles().stream().map(contentFile -> {
-      Map<String, Object> fileMap = new LinkedHashMap<>();
-      fileMap.put("dsid", contentFile.getDsid());
-      fileMap.put("filename", contentFile.getBagpath());
-      fileMap.put("mimetype", contentFile.getMimetype());
-      fileMap.put("title", contentFile.getTitle());
-      fileMap.put("description", contentFile.getDescription());
-      fileMap.put("creator", contentFile.getCreator());
-      fileMap.put("rights", contentFile.getRights());
-      fileMap.put("size", contentFile.getSize());
-      fileMap.put("tags", new ArrayList<>(contentFile.getTags()));
-      fileMap.put("lang", new ArrayList<>(contentFile.getLang()));
-      return fileMap;
-    }).collect(Collectors.toList());
-
-
-    sipJson.put("contentFiles", contentFiles);
-    sipJson.put("$schema", this.getSchema());
-    sipJson.put("created_by", this.getCreatedBy());
-    sipJson.put("source", this.getSource());
-
-    // Convert to JSON
-    // TODO use jackson instead?
-
-    return toJson(sipJson);
-
   }
-
 
   /**
    * TODO jdoc
