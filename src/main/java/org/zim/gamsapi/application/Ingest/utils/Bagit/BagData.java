@@ -27,6 +27,7 @@ import java.util.Set;
 public class BagData {
 
   @NotEmpty
+  @JsonProperty("recid")
   private String id;
 
   /**
@@ -34,29 +35,39 @@ public class BagData {
    */
   @NotEmpty
   @Size(min = 1, max = 10)
+  @JsonProperty("project")
   private String project;
 
   @NotEmpty
+  @JsonProperty("title")
   private String title;
 
   @NotEmpty
+  @JsonProperty("objectType")
   private String objectType;
 
+  @JsonProperty("description")
   private String description;
 
   @NotEmpty
+  @JsonProperty("creator")
   private String creator;
 
   @NotEmpty
+  @JsonProperty("rights")
   private String rights;
 
   @NotEmpty
+  @JsonProperty("publisher")
   private String publisher;
 
+  @JsonProperty("funder")
   private String funder;
 
+  @JsonProperty("mainResource")
   private String mainResource;
 
+  @JsonProperty("contentFiles")
   private Set<BagFile> contentFiles = new HashSet<>();
 
   @NotEmpty
@@ -70,12 +81,15 @@ public class BagData {
   private String sha512Checksum;
 
   @NotEmpty
+  @JsonProperty("$schema")
   private String schema;
 
   @NotEmpty
+  @JsonProperty("created_by")
   private String createdBy;
 
   @NotEmpty
+  @JsonProperty("source")
   private String source;
 
   public static BagData from(DigitalObject digitalObject, Set<Datastream> datastreams, SubmissionRecord submissionRecord){

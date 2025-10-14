@@ -402,10 +402,15 @@ public class IngestServiceIT extends IntegrationTest {
             }
             case "sip.json" -> {
               String sipJsonContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(sipJsonContent).isNotBlank();
+              Assertions.assertThat(sipJsonContent).contains("recid"); // field name of id
+
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.REC_ID);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PROJECT);
-              // createdBy is different for the export than for the ingest (it is set to the system user during export)
+              // createdBy is different for the export than for ingest (it is set to the system user during export)
+              Assertions.assertThat(sipJsonContent).contains("created_by");
               Assertions.assertThat(sipJsonContent).doesNotContain(TestBag.TestBagSipJson.CREATED_BY);
+              Assertions.assertThat(sipJsonContent).contains("$schema"); // field name of id
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SCHEMA);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SOURCE);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATOR);
