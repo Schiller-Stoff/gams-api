@@ -193,12 +193,12 @@ public class IngestServiceIT extends IntegrationTest {
 
     @Test
     public void ingestCreatesExpectedMetadataBaseEntity(){
-        var bagEntity = bagEntityRepository.findById(TestIngestRecord.ID);
+        var bagEntity = bagEntityRepository.findById(TestSubmissionRecord.ID);
         Assertions.assertThat(bagEntity)
             .isPresent();
         var foundBagEntity = bagEntity.get();
 
-        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestIngestRecord.ID);
+        Assertions.assertThat(foundBagEntity.getId()).isEqualTo(TestSubmissionRecord.ID);
         Assertions.assertThat(foundBagEntity.getBagCreatedBy()).isEqualTo(TestBag.TestBagSipJson.CREATED_BY);
         Assertions.assertThat(foundBagEntity.getBagSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
         Assertions.assertThat(foundBagEntity.getBagSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
@@ -404,7 +404,8 @@ public class IngestServiceIT extends IntegrationTest {
               String sipJsonContent = byteArrayOutputStream.toString();
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.REC_ID);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PROJECT);
-              Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATED_BY);
+              // createdBy is different for the export than for the ingest (it is set to the system user during export)
+              Assertions.assertThat(sipJsonContent).doesNotContain(TestBag.TestBagSipJson.CREATED_BY);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SCHEMA);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.SOURCE);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.CREATOR);

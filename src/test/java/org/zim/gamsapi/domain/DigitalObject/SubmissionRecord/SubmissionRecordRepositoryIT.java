@@ -51,7 +51,7 @@ public class SubmissionRecordRepositoryIT extends IntegrationTest {
                  testDataSet.project().getProjectAbbr() +".12345"
                 )
         );
-        var bagEntity = TestIngestRecord.generate(savedObject);
+        var bagEntity = TestSubmissionRecord.generate(savedObject);
         var savedBagEntity = bagEntityRepository.save(bagEntity);
 
         Assertions.assertThat(savedBagEntity).isNotNull();

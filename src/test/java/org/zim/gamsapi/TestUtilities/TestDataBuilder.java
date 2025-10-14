@@ -129,7 +129,7 @@ public class TestDataBuilder {
             testDataSet.project().getProjectAbbr(), randomDigitalObjectId
     );
 
-    bagEntityRepository.save(TestIngestRecord.generate(digitalObjectToBeSaved));
+    bagEntityRepository.save(TestSubmissionRecord.generate(digitalObjectToBeSaved));
 
     return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
@@ -146,7 +146,7 @@ public class TestDataBuilder {
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
-    var bagEntityToBeSaved = TestIngestRecord.generate(persistedDigitalObject);
+    var bagEntityToBeSaved = TestSubmissionRecord.generate(persistedDigitalObject);
 
     var persistedBagEntity = bagEntityRepository.save(bagEntityToBeSaved);
 

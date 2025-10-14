@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.TestUtilities.TestBag;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
-import org.zim.gamsapi.TestUtilities.TestIngestRecord;
+import org.zim.gamsapi.TestUtilities.TestSubmissionRecord;
 import org.zim.gamsapi.UnitTest;
 
 public class BagInfoTest extends UnitTest {
@@ -14,7 +14,7 @@ public class BagInfoTest extends UnitTest {
     @Nested
     public class From {
 
-        SubmissionRecord TEST_INGEST_RECORD = TestIngestRecord.generate(TestDigitalObject.generate());
+        SubmissionRecord TEST_INGEST_RECORD = TestSubmissionRecord.generate(TestDigitalObject.generate());
 
         @Test
         public void fromIngestRecordReturnsNonNullObject(){

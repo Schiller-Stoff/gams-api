@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.zim.gamsapi.TestUtilities.TestDatastream;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
-import org.zim.gamsapi.TestUtilities.TestIngestRecord;
+import org.zim.gamsapi.TestUtilities.TestSubmissionRecord;
 import org.zim.gamsapi.domain.Datastream.Datastream;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
@@ -19,7 +19,7 @@ public class BagDataTest {
     public class From {
 
         final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
-        final SubmissionRecord TEST_INGEST_RECORD = TestIngestRecord.generate(TEST_DIGITAL_OBJECT);
+        final SubmissionRecord TEST_INGEST_RECORD = TestSubmissionRecord.generate(TEST_DIGITAL_OBJECT);
         final Datastream TEST_DATASTREAM = TestDatastream.generate(TEST_DIGITAL_OBJECT);
 
         @Test
@@ -61,7 +61,7 @@ public class BagDataTest {
     @Nested
     public class ToSipJsonContent {
       final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
-      final SubmissionRecord TEST_INGEST_RECORD = TestIngestRecord.generate(TEST_DIGITAL_OBJECT);
+      final SubmissionRecord TEST_INGEST_RECORD = TestSubmissionRecord.generate(TEST_DIGITAL_OBJECT);
       final Datastream TEST_DATASTREAM = TestDatastream.generate(TEST_DIGITAL_OBJECT);
 
       BagData testBagdata;
