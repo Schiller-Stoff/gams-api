@@ -21,6 +21,7 @@ import org.zim.gamsapi.domain.Datastream.DatastreamService;
 import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;
 import org.zim.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.zim.gamsapi.domain.Project.Project;
@@ -51,6 +52,7 @@ public class DigitalObjectController {
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
   private final IDigitalObjectModificationService digitalObjectModificationService;
+  private final ISubmissionRecordService submissionRecordService;
 
 
   @Operation(
@@ -186,6 +188,9 @@ public class DigitalObjectController {
 
     // first query digital object projection dto
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
+
+    var submissionRecord = submissionRecordService.find(digitalObject.getId());
+    model.addAttribute("submissionRecord", submissionRecord);
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(

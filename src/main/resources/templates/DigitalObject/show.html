@@ -29,6 +29,7 @@
           Overview over a singular digital object
         </p>
         <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
+        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/record'">Submission metadata</a>
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h5">
@@ -341,9 +342,53 @@
           </div>
         </div>
 
-
-
-
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-submarine me-2"></i>Submission data
+            </h3>
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              <li class="list-group-item">
+                <small>schema</small>
+                <p th:text="${submissionRecord.getBagSchema()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>created by</small>
+                <p th:text="${submissionRecord.getBagCreatedBy()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>source</small>
+                <p th:text="${submissionRecord.getBagSource()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>bagging timestamp</small>
+                <p th:text="${submissionRecord.getBaggingTimeStamp()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>contact-mail</small>
+                <p th:text="${submissionRecord.getBagContactMail()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>external description</small>
+                <p th:text="${submissionRecord.getBagExternalDescription()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>source payload-oxum</small>
+                <p th:text="${submissionRecord.getBagPayloadOxum()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>bag version</small>
+                <p th:text="${submissionRecord.getBagVersion()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>character encoding</small>
+                <p th:text="${submissionRecord.getBagTagFileCharacterEncoding()}"></p>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     <footer th:replace="~{fragments/general.html :: footer}"></footer>
   </div>

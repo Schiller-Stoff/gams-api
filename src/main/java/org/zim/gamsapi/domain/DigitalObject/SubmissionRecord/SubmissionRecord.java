@@ -1,5 +1,6 @@
 package org.zim.gamsapi.domain.DigitalObject.SubmissionRecord;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -49,6 +50,7 @@ public class SubmissionRecord {
     @JoinColumn(name = "digital_object_id")
     @NotNull
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnore
     private DigitalObject digitalObject;
 
     /**
