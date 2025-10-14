@@ -33,8 +33,6 @@ public class BagInfoTest extends UnitTest {
         public void constructsExpectedBagInfo(){
             var bagInfo = BagInfo.from(TEST_INGEST_RECORD);
             Assertions.assertThat(bagInfo.getDate()).isEqualTo(TEST_INGEST_RECORD.getBaggingDate());
-            Assertions.assertThat(bagInfo.getTime()).isEqualTo(TEST_INGEST_RECORD.getBaggingTime());
-            Assertions.assertThat(bagInfo.getBaggingTimeStamp()).isEqualTo(TEST_INGEST_RECORD.getBaggingTimeStamp());
             Assertions.assertThat(bagInfo.getPayloadOxum()).isEqualTo(TEST_INGEST_RECORD.getBagPayloadOxum());
             Assertions.assertThat(bagInfo.getContactMail()).isEqualTo(TEST_INGEST_RECORD.getBagContactMail());
             Assertions.assertThat(bagInfo.getExternalDescription()).isEqualTo(TEST_INGEST_RECORD.getBagExternalDescription());
@@ -62,7 +60,6 @@ public class BagInfoTest extends UnitTest {
         var content = bagInfo.toBagInfoContent();
 
         Assertions.assertThat(content).contains(
-            TestBag.TestBagInfo.BAGGING_TIME,
             TestBag.TestBagInfo.BAGGING_DATE,
             TestBag.TestBagInfo.CONTACT_EMAIL,
             TestBag.TestBagInfo.EXTERNAL_DESCRIPTION,

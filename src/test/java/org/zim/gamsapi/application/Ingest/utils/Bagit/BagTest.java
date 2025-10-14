@@ -71,12 +71,6 @@ public class BagTest extends UnitTest {
       }
 
       @Test
-      public void bagInfoHasExpectedBaggingTime() {
-        Assertions.assertThat(bag.getBagInfo().getTime()).isNotNull();
-        Assertions.assertThat(bag.getBagInfo().getTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
-      }
-
-      @Test
       public void bagInfoHasExpectedExternalDescription() {
         Assertions.assertThat(bag.getBagInfo().getExternalDescription()).isNotNull();
         Assertions.assertThat(bag.getBagInfo().getExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);

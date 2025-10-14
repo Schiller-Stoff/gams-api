@@ -16,11 +16,5 @@ public class SubmissionRecordTest extends UnitTest {
                 .getBaggingDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
     }
 
-    @Test
-    public void getBaggingTimeReturnsExpectedValue(){
-        var TEST_INGEST_RECORD = TestSubmissionRecord.generate(TestDigitalObject.generate());
-        Assertions.assertThat(TEST_INGEST_RECORD
-                .getBaggingTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
-    }
 
 }

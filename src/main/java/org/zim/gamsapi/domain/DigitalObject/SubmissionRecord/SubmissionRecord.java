@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
@@ -75,12 +76,11 @@ public class SubmissionRecord {
     private String bagSource;
 
     /**
-     * Timestamp when the bag was created.
-     * In universal time (UTC).
+     * Date of the bag creation.
      */
     @Column
     @NotNull
-    private Instant baggingTimeStamp;
+    private String baggingDate;
 
     /**
      * Contact email for the bag creator or responsible party.
@@ -149,14 +149,5 @@ public class SubmissionRecord {
         return new SubmissionRecordBuilder();
     }
 
-    public String getBaggingDate() {
-        // TODO rethink string index access
-        return baggingTimeStamp.toString().substring(0, 10);
-    }
-
-    public String getBaggingTime() {
-        // TODO rethink string index access
-        return baggingTimeStamp.toString().substring(11, 19) + " UTC";
-    }
 
 }

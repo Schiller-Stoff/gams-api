@@ -495,7 +495,6 @@ public class IngestControllerIT extends IntegrationTest {
             org.assertj.core.api.Assertions.assertThat(bagInfoTxt)
                 .contains(testDataSet.submissionRecord().getBagExternalDescription())
                 .contains(testDataSet.submissionRecord().getBaggingDate())
-                .contains(testDataSet.submissionRecord().getBaggingTime())
                 .contains(testDataSet.submissionRecord().getBagContactMail())
                 .contains("Payload-Oxum: ")
             // Payload oxum cannot be the same because the test data ingest not the complete bag

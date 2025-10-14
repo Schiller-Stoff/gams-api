@@ -133,7 +133,6 @@ public class BagDirectoryReader {
     try {
       bagInfo = BagInfo.builder()
               .date(fileValues.get("Bagging-Date"))
-              .time(fileValues.get("Bagging-Time"))
               .payloadOxum(fileValues.get("Payload-Oxum"))
               .externalDescription(fileValues.get("External-Description"))
               .contactMail(fileValues.get("Contact-Email"))

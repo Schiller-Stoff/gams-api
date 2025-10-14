@@ -14,7 +14,7 @@ public class SubmissionRecordBuilderTest extends UnitTest {
                 .createdBy(TestSubmissionRecord.CREATED_BY)
                 .schema(TestSubmissionRecord.SCHEMA)
                 .source(TestSubmissionRecord.SOURCE)
-                .baggingTimeStamp(TestSubmissionRecord.BAGGING_TIMESTAMP)
+                .baggingDate(TestSubmissionRecord.BAGGING_DATE)
                 .contactMail(TestSubmissionRecord.CONTACT_EMAIL)
                 .externalDescription(TestSubmissionRecord.EXTERNAL_DESCRIPTION)
                 .payloadOxum(TestSubmissionRecord.PAYLOAD_OXUM)
@@ -29,7 +29,7 @@ public class SubmissionRecordBuilderTest extends UnitTest {
         Assertions.assertThat(TEST_BAG_ENTITY.getBagCreatedBy()).isEqualTo(TestSubmissionRecord.CREATED_BY);
         Assertions.assertThat(TEST_BAG_ENTITY.getBagSchema()).isEqualTo(TestSubmissionRecord.SCHEMA);
         Assertions.assertThat(TEST_BAG_ENTITY.getBagSource()).isEqualTo(TestSubmissionRecord.SOURCE);
-        Assertions.assertThat(TEST_BAG_ENTITY.getBaggingTimeStamp()).isEqualTo(TestSubmissionRecord.BAGGING_TIMESTAMP);
+        Assertions.assertThat(TEST_BAG_ENTITY.getBaggingDate()).isEqualTo(TestSubmissionRecord.BAGGING_DATE);
         Assertions.assertThat(TEST_BAG_ENTITY.getBagContactMail()).isEqualTo(TestSubmissionRecord.CONTACT_EMAIL);
         Assertions.assertThat(TEST_BAG_ENTITY.getBagExternalDescription()).isEqualTo(TestSubmissionRecord.EXTERNAL_DESCRIPTION);
         Assertions.assertThat(TEST_BAG_ENTITY.getBagPayloadOxum()).isEqualTo(TestSubmissionRecord.PAYLOAD_OXUM);
@@ -47,7 +47,7 @@ public class SubmissionRecordBuilderTest extends UnitTest {
                     .createdBy(TestSubmissionRecord.CREATED_BY)
                     .schema(TestSubmissionRecord.SCHEMA)
                     .source(TestSubmissionRecord.SOURCE)
-                    .baggingTimeStamp(TestSubmissionRecord.BAGGING_TIMESTAMP)
+                    .baggingDate(TestSubmissionRecord.BAGGING_DATE)
                     .contactMail(TestSubmissionRecord.CONTACT_EMAIL)
                     .build();
         }).isInstanceOf(IllegalStateException.class);

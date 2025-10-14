@@ -113,7 +113,6 @@ public class BagDirectoryReaderTest extends UnitTest {
       public void createsExpectedBagInfoObject(){
           var bagInfo = BagDirectoryReader.readBagInfoFile(bag.getBAG_DIR_PATH());
           Assertions.assertThat(bagInfo).isNotNull();
-          Assertions.assertThat(bagInfo.getTime()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIME);
           Assertions.assertThat(bagInfo.getDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
           Assertions.assertThat(bagInfo.getContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
           Assertions.assertThat(bagInfo.getPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
@@ -200,7 +199,7 @@ public class BagDirectoryReaderTest extends UnitTest {
           var keyValueMap = BagDirectoryReader.readKeyValueTxtFile(
                   bag.getBAG_DIR_PATH().resolve(BagFilePaths.BAG_INFO_FILE_PATH.name).toString()
           );
-          Assertions.assertThat(keyValueMap.size()).isEqualTo(5);
+          Assertions.assertThat(keyValueMap.size()).isEqualTo(4);
       }
 
       @Test

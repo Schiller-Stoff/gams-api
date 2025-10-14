@@ -3,6 +3,8 @@ package org.zim.gamsapi.domain.DigitalObject.SubmissionRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 
+import java.util.Date;
+
 @Slf4j
 public class SubmissionRecordBuilder {
 
@@ -23,8 +25,8 @@ public class SubmissionRecordBuilder {
         return this;
     }
 
-    public SubmissionRecordBuilder baggingTimeStamp(java.time.Instant baggingTimeStamp) {
-        submissionRecord.setBaggingTimeStamp(baggingTimeStamp);
+    public SubmissionRecordBuilder baggingDate(String baggingDate) {
+        submissionRecord.setBaggingDate(baggingDate);
         return this;
     }
 

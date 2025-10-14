@@ -76,7 +76,7 @@ public class SubmissionRecordControllerIT extends IntegrationTest {
               testDataSet.submissionRecord().getBagSchema(),
               testDataSet.submissionRecord().getBagCreatedBy(),
               testDataSet.submissionRecord().getBagSource(),
-              testDataSet.submissionRecord().getBaggingTimeStamp().toString(),
+              testDataSet.submissionRecord().getBaggingDate(),
               testDataSet.submissionRecord().getBagContactMail(),
               testDataSet.submissionRecord().getBagExternalDescription(),
               testDataSet.submissionRecord().getBagPayloadOxum(),

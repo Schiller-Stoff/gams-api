@@ -114,7 +114,7 @@ public class IngestService implements IIngestService {
               .source(bag.getBagData().getSource())
               .schema(bag.getBagData().getSchema())
               .contactMail(bag.getBagInfo().getContactMail())
-              .baggingTimeStamp(bag.getBagInfo().getBaggingTimeStamp())
+              .baggingDate(bag.getBagInfo().getDate())
               .externalDescription(bag.getBagInfo().getExternalDescription())
               .payloadOxum(bag.getBagInfo().getPayloadOxum())
               .bagVersion(bag.getBagMeta().getBagItVersion())

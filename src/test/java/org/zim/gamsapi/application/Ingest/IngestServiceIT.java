@@ -203,7 +203,7 @@ public class IngestServiceIT extends IntegrationTest {
         Assertions.assertThat(foundBagEntity.getBagSchema()).isEqualTo(TestBag.TestBagSipJson.SCHEMA);
         Assertions.assertThat(foundBagEntity.getBagSource()).isEqualTo(TestBag.TestBagSipJson.SOURCE);
         Assertions.assertThat(foundBagEntity.getBagExternalDescription()).isEqualTo(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
-        Assertions.assertThat(foundBagEntity.getBaggingTimeStamp()).isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
+        Assertions.assertThat(foundBagEntity.getBaggingDate()).isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
         Assertions.assertThat(foundBagEntity.getBagContactMail()).isEqualTo(TestBag.TestBagInfo.CONTACT_EMAIL);
         Assertions.assertThat(foundBagEntity.getBagPayloadOxum()).isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);
 
@@ -393,7 +393,6 @@ public class IngestServiceIT extends IntegrationTest {
               String bagInfoTxtContent = byteArrayOutputStream.toString();
               Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.EXTERNAL_DESCRIPTION);
               Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.BAGGING_DATE);
-              Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.BAGGING_TIME);
               Assertions.assertThat(bagInfoTxtContent).contains(TestBag.TestBagInfo.CONTACT_EMAIL);
               // reconstructed payload oxum may differ from original due to different line endings (windows vs unix etc.)
               // so we are only checking for the label here

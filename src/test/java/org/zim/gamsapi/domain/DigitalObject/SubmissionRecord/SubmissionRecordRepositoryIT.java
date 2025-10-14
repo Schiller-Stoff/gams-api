@@ -108,8 +108,8 @@ public class SubmissionRecordRepositoryIT extends IntegrationTest {
       Assertions.assertThat(foundIngestRecord.getBagSource())
           .isEqualTo(TestBag.TestBagSipJson.SOURCE);
 
-      Assertions.assertThat(foundIngestRecord.getBaggingTimeStamp())
-          .isEqualTo(TestBag.TestBagInfo.BAGGING_TIMESTAMP);
+      Assertions.assertThat(foundIngestRecord.getBaggingDate())
+          .isEqualTo(TestBag.TestBagInfo.BAGGING_DATE);
 
       Assertions.assertThat(foundIngestRecord.getBagPayloadOxum())
           .isEqualTo(TestBag.TestBagInfo.PAYLOAD_OXUM);

@@ -4,6 +4,7 @@ import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
 import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 
 import java.time.Instant;
+import java.util.Date;
 
 public class TestSubmissionRecord {
 
@@ -15,7 +16,7 @@ public class TestSubmissionRecord {
     public static final String PAYLOAD_OXUM = TestBag.TestBagInfo.PAYLOAD_OXUM;
     public static final String BAG_VERSION = TestBag.BagitTxt.BAGIT_VERSION;
     public static final String TAG_FILE_CHARACTER_ENCODING = TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING;
-    public static final Instant BAGGING_TIMESTAMP = TestBag.TestBagInfo.BAGGING_TIMESTAMP;
+    public static final String BAGGING_DATE = TestBag.TestBagInfo.BAGGING_DATE;
     public static final String CONTACT_EMAIL = TestBag.TestBagInfo.CONTACT_EMAIL;
 
     /**
@@ -30,7 +31,7 @@ public class TestSubmissionRecord {
                 .schema(TestSubmissionRecord.SCHEMA)
                 .source(TestSubmissionRecord.SOURCE)
                 .externalDescription(TestSubmissionRecord.EXTERNAL_DESCRIPTION)
-                .baggingTimeStamp(TestSubmissionRecord.BAGGING_TIMESTAMP)
+                .baggingDate(TestSubmissionRecord.BAGGING_DATE)
                 .contactMail(TestSubmissionRecord.CONTACT_EMAIL)
                 .payloadOxum(TestSubmissionRecord.PAYLOAD_OXUM)
                 .bagVersion(TestSubmissionRecord.BAG_VERSION)
