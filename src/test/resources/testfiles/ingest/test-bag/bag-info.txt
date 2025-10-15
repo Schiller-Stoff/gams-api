@@ -1,5 +1,4 @@
 Bagging-Date: 2025-08-19
-Bagging-Time: 12:07:07 UTC
-Payload-Oxum: 1140704.5
+Payload-Oxum: 27387.6
 Contact-Email: dh@uni-graz.at
 External-Description: Test bag for gamsapi tests

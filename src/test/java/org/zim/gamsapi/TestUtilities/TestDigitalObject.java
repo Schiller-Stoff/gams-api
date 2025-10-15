@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DigitalObjectBuilder;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 
 /**
  * Enum for test digital object.

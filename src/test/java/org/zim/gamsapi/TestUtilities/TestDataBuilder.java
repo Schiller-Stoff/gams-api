@@ -4,16 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.zim.gamsapi.Datastream.Datastream;
-import org.zim.gamsapi.Datastream.DatastreamContent.DatastreamContentRepository;
-import org.zim.gamsapi.Datastream.interfaces.IDatastreamRepository;
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.zim.gamsapi.DigitalObject.IDigitalObjectRepository;
-import org.zim.gamsapi.GAMSCollection.IGAMSCollectionRepository;
-import org.zim.gamsapi.Ingest.interfaces.IIngestRecordRepository;
-import org.zim.gamsapi.Project.Project;
-import org.zim.gamsapi.Project.interfaces.IProjectRepository;
+import org.zim.gamsapi.domain.Datastream.Datastream;
+import org.zim.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentRepository;
+import org.zim.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
+import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.zim.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.zim.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
+import org.zim.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
+import org.zim.gamsapi.domain.Project.Project;
+import org.zim.gamsapi.domain.Project.interfaces.IProjectRepository;
 
 /**
  * TestDataBuilder is a component that builds test data sets for testing.
@@ -38,17 +38,17 @@ public class TestDataBuilder {
   private DatastreamContentRepository datastreamContentRepository;
 
   @Autowired
-  private IIngestRecordRepository bagEntityRepository;
+  private ISubmissionRecordRepository bagEntityRepository;
 
   @Autowired
-  private IGAMSCollectionRepository gamsCollectionRepository;
+  private IDigitalObjectCollectionRepository gamsCollectionRepository;
 
   @Transactional
   public void removeAllExceptProjects(TestDataSet testDataSet) {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
-    bagEntityRepository.delete(testDataSet.ingestRecord());
+    bagEntityRepository.delete(testDataSet.submissionRecord());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 
@@ -129,7 +129,7 @@ public class TestDataBuilder {
             testDataSet.project().getProjectAbbr(), randomDigitalObjectId
     );
 
-    bagEntityRepository.save(TestBagEntity.generate(digitalObjectToBeSaved));
+    bagEntityRepository.save(TestSubmissionRecord.generate(digitalObjectToBeSaved));
 
     return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
@@ -146,7 +146,7 @@ public class TestDataBuilder {
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
-    var bagEntityToBeSaved = TestBagEntity.generate(persistedDigitalObject);
+    var bagEntityToBeSaved = TestSubmissionRecord.generate(persistedDigitalObject);
 
     var persistedBagEntity = bagEntityRepository.save(bagEntityToBeSaved);
 

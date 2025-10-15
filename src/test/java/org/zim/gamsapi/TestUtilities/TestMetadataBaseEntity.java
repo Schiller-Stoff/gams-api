@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
-import org.zim.gamsapi.MetadataBaseEntity;
-import org.zim.gamsapi.MetadataBaseEntityBuilder;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
+import org.zim.gamsapi.domain.MetadataBaseEntityBuilder;
 
 /**
  * Provides a test instance of MetadataBaseEntity
