@@ -1,7 +1,7 @@
 package org.zim.gamsapi.TestUtilities;
 
-import org.zim.gamsapi.DigitalObject.DigitalObject;
-import org.zim.gamsapi.DigitalObject.DublinCoreEntry.DublinCoreEntry;
+import org.zim.gamsapi.domain.DigitalObject.DigitalObject;
+import org.zim.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 
 /**
  * Enum for DublinCoreEntry.
