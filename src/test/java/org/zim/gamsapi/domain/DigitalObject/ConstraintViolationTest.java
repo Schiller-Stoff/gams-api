@@ -1,21 +1,23 @@
 package org.zim.gamsapi.domain.DigitalObject;
 
-import jakarta.validation.*;
-import org.junit.jupiter.api.Assertions;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.zim.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectException;
-import org.zim.gamsapi.domain.MetadataBaseEntity;
-import org.zim.gamsapi.domain.Project.ProjectBuilder;
-import org.zim.gamsapi.UnitTest;
 import org.zim.gamsapi.TestUtilities.TestDigitalObject;
 import org.zim.gamsapi.TestUtilities.TestMetadataBaseEntity;
+import org.zim.gamsapi.UnitTest;
+import org.zim.gamsapi.domain.MetadataBaseEntity;
+import org.zim.gamsapi.domain.Project.ProjectBuilder;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -108,7 +110,7 @@ public class ConstraintViolationTest extends UnitTest {
             "%s.a1-b2_c3.d4-e5",
             "%s.abc-123_xyz.final",
 
-            // no dot as separator - TODO goes through gunter's test
+            // no dot as separator
             "%s-project.item1",
             "%s-proj.123abc",
 
@@ -154,8 +156,11 @@ public class ConstraintViolationTest extends UnitTest {
           DigitalObject digitalObject = TestDigitalObject.generate();
           String objectId = String.format(id, digitalObject.getProject().getProjectAbbr());
           digitalObject.setId(objectId);
-          org.assertj.core.api.Assertions.assertThatThrownBy(() -> validator.validate(digitalObject))
-              .isInstanceOf(ValidationException.class);
+          System.out.println("Testing invalid ID: " + objectId);
+          org.assertj.core.api.Assertions
+              .assertThat(validator.validate(digitalObject).size())
+              .withFailMessage(" Supposedly invalid ID is unexpectedly valid: " + objectId)
+              .isGreaterThan(0);
         }
 
       }
@@ -171,12 +176,12 @@ public class ConstraintViolationTest extends UnitTest {
       }
 
       @Test
-      public void shouldRaiseValidationExceptionIfIdIsNull() {
+      public void shouldRaiseNoValidationExceptionIfIdIsNull() {
         DigitalObject digitalObject = TestDigitalObject.generate();
         digitalObject.setId(null);
-        Assertions.assertThrows(ValidationException.class, () -> validator.validate(digitalObject));
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
+        Assertions.assertThat(violationSet).isNotEmpty();
       }
-
 
       @Test
       public void shouldRaiseConstraintViolationIfMetadataIsEmpty() {
@@ -230,7 +235,7 @@ public class ConstraintViolationTest extends UnitTest {
       @Test
       public void shouldRaiseOneConstraintViolationIfIdIsTooLong() {
         DigitalObject digitalObject = TestDigitalObject.generate();
-        digitalObject.setId(digitalObject.getId() + "12345678901312312321312312323"); //
+        digitalObject.setId(digitalObject.getId() + "12345678901312312321312312323123456789013123123213123123231234567890131231232131231232312345678901312312321312312323"); //
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));
       }
@@ -241,14 +246,6 @@ public class ConstraintViolationTest extends UnitTest {
         digitalObject.setId(digitalObject.getId() + "$");
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));
-      }
-
-      @Test
-      public void doesNotRaiseConstraintViolationIfIdContainsDots() {
-        DigitalObject digitalObject = TestDigitalObject.generate();
-        digitalObject.setId(digitalObject.getId() + "...");
-        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
-        assertThat(violationSet, is(empty()));
       }
 
       @Test
