@@ -1,16 +1,13 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
+import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.domain.Project.Project;
-import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +26,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
   private BaseSearchService baseSearchService;
 
   @Autowired
-  private IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  private IProjectRepository projectRepository;
-
-  @Autowired
   private GAMSDockerDNS gamsDockerDNS;
-
-//  @Autowired
-//  private SOLRClient solrClient;
-
-  private final Project TEST_PROJECT = TestProject.generate();
 
   // disables auditing
   @MockitoBean
@@ -49,29 +35,34 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
   @Autowired
   private SOLRClient sOLRClient;
 
+  @Autowired
+  private TestDataBuilder testDataBuilder;
+
+  private TestDataSet testDataSet;
+
+  @BeforeEach
+  public void setup() {
+    testDataSet = testDataBuilder.buildTestDataSet();
+  }
+
   @Nested
   public class IndexObject {
-
 
     @Test
     public void tryingToIndexNonExistentObjectShouldThrow(){
       final String NON_EXISTENT_DIGITAL_OBJECT_ID = "DOES_NOT_EXIST";
       Assertions.assertThrows(IntegrationDataProcessingException.class, () -> {
-        baseSearchService.indexObject(TEST_PROJECT.getProjectAbbr(), NON_EXISTENT_DIGITAL_OBJECT_ID);
+        baseSearchService.indexObject(testDataSet.project().getProjectAbbr(), NON_EXISTENT_DIGITAL_OBJECT_ID);
       });
     }
 
     @Test
-    public void ableToIndexTestDigitalObject() {
-      // first save the gams project
-      projectRepository.save(TEST_PROJECT);
+    public void indexObjectDoesNotThrow() {
 
-      // then the object
-      DigitalObject testObject =  TestDigitalObject.generate();
-      digitalObjectRepository.save(testObject);
-
-      // index it
-      baseSearchService.indexObject(TEST_PROJECT.getProjectAbbr(), testObject.getId());
+      // index object
+      baseSearchService.indexObject(
+          testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+      );
 
       String coreName = "test";
       log.trace("Posting now byte array data to solr core {}", coreName);
