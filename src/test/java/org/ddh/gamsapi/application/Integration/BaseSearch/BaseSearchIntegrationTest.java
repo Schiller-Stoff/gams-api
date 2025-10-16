@@ -123,6 +123,8 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
       log.debug("Cleaning up Solr cores after test");
       solrClient.wipeCore(SOLR_GAMS_CORE);
       solrClient.wipeCore(SOLR_TEST_CORE);
+      // needs to be called - teardown in parent class is not called automatically
+      super.tearDown();
     } catch (Exception e) {
       log.warn("Failed to wipe cores in tearDown: {}", e.getMessage());
     }
