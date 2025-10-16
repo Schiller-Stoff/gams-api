@@ -6,15 +6,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled("Deactivated integration testing for SOLR because of unclear issues with the solr test-container.")
 public class SOLRClientIT extends BaseSearchIntegrationTest {
 
   // disables auditing
-  @MockBean
+  @MockitoBean
   private AuditingHandler auditingHandler;
 
   @Autowired
