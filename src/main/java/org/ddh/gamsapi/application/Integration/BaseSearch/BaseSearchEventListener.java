@@ -2,12 +2,16 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.Common.IntegrationFailure;
+import org.ddh.gamsapi.application.Integration.Common.enums.IntegrationStatus;
+import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationFailureRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
+import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -15,6 +19,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
 public class BaseSearchEventListener {
 
   private final BaseSearchService baseSearchService;
+  private final IIntegrationFailureRepository failureRepository;
 
   /**
    * Listen for DigitalObjectCreatedEvent, but only process after the transaction is committed.
@@ -25,7 +30,6 @@ public class BaseSearchEventListener {
   public void handleDigitalObjectCreatedEvent(DigitalObjectCreatedEvent event) {
 
     DigitalObject digitalObject = event.getDigitalObject();
-    log.debug("Handling DigitalObjectCreatedEvent for object: {}", digitalObject.getId());
 
     try {
       baseSearchService.indexObject(
@@ -33,12 +37,21 @@ public class BaseSearchEventListener {
           digitalObject.getId()
       );
     } catch (Exception e) {
-      log.error("Error processing DigitalObjectCreatedEvent for object: {}. Error: {}", digitalObject.getId(), e.getMessage());
-      return;
+      log.error("Error indexing object {}. Storing for retry. Error: {}",
+          digitalObject.getId(), e.getMessage());
+
+      // Store failure for retry
+      failureRepository.save(
+          IntegrationFailure.builder()
+              .serviceName("BaseSearch") // TODO better naming / enum?
+              .projectAbbr(digitalObject.getProject().getProjectAbbr())
+              .digitalObjectId(digitalObject.getId())
+              .operation(IntegrationStatus.INDEX) // TODO enum?
+              .errorMessage(e.getMessage())
+              .nextRetryAt(LocalDateTime.now().plusMinutes(5))
+              .build()
+      );
     }
-
-
-
   }
 
 
