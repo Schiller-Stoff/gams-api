@@ -3,6 +3,8 @@
            xmlns:t="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <dc:title>test-dc-title</dc:title>
     <dc:title xml:lang="en">test-dc-title-en</dc:title>
+    <dc:identifier>test-dc-title</dc:identifier>
+    <dc:identifier xml:lang="en">test-dc-title-en</dc:identifier>
     <dc:description>test-dc-description</dc:description>
     <dc:description xml:lang="en">test-dc-description-en</dc:description>
     <dc:relation>Hugo Schuchardt Archiv</dc:relation>
