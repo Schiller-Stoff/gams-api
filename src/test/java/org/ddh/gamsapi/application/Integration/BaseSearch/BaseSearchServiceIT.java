@@ -144,7 +144,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
     }
 
     @Test
-    public void indexesExpectedDublinCore(){
+    public void returnsExpectedDcFieldNamesInResponse(){
 
       // index object
       baseSearchService.indexObject(
