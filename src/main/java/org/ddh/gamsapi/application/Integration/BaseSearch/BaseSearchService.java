@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class BaseSearchService implements IIntegrationService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
+  private final IDublinCoreEntryRepository dublinCoreEntryRepository;
 
   private final String GAMS_CORE = "gams";
 
@@ -145,8 +147,6 @@ public class BaseSearchService implements IIntegrationService {
 
   }
 
-
-
   /**
    * Adds dublin core field to given base search entity.
    * TODO test
@@ -155,28 +155,15 @@ public class BaseSearchService implements IIntegrationService {
    * @param datastreamId datastream id
    */
   public void addDublinCore(BaseSearch baseSearch, DatastreamId datastreamId){
-    var dcContent =  datastreamContentRepository.findById(datastreamId);
-    Document dcXml;
-    try {
-      dcXml = XMLUtils.parseXml(dcContent.getInputStream());
-    } catch (IOException e) {
-      String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", dcContent.getDescription(), datastreamId, e);
+    var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(datastreamId.getDigitalObject());
+    if(dcEntries.isEmpty()){
+      String msg = String.format("No dublin core entries found for digital object %s", datastreamId.getDigitalObject());
       log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      throw new IntegrationDataProcessingException(msg);
     }
-
-    // retrieve all child elements of the root element
-    // TODO validate if it's correct dublin core?
-    // TODO this might be risky (will index all elements in the xml file)
-    var dcNodes = XMLUtils.getAllXpath("/*/*", dcXml);
-
-    for (int i = 0; i < dcNodes.getLength(); i++) {
-      var node = dcNodes.item(i);
-      String nodeName = node.getNodeName().replace(":", "."); // solr recommends not to use colons in field names
-      String nodeValue = node.getTextContent();
-
-      String propertyName = nodeName;
-      // add possible multiple values for the same field
+    dcEntries.forEach(dcEntry -> {
+      String propertyName = "dc." + dcEntry.getName();
+      String nodeValue = dcEntry.getValue();
       if(baseSearch.getProperty(propertyName) == null){
         baseSearch.addProperty(propertyName, List.of(nodeValue));
       } else {
@@ -185,7 +172,7 @@ public class BaseSearchService implements IIntegrationService {
         newValues.add(nodeValue);
         baseSearch.addProperty(propertyName, newValues);
       }
-    }
+    });
 
   }
 
