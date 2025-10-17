@@ -158,21 +158,21 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
       org.assertj.core.api.Assertions.assertThat(response)
           .isNotNull()
           .contains(
-              "dc_title",
-              "dc_creator",
-              "dc_subject",
-              "dc_description",
-              "dc_publisher",
-              "dc_contributor",
-              "dc_date",
-              "dc_type",
-              "dc_format",
-              "dc_identifier",
-              "dc_source",
-              "dc_language",
-              "dc_relation",
-              "dc_coverage",
-              "dc_rights"
+              "dc.title",
+              "dc.creator",
+              "dc.subject",
+              "dc.description",
+              "dc.publisher",
+              "dc.contributor",
+              "dc.date",
+              "dc.type",
+              "dc.format",
+              "dc.identifier",
+              "dc.source",
+              "dc.language",
+              "dc.relation",
+              "dc.coverage",
+              "dc.rights"
           )
       ;
 

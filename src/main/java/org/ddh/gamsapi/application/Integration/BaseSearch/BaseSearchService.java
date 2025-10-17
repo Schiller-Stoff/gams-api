@@ -170,25 +170,12 @@ public class BaseSearchService implements IIntegrationService {
     // TODO this might be risky (will index all elements in the xml file)
     var dcNodes = XMLUtils.getAllXpath("/*/*", dcXml);
 
-
     for (int i = 0; i < dcNodes.getLength(); i++) {
       var node = dcNodes.item(i);
-      String nodeName = node.getNodeName().replace(":", "_"); // solr recommends not to use colons in field names
+      String nodeName = node.getNodeName().replace(":", "."); // solr recommends not to use colons in field names
       String nodeValue = node.getTextContent();
 
-      // assign dynamic field for every dc element
-      String solrPostfix = "_ss";
-      // map lang attribute to solr if available
-      // TODO sophisticate handling of dublin core lang attribute
-      try {
-        String langAttributeValue = XMLUtils.extractAttributeValue("xml:lang", node);
-        solrPostfix = "_lang_" + langAttributeValue + solrPostfix;
-      } catch (IntegrationDataProcessingException e){
-        // no lang attribute found
-        log.trace("No lang attribute found for dublin core element {}", nodeName);
-      }
-
-      String propertyName = nodeName + solrPostfix;
+      String propertyName = nodeName;
       // add possible multiple values for the same field
       if(baseSearch.getProperty(propertyName) == null){
         baseSearch.addProperty(propertyName, List.of(nodeValue));

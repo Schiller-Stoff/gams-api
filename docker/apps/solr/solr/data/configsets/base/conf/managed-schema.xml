@@ -518,6 +518,23 @@
   <field name="entityLocationLabels" type="strings" multiValued="true"/>
 
 
+    <!-- Dublin Core fields in alphabetical order -->
+    <field name="dc.contributor" type="strings" multiValued="true"/>
+    <field name="dc.coverage" type="strings" multiValued="true"/>
+    <field name="dc.creator" type="strings" multiValued="true" />
+    <field name="dc.date" type="strings" multiValued="true"/>
+    <field name="dc.description" type="strings" multiValued="true" />
+    <field name="dc.format" type="strings" multiValued="true" />
+    <field name="dc.identifier" type="strings" multiValued="true"/>
+    <field name="dc.language" type="strings" multiValued="true" />
+    <field name="dc.publisher" type="strings" multiValued="true"/>
+    <field name="dc.relation" type="strings" multiValued="true" />
+    <field name="dc.rights" type="strings" multiValued="true" />
+    <field name="dc.source" type="strings" multiValued="true" />
+    <field name="dc.subject" type="strings" multiValued="true" />
+    <field name="dc.title" type="strings" multiValued="true"/>
+    <field name="dc.type" type="strings" multiValued="true"/>
+
   <!--
    *****
    Person data

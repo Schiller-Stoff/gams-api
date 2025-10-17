@@ -85,7 +85,7 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
           testCore.getExitCode(), testCore.getStdout().trim());
 
       if (testCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode());
+        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode() + "stdout: " + testCore.getStdout());
       }
 
       log.info("Creating '{}' core...", GamsSolrCores.GAMS_CORE.value);
@@ -96,7 +96,7 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
 
       if (gamsCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode());
+        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode() + "stdout: " + testCore.getStdout());
       }
 
       Thread.sleep(1000);
