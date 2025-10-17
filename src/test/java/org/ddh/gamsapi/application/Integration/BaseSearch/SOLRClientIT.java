@@ -17,9 +17,6 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private BaseSearchService baseSearchService;
-
-  @Autowired
   private SOLRClient solrClient;
 
   @Test
@@ -204,6 +201,22 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
       solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
 
       String response = solrClient.retrieveSolrDocumentByProperty(GamsSolrCores.TEST_CORE.value, "id", "123");
+      String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      Assertions.assertThat(response).contains(expectedSubstring);
+
+    }
+
+    @Test
+    public void queryReturnsExpectedData(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "1234";
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
+
+      String solrQuery = String.format("%s:%s", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      String response = solrClient.query(GamsSolrCores.TEST_CORE.value, solrQuery);
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       Assertions.assertThat(response).contains(expectedSubstring);
 

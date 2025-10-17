@@ -299,7 +299,6 @@ public class SOLRClient {
    */
   public String retrieveSolrDocumentByProperty(String coreName, String propertyName, String propertyValue){
 
-    // %3A is the URL encoded value for ":"
     final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s:%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, propertyName, propertyValue);
     log.trace("Retrieving document from core {} with property {}={}", coreName, propertyName, propertyValue);
 
@@ -322,6 +321,41 @@ public class SOLRClient {
       throw new IntegrationServiceException(msg);
     }
 
+  }
+
+
+  /**
+   * Execute a Solr query and return the raw JSON response.
+   *
+   * @param solrQuery Argument after 'q=' in Solr query URL
+   * @return Raw JSON response from Solr
+   */
+  public String query(String coreName, String solrQuery) {
+    final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, solrQuery);
+    log.trace("Executing Solr query: {}", CORE_QUERY_URL);
+
+    try {
+      return webClient.get()
+          .uri(CORE_QUERY_URL)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format(
+          "Failed to execute Solr query. SOLR-URL: %s, Status: %s, Error: %s",
+          CORE_QUERY_URL, e.getStatusCode(), errorResponseBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format(
+          "Failed to execute Solr query. SOLR-URL: %s, Cause: %s",
+          CORE_QUERY_URL, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
   }
 
 }
