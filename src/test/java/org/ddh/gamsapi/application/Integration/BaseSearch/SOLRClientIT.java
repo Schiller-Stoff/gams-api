@@ -191,6 +191,26 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
 
   }
 
+  @Nested
+  public class GET {
+
+    @Test
+    public void getReturnsExpectedData(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "123";
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(SOLR_TEST_CORE, baseSearch);
+
+      String response = solrClient.retrieveSolrDocumentByProperty(SOLR_TEST_CORE, "id", "123");
+      String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      Assertions.assertThat(response).contains(expectedSubstring);
+
+    }
+
+  }
+
 
   @Test
   @Disabled

@@ -290,4 +290,38 @@ public class SOLRClient {
 
   }
 
+  /**
+   * Retrieve a document from a core by a specific property.
+   * @param coreName name of the solr core
+   * @param propertyName name of the property to search by (of the solr document)
+   * @param propertyValue value of the property to search by
+   * @return the response body from the server
+   */
+  public String retrieveSolrDocumentByProperty(String coreName, String propertyName, String propertyValue){
+
+    // %3A is the URL encoded value for ":"
+    final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s:%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, propertyName, propertyValue);
+    log.trace("Retrieving document from core {} with property {}={}", coreName, propertyName, propertyValue);
+
+    try {
+      return webClient.get()
+          .uri(CORE_QUERY_URL)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format("Failed to retrieve document from solr core %s with property %s=%s. Via url: %s Status: %s. Error response from solr: %s",
+          coreName, propertyName, propertyValue, CORE_QUERY_URL, e.getStatusCode(), errorResponseBody);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (Exception e) {
+      String msg = String.format("Failed to retrieve document from solr core %s with property %s=%s. Via url: %s Cause: %s Original error: %s",
+          coreName, propertyName, propertyValue, CORE_QUERY_URL, e.getMessage(), e);
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+
+  }
+
 }
