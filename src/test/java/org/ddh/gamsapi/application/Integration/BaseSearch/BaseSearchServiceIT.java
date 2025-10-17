@@ -1,10 +1,14 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
-import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Ingest.Ingest;
+import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
+import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
+import org.ddh.gamsapi.domain.Project.ProjectBuilder;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,11 +16,16 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import java.io.File;
+import java.io.IOException;
+import java.util.Set;
 
 
 @Slf4j
@@ -24,6 +33,12 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
   @Autowired
   private BaseSearchService baseSearchService;
+
+  @Autowired
+  private IIngestService ingestService;
+
+  @Autowired
+  private IProjectRepository projectRepository;
 
   @Autowired
   private GAMSDockerDNS gamsDockerDNS;
@@ -35,15 +50,21 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
   @Autowired
   private SOLRClient sOLRClient;
 
-  @Autowired
-  private TestDataBuilder testDataBuilder;
-
-  private TestDataSet testDataSet;
+  File bagFile;
 
   @BeforeEach
-  public void setup() {
-    testDataSet = testDataBuilder.buildTestDataSet();
+  public void setup() throws IOException {
+    bagFile = TestBag.loadFile();
+    projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+    // ingest the bag
+    byte[] zippedBag = ZipUtils.zipDir(bagFile);
+    Ingest ingest = new Ingest();
+    ingest.setZippedBagItFolder(zippedBag);
+    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+    ingestService.ingest(ingest);
   }
+
 
   @Nested
   public class IndexObject {
@@ -52,7 +73,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
     public void tryingToIndexNonExistentObjectShouldThrow(){
       final String NON_EXISTENT_DIGITAL_OBJECT_ID = "DOES_NOT_EXIST";
       Assertions.assertThrows(IntegrationDataProcessingException.class, () -> {
-        baseSearchService.indexObject(testDataSet.project().getProjectAbbr(), NON_EXISTENT_DIGITAL_OBJECT_ID);
+        baseSearchService.indexObject(TestProject.PROJECT_ABBR.getValue(), NON_EXISTENT_DIGITAL_OBJECT_ID);
       });
     }
 
@@ -61,7 +82,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
       // index object
       baseSearchService.indexObject(
-          testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
       String coreName = "test";
@@ -108,16 +129,51 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
     public void findsExpectedObjectIdJsonEntry(){
       // index object
       baseSearchService.indexObject(
-          testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          GamsSolrCores.GAMS_CORE.value, "id", testDataSet.digitalObject().getId()
+          GamsSolrCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
       // solr also returns the initial query info, so we just check that the id is contained in the response
       org.assertj.core.api.Assertions.assertThat(response)
           .isNotNull()
-          .contains("\"id\":\""+ testDataSet.digitalObject().getId())
+          .contains("\"id\":\""+ TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      ;
+
+    }
+
+    @Test
+    public void indexesExpectedDublinCore(){
+
+      // index object
+      baseSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+      String response = solrClient.retrieveSolrDocumentByProperty(
+          GamsSolrCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      // solr also returns the initial query info, so we just check that the dc_title is contained in the response
+      org.assertj.core.api.Assertions.assertThat(response)
+          .isNotNull()
+          .contains(
+              "dc_title",
+              "dc_creator",
+              "dc_subject",
+              "dc_description",
+              "dc_publisher",
+              "dc_contributor",
+              "dc_date",
+              "dc_type",
+              "dc_format",
+              "dc_identifier",
+              "dc_source",
+              "dc_language",
+              "dc_relation",
+              "dc_coverage",
+              "dc_rights"
+          )
       ;
 
     }
