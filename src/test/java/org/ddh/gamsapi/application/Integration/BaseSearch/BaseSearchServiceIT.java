@@ -104,6 +104,24 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
     }
 
+    @Test
+    public void findsExpectedObjectIdJsonEntry(){
+      // index object
+      baseSearchService.indexObject(
+          testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+      );
+      String response = solrClient.retrieveSolrDocumentByProperty(
+          SOLR_GAMS_CORE, "id", testDataSet.digitalObject().getId()
+      );
+
+      // solr also returns the initial query info, so we just check that the id is contained in the response
+      org.assertj.core.api.Assertions.assertThat(response)
+          .isNotNull()
+          .contains("\"id\":\""+ testDataSet.digitalObject().getId())
+      ;
+
+    }
+
   }
 
 
