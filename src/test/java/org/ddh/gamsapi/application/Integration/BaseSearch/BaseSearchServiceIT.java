@@ -111,7 +111,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
           testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          SOLR_GAMS_CORE, "id", testDataSet.digitalObject().getId()
+          GamsSolrCores.GAMS_CORE.value, "id", testDataSet.digitalObject().getId()
       );
 
       // solr also returns the initial query info, so we just check that the id is contained in the response

@@ -32,7 +32,7 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
   @Test
   public void coreExistsDoesNotThrow(){
     org.junit.jupiter.api.Assertions.assertDoesNotThrow(
-        () -> solrClient.coreExists("test")
+        () -> solrClient.coreExists(GamsSolrCores.TEST_CORE.value)
     );
   }
 
@@ -72,7 +72,7 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
   public void verifyThatTestCoreExists(){
     Assertions.assertThat(
         solrClient.coreExists(
-            BaseSearchIntegrationTest.SOLR_TEST_CORE
+            GamsSolrCores.TEST_CORE.value
         )
     ).isTrue();
   }
@@ -201,9 +201,9 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
 
       final BaseSearch baseSearch = new BaseSearch();
       baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(SOLR_TEST_CORE, baseSearch);
+      solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
 
-      String response = solrClient.retrieveSolrDocumentByProperty(SOLR_TEST_CORE, "id", "123");
+      String response = solrClient.retrieveSolrDocumentByProperty(GamsSolrCores.TEST_CORE.value, "id", "123");
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       Assertions.assertThat(response).contains(expectedSubstring);
 
