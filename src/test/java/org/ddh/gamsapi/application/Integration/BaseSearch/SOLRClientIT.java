@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -219,6 +220,26 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
       String response = solrClient.query(GamsSolrCores.TEST_CORE.value, solrQuery);
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       Assertions.assertThat(response).contains(expectedSubstring);
+
+    }
+
+    @Test
+    public void getReturnsExpectedSolrData(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "1234";
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
+
+      String url = String.format("/solr/%s/select?q=*:*", GamsSolrCores.TEST_CORE.value);
+      String response = solrClient.get(url);
+      System.out.println("*** Response: " + response);
+      Assertions.assertThat(response)
+          .isNotNull()
+          .isNotEmpty()
+          .contains(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE)
+      ;
 
     }
 

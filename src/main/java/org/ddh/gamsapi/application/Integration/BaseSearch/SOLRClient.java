@@ -358,4 +358,37 @@ public class SOLRClient {
     }
   }
 
+  /**
+   * Execute a Solr query and return the raw JSON response.
+   *
+   * @param url The complete query path including parameters (e.g., "/solr/gams/select?q=*:*")
+   * @return Raw JSON response from Solr
+   */
+  public String get(String url) {
+    log.trace("Executing Solr url: {}", url);
+
+    try {
+      return webClient.get()
+          .uri(url)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format(
+          "Failed to execute Solr query. Path: %s, Status: %s, Error: %s",
+          url, e.getStatusCode(), errorResponseBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format(
+          "Failed to execute Solr query. Path: %s, Cause: %s",
+          url, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+  }
+
 }
