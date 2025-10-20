@@ -25,6 +25,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.Document;
@@ -109,19 +110,53 @@ public class BaseSearchService implements IIntegrationService {
         addDublinCore(baseSearch, datastreamId);
       }
 
-      // decide based on mimetype which documents to index
-      if(datastream.getMimeType().contains("xml")){
-        addFulltext(baseSearch, datastreamId);
-      }
-
-
     });
+
+    // TODO add logging
+    // add fulltext only for main resource or DC.xml
+    var fulltextDsid = digitalObject.getMainResource();
+    if(fulltextDsid == null || fulltextDsid.isEmpty()) {
+      fulltextDsid = GAMSDsid.DC.getValue();
+    }
+
+    // additionally check if datastream is xml
+    // TODO this is not elegant - because now the file ending must be contained - is this correct?
+    // TODO add logging
+    if(!fulltextDsid.contains(".xml")){
+      fulltextDsid = GAMSDsid.DC.getValue();
+    }
+
+    addFulltext(
+        baseSearch,
+        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(fulltextDsid).build()
+    );
+
+
 
     // the end post base search entity to SOLR
     solrClient.post(GAMS_CORE, baseSearch);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
   }
+
+
+  public String fulltextSearch(String projectAbbr, String searchTerm){
+    // TODO implement
+    // TODO sorting
+    // TODO pagination
+    // TODO additional stuff
+    // TODO own issue?
+
+    String response = solrClient.retrieveSolrDocumentByProperty(
+        GamsSolrCores.GAMS_CORE.value,
+        BaseSearchProperties.FULLTEXT.name,
+        searchTerm
+    );
+
+    return response;
+
+  }
+
 
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
@@ -201,6 +236,10 @@ public class BaseSearchService implements IIntegrationService {
       String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", xmlContent.getDescription(), datastreamId, e);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
+    } catch (IntegrationDataProcessingException e) {
+      String msg = String.format("Failed to parse xml datastream %s. Original error: %s", datastreamId, e);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
     }
 
     String docText = XMLUtils.extractText(dcXml);
@@ -231,6 +270,8 @@ public class BaseSearchService implements IIntegrationService {
     }
 
   }
+
+
 
   /**
    * Performs faceted Dublin Core search in Solr.

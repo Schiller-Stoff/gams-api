@@ -256,5 +256,24 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
   }
 
+  @Nested
+  public class FulltextSearch {
+
+    @Test
+    public void returnsNoNullOrEmptyResponse(){
+      // index object
+      baseSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      var responseBody = baseSearchService.fulltextSearch("", "Sondersammlungen");
+
+      org.assertj.core.api.Assertions.assertThat(responseBody)
+          .isNotNull()
+          .isNotEmpty();
+
+    }
+
+  }
 
 }
