@@ -144,6 +144,25 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
     }
 
     @Test
+    public void ableToFindDocumentsBasedOnProjectAbbreviations(){
+      // index object
+      baseSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+      String response = solrClient.retrieveSolrDocumentByProperty(
+          GamsSolrCores.GAMS_CORE.value, BaseSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
+      );
+
+      System.out.println("*** Response: " + response);
+
+      // solr also returns the initial query info, so we just check that the id is contained in the response
+      org.assertj.core.api.Assertions.assertThat(response)
+          .isNotNull()
+          .contains("\"id\":\""+ TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      ;
+    }
+
+    @Test
     public void returnsExpectedDcFieldNamesInResponse(){
 
       // index object
@@ -175,6 +194,63 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
               "dc.rights"
           )
       ;
+
+    }
+
+  }
+
+
+  @Nested
+  public class FacetSearch {
+
+    @Test
+    public void facetResultsAreNotEmpty(){
+
+      // index object
+      baseSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      // Basic search
+      var facetResult = baseSearchService.facetSearch(
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          new LinkedMultiValueMap<>(),
+          PageRequest.of(0, 20)
+      );
+
+      org.assertj.core.api.Assertions.assertThat(facetResult.getResults())
+              .isNotEmpty();
+
+      org.assertj.core.api.Assertions.assertThat(facetResult.getAvailableFacets())
+              .isNotEmpty();
+
+      org.assertj.core.api.Assertions.assertThat(facetResult.getTotalUnfilteredCount())
+          .isGreaterThan(0);
+
+    }
+
+    @Test
+    public void facetedResponseContainsExpectedObjectData(){
+
+      // index object
+      baseSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      // Basic search
+      var facetResult = baseSearchService.facetSearch(
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          new LinkedMultiValueMap<>(),
+          PageRequest.of(0, 20)
+      );
+
+      // TODO rethink assertion
+      org.assertj.core.api.Assertions.assertThat(facetResult.getResults())
+          .isNotEmpty()
+          .anySatisfy( baseSearch -> {
+            org.assertj.core.api.Assertions.assertThat(baseSearch.getProperty("id"))
+                .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+          });
 
     }
 
