@@ -15,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @Builder
-public class FacetSearchResponse {
+public class BaseSearchFacetResponse {
   private List<Map<String, Object>> results;
   private Map<String, List<SolrFacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
@@ -32,7 +32,7 @@ public class FacetSearchResponse {
    * @param selectedFacets slected facets during request building to solr
    * @return response for faceted search
    */
-  public static FacetSearchResponse from(
+  public static BaseSearchFacetResponse from(
       SolrFacetedResponse solrFacetedResponse,
       MultiValueMap<String, String> selectedFacets
   ){
@@ -42,7 +42,7 @@ public class FacetSearchResponse {
       selectedFacetsAsNormalMap.put(s, new ArrayList<>(strings));
     });
 
-    return FacetSearchResponse.builder()
+    return BaseSearchFacetResponse.builder()
         .results(solrFacetedResponse.getDocuments())
         .availableFacets(solrFacetedResponse.getFacets())
         .selectedFacets(selectedFacetsAsNormalMap)

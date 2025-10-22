@@ -4,10 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.FacetSearchResponse;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectDublinCoreSpecification;
-import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
-import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.BaseSearchFacetResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
@@ -88,7 +85,7 @@ public class BaseSearchController implements IIntegrationController {
   })
   @ResponseBody
   // TODO should i use PagedResponse? and
-  public FacetSearchResponse searchDigitalObjectsByDublinCoreAdvanced(
+  public BaseSearchFacetResponse searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
       @RequestParam(defaultValue = "0") int pageIndex,

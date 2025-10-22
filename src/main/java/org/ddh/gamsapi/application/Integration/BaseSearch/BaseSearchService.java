@@ -2,7 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.FacetSearchResponse;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.BaseSearchFacetResponse;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.application.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
@@ -285,7 +285,7 @@ public class BaseSearchService implements IIntegrationService {
    * @param pageable Pagination information
    * @return FacetSearchResponse containing results, facets, and metadata
    */
-  public FacetSearchResponse facetSearch(
+  public BaseSearchFacetResponse facetSearch(
       Set<String> projectAbbrs,
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {
@@ -326,7 +326,7 @@ public class BaseSearchService implements IIntegrationService {
 
     // STEP 5: Transform to response from our API
 
-    return FacetSearchResponse.from(
+    return BaseSearchFacetResponse.from(
         parsedResponse, selectedFacets
     );
 
