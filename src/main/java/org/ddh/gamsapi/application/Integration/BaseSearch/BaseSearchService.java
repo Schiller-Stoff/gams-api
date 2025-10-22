@@ -553,6 +553,9 @@ public class BaseSearchService implements IIntegrationService {
    * Handles multi-valued fields where language variants are in single array.
    */
   private SolrFacetedResponse parseSolrFacetResponse(String jsonResponse) {
+
+    // TODO use propper jackson workflow to parse solr repsonse!
+
     try {
       var OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
       JsonNode root = OBJECT_MAPPER.readTree(jsonResponse);
