@@ -1,7 +1,9 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import org.assertj.core.api.Assertions;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.GamsSolrCores;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

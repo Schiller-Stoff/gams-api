@@ -1,8 +1,9 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.Builder;
 import lombok.Data;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
 import org.springframework.util.MultiValueMap;
 

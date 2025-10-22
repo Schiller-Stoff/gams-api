@@ -1,7 +1,8 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;

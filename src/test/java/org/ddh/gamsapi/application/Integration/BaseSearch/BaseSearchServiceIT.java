@@ -5,6 +5,7 @@ import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SOLRClient;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;

@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SOLRClient;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;
