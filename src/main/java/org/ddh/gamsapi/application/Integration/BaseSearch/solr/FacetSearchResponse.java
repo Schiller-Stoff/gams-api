@@ -20,4 +20,7 @@ public class FacetSearchResponse {
   private long filteredCount;
   private long totalUnfilteredCount;
   private FacetSearchMetrics metrics;
+  private long start;
+  private long totalCount;
+
 }

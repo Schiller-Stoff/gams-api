@@ -338,6 +338,8 @@ public class BaseSearchService implements IIntegrationService {
     });
 
     // TODO update return value - should include pagination info etc.
+    // TODO pagination info etc. is included in parsed SolrFacetedResponse -> just needs to be used.
+    // PagedResoponse would be to complex to construct!
 
     // STEP 5: Build and return response
     return FacetSearchResponse.builder()
@@ -346,6 +348,8 @@ public class BaseSearchService implements IIntegrationService {
         .selectedFacets(selectedFacetsAsNormalMap)
         .filteredCount(parsedResponse.getNumFound())
         .totalUnfilteredCount(parsedResponse.getTotalCount())
+        .start(parsedResponse.getStart())
+        .totalCount(parsedResponse.getTotalCount())
         .metrics(FacetSearchMetrics.builder()
             .searchTimeMs(totalTime)
             .facetCountTimeMs(0L) // Solr computes facets inline
