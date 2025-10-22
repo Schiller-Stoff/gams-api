@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import lombok.Builder;
 import lombok.Data;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
 import org.springframework.util.MultiValueMap;
 
@@ -16,7 +17,7 @@ import java.util.Map;
 @Data
 @Builder
 public class BaseSearchFacetResponse {
-  private List<Map<String, Object>> results;
+  private List<BaseSearch> results;
   private Map<String, List<SolrFacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
   private long filteredCount;
@@ -42,8 +43,13 @@ public class BaseSearchFacetResponse {
       selectedFacetsAsNormalMap.put(s, new ArrayList<>(strings));
     });
 
+    List<BaseSearch> mapped = new ArrayList<>();
+    solrFacetedResponse.getDocuments().forEach((solrDocument) -> {
+      mapped.add(BaseSearch.from(solrDocument));
+    });
+
     return BaseSearchFacetResponse.builder()
-        .results(solrFacetedResponse.getDocuments())
+        .results(mapped)
         .availableFacets(solrFacetedResponse.getFacets())
         .selectedFacets(selectedFacetsAsNormalMap)
         .filteredCount(solrFacetedResponse.getNumFound())

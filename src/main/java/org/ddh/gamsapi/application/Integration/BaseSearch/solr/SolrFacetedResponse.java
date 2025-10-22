@@ -18,7 +18,7 @@ import java.util.Map;
 @Builder
 @Slf4j
 public class SolrFacetedResponse {
-  private List<Map<String, Object>> documents;
+  private List<SolrDocument> documents;
   private Map<String, List<SolrFacetValue>> facets;
   private long numFound;
   private long start;
@@ -55,12 +55,11 @@ public class SolrFacetedResponse {
       long start = responseNode.path("start").asLong();
 
       // Parse documents
-      List<Map<String, Object>> documents = new ArrayList<>();
+      List<SolrDocument> documents = new ArrayList<>();
       JsonNode docsNode = responseNode.path("docs");
       if (docsNode.isArray()) {
         for (JsonNode docNode : docsNode) {
-          var doc = OBJECT_MAPPER.treeToValue(docNode, Map.class);
-          // TODO unchecked cast?
+          var doc = OBJECT_MAPPER.treeToValue(docNode, SolrDocument.class);
           documents.add(doc);
         }
       }
