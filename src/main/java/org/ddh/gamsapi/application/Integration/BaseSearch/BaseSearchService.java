@@ -292,8 +292,6 @@ public class BaseSearchService implements IIntegrationService {
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {
 
-    // TODO method needs to return / use pageable
-
     long startTime = System.currentTimeMillis();
 
     log.debug("Solr faceted search: projects={}, filters={}, page={}",
@@ -308,6 +306,7 @@ public class BaseSearchService implements IIntegrationService {
     String solrQuery = buildSolrFacetQuery(projectAbbrs, selectedFacets);
 
     // STEP 2: Define default facet fields (Dublin Core standard fields with "dc." prefix)
+    // TODO: is this necessary?
     Set<String> facetFields = getDefaultDublinCoreFacetFields();
 
     // STEP 3: Execute Solr search with faceting
@@ -327,37 +326,12 @@ public class BaseSearchService implements IIntegrationService {
         totalTime, parsedResponse.getNumFound(), facetFields.size());
 
 
-    // ******** BUILDING RESPONSE FOR OUR API FROM HERE **********
-    // (returning the solr response directly?)
+    // STEP 5: Transform to response from our API
 
-    // transform selectedFacets to regular map for response
-    // to avoid exposing internal MultiValueMap implementation
-    var selectedFacetsAsNormalMap = new HashMap<String, List<String>>();
-    selectedFacets.forEach((s, strings) -> {
-      selectedFacetsAsNormalMap.put(s, new ArrayList<>(strings));
-    });
+    return FacetSearchResponse.from(
+        parsedResponse, selectedFacets
+    );
 
-    // TODO update return value - should include pagination info etc.
-    // TODO pagination info etc. is included in parsed SolrFacetedResponse -> just needs to be used.
-    // PagedResoponse would be to complex to construct!
-
-    // STEP 5: Build and return response
-    return FacetSearchResponse.builder()
-        .results(parsedResponse.getDocuments())
-        .availableFacets(parsedResponse.getFacets())
-        .selectedFacets(selectedFacetsAsNormalMap)
-        .filteredCount(parsedResponse.getNumFound())
-        .totalUnfilteredCount(parsedResponse.getTotalCount())
-        .start(parsedResponse.getStart())
-        .totalCount(parsedResponse.getTotalCount())
-        .metrics(FacetSearchMetrics.builder()
-            .searchTimeMs(totalTime)
-            .facetCountTimeMs(0L) // Solr computes facets inline
-            .totalTimeMs(totalTime)
-            .numberOfFacetFields(facetFields.size())
-            .performanceNote(getPerformanceNote(totalTime, facetFields.size()))
-            .build())
-        .build();
   }
 
   /**

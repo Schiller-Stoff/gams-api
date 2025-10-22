@@ -2,9 +2,11 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import lombok.Builder;
 import lombok.Data;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
+import org.springframework.util.MultiValueMap;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,4 +25,32 @@ public class FacetSearchResponse {
   private long start;
   private long totalCount;
 
+
+  /**
+   * Builds a FacetSearchResponse instance from given parsed solr response
+   * @param solrFacetedResponse response from solr
+   * @param selectedFacets slected facets during request building to solr
+   * @return response for faceted search
+   */
+  public static FacetSearchResponse from(
+      SolrFacetedResponse solrFacetedResponse,
+      MultiValueMap<String, String> selectedFacets
+  ){
+
+    var selectedFacetsAsNormalMap = new HashMap<String, List<String>>();
+    selectedFacets.forEach((s, strings) -> {
+      selectedFacetsAsNormalMap.put(s, new ArrayList<>(strings));
+    });
+
+    return FacetSearchResponse.builder()
+        .results(solrFacetedResponse.getDocuments())
+        .availableFacets(solrFacetedResponse.getFacets())
+        .selectedFacets(selectedFacetsAsNormalMap)
+        .filteredCount(solrFacetedResponse.getNumFound())
+        .totalUnfilteredCount(solrFacetedResponse.getTotalCount())
+        .start(solrFacetedResponse.getStart())
+        .totalCount(solrFacetedResponse.getTotalCount())
+        .build();
+
+  }
 }
