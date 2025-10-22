@@ -21,6 +21,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -335,6 +336,8 @@ public class BaseSearchService implements IIntegrationService {
     selectedFacets.forEach((s, strings) -> {
       selectedFacetsAsNormalMap.put(s, new ArrayList<>(strings));
     });
+
+    // TODO update return value - should include pagination info etc.
 
     // STEP 5: Build and return response
     return FacetSearchResponse.builder()
