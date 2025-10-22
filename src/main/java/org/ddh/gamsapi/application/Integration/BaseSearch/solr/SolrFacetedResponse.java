@@ -28,8 +28,9 @@ public class SolrFacetedResponse {
 
   /**
    * Creates class instance from a solrResponse document for facet querying
-   * @param solrResponse
+   * @param solrResponse TODO jdoc
    * @return
+   * TODO test
    */
   public static SolrFacetedResponse from(String solrResponse){
     return parseSolrFacetResponse(solrResponse);
