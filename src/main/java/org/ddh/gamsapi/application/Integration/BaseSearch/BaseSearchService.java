@@ -1,10 +1,8 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.FacetSearchResponse;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.FacetValue;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.application.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
@@ -18,10 +16,8 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMimeView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -31,7 +27,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -318,7 +316,7 @@ public class BaseSearchService implements IIntegrationService {
     );
 
     // STEP 4: Parse Solr response
-    SolrFacetedResponse parsedResponse = parseSolrFacetResponse(solrResponse);
+    SolrFacetedResponse parsedResponse = SolrFacetedResponse.from(solrResponse);
 
     long totalTime = System.currentTimeMillis() - startTime;
 
@@ -524,108 +522,6 @@ public class BaseSearchService implements IIntegrationService {
 
     return solrClient.get(finalUrl);
   }
-
-  /**
-   * Parses Solr faceted search response JSON.
-   * Extracts documents, facet counts, and metadata.
-   * Handles multi-valued fields where language variants are in single array.
-   */
-  private SolrFacetedResponse parseSolrFacetResponse(String jsonResponse) {
-
-    // TODO use propper jackson workflow to parse solr repsonse!
-
-    try {
-      var OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
-      JsonNode root = OBJECT_MAPPER.readTree(jsonResponse);
-
-      // Parse response metadata
-      JsonNode responseNode = root.path("response");
-      long numFound = responseNode.path("numFound").asLong();
-      long start = responseNode.path("start").asLong();
-
-      // Parse documents
-      List<Map<String, Object>> documents = new ArrayList<>();
-      JsonNode docsNode = responseNode.path("docs");
-      if (docsNode.isArray()) {
-        for (JsonNode docNode : docsNode) {
-          var doc = OBJECT_MAPPER.treeToValue(docNode, Map.class);
-          // TODO unchecked cast?
-          documents.add(doc);
-        }
-      }
-
-      // Parse facets
-      Map<String, List<FacetValue>> facets = new HashMap<>();
-      JsonNode facetFields = root.path("facet_counts").path("facet_fields");
-
-      if (facetFields.isObject()) {
-        facetFields.fields().forEachRemaining(entry -> {
-          String fieldName = entry.getKey();
-          JsonNode facetArray = entry.getValue();
-
-          List<FacetValue> facetValues = new ArrayList<>();
-
-          // Solr returns facets as alternating value/count array
-          // Format: ["value1", count1, "value2", count2, ...]
-          if (facetArray.isArray()) {
-            for (int i = 0; i < facetArray.size(); i += 2) {
-              if (i + 1 < facetArray.size()) {
-                String value = facetArray.get(i).asText();
-                long count = facetArray.get(i + 1).asLong();
-
-                if (count > 0) { // Only include non-zero counts
-                  facetValues.add(FacetValue.builder()
-                      .value(value)
-                      .count(count)
-                      .selected(false) // Will be set later based on selectedFacets
-                      .build());
-                }
-              }
-            }
-          }
-
-          // Sort facet values by count (descending) then by value (ascending)
-          facetValues.sort((a, b) -> {
-            int countCompare = Long.compare(b.getCount(), a.getCount());
-            return countCompare != 0 ? countCompare : a.getValue().compareTo(b.getValue());
-          });
-
-          // Keep field name as-is (already in "dc.fieldname" format)
-          facets.put(fieldName, facetValues);
-        });
-      }
-
-      return SolrFacetedResponse.builder()
-          .documents(documents)
-          .facets(facets)
-          .numFound(numFound)
-          .start(start)
-          .totalCount(numFound) // In basic implementation, same as numFound
-          .build();
-
-    } catch (Exception e) {
-      String msg = String.format("Failed to parse Solr faceted response. Cause: %s", e.getMessage());
-      log.error(msg, e);
-      throw new IntegrationDataProcessingException(msg);
-    }
-  }
-
-  /**
-   * Generates performance note based on search time.
-   */
-  private String getPerformanceNote(long totalTime, int facetFieldCount) {
-    if (totalTime < 100) {
-      return "Excellent performance - Solr faceting is very efficient";
-    } else if (totalTime < 500) {
-      return "Good performance - suitable for real-time use";
-    } else if (totalTime < 1000) {
-      return String.format("Acceptable performance with %d facet fields - consider reducing if needed",
-          facetFieldCount);
-    } else {
-      return "Consider optimizing Solr schema, adding field caching, or reducing facet field count";
-    }
-  }
-
 
 
 }
