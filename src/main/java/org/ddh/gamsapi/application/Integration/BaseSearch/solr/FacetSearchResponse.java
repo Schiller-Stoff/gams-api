@@ -14,7 +14,7 @@ import java.util.Map;
 @Data
 @Builder
 public class FacetSearchResponse {
-  private List<BaseSearch> results;
+  private List<Map<String, Object>> results;
   private Map<String, List<FacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
   private long filteredCount;

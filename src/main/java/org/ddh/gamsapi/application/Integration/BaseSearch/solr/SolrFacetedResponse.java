@@ -14,7 +14,7 @@ import java.util.Map;
 @Builder
 public class SolrFacetedResponse {
   // TODO rethink usage of BaseSearch class here
-  private List<BaseSearch> documents;
+  private List<Map<String, Object>> documents;
   private Map<String, List<FacetValue>> facets;
   private long numFound;
   private long start;

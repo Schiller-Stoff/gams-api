@@ -570,11 +570,12 @@ public class BaseSearchService implements IIntegrationService {
       long start = responseNode.path("start").asLong();
 
       // Parse documents
-      List<BaseSearch> documents = new ArrayList<>();
+      List<Map<String, Object>> documents = new ArrayList<>();
       JsonNode docsNode = responseNode.path("docs");
       if (docsNode.isArray()) {
         for (JsonNode docNode : docsNode) {
-          BaseSearch doc = OBJECT_MAPPER.treeToValue(docNode, BaseSearch.class);
+          var doc = OBJECT_MAPPER.treeToValue(docNode, Map.class);
+          // TODO unchecked cast?
           documents.add(doc);
         }
       }

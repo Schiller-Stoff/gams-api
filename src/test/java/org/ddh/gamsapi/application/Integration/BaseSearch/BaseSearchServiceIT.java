@@ -248,7 +248,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
       org.assertj.core.api.Assertions.assertThat(facetResult.getResults())
           .isNotEmpty()
           .anySatisfy( baseSearch -> {
-            org.assertj.core.api.Assertions.assertThat(baseSearch.getProperty("id"))
+            org.assertj.core.api.Assertions.assertThat(baseSearch.get("id"))
                 .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
           });
 
