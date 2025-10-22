@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FacetValue {
+public class SolrFacetValue {
   private String value;
   private long count;
   private boolean selected;

@@ -17,7 +17,7 @@ import java.util.Map;
 @Builder
 public class FacetSearchResponse {
   private List<Map<String, Object>> results;
-  private Map<String, List<FacetValue>> availableFacets;
+  private Map<String, List<SolrFacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
   private long filteredCount;
   private long totalUnfilteredCount;

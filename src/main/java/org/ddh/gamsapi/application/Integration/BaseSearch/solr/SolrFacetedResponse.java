@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import java.util.Map;
 @Slf4j
 public class SolrFacetedResponse {
   private List<Map<String, Object>> documents;
-  private Map<String, List<FacetValue>> facets;
+  private Map<String, List<SolrFacetValue>> facets;
   private long numFound;
   private long start;
   private long totalCount;
@@ -67,7 +66,7 @@ public class SolrFacetedResponse {
       }
 
       // Parse facets
-      Map<String, List<FacetValue>> facets = new HashMap<>();
+      Map<String, List<SolrFacetValue>> facets = new HashMap<>();
       JsonNode facetFields = root.path("facet_counts").path("facet_fields");
 
       if (facetFields.isObject()) {
@@ -75,7 +74,7 @@ public class SolrFacetedResponse {
           String fieldName = entry.getKey();
           JsonNode facetArray = entry.getValue();
 
-          List<FacetValue> facetValues = new ArrayList<>();
+          List<SolrFacetValue> solrFacetValues = new ArrayList<>();
 
           // Solr returns facets as alternating value/count array
           // Format: ["value1", count1, "value2", count2, ...]
@@ -86,7 +85,7 @@ public class SolrFacetedResponse {
                 long count = facetArray.get(i + 1).asLong();
 
                 if (count > 0) { // Only include non-zero counts
-                  facetValues.add(FacetValue.builder()
+                  solrFacetValues.add(SolrFacetValue.builder()
                       .value(value)
                       .count(count)
                       .selected(false) // Will be set later based on selectedFacets
@@ -97,13 +96,13 @@ public class SolrFacetedResponse {
           }
 
           // Sort facet values by count (descending) then by value (ascending)
-          facetValues.sort((a, b) -> {
+          solrFacetValues.sort((a, b) -> {
             int countCompare = Long.compare(b.getCount(), a.getCount());
             return countCompare != 0 ? countCompare : a.getValue().compareTo(b.getValue());
           });
 
           // Keep field name as-is (already in "dc.fieldname" format)
-          facets.put(fieldName, facetValues);
+          facets.put(fieldName, solrFacetValues);
         });
       }
 
