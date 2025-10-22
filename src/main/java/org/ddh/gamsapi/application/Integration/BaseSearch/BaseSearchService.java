@@ -204,6 +204,12 @@ public class BaseSearchService implements IIntegrationService {
     dcEntries.forEach(dcEntry -> {
       String propertyName = "dc." + dcEntry.getName();
       String nodeValue = dcEntry.getValue();
+
+      // if dc entry specifies a language -> prepend this e.g. 'en:'
+      if((dcEntry.getLanguage()) != null && (!dcEntry.getLanguage().isEmpty())){
+        nodeValue = dcEntry.getLanguage() + ":" +  nodeValue;
+      }
+
       if(baseSearch.getProperty(propertyName) == null){
         baseSearch.addProperty(propertyName, List.of(nodeValue));
       } else {
@@ -285,6 +291,8 @@ public class BaseSearchService implements IIntegrationService {
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {
 
+    // TODO method needs to return / use pageable
+
     long startTime = System.currentTimeMillis();
 
     log.debug("Solr faceted search: projects={}, filters={}, page={}",
@@ -316,6 +324,10 @@ public class BaseSearchService implements IIntegrationService {
 
     log.info("Solr faceted search completed in {}ms - found {} results with {} facet fields",
         totalTime, parsedResponse.getNumFound(), facetFields.size());
+
+
+    // ******** BUILDING RESPONSE FOR OUR API FROM HERE **********
+    // (returning the solr response directly?)
 
     // transform selectedFacets to regular map for response
     // to avoid exposing internal MultiValueMap implementation
