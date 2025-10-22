@@ -25,7 +25,7 @@ public class SolrDocument {
   public final Map<String, Object> properties = new HashMap<>();
 
 
-  public void  addProperty(String key, Object value) {
+  public void addProperty(String key, Object value) {
     properties.put(key, value);
   }
 

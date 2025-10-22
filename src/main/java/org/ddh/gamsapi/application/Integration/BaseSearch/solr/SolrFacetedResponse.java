@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.util.ArrayList;
@@ -60,6 +61,8 @@ public class SolrFacetedResponse {
       if (docsNode.isArray()) {
         for (JsonNode docNode : docsNode) {
           var doc = OBJECT_MAPPER.treeToValue(docNode, SolrDocument.class);
+          // will ignore the fulltext property
+          doc.removeProperty(BaseSearchProperties.FULLTEXT.name);
           documents.add(doc);
         }
       }
@@ -93,6 +96,8 @@ public class SolrFacetedResponse {
               }
             }
           }
+
+          // TODO this sorting seems to be very weird here
 
           // Sort facet values by count (descending) then by value (ascending)
           solrFacetValues.sort((a, b) -> {

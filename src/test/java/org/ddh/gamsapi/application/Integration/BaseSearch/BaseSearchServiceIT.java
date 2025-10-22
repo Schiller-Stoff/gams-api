@@ -256,6 +256,27 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
     }
 
+    @Test
+    public void facetedResponseDoesNotContainFulltextProperty(){
+
+      // index object
+      baseSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      // Basic search
+      var facetResult = baseSearchService.facetSearch(
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          new LinkedMultiValueMap<>(),
+          PageRequest.of(0, 20)
+      );
+
+      var returnedBaseSearchElem = facetResult.getResults().get(0);
+      org.assertj.core.api.Assertions.assertThat(returnedBaseSearchElem.getProperty(BaseSearchProperties.FULLTEXT.name))
+          .isNull();
+
+    }
+
   }
 
   @Nested
