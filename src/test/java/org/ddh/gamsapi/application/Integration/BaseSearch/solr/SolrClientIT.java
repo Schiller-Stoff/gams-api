@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.GamsSolrCores;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
   @Test
   public void coreExistsDoesNotThrow(){
     org.junit.jupiter.api.Assertions.assertDoesNotThrow(
-        () -> solrClient.coreExists(GamsSolrCores.TEST_CORE.value)
+        () -> solrClient.coreExists(SolrGamsCores.TEST_CORE.value)
     );
   }
 
@@ -72,7 +71,7 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
   public void verifyThatTestCoreExists(){
     Assertions.assertThat(
         solrClient.coreExists(
-            GamsSolrCores.TEST_CORE.value
+            SolrGamsCores.TEST_CORE.value
         )
     ).isTrue();
   }
@@ -201,9 +200,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
 
       final BaseSearch baseSearch = new BaseSearch();
       baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
 
-      String response = solrClient.retrieveSolrDocumentByProperty(GamsSolrCores.TEST_CORE.value, "id", "123");
+      String response = solrClient.retrieveSolrDocumentByProperty(SolrGamsCores.TEST_CORE.value, "id", "123");
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       Assertions.assertThat(response).contains(expectedSubstring);
 
@@ -216,10 +215,10 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
 
       final BaseSearch baseSearch = new BaseSearch();
       baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
 
       String solrQuery = String.format("%s:%s", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      String response = solrClient.query(GamsSolrCores.TEST_CORE.value, solrQuery);
+      String response = solrClient.query(SolrGamsCores.TEST_CORE.value, solrQuery);
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       Assertions.assertThat(response).contains(expectedSubstring);
 
@@ -232,9 +231,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
 
       final BaseSearch baseSearch = new BaseSearch();
       baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(GamsSolrCores.TEST_CORE.value, baseSearch);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
 
-      String url = String.format("/solr/%s/select?q=*:*", GamsSolrCores.TEST_CORE.value);
+      String url = String.format("/solr/%s/select?q=*:*", SolrGamsCores.TEST_CORE.value);
       String response = solrClient.get(url);
       System.out.println("*** Response: " + response);
       Assertions.assertThat(response)

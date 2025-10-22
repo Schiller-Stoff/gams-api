@@ -1,9 +1,9 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 /**
  * Enum of Solr cores used in GAMS.
  */
-public enum GamsSolrCores {
+public enum SolrGamsCores {
 
   GAMS_CORE("gams"),
   TEST_CORE("test"),
@@ -11,7 +11,7 @@ public enum GamsSolrCores {
 
   public final String value;
 
-  GamsSolrCores(String value) {
+  SolrGamsCores(String value) {
     this.value = value;
   }
 

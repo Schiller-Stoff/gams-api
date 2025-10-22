@@ -6,6 +6,7 @@ import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
@@ -133,7 +134,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          GamsSolrCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          SolrGamsCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
       // solr also returns the initial query info, so we just check that the id is contained in the response
@@ -151,7 +152,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          GamsSolrCores.GAMS_CORE.value, BaseSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
+          SolrGamsCores.GAMS_CORE.value, BaseSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
       );
 
       System.out.println("*** Response: " + response);
@@ -171,7 +172,7 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          GamsSolrCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          SolrGamsCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
       // solr also returns the initial query info, so we just check that the dc_title is contained in the response

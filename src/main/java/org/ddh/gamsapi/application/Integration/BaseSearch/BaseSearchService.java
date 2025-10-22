@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
@@ -57,7 +58,7 @@ public class BaseSearchService implements IIntegrationService {
     log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
     // delete selected from GAMS core
-    solrClient.delete(GamsSolrCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
 
     // delete all from project core
     solrClient.delete(projectAbbr, "*:*");
@@ -130,7 +131,7 @@ public class BaseSearchService implements IIntegrationService {
 
 
     // the end post base search entity to SOLR
-    solrClient.post(GamsSolrCores.GAMS_CORE.value, baseSearch);
+    solrClient.post(SolrGamsCores.GAMS_CORE.value, baseSearch);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
   }
@@ -144,7 +145,7 @@ public class BaseSearchService implements IIntegrationService {
     // TODO own issue?
 
     String response = solrClient.retrieveSolrDocumentByProperty(
-        GamsSolrCores.GAMS_CORE.value,
+        SolrGamsCores.GAMS_CORE.value,
         BaseSearchProperties.FULLTEXT.name,
         searchTerm
     );
@@ -161,7 +162,7 @@ public class BaseSearchService implements IIntegrationService {
     id = id.replaceAll(":", "\\\\\\\\:");
 
     // delete object from GAMS core
-    solrClient.delete(GamsSolrCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
     // this requires solr documents to have the projectAbbr field
     solrClient.delete(projectAbbr, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
 
@@ -309,7 +310,7 @@ public class BaseSearchService implements IIntegrationService {
 
     // STEP 3: Execute Solr search with faceting
     String solrResponse = executeSolrFacetedSearch(
-        GamsSolrCores.GAMS_CORE.value,
+        SolrGamsCores.GAMS_CORE.value,
         solrQuery,
         facetFields,
         pageable
