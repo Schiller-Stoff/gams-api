@@ -2,7 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SOLRClient;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -22,7 +22,7 @@ import java.time.Duration;
 public class BaseSearchIntegrationTest extends IntegrationTest {
 
   @Autowired
-  SOLRClient solrClient;
+  SolrClient solrClient;
 
   static final SolrContainer solr;
 

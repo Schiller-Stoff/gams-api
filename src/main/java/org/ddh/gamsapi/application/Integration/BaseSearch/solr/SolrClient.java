@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 @Component
-public class SOLRClient {
+public class SolrClient {
   private final WebClient webClient;
 
   private final String SOLR_CORE_API_ENDPOINT = "/api/cores";
@@ -34,7 +34,7 @@ public class SOLRClient {
 
   private final String SOLR_BASE_URL;
 
-  public SOLRClient(GAMSDockerDNS configProperties) {
+  public SolrClient(GAMSDockerDNS configProperties) {
     // TODO consider timeouts / retries / error handling / etc. against SOLR.
     SOLR_BASE_URL = configProperties.getBaseSearchUrl();
     this.webClient = WebClient.builder()

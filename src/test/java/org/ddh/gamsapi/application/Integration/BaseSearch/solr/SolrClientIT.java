@@ -13,14 +13,14 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SOLRClientIT extends BaseSearchIntegrationTest {
+public class SolrClientIT extends BaseSearchIntegrationTest {
 
   // disables auditing
   @MockitoBean
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private SOLRClient solrClient;
+  private SolrClient solrClient;
 
   @Test
   public void coreExistsReturnsFalseWhenExpectedCoreDoesNotExist() {

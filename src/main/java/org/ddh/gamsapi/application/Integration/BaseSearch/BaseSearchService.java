@@ -2,7 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SOLRClient;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.application.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
@@ -43,7 +43,7 @@ public class BaseSearchService implements IIntegrationService {
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
 
 
-  private final SOLRClient solrClient;
+  private final SolrClient solrClient;
 
   @Override
   public void indexObjects(String projectAbbr) {
