@@ -470,6 +470,24 @@
   <field name="objectRights" type="string"/>
 
 
+    <!-- Dublin Core fields in alphabetical order -->
+    <field name="dc.contributor" type="strings" multiValued="true"/>
+    <field name="dc.coverage" type="strings" multiValued="true"/>
+    <field name="dc.creator" type="strings" multiValued="true" />
+    <field name="dc.date" type="strings" multiValued="true"/>
+    <field name="dc.description" type="strings" multiValued="true" />
+    <field name="dc.format" type="strings" multiValued="true" />
+    <field name="dc.identifier" type="strings" multiValued="true"/>
+    <field name="dc.language" type="strings" multiValued="true" />
+    <field name="dc.publisher" type="strings" multiValued="true"/>
+    <field name="dc.relation" type="strings" multiValued="true" />
+    <field name="dc.rights" type="strings" multiValued="true" />
+    <field name="dc.source" type="strings" multiValued="true" />
+    <field name="dc.subject" type="strings" multiValued="true" />
+    <field name="dc.title" type="strings" multiValued="true"/>
+    <field name="dc.type" type="strings" multiValued="true"/>
+
+
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
