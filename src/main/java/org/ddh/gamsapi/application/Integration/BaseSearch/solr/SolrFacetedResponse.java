@@ -33,22 +33,12 @@ public class SolrFacetedResponse {
    * TODO test
    */
   public static SolrFacetedResponse from(String solrResponse){
-    return parseSolrFacetResponse(solrResponse);
-  }
 
-
-  /**
-   * Parses Solr faceted search response JSON.
-   * Extracts documents, facet counts, and metadata.
-   * Handles multi-valued fields where language variants are in single array.
-   */
-  private static SolrFacetedResponse parseSolrFacetResponse(String jsonResponse) {
-
-    // TODO use propper jackson workflow to parse solr repsonse!
+    // TODO use propper jackson workflow to parse solr repsonse? (is this even possible?)
 
     try {
       var OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
-      JsonNode root = OBJECT_MAPPER.readTree(jsonResponse);
+      JsonNode root = OBJECT_MAPPER.readTree(solrResponse);
 
       // Parse response metadata
       JsonNode responseNode = root.path("response");
@@ -123,5 +113,6 @@ public class SolrFacetedResponse {
       log.error(msg, e);
       throw new IntegrationDataProcessingException(msg);
     }
+
   }
 }

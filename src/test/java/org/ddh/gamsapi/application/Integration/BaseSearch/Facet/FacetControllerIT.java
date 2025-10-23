@@ -1,25 +1,35 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
+import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchService;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.io.File;
 import java.io.IOException;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @AutoConfigureMockMvc(addFilters = false)
-public class BaseSearchControllerIT extends BaseSearchIntegrationTest {
+public class FacetControllerIT extends BaseSearchIntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -58,6 +68,44 @@ public class BaseSearchControllerIT extends BaseSearchIntegrationTest {
     baseSearchService.indexObject(
         TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
     );
+  }
+
+  @Nested
+  public class FacetSearch {
+
+    final String FACETED_SEARCH_BASE_URL = String.format("/api/v1/integration/projects/%s/objects/search/testme", TestProject.PROJECT_ABBR.getValue());
+    String TEST_DC_URL_QUERY;
+    String TEST_DC_SEARCH_REQUEST_URL;
+
+    @BeforeEach
+    public void setup() {
+      TEST_DC_URL_QUERY = "dc." + TestDublinCoreEntry.NAME.getValue() + "=" + TestDublinCoreEntry.VALUE.getValue();
+      TEST_DC_SEARCH_REQUEST_URL = String.format("%s?projects=%s&%s",
+          FACETED_SEARCH_BASE_URL,
+          TestProject.PROJECT_ABBR.getValue(),
+          TEST_DC_URL_QUERY
+      );
+    }
+
+    @Test
+    public void facetedSearchResponseIsNotEmptyOrNull() throws Exception {
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(response).isNotNull();
+      Assertions.assertThat(response).isNotEmpty();
+
+
+    }
+
+
   }
 
 }

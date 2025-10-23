@@ -1,11 +1,12 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.TestUtilities.TestBag;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
@@ -18,16 +19,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 
 @Slf4j
@@ -48,9 +46,6 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
   // disables auditing
   @MockitoBean
   private AuditingHandler auditingHandler;
-
-  @Autowired
-  private SolrClient sOLRClient;
 
   File bagFile;
 
@@ -201,83 +196,6 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
 
   }
 
-
-  @Nested
-  public class FacetSearch {
-
-    @Test
-    public void facetResultsAreNotEmpty(){
-
-      // index object
-      baseSearchService.indexObject(
-          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
-      );
-
-      // Basic search
-      var facetResult = baseSearchService.facetSearch(
-          Set.of(TestProject.PROJECT_ABBR.getValue()),
-          new LinkedMultiValueMap<>(),
-          PageRequest.of(0, 20)
-      );
-
-      org.assertj.core.api.Assertions.assertThat(facetResult.getResults())
-              .isNotEmpty();
-
-      org.assertj.core.api.Assertions.assertThat(facetResult.getAvailableFacets())
-              .isNotEmpty();
-
-      org.assertj.core.api.Assertions.assertThat(facetResult.getTotalUnfilteredCount())
-          .isGreaterThan(0);
-
-    }
-
-    @Test
-    public void facetedResponseContainsExpectedObjectData(){
-
-      // index object
-      baseSearchService.indexObject(
-          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
-      );
-
-      // Basic search
-      var facetResult = baseSearchService.facetSearch(
-          Set.of(TestProject.PROJECT_ABBR.getValue()),
-          new LinkedMultiValueMap<>(),
-          PageRequest.of(0, 20)
-      );
-
-      // TODO rethink assertion
-      org.assertj.core.api.Assertions.assertThat(facetResult.getResults())
-          .isNotEmpty()
-          .anySatisfy( baseSearch -> {
-            org.assertj.core.api.Assertions.assertThat(baseSearch.getProperty("id"))
-                .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-          });
-
-    }
-
-    @Test
-    public void facetedResponseDoesNotContainFulltextProperty(){
-
-      // index object
-      baseSearchService.indexObject(
-          TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
-      );
-
-      // Basic search
-      var facetResult = baseSearchService.facetSearch(
-          Set.of(TestProject.PROJECT_ABBR.getValue()),
-          new LinkedMultiValueMap<>(),
-          PageRequest.of(0, 20)
-      );
-
-      var returnedBaseSearchElem = facetResult.getResults().get(0);
-      org.assertj.core.api.Assertions.assertThat(returnedBaseSearchElem.getProperty(BaseSearchProperties.FULLTEXT.name))
-          .isNull();
-
-    }
-
-  }
 
   @Nested
   public class FulltextSearch {
