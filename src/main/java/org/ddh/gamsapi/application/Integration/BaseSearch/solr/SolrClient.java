@@ -376,9 +376,10 @@ public class SolrClient {
           .block();
     } catch (WebClientResponseException e) {
       String errorResponseBody = e.getResponseBodyAsString();
+      assert e.getRequest() != null;
       String msg = String.format(
-          "Failed to execute Solr query. Path: %s, Status: %s, Error: %s",
-          url, e.getStatusCode(), errorResponseBody
+          "Failed to execute Solr query via url %s.  Status: %s, Error: %s",
+          e.getRequest().getURI(), e.getStatusCode(), errorResponseBody
       );
       log.error(msg);
       throw new IntegrationServiceException(msg);
