@@ -19,17 +19,17 @@ import java.util.Set;
  * Controller for handling faceted search requests for digital objects.
  */
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/search"})
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class FacetController {
 
+  public static final String FACET_SEARCH_PATH = "/api/v1/gsearch/facets";
+
   private final FacetService facetService;
 
-  // TODO update path
-  @GetMapping(path = "/testme", produces = {
+  @GetMapping(path = FACET_SEARCH_PATH, produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
       MimeTypeUtils.APPLICATION_XML_VALUE
   })

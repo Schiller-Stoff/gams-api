@@ -73,7 +73,7 @@ public class FacetControllerIT extends BaseSearchIntegrationTest {
   @Nested
   public class FacetSearch {
 
-    final String FACETED_SEARCH_BASE_URL = String.format("/api/v1/integration/projects/%s/objects/search/testme", TestProject.PROJECT_ABBR.getValue());
+    final String FACETED_SEARCH_BASE_URL = FacetController.FACET_SEARCH_PATH;
     String TEST_DC_URL_QUERY;
     String TEST_DC_SEARCH_REQUEST_URL;
 
