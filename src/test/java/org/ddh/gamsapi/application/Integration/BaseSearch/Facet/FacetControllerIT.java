@@ -105,6 +105,28 @@ public class FacetControllerIT extends BaseSearchIntegrationTest {
 
     }
 
+    @Test
+    public void facetSearchResponseContainsExpectedValues() throws Exception {
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(TEST_DC_SEARCH_REQUEST_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(TestDublinCoreEntry.VALUE.getValue())
+          .contains(TestDublinCoreEntry.NAME.getValue())
+          .contains(TestProject.PROJECT_ABBR.getValue())
+          .contains(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .contains(TestDublinCoreEntry.NAME.getValue())
+      ;
+
+
+    }
+
 
   }
 
