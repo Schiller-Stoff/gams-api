@@ -40,7 +40,8 @@ public class FacetController {
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize) {
 
-    pageSize = Math.min(pageSize, 20); // Limit page size
+    // TODO is this still needed?
+    pageSize = Math.min(pageSize, 50); // Limit page size
 
     // includes now all request parameters, not just "dc.*" ones
     // only keep parameters keys that start with "dc."
