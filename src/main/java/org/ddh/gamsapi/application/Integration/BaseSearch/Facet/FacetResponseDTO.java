@@ -24,7 +24,6 @@ public class FacetResponseDTO {
   private Map<String, List<String>> selectedFacets;
   private long filteredCount;
   private long totalUnfilteredCount;
-  private FacetSearchMetrics metrics;
   private long start;
   private long totalCount;
 
