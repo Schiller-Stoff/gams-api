@@ -101,8 +101,6 @@ public class BaseSearchControllerIT extends BaseSearchIntegrationTest {
       Assertions.assertThat(response).isNotNull();
       Assertions.assertThat(response).isNotEmpty();
 
-      System.out.println("*****RESPONSE" + response );
-
 
     }
 
