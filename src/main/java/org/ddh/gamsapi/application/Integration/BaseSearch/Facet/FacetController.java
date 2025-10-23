@@ -25,7 +25,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class FacetController {
 
-  public static final String FACET_SEARCH_PATH = "/api/v1/gsearch/facets";
+  public static final String FACET_SEARCH_PATH = "/api/v1/integration/gsearch/facets";
 
   private final FacetService facetService;
 
@@ -34,7 +34,6 @@ public class FacetController {
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
   @ResponseBody
-  // TODO should i use PagedResponse? and
   public FacetResponseDTO searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
