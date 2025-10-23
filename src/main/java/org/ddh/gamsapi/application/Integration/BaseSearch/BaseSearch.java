@@ -39,10 +39,9 @@ public class BaseSearch {
   }
 
   /**
-   * TODO docstring
-   * TODO test!
-   * @param solrDocument
-   * @return
+   * Creates BaseSearch instance from SolrDocument.
+   * @param solrDocument SolrDocument
+   * @return BaseSearch instance
    */
   public static BaseSearch from(SolrDocument solrDocument) {
 
