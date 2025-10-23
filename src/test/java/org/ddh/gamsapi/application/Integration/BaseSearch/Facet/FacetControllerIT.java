@@ -127,6 +127,29 @@ public class FacetControllerIT extends BaseSearchIntegrationTest {
 
     }
 
+    @Test
+    public void facetSearchForOnlyProjectReturnsExpectedValue() throws Exception {
+
+      final String REQUEST_URL = String.format("%s?projects=%s",
+          FACETED_SEARCH_BASE_URL,
+          TestProject.PROJECT_ABBR.getValue()
+      );
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(REQUEST_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(TestProject.PROJECT_ABBR.getValue())
+          .contains(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+    }
+
 
   }
 
