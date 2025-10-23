@@ -32,7 +32,7 @@ public class FacetResponseDTO {
   /**
    * Builds a FacetSearchResponse instance from given parsed solr response
    * @param solrFacetedResponse response from solr
-   * @param selectedFacets slected facets during request building to solr
+   * @param selectedFacets selected facets during request building to solr
    * @return response for faceted search
    */
   public static FacetResponseDTO from(
