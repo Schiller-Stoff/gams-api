@@ -2,7 +2,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchFacetResponse;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
@@ -38,7 +37,7 @@ public class FacetService {
    * @param pageable Pagination information
    * @return FacetSearchResponse containing results, facets, and metadata
    */
-  public BaseSearchFacetResponse facetSearch(
+  public FacetResponseDTO facetSearch(
       Set<String> projectAbbrs,
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {
@@ -79,7 +78,7 @@ public class FacetService {
 
     // STEP 5: Transform to response from our API
 
-    return BaseSearchFacetResponse.from(
+    return FacetResponseDTO.from(
         parsedResponse, selectedFacets
     );
 

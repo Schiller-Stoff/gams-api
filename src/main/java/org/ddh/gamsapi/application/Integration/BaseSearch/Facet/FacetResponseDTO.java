@@ -1,7 +1,8 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import lombok.Builder;
 import lombok.Data;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
@@ -17,7 +18,7 @@ import java.util.Map;
  */
 @Data
 @Builder
-public class BaseSearchFacetResponse {
+public class FacetResponseDTO {
   private List<BaseSearch> results;
   private Map<String, List<SolrFacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
@@ -34,7 +35,7 @@ public class BaseSearchFacetResponse {
    * @param selectedFacets slected facets during request building to solr
    * @return response for faceted search
    */
-  public static BaseSearchFacetResponse from(
+  public static FacetResponseDTO from(
       SolrFacetedResponse solrFacetedResponse,
       MultiValueMap<String, String> selectedFacets
   ){
@@ -49,7 +50,7 @@ public class BaseSearchFacetResponse {
       mapped.add(BaseSearch.from(solrDocument));
     });
 
-    return BaseSearchFacetResponse.builder()
+    return FacetResponseDTO.builder()
         .results(mapped)
         .availableFacets(solrFacetedResponse.getFacets())
         .selectedFacets(selectedFacetsAsNormalMap)

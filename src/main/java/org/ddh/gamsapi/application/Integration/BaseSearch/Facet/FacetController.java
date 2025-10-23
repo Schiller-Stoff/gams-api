@@ -4,7 +4,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchFacetResponse;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
@@ -36,7 +35,7 @@ public class FacetController {
   })
   @ResponseBody
   // TODO should i use PagedResponse? and
-  public BaseSearchFacetResponse searchDigitalObjectsByDublinCoreAdvanced(
+  public FacetResponseDTO searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
       @RequestParam(defaultValue = "0") int pageIndex,
