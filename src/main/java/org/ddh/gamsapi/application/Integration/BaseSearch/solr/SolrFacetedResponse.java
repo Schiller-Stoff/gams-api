@@ -51,8 +51,6 @@ public class SolrFacetedResponse {
       if (docsNode.isArray()) {
         for (JsonNode docNode : docsNode) {
           var doc = OBJECT_MAPPER.treeToValue(docNode, SolrDocument.class);
-          // will ignore the fulltext property
-          doc.removeProperty(BaseSearchProperties.FULLTEXT.name);
           documents.add(doc);
         }
       }

@@ -255,6 +255,23 @@ public class FacetService {
       url.append("&sort=").append(sortParam);
     }
 
+    // ⭐ EXPLICIT field list - solr returns only the fields we specify here
+    List<String> fieldsToReturn = List.of(
+        BaseSearchProperties.OBJECT_ID.name,
+        BaseSearchProperties.PROJECT.name,
+        BaseSearchProperties.OBJECT_ID.name,
+        BaseSearchProperties.DATASTREAMS.name,
+        BaseSearchProperties.TYPE.name,
+        BaseSearchProperties.TITLE.name,
+        BaseSearchProperties.DESCRIPTION.name,
+        BaseSearchProperties.CREATOR.name,
+        BaseSearchProperties.PUBLISHER.name,
+        BaseSearchProperties.RIGHTS.name,
+        "dc.*"  // All Dublin Core fields
+    );
+
+    url.append("&fl=").append(String.join(",", fieldsToReturn));
+
     // Faceting parameters
     url.append("&facet=true");
     url.append("&facet.mincount=1"); // Only return facets with at least 1 doc
