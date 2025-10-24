@@ -5,7 +5,7 @@ spring:
     password: admin
   # shows hibernate sql statements in console
   jpa:
-    show-sql: true
+    # show-sql: true  # uncomment to show generated sql statements in logging
     properties:
       hibernate.format_sql: true
 
