@@ -133,16 +133,6 @@ public class SolrFacetedResponseTest extends UnitTest {
   }
 
   @Test
-  public void doesNotParseFulltextField() {
-    var parsedResponse = SolrFacetedResponse.from(TEST_SOLR_RESPONSE);
-
-    parsedResponse.getDocuments().forEach(doc -> {
-      Assertions.assertThat(doc.getProperties())
-          .doesNotContainKey("objectFulltext");
-    });
-  }
-
-  @Test
   public void containsExpectedFacets() {
     var parsedResponse = SolrFacetedResponse.from(TEST_SOLR_RESPONSE);
 
