@@ -37,6 +37,7 @@ public class FacetController {
   public FacetResponseDTO searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
+      @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize) {
 
@@ -56,7 +57,12 @@ public class FacetController {
     log.debug("Advanced DC search - criteria: {}, projects: {}",
         dcCriteria, projects);
 
-    return facetService.facetSearch(projects, MultiValueMap.fromMultiValue(filteredDcFields), PageRequest.of(pageIndex, pageSize));
+    return facetService.facetSearch(
+        projects,
+        fulltextQuery,
+        MultiValueMap.fromMultiValue(filteredDcFields),
+        PageRequest.of(pageIndex, pageSize)
+    );
   }
 
 }

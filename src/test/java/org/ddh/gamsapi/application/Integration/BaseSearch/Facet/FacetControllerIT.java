@@ -150,6 +150,32 @@ public class FacetControllerIT extends BaseSearchIntegrationTest {
 
     }
 
+    @Test
+    public void facetSearchWithFulltextQueryReturnsExpectedValue() throws Exception {
+
+      final String FULLTEXT_QUERY = TestDublinCoreEntry.VALUE.getValue();
+      final String REQUEST_URL = String.format("%s?projects=%s&q=%s",
+          FACETED_SEARCH_BASE_URL,
+          TestProject.PROJECT_ABBR.getValue(),
+          FULLTEXT_QUERY
+      );
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(REQUEST_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(TestProject.PROJECT_ABBR.getValue())
+          .contains(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .contains(FULLTEXT_QUERY);
+
+    }
+
 
   }
 

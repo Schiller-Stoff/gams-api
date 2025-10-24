@@ -63,7 +63,7 @@ public class FacetQueryBuilderTest extends UnitTest {
     public void builtSolrQueryContainsExpectedValues(){
       var TEST_PROJECTS = Set.of(TestProject.PROJECT_ABBR.getValue());
 
-      var builtQuery =  FacetQueryBuilder.buildSolrFacetQuery(TEST_PROJECTS, TEST_DC_MAP);
+      var builtQuery =  FacetQueryBuilder.buildSolrFacetQuery(TEST_PROJECTS,"", TEST_DC_MAP);
 
       Assertions.assertThat(builtQuery)
           .isNotEmpty()

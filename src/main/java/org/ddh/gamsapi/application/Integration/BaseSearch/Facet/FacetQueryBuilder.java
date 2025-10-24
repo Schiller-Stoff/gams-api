@@ -22,7 +22,12 @@ public class FacetQueryBuilder {
    * @param pageable pagination and sorting info
    * @return the complete Solr faceted search URL
    */
-  public static String buildSolrFacetUrl(String coreName, String facetQuery, Set<String> facetFields, Pageable pageable) {
+  public static String buildSolrFacetUrl(
+      String coreName,
+      String facetQuery,
+      Set<String> facetFields,
+      Pageable pageable
+  ) {
 
     // Build Solr request URL with faceting parameters
     StringBuilder url = new StringBuilder();
@@ -90,9 +95,18 @@ public class FacetQueryBuilder {
    */
   public static String buildSolrFacetQuery(
       Set<String> projectAbbrs,
-      MultiValueMap<String, String> selectedFacets) {
+      String fulltextQuery,
+      MultiValueMap<String, String> selectedFacets
+  ) {
 
     List<String> queryParts = new ArrayList<>();
+
+    // STEP 1: Add fulltext query if provided
+    if (fulltextQuery != null && !fulltextQuery.trim().isEmpty()) {
+      String escapedFulltext = escapeSolrValue(fulltextQuery.trim());
+      // Search in the objectFulltext field
+      queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, escapedFulltext));
+    }
 
     // Add project filter (required)
     if (projectAbbrs.size() == 1) {

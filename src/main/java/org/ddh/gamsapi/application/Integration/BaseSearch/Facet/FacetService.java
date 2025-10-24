@@ -29,12 +29,14 @@ public class FacetService {
    * are stored in a single multi-valued field (e.g., dc.title = ["english title", "german title"])
    *
    * @param projectAbbrs Set of project abbreviations to filter by
+    * @param fulltextQuery Fulltext search query - if empty finds everything
    * @param selectedFacets MultiValueMap of selected Dublin Core facets (field -> values)
    * @param pageable Pagination information
    * @return FacetSearchResponse containing results, facets, and metadata
    */
   public FacetResponseDTO facetSearch(
       Set<String> projectAbbrs,
+      String fulltextQuery,
       MultiValueMap<String, String> selectedFacets,
       Pageable pageable) {
 
@@ -49,7 +51,7 @@ public class FacetService {
     }
 
     // STEP 1: Build Solr query with filters (just the value for the q parameter)
-    String solrQuery = FacetQueryBuilder.buildSolrFacetQuery(projectAbbrs, selectedFacets);
+    String solrQuery = FacetQueryBuilder.buildSolrFacetQuery(projectAbbrs, fulltextQuery, selectedFacets);
 
     // STEP 2: Define default facet fields (Dublin Core standard fields with "dc." prefix)
     Set<String> facetFields = getDefaultDublinCoreFacetFields();
