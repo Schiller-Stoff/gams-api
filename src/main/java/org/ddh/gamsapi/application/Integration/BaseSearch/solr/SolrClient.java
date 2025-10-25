@@ -453,15 +453,11 @@ public class SolrClient {
     log.trace("Executing Solr url: {}", url);
 
     try {
-      // TODO move somewhere else - SolrUrlBuilder! e.g. urlEncodeSolrSpecialChars() and TEST
-      // Build URI directly to bypass WebClient's encoding
-      url = url
-          .replace("{", "%7B")
-          .replace("}", "%7D")
-          .replace("|", "%7C")
-          .replace("!", "%21")
-          .replace(" ", "%20");
+      // custom URL encoding for Solr special characters
+      // to ensure proper query execution
+      url = SolrUrlBuilder.urlEncodeSolrSpecialCharacters(url);
 
+      // using uri to avoid encoding issues with special characters
       URI uri = URI.create(SOLR_BASE_URL + url);
 
       return webClient.get()

@@ -34,4 +34,23 @@ public class SolrUrlBuilder {
         .replace(":", "\\:");
   }
 
+  /**
+   * URL-encodes Solr special characters in query values.
+   * CRITICAL: Must URL-encode to prevent "Illegal character" errors in URIs
+   * @param url The input string to encode
+   * @return The URL-encoded value
+   */
+  public static String urlEncodeSolrSpecialCharacters(String url) {
+    if (url == null) {
+      return "";
+    }
+
+    return url
+        .replace("{", "%7B")
+        .replace("}", "%7D")
+        .replace("|", "%7C")
+        .replace("!", "%21")
+        .replace(" ", "%20");
+  }
+
 }
