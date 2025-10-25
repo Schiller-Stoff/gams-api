@@ -1,8 +1,11 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -241,6 +244,27 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
           .isNotEmpty()
           .contains(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE)
       ;
+
+    }
+
+  }
+
+  @Nested
+  public class CountProjectDocuments {
+
+    @Test
+    public void returnsExpectedCount(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+
+      int documentCount = solrClient.countProjectDocuments(SolrGamsCores.TEST_CORE.value, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      Assertions.assertThat(documentCount)
+          .isGreaterThan(0);
 
     }
 

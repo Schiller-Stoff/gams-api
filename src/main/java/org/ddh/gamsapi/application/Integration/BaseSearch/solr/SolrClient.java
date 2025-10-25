@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -357,6 +358,64 @@ public class SolrClient {
       log.error(msg);
       throw new IntegrationServiceException(msg);
     }
+  }
+
+  /**
+   * Count documents in a Solr core for a specific project.
+   * @param coreName
+   * @param projectAbbr
+   * @return
+   */
+  public int countProjectDocuments(String coreName, String projectAbbr){
+    final String CORE_COUNT_URL = String.format("%s/%s/select?q=%s:%s&rows=0", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, BaseSearchProperties.PROJECT.name, projectAbbr);
+    log.trace("Counting documents in core {} for project {}", coreName, projectAbbr);
+
+    // response will contain numFound field with the count
+    // only need to retrieve that field from the response
+
+
+    String solrResponse;
+    try {
+      solrResponse = webClient.get()
+          .uri(CORE_COUNT_URL)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format(
+          "Failed to count documents in Solr core %s for project %s. SOLR-URL: %s, Status: %s, Error: %s",
+          coreName, projectAbbr, CORE_COUNT_URL, e.getStatusCode(), errorResponseBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format(
+          "Failed to count documents in Solr core %s for project %s. SOLR-URL: %s, Cause: %s",
+          coreName, projectAbbr, CORE_COUNT_URL, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+
+    try {
+      // Parse the response to extract numFound
+      int numFound = OBJECT_MAPPER.readTree(solrResponse)
+          .path("response")
+          .path("numFound")
+          .asInt();
+
+      return numFound;
+    } catch (Exception e) {
+      String msg = String.format(
+          "Failed to parse Solr count response for core %s and project %s. Cause: %s",
+          coreName, projectAbbr, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationDataProcessingException(msg);
+    }
+
   }
 
   /**
