@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Facet.FacetQueryBuilder;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
+import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -13,12 +15,10 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
-import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,7 +101,7 @@ public class SolrClient {
       log.error(msg);
       throw new IntegrationServiceException(msg);
     } catch (WebClientException e) {
-      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, postUrl, data, e.getMessage(), e);
+      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, postUrl, Arrays.toString(data), e.getMessage(), e);
       log.error(msg);
       throw new IntegrationServiceException(msg);
     }
