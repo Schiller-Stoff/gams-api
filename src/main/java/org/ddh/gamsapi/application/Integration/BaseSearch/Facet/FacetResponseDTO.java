@@ -22,10 +22,24 @@ public class FacetResponseDTO {
   private List<BaseSearch> results;
   private Map<String, List<SolrFacetValue>> availableFacets;
   private Map<String, List<String>> selectedFacets;
+
+  /**
+   * Number of results matching the current query + filters.
+   * Example: 5 results when filtering by type=Brief
+   */
   private long filteredCount;
+
+  /**
+   * Total number of documents across all specified projects (baseline, no filters applied).
+   * Example: 1000 total documents in the project(s)
+   * This allows UI to show "Showing 5 of 1000 results"
+   */
   private long totalUnfilteredCount;
+
+  /**
+   * Starting offset for pagination (0-based).
+   */
   private long start;
-  private long totalCount;
 
 
   /**
@@ -36,7 +50,8 @@ public class FacetResponseDTO {
    */
   public static FacetResponseDTO from(
       SolrFacetedResponse solrFacetedResponse,
-      MultiValueMap<String, String> selectedFacets
+      MultiValueMap<String, String> selectedFacets,
+      int totalUnfilteredCount
   ){
 
     var selectedFacetsAsNormalMap = new HashMap<String, List<String>>();
@@ -54,9 +69,8 @@ public class FacetResponseDTO {
         .availableFacets(solrFacetedResponse.getFacets())
         .selectedFacets(selectedFacetsAsNormalMap)
         .filteredCount(solrFacetedResponse.getNumFound())
-        .totalUnfilteredCount(solrFacetedResponse.getTotalCount())
+        .totalUnfilteredCount(totalUnfilteredCount)
         .start(solrFacetedResponse.getStart())
-        .totalCount(solrFacetedResponse.getTotalCount())
         .build();
 
   }

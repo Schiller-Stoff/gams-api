@@ -76,9 +76,12 @@ public class FacetService {
 
 
     // STEP 5: Transform to response from our API
+    int projectDocumentsCount = solrClient.countProjectDocuments(SolrGamsCores.GAMS_CORE.value, projectAbbrs); // Warm-up cache for future requests
+
+    // STEP 6: Transform to response from our API
 
     return FacetResponseDTO.from(
-        parsedResponse, selectedFacets
+        parsedResponse, selectedFacets, projectDocumentsCount
     );
 
   }

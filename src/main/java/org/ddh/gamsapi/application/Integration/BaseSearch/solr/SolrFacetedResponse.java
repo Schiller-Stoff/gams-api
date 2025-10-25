@@ -23,7 +23,6 @@ public class SolrFacetedResponse {
   private Map<String, List<SolrFacetValue>> facets;
   private long numFound;
   private long start;
-  private long totalCount;
 
 
   /**
@@ -103,7 +102,6 @@ public class SolrFacetedResponse {
           .facets(facets)
           .numFound(numFound)
           .start(start)
-          .totalCount(numFound) // In basic implementation, same as numFound
           .build();
 
     } catch (Exception e) {
