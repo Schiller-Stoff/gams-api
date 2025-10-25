@@ -453,10 +453,6 @@ public class SolrClient {
     log.trace("Executing Solr url: {}", url);
 
     try {
-      // custom URL encoding for Solr special characters
-      // to ensure proper query execution
-      url = SolrUrlBuilder.urlEncodeSolrSpecialCharacters(url);
-
       // using uri to avoid encoding issues with special characters
       URI uri = URI.create(SOLR_BASE_URL + url);
 

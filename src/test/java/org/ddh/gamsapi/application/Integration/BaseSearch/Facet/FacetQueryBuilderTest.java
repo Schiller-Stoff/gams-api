@@ -44,7 +44,7 @@ public class FacetQueryBuilderTest extends UnitTest {
           .contains("q=dc.title:Test")
           .contains("start=0")
           .contains("rows=10")
-          .contains("sort=dc.title asc")
+          .contains("sort=dc.title%20asc")
           .contains("fl=")
           .contains("dc.title")
           .contains("dc.creator");

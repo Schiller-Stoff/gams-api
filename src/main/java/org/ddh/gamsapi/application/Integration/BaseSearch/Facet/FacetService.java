@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -57,39 +56,28 @@ public class FacetService {
       throw new IntegrationDataProcessingException("Project abbreviations must not be empty");
     }
 
-    //TODO can I simplify below`? - building of solr url could be done in one method? combined by FacetQueryBuilder
-    // e.g. buildSolrFacetDrilldownUrl(...)
-
-    // STEP 1: Build base Solr query (project + fulltext ONLY, no facet filters)
-    // This is the foundation for drill-down faceting
-    String baseSolrQuery = FacetQueryBuilder.buildBaseSolrQuery(projectAbbrs, fulltextQuery);
-
-    // STEP 2: Build filter queries (fq) with tags for drill-down
-    // Each facet filter gets its own fq parameter with a tag
-    // Format: {!tag=type}dc.type:"Brief"
-    List<String> filterQueries = FacetQueryBuilder.buildSolrFilterQueries(selectedFacets);
-
-    // STEP 3: Define default facet fields (Dublin Core standard fields with "dc." prefix)
+    // Define Dublin Core facet fields to use
     Set<String> facetFields = getDefaultDublinCoreFacetFields();
 
-    // STEP 4: Build complete Solr URL with drill-down exclusions
-    // Each facet field will exclude its own tag: {!ex=type}dc.type
-    // This allows seeing all values even when that facet is filtered
-    String solrFacetUrl = FacetQueryBuilder.buildSolrFacetUrl(
+    // STEP 1: Build SOLR url with drill-down support
+    String solrFacetUrl =  FacetQueryBuilder.buildSolrFacetDrilldownUrl(
         SolrGamsCores.GAMS_CORE.value,
-        baseSolrQuery,      // Base query (no facet filters)
-        filterQueries,      // Tagged filter queries for drill-down
+        projectAbbrs,
+        fulltextQuery,
+        selectedFacets,
         facetFields,
         pageable
     );
 
-    // STEP 5: Execute Solr query
+    log.trace("Constructed Solr faceted search URL: {}", solrFacetUrl);
+
+    // STEP 2: Execute Solr query
     String solrResponse = solrClient.get(solrFacetUrl);
 
-    // STEP 6: Parse Solr response
+    // STEP 3: Parse Solr response
     SolrFacetedResponse parsedResponse = SolrFacetedResponse.from(solrResponse);
 
-    // STEP 7: Get baseline total count for these projects
+    // STEP 4: Get baseline total count for these projects
     int projectDocumentsCount = solrClient.countProjectDocuments(
         SolrGamsCores.GAMS_CORE.value, projectAbbrs);
 
@@ -98,7 +86,7 @@ public class FacetService {
     log.info("Solr faceted search with drill-down completed in {}ms - found {} filtered results out of {} total with {} facet fields",
         totalTime, parsedResponse.getNumFound(), projectDocumentsCount, facetFields.size());
 
-    // STEP 8: Transform to response DTO with selected facets marked
+    // STEP 5: Transform to response DTO with selected facets marked
     return FacetResponseDTO.from(
         parsedResponse,
         selectedFacets,

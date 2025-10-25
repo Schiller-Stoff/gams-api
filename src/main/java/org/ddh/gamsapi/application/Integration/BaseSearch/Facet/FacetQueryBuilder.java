@@ -2,7 +2,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.springframework.data.domain.Pageable;
@@ -19,37 +18,47 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FacetQueryBuilder {
 
-  public static String buildSolrCountUrl(
-      Set<String> projectAbbrs
-  ) {
 
-    StringBuilder url = new StringBuilder();
-    url.append(String.format("/solr/%s/select", SolrGamsCores.GAMS_CORE.value));
-    url.append("?q=*:*");
+  /**
+   * Builds a Solr faceted search URL with drill-down support.
+   * TODO think about naming of method(s)
+   * TODO JDOC
+   * TODO propper testing?
+   * @param solrCore
+   * @param projectAbbrs
+   * @param fulltextQuery
+   * @param selectedFacets
+   * @param facetFields
+   * @param pageable
+   * @return
+   */
+  public static String buildSolrFacetDrilldownUrl(
+                                      String solrCore,
+                                      Set<String> projectAbbrs,
+                                      String fulltextQuery,
+                                      MultiValueMap<String, String> selectedFacets,
+                                      Set<String> facetFields,
+                                      Pageable pageable) {
 
-    // Project filter
-    if (projectAbbrs.size() == 1) {
-      url.append(String.format("&q=%s:%s",
-          BaseSearchProperties.PROJECT.name,
-          SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
-    } else {
-      String projectQuery = projectAbbrs.stream()
-          .map(abbr -> String.format("%s:%s",
-              BaseSearchProperties.PROJECT.name,
-              SolrUrlBuilder.escapeSolrValue(abbr)))
-          .collect(Collectors.joining(" OR "));
-      url.append("&q=(").append(projectQuery).append(")");
-    }
+    // STEP 1: Build base query (q parameter for solr)
+    // This is the foundation for drill-down faceting
+    String baseQuery = buildBaseSolrQuery(projectAbbrs, fulltextQuery);
 
-    // We only need the count
-    url.append("&rows=0");
-    url.append("&wt=json");
-    url.append("&indent=true");
+    // STEP 2: Build filter queries (fq) with tags for drill-down
+    // Each facet filter gets its own fq parameter with a tag
+    // Format: {!tag=type}dc.type:"Brief"
+    List<String> filterQueries = buildSolrFilterQueries(selectedFacets);
 
-    String finalUrl = url.toString();
-    log.debug("Built solr count query: {}", finalUrl);
-
-    return finalUrl;
+    // STEP 3: Build complete Solr URL with drill-down exclusions
+    // Each facet field will exclude its own tag: {!ex=type}dc.type
+    // This allows seeing all values even when that facet is filtered
+    return buildSolrFacetUrl(
+        solrCore,
+        baseQuery,
+        filterQueries,
+        facetFields,
+        pageable
+    );
 
   }
 
@@ -123,7 +132,10 @@ public class FacetQueryBuilder {
     url.append("&wt=json");
     url.append("&indent=true");
 
-    return url.toString();
+    // Final URL encoding for Solr special characters (solr uses this for certain operations)
+    String finalUrl = SolrUrlBuilder.urlEncodeSolrSpecialCharacters(url.toString());
+
+    return finalUrl;
   }
 
   public static String buildBaseSolrQuery(
