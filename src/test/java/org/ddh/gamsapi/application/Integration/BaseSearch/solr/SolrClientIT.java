@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.Set;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SolrClientIT extends BaseSearchIntegrationTest {
 
@@ -262,10 +264,12 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
       baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
 
-      int documentCount = solrClient.countProjectDocuments(SolrGamsCores.TEST_CORE.value, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      int documentCount = solrClient.countProjectDocuments(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
       Assertions.assertThat(documentCount)
           .isGreaterThan(0);
-
     }
 
   }

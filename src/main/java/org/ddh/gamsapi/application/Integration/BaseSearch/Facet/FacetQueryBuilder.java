@@ -2,6 +2,8 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
@@ -13,6 +15,40 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class FacetQueryBuilder {
+
+  public static String buildSolrCountUrl(
+      Set<String> projectAbbrs
+  ) {
+
+    StringBuilder url = new StringBuilder();
+    url.append(String.format("/solr/%s/select", SolrGamsCores.GAMS_CORE.value));
+    url.append("?q=*:*");
+
+    // Project filter
+    if (projectAbbrs.size() == 1) {
+      url.append(String.format("&q=%s:%s",
+          BaseSearchProperties.PROJECT.name,
+          SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
+    } else {
+      String projectQuery = projectAbbrs.stream()
+          .map(abbr -> String.format("%s:%s",
+              BaseSearchProperties.PROJECT.name,
+              SolrUrlBuilder.escapeSolrValue(abbr)))
+          .collect(Collectors.joining(" OR "));
+      url.append("&q=(").append(projectQuery).append(")");
+    }
+
+    // We only need the count
+    url.append("&rows=0");
+    url.append("&wt=json");
+    url.append("&indent=true");
+
+    String finalUrl = url.toString();
+    log.debug("Built solr count query: {}", finalUrl);
+
+    return finalUrl;
+
+  }
 
   /**
    * Builds the full Solr faceted search URL.
@@ -103,7 +139,7 @@ public class FacetQueryBuilder {
 
     // STEP 1: Add fulltext query if provided
     if (fulltextQuery != null && !fulltextQuery.trim().isEmpty()) {
-      String escapedFulltext = escapeSolrValue(fulltextQuery.trim());
+      String escapedFulltext = SolrUrlBuilder.escapeSolrValue(fulltextQuery.trim());
       // Search in the objectFulltext field
       queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, escapedFulltext));
     }
@@ -112,12 +148,12 @@ public class FacetQueryBuilder {
     if (projectAbbrs.size() == 1) {
       queryParts.add(String.format("%s:%s",
           BaseSearchProperties.PROJECT.name,
-          escapeSolrValue(projectAbbrs.iterator().next())));
+          SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
     } else {
       String projectQuery = projectAbbrs.stream()
           .map(abbr -> String.format("%s:%s",
               BaseSearchProperties.PROJECT.name,
-              escapeSolrValue(abbr)))
+              SolrUrlBuilder.escapeSolrValue(abbr)))
           .collect(Collectors.joining(" OR "));
       queryParts.add("(" + projectQuery + ")");
     }
@@ -184,43 +220,14 @@ public class FacetQueryBuilder {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
     }
 
-    String escapedValue = escapeSolrValue(value.trim());
+    String escapedValue = SolrUrlBuilder.escapeSolrValue(value.trim());
 
     // For text fields, use exact phrase matching
     // This works well with multi-valued fields containing different language variants
     return String.format("%s:\"%s\"", fieldName, escapedValue);
   }
 
-  /**
-   * Escapes special characters in Solr query values.
-   * CRITICAL: Must properly escape to prevent query syntax errors.
-   */
-  private static String escapeSolrValue(String value) {
-    if (value == null) {
-      return "";
-    }
 
-    // Escape Solr special characters: + - && || ! ( ) { } [ ] ^ " ~ * ? : \ /
-    return value
-        .replace("\\", "\\\\")  // Backslash FIRST
-        .replace("\"", "\\\"")  // Quote
-        .replace("+", "\\+")
-        .replace("-", "\\-")
-        .replace("&&", "\\&&")
-        .replace("||", "\\||")
-        .replace("!", "\\!")
-        .replace("(", "\\(")
-        .replace(")", "\\)")
-        .replace("{", "\\{")
-        .replace("}", "\\}")
-        .replace("[", "\\[")
-        .replace("]", "\\]")
-        .replace("^", "\\^")
-        .replace("~", "\\~")
-        .replace("*", "\\*")
-        .replace("?", "\\?")
-        .replace(":", "\\:");
-  }
 
 
 }

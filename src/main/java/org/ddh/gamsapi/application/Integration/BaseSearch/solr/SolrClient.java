@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.BaseSearch.Facet.FacetQueryBuilder;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,9 @@ import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServ
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Client for interacting with the SOLR server.
@@ -363,21 +367,40 @@ public class SolrClient {
   /**
    * Count documents in a Solr core for a specific project.
    * @param coreName
-   * @param projectAbbr
+   * @param projectAbbrs
    * @return
    */
-  public int countProjectDocuments(String coreName, String projectAbbr){
-    final String CORE_COUNT_URL = String.format("%s/%s/select?q=%s:%s&rows=0", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, BaseSearchProperties.PROJECT.name, projectAbbr);
-    log.trace("Counting documents in core {} for project {}", coreName, projectAbbr);
+  public int countProjectDocuments(String coreName, Set<String> projectAbbrs){
 
-    // response will contain numFound field with the count
-    // only need to retrieve that field from the response
+    StringBuilder url = new StringBuilder();
+    url.append(String.format("/solr/%s/select?", coreName));
 
+    // Project filter
+    if (projectAbbrs.size() == 1) {
+      url.append(String.format("q=%s:%s",
+          BaseSearchProperties.PROJECT.name,
+          SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
+    } else {
+      String projectQuery = projectAbbrs.stream()
+          .map(abbr -> String.format("%s:%s",
+              BaseSearchProperties.PROJECT.name,
+              SolrUrlBuilder.escapeSolrValue(abbr)))
+          .collect(Collectors.joining(" OR "));
+      url.append("&q=(").append(projectQuery).append(")");
+    }
+
+    // We only need the count
+    url.append("&rows=0");
+    url.append("&wt=json");
+    url.append("&indent=true");
+
+
+    log.info("Counting documents in Solr core {} for projects {} with URL: {}", coreName, projectAbbrs, url);
 
     String solrResponse;
     try {
       solrResponse = webClient.get()
-          .uri(CORE_COUNT_URL)
+          .uri(url.toString())
           .retrieve()
           .bodyToMono(String.class)
           .block();
@@ -385,15 +408,15 @@ public class SolrClient {
     } catch (WebClientResponseException e) {
       String errorResponseBody = e.getResponseBodyAsString();
       String msg = String.format(
-          "Failed to count documents in Solr core %s for project %s. SOLR-URL: %s, Status: %s, Error: %s",
-          coreName, projectAbbr, CORE_COUNT_URL, e.getStatusCode(), errorResponseBody
+          "Failed to count documents in Solr core %s for projects %s. SOLR-URL: %s, Status: %s, Error: %s",
+          coreName, projectAbbrs, url, e.getStatusCode(), errorResponseBody
       );
       log.error(msg);
       throw new IntegrationServiceException(msg);
     } catch (WebClientException e) {
       String msg = String.format(
-          "Failed to count documents in Solr core %s for project %s. SOLR-URL: %s, Cause: %s",
-          coreName, projectAbbr, CORE_COUNT_URL, e.getMessage()
+          "Failed to count documents in Solr core %s for projects %s. SOLR-URL: %s, Cause: %s",
+          coreName, projectAbbrs, url, e.getMessage()
       );
       log.error(msg);
       throw new IntegrationServiceException(msg);
@@ -409,8 +432,8 @@ public class SolrClient {
       return numFound;
     } catch (Exception e) {
       String msg = String.format(
-          "Failed to parse Solr count response for core %s and project %s. Cause: %s",
-          coreName, projectAbbr, e.getMessage()
+          "Failed to parse Solr count response for core %s and projects %s. Cause: %s",
+          coreName, projectAbbrs, e.getMessage()
       );
       log.error(msg);
       throw new IntegrationDataProcessingException(msg);
