@@ -8,6 +8,9 @@ import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationData
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -51,24 +54,31 @@ public class FacetQueryBuilder {
   }
 
   /**
-   * Builds the full Solr faceted search URL.
-   * @param coreName solr core to be queried
-   * @param facetQuery the Solr query string (content of the "q" parameter)
-   * @param facetFields the fields to facet on
-   * @param pageable pagination and sorting info
-   * @return the complete Solr faceted search URL
+   * Builds a Solr faceted search URL with drill-down support.
+   * @param coreName todo JDOC
+   * @param baseQuery
+   * @param filterQueries
+   * @param facetFields
+   * @param pageable
+   * @return
    */
   public static String buildSolrFacetUrl(
       String coreName,
-      String facetQuery,
+      String baseQuery,
+      List<String> filterQueries,
       Set<String> facetFields,
       Pageable pageable
   ) {
-
-    // Build Solr request URL with faceting parameters
     StringBuilder url = new StringBuilder();
     url.append(String.format("/solr/%s/select", coreName));
-    url.append("?q=").append(facetQuery);
+
+    // Base query (values should already be URL-encoded if needed)
+    url.append("?q=").append(baseQuery);
+
+    // Add filter queries (values already URL-encoded)
+    for (String fq : filterQueries) {
+      url.append("&fq=").append(fq);
+    }
 
     // Pagination
     url.append("&start=").append(pageable.getOffset());
@@ -82,11 +92,10 @@ public class FacetQueryBuilder {
       url.append("&sort=").append(sortParam);
     }
 
-    // ⭐ EXPLICIT field list - solr returns only the fields we specify here
+    // Field list
     List<String> fieldsToReturn = List.of(
         BaseSearchProperties.OBJECT_ID.name,
         BaseSearchProperties.PROJECT.name,
-        BaseSearchProperties.OBJECT_ID.name,
         BaseSearchProperties.DATASTREAMS.name,
         BaseSearchProperties.TYPE.name,
         BaseSearchProperties.TITLE.name,
@@ -94,61 +103,45 @@ public class FacetQueryBuilder {
         BaseSearchProperties.CREATOR.name,
         BaseSearchProperties.PUBLISHER.name,
         BaseSearchProperties.RIGHTS.name,
-        "dc.*"  // All Dublin Core fields
+        "dc.*"
     );
-
     url.append("&fl=").append(String.join(",", fieldsToReturn));
 
     // Faceting parameters
     url.append("&facet=true");
-    url.append("&facet.mincount=1"); // Only return facets with at least 1 doc
-    url.append("&facet.limit=100");  // Max facet values per field
-    url.append("&facet.sort=count"); // Sort by count (most common first)
+    url.append("&facet.mincount=1");
+    url.append("&facet.limit=100");
+    url.append("&facet.sort=count");
 
-    // Add facet fields
+    // Add facet fields with exclusions
     for (String facetField : facetFields) {
-      url.append("&facet.field=").append(facetField);
+      String fieldShortName = extractFieldShortName(facetField);
+      String facetFieldWithExclusion = String.format("{!ex=%s}%s", fieldShortName, facetField);
+      url.append("&facet.field=").append(facetFieldWithExclusion);
     }
 
-    // Response format
     url.append("&wt=json");
     url.append("&indent=true");
 
-    String finalUrl = url.toString();
-    log.debug("Built solr faceted query: {}", finalUrl);
-
-    return finalUrl;
-
+    return url.toString();
   }
 
-
-  /**
-   * Builds Solr query string with project and Dublin Core filters.
-   * Just what the query parameter needs.
-   * Implements proper faceted search logic:
-   * - Multiple values for SAME field = OR logic
-   * - Different fields = AND logic
-   */
-  public static String buildSolrFacetQuery(
+  public static String buildBaseSolrQuery(
       Set<String> projectAbbrs,
-      String fulltextQuery,
-      MultiValueMap<String, String> selectedFacets
+      String fulltextQuery
   ) {
-
     List<String> queryParts = new ArrayList<>();
 
-    // STEP 1: Add fulltext query if provided
     if (fulltextQuery != null && !fulltextQuery.trim().isEmpty()) {
       String escapedFulltext = SolrUrlBuilder.escapeSolrValue(fulltextQuery.trim());
-      // Search in the objectFulltext field
-      queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, escapedFulltext));
+      // URL encode the fulltext value
+      String encodedFulltext = urlEncode(escapedFulltext);
+      queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, encodedFulltext));
     }
 
-    // Add project filter (required)
     if (projectAbbrs.size() == 1) {
-      queryParts.add(String.format("%s:%s",
-          BaseSearchProperties.PROJECT.name,
-          SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
+      String project = SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next());
+      queryParts.add(String.format("%s:%s", BaseSearchProperties.PROJECT.name, project));
     } else {
       String projectQuery = projectAbbrs.stream()
           .map(abbr -> String.format("%s:%s",
@@ -158,75 +151,107 @@ public class FacetQueryBuilder {
       queryParts.add("(" + projectQuery + ")");
     }
 
-    // Add Dublin Core facet filters
-    if (selectedFacets != null && !selectedFacets.isEmpty()) {
-      selectedFacets.forEach((dcField, values) -> {
-        if (values != null && !values.isEmpty()) {
-          // Map DC field name to Solr field name (dc.title, dc.creator, etc.)
-          String solrFieldName = normalizeDublinCoreFieldName(dcField);
-
-          // Build OR query for multiple values of same field
-          if (values.size() == 1) {
-            // Single value - simple query
-            queryParts.add(buildSolrFieldQuery(solrFieldName, values.get(0)));
-          } else {
-            // Multiple values - OR query
-            String fieldQuery = values.stream()
-                .map(value -> buildSolrFieldQuery(solrFieldName, value))
-                .collect(Collectors.joining(" OR "));
-            queryParts.add("(" + fieldQuery + ")");
-          }
-        }
-      });
-    }
-
-    // Combine all parts with AND
     String finalQuery = queryParts.isEmpty() ? "*:*" : String.join(" AND ", queryParts);
-
-    log.debug("Built Solr query: {}", finalQuery);
+    log.debug("Built base Solr query: {}", finalQuery);
     return finalQuery;
   }
 
+  public static List<String> buildSolrFilterQueries(
+      MultiValueMap<String, String> selectedFacets
+  ) {
+    List<String> filterQueries = new ArrayList<>();
+
+    if (selectedFacets == null || selectedFacets.isEmpty()) {
+      return filterQueries;
+    }
+
+    selectedFacets.forEach((dcField, values) -> {
+      if (values != null && !values.isEmpty()) {
+        String solrFieldName = normalizeDublinCoreFieldName(dcField);
+        String fieldShortName = extractFieldShortName(solrFieldName);
+
+        if (values.size() == 1) {
+          // Single value: {!tag=type}dc.type:encodedValue
+          String fq = String.format("{!tag=%s}%s",
+              fieldShortName,
+              buildSolrFieldQuery(solrFieldName, values.get(0)));
+          filterQueries.add(fq);
+        } else {
+          // Multiple values: {!tag=type}(dc.type:val1 OR dc.type:val2)
+          String valueQuery = values.stream()
+              .map(value -> buildSolrFieldQuery(solrFieldName, value))
+              .collect(Collectors.joining(" OR "));
+          String fq = String.format("{!tag=%s}(%s)", fieldShortName, valueQuery);
+          filterQueries.add(fq);
+        }
+      }
+    });
+
+    log.debug("Built {} filter queries for drill-down", filterQueries.size());
+    return filterQueries;
+  }
 
   /**
-   * Normalizes Dublin Core field names to Solr schema format.
-   * Ensures consistent "dc.fieldname" format.
-   *
-   * Examples:
-   * - "title" -> "dc.title"
-   * - "dc.title" -> "dc.title"
-   * - "creator" -> "dc.creator"
+   * TODO
+   * @param dcFieldName
+   * @return
    */
   private static String normalizeDublinCoreFieldName(String dcFieldName) {
     if (dcFieldName == null || dcFieldName.isEmpty()) {
       throw new IntegrationDataProcessingException("Dublin Core field name cannot be null or empty");
     }
-
-    // Already has "dc." prefix
     if (dcFieldName.startsWith("dc.")) {
       return dcFieldName;
     }
-
-    // Add "dc." prefix
     return "dc." + dcFieldName;
   }
 
   /**
-   * Builds a Solr field query with proper escaping.
-   * Handles multi-valued fields where all language variants are in one field.
+   * TODO
+   * @param fullFieldName
+   * @return
+   */
+  private static String extractFieldShortName(String fullFieldName) {
+    if (fullFieldName.startsWith("dc.")) {
+      return fullFieldName.substring(3);
+    }
+    return fullFieldName;
+  }
+
+  /**
+   * Builds a Solr field query with proper escaping AND URL encoding.
+   *
+   * CRITICAL: URL-encodes the value so special characters like quotes
+   * don't cause "Illegal character" errors in URIs.
    */
   private static String buildSolrFieldQuery(String fieldName, String value) {
     if (value == null || value.trim().isEmpty()) {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
     }
 
+    // TODO test / think about
+
+    // STEP 1: Escape for Solr syntax (adds quotes around value)
     String escapedValue = SolrUrlBuilder.escapeSolrValue(value.trim());
 
-    // For text fields, use exact phrase matching
-    // This works well with multi-valued fields containing different language variants
-    return String.format("%s:\"%s\"", fieldName, escapedValue);
+    // STEP 2: URL-encode to handle special characters like quotes, backslashes
+    String urlEncodedValue = urlEncode(escapedValue);
+
+    // STEP 3: Build query - value is already quoted and URL-encoded
+    return String.format("%s:%s", fieldName, urlEncodedValue);
   }
 
+  /**
+   * URL-encodes a string for safe use in URLs.
+   * Converts special characters like " to %22, \ to %5C, etc.
+   */
+  private static String urlEncode(String value) {
+    try {
+      return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+    } catch (UnsupportedEncodingException e) {
+      throw new IntegrationDataProcessingException("Failed to URL-encode value: " + value);
+    }
+  }
 
 
 

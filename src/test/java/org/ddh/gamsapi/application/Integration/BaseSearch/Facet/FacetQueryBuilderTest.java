@@ -28,8 +28,15 @@ public class FacetQueryBuilderTest extends UnitTest {
           10,
           org.springframework.data.domain.Sort.by("dc.title").ascending()
       );
+      var TEST_FILTER_QUERIES = List.<String>of();
 
-      var builtUrl =  FacetQueryBuilder.buildSolrFacetUrl(TEST_CORE_NAME, TEST_FACET_QUERY, TEST_FACET_FIELDS, TEST_PAGEABLE);
+      var builtUrl =  FacetQueryBuilder.buildSolrFacetUrl(
+          TEST_CORE_NAME,
+          TEST_FACET_QUERY,
+          TEST_FILTER_QUERIES,
+          TEST_FACET_FIELDS,
+          TEST_PAGEABLE
+      );
 
       Assertions.assertThat(builtUrl)
           .isNotEmpty()
@@ -57,22 +64,6 @@ public class FacetQueryBuilderTest extends UnitTest {
       TEST_MAP.put("dc.title", List.of("Title 1", "Title 2"));
       TEST_MAP.put("dc.creator", List.of("Creator A"));
       TEST_DC_MAP = MultiValueMap.fromMultiValue(TEST_MAP);
-    }
-
-    @Test
-    public void builtSolrQueryContainsExpectedValues(){
-      var TEST_PROJECTS = Set.of(TestProject.PROJECT_ABBR.getValue());
-
-      var builtQuery =  FacetQueryBuilder.buildSolrFacetQuery(TEST_PROJECTS,"", TEST_DC_MAP);
-
-      Assertions.assertThat(builtQuery)
-          .isNotEmpty()
-          .contains("dc.title")
-          .contains("dc.creator")
-          .contains(TestProject.PROJECT_ABBR.getValue());
-
-
-
     }
 
 

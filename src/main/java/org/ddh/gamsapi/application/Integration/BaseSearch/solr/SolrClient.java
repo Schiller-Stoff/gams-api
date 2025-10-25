@@ -18,6 +18,7 @@ import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationData
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -443,6 +444,7 @@ public class SolrClient {
 
   /**
    * Execute a Solr query and return the raw JSON response.
+   * Handles complex Solr query syntax including special characters like {}, !, etc.
    *
    * @param url The complete query path including parameters (e.g., "/solr/gams/select?q=*:*")
    * @return Raw JSON response from Solr
@@ -451,8 +453,19 @@ public class SolrClient {
     log.trace("Executing Solr url: {}", url);
 
     try {
+      // TODO move somewhere else - SolrUrlBuilder! e.g. urlEncodeSolrSpecialChars() and TEST
+      // Build URI directly to bypass WebClient's encoding
+      url = url
+          .replace("{", "%7B")
+          .replace("}", "%7D")
+          .replace("|", "%7C")
+          .replace("!", "%21")
+          .replace(" ", "%20");
+
+      URI uri = URI.create(SOLR_BASE_URL + url);
+
       return webClient.get()
-          .uri(url)
+          .uri(uri)  // Use URI object instead of String
           .retrieve()
           .bodyToMono(String.class)
           .block();
@@ -460,7 +473,7 @@ public class SolrClient {
       String errorResponseBody = e.getResponseBodyAsString();
       assert e.getRequest() != null;
       String msg = String.format(
-          "Failed to execute Solr query via url %s.  Status: %s, Error: %s",
+          "Failed to execute Solr query via url %s. Status: %s, Error: %s",
           e.getRequest().getURI(), e.getStatusCode(), errorResponseBody
       );
       log.error(msg);
