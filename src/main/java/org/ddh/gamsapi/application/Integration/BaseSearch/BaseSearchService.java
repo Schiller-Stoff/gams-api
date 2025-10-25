@@ -94,9 +94,10 @@ public class BaseSearchService implements IIntegrationService {
     foundDatastreams.forEach(datastream -> {
       DatastreamId datastreamId =  DatastreamId.builder().dsid(datastream.getDsid()).digitalObject(id).build();
       // send custom search datastream directly to solr
-      if(datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)) {
-        sendCustomSolrDatastream(datastreamId, projectAbbr);
-      }
+      // TODO think about disabled custom solr indexing
+//      if(datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)) {
+//        sendCustomSolrDatastream(datastreamId, projectAbbr);
+//      }
 
       if(datastream.getDsid().equals(GAMSDsid.DC.getValue())){
         addDublinCore(baseSearch, datastreamId);
