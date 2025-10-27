@@ -83,15 +83,6 @@ public class SolrFacetedResponse {
               }
             }
           }
-
-          // TODO this sorting seems to be very weird here? Shouldn't be necessary with proper solr query params?
-
-          // Sort facet values by count (descending) then by value (ascending)
-          solrFacetValues.sort((a, b) -> {
-            int countCompare = Long.compare(b.getCount(), a.getCount());
-            return countCompare != 0 ? countCompare : a.getValue().compareTo(b.getValue());
-          });
-
           // Keep field name as-is (already in "dc.fieldname" format)
           facets.put(fieldName, solrFacetValues);
         });
