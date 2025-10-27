@@ -1,77 +1,116 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
-import org.ddh.gamsapi.domain.DigitalObject.Facet.FacetSearchMetrics;
+import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
- * Complete faceted search response wrapper.
+ * Complete faceted search response wrapper with proper Spring pagination support.
+ *
+ * This DTO provides:
+ * - Standard Spring Page metadata (page number, total pages, hasNext, etc.)
+ * - Facet-specific information (available facets, selected filters)
+ * - Unfiltered document count for "X of Y" displays
  */
 @Data
 @Builder
+@Schema(description = "Faceted search response with pagination and facet information")
 public class FacetResponseDTO {
-  private List<BaseSearch> results;
-  private Map<String, List<SolrFacetValue>> availableFacets;
-  private Map<String, List<String>> selectedFacets;
 
   /**
-   * Number of results matching the current query + filters.
-   * Example: 5 results when filtering by type=Brief
+   * Paginated search results with complete pagination metadata.
+   * Includes: page number, size, total elements, total pages, hasNext, hasPrevious, isFirst, isLast
    */
-  private long filteredCount;
+  @JsonProperty("results")
+  @Schema(description = "Paginated search results with complete metadata")
+  private PagedResponse<BaseSearch> results;
+
+  /**
+   * Available facet values with their counts for drill-down navigation.
+   * Key: facet field name (e.g., "type", "coverage")
+   * Value: List of possible values with their document counts
+   */
+  @JsonProperty("availableFacets")
+  @Schema(description = "Available facet values with counts for each facet field")
+  private Map<String, List<SolrFacetValue>> availableFacets;
+
+  /**
+   * Currently selected facet filters.
+   * Key: facet field name
+   * Value: List of selected values for that field
+   */
+  @JsonProperty("selectedFacets")
+  @Schema(description = "Currently selected facet filters")
+  private Map<String, List<String>> selectedFacets;
 
   /**
    * Total number of documents across all specified projects (baseline, no filters applied).
    * Example: 1000 total documents in the project(s)
    * This allows UI to show "Showing 5 of 1000 results"
    */
+  @JsonProperty("totalUnfilteredCount")
+  @Schema(description = "Total documents in projects before any filters", example = "1000")
   private long totalUnfilteredCount;
 
   /**
-   * Starting offset for pagination (0-based).
-   */
-  private long start;
-
-
-  /**
-   * Builds a FacetSearchResponse instance from given parsed solr response
-   * @param solrFacetedResponse response from solr
-   * @param selectedFacets selected facets during request building to solr
-   * @return response for faceted search
+   * Builds a FacetResponseDTO from Solr response with proper Spring pagination.
+   *
+   * @param solrFacetedResponse Parsed Solr response containing documents and facets
+   * @param selectedFacets Selected facets used in the query
+   * @param totalUnfilteredCount Total documents in projects (no filters)
+   * @param pageable Pagination parameters used in the query
+   * @return Complete faceted search response with pagination
    */
   public static FacetResponseDTO from(
       SolrFacetedResponse solrFacetedResponse,
       MultiValueMap<String, String> selectedFacets,
-      int totalUnfilteredCount
-  ){
+      int totalUnfilteredCount,
+      Pageable pageable
+  ) {
 
-    var selectedFacetsAsNormalMap = new HashMap<String, List<String>>();
-    selectedFacets.forEach((s, strings) -> {
-      selectedFacetsAsNormalMap.put(s, new ArrayList<>(strings));
-    });
+    // Step 1: Map Solr documents to domain objects
+    List<BaseSearch> searchResults = solrFacetedResponse.getDocuments().stream()
+        .map(BaseSearch::from)
+        .collect(Collectors.toList());
 
-    List<BaseSearch> mapped = new ArrayList<>();
-    solrFacetedResponse.getDocuments().forEach((solrDocument) -> {
-      mapped.add(BaseSearch.from(solrDocument));
-    });
+    // Step 2: Create Spring Page with complete pagination metadata
+    // This automatically calculates: totalPages, hasNext, hasPrevious, isFirst, isLast
+    Page<BaseSearch> page = new PageImpl<>(
+        searchResults,                      // Content for this page
+        pageable,                           // Pageable (contains page number, size, sort)
+        solrFacetedResponse.getNumFound()   // Total elements (for totalPages calculation)
+    );
 
+    // Step 3: Convert to standard PagedResponse wrapper
+    PagedResponse<BaseSearch> pagedResults = PagedResponse.from(page);
+
+    // Step 4: Convert selected facets from MultiValueMap to standard Map
+    Map<String, List<String>> selectedFacetsMap = new HashMap<>();
+    selectedFacets.forEach((key, values) ->
+        selectedFacetsMap.put(key, new ArrayList<>(values))
+    );
+
+    // Step 5: Build complete response
     return FacetResponseDTO.builder()
-        .results(mapped)
+        .results(pagedResults)
         .availableFacets(solrFacetedResponse.getFacets())
-        .selectedFacets(selectedFacetsAsNormalMap)
-        .filteredCount(solrFacetedResponse.getNumFound())
+        .selectedFacets(selectedFacetsMap)
         .totalUnfilteredCount(totalUnfilteredCount)
-        .start(solrFacetedResponse.getStart())
         .build();
-
   }
 }

@@ -14,12 +14,12 @@ import java.util.Set;
 
 /**
  * Service for performing faceted searches on Dublin Core metadata in Solr.
+ * Implements faceted search with drill-down support and proper Spring pagination.
  */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class FacetService {
-
 
   private final SolrClient solrClient;
 
@@ -34,11 +34,17 @@ public class FacetService {
    * - Facet filters are in separate fq (filter query) parameters with tags
    * - Each facet field excludes its own tag when counting
    *
+   * Returns proper Spring Page metadata including:
+   * - Current page number
+   * - Total pages
+   * - Total elements
+   * - hasNext, hasPrevious, isFirst, isLast flags
+   *
    * @param projectAbbrs Set of project abbreviations to filter by
    * @param fulltextQuery Fulltext search query - if empty finds everything
    * @param selectedFacets MultiValueMap of selected Dublin Core facets (field -> values)
-   * @param pageable Pagination information
-   * @return FacetSearchResponse containing results, facets, and metadata
+   * @param pageable Pagination information (page, size, sort)
+   * @return FacetResponseDTO containing results with pagination, facets, and metadata
    */
   public FacetResponseDTO facetSearch(
       Set<String> projectAbbrs,
@@ -48,8 +54,8 @@ public class FacetService {
 
     long startTime = System.currentTimeMillis();
 
-    log.debug("Solr faceted search with drill-down: projects={}, fulltext={}, filters={}, page={}",
-        projectAbbrs, fulltextQuery, selectedFacets, pageable);
+    log.debug("Solr faceted search with drill-down: projects={}, fulltext={}, filters={}, page={}, size={}",
+        projectAbbrs, fulltextQuery, selectedFacets, pageable.getPageNumber(), pageable.getPageSize());
 
     // Validate inputs
     if (projectAbbrs == null || projectAbbrs.isEmpty()) {
@@ -60,7 +66,7 @@ public class FacetService {
     Set<String> facetFields = getDefaultDublinCoreFacetFields();
 
     // STEP 1: Build SOLR url with drill-down support
-    String solrFacetUrl =  FacetQueryBuilder.buildSolrFacetDrilldownUrl(
+    String solrFacetUrl = FacetQueryBuilder.buildSolrFacetDrilldownUrl(
         SolrGamsCores.GAMS_CORE.value,
         projectAbbrs,
         fulltextQuery,
@@ -77,20 +83,27 @@ public class FacetService {
     // STEP 3: Parse Solr response
     SolrFacetedResponse parsedResponse = SolrFacetedResponse.from(solrResponse);
 
-    // STEP 4: Get baseline total count for these projects
+    // STEP 4: Get baseline total count for these projects (unfiltered)
     int projectDocumentsCount = solrClient.countProjectDocuments(
         SolrGamsCores.GAMS_CORE.value, projectAbbrs);
 
     long totalTime = System.currentTimeMillis() - startTime;
 
-    log.info("Solr faceted search with drill-down completed in {}ms - found {} filtered results out of {} total with {} facet fields",
-        totalTime, parsedResponse.getNumFound(), projectDocumentsCount, facetFields.size());
+    log.info("Solr faceted search with drill-down completed in {}ms - found {} filtered results (page {}/{}) out of {} total with {} facet fields",
+        totalTime,
+        parsedResponse.getNumFound(),
+        pageable.getPageNumber() + 1,  // Display as 1-indexed for logging
+        // TODO move calculation into variable -> make more clear for what this is used - or maybe remove it?
+        (int) Math.ceil((double) parsedResponse.getNumFound() / pageable.getPageSize()),
+        projectDocumentsCount,
+        facetFields.size());
 
-    // STEP 5: Transform to response DTO with selected facets marked
+    // STEP 5: Transform to response DTO with Spring pagination metadata
     return FacetResponseDTO.from(
         parsedResponse,
         selectedFacets,
-        projectDocumentsCount
+        projectDocumentsCount,
+        pageable  // ← CRITICAL: Pass Pageable to create proper Page metadata
     );
   }
 
@@ -111,6 +124,4 @@ public class FacetService {
         "dc.publisher"    // Publisher - useful for faceting
     );
   }
-
-
 }
