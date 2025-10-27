@@ -1,5 +1,18 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
+import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Slf4j
 public class SolrUrlBuilder {
 
   /**
@@ -51,6 +64,78 @@ public class SolrUrlBuilder {
         .replace("|", "%7C")
         .replace("!", "%21")
         .replace(" ", "%20");
+  }
+
+  /**
+   * Builds the base Solr query string with project abbreviations and fulltext query.
+   * @param projectAbbrs Set of project abbreviations to filter by
+   * @param fulltextQuery Fulltext search query - if empty finds everything
+   * @return
+   */
+  public static String buildBaseSolrQuery(
+      Set<String> projectAbbrs,
+      String fulltextQuery
+  ) {
+    List<String> queryParts = new ArrayList<>();
+
+    if (fulltextQuery != null && !fulltextQuery.trim().isEmpty()) {
+      String escapedFulltext = SolrUrlBuilder.escapeSolrValue(fulltextQuery.trim());
+      // URL encode the fulltext value
+      String encodedFulltext = urlEncode(escapedFulltext);
+      queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, encodedFulltext));
+    }
+
+    if (projectAbbrs.size() == 1) {
+      String project = SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next());
+      queryParts.add(String.format("%s:%s", BaseSearchProperties.PROJECT.name, project));
+    } else {
+      String projectQuery = projectAbbrs.stream()
+          .map(abbr -> String.format("%s:%s",
+              BaseSearchProperties.PROJECT.name,
+              SolrUrlBuilder.escapeSolrValue(abbr)))
+          .collect(Collectors.joining(" OR "));
+      queryParts.add("(" + projectQuery + ")");
+    }
+
+    String finalQuery = queryParts.isEmpty() ? "*:*" : String.join(" AND ", queryParts);
+    log.debug("Built base Solr query: {}", finalQuery);
+    return finalQuery;
+  }
+
+
+  /**
+   * URL-encodes a string for safe use in URLs.
+   * Converts special characters like " to %22, \ to %5C, etc.
+   */
+  private static String urlEncode(String value) {
+    try {
+      return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+    } catch (UnsupportedEncodingException e) {
+      throw new IntegrationDataProcessingException("Failed to URL-encode value: " + value);
+    }
+  }
+
+  /**
+   * Builds a Solr field query with proper escaping AND URL encoding.
+   *
+   * CRITICAL: URL-encodes the value so special characters like quotes
+   * don't cause "Illegal character" errors in URIs.
+   */
+  public static String buildSolrFieldQuery(String fieldName, String value) {
+    if (value == null || value.trim().isEmpty()) {
+      throw new IntegrationDataProcessingException("Search value cannot be null or empty");
+    }
+
+    // TODO test / think about
+
+    // STEP 1: Escape for Solr syntax (adds quotes around value)
+    String escapedValue = SolrUrlBuilder.escapeSolrValue(value.trim());
+
+    // STEP 2: URL-encode to handle special characters like quotes, backslashes
+    String urlEncodedValue = urlEncode(escapedValue);
+
+    // STEP 3: Build query - value is already quoted and URL-encoded
+    return String.format("%s:%s", fieldName, urlEncodedValue);
   }
 
 }
