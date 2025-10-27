@@ -87,10 +87,10 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           PageRequest.of(0, 10)
       );
 
-      var foundDocument = pagedResponse.getResults().getContent().get(0);
-
       Assertions.assertThat(pagedResponse.getResults().getContent().size())
           .isEqualTo(1);
+
+      var foundDocument = pagedResponse.getResults().getContent().get(0);
 
       Assertions.assertThat(foundDocument.getProperty("id"))
           .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
@@ -119,10 +119,10 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           PageRequest.of(0, 10)
       );
 
-      var foundDocument = pagedResponse.getResults().getContent().get(0);
-
       Assertions.assertThat(pagedResponse.getResults().getContent().size())
           .isEqualTo(1);
+
+      var foundDocument = pagedResponse.getResults().getContent().get(0);
 
       Assertions.assertThat(foundDocument.getProperty("id"))
           .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
