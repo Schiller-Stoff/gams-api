@@ -57,6 +57,7 @@ public class FacetController {
     var filteredDcFields = new HashMap<String, List<String>>();
     dcCriteria.forEach((key, values) -> {
       if (key.startsWith("dc.")) {
+        // TODO WTF AM I REMOVING THE dc. PREFIX HERE???
         String newKey = key.substring(3); // Remove "dc." prefix
         filteredDcFields.put(newKey, values);
       }
