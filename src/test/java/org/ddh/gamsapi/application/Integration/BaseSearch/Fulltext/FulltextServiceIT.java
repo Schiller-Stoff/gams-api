@@ -11,7 +11,6 @@ import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchService;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Facet.FacetService;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.util.MultiValueMap;
 
 import java.io.File;
 import java.io.IOException;
