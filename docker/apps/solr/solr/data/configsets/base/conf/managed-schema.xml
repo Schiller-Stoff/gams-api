@@ -449,6 +449,17 @@
       <tokenizer name="whitespace"/>
     </analyzer>
   </fieldType>
+    <!-- Custom field type for fulltext that preserves hyphens and special chars -->
+    <fieldType name="text_fulltext" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer name="whitespace"/>
+            <filter name="lowercase"/>
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer name="whitespace"/>
+            <filter name="lowercase"/>
+        </analyzer>
+    </fieldType>
 
   <!--  Internal solr fields -->
   <field name="_nest_path_" type="_nest_path_"/>
@@ -467,7 +478,8 @@
   <field name="objectTitle" type="strings"/>
   <field name="objectDesc" type="strings"/>
   <field name="objectDatastreams" type="strings" multiValued="true"/>
-  <field name="objectFulltext" type="text_general" multiValued="false" stored="true"/>
+    <!-- uses custom type with whitespace tokenizer -->
+    <field name="objectFulltext" type="text_fulltext" multiValued="false" stored="true"/>
   <field name="objectProjectAbbr" type="string" multiValued="false"/>
   <field name="objectType" type="string" multiValued="false"/>
   <field name="objectCreator" type="strings"/>

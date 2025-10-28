@@ -125,6 +125,41 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
 
     }
 
+    @Test
+    public void containsExpectedHighlightingString(){
+
+      var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+          TestDublinCoreEntry.VALUE.getValue(),
+          new HashMap<>(),
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          PageRequest.of(0, 10)
+      );
+
+      Assertions.assertThat(pagedResponse.getResults().getContent().size())
+          .isEqualTo(1);
+
+      var foundDocument = pagedResponse.getResults().getContent().get(0);
+
+      var highlighting = (List<String>) foundDocument.getProperty(FulltextResponseProperties.HIGHLIGHTING.name);
+
+      Assertions.assertThat(highlighting)
+          .isNotEmpty();
+
+      Assertions.assertThat(highlighting)
+          .hasSize(1);
+
+      var firstSnippet = highlighting.get(0);
+
+      final String EXPECTED_HIGHLIGHTED_STRING =
+          FulltextResponseProperties.HIGHLIGHT_PRE.name +
+          TestDublinCoreEntry.VALUE.getValue() +
+          FulltextResponseProperties.HIGHLIGHT_POST.name;
+
+      Assertions.assertThat(firstSnippet)
+          .contains(EXPECTED_HIGHLIGHTED_STRING);
+
+    }
+
 
   }
 
@@ -141,7 +176,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
       );
 
       var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
-          "*",
+          TestDublinCoreEntry.VALUE.getValue(),
           dcFilters,
           Set.of(TestProject.PROJECT_ABBR.getValue()),
           PageRequest.of(0, 10)
