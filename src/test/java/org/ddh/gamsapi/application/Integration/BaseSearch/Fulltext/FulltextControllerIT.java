@@ -1,0 +1,122 @@
+package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
+
+import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestBag;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
+import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.application.Ingest.Ingest;
+import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
+import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchService;
+import org.ddh.gamsapi.domain.Project.ProjectBuilder;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@Slf4j
+@AutoConfigureMockMvc(addFilters = false)
+public class FulltextControllerIT extends BaseSearchIntegrationTest {
+
+  @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+  @Autowired
+  private MockMvc mockMvc;
+
+  @Autowired
+  private BaseSearchService baseSearchService;
+
+  @Autowired
+  private IIngestService ingestService;
+
+  @Autowired
+  private IProjectRepository projectRepository;
+
+  // Disables auditing
+  @MockitoBean
+  private AuditingHandler auditingHandler;
+
+  File bagFile;
+
+  @BeforeEach
+  public void setup() throws IOException {
+    bagFile = TestBag.loadFile();
+    projectRepository.save(ProjectBuilder.builder()
+        .projectAbbr(TestProject.PROJECT_ABBR.getValue())
+        .build());
+
+    // Ingest the bag
+    byte[] zippedBag = ZipUtils.zipDir(bagFile);
+    Ingest ingest = new Ingest();
+    ingest.setZippedBagItFolder(zippedBag);
+    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
+    ingestService.ingest(ingest);
+
+    // Index object
+    baseSearchService.indexObject(
+        TestProject.PROJECT_ABBR.getValue(),
+        TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+    );
+  }
+
+  @Nested
+  public class GET {
+
+    String fulltextResponse;
+
+    @BeforeEach
+    public void setup() throws Exception {
+      final String FULLTEXT_SEARCH_URL = String.format("%s?projects=%s&q=%s",FulltextController.FULLTEXT_SEARCH_PATH, TestProject.PROJECT_ABBR.getValue(), TestDublinCoreEntry.VALUE.getValue());
+
+      fulltextResponse = mockMvc.perform(
+              MockMvcRequestBuilders.get(FULLTEXT_SEARCH_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+    }
+
+    @Test
+    public void responseContainsExpectedHighlightedString() {
+
+      Assertions.assertThat(fulltextResponse)
+          .isNotNull()
+          .isNotEmpty();
+
+      final String EXPECTED_HIGHLIGHTING_STRING = FulltextResponseProperties.HIGHLIGHT_PRE.name + TestDublinCoreEntry.VALUE.getValue() + FulltextResponseProperties.HIGHLIGHT_POST.name;
+      Assertions.assertThat(fulltextResponse)
+          .contains(EXPECTED_HIGHLIGHTING_STRING);
+
+    }
+
+    @Test
+    public void responseContainsExpectedDigitalObjectId() {
+      Assertions.assertThat(fulltextResponse)
+          .isNotNull()
+          .isNotEmpty();
+
+      final String EXPECTED_DIGITAL_OBJECT_ID_STRING = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+      Assertions.assertThat(fulltextResponse)
+          .contains(EXPECTED_DIGITAL_OBJECT_ID_STRING);
+
+    }
+
+  }
+
+}
