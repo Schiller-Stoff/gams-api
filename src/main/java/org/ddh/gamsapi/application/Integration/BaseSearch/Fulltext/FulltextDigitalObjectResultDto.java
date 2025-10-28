@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.BaseSearch.Facet.FacetResponseDTO;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
@@ -58,9 +59,20 @@ public class FulltextDigitalObjectResultDto {
       Pageable pageable
   ) {
 
-    // Step 1: Map Solr documents to domain objects
+    // Step 1: Map Solr documents to domain objects (and add highlighting data)
     List<BaseSearch> searchResults = fulltextSolrResponse.getDocuments().stream()
-        .map(BaseSearch::from)
+        .map( solrDocument -> {
+          var baseSearch = BaseSearch.from(solrDocument);
+          // additionally apply highlighting if available
+          String docId = (String) baseSearch.getProperty(BaseSearchProperties.OBJECT_ID.name);
+          var highlightInfo = fulltextSolrResponse.getHighlighting().get(docId);
+          // Add highlighting info if present
+          if(!highlightInfo.isEmpty()){
+            //TODO use enum?
+            baseSearch.addProperty("highlighting", highlightInfo);
+          }
+          return baseSearch;
+        })
         .collect(Collectors.toList());
 
     // Step 2: Create Spring Page with complete pagination metadata

@@ -118,11 +118,11 @@ public class FulltextQueryBuilder {
     url.append("&hl.fl=").append(BaseSearchProperties.FULLTEXT.name); // Highlight fulltext field
     url.append("&hl.snippets=3");  // Max 3 snippets per field
     url.append("&hl.fragsize=150");  // ~150 chars per snippet
-    url.append("&hl.simple.pre=").append(SolrUrlBuilder.urlEncode("<mark>"));  // HTML5 <mark> tag
-    url.append("&hl.simple.post=").append(SolrUrlBuilder.urlEncode("</mark>"));
+    url.append("&hl.simple.pre=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_PRE.name));  // HTML5 <mark> tag
+    url.append("&hl.simple.post=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_POST.name));
     url.append("&hl.method=unified");  // Use unified highlighter (best performance + accuracy)
-    url.append("&hl.tag.pre=").append(SolrUrlBuilder.urlEncode("<mark>"));
-    url.append("&hl.tag.post=").append(SolrUrlBuilder.urlEncode("</mark>"));
+    url.append("&hl.tag.pre=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_PRE.name));
+    url.append("&hl.tag.post=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_POST.name));
     // ====================================================
 
 

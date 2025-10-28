@@ -78,8 +78,6 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
     @Test
     public void findsExpectedTestDublinCoreFulltextValue(){
 
-      // TODO think about: truncating + phrase search: e.g. search via q=dc.title:*e* and dc.title:"Example Title"
-
       var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
@@ -94,6 +92,36 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
 
       Assertions.assertThat(foundDocument.getProperty("id"))
           .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+    }
+
+    @Test
+    public void containsExpectedHighlightingMarksInResults(){
+
+      var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+          TestDublinCoreEntry.VALUE.getValue(),
+          new HashMap<>(),
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          PageRequest.of(0, 10)
+      );
+
+      Assertions.assertThat(pagedResponse.getResults().getContent().size())
+          .isEqualTo(1);
+
+      var foundDocument = pagedResponse.getResults().getContent().get(0);
+
+      var highlighting = (List<String>) foundDocument.getProperty(FulltextResponseProperties.HIGHLIGHTING.name);
+
+      Assertions.assertThat(highlighting)
+          .isNotEmpty();
+
+      Assertions.assertThat(highlighting)
+          .hasSize(1);
+
+      var firstSnippet = highlighting.get(0);
+
+      Assertions.assertThat(firstSnippet)
+          .contains(FulltextResponseProperties.HIGHLIGHT_PRE.name, FulltextResponseProperties.HIGHLIGHT_POST.name);
 
     }
 
