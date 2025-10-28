@@ -116,6 +116,7 @@ public class FulltextQueryBuilder {
     // ========== HIGHLIGHTING PARAMETERS (NEW) ==========
     url.append("&hl=true");  // Enable highlighting
     url.append("&hl.fl=").append(BaseSearchProperties.FULLTEXT.name); // Highlight fulltext field
+    url.append("&hl.requireFieldMatch=true");  // Only highlight if field matches query (only objectFulltext being here matched)
     url.append("&hl.snippets=3");  // Max 3 snippets per field
     url.append("&hl.fragsize=150");  // ~150 chars per snippet
     url.append("&hl.simple.pre=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_PRE.name));  // HTML5 <mark> tag
