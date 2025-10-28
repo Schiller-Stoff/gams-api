@@ -107,7 +107,7 @@ public class SolrUrlBuilder {
    * URL-encodes a string for safe use in URLs.
    * Converts special characters like " to %22, \ to %5C, etc.
    */
-  private static String urlEncode(String value) {
+  public static String urlEncode(String value) {
     try {
       return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException e) {

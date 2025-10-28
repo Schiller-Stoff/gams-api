@@ -462,7 +462,7 @@
   <field name="objectTitle" type="string"/>
   <field name="objectDesc" type="string"/>
   <field name="objectDatastreams" type="strings" multiValued="true"/>
-  <field name="objectFulltext" type="text_general" multiValued="false"/>
+  <field name="objectFulltext" type="text_general" multiValued="false" stored="true"/>
   <field name="objectProjectAbbr" type="string" multiValued="false"/>
   <field name="objectType" type="string" multiValued="false"/>
   <field name="objectCreator" type="string"/>

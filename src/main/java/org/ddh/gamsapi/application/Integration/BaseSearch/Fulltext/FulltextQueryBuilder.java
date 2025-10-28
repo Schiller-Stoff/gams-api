@@ -61,6 +61,7 @@ public class FulltextQueryBuilder {
 
   /**
    * Builds a Solr faceted search URL with drill-down support.
+   * TODO test?
    * @param coreName todo JDOC
    * @param baseQuery
    * @param filterQueries
@@ -110,6 +111,20 @@ public class FulltextQueryBuilder {
         "dc.*"
     );
     url.append("&fl=").append(String.join(",", fieldsToReturn));
+
+
+    // ========== HIGHLIGHTING PARAMETERS (NEW) ==========
+    url.append("&hl=true");  // Enable highlighting
+    url.append("&hl.fl=").append(BaseSearchProperties.FULLTEXT.name); // Highlight fulltext field
+    url.append("&hl.snippets=3");  // Max 3 snippets per field
+    url.append("&hl.fragsize=150");  // ~150 chars per snippet
+    url.append("&hl.simple.pre=").append(SolrUrlBuilder.urlEncode("<mark>"));  // HTML5 <mark> tag
+    url.append("&hl.simple.post=").append(SolrUrlBuilder.urlEncode("</mark>"));
+    url.append("&hl.method=unified");  // Use unified highlighter (best performance + accuracy)
+    url.append("&hl.tag.pre=").append(SolrUrlBuilder.urlEncode("<mark>"));
+    url.append("&hl.tag.post=").append(SolrUrlBuilder.urlEncode("</mark>"));
+    // ====================================================
+
 
     url.append("&wt=json");
     url.append("&indent=true");
