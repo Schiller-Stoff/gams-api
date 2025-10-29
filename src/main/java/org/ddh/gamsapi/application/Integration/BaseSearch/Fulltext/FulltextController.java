@@ -53,7 +53,7 @@ public class FulltextController {
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
   @ResponseBody
-  public FulltextDigitalObjectResultDto searchDigitalObjectsByDublinCoreAdvanced(
+  public FulltextDigitalObjectResultDto searchDigitalObjects(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
