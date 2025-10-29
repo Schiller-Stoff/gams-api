@@ -274,7 +274,7 @@
 
               <!-- Results Table -->
               <div th:if="${!searchResults.isEmpty()}" class="table-responsive">
-                <table class="table table-hover mb-0 fulltext-results-table">
+                <table class="table table-hover mb-0 fulltext-results-table table-sm">
                   <thead class="table-light">
                   <tr>
                     <th>ID</th>
@@ -308,7 +308,7 @@
                       </div>
                     </td>
                     <td>
-                      <span class="badge bg-secondary" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</span>
+                      <a target="_blank" th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects'" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</a>
                     </td>
                     <td>
                       <!-- Dublin Core Metadata Display -->
