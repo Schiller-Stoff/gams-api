@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Facet.FacetResponseDTO;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +34,20 @@ public class FulltextController {
 
   private final FulltextService fulltextService;
 
+
+  /**
+   * TODO jdoc
+   * TODO OpenAPI doc
+   *
+   * @param dcCriteria
+   * @param projects
+   * @param fulltextQuery
+   * @param pageIndex
+   * @param pageSize
+   * @param sortBy
+   * @param sortDir
+   * @return
+   */
   @GetMapping(path = FULLTEXT_SEARCH_PATH, produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
       MimeTypeUtils.APPLICATION_XML_VALUE
@@ -73,14 +86,13 @@ public class FulltextController {
   }
 
 
-
   /**
    * Builds PageRequest with validated sort parameters.
    *
    * @param pageIndex Zero-based page index
-   * @param pageSize Number of results per page
-   * @param sortBy TODO
-   * @param sortDir TODO
+   * @param pageSize  Number of results per page
+   * @param sortBy    TODO
+   * @param sortDir   TODO
    * @return PageRequest with validated sort
    * @throws IllegalArgumentException if sort field is not allowed
    */
