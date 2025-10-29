@@ -21,17 +21,17 @@
 
     /* ID column - narrow */
     .fulltext-results-table td:nth-child(1) {
-        max-width: 150px;
+        max-width: 100px;
     }
 
     /* Object title - medium */
     .fulltext-results-table td:nth-child(2) {
-        max-width: 200px;
+        max-width: 100px;
     }
 
     /* DC.Title - medium */
     .fulltext-results-table td:nth-child(3) {
-        max-width: 200px;
+        max-width: 400px;
     }
 
     /* Matches/Highlighting - wider for snippets */
@@ -279,7 +279,6 @@
                   <tr>
                     <th>ID</th>
                     <th>Object title</th>
-                    <th>DC.Title</th>
                     <th>Matches</th>
                     <th>Project</th>
                     <th>Dublin Core Metadata</th>
@@ -293,9 +292,6 @@
                     </td>
                     <td>
                       <strong th:text="${result.getProperty('objectTitle') ?: '...'}">Object title</strong>
-                    </td>
-                    <td>
-                      <span th:text="${result.getProperty('dc.title') ?: 'No title'}">DC Title</span>
                     </td>
                     <td>
                       <div th:if="${result.getProperty('highlighting')}"
