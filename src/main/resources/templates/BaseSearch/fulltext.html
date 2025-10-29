@@ -3,6 +3,93 @@
 
 <head th:replace="~{fragments/general.html :: headtemplate}" />
 
+<!-- Custom Styles for Fulltext Search Table -->
+<style>
+    /* Align all table cells to top */
+    .fulltext-results-table tbody {
+        vertical-align: top;
+    }
+
+    /* Set max-width and enable text wrapping/truncation for specific columns */
+    .fulltext-results-table td {
+        max-width: 250px;
+        max-height: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+    }
+
+    /* ID column - narrow */
+    .fulltext-results-table td:nth-child(1) {
+        max-width: 150px;
+    }
+
+    /* Object title - medium */
+    .fulltext-results-table td:nth-child(2) {
+        max-width: 200px;
+    }
+
+    /* DC.Title - medium */
+    .fulltext-results-table td:nth-child(3) {
+        max-width: 200px;
+    }
+
+    /* Matches/Highlighting - wider for snippets */
+    .fulltext-results-table td:nth-child(4) {
+        max-width: 300px;
+        overflow-y: auto;
+    }
+
+    /* Project badge - narrow */
+    .fulltext-results-table td:nth-child(5) {
+        max-width: 120px;
+    }
+
+    /* Dublin Core Metadata - medium */
+    .fulltext-results-table td:nth-child(6) {
+        max-width: 250px;
+    }
+
+    /* Actions - narrow, no wrapping */
+    .fulltext-results-table td:nth-child(7) {
+        max-width: 100px;
+        white-space: nowrap;
+    }
+
+    /* Highlighting snippets styling */
+    .highlighting-snippets {
+        max-height: 100px;
+        overflow-y: auto;
+        padding: 0.25rem 0;
+    }
+
+    .highlighting-snippets mark {
+        background-color: #fff3cd;
+        padding: 0.1em 0.3em;
+        border-radius: 0.2em;
+        font-weight: 500;
+    }
+
+    /* Custom scrollbar for overflow content */
+    .highlighting-snippets::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .highlighting-snippets::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .highlighting-snippets::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .highlighting-snippets::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+</style>
+
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -187,7 +274,7 @@
 
               <!-- Results Table -->
               <div th:if="${!searchResults.isEmpty()}" class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0 fulltext-results-table">
                   <thead class="table-light">
                   <tr>
                     <th>ID</th>
@@ -196,52 +283,48 @@
                     <th>Matches</th>
                     <th>Project</th>
                     <th>Dublin Core Metadata</th>
-                    <th>Actions</th>t
                   </tr>
                   </thead>
                   <tbody>
                   <tr th:each="result : ${searchResults.content}">
-                    <td class="align-top">
-                      <a th:text="${result.getProperty('id')}" target="_blank" th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}">o:gams.123</a>
+                    <td>
+                      <a th:text="${result.getProperty('id')}" target="_blank"
+                         th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}">o:gams.123</a>
                     </td>
-                    <td class="align-top">
+                    <td>
                       <strong th:text="${result.getProperty('objectTitle') ?: '...'}">Object title</strong>
                     </td>
-                    <td class="align-top">
+                    <td>
                       <span th:text="${result.getProperty('dc.title') ?: 'No title'}">DC Title</span>
                     </td>
-                    <td class="align-top">
-                      <div th:each="snippet, iterStat : ${result.getProperty('highlighting')}">
-                        <small th:utext="${snippet}"></small>
-                        <span th:if="${!iterStat.last}">...</span>
+                    <td>
+                      <div th:if="${result.getProperty('highlighting')}"
+                           class="highlighting-snippets">
+                        <small th:utext="${result.getProperty('highlighting')}">Matches...</small>
+                      </div>
+                      <div th:unless="${result.getProperty('highlighting')}"
+                           class="text-muted">
+                        <small>No matches</small>
                       </div>
                     </td>
-                    <td class="align-top">
+                    <td>
                       <span class="badge bg-secondary" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</span>
                     </td>
-                    <td class="align-top">
+                    <td>
                       <!-- Dublin Core Metadata Display -->
                       <div class="dublin-core-metadata">
                         <div class="mb-1">
-                          <small class="text-muted" th:text="${'dc:title'}">dc:field</small>:
+                          <small class="text-muted">dc:title</small>:
                           <span class="badge bg-light text-dark me-1">
-                              <span th:text="${#strings.abbreviate(result.getProperty('dc.title'), 50)}">value</span>
-                          </span>
+                <span th:text="${#strings.abbreviate(result.getProperty('dc.title'), 50)}">value</span>
+              </span>
                         </div>
                       </div>
-                    </td>
-                    <td class="align-top">
-                      <a th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}"
-                         class="btn btn-outline-primary btn-sm" target="_blank">
-                        <i class="ti ti-external-link"></i> View
-                      </a>
                     </td>
                   </tr>
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
 
           <!-- Pagination -->
           <div th:if="${!searchResults.isEmpty() && searchResults.getPagination().getTotalPages() > 1}" class="d-flex justify-content-center mt-4">
