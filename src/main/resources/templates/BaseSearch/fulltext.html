@@ -201,25 +201,25 @@
                   </thead>
                   <tbody>
                   <tr th:each="result : ${searchResults.content}">
-                    <td>
+                    <td class="align-top">
                       <a th:text="${result.getProperty('id')}" target="_blank" th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}">o:gams.123</a>
                     </td>
-                    <td>
+                    <td class="align-top">
                       <strong th:text="${result.getProperty('objectTitle') ?: '...'}">Object title</strong>
                     </td>
-                    <td>
+                    <td class="align-top">
                       <span th:text="${result.getProperty('dc.title') ?: 'No title'}">DC Title</span>
                     </td>
-                    <td>
+                    <td class="align-top">
                       <div th:each="snippet, iterStat : ${result.getProperty('highlighting')}">
                         <small th:utext="${snippet}"></small>
                         <span th:if="${!iterStat.last}">...</span>
                       </div>
                     </td>
-                    <td>
+                    <td class="align-top">
                       <span class="badge bg-secondary" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</span>
                     </td>
-                    <td>
+                    <td class="align-top">
                       <!-- Dublin Core Metadata Display -->
                       <div class="dublin-core-metadata">
                         <div class="mb-1">
@@ -230,7 +230,7 @@
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td class="align-top">
                       <a th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}"
                          class="btn btn-outline-primary btn-sm" target="_blank">
                         <i class="ti ti-external-link"></i> View
