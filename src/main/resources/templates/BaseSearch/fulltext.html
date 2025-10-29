@@ -211,7 +211,10 @@
                       <span th:text="${result.getProperty('dc.title') ?: 'No title'}">DC Title</span>
                     </td>
                     <td>
-                      <small th:text="${result.getProperty('highlighting') ?: '...'}">Matches...</small>
+                      <div th:each="snippet, iterStat : ${result.getProperty('highlighting')}">
+                        <small th:utext="${snippet}"></small>
+                        <span th:if="${!iterStat.last}">...</span>
+                      </div>
                     </td>
                     <td>
                       <span class="badge bg-secondary" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</span>
