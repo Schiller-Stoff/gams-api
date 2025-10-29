@@ -134,6 +134,7 @@ public class FulltextController {
     model.addAttribute("searchResults", searchResults.getResults());
 
     model.addAttribute("dcCriteria", filteredDcFields);
+    model.addAttribute("fulltextQuery", fulltextQuery); // ADD THIS LINE
 
     // TODO query all available projects and add to model / view
     // (only need projectAbbr + description - maybe create a lightweight DTO for that?)

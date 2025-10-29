@@ -132,6 +132,21 @@
             <div class="card-body">
               <form id="searchForm" method="GET" action="/api/v1/search/dc">
 
+                <!-- NEW: Fulltext Query Field -->
+                <div class="col-md-6 mb-3">
+                  <label for="fulltextQuery" class="form-label">Fulltext Search Query</label>
+                  <input type="text"
+                         class="form-control"
+                         id="fulltextQuery"
+                         name="q"
+                         th:value="${fulltextQuery}"
+                         placeholder="Enter search term...">
+                  <div class="form-text">
+                    <i class="ti ti-info-circle me-1"></i>
+                    Search across all fulltext content. Leave empty to search all documents.
+                  </div>
+                </div>
+
                 <!-- Project Selection -->
                 <div class="row mb-3">
                   <div class="col-md-6">
