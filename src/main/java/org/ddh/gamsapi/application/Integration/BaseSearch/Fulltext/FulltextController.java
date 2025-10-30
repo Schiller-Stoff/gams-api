@@ -216,9 +216,8 @@ public class FulltextController {
           userField,
           String.join(", ", allowedSortFields)
       );
-      log.warn(msg);
-      // TODO wrong exception - should be a user side error status code!
-      throw new IntegrationServiceException(msg);
+      log.error(msg);
+      throw new FulltextUserQueryException(msg);
     }
 
     return userField;
