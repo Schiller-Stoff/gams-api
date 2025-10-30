@@ -150,7 +150,6 @@ public class FulltextController {
     String currentQuery = buildQueryString(
         projects,
         // TODO remove the following hardcoding
-        DigitalObjectDublinCoreSpecification.SearchMode.FULLTEXT,
         MultiValueMap.fromMultiValue(filteredDcFields),
         pageSize
     );
@@ -235,13 +234,11 @@ public class FulltextController {
    * Preserves all current search parameters.
    *
    * @param projects Selected projects
-   * @param searchMode Current search mode
    * @param dcCriteria Dublin Core search criteria
    * @param pageSize Current page size
    * @return URL-encoded query string
    */
   private String buildQueryString(Set<String> projects,
-                                  DigitalObjectDublinCoreSpecification.SearchMode searchMode,
                                   MultiValueMap<String, String> dcCriteria,
                                   int pageSize) {
 
@@ -253,7 +250,6 @@ public class FulltextController {
     }
 
     // Add search mode
-    builder.queryParam("searchMode", searchMode.name());
     builder.queryParam("pageSize", pageSize);
 
     // Add Dublin Core criteria

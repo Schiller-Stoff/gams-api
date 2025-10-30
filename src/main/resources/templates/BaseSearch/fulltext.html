@@ -474,7 +474,7 @@
                         class="page-item"
                         th:classappend="${page == searchResults.getPagination().getTotalElements()} ? 'active'">
                       <a class="page-link"
-                         th:href="@{'/api/v1/search/dc?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                         th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                          th:text="${page + 1}">1</a>
                     </li>
 
