@@ -381,8 +381,7 @@
                             class="form-select form-select-lg"
                             id="projects"
                             name="projects"
-                            size="3"
-                            required>
+                            size="3">
                       <option th:each="projectAbbr : ${projectAbbrs}"
                               th:value="${projectAbbr}"
                               th:text="${projectAbbr}"
@@ -595,12 +594,6 @@
                         params.append(dcFields[i], value);
                     });
                 }
-            }
-
-            // Redirect with query parameters
-            if (projects.length === 0) {
-                alert('Please select at least one project.');
-                return;
             }
 
             window.location.href = '/api/v1/search/dc?' + params.toString();

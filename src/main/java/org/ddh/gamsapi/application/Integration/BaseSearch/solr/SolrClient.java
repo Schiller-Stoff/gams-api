@@ -367,8 +367,8 @@ public class SolrClient {
 
   /**
    * Count documents in a Solr core for a specific project.
-   * @param coreName
-   * @param projectAbbrs
+   * @param coreName name of the solr core
+   * @param projectAbbrs set of project abbreviations to count documents for (might be empty)
    * @return
    */
   public int countProjectDocuments(String coreName, Set<String> projectAbbrs){
@@ -377,7 +377,9 @@ public class SolrClient {
     url.append(String.format("/solr/%s/select?", coreName));
 
     // Project filter
-    if (projectAbbrs.size() == 1) {
+    if(projectAbbrs.isEmpty()){
+      url.append(String.format("q=%s:*", BaseSearchProperties.PROJECT.name));
+    } else if (projectAbbrs.size() == 1) {
       url.append(String.format("q=%s:%s",
           BaseSearchProperties.PROJECT.name,
           SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));

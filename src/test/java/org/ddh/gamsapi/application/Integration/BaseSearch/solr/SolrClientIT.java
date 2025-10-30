@@ -272,6 +272,34 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
           .isGreaterThan(0);
     }
 
+    @Test
+    public void returnsZeroWhenNoDocumentsExist(){
+      int documentCount = solrClient.countProjectDocuments(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of("NON_EXISTENT_PROJECT_ABBR")
+      );
+      Assertions.assertThat(documentCount)
+          .isEqualTo(0);
+    }
+
+    @Test
+    public void returnsCountWhenProjectSetIsEmpty(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+
+      int documentCount = solrClient.countProjectDocuments(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of()
+      );
+      Assertions.assertThat(documentCount)
+          .isGreaterThan(0);
+    }
+
   }
 
 

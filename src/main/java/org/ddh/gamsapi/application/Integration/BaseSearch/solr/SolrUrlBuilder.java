@@ -68,7 +68,7 @@ public class SolrUrlBuilder {
 
   /**
    * Builds the base Solr query string with project abbreviations and fulltext query.
-   * @param projectAbbrs Set of project abbreviations to filter by
+   * @param projectAbbrs Set of project abbreviations to filter by. If empty includes all projects.
    * @param fulltextQuery Fulltext search query - if empty finds everything
    * @return
    */
@@ -85,7 +85,9 @@ public class SolrUrlBuilder {
       queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, encodedFulltext));
     }
 
-    if (projectAbbrs.size() == 1) {
+    if(projectAbbrs.isEmpty()){
+      queryParts.add(String.format("%s:*", BaseSearchProperties.PROJECT.name));
+    } else if (projectAbbrs.size() == 1) {
       String project = SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next());
       queryParts.add(String.format("%s:%s", BaseSearchProperties.PROJECT.name, project));
     } else {

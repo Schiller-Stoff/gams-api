@@ -43,7 +43,6 @@ public class FulltextController {
   /**
    * TODO jdoc
    * TODO OpenAPI doc
-   *
    * @param dcCriteria
    * @param projects
    * @param fulltextQuery
@@ -60,7 +59,7 @@ public class FulltextController {
   @ResponseBody
   public FulltextDigitalObjectResultDto searchDigitalObjects(
       @RequestParam MultiValueMap<String, String> dcCriteria,
-      @RequestParam Set<String> projects,
+      @RequestParam(required = false, defaultValue = "") Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
@@ -81,6 +80,7 @@ public class FulltextController {
 
     PageRequest pageRequest = buildPageRequest(pageIndex, pageSize, sortBy, sortDir);
 
+    // TODO rename method
     return fulltextService.searchDigitalObjectsByDublinCoreCriteria(
         fulltextQuery,
         filteredDcFields,
@@ -106,7 +106,7 @@ public class FulltextController {
   @GetMapping(path = FULLTEXT_SEARCH_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String searchDigitalObjectsByWebView(
       @RequestParam MultiValueMap<String, String> dcCriteria,
-      @RequestParam Set<String> projects,
+      @RequestParam(required = false, defaultValue = "") Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
