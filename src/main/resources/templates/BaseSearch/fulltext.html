@@ -402,7 +402,7 @@
               <!-- Search results -->
               <span class="badge bg-light text-dark">
                                 Total: <span th:text="${searchResults.getPagination().getTotalElements()}">0</span> objects
-                                (Page <span th:text="${searchResults.getPagination().getSize() + 1}">1</span> of <span th:text="${searchResults.getPagination().getTotalPages()}">1</span>)
+                                (Page <span th:text="${searchResults.getPagination().getPage() + 1}">1</span> of <span th:text="${searchResults.getPagination().getTotalPages()}">1</span>)
                             </span>
               <div th:if="${searchResults.isEmpty()}" class="text-center py-5">
                 <i class="ti ti-search-off display-4 text-muted"></i>
