@@ -206,10 +206,10 @@
                             name="projects"
                             size="3"
                             required>
-                      <option th:each="project : ${projects}"
-                              th:value="${project.projectAbbr}"
-                              th:text="${project.projectAbbr + ' - ' + project.description}"
-                              th:selected="${selectedProjects != null && selectedProjects.contains(project.projectAbbr)}">
+                      <option th:each="projectAbbr : ${projectAbbrs}"
+                              th:value="${projectAbbr}"
+                              th:text="${projectAbbr}"
+                              th:selected="${selectedProjects != null && selectedProjects.contains(projectAbbr)}">
                       </option>
                     </select>
                     <div class="form-text">Hold Ctrl/Cmd to select multiple</div>

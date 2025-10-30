@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectDublinCoreSpecification;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,6 +36,8 @@ public class FulltextController {
   public static final String FULLTEXT_SEARCH_PATH = "/api/v1/integration/gsearch/fulltext";
 
   private final FulltextService fulltextService;
+
+  private final IProjectService projectService;
 
 
   /**
@@ -138,7 +141,9 @@ public class FulltextController {
 
     // TODO query all available projects and add to model / view
     // (only need projectAbbr + description - maybe create a lightweight DTO for that?)
-
+    var projectAbbrs = projectService.findAllProjectAbbrs();
+    model.addAttribute("projectAbbrs", projectAbbrs);
+    model.addAttribute("selectedProjects", projects);
 
     // Build current query string for pagination
     // TODO is this necessary?
