@@ -459,34 +459,181 @@
               </div>
 
               <!-- Pagination -->
-              <div th:if="${!searchResults.isEmpty() && searchResults.getPagination().getTotalPages() > 1}" class="d-flex justify-content-center mt-4">
+              !--
+              STRICTLY 10-BOX PAGINATION - SIMPLEST VERSION (NO TYPE ISSUES)
+
+              This version removes the problematic "Showing 1-20 of 156" counter
+              and uses a simpler "Page X of Y (Z total)" format instead.
+
+              ZERO type casting issues!
+              -->
+
+              <!-- Results Summary - Simple Format -->
+              <div th:if="${!searchResults.isEmpty()}" class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted">
+                  <small>
+                    Page <strong th:text="${searchResults.getPagination().getPage() + 1}">1</strong>
+                    of <strong th:text="${searchResults.getPagination().getTotalPages()}">8</strong>
+                    (<strong th:text="${searchResults.getPagination().getTotalElements()}">156</strong> total results)
+                  </small>
+                </div>
+              </div>
+
+              <!-- Pagination Controls -->
+              <div th:if="${!searchResults.isEmpty() && searchResults.getPagination().getTotalPages() > 1}"
+                   class="d-flex justify-content-center mt-4">
                 <nav aria-label="Search results pagination">
                   <ul class="pagination">
-                    <!-- Previous Page -->
-                    <li class="page-item" th:classappend="${searchResults.getPagination().isFirst()} ? 'disabled'">
-                      <a class="page-link" th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}">
+
+                    <!-- Previous Page Button -->
+                    <li class="page-item"
+                        th:classappend="${searchResults.getPagination().isFirst()} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}"
+                         aria-label="Previous page">
                         <i class="ti ti-chevron-left"></i> Previous
                       </a>
                     </li>
 
-                    <!-- Page Numbers -->
-                    <li th:each="page : ${#numbers.sequence(0, searchResults.getPagination().getTotalPages() - 1)}"
-                        class="page-item"
-                        th:classappend="${page == searchResults.getPagination().getPage()} ? 'active'">
-                      <a class="page-link"
-                         th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
-                         th:text="${page + 1}">1</a>
-                    </li>
+                    <th:block th:with="currentPage=${searchResults.getPagination().getPage()},
+                         totalPages=${searchResults.getPagination().getTotalPages()}">
 
-                    <!-- Next Page -->
-                    <li class="page-item" th:classappend="${searchResults.getPagination().isLast()} ? 'disabled'">
-                      <a class="page-link" th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}">
+                      <!-- Case 1: 10 or fewer pages - Show all pages -->
+                      <th:block th:if="${totalPages <= 10}">
+                        <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
+                            class="page-item"
+                            th:classappend="${page == currentPage} ? 'active'">
+                          <a class="page-link"
+                             th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:text="${page + 1}"
+                             th:aria-label="${'Page ' + (page + 1)}"
+                             th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                        </li>
+                      </th:block>
+
+                      <!-- Case 2: More than 10 pages - Optimized smart pagination -->
+                      <th:block th:if="${totalPages > 10}">
+
+                        <!-- Sub-case A: Current page in first 4 pages (0, 1, 2, 3) -->
+                        <!-- Show: [1] [2] [3] [4] [5] [...] [98] [99] [100] -->
+                        <th:block th:if="${currentPage <= 3}">
+                          <th:block th:each="page : ${#numbers.sequence(0, 4)}">
+                            <li class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}"
+                                 th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+                        </th:block>
+
+                        <!-- Sub-case B: Current page in last 4 pages -->
+                        <!-- Show: [1] [2] [3] [...] [96] [97] [98] [99] [100] -->
+                        <th:block th:if="${currentPage >= totalPages - 4 and currentPage > 3}">
+                          <th:block th:each="page : ${#numbers.sequence(0, 2)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(totalPages - 5, totalPages - 1)}">
+                            <li class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}"
+                                 th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                            </li>
+                          </th:block>
+                        </th:block>
+
+                        <!-- Sub-case C: Current page in middle -->
+                        <!-- Show: [1] [2] [...] [49] [50] [51] [...] [99] [100] -->
+                        <th:block th:if="${currentPage > 3 and currentPage < totalPages - 4}">
+                          <th:block th:each="page : ${#numbers.sequence(0, 1)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(currentPage - 1, currentPage + 1)}">
+                            <li class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}"
+                                 th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(totalPages - 2, totalPages - 1)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+                        </th:block>
+
+                      </th:block>
+                    </th:block>
+
+                    <!-- Next Page Button -->
+                    <li class="page-item"
+                        th:classappend="${searchResults.getPagination().isLast()} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}"
+                         aria-label="Next page">
                         Next <i class="ti ti-chevron-right"></i>
                       </a>
                     </li>
+
                   </ul>
                 </nav>
               </div>
+
+              <!--
+                EXAMPLE OUTPUT:
+                "Page 3 of 8 (156 total results)"
+
+                Clean, simple, no type casting issues!
+              -->
 
             </div>
           </div>
