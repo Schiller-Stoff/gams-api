@@ -472,7 +472,7 @@
                     <!-- Page Numbers -->
                     <li th:each="page : ${#numbers.sequence(0, searchResults.getPagination().getTotalPages() - 1)}"
                         class="page-item"
-                        th:classappend="${page == searchResults.getPagination().getTotalElements()} ? 'active'">
+                        th:classappend="${page == searchResults.getPagination().getPage()} ? 'active'">
                       <a class="page-link"
                          th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                          th:text="${page + 1}">1</a>
