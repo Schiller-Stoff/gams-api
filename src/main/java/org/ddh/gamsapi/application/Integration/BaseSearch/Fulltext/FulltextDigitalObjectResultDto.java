@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Facet.FacetResponseDTO;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,6 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * DTO for fulltext digital object search results with pagination and selected filters.
+ * Includes:
+ * - Paginated search results
+ * - Currently selected Dublin Core filters
+ * - Total unfiltered document count for the specified projects
+ */
 @Builder
 @Data
 public class FulltextDigitalObjectResultDto {
@@ -32,7 +37,6 @@ public class FulltextDigitalObjectResultDto {
   @JsonProperty("results")
   @Schema(description = "Paginated search results with complete metadata")
   private PagedResponse<BaseSearch> results;
-
 
   /**
    * Currently selected dc filters.
@@ -68,8 +72,7 @@ public class FulltextDigitalObjectResultDto {
           var highlightInfo = fulltextSolrResponse.getHighlighting().get(docId);
           // Add highlighting info if present
           if(!highlightInfo.isEmpty()){
-            //TODO use enum?
-            baseSearch.addProperty("highlighting", highlightInfo);
+            baseSearch.addProperty(FulltextResponseProperties.HIGHLIGHTING.name, highlightInfo);
           }
           return baseSearch;
         })
