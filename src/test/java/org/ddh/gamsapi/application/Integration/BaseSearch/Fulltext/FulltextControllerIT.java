@@ -119,4 +119,40 @@ public class FulltextControllerIT extends BaseSearchIntegrationTest {
 
   }
 
+  @Nested
+  public class WebClient {
+
+    String fulltextWebclientResponse = "";
+
+    @BeforeEach
+    public void setup() throws Exception {
+
+      final String FULLTEXT_SEARCH_URL = String.format("%s?",FulltextController.FULLTEXT_SEARCH_PATH);
+
+      fulltextWebclientResponse = mockMvc.perform(
+              MockMvcRequestBuilders.get(FULLTEXT_SEARCH_URL)
+                  .accept(MediaType.TEXT_HTML_VALUE)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+    }
+
+    @Test
+    public void webclientResponseContainsExpectedData(){
+
+      Assertions.assertThat(fulltextWebclientResponse)
+          .contains(
+              "Fulltext",
+              TestDigitalObject.DIGITAL_OBJECT_ID.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_PROJECT_ABBR.getValue()
+          );
+
+    }
+
+  }
+
 }
