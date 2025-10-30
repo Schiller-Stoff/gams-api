@@ -245,8 +245,6 @@ public class FulltextController {
     }
 
     builder.queryParam("q", fulltextQuery);
-
-    // Add search mode
     builder.queryParam("pageSize", pageSize);
 
     // Add Dublin Core criteria
