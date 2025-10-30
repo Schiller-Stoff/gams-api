@@ -139,15 +139,13 @@ public class FulltextController {
     model.addAttribute("projectAbbrs", projectAbbrs);
     model.addAttribute("selectedProjects", projects);
 
-    // Build current query string for pagination
-    // TODO is this necessary?
+    // Build current query string for pagination and pass to model
     String currentQuery = buildQueryString(
         fulltextQuery,
         projects,
         MultiValueMap.fromMultiValue(filteredDcFields),
         pageSize
     );
-
     model.addAttribute("currentQuery", currentQuery);
 
     return "BaseSearch/fulltext";
