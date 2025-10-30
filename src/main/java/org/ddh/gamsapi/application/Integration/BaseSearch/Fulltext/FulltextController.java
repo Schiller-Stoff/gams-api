@@ -148,8 +148,8 @@ public class FulltextController {
     // Build current query string for pagination
     // TODO is this necessary?
     String currentQuery = buildQueryString(
+        fulltextQuery,
         projects,
-        // TODO remove the following hardcoding
         MultiValueMap.fromMultiValue(filteredDcFields),
         pageSize
     );
@@ -238,7 +238,9 @@ public class FulltextController {
    * @param pageSize Current page size
    * @return URL-encoded query string
    */
-  private String buildQueryString(Set<String> projects,
+  private String buildQueryString(
+                                  String fulltextQuery,
+                                  Set<String> projects,
                                   MultiValueMap<String, String> dcCriteria,
                                   int pageSize) {
 
@@ -248,6 +250,8 @@ public class FulltextController {
     if (projects != null) {
       projects.forEach(project -> builder.queryParam("projects", project));
     }
+
+    builder.queryParam("q", fulltextQuery);
 
     // Add search mode
     builder.queryParam("pageSize", pageSize);
