@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
@@ -78,8 +77,7 @@ public class FulltextController {
 
     PageRequest pageRequest = buildPageRequest(pageIndex, pageSize, sortBy, sortDir);
 
-    // TODO rename method
-    return fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+    return fulltextService.search(
         fulltextQuery,
         filteredDcFields,
         projects,
@@ -126,7 +124,7 @@ public class FulltextController {
 
     PageRequest pageRequest = buildPageRequest(pageIndex, pageSize, sortBy, sortDir);
 
-    var searchResults = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+    var searchResults = fulltextService.search(
         fulltextQuery,
         filteredDcFields,
         projects,

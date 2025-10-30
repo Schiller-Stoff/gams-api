@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
-import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -20,8 +19,7 @@ public class FulltextService {
 
   private final SolrClient solrClient;
 
-  // TODO think about what to return here
-  public FulltextDigitalObjectResultDto searchDigitalObjectsByDublinCoreCriteria(
+  public FulltextDigitalObjectResultDto search(
       String fulltextQuery,
       HashMap<String, List<String>> dublinCoreFilters,
       Set<String> projectAbbrs,

@@ -75,7 +75,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
     @Test
     public void findsExpectedTestDublinCoreFulltextValue(){
 
-      var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+      var pagedResponse = fulltextService.search(
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
           Set.of(TestProject.PROJECT_ABBR.getValue()),
@@ -95,7 +95,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
     @Test
     public void containsExpectedHighlightingMarksInResults(){
 
-      var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+      var pagedResponse = fulltextService.search(
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
           Set.of(TestProject.PROJECT_ABBR.getValue()),
@@ -125,7 +125,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
     @Test
     public void containsExpectedHighlightingString(){
 
-      var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+      var pagedResponse = fulltextService.search(
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
           Set.of(TestProject.PROJECT_ABBR.getValue()),
@@ -172,7 +172,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           List.of(TestDublinCoreEntry.VALUE.getValue())
       );
 
-      var pagedResponse = fulltextService.searchDigitalObjectsByDublinCoreCriteria(
+      var pagedResponse = fulltextService.search(
           TestDublinCoreEntry.VALUE.getValue(),
           dcFilters,
           Set.of(TestProject.PROJECT_ABBR.getValue()),
