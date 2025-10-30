@@ -30,7 +30,6 @@ public class FulltextService {
     // 01. build solr query from dublinCoreFilters, projectAbbrs, searchMode, pageable
     var fulltextQueryParam = FulltextQueryBuilder.buildBaseSolrQuery(projectAbbrs, fulltextQuery);
 
-
     // 02. Build filter queries from dublinCoreFilters
     var filterQueries = FulltextQueryBuilder.buildSolrFilterQueries(dcFiltersMultiValueMap);
 
@@ -49,6 +48,8 @@ public class FulltextService {
     // 05: Get baseline total count for these projects (unfiltered)
     int projectDocumentsCount = solrClient.countProjectDocuments(
         SolrGamsCores.GAMS_CORE.value, projectAbbrs);
+
+    log.info("Successfully executed fulltext search query against Solr. Built query URL: {}. Got result count:{}", fulltextSolrUrl, fulltextResponseParsed.getNumFound());
 
     // 06. parse solr response and build PagedResponse<DigitalObjectSearchResultDTO>
     return FulltextDigitalObjectResultDto.from(
