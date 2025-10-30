@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Builder for constructing Solr queries for fulltext search with Dublin Core filters.
+ */
 @Slf4j
 public class FulltextQueryBuilder {
 
@@ -18,7 +21,7 @@ public class FulltextQueryBuilder {
    * Builds the base Solr query string with project abbreviations and fulltext query.
    * @param projectAbbrs Set of project abbreviations to filter by
    * @param fulltextQuery Fulltext search query - if empty finds everything
-   * @return
+   * @return Base Solr query string (value of solr's "q" parameter)
    */
   public static String buildBaseSolrQuery(
       Set<String> projectAbbrs,
@@ -62,11 +65,11 @@ public class FulltextQueryBuilder {
   /**
    * Builds a Solr faceted search URL with drill-down support.
    * TODO test?
-   * @param coreName todo JDOC
-   * @param baseQuery
-   * @param filterQueries
-   * @param pageable
-   * @return
+   * @param coreName Solr core name
+   * @param baseQuery Base query string (value of solr's "q" parameter)
+   * @param filterQueries List of filter queries (values of solr's "fq" parameters)
+   * @param pageable Pagination and sorting information
+   * @return Complete Solr URL for fulltext search with filters
    */
   public static String buildSolrUrl(
       String coreName,
