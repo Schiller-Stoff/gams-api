@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectDublinCoreSpecification;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
@@ -17,7 +16,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
@@ -41,16 +39,16 @@ public class FulltextController {
 
 
   /**
-   * TODO jdoc
+   * Fulltext search for digital objects with Dublin Core criteria.
    * TODO OpenAPI doc
-   * @param dcCriteria
-   * @param projects
-   * @param fulltextQuery
-   * @param pageIndex
-   * @param pageSize
-   * @param sortBy
-   * @param sortDir
-   * @return
+   * @param dcCriteria Dublin Core search criteria
+   * @param projects Selected projects
+   * @param fulltextQuery Fulltext search query
+   * @param pageIndex Current page index
+   * @param pageSize Number of results per page
+   * @param sortBy Sort field
+   * @param sortDir Sort direction
+   * @return Paginated search results
    */
   @GetMapping(path = FULLTEXT_SEARCH_PATH, produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
@@ -91,17 +89,17 @@ public class FulltextController {
   }
 
   /**
-   * TODO jdoc
+   * Webclient view for the  fulltext search for digital objects with Dublin Core criteria.
    * TODO OpenAPI doc
    *
-   * @param dcCriteria
-   * @param projects
-   * @param fulltextQuery
-   * @param pageIndex
-   * @param pageSize
-   * @param sortBy
-   * @param sortDir
-   * @return
+   * @param dcCriteria Dublin Core search criteria
+   * @param projects Selected projects
+   * @param fulltextQuery Fulltext search query
+   * @param pageIndex Current page index
+   * @param pageSize Number of results per page
+   * @param sortBy field to be sorted by
+   * @param sortDir sort direction
+   * @return HTML view with paginated search results
    */
   @GetMapping(path = FULLTEXT_SEARCH_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String searchDigitalObjectsByWebView(
@@ -139,8 +137,6 @@ public class FulltextController {
     model.addAttribute("dcCriteria", filteredDcFields);
     model.addAttribute("fulltextQuery", fulltextQuery); // ADD THIS LINE
 
-    // TODO query all available projects and add to model / view
-    // (only need projectAbbr + description - maybe create a lightweight DTO for that?)
     var projectAbbrs = projectService.findAllProjectAbbrs();
     model.addAttribute("projectAbbrs", projectAbbrs);
     model.addAttribute("selectedProjects", projects);
@@ -166,8 +162,8 @@ public class FulltextController {
    *
    * @param pageIndex Zero-based page index
    * @param pageSize  Number of results per page
-   * @param sortBy    TODO
-   * @param sortDir   TODO
+   * @param sortBy field to be sorted by
+   * @param sortDir sort direction
    * @return PageRequest with validated sort
    * @throws IllegalArgumentException if sort field is not allowed
    */
@@ -186,9 +182,9 @@ public class FulltextController {
   }
 
   /**
-   * TODO
-   *
-   *
+   * Maps and validates user-provided sort field.
+   * Allowed fields are defined in allowedSortFields list.
+   * @param userField User-provided sort field
    */
   private String mapAndValidateSortField(String userField) {
 
