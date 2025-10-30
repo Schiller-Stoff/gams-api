@@ -1,23 +1,37 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.util.*;
 
+
+/**
+ * Represents the response from a fulltext Solr query,
+ * including documents, metadata, and highlighting.
+ */
 @Slf4j
 @Builder
 @Data
 public class FulltextSolrResponse {
 
+  /**
+   * List of Solr documents returned by the query.
+   */
   private List<SolrDocument> documents;
+
+  /**
+   * Total number of documents found matching the query.
+   */
   private long numFound;
+
+  /**
+   * Starting index of the returned documents.
+   */
   private long start;
 
   /**
@@ -118,27 +132,6 @@ public class FulltextSolrResponse {
 
     log.debug("Parsed highlighting for {} documents", simplifiedHighlights.size());
     return simplifiedHighlights;
-  }
-
-  @Builder
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Data
-  public static class FulltextSolrHighlighting {
-
-    /**
-     * Field-to-snippets mapping.
-     * Key: field name (e.g., "objectFulltext", "dc.title")
-     * Value: List of highlighted text fragments
-     */
-    private Map<String, List<String>> snippets;
-
-
-    /**
-     * Total number of highlighted fragments across all fields
-     */
-    private int totalFragments;
-
   }
 
 }
