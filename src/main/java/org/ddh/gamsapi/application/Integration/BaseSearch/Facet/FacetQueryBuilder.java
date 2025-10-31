@@ -22,14 +22,13 @@ public class FacetQueryBuilder {
   /**
    * Builds a Solr faceted search URL with drill-down support.
    * TODO think about naming of method(s)
-   * TODO JDOC
    * TODO propper testing?
-   * @param solrCore
-   * @param projectAbbrs
-   * @param fulltextQuery
-   * @param selectedFacets
-   * @param facetFields
-   * @param pageable
+   * @param solrCore solr core to be searched
+   * @param projectAbbrs projects to be filtered
+   * @param fulltextQuery fulltext search query
+   * @param selectedFacets selected facets for filtering
+   * @param facetFields fields to facet on
+   * @param pageable pagination and sorting information
    * @return
    */
   public static String buildSolrFacetDrilldownUrl(
@@ -64,12 +63,12 @@ public class FacetQueryBuilder {
 
   /**
    * Builds a Solr faceted search URL with drill-down support.
-   * @param coreName todo JDOC
-   * @param baseQuery
-   * @param filterQueries
-   * @param facetFields
-   * @param pageable
-   * @return
+   * @param coreName solr core that should be queried
+   * @param baseQuery value of the q parameter for solr
+   * @param filterQueries list of fq parameters for solr
+   * @param facetFields set of facet fields to include
+   * @param pageable pagination and sorting information
+   * @return complete Solr URL for faceted search with drill-down (escaped and encoded)
    */
   public static String buildSolrFacetUrl(
       String coreName,
@@ -138,6 +137,12 @@ public class FacetQueryBuilder {
     return finalUrl;
   }
 
+  /**
+   * Builds the base Solr query (q parameter) for faceted search.
+   * @param projectAbbrs set of project abbreviations to filter by
+   * @param fulltextQuery fulltext search query (can be null or empty)
+   * @return base Solr query string (escaped and URL-encoded)
+   */
   public static String buildBaseSolrQuery(
       Set<String> projectAbbrs,
       String fulltextQuery
@@ -168,6 +173,11 @@ public class FacetQueryBuilder {
     return finalQuery;
   }
 
+  /**
+   * Builds Solr filter queries (fq parameters) for selected facets with drill-down tags.
+   * @param selectedFacets map of selected facets (Dublin Core field name to list of values)
+   * @return list of Solr filter query strings (escaped and URL-encoded)
+   */
   public static List<String> buildSolrFilterQueries(
       MultiValueMap<String, String> selectedFacets
   ) {
@@ -204,9 +214,10 @@ public class FacetQueryBuilder {
   }
 
   /**
-   * TODO
-   * @param dcFieldName
-   * @return
+   * TODO logic should instead throw error if not starting with ".dc"
+   * Normalizes a Dublin Core field name to ensure it starts with "dc.".
+   * @param dcFieldName Dublin Core field name (e.g. "title" or "dc.title")
+   * @return normalized Dublin Core field name (e.g. "dc.title")
    */
   private static String normalizeDublinCoreFieldName(String dcFieldName) {
     if (dcFieldName == null || dcFieldName.isEmpty()) {
@@ -219,9 +230,10 @@ public class FacetQueryBuilder {
   }
 
   /**
-   * TODO
-   * @param fullFieldName
-   * @return
+   * Extracts the short field name from a full Dublin Core field name.
+   * E.g. "dc.type" -> "type"
+   * @param fullFieldName full Dublin Core field name
+   * @return short field name
    */
   private static String extractFieldShortName(String fullFieldName) {
     if (fullFieldName.startsWith("dc.")) {
