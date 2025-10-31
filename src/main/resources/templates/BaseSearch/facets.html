@@ -26,7 +26,7 @@
 
     .facet-results {
         flex: 1;
-        min-width: 0; /* Prevents flex item overflow */
+        min-width: 0;
     }
 
     /* Facet Group Styling */
@@ -102,19 +102,6 @@
         color: #fff;
     }
 
-    /* Facet Search Box */
-    .facet-search-box {
-        position: relative;
-        margin-bottom: 1rem;
-    }
-
-    .facet-search-input {
-        font-size: 0.85rem;
-        padding: 0.5rem 0.75rem;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-    }
-
     /* Results Table Styling */
     .facet-results-table {
         width: 100%;
@@ -133,33 +120,11 @@
         padding: 0.75rem;
     }
 
-    /* Specific column widths */
-    .facet-results-table td:nth-child(1) {
-        max-width: 120px;
-    }
-
-    /* ID */
-    .facet-results-table td:nth-child(2) {
-        max-width: 200px;
-    }
-
-    /* Title */
-    .facet-results-table td:nth-child(3) {
-        max-width: 300px;
-    }
-
-    /* DC Fields */
-    .facet-results-table td:nth-child(4) {
-        max-width: 120px;
-    }
-
-    /* Project */
-    .facet-results-table td:nth-child(5) {
-        max-width: 100px;
-        white-space: nowrap;
-    }
-
-    /* Actions */
+    .facet-results-table td:nth-child(1) { max-width: 120px; }
+    .facet-results-table td:nth-child(2) { max-width: 200px; }
+    .facet-results-table td:nth-child(3) { max-width: 300px; }
+    .facet-results-table td:nth-child(4) { max-width: 120px; }
+    .facet-results-table td:nth-child(5) { max-width: 100px; white-space: nowrap; }
 
     /* Empty State */
     .empty-state {
@@ -181,12 +146,6 @@
         padding: 0.75rem 1rem;
         margin-bottom: 1.5rem;
         border-radius: 4px;
-    }
-
-    .active-filters-title {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
     }
 
     .filter-badge {
@@ -246,33 +205,6 @@
         }
     }
 
-    /* Collapsible Facet Groups (Mobile) */
-    .facet-group-collapse {
-        display: none;
-    }
-
-    @media (max-width: 768px) {
-        .facet-group-title {
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .facet-group-title::after {
-            content: '▼';
-            font-size: 0.75rem;
-        }
-
-        .facet-group.collapsed .facet-group-title::after {
-            content: '▶';
-        }
-
-        .facet-group.collapsed .facet-items {
-            display: none;
-        }
-    }
-
     /* Custom scrollbar for facet sidebar */
     .facet-sidebar::-webkit-scrollbar {
         width: 6px;
@@ -291,31 +223,16 @@
     .facet-sidebar::-webkit-scrollbar-thumb:hover {
         background: #555;
     }
-
-    /* Loading state */
-    .facet-item.loading {
-        opacity: 0.6;
-        pointer-events: none;
-    }
-
-    /* Clear all filters button */
-    .clear-filters-btn {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
 </style>
 
 <body>
-<!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
   <aside th:replace="~{fragments/general.html :: aside}"></aside>
   <div class="body-wrapper">
     <header th:replace="~{fragments/general.html :: header}"></header>
-    <br/>
-    <br/>
-    <br/>
+    <br/><br/><br/>
     <div class="p-md-5 p-3" style="min-height: 100vh">
 
       <!-- Breadcrumb Navigation -->
@@ -425,7 +342,7 @@
           <div th:if="${selectedFacets != null && !selectedFacets.isEmpty()}" class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0 fw-semibold">Active Filters</h6>
-              <a href="#" class="text-danger text-decoration-none small" onclick="clearAllFilters(); return false;">
+              <a href="#" class="text-danger text-decoration-none small clear-all-filters">
                 <i class="ti ti-x"></i> Clear All
               </a>
             </div>
@@ -436,7 +353,8 @@
                   <span th:text="${facetEntry.key + ': ' + value}">coverage: Wien</span>
                   <a href="#"
                      class="remove-filter"
-                     th:onclick="'removeFacetFilter(\'' + ${facetEntry.key} + '\', \'' + ${value} + '\'); return false;'">
+                     th:data-facet="${facetEntry.key}"
+                     th:data-value="${value}">
                     ×
                   </a>
                 </div>
@@ -456,7 +374,8 @@
                 <div th:each="facetValue : ${availableFacets.get('coverage')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('coverage') && selectedFacets.get('coverage').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.coverage\', \'' + ${facetValue.value} + '\');'">
+                     th:data-facet="dc.coverage"
+                     th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Wien</span>
                   <span class="facet-count" th:text="${facetValue.count}">42</span>
                 </div>
@@ -470,9 +389,9 @@
                 <div th:each="facetValue : ${availableFacets.get('type')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('type') && selectedFacets.get('type').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.type\', \'' + ${facetValue.value} + '\');'">
-                      <span class="facet-label" th:text="${facetValue.value}"
-                            th:title="${facetValue.value}">Brief</span>
+                     th:data-facet="dc.type"
+                     th:data-value="${facetValue.value}">
+                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Brief</span>
                   <span class="facet-count" th:text="${facetValue.count}">156</span>
                 </div>
               </div>
@@ -485,9 +404,9 @@
                 <div th:each="facetValue : ${availableFacets.get('creator')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('creator') && selectedFacets.get('creator').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.creator\', \'' + ${facetValue.value} + '\');'">
-                      <span class="facet-label" th:text="${facetValue.value}"
-                            th:title="${facetValue.value}">Author Name</span>
+                     th:data-facet="dc.creator"
+                     th:data-value="${facetValue.value}">
+                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Author Name</span>
                   <span class="facet-count" th:text="${facetValue.count}">23</span>
                 </div>
               </div>
@@ -500,9 +419,9 @@
                 <div th:each="facetValue : ${availableFacets.get('subject')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('subject') && selectedFacets.get('subject').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.subject\', \'' + ${facetValue.value} + '\');'">
-                      <span class="facet-label" th:text="${facetValue.value}"
-                            th:title="${facetValue.value}">Topic</span>
+                     th:data-facet="dc.subject"
+                     th:data-value="${facetValue.value}">
+                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Topic</span>
                   <span class="facet-count" th:text="${facetValue.count}">67</span>
                 </div>
               </div>
@@ -515,9 +434,9 @@
                 <div th:each="facetValue : ${availableFacets.get('language')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('language') && selectedFacets.get('language').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.language\', \'' + ${facetValue.value} + '\');'">
-                      <span class="facet-label" th:text="${facetValue.value}"
-                            th:title="${facetValue.value}">German</span>
+                     th:data-facet="dc.language"
+                     th:data-value="${facetValue.value}">
+                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">German</span>
                   <span class="facet-count" th:text="${facetValue.count}">89</span>
                 </div>
               </div>
@@ -530,7 +449,8 @@
                 <div th:each="facetValue : ${availableFacets.get('format')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('format') && selectedFacets.get('format').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.format\', \'' + ${facetValue.value} + '\');'">
+                     th:data-facet="dc.format"
+                     th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">PDF</span>
                   <span class="facet-count" th:text="${facetValue.count}">34</span>
                 </div>
@@ -544,9 +464,9 @@
                 <div th:each="facetValue : ${availableFacets.get('publisher')}"
                      class="facet-item"
                      th:classappend="${selectedFacets.containsKey('publisher') && selectedFacets.get('publisher').contains(facetValue.value)} ? 'selected'"
-                     th:onclick="'toggleFacet(\'dc.publisher\', \'' + ${facetValue.value} + '\');'">
-                      <span class="facet-label" th:text="${facetValue.value}"
-                            th:title="${facetValue.value}">Publisher</span>
+                     th:data-facet="dc.publisher"
+                     th:data-value="${facetValue.value}">
+                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Publisher</span>
                   <span class="facet-count" th:text="${facetValue.count}">12</span>
                 </div>
               </div>
@@ -588,7 +508,7 @@
                 <i class="ti ti-file-search"></i>
                 <h5>No Results Found</h5>
                 <p class="text-muted">Try adjusting your filters or search query.</p>
-                <a href="#" onclick="clearAllFilters(); return false;" class="btn btn-outline-primary btn-sm">
+                <a href="#" class="btn btn-outline-primary btn-sm clear-all-filters">
                   <i class="ti ti-filter-off"></i> Clear All Filters
                 </a>
               </div>
@@ -610,22 +530,16 @@
                 </thead>
                 <tbody>
                 <tr th:each="result : ${searchResults.content}">
-                  <!-- Object ID -->
                   <td>
                     <code class="text-primary" th:text="${result.getProperty('id')}">o:vipa.123</code>
                   </td>
-
-                  <!-- Title -->
                   <td>
                     <strong th:text="${result.getProperty('dc.title') != null ? result.getProperty('dc.title') : 'Untitled'}">
                       Object Title
                     </strong>
                   </td>
-
-                  <!-- Dublin Core Metadata Display -->
                   <td>
                     <div class="dublin-core-metadata">
-                      <!-- Creator -->
                       <div th:if="${result.getProperty('dc.creator') != null}" class="mb-1">
                         <small class="text-muted">Creator:</small>
                         <span class="badge bg-light text-dark"
@@ -633,19 +547,14 @@
                             Creator Name
                           </span>
                       </div>
-                      <!-- Type -->
                       <div th:if="${result.getProperty('dc.type') != null}" class="mb-1">
                         <small class="text-muted">Type:</small>
-                        <span class="badge bg-info text-white"
-                              th:text="${result.getProperty('dc.type')}">Brief</span>
+                        <span class="badge bg-info text-white" th:text="${result.getProperty('dc.type')}">Brief</span>
                       </div>
-                      <!-- Coverage -->
                       <div th:if="${result.getProperty('dc.coverage') != null}" class="mb-1">
                         <small class="text-muted">Coverage:</small>
-                        <span class="badge bg-light text-dark"
-                              th:text="${result.getProperty('dc.coverage')}">Wien</span>
+                        <span class="badge bg-light text-dark" th:text="${result.getProperty('dc.coverage')}">Wien</span>
                       </div>
-                      <!-- Subject -->
                       <div th:if="${result.getProperty('dc.subject') != null}" class="mb-1">
                         <small class="text-muted">Subject:</small>
                         <span class="badge bg-light text-dark"
@@ -655,8 +564,6 @@
                       </div>
                     </div>
                   </td>
-
-                  <!-- Project Badge -->
                   <td>
                     <a th:if="${result.getProperty('objectProjectAbbr') != null}"
                        target="_blank"
@@ -666,8 +573,6 @@
                       PROJECT
                     </a>
                   </td>
-
-                  <!-- Actions -->
                   <td>
                     <a th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}"
                        class="btn btn-outline-primary btn-sm"
@@ -681,13 +586,11 @@
             </div>
           </div>
 
-          <!-- Pagination (Exact same pattern as fulltext.html) -->
+          <!-- Pagination -->
           <div th:if="${!searchResults.isEmpty() && searchResults.pagination.totalPages > 1}"
                class="d-flex justify-content-center mt-4">
             <nav aria-label="Search results pagination">
               <ul class="pagination">
-
-                <!-- Previous Button -->
                 <li class="page-item" th:classappend="${searchResults.pagination.isFirst()} ? 'disabled'">
                   <a class="page-link"
                      th:href="${searchResults.pagination.isFirst()} ? '#' : @{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${searchResults.pagination.page - 1}}"
@@ -696,11 +599,7 @@
                   </a>
                 </li>
 
-                <!-- Page Numbers (Smart Pagination Logic) -->
-                <th:block
-                        th:with="currentPage=${searchResults.pagination.page}, totalPages=${searchResults.pagination.totalPages}">
-
-                  <!-- Case 1: 10 or fewer pages - Show all -->
+                <th:block th:with="currentPage=${searchResults.pagination.page}, totalPages=${searchResults.pagination.totalPages}">
                   <th:block th:if="${totalPages <= 10}">
                     <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
                         class="page-item"
@@ -713,12 +612,7 @@
                     </li>
                   </th:block>
 
-                  <!-- Case 2: More than 10 pages - Smart pagination -->
                   <th:block th:if="${totalPages > 10}">
-                    <!-- Show first pages, ellipsis, last pages -->
-                    <!-- (See fulltext.html for full implementation logic) -->
-
-                    <!-- Current page in first 4 pages -->
                     <th:block th:if="${currentPage <= 3}">
                       <th:block th:each="page : ${#numbers.sequence(0, 4)}">
                         <li class="page-item" th:classappend="${page == currentPage} ? 'active'">
@@ -737,7 +631,6 @@
                       </th:block>
                     </th:block>
 
-                    <!-- Current page in last 4 pages -->
                     <th:block th:if="${currentPage >= totalPages - 4}">
                       <th:block th:each="page : ${#numbers.sequence(0, 2)}">
                         <li class="page-item">
@@ -756,7 +649,6 @@
                       </th:block>
                     </th:block>
 
-                    <!-- Current page in middle -->
                     <th:block th:if="${currentPage > 3 && currentPage < totalPages - 4}">
                       <li class="page-item">
                         <a class="page-link"
@@ -777,11 +669,9 @@
                            th:text="${totalPages}">100</a>
                       </li>
                     </th:block>
-
                   </th:block>
                 </th:block>
 
-                <!-- Next Button -->
                 <li class="page-item" th:classappend="${searchResults.pagination.isLast()} ? 'disabled'">
                   <a class="page-link"
                      th:href="${searchResults.pagination.isLast()} ? '#' : @{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${searchResults.pagination.page + 1}}"
@@ -789,106 +679,117 @@
                     Next <i class="ti ti-chevron-right"></i>
                   </a>
                 </li>
-
               </ul>
             </nav>
           </div>
 
-        </div> <!-- End Results Section -->
+        </div>
 
-      </div> <!-- End Faceted Search Container -->
-
+      </div>
 
       <!-- JavaScript for Facet Interaction -->
-      <script>
-          /**
-           * Toggle a facet filter (add or remove)
-           */
-          function toggleFacet(facetField, facetValue) {
-              const url = new URL(window.location.href);
-              const params = new URLSearchParams(url.search);
+      <script th:inline="javascript">
+          /*<![CDATA[*/
+          (function() {
+              'use strict';
 
-              // Get current values for this facet
-              const currentValues = params.getAll(facetField);
+              // Event delegation for facet items
+              document.addEventListener('click', function(e) {
+                  const facetItem = e.target.closest('.facet-item');
+                  if (facetItem) {
+                      const facetField = facetItem.dataset.facet;
+                      const facetValue = facetItem.dataset.value;
+                      if (facetField && facetValue) {
+                          toggleFacet(facetField, facetValue);
+                      }
+                  }
 
-              if (currentValues.includes(facetValue)) {
-                  // Remove this value
-                  params.delete(facetField);
-                  currentValues.filter(v => v !== facetValue).forEach(v => {
-                      params.append(facetField, v);
-                  });
-              } else {
-                  // Add this value
-                  params.append(facetField, facetValue);
-              }
+                  // Remove filter handler
+                  const removeFilter = e.target.closest('.remove-filter');
+                  if (removeFilter) {
+                      e.preventDefault();
+                      const facetField = removeFilter.dataset.facet;
+                      const facetValue = removeFilter.dataset.value;
+                      if (facetField && facetValue) {
+                          removeFacetFilter(facetField, facetValue);
+                      }
+                  }
 
-              // Reset to page 0 when filters change
-              params.set('pageIndex', '0');
-
-              // Navigate to new URL
-              window.location.href = url.pathname + '?' + params.toString();
-          }
-
-          /**
-           * Remove a specific facet filter
-           */
-          function removeFacetFilter(facetField, facetValue) {
-              const url = new URL(window.location.href);
-              const params = new URLSearchParams(url.search);
-
-              // Remove the specific value
-              params.delete('dc.' + facetField);
-              const currentValues = url.searchParams.getAll('dc.' + facetField);
-              currentValues.filter(v => v !== facetValue).forEach(v => {
-                  params.append('dc.' + facetField, v);
+                  // Clear all filters handler
+                  const clearAll = e.target.closest('.clear-all-filters');
+                  if (clearAll) {
+                      e.preventDefault();
+                      clearAllFilters();
+                  }
               });
 
-              // Reset to page 0
-              params.set('pageIndex', '0');
+              function toggleFacet(facetField, facetValue) {
+                  const url = new URL(window.location.href);
+                  const params = new URLSearchParams(url.search);
+                  const currentValues = params.getAll(facetField);
 
-              window.location.href = url.pathname + '?' + params.toString();
-          }
+                  if (currentValues.includes(facetValue)) {
+                      params.delete(facetField);
+                      currentValues.filter(v => v !== facetValue).forEach(v => {
+                          params.append(facetField, v);
+                      });
+                  } else {
+                      params.append(facetField, facetValue);
+                  }
 
-          /**
-           * Clear all active facet filters
-           */
-          function clearAllFilters() {
-              const url = new URL(window.location.href);
-              const params = new URLSearchParams(url.search);
+                  params.set('pageIndex', '0');
+                  window.location.href = url.pathname + '?' + params.toString();
+              }
 
-              // Keep only projects and query parameters
-              const projects = params.getAll('projects');
-              const query = params.get('q');
-              const sortBy = params.get('sortBy');
-              const sortDir = params.get('sortDir');
+              function removeFacetFilter(facetField, facetValue) {
+                  const url = new URL(window.location.href);
+                  const params = new URLSearchParams(url.search);
+                  const fullFieldName = 'dc.' + facetField;
 
-              // Build new clean URL
-              const newParams = new URLSearchParams();
-              projects.forEach(p => newParams.append('projects', p));
-              if (query) newParams.set('q', query);
-              if (sortBy) newParams.set('sortBy', sortBy);
-              if (sortDir) newParams.set('sortDir', sortDir);
-              newParams.set('pageIndex', '0');
+                  params.delete(fullFieldName);
+                  const currentValues = url.searchParams.getAll(fullFieldName);
+                  currentValues.filter(v => v !== facetValue).forEach(v => {
+                      params.append(fullFieldName, v);
+                  });
 
-              window.location.href = url.pathname + '?' + newParams.toString();
-          }
+                  params.set('pageIndex', '0');
+                  window.location.href = url.pathname + '?' + params.toString();
+              }
 
-          /**
-           * Mobile: Toggle facet group collapse
-           */
-          document.addEventListener('DOMContentLoaded', function () {
+              function clearAllFilters() {
+                  const url = new URL(window.location.href);
+                  const params = new URLSearchParams(url.search);
+
+                  const projects = params.getAll('projects');
+                  const query = params.get('q');
+                  const sortBy = params.get('sortBy');
+                  const sortDir = params.get('sortDir');
+
+                  const newParams = new URLSearchParams();
+                  projects.forEach(p => newParams.append('projects', p));
+                  if (query) newParams.set('q', query);
+                  if (sortBy) newParams.set('sortBy', sortBy);
+                  if (sortDir) newParams.set('sortDir', sortDir);
+                  newParams.set('pageIndex', '0');
+
+                  window.location.href = url.pathname + '?' + newParams.toString();
+              }
+
+              // Mobile: Toggle facet group collapse
               if (window.innerWidth <= 768) {
                   document.querySelectorAll('.facet-group-title').forEach(title => {
-                      title.addEventListener('click', function () {
+                      title.addEventListener('click', function() {
                           this.parentElement.classList.toggle('collapsed');
                       });
                   });
               }
-          });
+          })();
+          /*]]>*/
       </script>
 
       <footer th:replace="~{fragments/general.html :: footer}"></footer>
     </div>
   </div>
+</div>
 </body>
 </html>
