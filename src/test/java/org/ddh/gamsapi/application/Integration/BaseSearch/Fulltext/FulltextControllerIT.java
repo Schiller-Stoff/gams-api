@@ -192,6 +192,48 @@ public class FulltextControllerIT extends BaseSearchIntegrationTest {
   }
 
   @Nested
+  public class ComplexSearch {
+
+    @Test
+    public void containsExpectedValues() throws Exception {
+      final String FULLTEXT_DC_PHRASE_SEARCH_URL = String.format(
+          "%s?q=%s&dc.titleAsPhrase=%s&dc.rights=Commons&dc.rights=Creative&dc.descriptionAsPhrase=test-dc-description",
+          FulltextController.FULLTEXT_SEARCH_PATH,
+          TestDublinCoreEntry.VALUE.getValue(),
+          TestDublinCoreEntry.VALUE.getValue()
+      );
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(FULLTEXT_DC_PHRASE_SEARCH_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(response)
+          .isNotNull()
+          .isNotEmpty();
+
+      final String EXPECTED_DIGITAL_OBJECT_ID_STRING = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+      Assertions.assertThat(response)
+          .contains(EXPECTED_DIGITAL_OBJECT_ID_STRING)
+      ;
+
+      Assertions.assertThat(response)
+          .contains(FulltextSolrConfig.HIGHLIGHT_PRE.name + TestDublinCoreEntry.VALUE.getValue() + FulltextSolrConfig.HIGHLIGHT_POST.name)
+          .contains(
+              TestDigitalObject.DIGITAL_OBJECT_PROJECT_ABBR.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue()
+          );
+
+    }
+
+  }
+
+  @Nested
   public class WebClient {
 
     String fulltextWebclientResponse = "";
