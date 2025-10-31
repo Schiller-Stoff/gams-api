@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.UnitTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
