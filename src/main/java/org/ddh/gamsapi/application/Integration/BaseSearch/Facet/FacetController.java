@@ -27,7 +27,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
+@Tag(name = OpenAPIConfig.SEARCH_TAG, description = OpenAPIConfig.SEARCH_TAG_DESCRIPTION)
 public class FacetController {
 
   public static final String FACET_SEARCH_PATH = "/api/v1/integration/gsearch/facets";
@@ -49,7 +49,6 @@ public class FacetController {
       @RequestParam(required = false, defaultValue = "asc") String sortDir
   ) {
 
-    // TODO is this still needed?
     pageSize = Math.min(pageSize, 50); // Limit page size
 
     // includes now all request parameters, not just "dc.*" ones
