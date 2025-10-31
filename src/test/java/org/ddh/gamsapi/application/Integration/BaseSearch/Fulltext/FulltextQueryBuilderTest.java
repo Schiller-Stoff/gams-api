@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.UnitTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +57,33 @@ public class FulltextQueryBuilderTest extends UnitTest {
               EXPECTED_DC_SUBJECT_FILTER_QUERY,
               EXPECTED_FL_URL_PART
           );
+    }
+
+  }
+
+  @Nested
+  public class BuildSolrFieldQuery {
+
+    @Test
+    public void buildsExpectedSubstringQuery() {
+      String fieldName = "dc.subject";
+      String value = "Tag";
+      String expectedQuery = "dc.subject_txt:Tag";
+      String actualQuery = FulltextQueryBuilder.buildSolrFieldQuery(
+          fieldName, value
+      );
+      Assertions.assertThat(actualQuery).isEqualTo(expectedQuery);
+    }
+
+    @Test
+    public void buildsExpectedPhraseQuery() {
+      String fieldName = String.format("dc.subject%s", FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name);
+      String value = "Tag";
+      String expectedQuery = "dc.subject:Tag";
+      String actualQuery = FulltextQueryBuilder.buildSolrFieldQuery(
+          fieldName, value
+      );
+      Assertions.assertThat(actualQuery).isEqualTo(expectedQuery);
     }
 
   }

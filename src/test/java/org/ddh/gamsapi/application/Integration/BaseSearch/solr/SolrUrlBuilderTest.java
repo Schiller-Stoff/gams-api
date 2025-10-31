@@ -32,33 +32,4 @@ public class SolrUrlBuilderTest extends UnitTest {
     }
   }
 
-
-@Nested
-  public class buildSolrFieldQuery {
-
-    @Test
-    public void buildsExpectedSubstringQuery() {
-      String fieldName = "dc.subject";
-      String value = "Tag";
-      String expectedQuery = "dc.subject_txt:Tag";
-      String actualQuery = SolrUrlBuilder.buildSolrFieldQuery(
-          fieldName, value
-      );
-      Assertions.assertThat(actualQuery).isEqualTo(expectedQuery);
-    }
-
-    @Test
-    public void buildsExpectedPhraseQuery() {
-      String fieldName = String.format("dc.subject%s", FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name);
-      String value = "Tag";
-      String expectedQuery = "dc.subject:Tag";
-      String actualQuery = SolrUrlBuilder.buildSolrFieldQuery(
-          fieldName, value
-      );
-      Assertions.assertThat(actualQuery).isEqualTo(expectedQuery);
-    }
-
-  }
-
-
 }

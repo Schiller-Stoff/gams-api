@@ -3,6 +3,8 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
 
@@ -72,18 +74,20 @@ public class FulltextQueryBuilder {
     }
 
     selectedFacets.forEach((dcField, values) -> {
-      if (values != null && !values.isEmpty()) {
-        if (values.size() == 1) {
-          // Single value filter
-          String fq = SolrUrlBuilder.buildSolrFieldQuery(dcField, values.get(0));
-          filterQueries.add(fq);
-        } else {
-          // Multiple values: OR them together
-          String valueQuery = values.stream()
-              .map(value -> SolrUrlBuilder.buildSolrFieldQuery(dcField, value))
-              .collect(Collectors.joining(" OR "));
-          filterQueries.add("(" + valueQuery + ")");
-        }
+      // skip empty
+      if(values == null || values.isEmpty()) return;
+
+      if (values.size() == 1) {
+        // Single value filter
+        //String fq = SolrUrlBuilder.buildSolrFieldQuery(dcField, values.get(0));
+        String fq = FulltextQueryBuilder.buildSolrFieldQuery(dcField, values.get(0));
+        filterQueries.add(fq);
+      } else {
+        // Multiple values: OR them together
+        String valueQuery = values.stream()
+            .map(value -> FulltextQueryBuilder.buildSolrFieldQuery(dcField, value))
+            .collect(Collectors.joining(" OR "));
+        filterQueries.add("(" + valueQuery + ")");
       }
     });
 
@@ -168,5 +172,52 @@ public class FulltextQueryBuilder {
     return finalUrl;
   }
 
+
+  /**
+   * Builds a Solr field query with mode-aware field selection and proper escaping
+   * (e.g. dc.subjectAsPhrase -> dc.subject for PHRASE mode, etc.)
+   * @param dcField Dublin Core field name (e.g., "dc.subject" or "dc.title" or "dc.subjectAsPhrase")
+   * @param dcValue The search value
+   * @return Fully constructed field query
+   * @throws IntegrationUserQueryException if dcField is not a valid Dublin Core field Or if dcValue is null/empty
+   */
+  public static String buildSolrFieldQuery(String dcField, String dcValue) {
+
+    if (dcValue == null || dcField.trim().isEmpty()) {
+      String msg = String.format("Dublin core field for fulltext search is unexpectedly null or empty: '%s'", dcField);
+      log.error(msg);
+      throw new FulltextUserQueryException("Search value cannot be null or empty");
+    }
+
+    if(!dcField.startsWith("dc.")){
+      String msg = String.format(
+          "Field name '%s' is not a valid Dublin Core field. Must start with 'dc.' prefix.",
+          dcField
+      );
+      log.error(msg);
+      throw new FulltextUserQueryException(msg);
+    }
+
+    String mappedSolrField;
+    String queryValue;
+    if(dcField.endsWith(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name)){
+      // remove as Phrase suffix
+      mappedSolrField = dcField.replace(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name, "");
+      // Always use PHRASE mode for fields ending with "AsPhrase"
+      String escapedValue = SolrUrlBuilder.escapeSolrValue(dcValue.trim());
+      queryValue = SolrUrlBuilder.urlEncode(escapedValue);
+      log.trace("Built AS_PHRASE query: {}:{}", mappedSolrField, queryValue);
+      return String.format("%s:%s", mappedSolrField, queryValue);
+    } else {
+      // built as word search
+      mappedSolrField = String.format("%s%s", dcField, FulltextSolrConfig.DC_FIELD_FULLTEXT_SUFFIX.name);
+      // built as word search
+      // This allows "Tag" to match "Tagsatzung" after tokenization
+      queryValue = SolrUrlBuilder.urlEncode(dcValue.trim());
+      log.trace("Built SUBSTRING query: {}:{}", mappedSolrField, queryValue);
+      return String.format("%s:%s", mappedSolrField, queryValue);
+    }
+
+  }
 
 }
