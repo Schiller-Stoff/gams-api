@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
