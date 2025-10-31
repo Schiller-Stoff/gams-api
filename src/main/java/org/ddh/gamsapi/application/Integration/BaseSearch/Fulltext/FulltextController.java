@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
