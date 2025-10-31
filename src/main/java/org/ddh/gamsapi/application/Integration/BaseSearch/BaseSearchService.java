@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
-import org.ddh.gamsapi.application.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
@@ -133,24 +132,6 @@ public class BaseSearchService implements IIntegrationService {
   }
 
 
-  public String fulltextSearch(String projectAbbr, String searchTerm){
-    // TODO implement
-    // TODO sorting
-    // TODO pagination
-    // TODO additional stuff
-    // TODO own issue?
-
-    String response = solrClient.retrieveSolrDocumentByProperty(
-        SolrGamsCores.GAMS_CORE.value,
-        BaseSearchProperties.FULLTEXT.name,
-        searchTerm
-    );
-
-    return response;
-
-  }
-
-
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
 
@@ -203,7 +184,7 @@ public class BaseSearchService implements IIntegrationService {
 
       // if dc entry specifies a language -> prepend this e.g. 'en:'
       if((dcEntry.getLanguage()) != null && (!dcEntry.getLanguage().isEmpty())){
-        nodeValue = dcEntry.getLanguage() + ":" +  nodeValue;
+        nodeValue = dcEntry.getLanguage() + ": " +  nodeValue;
       }
 
       if(baseSearch.getProperty(propertyName) == null){
