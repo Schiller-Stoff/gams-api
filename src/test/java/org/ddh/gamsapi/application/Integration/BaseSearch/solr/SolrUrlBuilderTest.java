@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.UnitTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,32 @@ public class SolrUrlBuilderTest extends UnitTest {
   }
 
 
+@Nested
+  public class buildSolrFieldQuery {
 
+    @Test
+    public void buildsExpectedSubstringQuery() {
+      String fieldName = "dc.subject";
+      String value = "Tag";
+      String expectedQuery = "dc.subject_txt:Tag";
+      String actualQuery = SolrUrlBuilder.buildSolrFieldQuery(
+          fieldName, value, DublinCoreSearchMode.SUBSTRING
+      );
+      Assertions.assertThat(actualQuery).isEqualTo(expectedQuery);
+    }
+
+    @Test
+    public void buildsExpectedPhraseQuery() {
+      String fieldName = "dc.subject";
+      String value = "Tag";
+      String expectedQuery = "dc.subject:\"Tag\"";
+      String actualQuery = SolrUrlBuilder.buildSolrFieldQuery(
+          fieldName, value, DublinCoreSearchMode.PHRASE
+      );
+      Assertions.assertThat(actualQuery).isEqualTo(expectedQuery);
+    }
+
+  }
 
 
 }

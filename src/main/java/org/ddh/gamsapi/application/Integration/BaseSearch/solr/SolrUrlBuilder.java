@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.io.UnsupportedEncodingException;
@@ -118,26 +119,54 @@ public class SolrUrlBuilder {
   }
 
   /**
-   * Builds a Solr field query with proper escaping AND URL encoding.
+   * Builds a Solr field query with mode-aware field selection and proper escaping.
    *
-   * CRITICAL: URL-encodes the value so special characters like quotes
-   * don't cause "Illegal character" errors in URIs.
+   * @param fieldName The base Dublin Core field name (e.g., "dc.subject" or "subject")
+   * @param value The search value
+   * @param mode The search mode (PHRASE or SUBSTRING)
+   * @return Fully constructed and encoded field query
+   * @throws IntegrationDataProcessingException if value is null/empty
    */
-  public static String buildSolrFieldQuery(String fieldName, String value) {
+  public static String buildSolrFieldQuery(
+      String fieldName,
+      String value,
+      DublinCoreSearchMode mode
+  ) {
     if (value == null || value.trim().isEmpty()) {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
     }
 
-    // TODO test / think about
+    // Normalize field name (ensure "dc." prefix)
+    String normalizedField = fieldName.startsWith("dc.")
+        ? fieldName
+        : "dc." + fieldName;
 
-    // STEP 1: Escape for Solr syntax (adds quotes around value)
-    String escapedValue = SolrUrlBuilder.escapeSolrValue(value.trim());
+    // Get mode-specific Solr field name
+    String solrField = mode.getSolrFieldName(normalizedField);
 
-    // STEP 2: URL-encode to handle special characters like quotes, backslashes
-    String urlEncodedValue = urlEncode(escapedValue);
+    String queryValue;
 
-    // STEP 3: Build query - value is already quoted and URL-encoded
-    return String.format("%s:%s", fieldName, urlEncodedValue);
+    switch (mode) {
+      case PHRASE:
+        // PHRASE mode: Escape special chars + add quotes for exact matching
+        String escapedValue = escapeSolrValue(value.trim());
+        queryValue = urlEncode(escapedValue);
+        log.trace("Built PHRASE query: {}:{}", solrField, queryValue);
+        break;
+
+      case SUBSTRING:
+        // SUBSTRING mode: No escaping, just URL encode (let Solr tokenize)
+        // This allows "Tag" to match "Tagsatzung" after tokenization
+        queryValue = urlEncode(value.trim());
+        log.trace("Built SUBSTRING query: {}:{}", solrField, queryValue);
+        break;
+
+      default:
+        // TODO wrong exception - should be client error
+        throw new IntegrationDataProcessingException("Unsupported search mode: " + mode);
+    }
+
+    return String.format("%s:%s", solrField, queryValue);
   }
 
 }

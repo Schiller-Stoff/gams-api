@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.UnitTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,8 @@ public class FulltextQueryBuilderTest extends UnitTest {
                   "dc.title", List.of("Test Title"),
                   "dc.subject", List.of("Subject One", "Subject Two")
               )
-          )
+          ),
+          DublinCoreSearchMode.PHRASE
       );
 
       String builtSolrUrl = FulltextQueryBuilder.buildSolrUrl(

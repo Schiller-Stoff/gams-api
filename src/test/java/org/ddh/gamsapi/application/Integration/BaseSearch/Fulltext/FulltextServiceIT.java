@@ -11,6 +11,7 @@ import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchService;
+import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +80,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
           Set.of(TestProject.PROJECT_ABBR.getValue()),
+          DublinCoreSearchMode.PHRASE,
           PageRequest.of(0, 10)
       );
 
@@ -99,6 +101,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
           Set.of(TestProject.PROJECT_ABBR.getValue()),
+          DublinCoreSearchMode.PHRASE,
           PageRequest.of(0, 10)
       );
 
@@ -129,6 +132,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           TestDublinCoreEntry.VALUE.getValue(),
           new HashMap<>(),
           Set.of(TestProject.PROJECT_ABBR.getValue()),
+          DublinCoreSearchMode.PHRASE,
           PageRequest.of(0, 10)
       );
 
@@ -176,6 +180,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
           TestDublinCoreEntry.VALUE.getValue(),
           dcFilters,
           Set.of(TestProject.PROJECT_ABBR.getValue()),
+          DublinCoreSearchMode.PHRASE,
           PageRequest.of(0, 10)
       );
 

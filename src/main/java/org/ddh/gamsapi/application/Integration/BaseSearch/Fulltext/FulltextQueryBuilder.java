@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrUrlBuilder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.MultiValueMap;
@@ -31,10 +32,42 @@ public class FulltextQueryBuilder {
   }
 
 
+  /**
+   * Builds Solr filter queries from Dublin Core criteria with mode-specific matching.
+   *
+   * <p><b>Filter Query Structure:</b></p>
+   * <ul>
+   *   <li>Single value: {@code dc.field:value}</li>
+   *   <li>Multiple values: {@code (dc.field:val1 OR dc.field:val2)}</li>
+   * </ul>
+   *
+   * <p><b>Mode Behavior:</b></p>
+   * <table border="1">
+   *   <tr>
+   *     <th>Mode</th>
+   *     <th>Field</th>
+   *     <th>Example</th>
+   *   </tr>
+   *   <tr>
+   *     <td>PHRASE</td>
+   *     <td>dc.subject</td>
+   *     <td>dc.subject:"Tag"</td>
+   *   </tr>
+   *   <tr>
+   *     <td>SUBSTRING</td>
+   *     <td>dc.subject_txt</td>
+   *     <td>dc.subject_txt:Tag</td>
+   *   </tr>
+   * </table>
+   *
+   * @param selectedFacets MultiValueMap of DC field filters (field -> values)
+   * @param mode Search mode determining field selection and escaping
+   * @return List of filter query strings
+   */
   public static List<String> buildSolrFilterQueries(
-      MultiValueMap<String, String> selectedFacets
+      MultiValueMap<String, String> selectedFacets,
+      DublinCoreSearchMode mode
   ) {
-
     List<String> filterQueries = new ArrayList<>();
 
     if (selectedFacets == null || selectedFacets.isEmpty()) {
@@ -43,22 +76,22 @@ public class FulltextQueryBuilder {
 
     selectedFacets.forEach((dcField, values) -> {
       if (values != null && !values.isEmpty()) {
-
         if (values.size() == 1) {
-          // Single value: {!tag=type}dc.type:encodedValue
-          String fq = SolrUrlBuilder.buildSolrFieldQuery(dcField, values.get(0));
+          // Single value filter
+          String fq = SolrUrlBuilder.buildSolrFieldQuery(dcField, values.get(0), mode);
           filterQueries.add(fq);
         } else {
-          // Multiple values: {!tag=type}(dc.type:val1 OR dc.type:val2)
-          String fq = values.stream()
-              .map(value -> SolrUrlBuilder.buildSolrFieldQuery(dcField, value))
+          // Multiple values: OR them together
+          String valueQuery = values.stream()
+              .map(value -> SolrUrlBuilder.buildSolrFieldQuery(dcField, value, mode))
               .collect(Collectors.joining(" OR "));
-          filterQueries.add(fq);
+          filterQueries.add("(" + valueQuery + ")");
         }
       }
     });
 
-    log.debug("Built {} filter queries for drill-down", filterQueries.size());
+    log.debug("Built {} filter queries with mode {} for fulltext search",
+        filterQueries.size(), mode);
     return filterQueries;
   }
 
