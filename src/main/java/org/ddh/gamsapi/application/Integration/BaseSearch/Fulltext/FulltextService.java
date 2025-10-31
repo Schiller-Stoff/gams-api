@@ -84,7 +84,6 @@ public class FulltextService {
    * @param fulltextQuery Main fulltext search query (searches objectFulltext field)
    * @param dublinCoreFilters Map of Dublin Core field filters (field -> values)
    * @param projectAbbrs Set of project abbreviations to limit search scope
-   * @param dcSearchMode Search mode for Dublin Core filters (PHRASE or SUBSTRING)
    * @param pageable Pagination and sorting information
    * @return Paginated search results with highlighting and metadata
    */
