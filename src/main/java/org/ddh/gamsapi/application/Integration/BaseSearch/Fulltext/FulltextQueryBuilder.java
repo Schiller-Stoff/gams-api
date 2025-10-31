@@ -154,11 +154,11 @@ public class FulltextQueryBuilder {
     url.append("&hl.requireFieldMatch=true");  // Only highlight if field matches query (only objectFulltext being here matched)
     url.append("&hl.snippets=3");  // Max 3 snippets per field
     url.append("&hl.fragsize=150");  // ~150 chars per snippet
-    url.append("&hl.simple.pre=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_PRE.name));  // HTML5 <mark> tag
-    url.append("&hl.simple.post=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_POST.name));
+    url.append("&hl.simple.pre=").append(SolrUrlBuilder.urlEncode(FulltextSolrConfig.HIGHLIGHT_PRE.name));  // HTML5 <mark> tag
+    url.append("&hl.simple.post=").append(SolrUrlBuilder.urlEncode(FulltextSolrConfig.HIGHLIGHT_POST.name));
     url.append("&hl.method=unified");  // Use unified highlighter (best performance + accuracy)
-    url.append("&hl.tag.pre=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_PRE.name));
-    url.append("&hl.tag.post=").append(SolrUrlBuilder.urlEncode(FulltextResponseProperties.HIGHLIGHT_POST.name));
+    url.append("&hl.tag.pre=").append(SolrUrlBuilder.urlEncode(FulltextSolrConfig.HIGHLIGHT_PRE.name));
+    url.append("&hl.tag.post=").append(SolrUrlBuilder.urlEncode(FulltextSolrConfig.HIGHLIGHT_POST.name));
     // ====================================================
 
 
@@ -199,9 +199,9 @@ public class FulltextQueryBuilder {
 
     String mappedSolrField;
     String queryValue;
-    if(dcField.endsWith(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name)){
+    if(dcField.endsWith(FulltextRequestProperties.PHRASE_SEARCH_SUFFIX.name)){
       // remove as Phrase suffix
-      mappedSolrField = dcField.replace(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name, "");
+      mappedSolrField = dcField.replace(FulltextRequestProperties.PHRASE_SEARCH_SUFFIX.name, "");
       // Always use PHRASE mode for fields ending with "AsPhrase"
       String escapedValue = SolrUrlBuilder.escapeSolrValue(dcValue.trim());
       queryValue = SolrUrlBuilder.urlEncode(escapedValue);

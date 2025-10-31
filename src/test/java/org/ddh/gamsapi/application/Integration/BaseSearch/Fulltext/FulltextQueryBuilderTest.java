@@ -76,7 +76,7 @@ public class FulltextQueryBuilderTest extends UnitTest {
 
     @Test
     public void buildsExpectedPhraseQuery() {
-      String fieldName = String.format("dc.subject%s", FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name);
+      String fieldName = String.format("dc.subject%s", FulltextRequestProperties.PHRASE_SEARCH_SUFFIX.name);
       String value = "Tag";
       String expectedQuery = "dc.subject:Tag";
       String actualQuery = FulltextQueryBuilder.buildSolrFieldQuery(

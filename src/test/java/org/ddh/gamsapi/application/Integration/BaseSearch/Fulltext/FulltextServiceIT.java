@@ -107,7 +107,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
 
       var foundDocument = pagedResponse.getResults().getContent().get(0);
 
-      var highlighting = (List<String>) foundDocument.getProperty(FulltextResponseProperties.HIGHLIGHTING.name);
+      var highlighting = (List<String>) foundDocument.getProperty(FulltextRequestProperties.HIGHLIGHTING.name);
 
       Assertions.assertThat(highlighting)
           .isNotEmpty();
@@ -118,7 +118,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
       var firstSnippet = highlighting.get(0);
 
       Assertions.assertThat(firstSnippet)
-          .contains(FulltextResponseProperties.HIGHLIGHT_PRE.name, FulltextResponseProperties.HIGHLIGHT_POST.name);
+          .contains(FulltextSolrConfig.HIGHLIGHT_PRE.name, FulltextSolrConfig.HIGHLIGHT_POST.name);
 
     }
 
@@ -137,7 +137,7 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
 
       var foundDocument = pagedResponse.getResults().getContent().get(0);
 
-      var highlighting = (List<String>) foundDocument.getProperty(FulltextResponseProperties.HIGHLIGHTING.name);
+      var highlighting = (List<String>) foundDocument.getProperty(FulltextRequestProperties.HIGHLIGHTING.name);
 
       Assertions.assertThat(highlighting)
           .isNotEmpty();
@@ -148,9 +148,9 @@ public class FulltextServiceIT extends BaseSearchIntegrationTest {
       var firstSnippet = highlighting.get(0);
 
       final String EXPECTED_HIGHLIGHTED_STRING =
-          FulltextResponseProperties.HIGHLIGHT_PRE.name +
+          FulltextSolrConfig.HIGHLIGHT_PRE.name +
           TestDublinCoreEntry.VALUE.getValue() +
-          FulltextResponseProperties.HIGHLIGHT_POST.name;
+              FulltextSolrConfig.HIGHLIGHT_POST.name;
 
       Assertions.assertThat(firstSnippet)
           .contains(EXPECTED_HIGHLIGHTED_STRING);

@@ -6,15 +6,19 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 public enum FulltextSolrConfig {
 
   /**
-   * Suffix for phrase search fields in Solr schema.
-   *
-   */
-  PHRASE_SEARCH_SUFFIX("AsPhrase"),
-
-  /**
    * Suffix for fulltext fields in Solr schema.
    */
-  DC_FIELD_FULLTEXT_SUFFIX("_txt");
+  DC_FIELD_FULLTEXT_SUFFIX("_txt"),
+
+  /**
+   * Highlighting pre and post tags for Solr response.
+   */
+  HIGHLIGHT_PRE("<mark>"),
+
+  /**
+   * Highlighting post tag for Solr response.
+   */
+  HIGHLIGHT_POST("</mark>");
 
   public final String name;
 

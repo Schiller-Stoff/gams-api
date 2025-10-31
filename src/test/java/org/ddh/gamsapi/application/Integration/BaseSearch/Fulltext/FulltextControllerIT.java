@@ -97,7 +97,7 @@ public class FulltextControllerIT extends BaseSearchIntegrationTest {
           .isNotNull()
           .isNotEmpty();
 
-      final String EXPECTED_HIGHLIGHTING_STRING = FulltextResponseProperties.HIGHLIGHT_PRE.name + TestDublinCoreEntry.VALUE.getValue() + FulltextResponseProperties.HIGHLIGHT_POST.name;
+      final String EXPECTED_HIGHLIGHTING_STRING = FulltextSolrConfig.HIGHLIGHT_PRE.name + TestDublinCoreEntry.VALUE.getValue() + FulltextSolrConfig.HIGHLIGHT_POST.name;
       Assertions.assertThat(fulltextResponse)
           .contains(EXPECTED_HIGHLIGHTING_STRING);
 

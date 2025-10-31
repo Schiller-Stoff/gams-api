@@ -72,7 +72,7 @@ public class FulltextDigitalObjectResultDto {
           var highlightInfo = fulltextSolrResponse.getHighlighting().get(docId);
           // Add highlighting info if present
           if(!highlightInfo.isEmpty()){
-            baseSearch.addProperty(FulltextResponseProperties.HIGHLIGHTING.name, highlightInfo);
+            baseSearch.addProperty(FulltextRequestProperties.HIGHLIGHTING.name, highlightInfo);
           }
           return baseSearch;
         })

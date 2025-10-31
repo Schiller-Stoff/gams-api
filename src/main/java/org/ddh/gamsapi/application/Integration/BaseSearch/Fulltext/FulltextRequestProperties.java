@@ -3,18 +3,23 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 /**
  * Enum for fulltext response properties.
  */
-public enum FulltextResponseProperties {
+public enum FulltextRequestProperties {
 
   /**
    * Highlighting property in API response.
    */
   HIGHLIGHTING("highlighting"),
-  HIGHLIGHT_PRE("<mark>"),
-  HIGHLIGHT_POST("</mark>");
+
+
+  /**
+   * Suffix for phrase search fields in Solr schema.
+   *
+   */
+  PHRASE_SEARCH_SUFFIX("AsPhrase");
 
   public final String name;
 
-  FulltextResponseProperties(String name){
+  FulltextRequestProperties(String name){
     this.name = name;
   }
 
