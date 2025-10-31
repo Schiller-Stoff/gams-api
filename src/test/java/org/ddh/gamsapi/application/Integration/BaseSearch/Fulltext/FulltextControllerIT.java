@@ -13,9 +13,7 @@ import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationT
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchService;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
@@ -113,6 +111,80 @@ public class FulltextControllerIT extends BaseSearchIntegrationTest {
 
       final String EXPECTED_DIGITAL_OBJECT_ID_STRING = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
       Assertions.assertThat(fulltextResponse)
+          .contains(EXPECTED_DIGITAL_OBJECT_ID_STRING);
+
+    }
+
+  }
+
+  @Nested
+  public class DCWordSearch {
+
+    String fulltextDcSearchResponse;
+
+    @BeforeEach
+    public void setup() throws Exception {
+      final String FULLTEXT_DC_SEARCH_URL = String.format(
+          "%s?dc.rights=Commons",
+          FulltextController.FULLTEXT_SEARCH_PATH
+
+      );
+
+      fulltextDcSearchResponse = mockMvc.perform(
+              MockMvcRequestBuilders.get(FULLTEXT_DC_SEARCH_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+    }
+
+    @Test
+    public void dcSearchResponseContainsExpectedDigitalObjectId() {
+      Assertions.assertThat(fulltextDcSearchResponse)
+          .isNotNull()
+          .isNotEmpty();
+
+      final String EXPECTED_DIGITAL_OBJECT_ID_STRING = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+      Assertions.assertThat(fulltextDcSearchResponse)
+          .contains(EXPECTED_DIGITAL_OBJECT_ID_STRING);
+
+    }
+
+  }
+
+  @Nested
+  public class DCPhraseSearch {
+
+    String fulltextDcPhraseSearchResponse;
+
+    @BeforeEach
+    public void setup() throws Exception {
+      final String FULLTEXT_DC_PHRASE_SEARCH_URL = String.format(
+          "%s?dc.titleAsPhrase=%s",
+          FulltextController.FULLTEXT_SEARCH_PATH,
+          TestDublinCoreEntry.VALUE.getValue()
+      );
+
+      fulltextDcPhraseSearchResponse = mockMvc.perform(
+              MockMvcRequestBuilders.get(FULLTEXT_DC_PHRASE_SEARCH_URL)
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+    }
+
+    @Test
+    public void dcPhraseSearchResponseContainsExpectedDigitalObjectId() {
+      Assertions.assertThat(fulltextDcPhraseSearchResponse)
+          .isNotNull()
+          .isNotEmpty();
+
+      final String EXPECTED_DIGITAL_OBJECT_ID_STRING = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+      Assertions.assertThat(fulltextDcPhraseSearchResponse)
           .contains(EXPECTED_DIGITAL_OBJECT_ID_STRING);
 
     }

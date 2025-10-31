@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext.FulltextSolrConfig;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -134,21 +135,21 @@ public class SolrUrlBuilder {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
     }
 
-    // TODO rethink if the procedure is correct here (assigning custom fields per facet / fulltext should be in correspondent packages)
+    if(!fieldName.startsWith("dc.")){
+      String msg = String.format(
+          "Field name '%s' is not a valid Dublin Core field. Must start with 'dc.' prefix.",
+          fieldName
+      );
+      log.error(msg);
+      throw new IntegrationUserQueryException(msg);
+    }
 
-    // TODO is this normalization workflow needed here?
-    // Normalize field name (ensure "dc." prefix)
-    String normalizedField = fieldName.startsWith("dc.")
-        ? fieldName
-        : "dc." + fieldName;
-
-    // TODO not very elegant
-    String solrField = normalizedField;
-
+    // TODO move following logic to own packages? (fulltext / faceted search)
+    String solrField;
     String queryValue;
     if(fieldName.endsWith(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name)){
       // remove as Phrase suffix
-      solrField = solrField.replace(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name, "");
+      solrField = fieldName.replace(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name, "");
       // Always use PHRASE mode for fields ending with "AsPhrase"
       String escapedValue = escapeSolrValue(value.trim());
       queryValue = urlEncode(escapedValue);
@@ -156,10 +157,8 @@ public class SolrUrlBuilder {
       return String.format("%s:%s", solrField, queryValue);
     } else {
       // built as word search
-      // SUBSTRING mode: No escaping, just URL encode (let Solr tokenize)
       // This allows "Tag" to match "Tagsatzung" after tokenization
-      // TODO following procedure must be made more transparent! (capture in enum)
-      solrField = String.format("%s_txt", normalizedField);
+      solrField = String.format("%s%s", fieldName, FulltextSolrConfig.DC_FIELD_FULLTEXT_SUFFIX.name);
       queryValue = urlEncode(value.trim());
       log.trace("Built SUBSTRING query: {}:{}", solrField, queryValue);
     }
