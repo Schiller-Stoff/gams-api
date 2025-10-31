@@ -2,9 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext.FulltextSolrConfig;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
