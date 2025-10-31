@@ -2,7 +2,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.UnitTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext.FulltextSolrConfig;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
