@@ -368,12 +368,12 @@
           <div th:if="${availableFacets != null}">
 
             <!-- Coverage Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('coverage')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.coverage')}">
               <div class="facet-group-title">Coverage (Location)</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('coverage')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.coverage')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('coverage') && selectedFacets.get('coverage').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.coverage') && selectedFacets.get('dc.coverage').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.coverage"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Wien</span>
@@ -383,12 +383,12 @@
             </div>
 
             <!-- Type Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('type')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.type')}">
               <div class="facet-group-title">Type</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('type')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.type')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('type') && selectedFacets.get('type').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.type') && selectedFacets.get('dc.type').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.type"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Brief</span>
@@ -398,12 +398,12 @@
             </div>
 
             <!-- Creator Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('creator')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.creator')}">
               <div class="facet-group-title">Creator</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('creator')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.creator')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('creator') && selectedFacets.get('creator').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.creator') && selectedFacets.get('dc.creator').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.creator"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Author Name</span>
@@ -413,12 +413,12 @@
             </div>
 
             <!-- Subject Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('subject')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.subject')}">
               <div class="facet-group-title">Subject</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('subject')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.subject')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('subject') && selectedFacets.get('subject').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.subject') && selectedFacets.get('dc.subject').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.subject"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Topic</span>
@@ -428,12 +428,12 @@
             </div>
 
             <!-- Language Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('language')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.language')}">
               <div class="facet-group-title">Language</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('language')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.language')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('language') && selectedFacets.get('language').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.language') && selectedFacets.get('dc.language').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.language"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">German</span>
@@ -443,12 +443,12 @@
             </div>
 
             <!-- Format Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('format')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.format')}">
               <div class="facet-group-title">Format</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('format')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.format')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('format') && selectedFacets.get('format').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.format') && selectedFacets.get('dc.format').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.format"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">PDF</span>
@@ -458,12 +458,12 @@
             </div>
 
             <!-- Publisher Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('publisher')}">
+            <div class="facet-group" th:if="${availableFacets.containsKey('dc.publisher')}">
               <div class="facet-group-title">Publisher</div>
               <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('publisher')}"
+                <div th:each="facetValue : ${availableFacets.get('dc.publisher')}"
                      class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('publisher') && selectedFacets.get('publisher').contains(facetValue.value)} ? 'selected'"
+                     th:classappend="${selectedFacets.containsKey('dc.publisher') && selectedFacets.get('dc.publisher').contains(facetValue.value)} ? 'selected'"
                      th:data-facet="dc.publisher"
                      th:data-value="${facetValue.value}">
                   <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Publisher</span>
