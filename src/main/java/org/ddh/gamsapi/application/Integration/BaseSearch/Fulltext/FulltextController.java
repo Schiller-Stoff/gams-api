@@ -59,9 +59,6 @@ public class FulltextController {
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam(required = false, defaultValue = "") Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
-      // TODO hardcoded value
-      // TODO rename enum / variable
-      @RequestParam(required = false, defaultValue = "PHRASE") DublinCoreSearchMode searchMode,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
       @RequestParam(required = false, defaultValue = "dc.title") String sortBy,
@@ -85,7 +82,6 @@ public class FulltextController {
         fulltextQuery,
         filteredDcFields,
         projects,
-        searchMode,
         pageRequest
     );
 
@@ -109,7 +105,6 @@ public class FulltextController {
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam(required = false, defaultValue = "") Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
-      @RequestParam(required = false, defaultValue = "PHRASE") DublinCoreSearchMode searchMode,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
       @RequestParam(required = false, defaultValue = "dc.title") String sortBy,
@@ -134,7 +129,6 @@ public class FulltextController {
         fulltextQuery,
         filteredDcFields,
         projects,
-        searchMode,
         pageRequest
     );
     model.addAttribute("searchResults", searchResults.getResults());

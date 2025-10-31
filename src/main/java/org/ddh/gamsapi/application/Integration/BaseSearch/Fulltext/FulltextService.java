@@ -93,13 +93,12 @@ public class FulltextService {
       String fulltextQuery,
       HashMap<String, List<String>> dublinCoreFilters,
       Set<String> projectAbbrs,
-      DublinCoreSearchMode dcSearchMode,
       Pageable pageable
   ) {
     long startTime = System.currentTimeMillis();
 
-    log.debug("Fulltext search: query='{}', DC filters={}, projects={}, mode={}, page={}, size={}",
-        fulltextQuery, dublinCoreFilters, projectAbbrs, dcSearchMode,
+    log.debug("Fulltext search: query='{}', DC filters={}, projects={}, page={}, size={}",
+        fulltextQuery, dublinCoreFilters, projectAbbrs,
         pageable.getPageNumber(), pageable.getPageSize());
 
     var dcFiltersMultiValueMap = MultiValueMap.fromMultiValue(dublinCoreFilters);
@@ -112,8 +111,7 @@ public class FulltextService {
 
     // 02. Build filter queries from Dublin Core filters WITH SEARCH MODE
     var filterQueries = FulltextQueryBuilder.buildSolrFilterQueries(
-        dcFiltersMultiValueMap,
-        dcSearchMode  // <-- KEY CHANGE: Pass search mode
+        dcFiltersMultiValueMap
     );
 
     // 03. Build complete Solr URL
@@ -124,7 +122,7 @@ public class FulltextService {
         pageable
     );
 
-    log.error("Constructed Solr fulltext URL: {}", fulltextSolrUrl);
+    log.debug("Constructed Solr fulltext URL: {}", fulltextSolrUrl);
 
     // 04. Execute Solr query
     var fullTextSolrResponse = solrClient.get(fulltextSolrUrl);
@@ -136,8 +134,8 @@ public class FulltextService {
     );
 
     long totalTime = System.currentTimeMillis() - startTime;
-    log.info("Fulltext search completed in {}ms - found {} results (mode: {})",
-        totalTime, fulltextResponseParsed.getNumFound(), dcSearchMode);
+    log.info("Fulltext search completed in {}ms - found {} results",
+        totalTime, fulltextResponseParsed.getNumFound());
 
     // 06. Parse Solr response and build result DTO
     return FulltextDigitalObjectResultDto.from(

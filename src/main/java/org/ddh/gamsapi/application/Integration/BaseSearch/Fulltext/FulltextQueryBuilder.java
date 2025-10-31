@@ -61,12 +61,10 @@ public class FulltextQueryBuilder {
    * </table>
    *
    * @param selectedFacets MultiValueMap of DC field filters (field -> values)
-   * @param mode Search mode determining field selection and escaping
    * @return List of filter query strings
    */
   public static List<String> buildSolrFilterQueries(
-      MultiValueMap<String, String> selectedFacets,
-      DublinCoreSearchMode mode
+      MultiValueMap<String, String> selectedFacets
   ) {
     List<String> filterQueries = new ArrayList<>();
 
@@ -78,20 +76,19 @@ public class FulltextQueryBuilder {
       if (values != null && !values.isEmpty()) {
         if (values.size() == 1) {
           // Single value filter
-          String fq = SolrUrlBuilder.buildSolrFieldQuery(dcField, values.get(0), mode);
+          String fq = SolrUrlBuilder.buildSolrFieldQuery(dcField, values.get(0));
           filterQueries.add(fq);
         } else {
           // Multiple values: OR them together
           String valueQuery = values.stream()
-              .map(value -> SolrUrlBuilder.buildSolrFieldQuery(dcField, value, mode))
+              .map(value -> SolrUrlBuilder.buildSolrFieldQuery(dcField, value))
               .collect(Collectors.joining(" OR "));
           filterQueries.add("(" + valueQuery + ")");
         }
       }
     });
 
-    log.debug("Built {} filter queries with mode {} for fulltext search",
-        filterQueries.size(), mode);
+    log.debug("Built {} filter queries for fulltext search", filterQueries.size());
     return filterQueries;
   }
 

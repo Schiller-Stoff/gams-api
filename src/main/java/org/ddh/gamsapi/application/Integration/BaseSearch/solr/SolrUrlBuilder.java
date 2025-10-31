@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.BaseSearch.DublinCoreSearchMode;
+import org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext.FulltextSolrConfig;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.io.UnsupportedEncodingException;
@@ -123,14 +124,12 @@ public class SolrUrlBuilder {
    *
    * @param fieldName The base Dublin Core field name (e.g., "dc.subject" or "subject")
    * @param value The search value
-   * @param mode The search mode (PHRASE or SUBSTRING)
    * @return Fully constructed and encoded field query
    * @throws IntegrationDataProcessingException if value is null/empty
    */
   public static String buildSolrFieldQuery(
       String fieldName,
-      String value,
-      DublinCoreSearchMode mode
+      String value
   ) {
     if (value == null || value.trim().isEmpty()) {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
@@ -144,10 +143,13 @@ public class SolrUrlBuilder {
         ? fieldName
         : "dc." + fieldName;
 
+    // TODO not very elegant
     String solrField = normalizedField;
 
     String queryValue;
-    if(fieldName.endsWith("AsPhrase")){
+    if(fieldName.endsWith(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name)){
+      // remove as Phrase suffix
+      solrField = solrField.replace(FulltextSolrConfig.PHRASE_SEARCH_SUFFIX.name, "");
       // Always use PHRASE mode for fields ending with "AsPhrase"
       String escapedValue = escapeSolrValue(value.trim());
       queryValue = urlEncode(escapedValue);
@@ -157,6 +159,7 @@ public class SolrUrlBuilder {
       // built as word search
       // SUBSTRING mode: No escaping, just URL encode (let Solr tokenize)
       // This allows "Tag" to match "Tagsatzung" after tokenization
+      // TODO following procedure must be made more transparent! (capture in enum)
       solrField = String.format("%s_txt", normalizedField);
       queryValue = urlEncode(value.trim());
       log.trace("Built SUBSTRING query: {}:{}", solrField, queryValue);
