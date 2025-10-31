@@ -32,6 +32,7 @@ public enum DublinCoreSearchMode {
       throw new IllegalArgumentException("DC field name cannot be null or empty");
     }
 
+    // TODO why is there normalization everywhere?
     String normalizedField = dcFieldName.startsWith("dc.")
         ? dcFieldName
         : "dc." + dcFieldName;

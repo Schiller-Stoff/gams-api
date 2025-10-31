@@ -136,34 +136,30 @@ public class SolrUrlBuilder {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
     }
 
+    // TODO rethink if the procedure is correct here (assigning custom fields per facet / fulltext should be in correspondent packages)
+
+    // TODO is this normalization workflow needed here?
     // Normalize field name (ensure "dc." prefix)
     String normalizedField = fieldName.startsWith("dc.")
         ? fieldName
         : "dc." + fieldName;
 
-    // Get mode-specific Solr field name
-    String solrField = mode.getSolrFieldName(normalizedField);
+    String solrField = normalizedField;
 
     String queryValue;
-
-    switch (mode) {
-      case PHRASE:
-        // PHRASE mode: Escape special chars + add quotes for exact matching
-        String escapedValue = escapeSolrValue(value.trim());
-        queryValue = urlEncode(escapedValue);
-        log.trace("Built PHRASE query: {}:{}", solrField, queryValue);
-        break;
-
-      case SUBSTRING:
-        // SUBSTRING mode: No escaping, just URL encode (let Solr tokenize)
-        // This allows "Tag" to match "Tagsatzung" after tokenization
-        queryValue = urlEncode(value.trim());
-        log.trace("Built SUBSTRING query: {}:{}", solrField, queryValue);
-        break;
-
-      default:
-        // TODO wrong exception - should be client error
-        throw new IntegrationDataProcessingException("Unsupported search mode: " + mode);
+    if(fieldName.endsWith("AsPhrase")){
+      // Always use PHRASE mode for fields ending with "AsPhrase"
+      String escapedValue = escapeSolrValue(value.trim());
+      queryValue = urlEncode(escapedValue);
+      log.trace("Built AS_PHRASE query: {}:{}", solrField, queryValue);
+      return String.format("%s:%s", solrField, queryValue);
+    } else {
+      // built as word search
+      // SUBSTRING mode: No escaping, just URL encode (let Solr tokenize)
+      // This allows "Tag" to match "Tagsatzung" after tokenization
+      solrField = String.format("%s_txt", normalizedField);
+      queryValue = urlEncode(value.trim());
+      log.trace("Built SUBSTRING query: {}:{}", solrField, queryValue);
     }
 
     return String.format("%s:%s", solrField, queryValue);
