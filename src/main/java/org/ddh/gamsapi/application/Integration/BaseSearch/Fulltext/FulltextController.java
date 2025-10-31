@@ -1,5 +1,10 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +32,7 @@ import java.util.Set;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
+@Tag(name = OpenAPIConfig.SEARCH_TAG, description = OpenAPIConfig.SEARCH_TAG_DESCRIPTION)
 public class FulltextController {
 
   public static final String FULLTEXT_SEARCH_PATH = "/api/v1/integration/gsearch/fulltext";
@@ -39,7 +44,6 @@ public class FulltextController {
 
   /**
    * Fulltext search for digital objects with Dublin Core criteria.
-   * TODO OpenAPI doc
    * @param dcCriteria Dublin Core search criteria
    * @param projects Selected projects
    * @param fulltextQuery Fulltext search query
@@ -54,6 +58,39 @@ public class FulltextController {
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
   @ResponseBody
+  @Operation(
+      summary = "Fulltext search based on digital objects and multiple projects.",
+      description = "Searches for digital objects based on fulltext. Combinable with dublin core arguments. The search is performed on multiple projects and can include multiple Dublin Core fields.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital objects found"),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+              content = @Content)
+      }
+  )
+  @Parameter(
+      name = "q",
+      description = "Fulltext search query.",
+      required = false,
+      schema = @Schema(type = "string", example = "example search term")
+  )
+  @Parameter(
+      name = "projects",
+      description = "List of project abbreviations to search within. If not provided, all projects are searched.",
+      required = false,
+      schema = @Schema(type = "array", example = "[\"project1\", \"project2\"]")
+  )
+  @Parameter(
+      name = "dc.*",
+      description = "Dublin Core search criteria. Use 'dc.' prefix followed by the field name (e.g., dc.title, dc.creator). Multiple values can be provided for each field.",
+      required = false,
+      schema = @Schema(type = "string", examples = "dc.title=Example Title,dc.creatorAsPhrase=John Doe")
+  )
+  @Parameter(
+      name = "format",
+      description = "Format of the response. Defaults to JSON.",
+      required = false,
+      schema = @Schema(type = "string", examples = "xml,json")
+  )
   public FulltextDigitalObjectResultDto searchDigitalObjects(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam(required = false, defaultValue = "") Set<String> projects,
