@@ -123,6 +123,9 @@ public class FacetQueryBuilder {
 
     // Add facet fields with exclusions
     for (String facetField : facetFields) {
+      // Validate that facet field has proper format
+      validateDublinCoreFieldName(facetField);
+
       String fieldShortName = extractFieldShortName(facetField);
       String facetFieldWithExclusion = String.format("{!ex=%s}%s", fieldShortName, facetField);
       url.append("&facet.field=").append(facetFieldWithExclusion);
@@ -189,19 +192,21 @@ public class FacetQueryBuilder {
 
     selectedFacets.forEach((dcField, values) -> {
       if (values != null && !values.isEmpty()) {
-        String solrFieldName = normalizeDublinCoreFieldName(dcField);
-        String fieldShortName = extractFieldShortName(solrFieldName);
+        // VALIDATION: Ensure field starts with "dc."
+        validateDublinCoreFieldName(dcField);
+
+        String fieldShortName = extractFieldShortName(dcField);
 
         if (values.size() == 1) {
           // Single value: {!tag=type}dc.type:encodedValue
           String fq = String.format("{!tag=%s}%s",
               fieldShortName,
-              buildSolrFieldQuery(solrFieldName, values.get(0)));
+              buildSolrFieldQuery(dcField, values.get(0)));
           filterQueries.add(fq);
         } else {
           // Multiple values: {!tag=type}(dc.type:val1 OR dc.type:val2)
           String valueQuery = values.stream()
-              .map(value -> buildSolrFieldQuery(solrFieldName, value))
+              .map(value -> buildSolrFieldQuery(dcField, value))
               .collect(Collectors.joining(" OR "));
           String fq = String.format("{!tag=%s}(%s)", fieldShortName, valueQuery);
           filterQueries.add(fq);
@@ -214,32 +219,21 @@ public class FacetQueryBuilder {
   }
 
   /**
-   * TODO logic should instead throw error if not starting with ".dc"
-   * Normalizes a Dublin Core field name to ensure it starts with "dc.".
-   * @param dcFieldName Dublin Core field name (e.g. "title" or "dc.title")
-   * @return normalized Dublin Core field name (e.g. "dc.title")
-   */
-  private static String normalizeDublinCoreFieldName(String dcFieldName) {
-    if (dcFieldName == null || dcFieldName.isEmpty()) {
-      throw new IntegrationDataProcessingException("Dublin Core field name cannot be null or empty");
-    }
-    if (dcFieldName.startsWith("dc.")) {
-      return dcFieldName;
-    }
-    return "dc." + dcFieldName;
-  }
-
-  /**
    * Extracts the short field name from a full Dublin Core field name.
    * E.g. "dc.type" -> "type"
-   * @param fullFieldName full Dublin Core field name
-   * @return short field name
+   *
+   * @param fullFieldName full Dublin Core field name (must start with "dc.")
+   * @return short field name without prefix
+   * @throws IntegrationDataProcessingException if field doesn't start with "dc."
    */
   private static String extractFieldShortName(String fullFieldName) {
-    if (fullFieldName.startsWith("dc.")) {
-      return fullFieldName.substring(3);
+    if (!fullFieldName.startsWith("dc.")) {
+      throw new IntegrationDataProcessingException(
+          "Cannot extract short name from field '" + fullFieldName +
+              "' - must start with 'dc.' prefix"
+      );
     }
-    return fullFieldName;
+    return fullFieldName.substring(3);
   }
 
   /**
@@ -274,6 +268,32 @@ public class FacetQueryBuilder {
       return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException e) {
       throw new IntegrationDataProcessingException("Failed to URL-encode value: " + value);
+    }
+  }
+
+  /**
+   * Validates that a Dublin Core field name starts with "dc." prefix.
+   * Throws exception if invalid - NO automatic fixing/normalization.
+   *
+   * @param dcFieldName Dublin Core field name (must start with "dc.")
+   * @throws IntegrationDataProcessingException if field name is invalid
+   */
+  private static void validateDublinCoreFieldName(String dcFieldName) {
+    if (dcFieldName == null || dcFieldName.isEmpty()) {
+      throw new IntegrationDataProcessingException(
+          "Dublin Core field name cannot be null or empty"
+      );
+    }
+
+    if (!dcFieldName.startsWith("dc.")) {
+      String msg = String.format(
+          "Invalid Dublin Core field name: '%s'. Must start with 'dc.' prefix. " +
+              "This indicates a bug in the controller layer - field names should be " +
+              "validated and filtered before reaching the query builder.",
+          dcFieldName
+      );
+      log.error(msg);
+      throw new IntegrationDataProcessingException(msg);
     }
   }
 
