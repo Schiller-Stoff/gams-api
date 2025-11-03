@@ -1,6 +1,11 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,11 +44,39 @@ public class FacetController {
 
   private final IProjectService projectService;
 
+  /**
+   * TODO rename method
+   * TODO test method?
+   * API endpoint for advanced faceted search using Dublin Core metadata.
+   * @param dcCriteria All request parameters (will be filtered for dc.* fields)
+   * @param projects Selected project abbreviations
+   * @param fulltextQuery Optional fulltext search query
+   * @param pageIndex Current page (0-indexed)
+   * @param pageSize Results per page
+   * @param sortBy Sort field (default: dc.title)
+   * @param sortDir Sort direction (asc/desc)
+   * @return FacetResponseDTO containing search results and facet data
+   */
   @GetMapping(path = FACET_SEARCH_PATH, produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
       MimeTypeUtils.APPLICATION_XML_VALUE
   })
   @ResponseBody
+  @Operation(
+      summary = "Dublin core faceted search based on digital objects and multiple projects.",
+      description = "Searches for digital objects based on a faceted search over certain Dublin Core fields. The search is performed on multiple projects and can include multiple Dublin Core fields.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital objects found"),
+          @ApiResponse(responseCode = "400", description = "Invalid request parameters",
+              content = @Content)
+      }
+  )
+  @Parameter(
+      name = "format",
+      description = "Format of the response. Defaults to JSON.",
+      required = false,
+      schema = @Schema(type = "string", examples = "xml,json")
+  )
   public FacetResponseDTO searchDigitalObjectsByDublinCoreAdvanced(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
