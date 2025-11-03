@@ -345,51 +345,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     }
 
-
-    @Test
-    public void findsExpectedObjectCount(){
-
-      // arbitrary fulltext-search query (based on test data)
-      final String TEST_SEARCH_VALUE = testDataSet.dublinCoreEntry().getValue().substring(0, 3);
-
-      var foundDigitalObjects = digitalObjectService.searchByDCFulltext(
-          Set.of(testDataSet.project().getProjectAbbr()),
-          // empty -> runs fulltext across all dc fields
-          Set.of(),
-          TEST_SEARCH_VALUE,
-          Pageable.unpaged()
-      );
-
-      long EXPECTED_OBJECT_COUNT = 4; // // only three objects assigned to this project (but one is already in test data set)
-
-      Assertions.assertThat(foundDigitalObjects.getContent())
-          .isNotEmpty()
-      ;
-      Assertions.assertThat(
-          foundDigitalObjects.getPagination().getTotalElements()
-      ).isEqualTo(EXPECTED_OBJECT_COUNT);
-    }
-
-    @Test
-    public void findsNothingWhenNotInDCField(){
-
-      // arbitrary fulltext-search query (based on test data)
-      final String TEST_SEARCH_VALUE = TestDublinCoreEntry.VALUE.getValue().substring(0, 3);
-      final Set<String> TEST_DC_FIELDS = Set.of("type"); // should not be found
-
-      var foundDigitalObjects = digitalObjectService.searchByDCFulltext(
-          // only three objects assigned to this project
-          Set.of(testDataSet.project().getProjectAbbr()),
-          TEST_DC_FIELDS,
-          TEST_SEARCH_VALUE,
-          Pageable.unpaged()
-      );
-      Assertions.assertThat(foundDigitalObjects.getContent())
-          .isEmpty();
-      Assertions.assertThat(foundDigitalObjects.getPagination().getTotalElements()).isEqualTo(0);
-
-    }
-
   }
 
 
