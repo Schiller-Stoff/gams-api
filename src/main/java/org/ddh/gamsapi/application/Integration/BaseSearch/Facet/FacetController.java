@@ -92,9 +92,7 @@ public class FacetController {
     var filteredDcFields = new HashMap<String, List<String>>();
     dcCriteria.forEach((key, values) -> {
       if (key.startsWith("dc.")) {
-        // TODO WTF AM I REMOVING THE dc. PREFIX HERE???
-        String newKey = key.substring(3); // Remove "dc." prefix
-        filteredDcFields.put(newKey, values);
+        filteredDcFields.put(key, values);
       }
     });
 
@@ -158,9 +156,7 @@ public class FacetController {
     var filteredDcFields = new HashMap<String, List<String>>();
     dcCriteria.forEach((key, values) -> {
       if (key.startsWith("dc.")) {
-        // TODO wtf removing dc. prefix here???
-        String newKey = key.substring(3); // Remove "dc." prefix for service layer
-        filteredDcFields.put(newKey, values);
+        filteredDcFields.put(key, values);
       }
     });
 
