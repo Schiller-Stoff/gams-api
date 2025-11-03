@@ -45,8 +45,6 @@ public class FacetController {
   private final IProjectService projectService;
 
   /**
-   * TODO rename method
-   * TODO test method?
    * API endpoint for advanced faceted search using Dublin Core metadata.
    * @param dcCriteria All request parameters (will be filtered for dc.* fields)
    * @param projects Selected project abbreviations
@@ -77,7 +75,7 @@ public class FacetController {
       required = false,
       schema = @Schema(type = "string", examples = "xml,json")
   )
-  public FacetResponseDTO searchDigitalObjectsByDublinCoreAdvanced(
+  public FacetResponseDTO facetSearch(
       @RequestParam MultiValueMap<String, String> dcCriteria,
       @RequestParam Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
