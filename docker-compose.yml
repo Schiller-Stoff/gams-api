@@ -50,7 +50,7 @@ services:
     entrypoint:
       - bash
       - "-c"
-      - "precreate-core gams; precreate-core fulltext; exec solr -f"
+      - "precreate-core gams; precreate-core custom-fulltext; exec solr -f"
 
   triplestore:
     container_name: triplestore
