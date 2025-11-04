@@ -398,19 +398,19 @@
             </div>
 
             <!-- Creator Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('dc.creator')}">
-              <div class="facet-group-title">Creator</div>
-              <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('dc.creator')}"
-                     class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('dc.creator') && selectedFacets.get('dc.creator').contains(facetValue.value)} ? 'selected'"
-                     th:data-facet="dc.creator"
-                     th:data-value="${facetValue.value}">
-                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Author Name</span>
-                  <span class="facet-count" th:text="${facetValue.count}">23</span>
-                </div>
-              </div>
-            </div>
+<!--            <div class="facet-group" th:if="${availableFacets.containsKey('dc.creator')}">-->
+<!--              <div class="facet-group-title">Creator</div>-->
+<!--              <div class="facet-items">-->
+<!--                <div th:each="facetValue : ${availableFacets.get('dc.creator')}"-->
+<!--                     class="facet-item"-->
+<!--                     th:classappend="${selectedFacets.containsKey('dc.creator') && selectedFacets.get('dc.creator').contains(facetValue.value)} ? 'selected'"-->
+<!--                     th:data-facet="dc.creator"-->
+<!--                     th:data-value="${facetValue.value}">-->
+<!--                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Author Name</span>-->
+<!--                  <span class="facet-count" th:text="${facetValue.count}">23</span>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
 
             <!-- Subject Facet -->
             <div class="facet-group" th:if="${availableFacets.containsKey('dc.subject')}">
@@ -458,19 +458,19 @@
             </div>
 
             <!-- Publisher Facet -->
-            <div class="facet-group" th:if="${availableFacets.containsKey('dc.publisher')}">
-              <div class="facet-group-title">Publisher</div>
-              <div class="facet-items">
-                <div th:each="facetValue : ${availableFacets.get('dc.publisher')}"
-                     class="facet-item"
-                     th:classappend="${selectedFacets.containsKey('dc.publisher') && selectedFacets.get('dc.publisher').contains(facetValue.value)} ? 'selected'"
-                     th:data-facet="dc.publisher"
-                     th:data-value="${facetValue.value}">
-                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Publisher</span>
-                  <span class="facet-count" th:text="${facetValue.count}">12</span>
-                </div>
-              </div>
-            </div>
+<!--            <div class="facet-group" th:if="${availableFacets.containsKey('dc.publisher')}">-->
+<!--              <div class="facet-group-title">Publisher</div>-->
+<!--              <div class="facet-items">-->
+<!--                <div th:each="facetValue : ${availableFacets.get('dc.publisher')}"-->
+<!--                     class="facet-item"-->
+<!--                     th:classappend="${selectedFacets.containsKey('dc.publisher') && selectedFacets.get('dc.publisher').contains(facetValue.value)} ? 'selected'"-->
+<!--                     th:data-facet="dc.publisher"-->
+<!--                     th:data-value="${facetValue.value}">-->
+<!--                  <span class="facet-label" th:text="${facetValue.value}" th:title="${facetValue.value}">Publisher</span>-->
+<!--                  <span class="facet-count" th:text="${facetValue.count}">12</span>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
 
           </div>
 
@@ -522,7 +522,7 @@
                 <thead class="table-light">
                 <tr>
                   <th scope="col">Object ID</th>
-                  <th scope="col">Title</th>
+                  <th scope="col">DC.Title</th>
                   <th scope="col">Dublin Core Metadata</th>
                   <th scope="col">Project</th>
                   <th scope="col">Actions</th>

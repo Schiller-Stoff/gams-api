@@ -117,11 +117,11 @@ public class FacetService {
     return Set.of(
         "dc.coverage",    // Geographic/temporal coverage - commonly faceted
         "dc.type",        // Resource type - commonly faceted
-        "dc.creator",     // Creator/author - commonly faceted
+        //"dc.creator",     // Creator/author - commonly faceted
         "dc.subject",     // Subject/keywords - commonly faceted
         "dc.language",    // Language - commonly faceted
-        "dc.format",      // Format - commonly faceted
-        "dc.publisher"    // Publisher - useful for faceting
+        "dc.format"      // Format - commonly faceted
+        //"dc.publisher"    // Publisher - useful for faceting
     );
   }
 }

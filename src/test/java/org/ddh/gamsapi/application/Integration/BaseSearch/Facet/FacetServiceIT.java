@@ -192,8 +192,8 @@ public class FacetServiceIT extends BaseSearchIntegrationTest {
     @Test
     public void multipleValuesInSameFacetUseOrLogic() {
       MultiValueMap<String, String> filters = new LinkedMultiValueMap<>();
-      filters.add("type", "Brief");
-      filters.add("type", "Artikel");
+      filters.add("dc.type", "Brief");
+      filters.add("dc.type", "Artikel");
 
       var facetResult = facetService.facetSearch(
           Set.of(TestProject.PROJECT_ABBR.getValue()),
@@ -203,15 +203,15 @@ public class FacetServiceIT extends BaseSearchIntegrationTest {
       );
 
       Assertions.assertThat(facetResult).isNotNull();
-      Assertions.assertThat(facetResult.getSelectedFacets().get("type"))
+      Assertions.assertThat(facetResult.getSelectedFacets().get("dc.type"))
           .containsExactlyInAnyOrder("Brief", "Artikel");
     }
 
     @Test
     public void differentFacetsUseAndLogic() {
       MultiValueMap<String, String> filters = new LinkedMultiValueMap<>();
-      filters.add("type", "Brief");
-      filters.add("coverage", "Wien");
+      filters.add("dc.type", "Brief");
+      filters.add("dc.coverage", "Wien");
 
       var facetResult = facetService.facetSearch(
           Set.of(TestProject.PROJECT_ABBR.getValue()),
@@ -222,7 +222,7 @@ public class FacetServiceIT extends BaseSearchIntegrationTest {
 
       Assertions.assertThat(facetResult).isNotNull();
       Assertions.assertThat(facetResult.getSelectedFacets())
-          .containsKeys("type", "coverage");
+          .containsKeys("dc.type", "dc.coverage");
     }
   }
 
@@ -361,7 +361,7 @@ public class FacetServiceIT extends BaseSearchIntegrationTest {
     @Test
     public void unfilteredCountDifferentFromFilteredCount() {
       MultiValueMap<String, String> filters = new LinkedMultiValueMap<>();
-      filters.add("type", "Brief");
+      filters.add("dc.type", "Brief");
 
       var facetResult = facetService.facetSearch(
           Set.of(TestProject.PROJECT_ABBR.getValue()),

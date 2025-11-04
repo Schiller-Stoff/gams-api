@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,7 +47,7 @@ public class FacetController {
 
   /**
    * API endpoint for advanced faceted search using Dublin Core metadata.
-   * @param dcCriteria All request parameters (will be filtered for dc.* fields)
+   * @param allRequestParams All request parameters (will be filtered for dc.* fields)
    * @param projects Selected project abbreviations
    * @param fulltextQuery Optional fulltext search query
    * @param pageIndex Current page (0-indexed)
@@ -76,7 +77,7 @@ public class FacetController {
       schema = @Schema(type = "string", examples = "xml,json")
   )
   public FacetResponseDTO facetSearch(
-      @RequestParam MultiValueMap<String, String> dcCriteria,
+      @RequestParam MultiValueMap<String, String> allRequestParams,
       @RequestParam Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(defaultValue = "0") int pageIndex,
@@ -89,15 +90,10 @@ public class FacetController {
 
     // includes now all request parameters, not just "dc.*" ones
     // only keep parameters keys that start with "dc."
-    var filteredDcFields = new HashMap<String, List<String>>();
-    dcCriteria.forEach((key, values) -> {
-      if (key.startsWith("dc.")) {
-        filteredDcFields.put(key, values);
-      }
-    });
+    var filteredDcFields = extractAndValidateDcCriteria(allRequestParams);
 
     log.debug("Advanced DC search - criteria: {}, projects: {}",
-        dcCriteria, projects);
+        filteredDcFields, projects);
 
     // TODO add tests for sorting procedure!
     PageRequest pageRequest = buildPageRequest(pageIndex, pageSize, sortBy, sortDir);
@@ -105,7 +101,7 @@ public class FacetController {
     return facetService.facetSearch(
         projects,
         fulltextQuery,
-        MultiValueMap.fromMultiValue(filteredDcFields),
+        filteredDcFields,
         pageRequest
     );
   }
@@ -114,7 +110,7 @@ public class FacetController {
    * HTML view for faceted search interface.
    * Provides an interactive UI for filtering digital objects using Dublin Core facets.
    *
-   * @param dcCriteria All request parameters (will be filtered for dc.* fields)
+   * @param allRequestParams All request parameters (will be filtered for dc.* fields)
    * @param projects Selected project abbreviations
    * @param fulltextQuery Optional fulltext search query
    * @param pageIndex Current page (0-indexed)
@@ -126,7 +122,7 @@ public class FacetController {
    */
   @GetMapping(path = FACET_SEARCH_PATH, produces = MediaType.TEXT_HTML_VALUE)
   public String searchFacetedHtml(
-      @RequestParam MultiValueMap<String, String> dcCriteria,
+      @RequestParam MultiValueMap<String, String> allRequestParams,
       @RequestParam(required = false) Set<String> projects,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(defaultValue = "0") int pageIndex,
@@ -136,7 +132,7 @@ public class FacetController {
       Model model) {
 
     log.debug("Faceted search HTML view - criteria: {}, projects: {}, q: {}",
-        dcCriteria, projects, fulltextQuery);
+        allRequestParams, projects, fulltextQuery);
 
     // If no projects selected, show empty state with all available projects
     if (projects == null || projects.isEmpty()) {
@@ -153,12 +149,7 @@ public class FacetController {
     pageSize = Math.min(pageSize, 50);
 
     // Extract only dc.* parameters for filtering
-    var filteredDcFields = new HashMap<String, List<String>>();
-    dcCriteria.forEach((key, values) -> {
-      if (key.startsWith("dc.")) {
-        filteredDcFields.put(key, values);
-      }
-    });
+    var filteredDcFields = extractAndValidateDcCriteria(allRequestParams);
 
     try {
       // Execute faceted search
@@ -169,7 +160,7 @@ public class FacetController {
       FacetResponseDTO response = facetService.facetSearch(
           projects,
           fulltextQuery,
-          MultiValueMap.fromMultiValue(filteredDcFields),
+          filteredDcFields,
           PageRequest.of(pageIndex, pageSize, sort)
       );
 
@@ -184,7 +175,7 @@ public class FacetController {
       model.addAttribute("selectedProjects", projects);
 
       // Build query string for pagination links (preserve all current filters)
-      String currentQuery = buildQueryString(dcCriteria, projects, fulltextQuery, sortBy, sortDir);
+      String currentQuery = buildQueryString(allRequestParams, projects, fulltextQuery, sortBy, sortDir);
       model.addAttribute("currentQuery", currentQuery);
 
       // Add search parameters for form repopulation
@@ -208,8 +199,8 @@ public class FacetController {
    *
    * @param pageIndex Zero-based page index
    * @param pageSize Number of results per page
-   * @param sortBy TODO
-   * @param sortDir TODO
+   * @param sortBy Sort field
+   * @param sortDir Sort direction (asc/desc)
    * @return PageRequest with validated sort
    * @throws IllegalArgumentException if sort field is not allowed
    */
@@ -228,9 +219,48 @@ public class FacetController {
   }
 
   /**
-   * TODO
-   *
-   *
+   * Extracts and validates DC criteria from all request parameters.
+   * Only allows certain DC fields for faceting.
+   * @param allParams All request parameters
+   * @return Filtered DC criteria
+   * @throws IntegrationUserQueryException if any disallowed DC field is present
+   */
+  public MultiValueMap<String, String> extractAndValidateDcCriteria(MultiValueMap<String, String> allParams) {
+    MultiValueMap<String, String> dcCriteria = new LinkedMultiValueMap<>();
+
+    final List<String> ALLOWED_DC_FIELDS = List.of(
+        "dc.subject",
+        "dc.coverage",
+        "dc.rights",
+        "dc.type",
+        "dc.format",
+        "dc.language"
+    );
+
+    allParams.forEach((key, values) -> {
+      if (key.startsWith("dc.")) {
+        if(!ALLOWED_DC_FIELDS.contains(key)){
+          String msg = String.format(
+              "Faceting by dc field '%s' is not allowed. Allowed fields are: %s",
+              key,
+              String.join(", ", ALLOWED_DC_FIELDS)
+          );
+          log.warn(msg);
+          throw new IntegrationUserQueryException(msg);
+        }
+        dcCriteria.put(key, values);
+      }
+    });
+
+    return dcCriteria;
+  }
+
+
+  /**
+   * Maps user-provided sort field to Solr field and validates it.
+   * @param userField User-provided sort field
+   * @return Mapped Solr field
+   * @throws IntegrationUserQueryException if field is not allowed for sorting
    */
   private String mapAndValidateSortField(String userField) {
 
@@ -263,8 +293,7 @@ public class FacetController {
           String.join(", ", allowedSortFields)
       );
       log.warn(msg);
-      // TODO wrong exception - should be a user side error status code!
-      throw new IntegrationServiceException(msg);
+      throw new IntegrationUserQueryException(msg);
     }
 
     return userField;
@@ -316,12 +345,5 @@ public class FacetController {
     String query = builder.build().encode().getQuery();
     return query != null ? query : "";
   }
-
-
-
-
-
-
-
 
 }
