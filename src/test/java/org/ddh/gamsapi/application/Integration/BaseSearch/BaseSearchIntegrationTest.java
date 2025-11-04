@@ -53,14 +53,6 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
       solr.start();
       log.info("✓ Solr started at {}:{}", solr.getHost(), solr.getSolrPort());
 
-      // Rename schema file in temp
-      log.info("Preparing configset...");
-      solr.execInContainer(
-          "sh", "-c",
-          "if [ -f /tmp/base_configset/conf/managed-schema.xml ]; then " +
-              "mv /tmp/base_configset/conf/managed-schema.xml /tmp/base_configset/conf/managed-schema; fi"
-      );
-
       // Copy to /var/solr/data/configsets for API usage
       log.info("Copying configset to /var/solr/data/configsets for API access...");
       solr.execInContainer("mkdir", "-p", "/var/solr/data/configsets");
