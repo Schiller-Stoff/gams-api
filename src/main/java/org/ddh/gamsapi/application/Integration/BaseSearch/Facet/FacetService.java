@@ -110,8 +110,6 @@ public class FacetService {
   /**
    * Returns default Dublin Core fields for faceting.
    * Uses schema format with "dc." prefix.
-   *
-   * Based on your schema definition and common faceting needs.
    */
   private Set<String> getDefaultDublinCoreFacetFields() {
     return Set.of(
