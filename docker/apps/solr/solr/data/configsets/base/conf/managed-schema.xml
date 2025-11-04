@@ -449,6 +449,17 @@
       <tokenizer name="whitespace"/>
     </analyzer>
   </fieldType>
+    <!-- Custom field type for fulltext that preserves hyphens and special chars -->
+    <fieldType name="text_fulltext" class="solr.TextField" positionIncrementGap="100">
+        <analyzer type="index">
+            <tokenizer name="whitespace"/>
+            <filter name="lowercase"/>
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer name="whitespace"/>
+            <filter name="lowercase"/>
+        </analyzer>
+    </fieldType>
 
   <!--  Internal solr fields -->
   <field name="_nest_path_" type="_nest_path_"/>
@@ -467,7 +478,8 @@
   <field name="objectTitle" type="strings"/>
   <field name="objectDesc" type="strings"/>
   <field name="objectDatastreams" type="strings" multiValued="true"/>
-  <field name="objectFulltext" type="text_general" multiValued="false"/>
+    <!-- uses custom type with whitespace tokenizer -->
+    <field name="objectFulltext" type="text_fulltext" multiValued="false" stored="true"/>
   <field name="objectProjectAbbr" type="string" multiValued="false"/>
   <field name="objectType" type="string" multiValued="false"/>
   <field name="objectCreator" type="strings"/>
@@ -518,6 +530,23 @@
   <field name="entityLocationLabels" type="strings" multiValued="true"/>
 
 
+    <!-- Dublin Core fields in alphabetical order -->
+    <field name="dc.contributor" type="strings" multiValued="true"/>
+    <field name="dc.coverage" type="strings" multiValued="true"/>
+    <field name="dc.creator" type="strings" multiValued="true" />
+    <field name="dc.date" type="strings" multiValued="true"/>
+    <field name="dc.description" type="strings" multiValued="true" />
+    <field name="dc.format" type="strings" multiValued="true" />
+    <field name="dc.identifier" type="strings" multiValued="true"/>
+    <field name="dc.language" type="strings" multiValued="true" />
+    <field name="dc.publisher" type="strings" multiValued="true"/>
+    <field name="dc.relation" type="strings" multiValued="true" />
+    <field name="dc.rights" type="strings" multiValued="true" />
+    <field name="dc.source" type="strings" multiValued="true" />
+    <field name="dc.subject" type="strings" multiValued="true" />
+    <field name="dc.title" type="strings" multiValued="true"/>
+    <field name="dc.type" type="strings" multiValued="true"/>
+
   <!--
    *****
    Person data
@@ -529,6 +558,62 @@
   <field name="persAlternativeName" type="strings" multiValued="true"/>
   <field name="persBirthdate" type="pdate" multiValued="true"/>
   <field name="persDeathdate" type="pdate" multiValued="true"/>
+
+
+    <!-- ====================================================================
+    DUBLIN CORE FIELDS - TOKENIZED VERSIONS FOR SUBSTRING SEARCH
+    ==================================================================== -->
+
+    <!--
+      These text_general fields enable substring matching and full-text search
+      on Dublin Core fields while preserving the original string fields for faceting.
+
+      Pattern: dc.{field}_txt stores tokenized version of dc.{field}
+    -->
+
+    <field name="dc.contributor_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.coverage_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.creator_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.date_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.description_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.format_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.identifier_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.language_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.publisher_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.relation_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.rights_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.source_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.subject_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.title_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+    <field name="dc.type_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
+
+
+    <!-- ====================================================================
+         COPY FIELDS - AUTOMATIC POPULATION OF TOKENIZED VERSIONS
+         ==================================================================== -->
+
+    <!--
+      CopyField directives automatically populate the _txt fields when documents
+      are indexed. This is transparent to the application code.
+
+      NOTE: No maxChars limit - we want full content for search
+    -->
+
+    <copyField source="dc.contributor" dest="dc.contributor_txt"/>
+    <copyField source="dc.coverage" dest="dc.coverage_txt"/>
+    <copyField source="dc.creator" dest="dc.creator_txt"/>
+    <copyField source="dc.date" dest="dc.date_txt"/>
+    <copyField source="dc.description" dest="dc.description_txt"/>
+    <copyField source="dc.format" dest="dc.format_txt"/>
+    <copyField source="dc.identifier" dest="dc.identifier_txt"/>
+    <copyField source="dc.language" dest="dc.language_txt"/>
+    <copyField source="dc.publisher" dest="dc.publisher_txt"/>
+    <copyField source="dc.relation" dest="dc.relation_txt"/>
+    <copyField source="dc.rights" dest="dc.rights_txt"/>
+    <copyField source="dc.source" dest="dc.source_txt"/>
+    <copyField source="dc.subject" dest="dc.subject_txt"/>
+    <copyField source="dc.title" dest="dc.title_txt"/>
+    <copyField source="dc.type" dest="dc.type_txt"/>
 
 
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>

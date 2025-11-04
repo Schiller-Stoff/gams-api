@@ -1,6 +1,11 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -9,18 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.util.Set;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SOLRClientIT extends BaseSearchIntegrationTest {
+public class SolrClientIT extends BaseSearchIntegrationTest {
 
   // disables auditing
   @MockitoBean
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private BaseSearchService baseSearchService;
-
-  @Autowired
-  private SOLRClient solrClient;
+  private SolrClient solrClient;
 
   @Test
   public void coreExistsReturnsFalseWhenExpectedCoreDoesNotExist() {
@@ -32,7 +36,7 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
   @Test
   public void coreExistsDoesNotThrow(){
     org.junit.jupiter.api.Assertions.assertDoesNotThrow(
-        () -> solrClient.coreExists("test")
+        () -> solrClient.coreExists(SolrGamsCores.TEST_CORE.value)
     );
   }
 
@@ -72,7 +76,7 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
   public void verifyThatTestCoreExists(){
     Assertions.assertThat(
         solrClient.coreExists(
-            BaseSearchIntegrationTest.SOLR_TEST_CORE
+            SolrGamsCores.TEST_CORE.value
         )
     ).isTrue();
   }
@@ -201,12 +205,99 @@ public class SOLRClientIT extends BaseSearchIntegrationTest {
 
       final BaseSearch baseSearch = new BaseSearch();
       baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(SOLR_TEST_CORE, baseSearch);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
 
-      String response = solrClient.retrieveSolrDocumentByProperty(SOLR_TEST_CORE, "id", "123");
+      String response = solrClient.retrieveSolrDocumentByProperty(SolrGamsCores.TEST_CORE.value, "id", "123");
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       Assertions.assertThat(response).contains(expectedSubstring);
 
+    }
+
+    @Test
+    public void queryReturnsExpectedData(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "1234";
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+
+      String solrQuery = String.format("%s:%s", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      String response = solrClient.query(SolrGamsCores.TEST_CORE.value, solrQuery);
+      String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      Assertions.assertThat(response).contains(expectedSubstring);
+
+    }
+
+    @Test
+    public void getReturnsExpectedSolrData(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "1234";
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+
+      String url = String.format("/solr/%s/select?q=*:*", SolrGamsCores.TEST_CORE.value);
+      String response = solrClient.get(url);
+      System.out.println("*** Response: " + response);
+      Assertions.assertThat(response)
+          .isNotNull()
+          .isNotEmpty()
+          .contains(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE)
+      ;
+
+    }
+
+  }
+
+  @Nested
+  public class CountProjectDocuments {
+
+    @Test
+    public void returnsExpectedCount(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+
+      int documentCount = solrClient.countProjectDocuments(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+      Assertions.assertThat(documentCount)
+          .isGreaterThan(0);
+    }
+
+    @Test
+    public void returnsZeroWhenNoDocumentsExist(){
+      int documentCount = solrClient.countProjectDocuments(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of("NON_EXISTENT_PROJECT_ABBR")
+      );
+      Assertions.assertThat(documentCount)
+          .isEqualTo(0);
+    }
+
+    @Test
+    public void returnsCountWhenProjectSetIsEmpty(){
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
+      String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
+
+      final BaseSearch baseSearch = new BaseSearch();
+      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+
+      int documentCount = solrClient.countProjectDocuments(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of()
+      );
+      Assertions.assertThat(documentCount)
+          .isGreaterThan(0);
     }
 
   }

@@ -2,6 +2,8 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -21,10 +23,7 @@ import java.time.Duration;
 public class BaseSearchIntegrationTest extends IntegrationTest {
 
   @Autowired
-  SOLRClient solrClient;
-
-  public static final String SOLR_TEST_CORE = "test";
-  public static final String SOLR_GAMS_CORE = "gams";
+  SolrClient solrClient;
 
   static final SolrContainer solr;
 
@@ -80,26 +79,26 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
       Thread.sleep(2000);
 
       // Create cores using absolute path (CLI method)
-      log.info("Creating '{}' core...", SOLR_TEST_CORE);
+      log.info("Creating '{}' core...", SolrGamsCores.TEST_CORE.value);
       var testCore = solr.execInContainer(
-          "solr", "create_core", "-c", SOLR_TEST_CORE, "-d", "/tmp/base_configset"
+          "solr", "create_core", "-c", SolrGamsCores.TEST_CORE.value, "-d", "/tmp/base_configset"
       );
       log.info("Test core - exitCode: {}, stdout: '{}'",
           testCore.getExitCode(), testCore.getStdout().trim());
 
       if (testCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode());
+        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode() + "stdout: " + testCore.getStdout());
       }
 
-      log.info("Creating '{}' core...", SOLR_GAMS_CORE);
+      log.info("Creating '{}' core...", SolrGamsCores.GAMS_CORE.value);
       var gamsCore = solr.execInContainer(
-          "solr", "create_core", "-c", SOLR_GAMS_CORE, "-d", "/tmp/base_configset"
+          "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", "/tmp/base_configset"
       );
       log.info("GAMS core - exitCode: {}, stdout: '{}'",
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
 
       if (gamsCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode());
+        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode() + "stdout: " + testCore.getStdout());
       }
 
       Thread.sleep(1000);
@@ -121,8 +120,8 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
   public void tearDown() {
     try {
       log.debug("Cleaning up Solr cores after test");
-      solrClient.wipeCore(SOLR_GAMS_CORE);
-      solrClient.wipeCore(SOLR_TEST_CORE);
+      solrClient.wipeCore(SolrGamsCores.GAMS_CORE.value);
+      solrClient.wipeCore(SolrGamsCores.TEST_CORE.value);
       // needs to be called - teardown in parent class is not called automatically
       super.tearDown();
     } catch (Exception e) {

@@ -1,20 +1,19 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Part of the response
+ * Response of a SOLR document. Used for marshalling and unmarshalling via Jackson.
  */
 @Slf4j
 @ToString
-public class BaseSearch {
+public class SolrDocument {
 
   /**
    * JSON Any-Setter: All properties will be mapped to this map.
@@ -26,7 +25,7 @@ public class BaseSearch {
   public final Map<String, Object> properties = new HashMap<>();
 
 
-  public void  addProperty(String key, Object value) {
+  public void addProperty(String key, Object value) {
     properties.put(key, value);
   }
 
@@ -38,22 +37,9 @@ public class BaseSearch {
     return properties.get(key);
   }
 
-  /**
-   * Creates BaseSearch instance from SolrDocument.
-   * @param solrDocument SolrDocument
-   * @return BaseSearch instance
-   */
-  public static BaseSearch from(SolrDocument solrDocument) {
-
-    BaseSearch baseSearch = new BaseSearch();
-    solrDocument.getProperties().forEach((key, value) -> {
-      baseSearch.addProperty(key, value);
-    });
-
-    return baseSearch;
-
+  public Map<String, Object> getProperties() {
+    return properties;
   }
-
 
 
 }

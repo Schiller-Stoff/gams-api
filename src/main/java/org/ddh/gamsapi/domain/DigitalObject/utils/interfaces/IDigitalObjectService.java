@@ -56,17 +56,6 @@ public interface IDigitalObjectService {
 
 
   /**
-   * Fulltext search over objects of defined project. Searches for string occurrence in defined dublin core fields.
-   * The object is being returned when one value in the value list matches exactly.
-   * @param projectAbbrs list of project abbreviations
-   * @param dcEntries list of DublinCoreElement names. If empty all dublin core fields will be searched
-   * @param fulltext fulltext search string
-   * @param pageAble pagination
-   * @return a page of digital objects
-   */
-  PagedResponse<DigitalObjectListItemView> searchByDCFulltext(Set<String> projectAbbrs, Set<String> dcEntries, String fulltext, Pageable pageAble);
-
-  /**
    * Find a digital object by its id and return a compact DTO representation.
    * @param id the id of the digital object
    * @return a DigitalObjectCompactDTO representation of the digital object

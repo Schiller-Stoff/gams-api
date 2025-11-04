@@ -1,7 +1,12 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
+import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -10,17 +15,19 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
-import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Client for interacting with the SOLR server.
  */
 @Slf4j
 @Component
-public class SOLRClient {
+public class SolrClient {
   private final WebClient webClient;
 
   private final String SOLR_CORE_API_ENDPOINT = "/api/cores";
@@ -33,7 +40,7 @@ public class SOLRClient {
 
   private final String SOLR_BASE_URL;
 
-  public SOLRClient(GAMSDockerDNS configProperties) {
+  public SolrClient(GAMSDockerDNS configProperties) {
     // TODO consider timeouts / retries / error handling / etc. against SOLR.
     SOLR_BASE_URL = configProperties.getBaseSearchUrl();
     this.webClient = WebClient.builder()
@@ -94,7 +101,7 @@ public class SOLRClient {
       log.error(msg);
       throw new IntegrationServiceException(msg);
     } catch (WebClientException e) {
-      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, postUrl, data, e.getMessage(), e);
+      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, postUrl, Arrays.toString(data), e.getMessage(), e);
       log.error(msg);
       throw new IntegrationServiceException(msg);
     }
@@ -299,7 +306,6 @@ public class SOLRClient {
    */
   public String retrieveSolrDocumentByProperty(String coreName, String propertyName, String propertyValue){
 
-    // %3A is the URL encoded value for ":"
     final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s:%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, propertyName, propertyValue);
     log.trace("Retrieving document from core {} with property {}={}", coreName, propertyName, propertyValue);
 
@@ -322,6 +328,158 @@ public class SOLRClient {
       throw new IntegrationServiceException(msg);
     }
 
+  }
+
+
+  /**
+   * Execute a Solr query and return the raw JSON response.
+   *
+   * @param solrQuery Argument after 'q=' in Solr query URL
+   * @return Raw JSON response from Solr
+   */
+  public String query(String coreName, String solrQuery) {
+    final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, solrQuery);
+    log.trace("Executing Solr query: {}", CORE_QUERY_URL);
+
+    try {
+      return webClient.get()
+          .uri(CORE_QUERY_URL)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format(
+          "Failed to execute Solr query. SOLR-URL: %s, Status: %s, Error: %s",
+          CORE_QUERY_URL, e.getStatusCode(), errorResponseBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format(
+          "Failed to execute Solr query. SOLR-URL: %s, Cause: %s",
+          CORE_QUERY_URL, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+  }
+
+  /**
+   * Count documents in a Solr core for a specific project.
+   * @param coreName name of the solr core
+   * @param projectAbbrs set of project abbreviations to count documents for (might be empty)
+   * @return
+   */
+  public int countProjectDocuments(String coreName, Set<String> projectAbbrs){
+
+    StringBuilder url = new StringBuilder();
+    url.append(String.format("/solr/%s/select?", coreName));
+
+    // Project filter
+    if(projectAbbrs.isEmpty()){
+      url.append(String.format("q=%s:*", BaseSearchProperties.PROJECT.name));
+    } else if (projectAbbrs.size() == 1) {
+      url.append(String.format("q=%s:%s",
+          BaseSearchProperties.PROJECT.name,
+          SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
+    } else {
+      String projectQuery = projectAbbrs.stream()
+          .map(abbr -> String.format("%s:%s",
+              BaseSearchProperties.PROJECT.name,
+              SolrUrlBuilder.escapeSolrValue(abbr)))
+          .collect(Collectors.joining(" OR "));
+      url.append("&q=(").append(projectQuery).append(")");
+    }
+
+    // We only need the count
+    url.append("&rows=0");
+    url.append("&wt=json");
+    url.append("&indent=true");
+
+
+    log.info("Counting documents in Solr core {} for projects {} with URL: {}", coreName, projectAbbrs, url);
+
+    String solrResponse;
+    try {
+      solrResponse = webClient.get()
+          .uri(url.toString())
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      String msg = String.format(
+          "Failed to count documents in Solr core %s for projects %s. SOLR-URL: %s, Status: %s, Error: %s",
+          coreName, projectAbbrs, url, e.getStatusCode(), errorResponseBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format(
+          "Failed to count documents in Solr core %s for projects %s. SOLR-URL: %s, Cause: %s",
+          coreName, projectAbbrs, url, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
+
+    try {
+      // Parse the response to extract numFound
+      int numFound = OBJECT_MAPPER.readTree(solrResponse)
+          .path("response")
+          .path("numFound")
+          .asInt();
+
+      return numFound;
+    } catch (Exception e) {
+      String msg = String.format(
+          "Failed to parse Solr count response for core %s and projects %s. Cause: %s",
+          coreName, projectAbbrs, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationDataProcessingException(msg);
+    }
+
+  }
+
+  /**
+   * Execute a Solr query and return the raw JSON response.
+   * Handles complex Solr query syntax including special characters like {}, !, etc.
+   *
+   * @param url The complete query path including parameters (e.g., "/solr/gams/select?q=*:*")
+   * @return Raw JSON response from Solr
+   */
+  public String get(String url) {
+    log.trace("Executing Solr url: {}", url);
+
+    try {
+      // using uri to avoid encoding issues with special characters
+      URI uri = URI.create(SOLR_BASE_URL + url);
+
+      return webClient.get()
+          .uri(uri)  // Use URI object instead of String
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+    } catch (WebClientResponseException e) {
+      String errorResponseBody = e.getResponseBodyAsString();
+      assert e.getRequest() != null;
+      String msg = String.format(
+          "Failed to execute Solr query via url %s. Status: %s, Error: %s",
+          e.getRequest().getURI(), e.getStatusCode(), errorResponseBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format(
+          "Failed to execute Solr query. Path: %s, Cause: %s",
+          url, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    }
   }
 
 }

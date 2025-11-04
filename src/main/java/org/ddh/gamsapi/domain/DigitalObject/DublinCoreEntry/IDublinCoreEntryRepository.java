@@ -82,48 +82,5 @@ public interface IDublinCoreEntryRepository extends JpaRepository<DublinCoreEntr
    */
   void deleteAllByDigitalObject(DigitalObject digitalObject);
 
-  /**
-   * Fulltext search over all dublin core fields of a digital object.
-   * Allows to search across multiple projects.
-   * @param projectAbbrs list of project abbreviations
-   * @param searchTerm search term
-   * @param pageable pagination information
-   * @return a page of digital objects
-   */
-  @Query(value = "SELECT DISTINCT do FROM DigitalObject do " +
-      "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
-      "WHERE LOWER(dcm.value) LIKE CONCAT('%', LOWER(:searchTerm), '%') " +
-      "AND do.project.projectAbbr IN :projectAbbrs")
-  @QueryHints(value = {
-      @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
-      @QueryHint(name = HINT_READONLY, value = "true")
-  })
-  Page<DigitalObjectListItemView> findDigitalObjectsByDCFulltext(
-      @Param("projectAbbrs") Set<String> projectAbbrs,
-      @Param("searchTerm") String searchTerm,
-      Pageable pageable);
-
-  /**
-   * Fulltext search over all dublin core fields of a digital object -> allows to retrict search to certain specific dc-fields.
-   * @param projectAbbrs list of project abbreviations
-   * @param elementNames list of DublinCoreElement names
-   * @param searchTerm search term
-   * @param pageable pagination information
-   * @return a page of digital objects
-   */
-  @Query(value = "SELECT DISTINCT do FROM DigitalObject do " +
-      "JOIN DublinCoreEntry dcm ON dcm.digitalObject = do " +
-      "WHERE dcm.name IN :elementNames " +
-      "AND LOWER(dcm.value) LIKE CONCAT('%', LOWER(:searchTerm), '%') " +
-      "AND do.project.projectAbbr IN :projectAbbrs")
-  @QueryHints(value = {
-      @QueryHint(name = HINT_FETCH_SIZE, value = "50"),
-      @QueryHint(name = HINT_READONLY, value = "true")
-  })
-  Page<DigitalObjectListItemView> findDigitalObjectsByFulltextOnSpecificElements(
-      @Param("projectAbbrs") Set<String> projectAbbrs,
-      @Param("elementNames") Set<String> elementNames,
-      @Param("searchTerm") String searchTerm,
-      Pageable pageable);
 
 }

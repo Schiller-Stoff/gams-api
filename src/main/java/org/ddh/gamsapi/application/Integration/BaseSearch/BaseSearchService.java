@@ -2,24 +2,27 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
+import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
+import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMimeView;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.Document;
-import org.ddh.gamsapi.domain.Datastream.DatastreamId;
-import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
-import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
-import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMimeView;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
-import org.ddh.gamsapi.application.Integration.Common.enums.GAMSAPIntegrationDatastreamId;
-import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
-import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
-import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +35,10 @@ public class BaseSearchService implements IIntegrationService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
+  private final IDublinCoreEntryRepository dublinCoreEntryRepository;
 
-  private final String GAMS_CORE = "gams";
 
-
-  private final SOLRClient solrClient;
+  private final SolrClient solrClient;
 
   @Override
   public void indexObjects(String projectAbbr) {
@@ -50,7 +52,7 @@ public class BaseSearchService implements IIntegrationService {
     log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
     // delete selected from GAMS core
-    solrClient.delete(GAMS_CORE, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
 
     // delete all from project core
     solrClient.delete(projectAbbr, "*:*");
@@ -91,27 +93,44 @@ public class BaseSearchService implements IIntegrationService {
     foundDatastreams.forEach(datastream -> {
       DatastreamId datastreamId =  DatastreamId.builder().dsid(datastream.getDsid()).digitalObject(id).build();
       // send custom search datastream directly to solr
-      if(datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)) {
-        sendCustomSolrDatastream(datastreamId, projectAbbr);
-      }
+      // TODO think about disabled custom solr indexing
+//      if(datastream.getDsid().equals(GAMSAPIntegrationDatastreamId.SEARCH_DATASTREAM_ID.name)) {
+//        sendCustomSolrDatastream(datastreamId, projectAbbr);
+//      }
 
       if(datastream.getDsid().equals(GAMSDsid.DC.getValue())){
         addDublinCore(baseSearch, datastreamId);
       }
 
-      // decide based on mimetype which documents to index
-      if(datastream.getMimeType().contains("xml")){
-        addFulltext(baseSearch, datastreamId);
-      }
-
-
     });
 
+    // TODO add logging
+    // add fulltext only for main resource or DC.xml
+    var fulltextDsid = digitalObject.getMainResource();
+    if(fulltextDsid == null || fulltextDsid.isEmpty()) {
+      fulltextDsid = GAMSDsid.DC.getValue();
+    }
+
+    // additionally check if datastream is xml
+    // TODO this is not elegant - because now the file ending must be contained - is this correct?
+    // TODO add logging
+    if(!fulltextDsid.contains(".xml")){
+      fulltextDsid = GAMSDsid.DC.getValue();
+    }
+
+    addFulltext(
+        baseSearch,
+        DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(fulltextDsid).build()
+    );
+
+
+
     // the end post base search entity to SOLR
-    solrClient.post(GAMS_CORE, baseSearch);
+    solrClient.post(SolrGamsCores.GAMS_CORE.value, baseSearch);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
   }
+
 
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
@@ -120,7 +139,7 @@ public class BaseSearchService implements IIntegrationService {
     id = id.replaceAll(":", "\\\\\\\\:");
 
     // delete object from GAMS core
-    solrClient.delete(GAMS_CORE, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
     // this requires solr documents to have the projectAbbr field
     solrClient.delete(projectAbbr, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
 
@@ -145,8 +164,6 @@ public class BaseSearchService implements IIntegrationService {
 
   }
 
-
-
   /**
    * Adds dublin core field to given base search entity.
    * TODO test
@@ -155,41 +172,21 @@ public class BaseSearchService implements IIntegrationService {
    * @param datastreamId datastream id
    */
   public void addDublinCore(BaseSearch baseSearch, DatastreamId datastreamId){
-    var dcContent =  datastreamContentRepository.findById(datastreamId);
-    Document dcXml;
-    try {
-      dcXml = XMLUtils.parseXml(dcContent.getInputStream());
-    } catch (IOException e) {
-      String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", dcContent.getDescription(), datastreamId, e);
+    var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(datastreamId.getDigitalObject());
+    if(dcEntries.isEmpty()){
+      String msg = String.format("No dublin core entries found for digital object %s", datastreamId.getDigitalObject());
       log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      throw new IntegrationDataProcessingException(msg);
     }
+    dcEntries.forEach(dcEntry -> {
+      String propertyName = "dc." + dcEntry.getName();
+      String nodeValue = dcEntry.getValue();
 
-    // retrieve all child elements of the root element
-    // TODO validate if it's correct dublin core?
-    // TODO this might be risky (will index all elements in the xml file)
-    var dcNodes = XMLUtils.getAllXpath("/*/*", dcXml);
-
-
-    for (int i = 0; i < dcNodes.getLength(); i++) {
-      var node = dcNodes.item(i);
-      String nodeName = node.getNodeName().replace(":", "_"); // solr recommends not to use colons in field names
-      String nodeValue = node.getTextContent();
-
-      // assign dynamic field for every dc element
-      String solrPostfix = "_ss";
-      // map lang attribute to solr if available
-      // TODO sophisticate handling of dublin core lang attribute
-      try {
-        String langAttributeValue = XMLUtils.extractAttributeValue("xml:lang", node);
-        solrPostfix = "_lang_" + langAttributeValue + solrPostfix;
-      } catch (IntegrationDataProcessingException e){
-        // no lang attribute found
-        log.trace("No lang attribute found for dublin core element {}", nodeName);
+      // if dc entry specifies a language -> prepend this e.g. 'en:'
+      if((dcEntry.getLanguage()) != null && (!dcEntry.getLanguage().isEmpty())){
+        nodeValue = dcEntry.getLanguage() + ": " +  nodeValue;
       }
 
-      String propertyName = nodeName + solrPostfix;
-      // add possible multiple values for the same field
       if(baseSearch.getProperty(propertyName) == null){
         baseSearch.addProperty(propertyName, List.of(nodeValue));
       } else {
@@ -198,7 +195,7 @@ public class BaseSearchService implements IIntegrationService {
         newValues.add(nodeValue);
         baseSearch.addProperty(propertyName, newValues);
       }
-    }
+    });
 
   }
 
@@ -217,6 +214,10 @@ public class BaseSearchService implements IIntegrationService {
       dcXml = XMLUtils.parseXml(xmlContent.getInputStream());
     } catch (IOException e) {
       String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", xmlContent.getDescription(), datastreamId, e);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    } catch (IntegrationDataProcessingException e) {
+      String msg = String.format("Failed to parse xml datastream %s. Original error: %s", datastreamId, e);
       log.error(msg);
       throw new DatastreamCannotLoadFileException(msg);
     }
@@ -249,6 +250,5 @@ public class BaseSearchService implements IIntegrationService {
     }
 
   }
-
 
 }

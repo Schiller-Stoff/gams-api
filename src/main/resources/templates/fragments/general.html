@@ -23,43 +23,26 @@
               <i class="ti ti-menu-2"></i>
             </a>
           </li>
-<!--          <li class="nav-item">-->
-<!--            <a class="nav-link nav-icon-hover" href="javascript:void(0)">-->
-<!--              <i class="ti ti-bell-ringing"></i>-->
-<!--              <div class="notification bg-primary rounded-circle"></div>-->
-<!--            </a>-->
-<!--          </li>-->
         </ul>
-        <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
-          <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-<!--            <li class="nav-item"><a href="/api/v1/userinfo"><i class="ti ti-user fs-6 rounded-circle text-black"></i></a></li>-->
-            <li class="nav-item"><a href="/api/v1/search/dc?projects=none"><i class="ti ti-search fs-6 rounded-circle text-black"></i></a></li>
 
-<!--            <a href="/api/v1" class="btn btn-outline-primary">Home</a>-->
-<!--            <li class="nav-item dropdown">-->
-<!--              <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"-->
-<!--                 aria-expanded="false">-->
-<!--                <i class="ti ti-user fs-6 rounded-circle"></i>-->
-<!--              </a>-->
-<!--              <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">-->
-<!--                <div class="message-body">-->
-<!--                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">-->
-<!--                    <i class="ti ti-user fs-6"></i>-->
-<!--                    <p class="mb-0 fs-3">My Profile</p>-->
-<!--                  </a>-->
-<!--                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">-->
-<!--                    <i class="ti ti-mail fs-6"></i>-->
-<!--                    <p class="mb-0 fs-3">My Account</p>-->
-<!--                  </a>-->
-<!--                  <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">-->
-<!--                    <i class="ti ti-list-check fs-6"></i>-->
-<!--                    <p class="mb-0 fs-3">My Task</p>-->
-<!--                  </a>-->
-<!--                  <a href="./authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </li>-->
-          </ul>
+        <!-- Fulltext Search Form - NEW -->
+        <div class="navbar-collapse justify-content-end px-0" id="navbarSearch">
+          <form action="/api/v1/integration/gsearch/fulltext" method="GET" class="d-flex w-100" style="max-width: 600px;">
+            <!-- Search input -->
+            <input type="text"
+                   name="q"
+                   class="form-control me-2"
+                   placeholder="Search fulltext..."
+                   aria-label="Fulltext search"
+                   minlength="2"
+                   required>
+
+            <!-- Search button -->
+            <button class="btn btn-primary" type="submit" style="white-space: nowrap;">
+              <i class="ti ti-search"></i>
+              <span class="d-none d-md-inline ms-1">Search</span>
+            </button>
+          </form>
         </div>
       </nav>
     </header>
@@ -105,11 +88,19 @@
               </a>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/api/v1/search/dc?projects=none" aria-expanded="false">
+              <a class="sidebar-link" href="/api/v1/integration/gsearch/fulltext" aria-expanded="false">
                 <span>
-                  <i class="ti ti-search"></i>
+                  <i class="ti ti-file-search"></i>
                 </span>
-                <span class="hide-menu">Search</span>
+                <span class="hide-menu">Fulltext</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="/api/v1/integration/gsearch/facets" aria-expanded="false">
+                <span>
+                  <i class="ti ti-list-search"></i>
+                </span>
+                <span class="hide-menu">Facets</span>
               </a>
             </li>
 <!--            <li class="nav-small-cap">-->

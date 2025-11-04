@@ -48,4 +48,11 @@ public interface IProjectService {
    */
   Project updateProject(Project project);
 
+
+  /**
+   * Finds all project abbreviations.
+   * @return List of project abbreviations as strings
+   */
+  List<String> findAllProjectAbbrs();
+
 }
