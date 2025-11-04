@@ -89,12 +89,10 @@ public class FacetService {
 
     long totalTime = System.currentTimeMillis() - startTime;
 
-    log.info("Solr faceted search with drill-down completed in {}ms - found {} filtered results (page {}/{}) out of {} total with {} facet fields",
+    log.info("Solr faceted search with drill-down completed in {}ms - found {} filtered results (page {}) out of {} total with {} facet fields",
         totalTime,
         parsedResponse.getNumFound(),
         pageable.getPageNumber() + 1,  // Display as 1-indexed for logging
-        // TODO move calculation into variable -> make more clear for what this is used - or maybe remove it?
-        (int) Math.ceil((double) parsedResponse.getNumFound() / pageable.getPageSize()),
         projectDocumentsCount,
         facetFields.size());
 
