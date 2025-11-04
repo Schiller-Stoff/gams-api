@@ -79,7 +79,7 @@ public class FacetControllerIT extends BaseSearchIntegrationTest {
 
     @BeforeEach
     public void setup() {
-      TEST_DC_URL_QUERY = "dc." + TestDublinCoreEntry.NAME.getValue() + "=" + TestDublinCoreEntry.VALUE.getValue();
+      TEST_DC_URL_QUERY = "dc.subject=Rumänisch";
       TEST_DC_SEARCH_REQUEST_URL = String.format("%s?projects=%s&%s",
           FACETED_SEARCH_BASE_URL,
           TestProject.PROJECT_ABBR.getValue(),
@@ -175,6 +175,41 @@ public class FacetControllerIT extends BaseSearchIntegrationTest {
           .contains(FULLTEXT_QUERY);
 
     }
+
+
+  }
+
+  @Nested
+  public class Webclient {
+
+    @Test
+    public void containsExpectedValues() throws Exception {
+
+      final String FULLTEXT_SEARCH_URL = String.format("%s?projects=%s", FacetController.FACET_SEARCH_PATH,
+          TestProject.PROJECT_ABBR.getValue()
+      );
+
+      String facetWebclientResponse = mockMvc.perform(
+              MockMvcRequestBuilders.get(FULLTEXT_SEARCH_URL)
+                  .accept(MediaType.TEXT_HTML_VALUE)
+          )
+          .andExpect(status().isOk())
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+      Assertions.assertThat(facetWebclientResponse)
+          .isNotEmpty()
+          .contains(
+              "Faceted Search",
+              TestDigitalObject.DIGITAL_OBJECT_ID.getValue(),
+              TestProject.PROJECT_ABBR.getValue(),
+              TestDublinCoreEntry.VALUE.getValue()
+          );
+
+
+    }
+
 
 
   }
