@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.UnitTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,8 +55,10 @@ public class FacetQueryBuilderTest extends UnitTest {
 
 
   @Nested
-  public class BuildSolrFacetQuery {
+  public class BuildSolrFacetDrilldownUrl {
 
+    final String TEST_FULLTEXT_QUERY = "Alex";
+    final Set<String> TEST_FACET_FIELDS = Set.of("dc.title", "dc.creator");
     MultiValueMap<String, String> TEST_DC_MAP;
 
     @BeforeEach
@@ -64,6 +67,26 @@ public class FacetQueryBuilderTest extends UnitTest {
       TEST_MAP.put("dc.title", List.of("Title 1", "Title 2"));
       TEST_MAP.put("dc.creator", List.of("Creator A"));
       TEST_DC_MAP = MultiValueMap.fromMultiValue(TEST_MAP);
+    }
+
+    @Test
+    public void builtSolrFacetQueryContainsExpectedValues(){
+      var builtFacetQuery = FacetQueryBuilder.buildSolrFacetDrilldownUrl(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          TEST_FULLTEXT_QUERY,
+          TEST_DC_MAP,
+          TEST_FACET_FIELDS,
+          PageRequest.of(0,10)
+      );
+
+      Assertions.assertThat(builtFacetQuery)
+          .isNotEmpty()
+          .contains(
+              TEST_FULLTEXT_QUERY,
+              TestProject.PROJECT_ABBR.getValue()
+          )
+          .contains(TEST_FACET_FIELDS);
     }
 
 
