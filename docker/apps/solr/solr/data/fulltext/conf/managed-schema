@@ -466,94 +466,28 @@
   <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
 
-  <!--  Basic id field of every solr document-->
+  <!-- Basic id field of every solr document-->
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 
-  <!--  Fields assigned from the internal, administrative metadata of the REST-API -->
-  <field name="objectTitle" type="string"/>
-  <field name="objectDesc" type="string"/>
-  <field name="objectDatastreams" type="strings" multiValued="true"/>
-    <!-- uses custom type with whitespace tokenizer -->
-    <field name="objectFulltext" type="text_fulltext" multiValued="false" stored="true"/>
-  <field name="objectProjectAbbr" type="string" multiValued="false"/>
-  <field name="objectType" type="string" multiValued="false"/>
-  <field name="objectCreator" type="string"/>
-  <field name="objectPublisher" type="string"/>
-  <field name="objectRights" type="string"/>
+  <!-- Document belongs to a digital object -->
+  <field name="objectId" type="string" multiValued="false" indexed="true" stored="true" required="true"/>
+  <!-- Document belongs to a project (abbreviation) -->
+  <field name="objectProjectAbbr" type="string" multiValued="false" indexed="true" stored="true" required="true"/>
 
+  <field name="entityFulltext" type="text_fulltext" multiValued="false" stored="true"/>
+  <field name="entityTags" type="strings" multiValued="true" required="false"/>
 
-    <!-- Dublin Core fields in alphabetical order -->
-    <field name="dc.contributor" type="strings" multiValued="true"/>
-    <field name="dc.coverage" type="strings" multiValued="true"/>
-    <field name="dc.creator" type="strings" multiValued="true" />
-    <field name="dc.date" type="strings" multiValued="true"/>
-    <field name="dc.description" type="strings" multiValued="true" />
-    <field name="dc.format" type="strings" multiValued="true" />
-    <field name="dc.identifier" type="strings" multiValued="true"/>
-    <field name="dc.language" type="strings" multiValued="true" />
-    <field name="dc.publisher" type="strings" multiValued="true"/>
-    <field name="dc.relation" type="strings" multiValued="true" />
-    <field name="dc.rights" type="strings" multiValued="true" />
-    <field name="dc.source" type="strings" multiValued="true" />
-    <field name="dc.subject" type="strings" multiValued="true" />
-    <field name="dc.title" type="strings" multiValued="true"/>
-    <field name="dc.type" type="strings" multiValued="true"/>
+  <!-- Temporal fields -->
+  <field name="entityStartDate" type="pdate" multiValued="false" required="false"/>
+  <field name="entityEndDate" type="pdate" multiValued="false" required="false"/>
 
+  <!--  Pointers and linking logic-->
+  <field name="entityPointers" type="strings" multiValued="true" required="false"/>
 
-    <!-- ====================================================================
-    DUBLIN CORE FIELDS - TOKENIZED VERSIONS FOR SUBSTRING SEARCH
-    ==================================================================== -->
-
-    <!--
-      These text_general fields enable substring matching and full-text search
-      on Dublin Core fields while preserving the original string fields for faceting.
-
-      Pattern: dc.{field}_txt stores tokenized version of dc.{field}
-    -->
-
-    <field name="dc.contributor_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.coverage_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.creator_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.date_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.description_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.format_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.identifier_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.language_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.publisher_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.relation_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.rights_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.source_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.subject_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.title_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-    <field name="dc.type_txt" type="text_general" multiValued="true" indexed="true" stored="false"/>
-
-
-    <!-- ====================================================================
-         COPY FIELDS - AUTOMATIC POPULATION OF TOKENIZED VERSIONS
-         ==================================================================== -->
-
-    <!--
-      CopyField directives automatically populate the _txt fields when documents
-      are indexed. This is transparent to the application code.
-
-      NOTE: No maxChars limit - we want full content for search
-    -->
-
-    <copyField source="dc.contributor" dest="dc.contributor_txt"/>
-    <copyField source="dc.coverage" dest="dc.coverage_txt"/>
-    <copyField source="dc.creator" dest="dc.creator_txt"/>
-    <copyField source="dc.date" dest="dc.date_txt"/>
-    <copyField source="dc.description" dest="dc.description_txt"/>
-    <copyField source="dc.format" dest="dc.format_txt"/>
-    <copyField source="dc.identifier" dest="dc.identifier_txt"/>
-    <copyField source="dc.language" dest="dc.language_txt"/>
-    <copyField source="dc.publisher" dest="dc.publisher_txt"/>
-    <copyField source="dc.relation" dest="dc.relation_txt"/>
-    <copyField source="dc.rights" dest="dc.rights_txt"/>
-    <copyField source="dc.source" dest="dc.source_txt"/>
-    <copyField source="dc.subject" dest="dc.subject_txt"/>
-    <copyField source="dc.title" dest="dc.title_txt"/>
-    <copyField source="dc.type" dest="dc.type_txt"/>
+  <!-- Geographical fields-->
+  <field name="entityLongLat" type="location"/>
+  <field name="entityLocationShape" type="location_rpt" indexed="true" stored="true"/>
+  <field name="entityLocationLabels" type="strings" multiValued="true"/>
 
   <dynamicField name="*_txt_en_split_tight" type="text_en_splitting_tight" indexed="true" stored="true"/>
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
