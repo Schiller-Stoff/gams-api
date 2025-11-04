@@ -70,7 +70,11 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
 
       Thread.sleep(2000);
 
-      // Create cores using absolute path (CLI method)
+      // ========================================
+      // CREATE ALL THREE CORES
+      // ========================================
+
+      // 1. TEST_CORE
       log.info("Creating '{}' core...", SolrGamsCores.TEST_CORE.value);
       var testCore = solr.execInContainer(
           "solr", "create_core", "-c", SolrGamsCores.TEST_CORE.value, "-d", "/tmp/base_configset"
@@ -79,9 +83,10 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
           testCore.getExitCode(), testCore.getStdout().trim());
 
       if (testCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode() + "stdout: " + testCore.getStdout());
+        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode() + " stdout: " + testCore.getStdout());
       }
 
+      // 2. GAMS_CORE
       log.info("Creating '{}' core...", SolrGamsCores.GAMS_CORE.value);
       var gamsCore = solr.execInContainer(
           "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", "/tmp/base_configset"
@@ -90,14 +95,27 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
 
       if (gamsCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode() + "stdout: " + testCore.getStdout());
+        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode() + " stdout: " + gamsCore.getStdout());
+      }
+
+      // 3. ADD FULLTEXT_CORE
+      log.info("Creating '{}' core...", SolrGamsCores.FULLTEXT_CORE.value);
+      var fulltextCore = solr.execInContainer(
+          "solr", "create_core", "-c", SolrGamsCores.FULLTEXT_CORE.value, "-d", "/tmp/base_configset"
+      );
+      log.info("Fulltext core - exitCode: {}, stdout: '{}'",
+          fulltextCore.getExitCode(), fulltextCore.getStdout().trim());
+
+      if (fulltextCore.getExitCode() != 0) {
+        throw new AssertionError("Failed to create fulltext core. Exit: " + fulltextCore.getExitCode() + " stdout: " + fulltextCore.getStdout());
       }
 
       Thread.sleep(1000);
-      log.info("✓ Solr test container fully initialized");
+      log.info("✓ Solr test container fully initialized with 3 cores");
 
     } catch (Exception e) {
-      // ... existing error handling ...
+      log.error("Failed to initialize Solr container", e);
+      throw new RuntimeException("Solr initialization failed", e);
     }
   }
 
@@ -114,7 +132,7 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
       log.debug("Cleaning up Solr cores after test");
       solrClient.wipeCore(SolrGamsCores.GAMS_CORE.value);
       solrClient.wipeCore(SolrGamsCores.TEST_CORE.value);
-      // needs to be called - teardown in parent class is not called automatically
+      solrClient.wipeCore(SolrGamsCores.FULLTEXT_CORE.value);
       super.tearDown();
     } catch (Exception e) {
       log.warn("Failed to wipe cores in tearDown: {}", e.getMessage());
