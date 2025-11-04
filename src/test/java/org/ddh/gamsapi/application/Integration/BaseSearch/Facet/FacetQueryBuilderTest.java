@@ -1,0 +1,96 @@
+package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
+
+import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.UnitTest;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.util.MultiValueMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+public class FacetQueryBuilderTest extends UnitTest {
+
+  @Nested
+  public class BuildSolrFacetUrl {
+
+    @Test
+    public void builtSolrUrlContainsExpectedValues(){
+      var TEST_CORE_NAME = "test_core";
+      var TEST_FACET_QUERY = "dc.title:Test";
+      var TEST_FACET_FIELDS = Set.of("dc.title", "dc.creator");
+      var TEST_PAGEABLE =  PageRequest.of(
+          0,
+          10,
+          org.springframework.data.domain.Sort.by("dc.title").ascending()
+      );
+      var TEST_FILTER_QUERIES = List.<String>of();
+
+      var builtUrl =  FacetQueryBuilder.buildSolrFacetUrl(
+          TEST_CORE_NAME,
+          TEST_FACET_QUERY,
+          TEST_FILTER_QUERIES,
+          TEST_FACET_FIELDS,
+          TEST_PAGEABLE
+      );
+
+      Assertions.assertThat(builtUrl)
+          .isNotEmpty()
+          .contains("/solr/test_core/select")
+          .contains("q=dc.title:Test")
+          .contains("start=0")
+          .contains("rows=10")
+          .contains("sort=dc.title%20asc")
+          .contains("fl=")
+          .contains("dc.title")
+          .contains("dc.creator");
+    }
+
+  }
+
+
+  @Nested
+  public class BuildSolrFacetDrilldownUrl {
+
+    final String TEST_FULLTEXT_QUERY = "Alex";
+    final Set<String> TEST_FACET_FIELDS = Set.of("dc.title", "dc.creator");
+    MultiValueMap<String, String> TEST_DC_MAP;
+
+    @BeforeEach
+    public void setup(){
+      final Map<String, List<String>> TEST_MAP = new HashMap<String, List<String>>();
+      TEST_MAP.put("dc.title", List.of("Title 1", "Title 2"));
+      TEST_MAP.put("dc.creator", List.of("Creator A"));
+      TEST_DC_MAP = MultiValueMap.fromMultiValue(TEST_MAP);
+    }
+
+    @Test
+    public void builtSolrFacetQueryContainsExpectedValues(){
+      var builtFacetQuery = FacetQueryBuilder.buildSolrFacetDrilldownUrl(
+          SolrGamsCores.TEST_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          TEST_FULLTEXT_QUERY,
+          TEST_DC_MAP,
+          TEST_FACET_FIELDS,
+          PageRequest.of(0,10)
+      );
+
+      Assertions.assertThat(builtFacetQuery)
+          .isNotEmpty()
+          .contains(
+              TEST_FULLTEXT_QUERY,
+              TestProject.PROJECT_ABBR.getValue()
+          )
+          .contains(TEST_FACET_FIELDS);
+    }
+
+
+  }
+
+
+}

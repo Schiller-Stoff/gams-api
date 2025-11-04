@@ -3,6 +3,8 @@
            xmlns:t="http://www.tei-c.org/ns/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <dc:title>test-dc-title</dc:title>
     <dc:title xml:lang="en">test-dc-title-en</dc:title>
+    <dc:identifier>test-dc-title</dc:identifier>
+    <dc:identifier xml:lang="en">test-dc-title-en</dc:identifier>
     <dc:description>test-dc-description</dc:description>
     <dc:description xml:lang="en">test-dc-description-en</dc:description>
     <dc:relation>Hugo Schuchardt Archiv</dc:relation>
@@ -24,10 +26,6 @@
     <dc:coverage>Paris</dc:coverage>
     <dc:rights>Creative Commons BY-NC 4.0</dc:rights>
     <dc:rights>http://creativecommons.org/licenses/by-nc/4.0</dc:rights>
-    <dc:subject>
-        Romania (Zeitschrift)
-    </dc:subject>
-    <dc:subject>
-        Rumänisch
-    </dc:subject>
+    <dc:subject>Romania (Zeitschrift)</dc:subject>
+    <dc:subject>Rumänisch</dc:subject>
 </oai_dc:dc>
