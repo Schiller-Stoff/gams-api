@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
@@ -18,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,10 +50,11 @@ public class SolrClient {
 
   /**
    * Post a base search entity to the solr server.
-   * @param coreName name of the core to post to
+   *
+   * @param coreName           name of the core to post to
    * @param baseSearchEntities the base search entities to post
    */
-  public void post(String coreName, BaseSearch[] baseSearchEntities){
+  public void post(String coreName, BaseSearch[] baseSearchEntities, boolean commit) {
     log.trace("Posting base search entity to solr");
 
     byte[] json;
@@ -66,64 +67,96 @@ public class SolrClient {
       throw new IntegrationDataProcessingException(msg);
     }
 
-    this.post(coreName, json);
+    this.post(coreName, json, commit);
 
   }
-
 
   /**
    * Post a single base search entity to the solr server.
-   * @param coreName name of the core to post to
+   *
+   * @param coreName         name of the core to post to
    * @param baseSearchEntity the base search entity to post
    */
-  public void post(String coreName, BaseSearch baseSearchEntity){
-    post(coreName, new BaseSearch[]{baseSearchEntity});
+  public void post(String coreName, BaseSearch baseSearchEntity) {
+    post(coreName, new BaseSearch[]{baseSearchEntity}, true);  // Default: commit
   }
 
-  public void post(String coreName, byte[] data){
-    log.trace("Posting now byte array data to solr core {}", coreName);
+  /**
+   * Post multiple base search entities to the solr server.
+   *
+   * @param coreName           name of the core to post to
+   * @param baseSearchEntities the base search entities to post
+   */
+  public void post(String coreName, BaseSearch[] baseSearchEntities) {
+    post(coreName, baseSearchEntities, true);  // Default: commit
+  }
 
-    String postUrl = String.format("%s/%s/update/json/docs?commit=true", SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
+  /**
+   * Post raw JSON bytes to the solr server.
+   *
+   * @param coreName name of the core to post to
+   * @param json     the JSON bytes to post
+   */
+  public void post(String coreName, byte[] json) {
+    post(coreName, json, true);  // Default: commit
+  }
+
+  /**
+   * Post raw JSON bytes to the solr server with optional commit.
+   *
+   * @param coreName name of the core to post to
+   * @param json     the JSON bytes to post
+   * @param commit   whether to commit after posting
+   */
+  public void post(String coreName, byte[] json, boolean commit) {
+    log.trace("Posting byte array data to solr core {} (commit={})", coreName, commit);
+
+    String postUrl = String.format("%s/%s/update/json/docs?commit=%s",
+        SOLR_SINGLE_CORE_API_ENDPOINT, coreName, commit);
 
     try {
       webClient.post()
           .uri(postUrl)
           .contentType(MediaType.APPLICATION_JSON)
-          .bodyValue(data)
+          .bodyValue(json)
           .retrieve()
           .toBodilessEntity()
           .block();
+
+      log.info("Successfully posted data to solr core {}", coreName);
+
     } catch (WebClientResponseException e) {
-      // This exception contains the response body from the server
       String errorResponseBody = e.getResponseBodyAsString();
-      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
-          coreName, SOLR_BASE_URL, postUrl, e.getStatusCode(), errorResponseBody);
+      String msg = String.format(
+          "Failed to post data to solr core %s. Status: %s. Error response from solr: %s",
+          coreName, e.getStatusCode(), errorResponseBody
+      );
       log.error(msg);
       throw new IntegrationServiceException(msg);
     } catch (WebClientException e) {
-      String msg = String.format("Failed to post data to solr core %s. Via baseUrl %s and endpoint %s and body %s Cause: %s. Original error: %s", coreName, SOLR_BASE_URL, postUrl, Arrays.toString(data), e.getMessage(), e);
-      log.error(msg);
+      String msg = String.format("Failed to post data to solr core %s. Cause: %s",
+          coreName, e.getMessage());
+      log.error(msg, e);
       throw new IntegrationServiceException(msg);
     }
-
-
   }
 
   /**
    * Creates a new core on the SOLR server.
+   *
    * @param coreName the name of the core to create
    * @return the response body from the server
    */
   public String createCore(String coreName) {
     final String URL = SOLR_CORE_API_ENDPOINT;
     String body = String.format("""
-                {
-                    "create": {
-                      "name": "%s",
-                      "configSet": "base"
-                    }
-                  }
-              """, coreName);
+          {
+              "create": {
+                "name": "%s",
+                "configSet": "base"
+              }
+            }
+        """, coreName);
 
     try {
       return webClient.post()
@@ -133,7 +166,7 @@ public class SolrClient {
           .retrieve()
           .bodyToMono(String.class)
           .block();
-    } catch (WebClientResponseException e){
+    } catch (WebClientResponseException e) {
       // This exception contains the response body from the server
       String errorResponseBody = e.getResponseBodyAsString();
       String msg = String.format("Failed to create solr core for project %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
@@ -149,8 +182,9 @@ public class SolrClient {
 
   /**
    * Deletes all documents in a core that match a query.
+   *
    * @param coreName the name of the core to delete documents from
-   * @param query the query to match documents to delete
+   * @param query    the query to match documents to delete
    */
   public void delete(String coreName, String query) {
 
@@ -193,25 +227,26 @@ public class SolrClient {
   /**
    * Check if a core exists for a given project.
    * Requests against the select endpoint of the core. (If a http error is sent back -> core doesn't exist)
+   *
    * @param coreName the name of the core to check
    * @return true if the core exists, false otherwise
    */
-  public boolean coreExists(String coreName){
+  public boolean coreExists(String coreName) {
     log.trace("Checking if core {} exists", coreName);
     final String CORE_STATUS_URL = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/select";
 
     try {
       return Boolean.TRUE.equals(
           webClient.get()
-            .uri(CORE_STATUS_URL)
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, clientResponse -> Mono.error(new HttpClientErrorException(clientResponse.statusCode())))
-            .bodyToMono(String.class)
-            .map(response -> true)
-            .onErrorReturn(false)
-            .block()
+              .uri(CORE_STATUS_URL)
+              .retrieve()
+              .onStatus(HttpStatusCode::isError, clientResponse -> Mono.error(new HttpClientErrorException(clientResponse.statusCode())))
+              .bodyToMono(String.class)
+              .map(response -> true)
+              .onErrorReturn(false)
+              .block()
       );
-    } catch (WebClientException e){
+    } catch (WebClientException e) {
       String msg = String.format("Failed to check if solr core exists for project %s. Via url: %s Cause: %s Original error: %s", coreName, CORE_STATUS_URL, e.getMessage(), e);
       log.error(msg);
       throw new IntegrationServiceException(msg);
@@ -221,9 +256,10 @@ public class SolrClient {
 
   /**
    * Deletes a core from the SOLR server.
+   *
    * @param coreName the name of the core to delete
    */
-  public void removeCore(String coreName){
+  public void removeCore(String coreName) {
 
     final String URL = String.format("%s?action=UNLOAD&core=%s&deleteInstanceDir=true", SOLR_CORE_ADMIN_API_ENDPOINT, coreName);
 
@@ -234,7 +270,7 @@ public class SolrClient {
           .retrieve()
           .bodyToMono(String.class)
           .block();
-    } catch (WebClientResponseException e){
+    } catch (WebClientResponseException e) {
       // This exception contains the response body from the server
       String errorResponseBody = e.getResponseBodyAsString();
       String msg = String.format("Failed to delete solr core %s. Via baseUrl %s and endpoint %s. Status: %s. Error response from solr: %s",
@@ -252,18 +288,20 @@ public class SolrClient {
 
   /**
    * Wipes all documents from a core.
+   *
    * @param coreName the name of the core to wipe
    */
-  public void wipeCore(String coreName){
+  public void wipeCore(String coreName) {
     log.trace("Wiping core {}", coreName);
     this.delete(coreName, "*:*");
   }
 
   /**
    * Checks if a core is empty.
+   *
    * @param coreName the name of the core to check
    */
-  public boolean checkCoreIsEmpty(String coreName){
+  public boolean checkCoreIsEmpty(String coreName) {
     log.trace("Checking if core {} is empty", coreName);
     final String CORE_QUERY_URL = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/select?q=*:*&rows=0";
 
@@ -299,12 +337,13 @@ public class SolrClient {
 
   /**
    * Retrieve a document from a core by a specific property.
-   * @param coreName name of the solr core
-   * @param propertyName name of the property to search by (of the solr document)
+   *
+   * @param coreName      name of the solr core
+   * @param propertyName  name of the property to search by (of the solr document)
    * @param propertyValue value of the property to search by
    * @return the response body from the server
    */
-  public String retrieveSolrDocumentByProperty(String coreName, String propertyName, String propertyValue){
+  public String retrieveSolrDocumentByProperty(String coreName, String propertyName, String propertyValue) {
 
     final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s:%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, propertyName, propertyValue);
     log.trace("Retrieving document from core {} with property {}={}", coreName, propertyName, propertyValue);
@@ -367,17 +406,18 @@ public class SolrClient {
 
   /**
    * Count documents in a Solr core for a specific project.
-   * @param coreName name of the solr core
+   *
+   * @param coreName     name of the solr core
    * @param projectAbbrs set of project abbreviations to count documents for (might be empty)
    * @return
    */
-  public int countProjectDocuments(String coreName, Set<String> projectAbbrs){
+  public int countProjectDocuments(String coreName, Set<String> projectAbbrs) {
 
     StringBuilder url = new StringBuilder();
     url.append(String.format("/solr/%s/select?", coreName));
 
     // Project filter
-    if(projectAbbrs.isEmpty()){
+    if (projectAbbrs.isEmpty()) {
       url.append(String.format("q=%s:*", BaseSearchProperties.PROJECT.name));
     } else if (projectAbbrs.size() == 1) {
       url.append(String.format("q=%s:%s",
@@ -479,6 +519,70 @@ public class SolrClient {
       );
       log.error(msg);
       throw new IntegrationServiceException(msg);
+    }
+  }
+
+
+  /**
+   * Explicitly commits changes to Solr core.
+   * Use after batch indexing operations for optimal performance.
+   *
+   * @param coreName Solr core name
+   */
+  public void commit(String coreName) {
+    log.debug("Committing core: {}", coreName);
+
+    String commitUrl = String.format("%s/%s/update?commit=true",
+        SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
+
+    try {
+      webClient.post()
+          .uri(commitUrl)
+          .retrieve()
+          .toBodilessEntity()
+          .block();
+
+      log.info("Successfully committed core: {}", coreName);
+
+    } catch (WebClientResponseException e) {
+      String errorBody = e.getResponseBodyAsString();
+      String msg = String.format(
+          "Failed to commit core %s. Status: %s. Solr error: %s",
+          coreName, e.getStatusCode(), errorBody
+      );
+      log.error(msg);
+      throw new IntegrationServiceException(msg);
+    } catch (WebClientException e) {
+      String msg = String.format("Network error committing core %s: %s", coreName, e.getMessage());
+      log.error(msg, e);
+      throw new IntegrationServiceException(msg);
+    }
+  }
+
+  /**
+   * Gets document count in Solr core.
+   *
+   * @param coreName Solr core name
+   * @return Number of documents in core
+   */
+  public long getDocumentCount(String coreName) {
+    String queryUrl = String.format("%s/%s/select?q=*:*&rows=0&wt=json",
+        SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
+
+    try {
+      String response = webClient.get()
+          .uri(queryUrl)
+          .retrieve()
+          .bodyToMono(String.class)
+          .block();
+
+      // Parse response to get numFound
+      JsonNode root = OBJECT_MAPPER.readTree(response);
+      return root.path("response").path("numFound").asLong(0);
+
+    } catch (Exception e) {
+      log.error("Failed to get document count for core: {}", coreName, e);
+      return 0;
     }
   }
 
