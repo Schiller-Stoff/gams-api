@@ -18,6 +18,11 @@ import java.time.Duration;
 
 /**
  * Handles integration of apache solr for testing.
+ *
+ * CRITICAL CHANGES:
+ * 1. Mounts BOTH base and custom-fulltext configsets
+ * 2. Creates FULLTEXT_CORE with custom-fulltext configuration
+ * 3. Creates GAMS_CORE and TEST_CORE with base configuration
  */
 @Slf4j
 public class BaseSearchIntegrationTest extends IntegrationTest {
@@ -28,20 +33,40 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
   static final SolrContainer solr;
 
   static {
+    // ========================================
+    // VALIDATE CONFIGSET EXISTENCE
+    // ========================================
     String baseConfigsetPath = "docker/apps/solr/solr/data/configsets/base";
+    String customFulltextConfigPath = "docker/apps/solr/solr/data/custom-fulltext";
+
     File baseConfigset = new File(baseConfigsetPath);
+    File customFulltextConfig = new File(customFulltextConfigPath);
 
     if (!baseConfigset.exists()) {
       throw new AssertionError("'base' configset not found at: " + baseConfigset.getAbsolutePath());
     }
 
-    log.info("✓ Found 'base' configset at: {}", baseConfigset.getAbsolutePath());
+    if (!customFulltextConfig.exists()) {
+      throw new AssertionError("'custom-fulltext' config not found at: " + customFulltextConfig.getAbsolutePath());
+    }
 
+    log.info("✓ Found 'base' configset at: {}", baseConfigset.getAbsolutePath());
+    log.info("✓ Found 'custom-fulltext' config at: {}", customFulltextConfig.getAbsolutePath());
+
+    // ========================================
+    // CONTAINER SETUP WITH BOTH CONFIGSETS
+    // ========================================
     solr = new SolrContainer(DockerImageName.parse("solr:9.2.1"))
         .withZookeeper(false)
+        // Mount base configset
         .withCopyToContainer(
             MountableFile.forHostPath(baseConfigsetPath),
             "/tmp/base_configset"
+        )
+        // Mount custom-fulltext configset
+        .withCopyToContainer(
+            MountableFile.forHostPath(customFulltextConfigPath),
+            "/tmp/custom_fulltext_configset"
         )
         .waitingFor(Wait.forHttp("/solr/admin/cores?action=STATUS")
             .forPort(8983)
@@ -53,29 +78,44 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
       solr.start();
       log.info("✓ Solr started at {}:{}", solr.getHost(), solr.getSolrPort());
 
-      // Copy to /var/solr/data/configsets for API usage
-      log.info("Copying configset to /var/solr/data/configsets for API access...");
+      // ========================================
+      // COPY CONFIGSETS TO SOLR DATA DIR
+      // ========================================
+      log.info("Copying configsets to /var/solr/data/configsets for API access...");
       solr.execInContainer("mkdir", "-p", "/var/solr/data/configsets");
 
-      var copyForApi = solr.execInContainer(
+      // Copy base configset
+      var copyBaseForApi = solr.execInContainer(
           "sh", "-c",
           "cp -r /tmp/base_configset /var/solr/data/configsets/base && chmod -R 755 /var/solr/data/configsets/base"
       );
 
-      if (copyForApi.getExitCode() != 0) {
-        log.warn("Failed to copy to /var/solr/data/configsets (API won't work): {}", copyForApi.getStderr());
+      if (copyBaseForApi.getExitCode() != 0) {
+        log.warn("Failed to copy base configset: {}", copyBaseForApi.getStderr());
       } else {
-        log.info("✓ Configset copied to /var/solr/data/configsets/base for API usage");
+        log.info("✓ Base configset copied to /var/solr/data/configsets/base");
+      }
+
+      // Copy custom-fulltext configset
+      var copyCustomForApi = solr.execInContainer(
+          "sh", "-c",
+          "cp -r /tmp/custom_fulltext_configset /var/solr/data/configsets/custom-fulltext && chmod -R 755 /var/solr/data/configsets/custom-fulltext"
+      );
+
+      if (copyCustomForApi.getExitCode() != 0) {
+        log.warn("Failed to copy custom-fulltext configset: {}", copyCustomForApi.getStderr());
+      } else {
+        log.info("✓ Custom-fulltext configset copied to /var/solr/data/configsets/custom-fulltext");
       }
 
       Thread.sleep(2000);
 
       // ========================================
-      // CREATE ALL THREE CORES
+      // CREATE CORES WITH CORRECT CONFIGSETS
       // ========================================
 
-      // 1. TEST_CORE
-      log.info("Creating '{}' core...", SolrGamsCores.TEST_CORE.value);
+      // 1. TEST_CORE (uses base configset)
+      log.info("Creating '{}' core with BASE configset...", SolrGamsCores.TEST_CORE.value);
       var testCore = solr.execInContainer(
           "solr", "create_core", "-c", SolrGamsCores.TEST_CORE.value, "-d", "/tmp/base_configset"
       );
@@ -83,11 +123,12 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
           testCore.getExitCode(), testCore.getStdout().trim());
 
       if (testCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode() + " stdout: " + testCore.getStdout());
+        throw new AssertionError("Failed to create test core. Exit: " + testCore.getExitCode() +
+            " stdout: " + testCore.getStdout());
       }
 
-      // 2. GAMS_CORE
-      log.info("Creating '{}' core...", SolrGamsCores.GAMS_CORE.value);
+      // 2. GAMS_CORE (uses base configset)
+      log.info("Creating '{}' core with BASE configset...", SolrGamsCores.GAMS_CORE.value);
       var gamsCore = solr.execInContainer(
           "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", "/tmp/base_configset"
       );
@@ -95,23 +136,29 @@ public class BaseSearchIntegrationTest extends IntegrationTest {
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
 
       if (gamsCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode() + " stdout: " + gamsCore.getStdout());
+        throw new AssertionError("Failed to create GAMS core. Exit: " + gamsCore.getExitCode() +
+            " stdout: " + gamsCore.getStdout());
       }
 
-      // 3. ADD FULLTEXT_CORE
-      log.info("Creating '{}' core...", SolrGamsCores.FULLTEXT_CORE.value);
+      // 3. FULLTEXT_CORE (uses CUSTOM-FULLTEXT configset) ← THE KEY CHANGE
+      log.info("Creating '{}' core with CUSTOM-FULLTEXT configset...", SolrGamsCores.FULLTEXT_CORE.value);
       var fulltextCore = solr.execInContainer(
-          "solr", "create_core", "-c", SolrGamsCores.FULLTEXT_CORE.value, "-d", "/tmp/base_configset"
+          "solr", "create_core", "-c", SolrGamsCores.FULLTEXT_CORE.value,
+          "-d", "/tmp/custom_fulltext_configset"  // ← USES CUSTOM CONFIG
       );
       log.info("Fulltext core - exitCode: {}, stdout: '{}'",
           fulltextCore.getExitCode(), fulltextCore.getStdout().trim());
 
       if (fulltextCore.getExitCode() != 0) {
-        throw new AssertionError("Failed to create fulltext core. Exit: " + fulltextCore.getExitCode() + " stdout: " + fulltextCore.getStdout());
+        throw new AssertionError("Failed to create fulltext core. Exit: " + fulltextCore.getExitCode() +
+            " stdout: " + fulltextCore.getStdout());
       }
 
       Thread.sleep(1000);
       log.info("✓ Solr test container fully initialized with 3 cores");
+      log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.TEST_CORE.value);
+      log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.GAMS_CORE.value);
+      log.info("  - {} (custom-fulltext schema): entityFulltext, entity* fields", SolrGamsCores.FULLTEXT_CORE.value);
 
     } catch (Exception e) {
       log.error("Failed to initialize Solr container", e);
