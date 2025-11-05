@@ -1,5 +1,8 @@
 package org.ddh.gamsapi.application.Integration.BaseSearch;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
@@ -24,7 +27,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -232,6 +237,109 @@ public class BaseSearchService implements IIntegrationService {
     }
 
   }
+
+  /**
+   * Indexes all digital objects for a given project that have FULLTEXT_INDEX.json datastream.
+   * @param projectAbbr project abbreviation
+   */
+  public void indexCustom(String projectAbbr){
+
+    log.info("*** BaseSearchService: Starting project indexing for: {}", projectAbbr);
+
+    List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
+
+    if (digitalObjects.isEmpty()) {
+      log.info("No digital objects found for project: {}", projectAbbr);
+      return;
+    }
+
+    log.info("Found {} digital objects for project {}", digitalObjects.size(), projectAbbr);
+
+    List<DatastreamId> objectIdsWithFulltext = new ArrayList<>();
+
+    // TODO instead use method on datastream repository to find all datastreams that match FULLTEXT_INDEX.json
+    digitalObjects.forEach(digitalObject -> {
+      var datastreamId = DatastreamId.builder()
+          .digitalObject(digitalObject.getId())
+          .dsid("FULLTEXT_INDEX.json")
+          .build();
+      if(datastreamRepository.existsById(datastreamId)){
+        objectIdsWithFulltext.add(datastreamId);
+      }
+    });
+
+    /////
+    //
+    // BATCH INDEX ALL fulltext documents together
+
+    if(objectIdsWithFulltext.isEmpty()){
+      log.info("No digital objects with FULLTEXT_INDEX.json datastream found for project: {}", projectAbbr);
+      return;
+    }
+
+    int batchCount = 0;
+    int objectsProcessed = 0;
+
+    // TODO this should be configurable?
+    final int DEFAULT_BATCH_SIZE = 500;
+
+
+    List<BaseSearch> currentBatch = new ArrayList<>(500);
+    for (DatastreamId datastreamId : objectIdsWithFulltext) {
+      objectsProcessed++;
+
+      // load datastream content
+      InputStreamResource resource = datastreamContentRepository.findById(datastreamId);
+
+      // parse datastream content as BaseSearch array
+      BaseSearch[] baseSearch;
+      try {
+        baseSearch = BaseSearch.from(resource);
+      } catch (IOException e) {
+        String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", resource.getDescription(), datastreamId, e);
+        log.error(msg);
+        // TODO better / different exception
+        throw new DatastreamCannotLoadFileException(msg);
+      }
+
+      // TODO validate baseSearch entries?
+
+      //02. add to batch
+      // TODO fix - inefficient array to list conversion - and back
+      currentBatch.addAll(Arrays.asList(baseSearch));
+
+      //03. After reaching batch size, post to solr + clear batch (with commit)
+      // Flush batch if it's getting full (but don't commit yet)
+      if (currentBatch.size() >= DEFAULT_BATCH_SIZE) {
+        log.info("Processed {} BaseSearch objects from datastream {} - current batch: {}", currentBatch.size(), datastreamId, currentBatch);
+        solrClient.post(SolrGamsCores.FULLTEXT_CORE.value, currentBatch.toArray(new BaseSearch[0]));
+        currentBatch.clear();
+        batchCount++;
+        log.info("Processed batch {} for fulltext core ({} objects processed so far)", batchCount, objectsProcessed);
+      }
+
+    }
+
+    // Post remaining documents in batch (e.g. when batch size not reached at the end / or never reached)
+    if (!currentBatch.isEmpty()) {
+      solrClient.post(SolrGamsCores.FULLTEXT_CORE.value, currentBatch.toArray(new BaseSearch[0]));
+    }
+
+
+
+    // TODO think about - do i really need to commit by hand?
+    // Final commit
+//    try {
+//      solrClient.commit(SolrGamsCores.FULLTEXT_CORE.value);
+//      log.info("Final commit completed for fulltext core");
+//    } catch (Exception e) {
+//      //stats.addWarning("Final commit failed: " + e.getMessage());
+//    }
+
+
+
+  }
+
 
   /**
    * Sends custom solr datastream to solr.
