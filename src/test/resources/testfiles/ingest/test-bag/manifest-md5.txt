@@ -4,3 +4,4 @@
 440193d9633d8449ee1bff28030fe045 data/content/search.json
 540193d9633d8449ee1bff28030fe045 data/meta/sip.json
 640193d9633d8449ee1bff28030fe045 data/content/test.xml
+740193d9633d8449ee1bff28030fe045 data/content/FULLTEXT_INDEX.json
