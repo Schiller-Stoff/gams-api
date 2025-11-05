@@ -7,7 +7,7 @@ public enum SolrGamsCores {
 
   GAMS_CORE("gams"),
   TEST_CORE("test"),
-  FULLTEXT_CORE("fulltext"),
+  FULLTEXT_CORE("custom-fulltext"),
   BASE_CORE_CONFIG("base");
 
   public final String value;
