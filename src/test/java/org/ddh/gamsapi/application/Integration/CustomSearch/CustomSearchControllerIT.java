@@ -72,7 +72,7 @@ public class CustomSearchControllerIT extends BaseSearchIntegrationTest {
     public void customIndexCreatesAtLeastOneDocumentInFulltextCore() throws Exception {
 
       int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
-          SolrGamsCores.FULLTEXT_CORE.value,
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
@@ -87,7 +87,7 @@ public class CustomSearchControllerIT extends BaseSearchIntegrationTest {
           .andExpect(status().isOk());
 
       int fulltextCoreDocumentCount = solrClient.countProjectDocuments(
-          SolrGamsCores.FULLTEXT_CORE.value,
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -108,7 +108,7 @@ public class CustomSearchControllerIT extends BaseSearchIntegrationTest {
 
       // first index some documents
       int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
-          SolrGamsCores.FULLTEXT_CORE.value,
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -126,7 +126,7 @@ public class CustomSearchControllerIT extends BaseSearchIntegrationTest {
           .andExpect(status().isOk());
 
       int fulltextCoreDocumentCountAfterDelete = solrClient.countProjectDocuments(
-          SolrGamsCores.FULLTEXT_CORE.value,
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 

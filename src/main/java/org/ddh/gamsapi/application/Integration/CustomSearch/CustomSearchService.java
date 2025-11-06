@@ -112,7 +112,7 @@ public class CustomSearchService implements IIntegrationService {
       // Flush batch if it's getting full (but don't commit yet)
       if (currentBatch.size() >= DEFAULT_BATCH_SIZE) {
         log.info("Processed {} BaseSearch objects from datastream {} - current batch: {}", currentBatch.size(), datastreamId, currentBatch);
-        solrClient.post(SolrGamsCores.FULLTEXT_CORE.value, currentBatch.toArray(new BaseSearch[0]));
+        solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value, currentBatch.toArray(new BaseSearch[0]));
         currentBatch.clear();
         batchCount++;
         log.info("Processed batch {} for fulltext core ({} objects processed so far)", batchCount, objectsProcessed);
@@ -122,7 +122,7 @@ public class CustomSearchService implements IIntegrationService {
 
     // Post remaining documents in batch (e.g. when batch size not reached at the end / or never reached)
     if (!currentBatch.isEmpty()) {
-      solrClient.post(SolrGamsCores.FULLTEXT_CORE.value, currentBatch.toArray(new BaseSearch[0]));
+      solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value, currentBatch.toArray(new BaseSearch[0]));
     }
 
 
@@ -149,7 +149,7 @@ public class CustomSearchService implements IIntegrationService {
   public void deleteIndexedObjects(String projectAbbr) {
     final String DELETE_QUERY = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
     solrClient.delete(
-        SolrGamsCores.FULLTEXT_CORE.value,
+        SolrGamsCores.CUSTOM_SEARCH_CORE.value,
         DELETE_QUERY
     );
     log.info("Deled all indexed objects for project: {} from custom search core", projectAbbr);
@@ -180,7 +180,7 @@ public class CustomSearchService implements IIntegrationService {
     // TODO hardcoded string
     final String DELETE_QUERY = String.format("%s:%s", "objectId", id);
     solrClient.delete(
-        SolrGamsCores.FULLTEXT_CORE.value, DELETE_QUERY
+        SolrGamsCores.CUSTOM_SEARCH_CORE.value, DELETE_QUERY
     );
     log.info("Deleted indexed object with id: {} from custom search core", id);
   }

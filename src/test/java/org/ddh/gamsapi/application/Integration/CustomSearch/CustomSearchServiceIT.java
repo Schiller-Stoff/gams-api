@@ -67,10 +67,10 @@ public class CustomSearchServiceIT extends BaseSearchIntegrationTest {
       customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
 
       String response = solrClient.retrieveSolrDocumentByProperty(
-          SolrGamsCores.FULLTEXT_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
-      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.FULLTEXT_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
 
       org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
           .isGreaterThan(0);
