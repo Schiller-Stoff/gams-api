@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
 import org.ddh.gamsapi.UnitTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

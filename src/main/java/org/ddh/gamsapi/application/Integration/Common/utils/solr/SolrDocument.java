@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;

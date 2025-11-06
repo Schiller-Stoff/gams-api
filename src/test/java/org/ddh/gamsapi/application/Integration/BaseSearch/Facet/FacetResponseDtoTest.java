@@ -2,7 +2,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.UnitTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;

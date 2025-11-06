@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Common.utils.solr;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
@@ -6,6 +6,8 @@ import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

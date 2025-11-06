@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.UnitTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

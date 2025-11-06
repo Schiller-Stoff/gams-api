@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 
 /**
  * Enum of Solr cores used in GAMS.

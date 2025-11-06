@@ -2,8 +2,8 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrClient;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;

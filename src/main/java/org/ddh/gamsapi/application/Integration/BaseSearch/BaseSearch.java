@@ -5,10 +5,9 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.springframework.core.io.InputStreamResource;
 
 import java.io.IOException;
