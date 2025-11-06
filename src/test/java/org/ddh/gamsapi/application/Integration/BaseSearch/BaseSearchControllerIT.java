@@ -60,4 +60,6 @@ public class BaseSearchControllerIT extends BaseSearchIntegrationTest {
     );
   }
 
+  // TODO add missing tests!
+
 }
