@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -46,7 +45,7 @@ public class FacetResponseDTO {
    */
   @JsonProperty("availableFacets")
   @Schema(description = "Available facet values with counts for each facet field")
-  private Map<String, List<SolrFacetValue>> availableFacets;
+  private Map<String, List<FacetSolrValue>> availableFacets;
 
   /**
    * Currently selected facet filters.

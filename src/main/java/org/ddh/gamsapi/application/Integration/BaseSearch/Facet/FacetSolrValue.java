@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SolrFacetValue {
+public class FacetSolrValue {
   private String value;
   private long count;
   private boolean selected;

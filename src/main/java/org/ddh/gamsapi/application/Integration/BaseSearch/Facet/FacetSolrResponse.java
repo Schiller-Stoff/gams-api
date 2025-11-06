@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import java.util.Map;
 @Slf4j
 public class FacetSolrResponse {
   private List<SolrDocument> documents;
-  private Map<String, List<SolrFacetValue>> facets;
+  private Map<String, List<FacetSolrValue>> facets;
   private long numFound;
   private long start;
 
@@ -56,7 +55,7 @@ public class FacetSolrResponse {
       }
 
       // Parse facets
-      Map<String, List<SolrFacetValue>> facets = new HashMap<>();
+      Map<String, List<FacetSolrValue>> facets = new HashMap<>();
       JsonNode facetFields = root.path("facet_counts").path("facet_fields");
 
       if (facetFields.isObject()) {
@@ -64,7 +63,7 @@ public class FacetSolrResponse {
           String fieldName = entry.getKey();
           JsonNode facetArray = entry.getValue();
 
-          List<SolrFacetValue> solrFacetValues = new ArrayList<>();
+          List<FacetSolrValue> facetSolrValues = new ArrayList<>();
 
           // Solr returns facets as alternating value/count array
           // Format: ["value1", count1, "value2", count2, ...]
@@ -75,7 +74,7 @@ public class FacetSolrResponse {
                 long count = facetArray.get(i + 1).asLong();
 
                 if (count > 0) { // Only include non-zero counts
-                  solrFacetValues.add(SolrFacetValue.builder()
+                  facetSolrValues.add(FacetSolrValue.builder()
                       .value(value)
                       .count(count)
                       .selected(false) // Will be set later based on selectedFacets
@@ -85,7 +84,7 @@ public class FacetSolrResponse {
             }
           }
           // Keep field name as-is (already in "dc.fieldname" format)
-          facets.put(fieldName, solrFacetValues);
+          facets.put(fieldName, facetSolrValues);
         });
       }
 
