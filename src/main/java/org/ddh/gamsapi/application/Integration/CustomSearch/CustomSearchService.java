@@ -104,6 +104,7 @@ public class CustomSearchService implements IIntegrationService {
       }
 
       // TODO validate baseSearch entries?
+      // TODO objectId + objectProjectAbbr - should be added by the gams-api (should be available no matter what)
 
       //02. add to batch
       // TODO fix - inefficient array to list conversion - and back
