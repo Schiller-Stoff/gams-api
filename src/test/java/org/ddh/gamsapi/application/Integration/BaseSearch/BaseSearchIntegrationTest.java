@@ -28,7 +28,7 @@ import java.time.Duration;
 public class BaseSearchIntegrationTest extends IntegrationTest {
 
   @Autowired
-  SolrClient solrClient;
+  public SolrClient solrClient;
 
   static final SolrContainer solr;
 

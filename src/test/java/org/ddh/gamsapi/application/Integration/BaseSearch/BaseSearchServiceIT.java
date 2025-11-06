@@ -197,32 +197,4 @@ public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
     }
 
   }
-
-  @Nested
-  public class CustomSearch {
-
-    @Test
-    public void customFulltextIndexingIndexesExpectedData(){
-
-      baseSearchService.indexCustom(TestProject.PROJECT_ABBR.getValue());
-
-      String response = solrClient.retrieveSolrDocumentByProperty(
-          SolrGamsCores.FULLTEXT_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
-      );
-
-      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.FULLTEXT_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
-
-      org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
-          .isGreaterThan(0);
-
-      org.assertj.core.api.Assertions.assertThat(response)
-          .isNotNull()
-          .contains("\"objectId\":\""+ TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-
-    }
-
-
-
-  }
-
 }

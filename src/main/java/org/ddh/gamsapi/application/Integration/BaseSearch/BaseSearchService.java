@@ -2,24 +2,21 @@ package org.ddh.gamsapi.application.Integration.BaseSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
-import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
-import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamIndexingView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMimeView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,7 +24,6 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -232,127 +228,6 @@ public class BaseSearchService implements IIntegrationService {
     } else {
       String existingText = (String) baseSearch.getProperty(BaseSearchProperties.FULLTEXT.name);
       baseSearch.addProperty(BaseSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
-    }
-
-  }
-
-  /**
-   * Indexes all digital objects for a given project that have FULLTEXT_INDEX.json datastream.
-   * @param projectAbbr project abbreviation
-   */
-  public void indexCustom(String projectAbbr){
-
-    // https://claude.ai/chat/712f87c4-aa48-48c1-bf63-b3c5a91f629d
-
-    log.info("*** BaseSearchService: Starting project indexing for: {}", projectAbbr);
-
-    var page = datastreamRepository.findAllByDsidAndProject(
-        "FULLTEXT_INDEX.json",
-        projectAbbr,
-        PageRequest.of(0, 1000000000)
-    );
-
-    if (page.isEmpty()) {
-      log.info("No digital objects found for project: {}", projectAbbr);
-      return;
-    }
-
-    log.info("Found {} datastreams for custom fulltext-indexing for project {}", page.getTotalElements(), projectAbbr);
-
-
-    /////
-    //
-    // BATCH INDEX ALL fulltext documents together
-
-    if(page.getTotalElements() == 0){
-      log.info("No digital objects with FULLTEXT_INDEX.json datastream found for project: {}", projectAbbr);
-      return;
-    }
-
-    int batchCount = 0;
-    int objectsProcessed = 0;
-
-    // TODO this should be configurable?
-    final int DEFAULT_BATCH_SIZE = 500;
-
-
-    List<BaseSearch> currentBatch = new ArrayList<>(500);
-    for (IDatastreamIndexingView datastreamIndexingView : page.getContent()) {
-      objectsProcessed++;
-
-      DatastreamId datastreamId = DatastreamId.builder()
-          .dsid(datastreamIndexingView.getDsid())
-          .digitalObject(datastreamIndexingView.getDigitalObject().getId())
-          .build();
-
-      // load datastream content
-      InputStreamResource resource = datastreamContentRepository.findById(datastreamId);
-
-      // parse datastream content as BaseSearch array
-      // TODO check if working on BaseSearch entities is correct / maybe use SolrDocument here?
-      BaseSearch[] baseSearch;
-      try {
-        baseSearch = BaseSearch.from(resource);
-      } catch (IOException e) {
-        String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", resource.getDescription(), datastreamId, e);
-        log.error(msg);
-        // TODO better / different exception
-        throw new DatastreamCannotLoadFileException(msg);
-      }
-
-      // TODO validate baseSearch entries?
-
-      //02. add to batch
-      // TODO fix - inefficient array to list conversion - and back
-      currentBatch.addAll(Arrays.asList(baseSearch));
-
-      //03. After reaching batch size, post to solr + clear batch (with commit)
-      // Flush batch if it's getting full (but don't commit yet)
-      if (currentBatch.size() >= DEFAULT_BATCH_SIZE) {
-        log.info("Processed {} BaseSearch objects from datastream {} - current batch: {}", currentBatch.size(), datastreamId, currentBatch);
-        solrClient.post(SolrGamsCores.FULLTEXT_CORE.value, currentBatch.toArray(new BaseSearch[0]));
-        currentBatch.clear();
-        batchCount++;
-        log.info("Processed batch {} for fulltext core ({} objects processed so far)", batchCount, objectsProcessed);
-      }
-
-    }
-
-    // Post remaining documents in batch (e.g. when batch size not reached at the end / or never reached)
-    if (!currentBatch.isEmpty()) {
-      solrClient.post(SolrGamsCores.FULLTEXT_CORE.value, currentBatch.toArray(new BaseSearch[0]));
-    }
-
-
-
-    // TODO think about - do i really need to commit by hand?
-    // Final commit
-//    try {
-//      solrClient.commit(SolrGamsCores.FULLTEXT_CORE.value);
-//      log.info("Final commit completed for fulltext core");
-//    } catch (Exception e) {
-//      //stats.addWarning("Final commit failed: " + e.getMessage());
-//    }
-
-
-
-  }
-
-
-  /**
-   * Sends custom solr datastream to solr.
-   * TODO test?
-   * @param datastreamId datastream id (object id and dsid)
-   * @param projectAbbr project abbreviation
-   */
-  public void sendCustomSolrDatastream(DatastreamId datastreamId, String projectAbbr){
-    InputStreamResource inputStreamResource =  datastreamContentRepository.findById(datastreamId);
-    try {
-      solrClient.post(projectAbbr, inputStreamResource.getContentAsByteArray());
-    } catch (IOException e) {
-      String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", inputStreamResource.getDescription(), datastreamId, e);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
     }
 
   }
