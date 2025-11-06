@@ -14,6 +14,7 @@ import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamIndexingView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMimeView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
@@ -21,6 +22,8 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -244,35 +247,29 @@ public class BaseSearchService implements IIntegrationService {
    */
   public void indexCustom(String projectAbbr){
 
+    // https://claude.ai/chat/712f87c4-aa48-48c1-bf63-b3c5a91f629d
+
     log.info("*** BaseSearchService: Starting project indexing for: {}", projectAbbr);
 
-    List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
+    var page = datastreamRepository.findAllByDsidAndProject(
+        "FULLTEXT_INDEX.json",
+        projectAbbr,
+        PageRequest.of(0, 1000000000)
+    );
 
-    if (digitalObjects.isEmpty()) {
+    if (page.isEmpty()) {
       log.info("No digital objects found for project: {}", projectAbbr);
       return;
     }
 
-    log.info("Found {} digital objects for project {}", digitalObjects.size(), projectAbbr);
+    log.info("Found {} datastreams for custom fulltext-indexing for project {}", page.getTotalElements(), projectAbbr);
 
-    List<DatastreamId> objectIdsWithFulltext = new ArrayList<>();
-
-    // TODO instead use method on datastream repository to find all datastreams that match FULLTEXT_INDEX.json
-    digitalObjects.forEach(digitalObject -> {
-      var datastreamId = DatastreamId.builder()
-          .digitalObject(digitalObject.getId())
-          .dsid("FULLTEXT_INDEX.json")
-          .build();
-      if(datastreamRepository.existsById(datastreamId)){
-        objectIdsWithFulltext.add(datastreamId);
-      }
-    });
 
     /////
     //
     // BATCH INDEX ALL fulltext documents together
 
-    if(objectIdsWithFulltext.isEmpty()){
+    if(page.getTotalElements() == 0){
       log.info("No digital objects with FULLTEXT_INDEX.json datastream found for project: {}", projectAbbr);
       return;
     }
@@ -285,13 +282,19 @@ public class BaseSearchService implements IIntegrationService {
 
 
     List<BaseSearch> currentBatch = new ArrayList<>(500);
-    for (DatastreamId datastreamId : objectIdsWithFulltext) {
+    for (IDatastreamIndexingView datastreamIndexingView : page.getContent()) {
       objectsProcessed++;
+
+      DatastreamId datastreamId = DatastreamId.builder()
+          .dsid(datastreamIndexingView.getDsid())
+          .digitalObject(datastreamIndexingView.getDigitalObject().getId())
+          .build();
 
       // load datastream content
       InputStreamResource resource = datastreamContentRepository.findById(datastreamId);
 
       // parse datastream content as BaseSearch array
+      // TODO check if working on BaseSearch entities is correct / maybe use SolrDocument here?
       BaseSearch[] baseSearch;
       try {
         baseSearch = BaseSearch.from(resource);
