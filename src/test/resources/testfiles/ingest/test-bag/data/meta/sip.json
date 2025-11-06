@@ -74,7 +74,7 @@
     {
       "size": 1000,
       "bagpath": "data/content/CUSTOM_SEARCH.json",
-      "dsid": "FULLTEXT_INDEX.json",
+      "dsid": "CUSTOM_SEARCH.json",
       "mimetype": "application/json",
       "title": "Fulltext index",
       "description": "Contains the fulltext index for search functionality.",
