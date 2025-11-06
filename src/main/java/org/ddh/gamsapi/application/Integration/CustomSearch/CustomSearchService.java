@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
@@ -44,7 +45,7 @@ public class CustomSearchService implements IIntegrationService {
 
     // https://claude.ai/chat/712f87c4-aa48-48c1-bf63-b3c5a91f629d
 
-    log.info("*** BaseSearchService: Starting project indexing for: {}", projectAbbr);
+    log.info("*** {}: Starting project indexing for: {}", this.getClass().getName(), projectAbbr);
 
     var page = datastreamRepository.findAllByDsidAndProject(
         "FULLTEXT_INDEX.json",
@@ -76,6 +77,7 @@ public class CustomSearchService implements IIntegrationService {
     final int DEFAULT_BATCH_SIZE = 500;
 
 
+    // TODO BaseSearch object seems off here - should we work with SolrDocument instead?
     List<BaseSearch> currentBatch = new ArrayList<>(500);
     for (IDatastreamIndexingView datastreamIndexingView : page.getContent()) {
       objectsProcessed++;
@@ -138,18 +140,48 @@ public class CustomSearchService implements IIntegrationService {
 
   }
 
+  /**
+   * TODO test
+   * Delete all indexed objects for a given project.
+   * @param projectAbbr Project abbreviation
+   */
   @Override
   public void deleteIndexedObjects(String projectAbbr) {
-
+    final String DELETE_QUERY = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
+    solrClient.delete(
+        SolrGamsCores.FULLTEXT_CORE.value,
+        DELETE_QUERY
+    );
+    log.info("Deled all indexed objects for project: {} from custom search core", projectAbbr);
   }
 
+  /**
+   * TODO jdoc
+   * TODO test
+   * @param projectAbbr project to be indexed
+   * @param id id of the object to be indexed
+   */
   @Override
   public void indexObject(String projectAbbr, String id) {
 
+    // TODO implement if needed
+    throw new UnsupportedOperationException("indexObject not implemented in CustomSearchService yet.");
+
   }
 
+  /**
+   * TODO test
+   * TODO jdoc
+   * @param projectAbbr project to be indexed to facets database
+   * @param id id of the object to be deleted
+   */
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
-
+    // TODO hardcoded string
+    final String DELETE_QUERY = String.format("%s:%s", "objectId", id);
+    solrClient.delete(
+        SolrGamsCores.FULLTEXT_CORE.value, DELETE_QUERY
+    );
+    log.info("Deleted indexed object with id: {} from custom search core", id);
   }
 }
