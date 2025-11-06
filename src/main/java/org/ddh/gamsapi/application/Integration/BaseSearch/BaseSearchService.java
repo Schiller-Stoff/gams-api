@@ -53,9 +53,6 @@ public class BaseSearchService implements IIntegrationService {
     // delete selected from GAMS core
     solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
 
-    // delete all from project core
-    solrClient.delete(projectAbbr, "*:*");
-
   }
 
   @Override
