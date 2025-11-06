@@ -73,7 +73,7 @@
     },
     {
       "size": 1000,
-      "bagpath": "data/content/FULLTEXT_INDEX.json",
+      "bagpath": "data/content/CUSTOM_SEARCH.json",
       "dsid": "FULLTEXT_INDEX.json",
       "mimetype": "application/json",
       "title": "Fulltext index",
