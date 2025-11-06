@@ -48,7 +48,8 @@ public class CustomSearchService implements IIntegrationService {
     log.info("*** {}: Starting project indexing for: {}", this.getClass().getName(), projectAbbr);
 
     var page = datastreamRepository.findAllByDsidAndProject(
-        "FULLTEXT_INDEX.json",
+        //  TODO hardcoded string
+        "CUSTOM_SEARCH.json",
         projectAbbr,
         PageRequest.of(0, 1000000000)
     );
