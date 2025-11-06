@@ -1,10 +1,10 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.UnitTest;
 import org.junit.jupiter.api.Test;
 
-public class SolrFacetedResponseTest extends UnitTest {
+public class FacetSolrResponseTest extends UnitTest {
 
   final String NUM_FOUND = "1";
   final String START = "0";
@@ -108,7 +108,7 @@ public class SolrFacetedResponseTest extends UnitTest {
 
   @Test
   public void parsedSolrFacetedResponseIsNotNull() {
-    var parsedResponse = SolrFacetedResponse.from(TEST_SOLR_RESPONSE);
+    var parsedResponse = FacetSolrResponse.from(TEST_SOLR_RESPONSE);
 
     Assertions.assertThat(parsedResponse)
         .isNotNull()
@@ -118,7 +118,7 @@ public class SolrFacetedResponseTest extends UnitTest {
 
   @Test
   public void containsExpectedNumFound() {
-    var parsedResponse = SolrFacetedResponse.from(TEST_SOLR_RESPONSE);
+    var parsedResponse = FacetSolrResponse.from(TEST_SOLR_RESPONSE);
 
     Assertions.assertThat(parsedResponse.getNumFound())
         .isEqualTo(Long.parseLong(NUM_FOUND));
@@ -126,7 +126,7 @@ public class SolrFacetedResponseTest extends UnitTest {
 
   @Test
   public void containsExpectedStart() {
-    var parsedResponse = SolrFacetedResponse.from(TEST_SOLR_RESPONSE);
+    var parsedResponse = FacetSolrResponse.from(TEST_SOLR_RESPONSE);
 
     Assertions.assertThat(parsedResponse.getStart())
         .isEqualTo(Long.parseLong(START));
@@ -134,7 +134,7 @@ public class SolrFacetedResponseTest extends UnitTest {
 
   @Test
   public void containsExpectedFacets() {
-    var parsedResponse = SolrFacetedResponse.from(TEST_SOLR_RESPONSE);
+    var parsedResponse = FacetSolrResponse.from(TEST_SOLR_RESPONSE);
 
     Assertions.assertThat(parsedResponse.getFacets())
         .isNotEmpty()

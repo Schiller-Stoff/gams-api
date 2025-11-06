@@ -1,10 +1,11 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch.solr;
+package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
+import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.Map;
 @Data
 @Builder
 @Slf4j
-public class SolrFacetedResponse {
+public class FacetSolrResponse {
   private List<SolrDocument> documents;
   private Map<String, List<SolrFacetValue>> facets;
   private long numFound;
@@ -31,7 +32,7 @@ public class SolrFacetedResponse {
    * @param solrResponse Solr response as String
    * @return SolrFacetedResponse instance
    */
-  public static SolrFacetedResponse from(String solrResponse){
+  public static FacetSolrResponse from(String solrResponse){
 
     // TODO use propper jackson workflow to parse solr repsonse? (is this even possible?)
 
@@ -88,7 +89,7 @@ public class SolrFacetedResponse {
         });
       }
 
-      return SolrFacetedResponse.builder()
+      return FacetSolrResponse.builder()
           .documents(documents)
           .facets(facets)
           .numFound(numFound)

@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Integration.BaseSearch.Facet;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.UnitTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrDocument;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +25,7 @@ public class FacetResponseDtoTest extends UnitTest {
 
     @Test
     public void fromProducesNotNullObjectWithNoNullProperties() {
-      SolrFacetedResponse solrResponse = createSolrResponse(1, 0, 1);
+      FacetSolrResponse solrResponse = createSolrResponse(1, 0, 1);
       Pageable pageable = PageRequest.of(0, 20);
 
       var mapped = FacetResponseDTO.from(
@@ -44,7 +43,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void fromMapsCorrectNumberOfResults() {
       int numDocuments = 5;
-      SolrFacetedResponse solrResponse = createSolrResponse(numDocuments, 0, numDocuments);
+      FacetSolrResponse solrResponse = createSolrResponse(numDocuments, 0, numDocuments);
       Pageable pageable = PageRequest.of(0, 20);
 
       var mapped = FacetResponseDTO.from(
@@ -61,7 +60,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void fromPreservesTotalUnfilteredCount() {
       int TOTAL_UNFILTERED = 1000;
-      SolrFacetedResponse solrResponse = createSolrResponse(10, 0, 50);
+      FacetSolrResponse solrResponse = createSolrResponse(10, 0, 50);
       Pageable pageable = PageRequest.of(0, 20);
 
       var mapped = FacetResponseDTO.from(
@@ -82,7 +81,7 @@ public class FacetResponseDtoTest extends UnitTest {
       selectedFacets.add("type", "Artikel");
       selectedFacets.add("coverage", "Wien");
 
-      SolrFacetedResponse solrResponse = createSolrResponse(5, 0, 5);
+      FacetSolrResponse solrResponse = createSolrResponse(5, 0, 5);
       Pageable pageable = PageRequest.of(0, 20);
 
       var mapped = FacetResponseDTO.from(
@@ -105,7 +104,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void firstPageHasCorrectPaginationMetadata() {
       // Page 0, 20 items per page, 156 total results
-      SolrFacetedResponse solrResponse = createSolrResponse(20, 0, 156);
+      FacetSolrResponse solrResponse = createSolrResponse(20, 0, 156);
       Pageable pageable = PageRequest.of(0, 20);
 
       var result = FacetResponseDTO.from(
@@ -130,7 +129,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void middlePageHasCorrectPaginationMetadata() {
       // Page 2 (third page), 20 items per page, 156 total results
-      SolrFacetedResponse solrResponse = createSolrResponse(20, 40, 156);
+      FacetSolrResponse solrResponse = createSolrResponse(20, 40, 156);
       Pageable pageable = PageRequest.of(2, 20);
 
       var result = FacetResponseDTO.from(
@@ -155,7 +154,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void lastPageHasCorrectPaginationMetadata() {
       // Page 7 (last page), 20 items per page, 156 total results (16 items on last page)
-      SolrFacetedResponse solrResponse = createSolrResponse(16, 140, 156);
+      FacetSolrResponse solrResponse = createSolrResponse(16, 140, 156);
       Pageable pageable = PageRequest.of(7, 20);
 
       var result = FacetResponseDTO.from(
@@ -183,7 +182,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void singlePageHasCorrectMetadata() {
       // All results fit on one page
-      SolrFacetedResponse solrResponse = createSolrResponse(15, 0, 15);
+      FacetSolrResponse solrResponse = createSolrResponse(15, 0, 15);
       Pageable pageable = PageRequest.of(0, 20);
 
       var result = FacetResponseDTO.from(
@@ -206,7 +205,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void emptyResultsHaveCorrectMetadata() {
       // No results found
-      SolrFacetedResponse solrResponse = createSolrResponse(0, 0, 0);
+      FacetSolrResponse solrResponse = createSolrResponse(0, 0, 0);
       Pageable pageable = PageRequest.of(0, 20);
 
       var result = FacetResponseDTO.from(
@@ -230,7 +229,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void handlesExactlyFullPages() {
       // Exactly 100 results with 20 per page = 5 pages exactly
-      SolrFacetedResponse solrResponse = createSolrResponse(20, 0, 100);
+      FacetSolrResponse solrResponse = createSolrResponse(20, 0, 100);
       Pageable pageable = PageRequest.of(0, 20);
 
       var result = FacetResponseDTO.from(
@@ -247,7 +246,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void handlesLargePageSize() {
       // Page size larger than total results
-      SolrFacetedResponse solrResponse = createSolrResponse(10, 0, 10);
+      FacetSolrResponse solrResponse = createSolrResponse(10, 0, 10);
       Pageable pageable = PageRequest.of(0, 100);
 
       var result = FacetResponseDTO.from(
@@ -264,7 +263,7 @@ public class FacetResponseDtoTest extends UnitTest {
     @Test
     public void handlesSmallPageSize() {
       // Very small page size
-      SolrFacetedResponse solrResponse = createSolrResponse(1, 0, 100);
+      FacetSolrResponse solrResponse = createSolrResponse(1, 0, 100);
       Pageable pageable = PageRequest.of(0, 1);
 
       var result = FacetResponseDTO.from(
@@ -280,7 +279,7 @@ public class FacetResponseDtoTest extends UnitTest {
 
     @Test
     public void emptySelectedFacetsDoesNotCauseIssues() {
-      SolrFacetedResponse solrResponse = createSolrResponse(10, 0, 50);
+      FacetSolrResponse solrResponse = createSolrResponse(10, 0, 50);
       Pageable pageable = PageRequest.of(0, 20);
 
       var result = FacetResponseDTO.from(
@@ -307,7 +306,7 @@ public class FacetResponseDtoTest extends UnitTest {
       selectedFacets.add("type", "Brief");
       selectedFacets.add("coverage", "Wien");
 
-      SolrFacetedResponse solrResponse = createSolrResponse(20, 20, 45);
+      FacetSolrResponse solrResponse = createSolrResponse(20, 20, 45);
       Pageable pageable = PageRequest.of(1, 20);
 
       var result = FacetResponseDTO.from(
@@ -334,12 +333,12 @@ public class FacetResponseDtoTest extends UnitTest {
   }
 
   // Helper method to create SolrFacetedResponse for testing
-  private SolrFacetedResponse createSolrResponse(int numDocuments, int start, long totalFound) {
+  private FacetSolrResponse createSolrResponse(int numDocuments, int start, long totalFound) {
     List<SolrDocument> documents = IntStream.range(0, numDocuments)
         .mapToObj(i -> new SolrDocument())
         .collect(Collectors.toList());
 
-    return SolrFacetedResponse.builder()
+    return FacetSolrResponse.builder()
         .documents(documents)
         .start(start)
         .numFound(totalFound)

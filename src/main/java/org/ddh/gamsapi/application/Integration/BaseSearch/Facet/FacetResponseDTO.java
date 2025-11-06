@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetValue;
-import org.ddh.gamsapi.application.Integration.BaseSearch.solr.SolrFacetedResponse;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -70,21 +69,21 @@ public class FacetResponseDTO {
   /**
    * Builds a FacetResponseDTO from Solr response with proper Spring pagination.
    *
-   * @param solrFacetedResponse Parsed Solr response containing documents and facets
+   * @param facetSolrResponse Parsed Solr response containing documents and facets
    * @param selectedFacets Selected facets used in the query
    * @param totalUnfilteredCount Total documents in projects (no filters)
    * @param pageable Pagination parameters used in the query
    * @return Complete faceted search response with pagination
    */
   public static FacetResponseDTO from(
-      SolrFacetedResponse solrFacetedResponse,
+      FacetSolrResponse facetSolrResponse,
       MultiValueMap<String, String> selectedFacets,
       int totalUnfilteredCount,
       Pageable pageable
   ) {
 
     // Step 1: Map Solr documents to domain objects
-    List<BaseSearch> searchResults = solrFacetedResponse.getDocuments().stream()
+    List<BaseSearch> searchResults = facetSolrResponse.getDocuments().stream()
         .map(BaseSearch::from)
         .collect(Collectors.toList());
 
@@ -93,7 +92,7 @@ public class FacetResponseDTO {
     Page<BaseSearch> page = new PageImpl<>(
         searchResults,                      // Content for this page
         pageable,                           // Pageable (contains page number, size, sort)
-        solrFacetedResponse.getNumFound()   // Total elements (for totalPages calculation)
+        facetSolrResponse.getNumFound()   // Total elements (for totalPages calculation)
     );
 
     // Step 3: Convert to standard PagedResponse wrapper
@@ -108,7 +107,7 @@ public class FacetResponseDTO {
     // Step 5: Build complete response
     return FacetResponseDTO.builder()
         .results(pagedResults)
-        .availableFacets(solrFacetedResponse.getFacets())
+        .availableFacets(facetSolrResponse.getFacets())
         .selectedFacets(selectedFacetsMap)
         .totalUnfilteredCount(totalUnfilteredCount)
         .build();
