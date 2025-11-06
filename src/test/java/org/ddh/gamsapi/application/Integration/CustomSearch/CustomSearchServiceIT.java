@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
@@ -63,6 +64,13 @@ public class CustomSearchServiceIT extends BaseSearchIntegrationTest {
 
     @Test
     public void customFulltextIndexingIndexesExpectedData(){
+
+      int initialDocumentsCount = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(initialDocumentsCount).isEqualTo(0);
 
       customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
 
