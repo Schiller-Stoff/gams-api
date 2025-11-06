@@ -477,6 +477,9 @@
   <field name="entityFulltext" type="text_fulltext" multiValued="false" stored="true"/>
   <field name="entityTags" type="strings" multiValued="true" required="false"/>
 
+  <field name="entityTitles" type="strings" multiValued="true" required="false" stored="false"/>
+  <field name="entityDescs" type="strings" multiValued="true" required="false" stored="false"/>
+
   <!-- Temporal fields -->
   <field name="entityStartDate" type="pdate" multiValued="false" required="false"/>
   <field name="entityEndDate" type="pdate" multiValued="false" required="false"/>
