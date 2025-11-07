@@ -5,6 +5,7 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
  */
 public enum CustomSearchProperties {
 
+  DATASTREAM_DSID("CUSTOM_SEARCH.json"),
   ENTITY_ID("id"),
   ENTITY_PROJECT_ABBR("objectProjectAbbr"),
   ENTITY_OBJECT_ID("objectId");
