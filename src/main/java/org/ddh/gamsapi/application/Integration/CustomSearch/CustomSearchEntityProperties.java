@@ -5,6 +5,7 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
  */
 public enum CustomSearchEntityProperties {
 
+  ENTITY_ID("id"),
   ENTITY_PROJECT_ABBR("objectProjectAbbr"),
   ENTITY_OBJECT_ID("objectId");
 

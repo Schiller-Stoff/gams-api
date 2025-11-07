@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Service for custom search integration.
@@ -198,6 +199,14 @@ public class CustomSearchService implements IIntegrationService {
       entry.addProperty(CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
       // ensure object id is set
       entry.addProperty(CustomSearchEntityProperties.ENTITY_OBJECT_ID.name, objectId);
+
+      // validate id must start with the projectAbbr
+      String entityId = (String) entry.getProperty(CustomSearchEntityProperties.ENTITY_ID.name);
+      if(!entityId.toLowerCase().startsWith(projectAbbr.toLowerCase())){
+        String msg = String.format("Invalid entity id '%s' in custom search entry for object '%s' in project '%s'. Entity id must start with the project abbreviation.", entityId, objectId, projectAbbr);
+        log.error(msg);
+        throw new IntegrationDataProcessingException(msg);
+      }
     }
     return entries;
   }
