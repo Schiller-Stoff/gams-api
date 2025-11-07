@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
@@ -96,6 +97,7 @@ public class CustomSearchService implements IIntegrationService {
       BaseSearch[] baseSearch;
       try {
         baseSearch = BaseSearch.from(resource);
+        baseSearch = refineBaseSearchEntries(baseSearch, projectAbbr, datastreamId.getDigitalObject());
       } catch (IOException e) {
         String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", resource.getDescription(), datastreamId, e);
         log.error(msg);
@@ -182,4 +184,22 @@ public class CustomSearchService implements IIntegrationService {
     );
     log.info("Deleted indexed object with id: {} from custom search core", id);
   }
+
+  /**
+   * Validates and ensures required properties are set on BaseSearch entries.
+   * TODO test
+   * @param entries BaseSearch entries to be validated and refined
+   * @param projectAbbr project abbreviation to be set on each entry
+   * @return validated and refined BaseSearch entries
+   */
+  public BaseSearch[] refineBaseSearchEntries(BaseSearch[] entries, String projectAbbr, String objectId) {
+    for (var entry : entries) {
+      // ensure projectAbbr is set
+      entry.addProperty(CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
+      // ensure object id is set
+      entry.addProperty(CustomSearchEntityProperties.ENTITY_OBJECT_ID.name, objectId);
+    }
+    return entries;
+  }
+
 }
