@@ -2,8 +2,6 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
@@ -78,7 +76,6 @@ public class CustomSearchService implements IIntegrationService {
     final int DEFAULT_BATCH_SIZE = 500;
 
 
-    // TODO BaseSearch object seems off here - should we work with SolrDocument instead?
     List<SolrDocument> currentBatch = new ArrayList<>(DEFAULT_BATCH_SIZE);
     for (IDatastreamIndexingView datastreamIndexingView : page.getContent()) {
       objectsProcessed++;
@@ -91,21 +88,17 @@ public class CustomSearchService implements IIntegrationService {
       // load datastream content
       InputStreamResource resource = datastreamContentRepository.findById(datastreamId);
 
-      // parse datastream content as BaseSearch array
-      // TODO check if working on BaseSearch entities is correct / maybe use SolrDocument here?
+      // parse datastream content as solrDocuments array
       SolrDocument[] solrDocuments;
       try {
         solrDocuments = SolrDocument.from(resource);
-        solrDocuments = refineBaseSearchEntries(solrDocuments, projectAbbr, datastreamId.getDigitalObject());
+        // validates that required properties are set for the custom search
+        solrDocuments = validateSolrDocuments(solrDocuments, projectAbbr, datastreamId.getDigitalObject());
       } catch (IOException e) {
         String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", resource.getDescription(), datastreamId, e);
         log.error(msg);
-        // TODO better / different exception
         throw new DatastreamCannotLoadFileException(msg);
       }
-
-      // TODO validate baseSearch entries?
-      // TODO objectId + objectProjectAbbr - should be added by the gams-api (should be available no matter what)
 
       //02. add to batch
       // TODO fix - inefficient array to list conversion - and back
@@ -147,7 +140,7 @@ public class CustomSearchService implements IIntegrationService {
    */
   @Override
   public void deleteIndexedObjects(String projectAbbr) {
-    final String DELETE_QUERY = String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr);
+    final String DELETE_QUERY = String.format("%s:%s", CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
     solrClient.delete(
         SolrGamsCores.CUSTOM_SEARCH_CORE.value,
         DELETE_QUERY
@@ -188,14 +181,14 @@ public class CustomSearchService implements IIntegrationService {
   }
 
   /**
-   * Validates and ensures required properties are set on BaseSearch entries.
+   * Validates and ensures required properties are set on solrDocuments
    * TODO test
    *
-   * @param entries     BaseSearch entries to be validated and refined
+   * @param documents documents to be validated and refined
    * @param projectAbbr project abbreviation to be set on each entry
-   * @return validated and refined BaseSearch entries
+   * @return validated and refined solrDocuments
    */
-  public SolrDocument[] refineBaseSearchEntries(SolrDocument[] documents, String projectAbbr, String objectId) {
+  public SolrDocument[] validateSolrDocuments(SolrDocument[] documents, String projectAbbr, String objectId) {
     for (var document : documents) {
       // ensure projectAbbr is set
       document.addProperty(CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
