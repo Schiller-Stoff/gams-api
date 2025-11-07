@@ -140,7 +140,7 @@ public class CustomSearchService implements IIntegrationService {
    */
   @Override
   public void deleteIndexedObjects(String projectAbbr) {
-    final String DELETE_QUERY = String.format("%s:%s", CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
+    final String DELETE_QUERY = String.format("%s:%s", CustomSearchProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
     solrClient.delete(
         SolrGamsCores.CUSTOM_SEARCH_CORE.value,
         DELETE_QUERY
@@ -191,12 +191,12 @@ public class CustomSearchService implements IIntegrationService {
   public SolrDocument[] validateSolrDocuments(SolrDocument[] documents, String projectAbbr, String objectId) {
     for (var document : documents) {
       // ensure projectAbbr is set
-      document.addProperty(CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
+      document.addProperty(CustomSearchProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
       // ensure object id is set
-      document.addProperty(CustomSearchEntityProperties.ENTITY_OBJECT_ID.name, objectId);
+      document.addProperty(CustomSearchProperties.ENTITY_OBJECT_ID.name, objectId);
 
       // validate id must start with the projectAbbr
-      String entityId = (String) document.getProperty(CustomSearchEntityProperties.ENTITY_ID.name);
+      String entityId = (String) document.getProperty(CustomSearchProperties.ENTITY_ID.name);
       if (!entityId.toLowerCase().startsWith(projectAbbr.toLowerCase())) {
         String msg = String.format("Invalid entity id '%s' in custom search entry for object '%s' in project '%s'. Entity id must start with the project abbreviation.", entityId, objectId, projectAbbr);
         log.error(msg);

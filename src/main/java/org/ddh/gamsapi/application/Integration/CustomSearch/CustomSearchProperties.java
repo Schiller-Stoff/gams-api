@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
 /**
  * Enum representing custom search entity properties.
  */
-public enum CustomSearchEntityProperties {
+public enum CustomSearchProperties {
 
   ENTITY_ID("id"),
   ENTITY_PROJECT_ABBR("objectProjectAbbr"),
@@ -11,7 +11,7 @@ public enum CustomSearchEntityProperties {
 
   public final String name;
 
-  CustomSearchEntityProperties(String name) {
+  CustomSearchProperties(String name) {
     this.name = name;
   }
 }
