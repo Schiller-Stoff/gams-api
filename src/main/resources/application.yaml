@@ -104,6 +104,11 @@ gams:
   storage:
     # root of GAMS files (datastreams) to be stored.
     rootPath: ${GAMS_FILES_ROOT_PATH:gams}
+  # optional solr client configuration
+#  solr:
+#    auto-commit: false # whether to auto-commit changes to solr (in production should be false)
+#    batch-size: 500 # number of documents to be indexed in a batch
+#    commit-interval: 10 # in seconds
 
 # swagger ui base path
 springdoc:

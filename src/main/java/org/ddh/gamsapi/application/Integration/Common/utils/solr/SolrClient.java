@@ -40,12 +40,18 @@ public class SolrClient {
 
   private final String SOLR_BASE_URL;
 
-  public SolrClient(GAMSDockerDNS configProperties) {
+  private final SolrClientProperties solrClientProperties;
+
+  public SolrClient(GAMSDockerDNS configProperties, SolrClientProperties solrClientProperties) {
     // TODO consider timeouts / retries / error handling / etc. against SOLR.
     SOLR_BASE_URL = configProperties.getBaseSearchUrl();
+    this.solrClientProperties = solrClientProperties;
     this.webClient = WebClient.builder()
         .baseUrl(configProperties.getBaseSearchUrl())
         .build();
+
+    log.info("SolrClient initialized with autoCommit={}, batchSize={}, commitInterval={}",
+        solrClientProperties.isAutoCommit(), solrClientProperties.getBatchSize(), solrClientProperties.getCommitInterval());
   }
 
   /**
@@ -78,7 +84,17 @@ public class SolrClient {
    * @param baseSearchEntity the base search entity to post
    */
   public void post(String coreName, BaseSearch baseSearchEntity) {
-    post(coreName, new BaseSearch[]{baseSearchEntity}, true);  // Default: commit
+    post(coreName, new BaseSearch[]{baseSearchEntity}, solrClientProperties.isAutoCommit());
+  }
+
+  /**
+   * Post a single base search entity to the solr server.
+   *
+   * @param coreName         name of the core to post to
+   * @param baseSearchEntity the base search entity to post
+   */
+  public void post(String coreName, BaseSearch baseSearchEntity, boolean commit) {
+    post(coreName, new BaseSearch[]{baseSearchEntity}, commit);
   }
 
   /**
@@ -88,7 +104,7 @@ public class SolrClient {
    * @param baseSearchEntities the base search entities to post
    */
   public void post(String coreName, BaseSearch[] baseSearchEntities) {
-    post(coreName, baseSearchEntities, true);  // Default: commit
+    post(coreName, baseSearchEntities, solrClientProperties.isAutoCommit());
   }
 
   /**
@@ -538,6 +554,7 @@ public class SolrClient {
     try {
       webClient.post()
           .uri(commitUrl)
+          .contentType(MediaType.APPLICATION_JSON)
           .retrieve()
           .toBodilessEntity()
           .block();
