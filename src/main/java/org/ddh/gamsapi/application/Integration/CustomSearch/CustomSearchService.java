@@ -79,7 +79,7 @@ public class CustomSearchService implements IIntegrationService {
 
 
     // TODO BaseSearch object seems off here - should we work with SolrDocument instead?
-    List<BaseSearch> currentBatch = new ArrayList<>(500);
+    List<BaseSearch> currentBatch = new ArrayList<>(DEFAULT_BATCH_SIZE);
     for (IDatastreamIndexingView datastreamIndexingView : page.getContent()) {
       objectsProcessed++;
 
@@ -128,17 +128,13 @@ public class CustomSearchService implements IIntegrationService {
     }
 
 
-
-    // TODO think about - do i really need to commit by hand?
     // Final commit
-//    try {
-//      solrClient.commit(SolrGamsCores.FULLTEXT_CORE.value);
-//      log.info("Final commit completed for fulltext core");
-//    } catch (Exception e) {
-//      //stats.addWarning("Final commit failed: " + e.getMessage());
-//    }
-
-
+    try {
+      solrClient.commit(SolrGamsCores.CUSTOM_SEARCH_CORE.value);
+      log.info("Final commit completed for fulltext core");
+    } catch (Exception e) {
+      //stats.addWarning("Final commit failed: " + e.getMessage());
+    }
 
   }
 
