@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Service for custom search integration.
@@ -44,8 +43,6 @@ public class CustomSearchService implements IIntegrationService {
 
   @Override
   public void indexObjects(String projectAbbr) {
-
-    // https://claude.ai/chat/712f87c4-aa48-48c1-bf63-b3c5a91f629d
 
     log.info("*** {}: Starting project indexing for: {}", this.getClass().getName(), projectAbbr);
 
@@ -68,7 +65,7 @@ public class CustomSearchService implements IIntegrationService {
     //
     // BATCH INDEX ALL fulltext documents together
 
-    if(page.getTotalElements() == 0){
+    if (page.getTotalElements() == 0) {
       log.info("No digital objects with FULLTEXT_INDEX.json datastream found for project: {}", projectAbbr);
       return;
     }
@@ -144,6 +141,7 @@ public class CustomSearchService implements IIntegrationService {
   /**
    * TODO test
    * Delete all indexed objects for a given project.
+   *
    * @param projectAbbr Project abbreviation
    */
   @Override
@@ -159,8 +157,9 @@ public class CustomSearchService implements IIntegrationService {
   /**
    * TODO jdoc
    * TODO test
+   *
    * @param projectAbbr project to be indexed
-   * @param id id of the object to be indexed
+   * @param id          id of the object to be indexed
    */
   @Override
   public void indexObject(String projectAbbr, String id) {
@@ -173,8 +172,9 @@ public class CustomSearchService implements IIntegrationService {
   /**
    * TODO test
    * TODO jdoc
+   *
    * @param projectAbbr project to be indexed to facets database
-   * @param id id of the object to be deleted
+   * @param id          id of the object to be deleted
    */
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
@@ -189,7 +189,8 @@ public class CustomSearchService implements IIntegrationService {
   /**
    * Validates and ensures required properties are set on BaseSearch entries.
    * TODO test
-   * @param entries BaseSearch entries to be validated and refined
+   *
+   * @param entries     BaseSearch entries to be validated and refined
    * @param projectAbbr project abbreviation to be set on each entry
    * @return validated and refined BaseSearch entries
    */
@@ -202,7 +203,7 @@ public class CustomSearchService implements IIntegrationService {
 
       // validate id must start with the projectAbbr
       String entityId = (String) entry.getProperty(CustomSearchEntityProperties.ENTITY_ID.name);
-      if(!entityId.toLowerCase().startsWith(projectAbbr.toLowerCase())){
+      if (!entityId.toLowerCase().startsWith(projectAbbr.toLowerCase())) {
         String msg = String.format("Invalid entity id '%s' in custom search entry for object '%s' in project '%s'. Entity id must start with the project abbreviation.", entityId, objectId, projectAbbr);
         log.error(msg);
         throw new IntegrationDataProcessingException(msg);
