@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
@@ -58,14 +57,14 @@ public class SolrClient {
    * Post a base search entity to the solr server.
    *
    * @param coreName           name of the core to post to
-   * @param baseSearchEntities the base search entities to post
+   * @param solrDocuments the base search entities to post
    */
-  public void post(String coreName, BaseSearch[] baseSearchEntities, boolean commit) {
+  public void post(String coreName, SolrDocument[] solrDocuments, boolean commit) {
     log.trace("Posting base search entity to solr");
 
     byte[] json;
     try {
-      json = this.OBJECT_MAPPER.writeValueAsBytes(baseSearchEntities);
+      json = this.OBJECT_MAPPER.writeValueAsBytes(solrDocuments);
       log.trace("Mapped base search entities to json: {}", json);
     } catch (Exception e) {
       String msg = String.format("Failed to convert base search entity to json. Cause: %s. Original error: %s", e.getMessage(), e);
@@ -81,30 +80,30 @@ public class SolrClient {
    * Post a single base search entity to the solr server.
    *
    * @param coreName         name of the core to post to
-   * @param baseSearchEntity the base search entity to post
+   * @param solrDocument the base search entity to post
    */
-  public void post(String coreName, BaseSearch baseSearchEntity) {
-    post(coreName, new BaseSearch[]{baseSearchEntity}, solrClientProperties.isAutoCommit());
+  public void post(String coreName, SolrDocument solrDocument) {
+    post(coreName, new SolrDocument[]{solrDocument}, solrClientProperties.isAutoCommit());
   }
 
   /**
    * Post a single base search entity to the solr server.
    *
    * @param coreName         name of the core to post to
-   * @param baseSearchEntity the base search entity to post
+   * @param solrDocument the base search entity to post
    */
-  public void post(String coreName, BaseSearch baseSearchEntity, boolean commit) {
-    post(coreName, new BaseSearch[]{baseSearchEntity}, commit);
+  public void post(String coreName, SolrDocument solrDocument, boolean commit) {
+    post(coreName, new SolrDocument[]{solrDocument}, commit);
   }
 
   /**
    * Post multiple base search entities to the solr server.
    *
    * @param coreName           name of the core to post to
-   * @param baseSearchEntities the base search entities to post
+   * @param solrDocuments the base search entities to post
    */
-  public void post(String coreName, BaseSearch[] baseSearchEntities) {
-    post(coreName, baseSearchEntities, solrClientProperties.isAutoCommit());
+  public void post(String coreName, SolrDocument[] solrDocuments) {
+    post(coreName, solrDocuments, solrClientProperties.isAutoCommit());
   }
 
   /**

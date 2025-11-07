@@ -6,6 +6,7 @@ import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationData
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
@@ -63,25 +64,25 @@ public class BaseSearchService implements IIntegrationService {
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
             .orElseThrow(() -> new IntegrationDataProcessingException(String.format("Digital object with id %s not found", id)));
 
-    BaseSearch baseSearch = new BaseSearch();
+    SolrDocument solrDocument = new SolrDocument();
 
     var foundDatastreams = datastreamRepository.findAllDatastreamMimeViewsByDigitalObject(digitalObject);
 
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-    baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-    baseSearch.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-    baseSearch.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
+    solrDocument.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
+    solrDocument.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+    solrDocument.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
     // index datastream ids
     if(!foundDatastreams.isEmpty()){
-      baseSearch.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
+      solrDocument.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
     }
 
     // These fields might differ from the dublin core!
-     baseSearch.addProperty(BaseSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
-     baseSearch.addProperty(BaseSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
-     baseSearch.addProperty(BaseSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
-     baseSearch.addProperty(BaseSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
-     baseSearch.addProperty(BaseSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
+     solrDocument.addProperty(BaseSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
+     solrDocument.addProperty(BaseSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
+     solrDocument.addProperty(BaseSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
+     solrDocument.addProperty(BaseSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
+     solrDocument.addProperty(BaseSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
 
 
     // send datastream contained info to solr
@@ -95,7 +96,7 @@ public class BaseSearchService implements IIntegrationService {
 //      }
 
       if(datastream.getDsid().equals(GAMSDsid.DC.getValue())){
-        addDublinCore(baseSearch, datastreamId);
+        addDublinCore(solrDocument, datastreamId);
       }
 
     });
@@ -115,14 +116,14 @@ public class BaseSearchService implements IIntegrationService {
     }
 
     addFulltext(
-        baseSearch,
+        solrDocument,
         DatastreamId.builder().digitalObject(digitalObject.getId()).dsid(fulltextDsid).build()
     );
 
 
 
     // the end post base search entity to SOLR
-    solrClient.post(SolrGamsCores.GAMS_CORE.value, baseSearch);
+    solrClient.post(SolrGamsCores.GAMS_CORE.value, solrDocument);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
   }
@@ -163,11 +164,11 @@ public class BaseSearchService implements IIntegrationService {
   /**
    * Adds dublin core field to given base search entity.
    * TODO test
-   * @param baseSearch base search entity
+   * @param solrDocument base search entity
    *                   (will be modified in place)
    * @param datastreamId datastream id
    */
-  public void addDublinCore(BaseSearch baseSearch, DatastreamId datastreamId){
+  public void addDublinCore(SolrDocument solrDocument, DatastreamId datastreamId){
     var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(datastreamId.getDigitalObject());
     if(dcEntries.isEmpty()){
       String msg = String.format("No dublin core entries found for digital object %s", datastreamId.getDigitalObject());
@@ -183,13 +184,13 @@ public class BaseSearchService implements IIntegrationService {
         nodeValue = dcEntry.getLanguage() + ": " +  nodeValue;
       }
 
-      if(baseSearch.getProperty(propertyName) == null){
-        baseSearch.addProperty(propertyName, List.of(nodeValue));
+      if(solrDocument.getProperty(propertyName) == null){
+        solrDocument.addProperty(propertyName, List.of(nodeValue));
       } else {
-        List<String> values = (List<String>) baseSearch.getProperty(propertyName);
+        List<String> values = (List<String>) solrDocument.getProperty(propertyName);
         List<String> newValues = new ArrayList<>(values);
         newValues.add(nodeValue);
-        baseSearch.addProperty(propertyName, newValues);
+        solrDocument.addProperty(propertyName, newValues);
       }
     });
 
@@ -199,10 +200,10 @@ public class BaseSearchService implements IIntegrationService {
   /**
    * Adds fulltext field to given base search entity.
    * TODO test
-   * @param baseSearch base search entity
+   * @param solrDocument base search entity
    * @param datastreamId datastream id
    */
-  public void addFulltext(BaseSearch baseSearch, DatastreamId datastreamId){
+  public void addFulltext(SolrDocument solrDocument, DatastreamId datastreamId){
 
     var xmlContent =  datastreamContentRepository.findById(datastreamId);
     Document dcXml;
@@ -220,11 +221,11 @@ public class BaseSearchService implements IIntegrationService {
 
     String docText = XMLUtils.extractText(dcXml);
 
-    if(baseSearch.getProperty(BaseSearchProperties.FULLTEXT.name) == null){
-      baseSearch.addProperty(BaseSearchProperties.FULLTEXT.name, docText);
+    if(solrDocument.getProperty(BaseSearchProperties.FULLTEXT.name) == null){
+      solrDocument.addProperty(BaseSearchProperties.FULLTEXT.name, docText);
     } else {
-      String existingText = (String) baseSearch.getProperty(BaseSearchProperties.FULLTEXT.name);
-      baseSearch.addProperty(BaseSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
+      String existingText = (String) solrDocument.getProperty(BaseSearchProperties.FULLTEXT.name);
+      solrDocument.addProperty(BaseSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
     }
 
   }

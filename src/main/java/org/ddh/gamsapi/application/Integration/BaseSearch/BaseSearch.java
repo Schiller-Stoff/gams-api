@@ -50,9 +50,8 @@ public class BaseSearch {
    * @return BaseSearch instance
    */
   public static BaseSearch from(SolrDocument solrDocument) {
-
     BaseSearch baseSearch = new BaseSearch();
-    solrDocument.getProperties().forEach((key, value) -> {
+    solrDocument.retrievePropertiesMap().forEach((key, value) -> {
       baseSearch.addProperty(key, value);
     });
 

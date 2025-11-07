@@ -7,6 +7,7 @@ import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
@@ -78,7 +79,7 @@ public class CustomSearchService implements IIntegrationService {
 
 
     // TODO BaseSearch object seems off here - should we work with SolrDocument instead?
-    List<BaseSearch> currentBatch = new ArrayList<>(DEFAULT_BATCH_SIZE);
+    List<SolrDocument> currentBatch = new ArrayList<>(DEFAULT_BATCH_SIZE);
     for (IDatastreamIndexingView datastreamIndexingView : page.getContent()) {
       objectsProcessed++;
 
@@ -92,10 +93,10 @@ public class CustomSearchService implements IIntegrationService {
 
       // parse datastream content as BaseSearch array
       // TODO check if working on BaseSearch entities is correct / maybe use SolrDocument here?
-      BaseSearch[] baseSearch;
+      SolrDocument[] solrDocuments;
       try {
-        baseSearch = BaseSearch.from(resource);
-        baseSearch = refineBaseSearchEntries(baseSearch, projectAbbr, datastreamId.getDigitalObject());
+        solrDocuments = SolrDocument.from(resource);
+        solrDocuments = refineBaseSearchEntries(solrDocuments, projectAbbr, datastreamId.getDigitalObject());
       } catch (IOException e) {
         String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", resource.getDescription(), datastreamId, e);
         log.error(msg);
@@ -108,13 +109,13 @@ public class CustomSearchService implements IIntegrationService {
 
       //02. add to batch
       // TODO fix - inefficient array to list conversion - and back
-      currentBatch.addAll(Arrays.asList(baseSearch));
+      currentBatch.addAll(Arrays.asList(solrDocuments));
 
       //03. After reaching batch size, post to solr + clear batch (with commit)
       // Flush batch if it's getting full (but don't commit yet)
       if (currentBatch.size() >= DEFAULT_BATCH_SIZE) {
-        log.info("Processed {} BaseSearch objects from datastream {} - current batch: {}", currentBatch.size(), datastreamId, currentBatch);
-        solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value, currentBatch.toArray(new BaseSearch[0]));
+        log.info("Processed {} custom search objects from datastream {} - current batch: {}", currentBatch.size(), datastreamId, currentBatch);
+        solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value, currentBatch.toArray(new SolrDocument[0]));
         currentBatch.clear();
         batchCount++;
         log.info("Processed batch {} for fulltext core ({} objects processed so far)", batchCount, objectsProcessed);
@@ -124,7 +125,7 @@ public class CustomSearchService implements IIntegrationService {
 
     // Post remaining documents in batch (e.g. when batch size not reached at the end / or never reached)
     if (!currentBatch.isEmpty()) {
-      solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value, currentBatch.toArray(new BaseSearch[0]));
+      solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value, currentBatch.toArray(new SolrDocument[0]));
     }
 
 
@@ -194,22 +195,22 @@ public class CustomSearchService implements IIntegrationService {
    * @param projectAbbr project abbreviation to be set on each entry
    * @return validated and refined BaseSearch entries
    */
-  public BaseSearch[] refineBaseSearchEntries(BaseSearch[] entries, String projectAbbr, String objectId) {
-    for (var entry : entries) {
+  public SolrDocument[] refineBaseSearchEntries(SolrDocument[] documents, String projectAbbr, String objectId) {
+    for (var document : documents) {
       // ensure projectAbbr is set
-      entry.addProperty(CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
+      document.addProperty(CustomSearchEntityProperties.ENTITY_PROJECT_ABBR.name, projectAbbr);
       // ensure object id is set
-      entry.addProperty(CustomSearchEntityProperties.ENTITY_OBJECT_ID.name, objectId);
+      document.addProperty(CustomSearchEntityProperties.ENTITY_OBJECT_ID.name, objectId);
 
       // validate id must start with the projectAbbr
-      String entityId = (String) entry.getProperty(CustomSearchEntityProperties.ENTITY_ID.name);
+      String entityId = (String) document.getProperty(CustomSearchEntityProperties.ENTITY_ID.name);
       if (!entityId.toLowerCase().startsWith(projectAbbr.toLowerCase())) {
         String msg = String.format("Invalid entity id '%s' in custom search entry for object '%s' in project '%s'. Entity id must start with the project abbreviation.", entityId, objectId, projectAbbr);
         log.error(msg);
         throw new IntegrationDataProcessingException(msg);
       }
     }
-    return entries;
+    return documents;
   }
 
 }

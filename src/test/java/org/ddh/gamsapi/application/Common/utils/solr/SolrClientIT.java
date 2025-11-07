@@ -3,10 +3,10 @@ package org.ddh.gamsapi.application.Common.utils.solr;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearch;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
@@ -103,9 +103,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
         solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
     ).isTrue();
 
-    final BaseSearch baseSearch = new BaseSearch();
-    baseSearch.addProperty("id", "123");
-    solrClient.post(TEST_CORE_NAME, baseSearch);
+    final SolrDocument solrDocument = new SolrDocument();
+    solrDocument.addProperty("id", "123");
+    solrClient.post(TEST_CORE_NAME, solrDocument);
 
     // this core should be filled now with data
     Assertions.assertThat(
@@ -139,9 +139,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
         solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
     ).isTrue();
 
-    final BaseSearch baseSearch = new BaseSearch();
-    baseSearch.addProperty("id", "123");
-    solrClient.post(TEST_CORE_NAME, baseSearch);
+    final SolrDocument solrDocument = new SolrDocument();
+    solrDocument.addProperty("id", "123");
+    solrClient.post(TEST_CORE_NAME, solrDocument);
 
     // this core should be filled now with data
     Assertions.assertThat(
@@ -185,9 +185,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
           solrClient.checkCoreIsEmpty(TEST_CORE_NAME)
       ).isTrue();
 
-      final BaseSearch baseSearch = new BaseSearch();
-      baseSearch.addProperty("id", "123");
-      solrClient.post(TEST_CORE_NAME, baseSearch);
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty("id", "123");
+      solrClient.post(TEST_CORE_NAME, solrDocument);
 
       Assertions.assertThat(solrClient.checkCoreIsEmpty(TEST_CORE_NAME)).isFalse();
 
@@ -205,9 +205,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
       String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "123";
 
-      final BaseSearch baseSearch = new BaseSearch();
-      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       String response = solrClient.retrieveSolrDocumentByProperty(SolrGamsCores.TEST_CORE.value, "id", "123");
       String expectedSubstring = String.format("\"%s\":\"%s\"", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
@@ -220,9 +220,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
       String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "1234";
 
-      final BaseSearch baseSearch = new BaseSearch();
-      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       String solrQuery = String.format("%s:%s", TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
       String response = solrClient.query(SolrGamsCores.TEST_CORE.value, solrQuery);
@@ -236,9 +236,9 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
       String TEST_SOLR_DOCUMENT_PROPERTY_NAME = "id";
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = "1234";
 
-      final BaseSearch baseSearch = new BaseSearch();
-      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       String url = String.format("/solr/%s/select?q=*:*", SolrGamsCores.TEST_CORE.value);
       String response = solrClient.get(url);
@@ -261,10 +261,10 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
       String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
 
-      final BaseSearch baseSearch = new BaseSearch();
-      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrDocument.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       int documentCount = solrClient.countProjectDocuments(
           SolrGamsCores.TEST_CORE.value,
@@ -289,10 +289,10 @@ public class SolrClientIT extends BaseSearchIntegrationTest {
       String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
 
-      final BaseSearch baseSearch = new BaseSearch();
-      baseSearch.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      baseSearch.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
-      solrClient.post(SolrGamsCores.TEST_CORE.value, baseSearch);
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
+      solrDocument.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       int documentCount = solrClient.countProjectDocuments(
           SolrGamsCores.TEST_CORE.value,
