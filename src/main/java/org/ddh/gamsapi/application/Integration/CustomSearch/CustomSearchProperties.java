@@ -8,6 +8,7 @@ public enum CustomSearchProperties {
   DATASTREAM_DSID("CUSTOM_SEARCH.json"),
   ENTITY_ID("id"),
   ENTITY_PROJECT_ABBR("objectProjectAbbr"),
+  SOLR_FULLTEXT_PROPERTY("entityFulltext"),
   ENTITY_OBJECT_ID("objectId");
 
   public final String name;

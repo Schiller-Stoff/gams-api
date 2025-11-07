@@ -16,11 +16,13 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for custom search integration.
@@ -203,6 +205,40 @@ public class CustomSearchService implements IIntegrationService {
       }
     }
     return documents;
+  }
+
+
+  /**
+   * TODO jdoc
+   * @param fulltext
+   * @param projectAbbrs
+   * @param pageable
+   */
+  public CustomSearchResponseDto search(
+      String fulltext,
+      Set<String> projectAbbrs,
+      Pageable pageable
+  ){
+
+    String baseQuery = CustomSearchSolrQueryBuilder.buildBaseSolrQuery(projectAbbrs, fulltext);
+
+    String solrUrl = CustomSearchSolrQueryBuilder.buildSolrUrl(
+        SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+        baseQuery,
+        List.of(),
+        pageable
+    );
+
+    log.info("Constructed custom search solr url: {}", solrUrl);
+
+    String response = solrClient.get(solrUrl);
+
+    log.info("Custom search solr response: {}", response);
+
+    return CustomSearchResponseDto.from(response, pageable);
+
+
+
   }
 
 }

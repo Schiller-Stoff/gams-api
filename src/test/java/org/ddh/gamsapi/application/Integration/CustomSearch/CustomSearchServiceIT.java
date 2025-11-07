@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
@@ -60,7 +61,7 @@ public class CustomSearchServiceIT extends BaseSearchIntegrationTest {
 
 
   @Nested
-  public class CustomSearch {
+  public class Indexing {
 
     @Test
     public void customFulltextIndexingIndexesExpectedData(){
@@ -90,6 +91,37 @@ public class CustomSearchServiceIT extends BaseSearchIntegrationTest {
     }
 
 
+
+  }
+
+  @Nested
+  public class Search {
+
+    @Test
+    public void customFulltextSearchReturnsExpectedResults(){
+
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      final String FULLTEXT_QUERY = "";
+
+      var responseDto = customSearchService.search(
+          FULLTEXT_QUERY,
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          PageRequest.of(0,100)
+      );
+
+      org.assertj.core.api.Assertions.assertThat(responseDto)
+          .isNotNull();
+
+      Assertions.assertThat(responseDto.getResults().getContent())
+          .hasSize(1)
+          .allMatch(solrDocument -> {
+            String objectId = (String) solrDocument.getProperty("objectId");
+            return objectId != null && objectId.equals(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+          })
+      ;
+
+    }
 
   }
 
