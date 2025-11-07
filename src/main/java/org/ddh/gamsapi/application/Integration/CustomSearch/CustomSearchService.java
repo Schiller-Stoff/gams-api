@@ -100,8 +100,9 @@ public class CustomSearchService implements IIntegrationService {
       }
 
       //02. add to batch
-      // TODO fix - inefficient array to list conversion - and back
-      currentBatch.addAll(Arrays.asList(solrDocuments));
+      for (SolrDocument document : solrDocuments) {
+        currentBatch.add(document);
+      }
 
       //03. After reaching batch size, post to solr + clear batch (with commit)
       // Flush batch if it's getting full (but don't commit yet)
