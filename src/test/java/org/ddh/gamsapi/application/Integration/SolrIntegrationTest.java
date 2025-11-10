@@ -37,7 +37,8 @@ public class SolrIntegrationTest extends IntegrationTest {
     // VALIDATE CONFIGSET EXISTENCE
     // ========================================
     String baseConfigsetPath = "docker/apps/solr/solr/data/configsets/base";
-    String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search";
+    // just take the conf folder
+    String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search/conf";
 
     File baseConfigset = new File(baseConfigsetPath);
     File customSearchConfig = new File(customSearchConfigPath);
