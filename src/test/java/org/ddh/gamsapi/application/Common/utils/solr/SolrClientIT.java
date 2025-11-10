@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;

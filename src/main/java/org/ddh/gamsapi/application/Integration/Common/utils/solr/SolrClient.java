@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;

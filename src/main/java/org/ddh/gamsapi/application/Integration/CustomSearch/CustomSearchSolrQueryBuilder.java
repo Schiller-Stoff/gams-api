@@ -1,8 +1,8 @@
 package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchProperties;
-import org.ddh.gamsapi.application.Integration.BaseSearch.Fulltext.FulltextSolrConfig;
+import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.Fulltext.FulltextSolrConfig;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrUrlBuilder;
 import org.springframework.data.domain.Pageable;
 
