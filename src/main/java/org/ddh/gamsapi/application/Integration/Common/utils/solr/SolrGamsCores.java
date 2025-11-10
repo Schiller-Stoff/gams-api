@@ -5,7 +5,7 @@ package org.ddh.gamsapi.application.Integration.Common.utils.solr;
  */
 public enum SolrGamsCores {
 
-  GAMS_CORE("gams"),
+  GAMS_CORE("g-search"),
   TEST_CORE("test"),
   CUSTOM_SEARCH_CORE("custom-search"),
   BASE_CORE_CONFIG("base");

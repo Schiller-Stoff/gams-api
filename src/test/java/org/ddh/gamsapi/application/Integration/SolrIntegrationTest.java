@@ -40,15 +40,16 @@ public class SolrIntegrationTest extends IntegrationTest {
     String baseConfigsetPath = "docker/apps/solr/solr/data/configsets/base";
 
     // base search configuration
-    final String BASE_SEARCH_SERVICE_NAME = "gams";
+    // TODO introduce more final variables like below
+    final String BASE_SEARCH_SERVICE_NAME = "g-search";
     final String BASE_SEARCH_CONTAINER_TEMP_PATH = String.format("/tmp/%s_configset", BASE_SEARCH_SERVICE_NAME);
-    String baseSearchConfigPath = "docker/apps/solr/solr/data/gams/conf";
+    final String BASE_SEARCH_LOCAL_CONFIG_PATH = "docker/apps/solr/solr/data/g-search/conf";
 
     // custom-search configuration
     String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search/conf";
 
     File baseConfigset = new File(baseConfigsetPath);
-    File baseSearchConfig = new File(baseSearchConfigPath);
+    File baseSearchConfig = new File(BASE_SEARCH_LOCAL_CONFIG_PATH);
     File customSearchConfig = new File(customSearchConfigPath);
 
     if (!baseConfigset.exists()) {
@@ -78,7 +79,7 @@ public class SolrIntegrationTest extends IntegrationTest {
             "/tmp/base_configset"
         )
         .withCopyToContainer(
-            MountableFile.forHostPath(baseSearchConfigPath),
+            MountableFile.forHostPath(BASE_SEARCH_LOCAL_CONFIG_PATH),
             BASE_SEARCH_CONTAINER_TEMP_PATH
         )
         // Mount custom-search configset
