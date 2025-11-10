@@ -207,6 +207,73 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
 
     }
 
+    @Test
+    public void complexFulltextSearchReturnContainsExpectedValues() throws Exception {
+
+      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+      // at first fulltext core should be empty
+      Assertions.assertThat(fulltextCoreDocumentCountInitial).isEqualTo(0);
+
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      CustomSearchController.CUSTOM_SEARCH_GET_PATH
+                  )
+                  .param("project", TestProject.PROJECT_ABBR.getValue())
+                  .param("q", "")
+                  .param("tag", "test")
+                  .param("pageIndex", "0")
+                  .param("pageSize", "10")
+                  .param("sortBy", "id")
+                  .param("sortDir", "asc")
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .isNotEmpty()
+          .isNotNull()
+          .contains(
+              TestProject.PROJECT_ABBR.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          );
+
+    }
+
+    @Test
+    public void fulltextSearchWithUnkownTagReturnsNoResults() throws Exception {
+
+      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+      // at first fulltext core should be empty
+      Assertions.assertThat(fulltextCoreDocumentCountInitial).isEqualTo(0);
+
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      CustomSearchController.CUSTOM_SEARCH_GET_PATH
+                  )
+                  .param("project", TestProject.PROJECT_ABBR.getValue())
+                  .param("q", "")
+                  .param("tag", "thisTagDoesNotExistInIndex")
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .isNotEmpty()
+          .isNotNull()
+          .contains("\"totalElements\":0");
+
+    }
+
   }
 
 }

@@ -209,23 +209,28 @@ public class CustomSearchService implements ClientManagedIntegrationService {
 
 
   /**
-   * TODO jdoc
-   * @param fulltext
-   * @param projectAbbrs
-   * @param pageable
+   * Performs a custom search with given parameters.
+   * @param fulltext fulltext search string
+   * @param projectAbbrs projects to be searched
+   * @param tags tags to be filtered by
+   * @param pageable pagination information
+   * @return custom search response dto
    */
   public CustomSearchResponseDto search(
       String fulltext,
       Set<String> projectAbbrs,
+      List<String> tags,
       Pageable pageable
   ){
 
     String baseQuery = CustomSearchSolrQueryBuilder.buildBaseSolrQuery(projectAbbrs, fulltext);
 
+    List<String> filterQueries = CustomSearchSolrQueryBuilder.buildFilterQueries(tags);
+
     String solrUrl = CustomSearchSolrQueryBuilder.buildSolrUrl(
         SolrGamsCores.CUSTOM_SEARCH_CORE.value,
         baseQuery,
-        List.of(),
+        filterQueries,
         pageable
     );
 
@@ -236,8 +241,6 @@ public class CustomSearchService implements ClientManagedIntegrationService {
     log.info("Custom search solr response: {}", response);
 
     return CustomSearchResponseDto.from(response, pageable);
-
-
 
   }
 

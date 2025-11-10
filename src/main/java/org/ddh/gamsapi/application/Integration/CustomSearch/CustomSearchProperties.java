@@ -9,7 +9,8 @@ public enum CustomSearchProperties {
   ENTITY_ID("id"),
   ENTITY_PROJECT_ABBR("objectProjectAbbr"),
   SOLR_FULLTEXT_PROPERTY("entityFulltext"),
-  ENTITY_OBJECT_ID("objectId");
+  ENTITY_OBJECT_ID("objectId"),
+  ENTITY_TAGS("entityTags");
 
   public final String name;
 

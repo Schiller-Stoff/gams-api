@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -66,6 +67,7 @@ public class CustomSearchController {
   public CustomSearchResponseDto search(
       @RequestParam String project,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
+      @RequestParam(required = false, defaultValue = "", name = "tag") List<String> tags,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
       @RequestParam(required = false, defaultValue = "id") String sortBy,
@@ -88,6 +90,7 @@ public class CustomSearchController {
     return customSearchService.search(
       fulltextQuery,
       Set.of(project),
+      tags,
       pageRequest
     );
 

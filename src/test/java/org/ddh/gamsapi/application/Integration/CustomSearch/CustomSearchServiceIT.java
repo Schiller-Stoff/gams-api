@@ -23,6 +23,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -107,6 +108,7 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
       var responseDto = customSearchService.search(
           FULLTEXT_QUERY,
           Set.of(TestProject.PROJECT_ABBR.getValue()),
+          List.of(),
           PageRequest.of(0,100)
       );
 

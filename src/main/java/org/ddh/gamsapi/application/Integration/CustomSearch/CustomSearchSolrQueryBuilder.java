@@ -54,6 +54,37 @@ public class CustomSearchSolrQueryBuilder {
   }
 
   /**
+   * Builds Solr filter queries from tag criteria.
+   * @param tags tag filters
+   * @return list of Solr filter queries based on given tags
+   */
+  public static List<String> buildFilterQueries(
+      List<String> tags
+  ) {
+
+    if(tags == null || tags.isEmpty()){
+      return List.of();
+    }
+
+    List<String> filterQueries = new ArrayList<>();
+    if (tags.size() == 1) {
+      String tagValue = SolrUrlBuilder.escapeSolrValue(tags.get(0));
+      filterQueries.add(String.format("%s:%s", CustomSearchProperties.ENTITY_TAGS.name, tagValue));
+    } else {
+      String tagsFq = tags.stream()
+          .map(tag -> String.format("%s:%s",
+              CustomSearchProperties.ENTITY_TAGS.name,
+              SolrUrlBuilder.escapeSolrValue(tag)))
+          .collect(Collectors.joining(" AND "));
+      filterQueries.add("(" + tagsFq + ")");
+    }
+
+
+    return filterQueries;
+
+  }
+
+  /**
    * TODO
    * @param coreName
    * @param baseQuery
