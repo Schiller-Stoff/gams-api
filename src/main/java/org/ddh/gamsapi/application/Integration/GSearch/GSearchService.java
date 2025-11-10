@@ -123,7 +123,7 @@ public class GSearchService implements IIntegrationService {
 
 
     // the end post base search entity to SOLR
-    solrClient.post(SolrGamsCores.GAMS_CORE.value, solrDocument);
+    solrClient.post(SolrGamsCores.GAMS_CORE.value, solrDocument, true);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
   }
