@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestBag;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
@@ -132,6 +133,77 @@ public class CustomSearchControllerIT extends BaseSearchIntegrationTest {
 
       Assertions.assertThat(fulltextCoreDocumentCountAfterDelete)
           .isEqualTo(0);
+
+    }
+
+  }
+
+  @Nested
+  public class SearchEntities {
+
+    @Test
+    public void simpleFulltextSearchReturnContainsExpectedValues() throws Exception {
+
+      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+      // at first fulltext core should be empty
+      Assertions.assertThat(fulltextCoreDocumentCountInitial).isEqualTo(0);
+
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      CustomSearchController.CUSTOM_SEARCH_PATH,
+                      TestProject.PROJECT_ABBR.getValue()
+                  )
+                  .param("q", "")
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .isNotEmpty()
+          .isNotNull()
+          .contains(
+              TestProject.PROJECT_ABBR.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          );
+
+    }
+
+    @Test
+    public void simpleFulltextSearchWithPaginationReturnContainsExpectedValues() throws Exception {
+
+      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+      // at first fulltext core should be empty
+      Assertions.assertThat(fulltextCoreDocumentCountInitial).isEqualTo(0);
+
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      CustomSearchController.CUSTOM_SEARCH_PATH,
+                      TestProject.PROJECT_ABBR.getValue()
+                  )
+                  .param("q", "")
+                  .param("pageIndex", "0")
+                  .param("pageSize", "10")
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .isNotEmpty()
+          .isNotNull()
+          .contains(
+              TestProject.PROJECT_ABBR.getValue(),
+              TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          );
 
     }
 
