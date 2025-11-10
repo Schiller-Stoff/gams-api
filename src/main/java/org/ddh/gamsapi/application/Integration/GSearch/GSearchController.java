@@ -59,15 +59,4 @@ public class GSearchController implements IIntegrationController {
     gSearchService.deleteIndexedObject(projectAbbr, pid);
   }
 
-  @Operation(
-      summary = "Setup project specific BaseSearch integration service",
-      description = "This endpoint sets up the BaseSearch integration service for a project. " +
-          "It should be called once per project to initialize the integration."
-  )
-  @PostMapping("/setup")
-  public void setupIntegrationService(@PathVariable String projectAbbr){
-    log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
-    gSearchService.setupIntegrationService(projectAbbr);
-  }
-
 }

@@ -18,6 +18,7 @@ import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
  */
 @Controller
 // TODO should expose "baseSearch" in url
+// TODO this is completely outdated, needs refactor
 @RequestMapping(value = {"/api/v1/integration/search" })
 @Slf4j
 @RequiredArgsConstructor

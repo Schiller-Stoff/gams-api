@@ -144,24 +144,6 @@ public class GSearchService implements IIntegrationService {
 
 
   /**
-   * Sets up the solr integration service for the given project.
-   * @param projectAbbr project abbreviation
-   */
-  public void setupIntegrationService(String projectAbbr){
-    log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
-
-    // check if the project setup is correct
-    if (solrClient.coreExists(projectAbbr)){
-      String msg = String.format("A solr core already exists for the project %s", projectAbbr);
-      log.error(msg);
-      throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
-    }
-
-   solrClient.createCore(projectAbbr);
-
-  }
-
-  /**
    * Adds dublin core field to given base search entity.
    * TODO test
    * @param solrDocument base search entity
