@@ -22,6 +22,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class CustomSearchController {
 
+  // TODO rethink endpoint path
   public static final String CUSTOM_SEARCH_PATH = "/api/v1/integration/projects/{projectAbbr}/objects/customSearch";
 
   private final CustomSearchService customSearchService;
