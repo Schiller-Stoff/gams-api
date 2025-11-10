@@ -220,12 +220,25 @@ public class CustomSearchService implements ClientManagedIntegrationService {
       String fulltext,
       Set<String> projectAbbrs,
       List<String> tags,
+      String startDate,
+      String endDate,
       Pageable pageable
   ){
 
     String baseQuery = CustomSearchSolrQueryBuilder.buildBaseSolrQuery(projectAbbrs, fulltext);
 
-    List<String> filterQueries = CustomSearchSolrQueryBuilder.buildFilterQueries(tags);
+    List<String> filterQueries = new ArrayList<>();
+
+    // TODO rename method to buildTagFilterQueries.
+    filterQueries.addAll(
+        CustomSearchSolrQueryBuilder.buildFilterQueries(tags)
+    );
+
+    // Add date filters
+    filterQueries.addAll(
+        CustomSearchSolrQueryBuilder.buildDateFilterQueries(startDate, endDate)
+    );
+
 
     String solrUrl = CustomSearchSolrQueryBuilder.buildSolrUrl(
         SolrGamsCores.CUSTOM_SEARCH_CORE.value,

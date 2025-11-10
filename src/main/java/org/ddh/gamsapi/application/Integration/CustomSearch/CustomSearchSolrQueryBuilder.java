@@ -83,9 +83,43 @@ public class CustomSearchSolrQueryBuilder {
     return filterQueries;
 
   }
+  /**
+   * Builds date range filter queries.
+   *
+   * @param startDate Optional start date filter (ISO-8601 format with timezone)
+   * @param endDate Optional end date filter (ISO-8601 format with timezone)
+   * @return List of Solr date range filter queries
+   */
+  public static List<String> buildDateFilterQueries(
+      String startDate,
+      String endDate
+  ) {
+    List<String> dateFilters = new ArrayList<>();
+
+    if (startDate != null && !startDate.trim().isEmpty()) {
+      // DO NOT escape ISO-8601 dates - they contain valid Solr syntax
+      // URL encoding will be handled by the HTTP client
+      dateFilters.add(String.format(
+          "%s:[%s TO *]",
+          CustomSearchProperties.ENTITY_END_DATE.name,
+          startDate.trim()  // ✅ Remove escapeSolrValue()
+      ));
+    }
+
+    if (endDate != null && !endDate.trim().isEmpty()) {
+      dateFilters.add(String.format(
+          "%s:[* TO %s]",
+          CustomSearchProperties.ENTITY_START_DATE.name,
+          endDate.trim()  // ✅ Remove escapeSolrValue()
+      ));
+    }
+
+    return dateFilters;
+  }
 
   /**
-   * TODO
+   * TODO jdoc
+   * TODO test
    * @param coreName
    * @param baseQuery
    * @param filterQueries

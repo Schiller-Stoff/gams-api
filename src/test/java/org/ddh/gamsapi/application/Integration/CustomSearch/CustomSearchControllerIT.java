@@ -230,6 +230,8 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
                   .param("pageSize", "10")
                   .param("sortBy", "id")
                   .param("sortDir", "asc")
+                  .param("startDate", "2015-09-01T00:00:00Z")
+                  .param("endDate", "2015-09-01T23:59:59Z")
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk())
           .andReturn().getResponse().getContentAsString();

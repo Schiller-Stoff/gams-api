@@ -109,6 +109,8 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
           FULLTEXT_QUERY,
           Set.of(TestProject.PROJECT_ABBR.getValue()),
           List.of(),
+          "",
+          "",
           PageRequest.of(0,100)
       );
 
@@ -123,6 +125,28 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
           })
       ;
 
+    }
+
+    @Test
+    void search_withDateRange_returnsOnlyMatchingDocuments() {
+      // Index test data with various date ranges
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      var response = customSearchService.search(
+          "",
+          Set.of(TestProject.PROJECT_ABBR.getValue()),
+          List.of(),
+          "2023-06-01T00:00:00Z",  // Only 2023 H2 events
+          "2023-12-31T23:59:59Z",
+          PageRequest.of(0, 100)
+      );
+
+      Assertions.assertThat(response.getResults().getContent())
+          .allMatch(doc -> {
+            // Verify dates are within range
+            String startDate = (String) doc.getProperty("entityStartDate");
+            return startDate != null && startDate.compareTo("2023-06-01") >= 0;
+          });
     }
 
   }

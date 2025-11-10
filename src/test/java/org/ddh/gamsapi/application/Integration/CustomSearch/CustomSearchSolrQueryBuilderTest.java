@@ -35,5 +35,30 @@ public class CustomSearchSolrQueryBuilderTest extends UnitTest {
 
   }
 
+  @Nested
+  public class BuildDateFilterQueries {
+
+    @Test
+    void buildDateFilterQueries_withBothDates() {
+      List<String> filters = CustomSearchSolrQueryBuilder.buildDateFilterQueries(
+          "2023-01-01T00:00:00Z",
+          "2023-12-31T23:59:59Z"
+      );
+      Assertions.assertThat(filters).hasSize(2);
+      Assertions.assertThat(filters.get(0)).contains("entityEndDate:[2023-01-01T00:00:00Z TO *]");
+      Assertions.assertThat(filters.get(1)).contains("entityStartDate:[* TO 2023-12-31T23:59:59Z]");
+    }
+
+    @Test
+    void buildDateFilterQueries_withOnlyStartDate() {
+      List<String> filters = CustomSearchSolrQueryBuilder.buildDateFilterQueries(
+          "2023-01-01T00:00:00Z", null
+      );
+      Assertions.assertThat(filters).hasSize(1);
+    }
+
+
+  }
+
 
 }

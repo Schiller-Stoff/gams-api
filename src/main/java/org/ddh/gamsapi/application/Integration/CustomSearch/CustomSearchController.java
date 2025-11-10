@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 
@@ -68,6 +71,8 @@ public class CustomSearchController {
       @RequestParam String project,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(required = false, defaultValue = "", name = "tag") List<String> tags,
+      @RequestParam(required = false, name = "startDate") String startDate,
+      @RequestParam(required = false, name = "endDate") String endDate,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
       @RequestParam(required = false, defaultValue = "id") String sortBy,
@@ -77,6 +82,9 @@ public class CustomSearchController {
     pageSize = Math.min(pageSize, 50); // Limit page size
 
     PageRequest pageRequest;
+
+    validateDateFormat(startDate, "startDate");
+    validateDateFormat(endDate, "endDate");
 
     if (sortBy == null || sortBy.isEmpty()) {
       // Default: no explicit sorting (Solr relevance score)
@@ -91,9 +99,26 @@ public class CustomSearchController {
       fulltextQuery,
       Set.of(project),
       tags,
+      startDate,
+      endDate,
       pageRequest
     );
 
+  }
+
+
+  // In Controller or Service
+  private void validateDateFormat(String date, String paramName) {
+    if (date == null || date.isEmpty()) return;
+
+    try {
+      Instant.parse(date); // Validates ISO-8601 format
+    } catch (DateTimeParseException e) {
+      String msg = String.format("Invalid %s format: %s. Must be ISO-8601 with timezone (e.g., 2023-01-01T00:00:00Z)",
+          paramName, date);
+      log.warn(msg);
+      throw new IntegrationUserQueryException(msg);
+    }
   }
 
 }
