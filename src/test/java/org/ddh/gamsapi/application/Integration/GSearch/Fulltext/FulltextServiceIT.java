@@ -10,7 +10,7 @@ import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchService;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchService;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ import java.util.Set;
 public class FulltextServiceIT extends SolrIntegrationTest {
 
   @Autowired
-  private BaseSearchService baseSearchService;
+  private GSearchService gSearchService;
 
   @Autowired
   private FulltextService fulltextService;
@@ -63,7 +63,7 @@ public class FulltextServiceIT extends SolrIntegrationTest {
     ingestService.ingest(ingest);
 
     // Index object
-    baseSearchService.indexObject(
+    gSearchService.indexObject(
         TestProject.PROJECT_ABBR.getValue(),
         TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
     );

@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class BaseSearchEventListener {
+public class GSearchEventListener {
 
-  private final BaseSearchService baseSearchService;
+  private final GSearchService gSearchService;
   private final IIntegrationFailureRepository failureRepository;
 
   /**
@@ -32,7 +32,7 @@ public class BaseSearchEventListener {
     DigitalObject digitalObject = event.getDigitalObject();
 
     try {
-      baseSearchService.indexObject(
+      gSearchService.indexObject(
           digitalObject.getProject().getProjectAbbr(),
           digitalObject.getId()
       );

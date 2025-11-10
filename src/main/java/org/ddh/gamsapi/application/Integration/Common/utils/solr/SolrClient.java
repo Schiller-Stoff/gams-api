@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
@@ -433,15 +433,15 @@ public class SolrClient {
 
     // Project filter
     if (projectAbbrs.isEmpty()) {
-      url.append(String.format("q=%s:*", BaseSearchProperties.PROJECT.name));
+      url.append(String.format("q=%s:*", GSearchProperties.PROJECT.name));
     } else if (projectAbbrs.size() == 1) {
       url.append(String.format("q=%s:%s",
-          BaseSearchProperties.PROJECT.name,
+          GSearchProperties.PROJECT.name,
           SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next())));
     } else {
       String projectQuery = projectAbbrs.stream()
           .map(abbr -> String.format("%s:%s",
-              BaseSearchProperties.PROJECT.name,
+              GSearchProperties.PROJECT.name,
               SolrUrlBuilder.escapeSolrValue(abbr)))
           .collect(Collectors.joining(" OR "));
       url.append("&q=(").append(projectQuery).append(")");

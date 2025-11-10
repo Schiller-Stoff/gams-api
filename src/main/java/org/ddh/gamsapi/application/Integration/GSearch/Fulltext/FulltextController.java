@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.data.domain.PageRequest;
@@ -222,10 +222,10 @@ public class FulltextController {
   private String mapAndValidateSortField(String userField) {
 
     List<String> allowedSortFields = List.of(
-        BaseSearchProperties.TITLE.name,
-        BaseSearchProperties.CREATOR.name,
-        BaseSearchProperties.PUBLISHER.name,
-        BaseSearchProperties.OBJECT_ID.name,
+        GSearchProperties.TITLE.name,
+        GSearchProperties.CREATOR.name,
+        GSearchProperties.PUBLISHER.name,
+        GSearchProperties.OBJECT_ID.name,
         "dc.title",
         "dc.creator",
         "dc.publisher",
@@ -238,9 +238,9 @@ public class FulltextController {
         "dc.rights",
         "dc.coverage",
         "dc.description",
-        BaseSearchProperties.TYPE.name,
-        BaseSearchProperties.PROJECT.name,
-        BaseSearchProperties.DATASTREAMS.name
+        GSearchProperties.TYPE.name,
+        GSearchProperties.PROJECT.name,
+        GSearchProperties.DATASTREAMS.name
     );
 
     if (!allowedSortFields.contains(userField)) {

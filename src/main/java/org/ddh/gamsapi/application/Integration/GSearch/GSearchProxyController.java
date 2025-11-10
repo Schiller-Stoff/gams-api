@@ -23,7 +23,7 @@ import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 @RequiredArgsConstructor
 @RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
-public class BaseSearchProxyController implements IIntegrationProxyController {
+public class GSearchProxyController implements IIntegrationProxyController {
 
   private final IProxyService proxyService;
   private final GAMSDockerDNS gamsConfigProperties;

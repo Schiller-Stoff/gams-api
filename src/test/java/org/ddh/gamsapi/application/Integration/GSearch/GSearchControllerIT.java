@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 @AutoConfigureMockMvc(addFilters = false)
-public class BaseSearchControllerIT extends SolrIntegrationTest {
+public class GSearchControllerIT extends SolrIntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -33,7 +33,7 @@ public class BaseSearchControllerIT extends SolrIntegrationTest {
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private BaseSearchService baseSearchService;
+  private GSearchService gSearchService;
 
   @Autowired
   private IIngestService ingestService;
@@ -56,7 +56,7 @@ public class BaseSearchControllerIT extends SolrIntegrationTest {
     ingestService.ingest(ingest);
 
     // index object
-    baseSearchService.indexObject(
+    gSearchService.indexObject(
         TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
     );
   }

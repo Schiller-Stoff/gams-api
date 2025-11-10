@@ -1,6 +1,6 @@
 package org.ddh.gamsapi.application.Integration.GSearch;
 
-public enum BaseSearchProperties {
+public enum GSearchProperties {
 
   PROJECT("objectProjectAbbr"),
 
@@ -24,7 +24,7 @@ public enum BaseSearchProperties {
 
   public final String name;
 
-  BaseSearchProperties(String name){
+  GSearchProperties(String name){
     this.name = name;
   }
 

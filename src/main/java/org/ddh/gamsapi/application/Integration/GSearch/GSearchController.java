@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
-public class BaseSearchController implements IIntegrationController {
+public class GSearchController implements IIntegrationController {
 
-  private final BaseSearchService baseSearchService;
+  private final GSearchService gSearchService;
 
   @Operation(
       summary = "Add all project objects to external BaseSearch service",
@@ -26,7 +26,7 @@ public class BaseSearchController implements IIntegrationController {
   @PostMapping
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
-    baseSearchService.indexObjects(projectAbbr);
+    gSearchService.indexObjects(projectAbbr);
   }
 
   @Operation(
@@ -36,7 +36,7 @@ public class BaseSearchController implements IIntegrationController {
   @DeleteMapping
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
-    baseSearchService.deleteIndexedObjects(projectAbbr);
+    gSearchService.deleteIndexedObjects(projectAbbr);
   }
 
   @Operation(
@@ -46,7 +46,7 @@ public class BaseSearchController implements IIntegrationController {
   @PostMapping("/{pid}")
   public void indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to index object with pid {}", pid);
-    baseSearchService.indexObject(projectAbbr, pid);
+    gSearchService.indexObject(projectAbbr, pid);
   }
 
   @Operation(
@@ -56,7 +56,7 @@ public class BaseSearchController implements IIntegrationController {
   @DeleteMapping("/{pid}")
   public void deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
-    baseSearchService.deleteIndexedObject(projectAbbr, pid);
+    gSearchService.deleteIndexedObject(projectAbbr, pid);
   }
 
   @Operation(
@@ -67,7 +67,7 @@ public class BaseSearchController implements IIntegrationController {
   @PostMapping("/setup")
   public void setupIntegrationService(@PathVariable String projectAbbr){
     log.trace("*** Setting up integration service {}", this.getClass().getSimpleName());
-    baseSearchService.setupIntegrationService(projectAbbr);
+    gSearchService.setupIntegrationService(projectAbbr);
   }
 
 }

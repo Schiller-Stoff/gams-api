@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
@@ -258,12 +258,12 @@ public class SolrClientIT extends SolrIntegrationTest {
 
     @Test
     public void returnsExpectedCount(){
-      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = GSearchProperties.PROJECT.name;
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
 
       final SolrDocument solrDocument = new SolrDocument();
       solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrDocument.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       int documentCount = solrClient.countProjectDocuments(
@@ -286,12 +286,12 @@ public class SolrClientIT extends SolrIntegrationTest {
 
     @Test
     public void returnsCountWhenProjectSetIsEmpty(){
-      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = BaseSearchProperties.PROJECT.name;
+      String TEST_SOLR_DOCUMENT_PROPERTY_NAME = GSearchProperties.PROJECT.name;
       String TEST_SOLR_DOCUMENT_PROPERTY_VALUE = TestProject.PROJECT_ABBR.getValue();
 
       final SolrDocument solrDocument = new SolrDocument();
       solrDocument.addProperty(TEST_SOLR_DOCUMENT_PROPERTY_NAME, TEST_SOLR_DOCUMENT_PROPERTY_VALUE);
-      solrDocument.addProperty(BaseSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
       int documentCount = solrClient.countProjectDocuments(

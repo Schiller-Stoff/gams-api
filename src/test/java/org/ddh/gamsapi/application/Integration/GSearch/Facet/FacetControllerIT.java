@@ -8,8 +8,8 @@ import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchService;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchService;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ public class FacetControllerIT extends SolrIntegrationTest {
   private AuditingHandler auditingHandler;
 
   @Autowired
-  private BaseSearchService baseSearchService;
+  private GSearchService gSearchService;
 
   @Autowired
   private IIngestService ingestService;
@@ -65,7 +65,7 @@ public class FacetControllerIT extends SolrIntegrationTest {
     ingestService.ingest(ingest);
 
     // index object
-    baseSearchService.indexObject(
+    gSearchService.indexObject(
         TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
     );
   }

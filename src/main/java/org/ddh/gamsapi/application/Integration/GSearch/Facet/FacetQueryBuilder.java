@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.application.Integration.GSearch.Facet;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrUrlBuilder;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.springframework.data.domain.Pageable;
@@ -102,15 +102,15 @@ public class FacetQueryBuilder {
 
     // Field list
     List<String> fieldsToReturn = List.of(
-        BaseSearchProperties.OBJECT_ID.name,
-        BaseSearchProperties.PROJECT.name,
-        BaseSearchProperties.DATASTREAMS.name,
-        BaseSearchProperties.TYPE.name,
-        BaseSearchProperties.TITLE.name,
-        BaseSearchProperties.DESCRIPTION.name,
-        BaseSearchProperties.CREATOR.name,
-        BaseSearchProperties.PUBLISHER.name,
-        BaseSearchProperties.RIGHTS.name,
+        GSearchProperties.OBJECT_ID.name,
+        GSearchProperties.PROJECT.name,
+        GSearchProperties.DATASTREAMS.name,
+        GSearchProperties.TYPE.name,
+        GSearchProperties.TITLE.name,
+        GSearchProperties.DESCRIPTION.name,
+        GSearchProperties.CREATOR.name,
+        GSearchProperties.PUBLISHER.name,
+        GSearchProperties.RIGHTS.name,
         "dc.*"
     );
     url.append("&fl=").append(String.join(",", fieldsToReturn));
@@ -156,16 +156,16 @@ public class FacetQueryBuilder {
       String escapedFulltext = SolrUrlBuilder.escapeSolrValue(fulltextQuery.trim());
       // URL encode the fulltext value
       String encodedFulltext = urlEncode(escapedFulltext);
-      queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, encodedFulltext));
+      queryParts.add(String.format("%s:%s", GSearchProperties.FULLTEXT.name, encodedFulltext));
     }
 
     if (projectAbbrs.size() == 1) {
       String project = SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next());
-      queryParts.add(String.format("%s:%s", BaseSearchProperties.PROJECT.name, project));
+      queryParts.add(String.format("%s:%s", GSearchProperties.PROJECT.name, project));
     } else {
       String projectQuery = projectAbbrs.stream()
           .map(abbr -> String.format("%s:%s",
-              BaseSearchProperties.PROJECT.name,
+              GSearchProperties.PROJECT.name,
               SolrUrlBuilder.escapeSolrValue(abbr)))
           .collect(Collectors.joining(" OR "));
       queryParts.add("(" + projectQuery + ")");

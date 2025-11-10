@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.io.UnsupportedEncodingException;
@@ -82,18 +82,18 @@ public class SolrUrlBuilder {
       String escapedFulltext = SolrUrlBuilder.escapeSolrValue(fulltextQuery.trim());
       // URL encode the fulltext value
       String encodedFulltext = urlEncode(escapedFulltext);
-      queryParts.add(String.format("%s:%s", BaseSearchProperties.FULLTEXT.name, encodedFulltext));
+      queryParts.add(String.format("%s:%s", GSearchProperties.FULLTEXT.name, encodedFulltext));
     }
 
     if(projectAbbrs.isEmpty()){
-      queryParts.add(String.format("%s:*", BaseSearchProperties.PROJECT.name));
+      queryParts.add(String.format("%s:*", GSearchProperties.PROJECT.name));
     } else if (projectAbbrs.size() == 1) {
       String project = SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next());
-      queryParts.add(String.format("%s:%s", BaseSearchProperties.PROJECT.name, project));
+      queryParts.add(String.format("%s:%s", GSearchProperties.PROJECT.name, project));
     } else {
       String projectQuery = projectAbbrs.stream()
           .map(abbr -> String.format("%s:%s",
-              BaseSearchProperties.PROJECT.name,
+              GSearchProperties.PROJECT.name,
               SolrUrlBuilder.escapeSolrValue(abbr)))
           .collect(Collectors.joining(" OR "));
       queryParts.add("(" + projectQuery + ")");

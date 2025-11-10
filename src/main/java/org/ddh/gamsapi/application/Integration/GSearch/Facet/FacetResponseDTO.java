@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearch;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearch;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,7 +36,7 @@ public class FacetResponseDTO {
    */
   @JsonProperty("results")
   @Schema(description = "Paginated search results with complete metadata")
-  private PagedResponse<BaseSearch> results;
+  private PagedResponse<GSearch> results;
 
   /**
    * Available facet values with their counts for drill-down navigation.
@@ -82,20 +82,20 @@ public class FacetResponseDTO {
   ) {
 
     // Step 1: Map Solr documents to domain objects
-    List<BaseSearch> searchResults = facetSolrResponse.getDocuments().stream()
-        .map(BaseSearch::from)
+    List<GSearch> searchResults = facetSolrResponse.getDocuments().stream()
+        .map(GSearch::from)
         .collect(Collectors.toList());
 
     // Step 2: Create Spring Page with complete pagination metadata
     // This automatically calculates: totalPages, hasNext, hasPrevious, isFirst, isLast
-    Page<BaseSearch> page = new PageImpl<>(
+    Page<GSearch> page = new PageImpl<>(
         searchResults,                      // Content for this page
         pageable,                           // Pageable (contains page number, size, sort)
         facetSolrResponse.getNumFound()   // Total elements (for totalPages calculation)
     );
 
     // Step 3: Convert to standard PagedResponse wrapper
-    PagedResponse<BaseSearch> pagedResults = PagedResponse.from(page);
+    PagedResponse<GSearch> pagedResults = PagedResponse.from(page);
 
     // Step 4: Convert selected facets from MultiValueMap to standard Map
     Map<String, List<String>> selectedFacetsMap = new HashMap<>();

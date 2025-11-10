@@ -30,7 +30,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BaseSearchService implements IIntegrationService {
+public class GSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
@@ -52,7 +52,7 @@ public class BaseSearchService implements IIntegrationService {
     log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
     // delete selected from GAMS core
-    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.PROJECT.name, projectAbbr));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", GSearchProperties.PROJECT.name, projectAbbr));
 
   }
 
@@ -69,20 +69,20 @@ public class BaseSearchService implements IIntegrationService {
     var foundDatastreams = datastreamRepository.findAllDatastreamMimeViewsByDigitalObject(digitalObject);
 
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-    solrDocument.addProperty(BaseSearchProperties.OBJECT_ID.name, digitalObject.getId());
-    solrDocument.addProperty(BaseSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-    solrDocument.addProperty(BaseSearchProperties.TYPE.name, BaseSearchTypes.DIGITAL_OBJECT.name);
+    solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, digitalObject.getId());
+    solrDocument.addProperty(GSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+    solrDocument.addProperty(GSearchProperties.TYPE.name, GSearchTypes.DIGITAL_OBJECT.name);
     // index datastream ids
     if(!foundDatastreams.isEmpty()){
-      solrDocument.addProperty(BaseSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
+      solrDocument.addProperty(GSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
     }
 
     // These fields might differ from the dublin core!
-     solrDocument.addProperty(BaseSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
-     solrDocument.addProperty(BaseSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
-     solrDocument.addProperty(BaseSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
-     solrDocument.addProperty(BaseSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
-     solrDocument.addProperty(BaseSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
+     solrDocument.addProperty(GSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
+     solrDocument.addProperty(GSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
+     solrDocument.addProperty(GSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
+     solrDocument.addProperty(GSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
+     solrDocument.addProperty(GSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
 
 
     // send datastream contained info to solr
@@ -136,9 +136,9 @@ public class BaseSearchService implements IIntegrationService {
     id = id.replaceAll(":", "\\\\\\\\:");
 
     // delete object from GAMS core
-    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", GSearchProperties.OBJECT_ID.name, id));
     // this requires solr documents to have the projectAbbr field
-    solrClient.delete(projectAbbr, String.format("%s:%s", BaseSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(projectAbbr, String.format("%s:%s", GSearchProperties.OBJECT_ID.name, id));
 
   }
 
@@ -221,11 +221,11 @@ public class BaseSearchService implements IIntegrationService {
 
     String docText = XMLUtils.extractText(dcXml);
 
-    if(solrDocument.getProperty(BaseSearchProperties.FULLTEXT.name) == null){
-      solrDocument.addProperty(BaseSearchProperties.FULLTEXT.name, docText);
+    if(solrDocument.getProperty(GSearchProperties.FULLTEXT.name) == null){
+      solrDocument.addProperty(GSearchProperties.FULLTEXT.name, docText);
     } else {
-      String existingText = (String) solrDocument.getProperty(BaseSearchProperties.FULLTEXT.name);
-      solrDocument.addProperty(BaseSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
+      String existingText = (String) solrDocument.getProperty(GSearchProperties.FULLTEXT.name);
+      solrDocument.addProperty(GSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
     }
 
   }

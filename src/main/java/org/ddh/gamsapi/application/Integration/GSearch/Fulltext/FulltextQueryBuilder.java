@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.application.Integration.GSearch.Fulltext;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.BaseSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrUrlBuilder;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 import org.springframework.data.domain.Pageable;
@@ -134,15 +134,15 @@ public class FulltextQueryBuilder {
 
     // Field list
     List<String> fieldsToReturn = List.of(
-        BaseSearchProperties.OBJECT_ID.name,
-        BaseSearchProperties.PROJECT.name,
-        BaseSearchProperties.DATASTREAMS.name,
-        BaseSearchProperties.TYPE.name,
-        BaseSearchProperties.TITLE.name,
-        BaseSearchProperties.DESCRIPTION.name,
-        BaseSearchProperties.CREATOR.name,
-        BaseSearchProperties.PUBLISHER.name,
-        BaseSearchProperties.RIGHTS.name,
+        GSearchProperties.OBJECT_ID.name,
+        GSearchProperties.PROJECT.name,
+        GSearchProperties.DATASTREAMS.name,
+        GSearchProperties.TYPE.name,
+        GSearchProperties.TITLE.name,
+        GSearchProperties.DESCRIPTION.name,
+        GSearchProperties.CREATOR.name,
+        GSearchProperties.PUBLISHER.name,
+        GSearchProperties.RIGHTS.name,
         "dc.*"
     );
     url.append("&fl=").append(String.join(",", fieldsToReturn));
@@ -150,7 +150,7 @@ public class FulltextQueryBuilder {
 
     // ========== HIGHLIGHTING PARAMETERS (NEW) ==========
     url.append("&hl=true");  // Enable highlighting
-    url.append("&hl.fl=").append(BaseSearchProperties.FULLTEXT.name); // Highlight fulltext field
+    url.append("&hl.fl=").append(GSearchProperties.FULLTEXT.name); // Highlight fulltext field
     url.append("&hl.requireFieldMatch=true");  // Only highlight if field matches query (only objectFulltext being here matched)
     url.append("&hl.snippets=3");  // Max 3 snippets per field
     url.append("&hl.fragsize=150");  // ~150 chars per snippet

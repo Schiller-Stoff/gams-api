@@ -31,10 +31,10 @@ import java.io.IOException;
 
 
 @Slf4j
-public class BaseSearchServiceIT extends SolrIntegrationTest {
+public class GSearchServiceIT extends SolrIntegrationTest {
 
   @Autowired
-  private BaseSearchService baseSearchService;
+  private GSearchService gSearchService;
 
   @Autowired
   private IIngestService ingestService;
@@ -72,7 +72,7 @@ public class BaseSearchServiceIT extends SolrIntegrationTest {
     public void tryingToIndexNonExistentObjectShouldThrow(){
       final String NON_EXISTENT_DIGITAL_OBJECT_ID = "DOES_NOT_EXIST";
       Assertions.assertThrows(IntegrationDataProcessingException.class, () -> {
-        baseSearchService.indexObject(TestProject.PROJECT_ABBR.getValue(), NON_EXISTENT_DIGITAL_OBJECT_ID);
+        gSearchService.indexObject(TestProject.PROJECT_ABBR.getValue(), NON_EXISTENT_DIGITAL_OBJECT_ID);
       });
     }
 
@@ -80,7 +80,7 @@ public class BaseSearchServiceIT extends SolrIntegrationTest {
     public void indexObjectDoesNotThrow() {
 
       // index object
-      baseSearchService.indexObject(
+      gSearchService.indexObject(
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
@@ -127,7 +127,7 @@ public class BaseSearchServiceIT extends SolrIntegrationTest {
     @Test
     public void findsExpectedObjectIdJsonEntry(){
       // index object
-      baseSearchService.indexObject(
+      gSearchService.indexObject(
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
@@ -145,11 +145,11 @@ public class BaseSearchServiceIT extends SolrIntegrationTest {
     @Test
     public void ableToFindDocumentsBasedOnProjectAbbreviations(){
       // index object
-      baseSearchService.indexObject(
+      gSearchService.indexObject(
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          SolrGamsCores.GAMS_CORE.value, BaseSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
+          SolrGamsCores.GAMS_CORE.value, GSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
       );
 
       System.out.println("*** Response: " + response);
@@ -165,7 +165,7 @@ public class BaseSearchServiceIT extends SolrIntegrationTest {
     public void returnsExpectedDcFieldNamesInResponse(){
 
       // index object
-      baseSearchService.indexObject(
+      gSearchService.indexObject(
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
