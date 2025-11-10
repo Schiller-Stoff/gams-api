@@ -81,7 +81,7 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
 
       mockMvc.perform(
               MockMvcRequestBuilders.post(
-                      "/api/v1/integration/projects/{projectAbbr}/objects/customSearch",
+                      CustomSearchController.CUSTOM_SEARCH_MANAGEMENT_PATH,
                       TestProject.PROJECT_ABBR.getValue()
                   )
                   .contentType(MediaType.APPLICATION_JSON))
@@ -120,7 +120,7 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
       // now delete the indexed documents
       mockMvc.perform(
               MockMvcRequestBuilders.delete(
-                      "/api/v1/integration/projects/{projectAbbr}/objects/customSearch",
+                      CustomSearchController.CUSTOM_SEARCH_MANAGEMENT_PATH,
                       TestProject.PROJECT_ABBR.getValue()
                   )
                   .contentType(MediaType.APPLICATION_JSON))
@@ -155,9 +155,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
 
       String response = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      CustomSearchController.CUSTOM_SEARCH_PATH,
-                      TestProject.PROJECT_ABBR.getValue()
+                      CustomSearchController.CUSTOM_SEARCH_GET_PATH
                   )
+                  .param("project", TestProject.PROJECT_ABBR.getValue())
                   .param("q", "")
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk())
@@ -187,9 +187,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
 
       String response = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      CustomSearchController.CUSTOM_SEARCH_PATH,
-                      TestProject.PROJECT_ABBR.getValue()
+                      CustomSearchController.CUSTOM_SEARCH_GET_PATH
                   )
+                  .param("project", TestProject.PROJECT_ABBR.getValue())
                   .param("q", "")
                   .param("pageIndex", "0")
                   .param("pageSize", "10")

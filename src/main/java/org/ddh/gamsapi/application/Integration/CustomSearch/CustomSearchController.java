@@ -15,15 +15,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @Controller
-@RequestMapping(value = {CustomSearchController.CUSTOM_SEARCH_PATH})
+@RequestMapping
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class CustomSearchController {
 
-  // TODO rethink endpoint path
-  public static final String CUSTOM_SEARCH_PATH = "/api/v1/integration/projects/{projectAbbr}/objects/customSearch";
+  public static final String CUSTOM_SEARCH_GET_PATH = "/api/v1/integration/c-search";
+
+  public static final String CUSTOM_SEARCH_MANAGEMENT_PATH = "/api/v1/integration/projects/{projectAbbr}/objects/c-search";
 
   private final CustomSearchService customSearchService;
 
@@ -31,7 +32,7 @@ public class CustomSearchController {
       summary = "Add all project objects to external CustomSearch service",
       description = "This endpoint indexes all objects of a project in the CustomSearch service."
   )
-  @PostMapping
+  @PostMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
     customSearchService.indexObjects(projectAbbr);
@@ -41,7 +42,7 @@ public class CustomSearchController {
       summary = "Delete all project objects from external CustomSearch service",
       description = "This endpoint deletes all objects of a project from the CustomSearch service."
   )
-  @DeleteMapping
+  @DeleteMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     customSearchService.deleteIndexedObjects(projectAbbr);
@@ -60,10 +61,10 @@ public class CustomSearchController {
   @GetMapping(produces = {
       MimeTypeUtils.APPLICATION_JSON_VALUE,
       MimeTypeUtils.APPLICATION_XML_VALUE
-  })
+  }, value = CUSTOM_SEARCH_GET_PATH)
   @ResponseBody
   public CustomSearchResponseDto search(
-      @PathVariable String projectAbbr,
+      @RequestParam String project,
       @RequestParam(required = false, defaultValue = "", name = "q") String fulltextQuery,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
@@ -86,7 +87,7 @@ public class CustomSearchController {
 
     return customSearchService.search(
       fulltextQuery,
-      Set.of(projectAbbr),
+      Set.of(project),
       pageRequest
     );
 
