@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.CustomSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
-import org.ddh.gamsapi.application.Integration.Common.interfaces.SystemManagedIntegrationService;
+import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
@@ -30,7 +30,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CustomSearchService implements SystemManagedIntegrationService {
+public class CustomSearchService implements ClientManagedIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
