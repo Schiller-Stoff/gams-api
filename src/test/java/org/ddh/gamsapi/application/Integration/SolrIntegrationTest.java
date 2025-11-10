@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.application.Integration.BaseSearch;
+package org.ddh.gamsapi.application.Integration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
@@ -25,7 +25,7 @@ import java.time.Duration;
  * 3. Creates GAMS_CORE and TEST_CORE with base configuration
  */
 @Slf4j
-public class BaseSearchIntegrationTest extends IntegrationTest {
+public class SolrIntegrationTest extends IntegrationTest {
 
   @Autowired
   public SolrClient solrClient;

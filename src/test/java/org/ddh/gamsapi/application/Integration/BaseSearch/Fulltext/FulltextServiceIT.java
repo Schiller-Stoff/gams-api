@@ -9,7 +9,7 @@ import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchService;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class FulltextServiceIT extends BaseSearchIntegrationTest {
+public class FulltextServiceIT extends SolrIntegrationTest {
 
   @Autowired
   private BaseSearchService baseSearchService;

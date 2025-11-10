@@ -10,6 +10,7 @@ import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationServiceException;
+import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
@@ -27,11 +28,10 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 
 @Slf4j
-public class BaseSearchServiceIT extends BaseSearchIntegrationTest {
+public class BaseSearchServiceIT extends SolrIntegrationTest {
 
   @Autowired
   private BaseSearchService baseSearchService;

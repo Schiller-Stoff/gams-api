@@ -8,7 +8,7 @@ import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
-import org.ddh.gamsapi.application.Integration.BaseSearch.BaseSearchIntegrationTest;
+import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.Set;
 
 @Slf4j
-public class CustomSearchServiceIT extends BaseSearchIntegrationTest {
+public class CustomSearchServiceIT extends SolrIntegrationTest {
 
   @Autowired
   private CustomSearchService customSearchService;
