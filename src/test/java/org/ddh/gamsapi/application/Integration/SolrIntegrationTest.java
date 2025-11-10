@@ -36,15 +36,27 @@ public class SolrIntegrationTest extends IntegrationTest {
     // ========================================
     // VALIDATE CONFIGSET EXISTENCE
     // ========================================
+    // base configuration for every solr to be created
     String baseConfigsetPath = "docker/apps/solr/solr/data/configsets/base";
-    // just take the conf folder
+
+    // base search configuration
+    final String BASE_SEARCH_SERVICE_NAME = "gams";
+    final String BASE_SEARCH_CONTAINER_TEMP_PATH = String.format("/tmp/%s_configset", BASE_SEARCH_SERVICE_NAME);
+    String baseSearchConfigPath = "docker/apps/solr/solr/data/gams/conf";
+
+    // custom-search configuration
     String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search/conf";
 
     File baseConfigset = new File(baseConfigsetPath);
+    File baseSearchConfig = new File(baseSearchConfigPath);
     File customSearchConfig = new File(customSearchConfigPath);
 
     if (!baseConfigset.exists()) {
       throw new AssertionError("'base' configset not found at: " + baseConfigset.getAbsolutePath());
+    }
+
+    if (!baseSearchConfig.exists()) {
+      throw new AssertionError("'custom-search' config not found at: " + customSearchConfig.getAbsolutePath());
     }
 
     if (!customSearchConfig.exists()) {
@@ -52,6 +64,7 @@ public class SolrIntegrationTest extends IntegrationTest {
     }
 
     log.info("✓ Found 'base' configset at: {}", baseConfigset.getAbsolutePath());
+    log.info("✓ Found {} configset at: {}", BASE_SEARCH_SERVICE_NAME,  baseConfigset.getAbsolutePath());
     log.info("✓ Found 'custom-search' config at: {}", customSearchConfig.getAbsolutePath());
 
     // ========================================
@@ -63,6 +76,10 @@ public class SolrIntegrationTest extends IntegrationTest {
         .withCopyToContainer(
             MountableFile.forHostPath(baseConfigsetPath),
             "/tmp/base_configset"
+        )
+        .withCopyToContainer(
+            MountableFile.forHostPath(baseSearchConfigPath),
+            BASE_SEARCH_CONTAINER_TEMP_PATH
         )
         // Mount custom-search configset
         .withCopyToContainer(
@@ -97,6 +114,19 @@ public class SolrIntegrationTest extends IntegrationTest {
         log.info("✓ Base configset copied to /var/solr/data/configsets/base");
       }
 
+      var copyBaseSearchForApi = solr.execInContainer(
+          "sh", "-c",
+          String.format("cp -r %s /var/solr/data/configsets/%s && chmod -R 755 /var/solr/data/configsets/%s",
+              BASE_SEARCH_CONTAINER_TEMP_PATH, BASE_SEARCH_SERVICE_NAME, BASE_SEARCH_SERVICE_NAME)
+      );
+
+      if (copyBaseSearchForApi.getExitCode() != 0) {
+        log.warn("Failed to copy {} configset: {}", BASE_SEARCH_SERVICE_NAME, copyBaseSearchForApi.getStderr());
+      } else {
+        log.info("✓ {} configset copied to /var/solr/data/configsets/{}",
+            BASE_SEARCH_SERVICE_NAME, BASE_SEARCH_SERVICE_NAME);
+      }
+
       // Copy custom-search configset
       var copyCustomForApi = solr.execInContainer(
           "sh", "-c",
@@ -129,9 +159,10 @@ public class SolrIntegrationTest extends IntegrationTest {
       }
 
       // 2. GAMS_CORE (uses base configset)
+      // TODO rename / redo to base-search core!
       log.info("Creating '{}' core with BASE configset...", SolrGamsCores.GAMS_CORE.value);
       var gamsCore = solr.execInContainer(
-          "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", "/tmp/base_configset"
+          "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", BASE_SEARCH_CONTAINER_TEMP_PATH
       );
       log.info("GAMS core - exitCode: {}, stdout: '{}'",
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
