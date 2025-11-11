@@ -10,14 +10,14 @@ import java.util.List;
 public class CustomSearchSolrQueryBuilderTest extends UnitTest {
 
   @Nested
-  public class BuildFilterQueries {
+  public class BuildTagFilterQueries {
 
     @Test
     public void buildsExpectedFilterQueries(){
 
       final List<String> TAG_FILTERS = List.of("tag1", "tag2", "tag3");
 
-      var filterQueries = CustomSearchSolrQueryBuilder.buildFilterQueries(TAG_FILTERS);
+      var filterQueries = CustomSearchSolrQueryBuilder.buildTagFilterQueries(TAG_FILTERS);
 
       Assertions.assertThat(
           filterQueries

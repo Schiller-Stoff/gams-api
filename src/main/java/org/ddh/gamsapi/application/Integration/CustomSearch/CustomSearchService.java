@@ -244,9 +244,8 @@ public class CustomSearchService implements ClientManagedIntegrationService {
 
     List<String> filterQueries = new ArrayList<>();
 
-    // TODO rename method to buildTagFilterQueries.
     filterQueries.addAll(
-        CustomSearchSolrQueryBuilder.buildFilterQueries(tags)
+        CustomSearchSolrQueryBuilder.buildTagFilterQueries(tags)
     );
 
     // Add date filters

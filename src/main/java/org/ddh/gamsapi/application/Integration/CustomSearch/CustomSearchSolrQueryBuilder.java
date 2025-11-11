@@ -58,7 +58,7 @@ public class CustomSearchSolrQueryBuilder {
    * @param tags tag filters
    * @return list of Solr filter queries based on given tags
    */
-  public static List<String> buildFilterQueries(
+  public static List<String> buildTagFilterQueries(
       List<String> tags
   ) {
 
