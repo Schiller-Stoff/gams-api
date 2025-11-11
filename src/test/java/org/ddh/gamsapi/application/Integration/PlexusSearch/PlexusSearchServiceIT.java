@@ -7,7 +7,6 @@ import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
-import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
@@ -82,24 +81,23 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
     @Test
     public void indexCreatesDocumentsWithExpectedFields(){
 
+      final String TEST_SOLR_DOCUMENT_ID = "test.9124719230";
+
       // run the indexing
       plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
 
-      // query solr for documents
-      var response = solrClient.retrieveSolrDocumentByProperty(
+      var solrDocument = solrClient.retrieveSolrDocumentById(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
-          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
-          TestProject.PROJECT_ABBR.getValue()
+          TEST_SOLR_DOCUMENT_ID
       );
 
-      // assert expected fields are present
-      Assertions.assertThat(response)
-          .isNotNull()
-          .isNotEmpty()
-          .contains(
-              TestProject.PROJECT_ABBR.getValue(),
-              "test.9124719230"
-          );
+      Assertions.assertThat(solrDocument)
+          .isNotNull();
+
+      Assertions.assertThat(solrDocument.getProperty("id"))
+          .isEqualTo(TEST_SOLR_DOCUMENT_ID);
+
+
     }
 
 
