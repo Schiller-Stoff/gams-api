@@ -187,4 +187,35 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
 
   }
 
+  @Nested
+  public class DeleteIndexedObject {
+
+    @Test
+    public void deleteIndexedObjectRemovesExpectedData(){
+
+      customSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+
+      org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
+          .isEqualTo(1);
+
+      customSearchService.deleteIndexedObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+
+      org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
+          .isEqualTo(0);
+
+    }
+
+
+  }
+
 }

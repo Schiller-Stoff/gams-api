@@ -183,16 +183,13 @@ public class CustomSearchService implements ClientManagedIntegrationService {
   }
 
   /**
-   * TODO test
-   * TODO jdoc
-   *
+   * Deletes a single indexed object from custom search.
    * @param projectAbbr project to be indexed to facets database
    * @param id          id of the object to be deleted
    */
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
-    // TODO hardcoded string
-    final String DELETE_QUERY = String.format("%s:%s", "objectId", id);
+    final String DELETE_QUERY = String.format("%s:%s", CustomSearchProperties.ENTITY_OBJECT_ID.name, id);
     solrClient.delete(
         SolrGamsCores.CUSTOM_SEARCH_CORE.value, DELETE_QUERY
     );
