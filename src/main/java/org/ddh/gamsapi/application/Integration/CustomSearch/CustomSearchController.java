@@ -66,6 +66,19 @@ public class CustomSearchController {
     customSearchService.deleteIndexedObjects(projectAbbr);
   }
 
+  @Operation(
+      summary = "Delete a single project object from external c-search service",
+      description = "This endpoint deletes a single object of a project from the CustomSearch service."
+  )
+  @DeleteMapping(CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  public void deleteProjectObject(
+      @PathVariable String projectAbbr,
+      @PathVariable String id
+  ){
+    log.trace("*** Trying to delete single project object from custom-search service. Object-id: {}", id);
+    customSearchService.deleteIndexedObject(projectAbbr, id);
+  }
+
 
   // TODO add missing open api doc
   /**

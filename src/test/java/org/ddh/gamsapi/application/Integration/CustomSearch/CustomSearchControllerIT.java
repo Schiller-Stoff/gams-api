@@ -178,6 +178,45 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
   }
 
   @Nested
+  public class DeleteIndexedObject {
+
+    @Test
+    public void deleteSingleIndexedObjectDecrementsDocumentCountFromFulltextCore() throws Exception {
+
+      // first index some documents
+      customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(fulltextCoreDocumentCountInitial)
+          .isGreaterThan(0);
+
+      // now delete the single indexed document
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete(
+                      CustomSearchController.CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH,
+                      TestProject.PROJECT_ABBR.getValue(),
+                      TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+                  )
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk());
+
+      int fulltextCoreDocumentCountAfterDelete = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(fulltextCoreDocumentCountAfterDelete)
+          .isEqualTo(fulltextCoreDocumentCountInitial - 1);
+
+    }
+  }
+
+
+  @Nested
   public class SearchEntities {
 
     @Test
