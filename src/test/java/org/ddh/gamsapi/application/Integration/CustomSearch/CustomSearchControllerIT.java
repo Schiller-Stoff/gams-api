@@ -100,6 +100,45 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
   }
 
   @Nested
+  public class IndexObject {
+
+    @Test
+    public void indexSingleObjectCreatesExpectedDocumentInFulltextCore() throws Exception {
+
+      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+      // at first fulltext core should be empty
+      Assertions.assertThat(fulltextCoreDocumentCountInitial).isEqualTo(0);
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.post(
+                      CustomSearchController.CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH,
+                      TestProject.PROJECT_ABBR.getValue(),
+                      TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+                  )
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isOk());
+
+      String response = solrClient.retrieveSolrDocumentByProperty(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+
+      Assertions.assertThat(solrDocumentCount)
+          .isGreaterThan(0);
+
+      Assertions.assertThat(response)
+          .isNotNull()
+          .contains("\"objectId\":\""+ TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+    }
+
+  }
+
+  @Nested
   public class DeleteIndexedObjects {
 
     @Test

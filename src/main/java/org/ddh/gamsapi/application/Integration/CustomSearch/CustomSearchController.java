@@ -28,13 +28,15 @@ public class CustomSearchController {
 
   public static final String CUSTOM_SEARCH_GET_PATH = "/api/v1/integration/c-search";
 
-  public static final String CUSTOM_SEARCH_MANAGEMENT_PATH = "/api/v1/integration/projects/{projectAbbr}/objects/c-search";
+  public static final String CUSTOM_SEARCH_MANAGEMENT_PATH = CUSTOM_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
+
+  public static final String CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH = CUSTOM_SEARCH_MANAGEMENT_PATH + "/{id}";
 
   private final CustomSearchService customSearchService;
 
   @Operation(
-      summary = "Add all project objects to external CustomSearch service",
-      description = "This endpoint indexes all objects of a project in the CustomSearch service."
+      summary = "Add all project objects to external c-search service",
+      description = "This endpoint indexes all objects of a project in the c-search service."
   )
   @PostMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
   public void indexProjectObjects(@PathVariable String projectAbbr){
@@ -43,7 +45,19 @@ public class CustomSearchController {
   }
 
   @Operation(
-      summary = "Delete all project objects from external CustomSearch service",
+      summary = "Add a single project object to external c-search service",
+      description = "This endpoint indexes all objects of a project in the c-search service."
+  )
+  @PostMapping(CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  public void indexProjectObject(
+      @PathVariable String projectAbbr,
+      @PathVariable String id
+  ){
+    customSearchService.indexObject(projectAbbr, id);
+  }
+
+  @Operation(
+      summary = "Delete all project objects from external c-search service",
       description = "This endpoint deletes all objects of a project from the CustomSearch service."
   )
   @DeleteMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
@@ -53,9 +67,10 @@ public class CustomSearchController {
   }
 
 
+  // TODO add missing open api doc
   /**
    * Searches custom entities via fulltext query
-   * @param projectAbbr project to be searched
+   * @param project project to be searched
    * @param fulltextQuery fulltext query
    * @param pageIndex pagination index
    * @param pageSize pagination size
