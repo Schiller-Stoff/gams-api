@@ -459,6 +459,8 @@ public class SolrClient {
     StringBuilder url = new StringBuilder();
     url.append(String.format("/solr/%s/select?", coreName));
 
+    // TODO use of GSearchProperties is dangerous here!
+
     // Project filter
     if (projectAbbrs.isEmpty()) {
       url.append(String.format("q=%s:*", GSearchProperties.PROJECT.name));
