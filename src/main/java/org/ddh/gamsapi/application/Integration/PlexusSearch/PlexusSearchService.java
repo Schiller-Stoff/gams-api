@@ -158,9 +158,12 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
   @Override
   public void deleteIndexedObjects(String projectAbbr) {
 
-    throw new UnsupportedOperationException(
-        "Bulk deletion of Plexus indexed objects is not supported."
-    );
+    final String DELETION_QUERY = String.format("%s:%s",
+        PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
+        projectAbbr);
+
+    solrClient.delete(SolrGamsCores.PLEXUS_SEARCH_CORE.value, DELETION_QUERY);
+
   }
 
   @Override

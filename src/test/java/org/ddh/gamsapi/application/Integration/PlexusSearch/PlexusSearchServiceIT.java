@@ -3,10 +3,12 @@ package org.ddh.gamsapi.application.Integration.PlexusSearch;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestBag;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
+import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
@@ -100,7 +102,48 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
 
     }
 
+  }
+
+  @Nested
+  public class DeleteIndexedObjects {
+
+    @Test
+    public void deleteRemovesAllProjectDocuments(){
+
+      final String TEST_SOLR_DOCUMENT_ID = "test.1111111";
+
+      // first fill data of plexus search core
+      SolrDocument testSolrDocument = new SolrDocument();
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_ID.name, TEST_SOLR_DOCUMENT_ID);
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_PROJECT_ABBR.name, TestProject.PROJECT_ABBR.getValue());
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      // posting data to solr
+      solrClient.post(SolrGamsCores.PLEXUS_SEARCH_CORE.value, testSolrDocument);
+
+      Assertions.assertThat(
+          solrClient.checkCoreIsEmpty(SolrGamsCores.PLEXUS_SEARCH_CORE.value)
+      ).isFalse();
+
+      int documentsCountAfterIndexing = solrClient.countProjectDocuments(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          Set.of()
+      );
+
+      Assertions.assertThat(documentsCountAfterIndexing).isGreaterThan(0); // expecting some documents to be indexed
+
+      // run the deletion
+      plexusSearchService.deleteIndexedObjects(TestProject.PROJECT_ABBR.getValue());
+
+      int documentsCountAfterDeletion = solrClient.countProjectDocuments(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(documentsCountAfterDeletion).isEqualTo(0); // expecting all documents to be deleted
+
+    }
 
   }
+
 
 }
