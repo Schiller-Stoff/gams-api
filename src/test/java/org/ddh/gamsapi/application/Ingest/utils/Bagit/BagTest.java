@@ -90,7 +90,7 @@ public class BagTest extends UnitTest {
       @Test
       public void bagitSipJsonHasExpectedNumberOfContentFiles() {
         Assertions.assertThat(bag.getBagData().getContentFiles()).isNotNull();
-        Assertions.assertThat(bag.getBagData().getContentFiles().size()).isEqualTo(6);
+        Assertions.assertThat(bag.getBagData().getContentFiles().size()).isEqualTo(7);
       }
 
       @Test
@@ -188,7 +188,7 @@ public class BagTest extends UnitTest {
 
       @Test
       public void bagFilesHaveExpectedSize() {
-        Assertions.assertThat(bag.getContentFiles().size()).isEqualTo(6);
+        Assertions.assertThat(bag.getContentFiles().size()).isEqualTo(7);
       }
 
       @Test
