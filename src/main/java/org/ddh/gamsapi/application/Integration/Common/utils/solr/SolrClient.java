@@ -351,6 +351,34 @@ public class SolrClient {
   }
 
   /**
+   * Retrieve a document from a core by its ID.
+   * @param coreName name of the solr core
+   * @param documentId ID of the document to retrieve
+   * @return the SolrDocument object
+   */
+  public SolrDocument retrieveSolrDocumentById(String coreName, String documentId) {
+    String response = retrieveSolrDocumentByProperty(coreName, "id", documentId);
+    try {
+      JsonNode docsNode = OBJECT_MAPPER.readTree(response)
+          .path("response")
+          .path("docs");
+      if (docsNode.isArray() && !docsNode.isEmpty()) {
+        return OBJECT_MAPPER.treeToValue(docsNode.get(0), SolrDocument.class);
+      } else {
+        String msg = String.format("Solr document with ID %s not found in core %s", documentId, coreName);
+        log.warn(msg);
+        throw new IntegrationDataProcessingException(msg);
+      }
+    } catch (Exception e) {
+      String msg = String.format("Failed to parse Solr document response for core %s and document ID %s. Cause: %s",
+          coreName, documentId, e.getMessage()
+      );
+      log.error(msg);
+      throw new IntegrationDataProcessingException(msg);
+    }
+  }
+
+  /**
    * Retrieve a document from a core by a specific property.
    *
    * @param coreName      name of the solr core

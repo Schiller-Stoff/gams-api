@@ -304,6 +304,29 @@ public class SolrClientIT extends SolrIntegrationTest {
 
   }
 
+  @Nested
+  public class RetrieveSolrDocumentById {
+
+    @Test
+    public void returnsExpectedDocument(){
+      String TEST_SOLR_DOCUMENT_ID = "unique-doc-id-12345";
+
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty("id", TEST_SOLR_DOCUMENT_ID);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
+
+      SolrDocument retrievedDocument = solrClient.retrieveSolrDocumentById(
+          SolrGamsCores.TEST_CORE.value,
+          TEST_SOLR_DOCUMENT_ID
+      );
+      Assertions.assertThat(retrievedDocument)
+          .isNotNull();
+      Assertions.assertThat(retrievedDocument.getProperty("id"))
+          .isEqualTo(TEST_SOLR_DOCUMENT_ID);
+    }
+
+  }
+
 
   @Test
   @Disabled
