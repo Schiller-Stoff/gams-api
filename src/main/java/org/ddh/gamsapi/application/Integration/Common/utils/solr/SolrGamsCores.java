@@ -8,6 +8,7 @@ public enum SolrGamsCores {
   GAMS_CORE("g-search"),
   TEST_CORE("test"),
   CUSTOM_SEARCH_CORE("custom-search"),
+  PLEXUS_SEARCH_CORE("plexus-search"),
   BASE_CORE_CONFIG("base");
 
   public final String value;

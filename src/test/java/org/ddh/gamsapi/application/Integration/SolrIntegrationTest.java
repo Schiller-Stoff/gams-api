@@ -48,9 +48,16 @@ public class SolrIntegrationTest extends IntegrationTest {
     // custom-search configuration
     String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search/conf";
 
+    // plexus search configuration
+    final String PLEXUS_SEARCH_SERVICE_NAME = "plexus-search";
+    final String PLEXUS_SEARCH_CONTAINER_TEMP_PATH = String.format("/tmp/%s_configset", PLEXUS_SEARCH_SERVICE_NAME);
+    final String PLEXUS_SEARCH_LOCAL_CONFIG_PATH = "docker/apps/solr/solr/data/plexus-search/conf";
+
+
     File baseConfigset = new File(baseConfigsetPath);
     File baseSearchConfig = new File(BASE_SEARCH_LOCAL_CONFIG_PATH);
     File customSearchConfig = new File(customSearchConfigPath);
+    File plexusSearchConfig = new File(PLEXUS_SEARCH_LOCAL_CONFIG_PATH);
 
     if (!baseConfigset.exists()) {
       throw new AssertionError("'base' configset not found at: " + baseConfigset.getAbsolutePath());
@@ -64,9 +71,14 @@ public class SolrIntegrationTest extends IntegrationTest {
       throw new AssertionError("'custom-search' config not found at: " + customSearchConfig.getAbsolutePath());
     }
 
+    if(!plexusSearchConfig.exists()) {
+      throw new AssertionError("'plexus-search' config not found at: " + plexusSearchConfig.getAbsolutePath());
+    }
+
     log.info("✓ Found 'base' configset at: {}", baseConfigset.getAbsolutePath());
     log.info("✓ Found {} configset at: {}", BASE_SEARCH_SERVICE_NAME,  baseConfigset.getAbsolutePath());
     log.info("✓ Found 'custom-search' config at: {}", customSearchConfig.getAbsolutePath());
+    log.info("✓ Found {} config at: {}", PLEXUS_SEARCH_SERVICE_NAME, plexusSearchConfig.getAbsolutePath());
 
     // ========================================
     // CONTAINER SETUP WITH BOTH CONFIGSETS
@@ -86,6 +98,11 @@ public class SolrIntegrationTest extends IntegrationTest {
         .withCopyToContainer(
             MountableFile.forHostPath(customSearchConfigPath),
             "/tmp/custom_search_configset"
+        )
+        // Mount plexus-search configset
+        .withCopyToContainer(
+            MountableFile.forHostPath(PLEXUS_SEARCH_LOCAL_CONFIG_PATH),
+            PLEXUS_SEARCH_CONTAINER_TEMP_PATH
         )
         .waitingFor(Wait.forHttp("/solr/admin/cores?action=STATUS")
             .forPort(8983)
@@ -140,6 +157,19 @@ public class SolrIntegrationTest extends IntegrationTest {
         log.info("✓ Custom-search configset copied to /var/solr/data/configsets/custom-search");
       }
 
+      var copyPlexusForApi = solr.execInContainer(
+          "sh", "-c",
+          String.format("cp -r %s /var/solr/data/configsets/%s && chmod -R 755 /var/solr/data/configsets/%s",
+              PLEXUS_SEARCH_CONTAINER_TEMP_PATH, PLEXUS_SEARCH_SERVICE_NAME, PLEXUS_SEARCH_SERVICE_NAME)
+      );
+
+      if (copyPlexusForApi.getExitCode() != 0) {
+        log.warn("Failed to copy {} configset: {}", PLEXUS_SEARCH_SERVICE_NAME, copyPlexusForApi.getStderr());
+      } else {
+        log.info("✓ {} configset copied to /var/solr/data/configsets/{}",
+            PLEXUS_SEARCH_SERVICE_NAME, PLEXUS_SEARCH_SERVICE_NAME);
+      }
+
       Thread.sleep(2000);
 
       // ========================================
@@ -187,11 +217,26 @@ public class SolrIntegrationTest extends IntegrationTest {
             " stdout: " + customSearchCore.getStdout());
       }
 
+      // 4. PLEXUS_SEARCH_CORE (uses PLEXUS-SEARCH configset)
+      log.info("Creating '{}' core with PLEXUS-SEARCH configset...", PLEXUS_SEARCH_SERVICE_NAME);
+      var plexusSearchCore = solr.execInContainer(
+          "solr", "create_core", "-c", PLEXUS_SEARCH_SERVICE_NAME,
+          "-d", PLEXUS_SEARCH_CONTAINER_TEMP_PATH  // ← USES PLEXUS CONFIG
+      );
+      log.info("Plexus-search core - exitCode: {}, stdout: '{}'",
+          plexusSearchCore.getExitCode(), plexusSearchCore.getStdout().trim());
+
+      if (plexusSearchCore.getExitCode() != 0) {
+        throw new AssertionError("Failed to create plexus-search core. Exit: " + plexusSearchCore.getExitCode() +
+            " stdout: " + plexusSearchCore.getStdout());
+      }
+
       Thread.sleep(1000);
-      log.info("✓ Solr test container fully initialized with 3 cores");
+      log.info("✓ Solr test container fully initialized with 4 cores");
       log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.TEST_CORE.value);
       log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.GAMS_CORE.value);
       log.info("  - {} (custom-search schema): entityFulltext, entity* fields", SolrGamsCores.CUSTOM_SEARCH_CORE.value);
+      log.info("  - {} (plexus-search schema): plexusFulltext, plexus* fields", PLEXUS_SEARCH_SERVICE_NAME);
 
     } catch (Exception e) {
       log.error("Failed to initialize Solr container", e);
@@ -213,6 +258,7 @@ public class SolrIntegrationTest extends IntegrationTest {
       solrClient.wipeCore(SolrGamsCores.GAMS_CORE.value);
       solrClient.wipeCore(SolrGamsCores.TEST_CORE.value);
       solrClient.wipeCore(SolrGamsCores.CUSTOM_SEARCH_CORE.value);
+      solrClient.wipeCore(SolrGamsCores.PLEXUS_SEARCH_CORE.value);
       super.tearDown();
     } catch (Exception e) {
       log.warn("Failed to wipe cores in tearDown: {}", e.getMessage());
