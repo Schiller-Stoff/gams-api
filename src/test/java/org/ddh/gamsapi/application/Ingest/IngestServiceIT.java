@@ -2,6 +2,8 @@ package org.ddh.gamsapi.application.Ingest;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.PlexusSearchProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -125,7 +127,7 @@ public class IngestServiceIT extends IntegrationTest {
       var datastreams = datastreamRepository.findAll();
       Assertions.assertThat(datastreams)
           .isNotEmpty()
-          .hasSize(6);
+          .hasSize(7);
 
       // assert that expected datastream content exists on the fileystem
       datastreams.forEach(datastream -> {
@@ -216,7 +218,7 @@ public class IngestServiceIT extends IntegrationTest {
       var datastreams = datastreamRepository.findAll();
       Assertions.assertThat(datastreams)
           .isNotEmpty()
-          .hasSize(6);
+          .hasSize(7);
 
     }
 
@@ -467,7 +469,7 @@ public class IngestServiceIT extends IntegrationTest {
         });
 
 
-        Assertions.assertThat(entryNames.size()).isEqualTo(11);
+        Assertions.assertThat(entryNames.size()).isEqualTo(12);
 
         // Assert presence of generated files
         Assertions.assertThat(entryNames).contains(
@@ -485,7 +487,8 @@ public class IngestServiceIT extends IntegrationTest {
             String.format("%s/data/content/test.xml", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/data/content/test.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/data/content/manifest.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/content/search.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), CustomSearchProperties.DATASTREAM_DSID.name),
+            String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), PlexusSearchProperties.DATASTREAM_DSID.name)
         );
 
 
