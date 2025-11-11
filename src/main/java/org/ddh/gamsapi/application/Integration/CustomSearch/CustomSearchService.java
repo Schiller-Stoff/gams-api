@@ -150,17 +150,35 @@ public class CustomSearchService implements ClientManagedIntegrationService {
   }
 
   /**
-   * TODO jdoc
-   * TODO test
-   *
+   * Indexes a single object for custom search.
    * @param projectAbbr project to be indexed
    * @param id          id of the object to be indexed
    */
   @Override
   public void indexObject(String projectAbbr, String id) {
 
-    // TODO implement if needed
-    throw new UnsupportedOperationException("indexObject not implemented in CustomSearchService yet.");
+    final var CUSTOM_SEARCH_JSON_DSID = DatastreamId.builder()
+        .digitalObject(id)
+        .dsid(CustomSearchProperties.DATASTREAM_DSID.name)
+        .build();
+
+    var datastreamAsStream = datastreamContentRepository.findById(CUSTOM_SEARCH_JSON_DSID);
+
+    SolrDocument[] solrDocuments;
+    try {
+      solrDocuments = SolrDocument.from(datastreamAsStream);
+    } catch (IOException e) {
+      String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", datastreamAsStream.getDescription(), CUSTOM_SEARCH_JSON_DSID, e);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    }
+
+    // TODO post batch size of documents? (might be a lot lof solr documents in a single object)
+
+    // currently posting all documents at once
+    solrClient.post(SolrGamsCores.CUSTOM_SEARCH_CORE.value,  solrDocuments);
+    // commit all documents at once?
+    solrClient.commit(SolrGamsCores.CUSTOM_SEARCH_CORE.value);
 
   }
 

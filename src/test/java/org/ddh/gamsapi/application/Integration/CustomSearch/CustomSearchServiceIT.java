@@ -96,6 +96,42 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
   }
 
   @Nested
+  public class IndexObject {
+
+    @Test
+    public void indexSingleObjectIndexesExpectedData(){
+
+      int initialDocumentsCount = solrClient.countProjectDocuments(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(initialDocumentsCount).isEqualTo(0);
+
+      customSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      String response = solrClient.retrieveSolrDocumentByProperty(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+
+      org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
+          .isEqualTo(1);
+
+      org.assertj.core.api.Assertions.assertThat(response)
+          .isNotNull()
+          .contains("\"objectId\":\""+ TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+    }
+
+
+  }
+
+  @Nested
   public class Search {
 
     @Test
