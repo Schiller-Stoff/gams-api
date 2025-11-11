@@ -232,4 +232,19 @@ public class Datastream {
     return StringUtils.getFilename(bagPath);
   }
 
+  // implement to String method for better logging
+  @Override
+  public String toString() {
+    return "Datastream{" +
+            "digitalObject=" + (digitalObject != null ? digitalObject.getId() : "null") +
+            ", dsid='" + dsid + '\'' +
+            ", mimeType='" + mimeType + '\'' +
+            ", bagPath='" + bagPath + '\'' +
+            ", size=" + size +
+            ", type='" + type + '\'' +
+            ", created=" + created +
+            ", modified=" + modified +
+            '}';
+  }
+
 }
