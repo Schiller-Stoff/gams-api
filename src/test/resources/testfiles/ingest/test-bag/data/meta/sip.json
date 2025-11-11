@@ -70,6 +70,19 @@
       "publisher": "test GAMS project",
       "tags": ["test-tag1", "test-tag2", "test-tag3"],
       "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "size": 1000,
+      "bagpath": "data/content/CUSTOM_SEARCH.json",
+      "dsid": "CUSTOM_SEARCH.json",
+      "mimetype": "application/json",
+      "title": "Fulltext index",
+      "description": "Contains the fulltext index for search functionality.",
+      "creator": "Foo bar",
+      "rights": "Rights foo",
+      "publisher": "test GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
     }
   ],
   "$schema": "https://gitlab.cern.ch/digitalmemory/sip-spec/-/blob/master/sip-schema-d1.json",

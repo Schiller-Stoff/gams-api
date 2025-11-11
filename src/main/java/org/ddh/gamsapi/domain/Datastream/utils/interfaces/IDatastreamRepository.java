@@ -136,4 +136,23 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
       @Param("digitalObjectIds") Set<String> digitalObjectIds
   );
 
+  /**
+   * Find all datastreams with a specific dsid for a given project.
+   * RECOMMENDED: Always filter by project for better performance and multi-tenancy.
+   *
+   * @param dsid Datastream identifier (e.g., "FULLTEXT_INDEX.json")
+   * @param projectAbbr Project abbreviation for filtering
+   * @param pageable Pagination parameters (REQUIRED for large result sets)
+   * @return Page of datastream indexing projections with total count
+   *
+   */
+  @Query("SELECT d FROM Datastream d " +
+      "WHERE d.dsid = :dsid " +
+      "AND d.digitalObject.project.projectAbbr = :projectAbbr")
+  Page<IDatastreamIndexingView> findAllByDsidAndProject(
+      @Param("dsid") String dsid,
+      @Param("projectAbbr") String projectAbbr,
+      Pageable pageable
+  );
+
 }

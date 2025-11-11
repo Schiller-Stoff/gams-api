@@ -7,6 +7,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.transaction.annotation.Transactional;
@@ -562,6 +563,32 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             );
 
         }
+
+    }
+
+    @Nested
+    public class FindAllByDsidAndProject {
+
+      @Test
+      public void findsExpectedDatastreamsByDsidAndProjectAbbr() {
+
+          var foundDatastreams = datastreamRepository.findAllByDsidAndProject(
+              testDataSet.mainDatastream().getDsid(),
+              testDataSet.project().getProjectAbbr(),
+              PageRequest.of(0,1000)
+          );
+
+          Assertions.assertThat(foundDatastreams)
+              .isNotNull()
+              .isNotEmpty()
+              .hasSize(1)
+              .allSatisfy(datastream -> {
+                  Assertions.assertThat(datastream.getDsid())
+                      .isEqualTo(testDataSet.mainDatastream().getDsid());
+                  Assertions.assertThat(datastream.getDigitalObject().getId())
+                      .isEqualTo(testDataSet.digitalObject().getId());
+              });
+      }
 
     }
 

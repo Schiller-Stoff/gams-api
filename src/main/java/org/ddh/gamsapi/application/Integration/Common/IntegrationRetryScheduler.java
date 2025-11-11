@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.enums.IntegrationStatus;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationFailureRepository;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
+import org.ddh.gamsapi.application.Integration.Common.interfaces.SystemManagedIntegrationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import java.util.List;
 public class IntegrationRetryScheduler {
 
   private final IIntegrationFailureRepository failureRepository;
-  private final List<IIntegrationService> integrationServices;
+  private final List<SystemManagedIntegrationService> integrationServices;
 
   // Runs every 5 minutes
   @Scheduled(fixedDelay = 300000, initialDelay = 60000)
@@ -68,6 +69,7 @@ public class IntegrationRetryScheduler {
     return integrationServices.stream()
         .filter(s -> s.getClass().getSimpleName().contains(serviceName))
         .findFirst()
+        // TODO rethink dangerous runtime exception!
         .orElseThrow(() -> new RuntimeException("Service not found: " + serviceName));
   }
 }

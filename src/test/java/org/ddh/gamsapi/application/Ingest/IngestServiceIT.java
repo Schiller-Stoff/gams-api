@@ -125,7 +125,7 @@ public class IngestServiceIT extends IntegrationTest {
       var datastreams = datastreamRepository.findAll();
       Assertions.assertThat(datastreams)
           .isNotEmpty()
-          .hasSize(5);
+          .hasSize(6);
 
       // assert that expected datastream content exists on the fileystem
       datastreams.forEach(datastream -> {
@@ -216,7 +216,7 @@ public class IngestServiceIT extends IntegrationTest {
       var datastreams = datastreamRepository.findAll();
       Assertions.assertThat(datastreams)
           .isNotEmpty()
-          .hasSize(5);
+          .hasSize(6);
 
     }
 
@@ -467,7 +467,7 @@ public class IngestServiceIT extends IntegrationTest {
         });
 
 
-        Assertions.assertThat(entryNames.size()).isEqualTo(10);
+        Assertions.assertThat(entryNames.size()).isEqualTo(11);
 
         // Assert presence of generated files
         Assertions.assertThat(entryNames).contains(

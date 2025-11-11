@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class IntegrationActionController {
   /**
    * All beans injected that implement the interface.
    */
-  private final List<IIntegrationService> integrationServices;
+  private final List<ClientManagedIntegrationService> integrationServices;
 
   @Operation(
       summary = "Integrate digital object with external services",
