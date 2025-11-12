@@ -12,6 +12,7 @@ import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQuer
 import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchResponseDto;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.validation.PlexusSearchQueryValidator;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamIndexingView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
@@ -176,8 +177,27 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
   @Override
   public void indexObject(String projectAbbr, String id) {
 
-    throw new UnsupportedOperationException("Single object indexing is not supported for PlexusSearch.");
+    final var PLEXUS_SEARCH_JSON_DSID = DatastreamId.builder()
+        .digitalObject(id)
+        .dsid(PlexusSearchProperties.DATASTREAM_DSID.name)
+        .build();
 
+    var datastreamAsStream = datastreamContentRepository.findById(PLEXUS_SEARCH_JSON_DSID);
+
+    SolrDocument[] solrDocuments;
+    try {
+      solrDocuments = SolrDocument.from(datastreamAsStream);
+    } catch (IOException e) {
+      String msg = String.format("Failed to read datastream content %s for datastream %s. Original error: %s", datastreamAsStream.getDescription(), PLEXUS_SEARCH_JSON_DSID, e);
+      log.error(msg);
+      throw new DatastreamCannotLoadFileException(msg);
+    }
+
+    // TODO post batch size of documents? (might be a lot lof solr documents in a single object)
+    // currently posting all documents at once
+    solrClient.post(SolrGamsCores.PLEXUS_SEARCH_CORE.value,  solrDocuments);
+    // commit all documents at once?
+    solrClient.commit(SolrGamsCores.PLEXUS_SEARCH_CORE.value);
 
   }
 

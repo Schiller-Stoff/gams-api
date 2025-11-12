@@ -108,6 +108,36 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
   }
 
   @Nested
+  public class IndexObject {
+
+    @Test
+    public void indexCreatesASolrDocumentForGivenObjectId() {
+
+      final String TEST_SOLR_DOCUMENT_ID = "test.9124719230";
+
+      // run the indexing
+      plexusSearchService.indexObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      var solrDocument = solrClient.retrieveSolrDocumentById(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          TEST_SOLR_DOCUMENT_ID
+      );
+
+      Assertions.assertThat(solrDocument)
+          .isNotNull();
+
+      Assertions.assertThat(solrDocument.getProperty("id"))
+          .isEqualTo(TEST_SOLR_DOCUMENT_ID);
+
+    }
+
+
+  }
+
+  @Nested
   public class DeleteIndexedObjects {
 
     @Test
