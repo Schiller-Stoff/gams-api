@@ -2,10 +2,15 @@ package org.ddh.gamsapi.application.Integration.PlexusSearch;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchResponseDto;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +49,29 @@ public class PlexusSearchController {
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     plexusSearchService.deleteIndexedObjects(projectAbbr);
+  }
+
+
+  /**
+   * TODO jdoc
+   * TODO test
+   * TODO openapi
+   * @param projectAbbr
+   * @param request
+   * @return
+   */
+  public ResponseEntity<PlexusSearchResponseDto> search(
+      @Parameter(description = "Project abbreviation", required = true)
+      @PathVariable String projectAbbr,
+
+      @Parameter(description = "Query parameters", required = true)
+      @Valid @RequestBody PlexusSearchQueryRequestDto request
+  ) {
+    log.info("Plexus search request for project: {}, query: {}", projectAbbr, request.getQuery());
+
+    PlexusSearchResponseDto response = plexusSearchService.search(projectAbbr, request);
+
+    return ResponseEntity.ok(response);
   }
 
 }

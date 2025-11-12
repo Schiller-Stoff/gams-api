@@ -1,13 +1,18 @@
 package org.ddh.gamsapi.application.Integration.PlexusSearch;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchResponseDto;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.validation.PlexusSearchQueryValidator;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamIndexingView;
@@ -19,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +39,9 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final SolrClient solrClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final PlexusSearchQueryValidator queryValidator;
+
+  private final String SHARED_CORE_NAME = SolrGamsCores.PLEXUS_SEARCH_CORE.value;
 
   private static final int DEFAULT_BATCH_SIZE = 500;
   private static final int COMMIT_INTERVAL = 10; // Commit every 10 batches
@@ -181,6 +190,73 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
   }
 
 
+  /**
+   * Executes a Plexus search query.
+   *
+   * CRITICAL: Always adds mandatory project filter for tenant isolation in shared core.
+   *
+   * @param projectAbbr Project abbreviation
+   * @param request Query request
+   * @return Search response with results and metadata
+   */
+  public PlexusSearchResponseDto search(String projectAbbr, PlexusSearchQueryRequestDto request) {
+    log.debug("Executing Plexus search for project {} in core {}: {}",
+        projectAbbr, SHARED_CORE_NAME, request.getQuery());
+
+    long startTime = System.currentTimeMillis();
+
+    // 1. Check query quota
+    // TODO not implemented
+    //quotaManager.checkQueryQuota(projectAbbr);
+
+    // 2. Validate query
+    // TODO this method does not exist
+    // TODO change name of injected field queryValidator to plexusQueryValidator
+    // List<String> warnings = queryValidator.validate(request, projectAbbr);
+
+    // 3. Add mandatory project filter (CRITICAL for tenant isolation in shared core)
+    List<String> filterQueries = new ArrayList<>(request.getFilterQueries() != null ?
+        request.getFilterQueries() : List.of());
+    String projectFilter = PlexusSearchProperties.ENTITY_PROJECT_ABBR.name + ":" + projectAbbr;
+    filterQueries.add(0, projectFilter); // Add as first filter
+
+    // 4. Validate mandatory filter is present
+    // TODO does not exist
+    //queryValidator.validateMandatoryProjectFilter(filterQueries, projectAbbr);
+
+    // 5. Build Solr query URL (CHANGED: uses shared core)
+    String solrUrl = buildSolrQueryUrl(SHARED_CORE_NAME, request, filterQueries);
+
+    log.info("Plexus query URL (shared core): {}", solrUrl);
+
+    // 6. Execute query
+    String responseJson = solrClient.get(solrUrl);
+
+    log.info("*** Plexus query response JSON: {}", responseJson);
+
+    // 7. Parse response
+    // TODO private method does not work yet
+    //PlexusSearchResponseDto response = parseSearchResponse(responseJson, request);
+
+    // 8. Add metadata
+//    long elapsedMs = System.currentTimeMillis() - startTime;
+//    response.setExecutionTimeMs((int) elapsedMs);
+//    response.setWarnings(warnings.isEmpty() ? null : warnings);
+//
+//    // 9. Add hints for query optimization
+//    List<String> hints = generateQueryHints(request, response);
+//    response.setHints(hints.isEmpty() ? null : hints);
+//
+//    log.debug("Plexus search completed for project {} in shared core {} in {}ms: {} results",
+//        projectAbbr, SHARED_CORE_NAME, elapsedMs, response.getTotalResults());
+
+
+    // TODO return propper response
+    return null;
+
+    //return response;
+  }
+
 
   /**
    * Validates and enriches Solr documents with required fields.
@@ -215,6 +291,121 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     }
 
     return documents;
+  }
+
+
+  /**
+   * Builds Solr query URL from request parameters.
+   */
+  private String buildSolrQueryUrl(
+      String coreName,
+      PlexusSearchQueryRequestDto request,
+      List<String> filterQueries
+  ) {
+    StringBuilder url = new StringBuilder();
+
+    // TODO use gamsDockerDns or config value
+    url.append("/solr/").append(coreName).append("/select");
+    url.append("?q=").append(encodeQueryParam(request.getQuery()));
+    url.append("&rows=").append(request.getRows());
+    url.append("&start=").append(request.getStart());
+
+    // Add filter queries (includes mandatory project filter)
+    for (String fq : filterQueries) {
+      url.append("&fq=").append(encodeQueryParam(fq));
+    }
+
+    // Add sort
+    if (request.getSort() != null && !request.getSort().isEmpty()) {
+      url.append("&sort=").append(encodeQueryParam(request.getSort()));
+    }
+
+    // Add highlighting
+    if (Boolean.TRUE.equals(request.getHighlight())) {
+      url.append("&hl=true");
+      if (request.getHighlightFields() != null && !request.getHighlightFields().isEmpty()) {
+        url.append("&hl.fl=").append(String.join(",", request.getHighlightFields()));
+      }
+    }
+
+    // Add faceting
+    if (request.getFacetFields() != null && !request.getFacetFields().isEmpty()) {
+      url.append("&facet=true");
+      url.append("&facet.field=").append(String.join("&facet.field=", request.getFacetFields()));
+      url.append("&facet.limit=").append(request.getFacetLimit());
+    }
+
+    // Add cursor mark if provided
+    if (request.getCursorMark() != null && !request.getCursorMark().isEmpty()) {
+      url.append("&cursorMark=").append(encodeQueryParam(request.getCursorMark()));
+      // Cursor pagination requires a sort with unique field
+      if (request.getSort() == null || request.getSort().isEmpty()) {
+        url.append("&sort=").append(PlexusSearchProperties.ENTITY_ID.name).append(" asc");
+      }
+    }
+
+    return url.toString();
+  }
+
+
+  /**
+   * URL-encodes query parameter values.
+   */
+  private String encodeQueryParam(String value) {
+    try {
+      return java.net.URLEncoder.encode(value, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      return value; // Fallback
+    }
+  }
+
+
+
+  /**
+   * Parses Solr JSON response into PlexusSearchResponse.
+   */
+  private PlexusSearchResponseDto parseSearchResponse(String responseJson, PlexusSearchQueryRequestDto request) {
+
+    throw new NotImplementedException("Parsing of Solr response is not yet implemented.");
+//
+//    try {
+//      JsonNode root = objectMapper.readTree(responseJson);
+//      JsonNode response = root.path("response");
+//
+//      long totalResults = response.path("numFound").asLong();
+//      int start = response.path("start").asInt();
+//
+//      List<JsonNode> documents = new ArrayList<>();
+//      response.path("docs").forEach(documents::add);
+//
+//      PlexusSearchResponseDto.PlexusSearchResponseDtoBuilder builder = PlexusSearchResponseDto.builder()
+//          .documents(documents)
+//          .totalResults(totalResults)
+//          .start(start)
+//          .rows(documents.size())
+//          .hasMore(start + documents.size() < totalResults);
+//
+//      // Parse highlighting if present
+//      if (root.has("highlighting")) {
+//        // TODO: Parse highlighting structure
+//      }
+//
+//      // Parse facets if present
+//      if (root.has("facet_counts")) {
+//        // TODO: Parse facet structure
+//      }
+//
+//      // Parse next cursor mark if present
+//      if (root.has("nextCursorMark")) {
+//        builder.nextCursorMark(root.path("nextCursorMark").asText());
+//      }
+//
+//      return builder.build();
+//
+//    } catch (Exception e) {
+//      log.error("Failed to parse Solr response", e);
+//      throw new IntegrationDataProcessingException("Failed to parse Solr response: " + e.getMessage());
+//    }
   }
 
 
