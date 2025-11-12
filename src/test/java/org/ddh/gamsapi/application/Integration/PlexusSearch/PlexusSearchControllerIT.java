@@ -9,7 +9,6 @@ import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
-import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchService;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -39,9 +38,6 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
   // this auditing / security test is done in a separate test
   @MockitoBean
   private AuditingHandler auditingHandler;
-
-  @Autowired
-  private CustomSearchService customSearchService;
 
   @Autowired
   private IIngestService ingestService;
