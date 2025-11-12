@@ -203,10 +203,12 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     log.debug("Executing Plexus search for project {} in core {}: {}",
         projectAbbr, SHARED_CORE_NAME, request.getQuery());
 
+    // TODO add more logging to method
+
     long startTime = System.currentTimeMillis();
 
     // 1. Check query quota
-    // TODO not implemented
+    // TODO not implemented (not taken over atm - implement later if needed)
     //quotaManager.checkQueryQuota(projectAbbr);
 
     // 2. Validate query
@@ -221,7 +223,7 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     filterQueries.add(0, projectFilter); // Add as first filter
 
     // 4. Validate mandatory filter is present
-    // TODO does not exist
+    // TODO method does not exist
     //queryValidator.validateMandatoryProjectFilter(filterQueries, projectAbbr);
 
     // 5. Build Solr query URL (CHANGED: uses shared core)
@@ -230,9 +232,8 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     log.info("Plexus query URL (shared core): {}", solrUrl);
 
     // 6. Execute query
+    // TODO would be better if solrClient returns a SolrResponse class
     String responseJson = solrClient.get(solrUrl);
-
-    log.info("*** Plexus query response JSON: {}", responseJson);
 
     // 7. Parse response
     // TODO private method does not work yet
@@ -251,10 +252,9 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
 //        projectAbbr, SHARED_CORE_NAME, elapsedMs, response.getTotalResults());
 
 
-    // TODO return propper response
-    return null;
+    var response = PlexusSearchResponseDto.from(responseJson, request);
 
-    //return response;
+    return response;
   }
 
 
@@ -302,6 +302,8 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
       PlexusSearchQueryRequestDto request,
       List<String> filterQueries
   ) {
+    // TODO move logic to own class PlexusSearchSolrQueryBuilder.java?
+
     StringBuilder url = new StringBuilder();
 
     // TODO use gamsDockerDns or config value
@@ -357,55 +359,6 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     } catch (Exception e) {
       return value; // Fallback
     }
-  }
-
-
-
-  /**
-   * Parses Solr JSON response into PlexusSearchResponse.
-   */
-  private PlexusSearchResponseDto parseSearchResponse(String responseJson, PlexusSearchQueryRequestDto request) {
-
-    throw new NotImplementedException("Parsing of Solr response is not yet implemented.");
-//
-//    try {
-//      JsonNode root = objectMapper.readTree(responseJson);
-//      JsonNode response = root.path("response");
-//
-//      long totalResults = response.path("numFound").asLong();
-//      int start = response.path("start").asInt();
-//
-//      List<JsonNode> documents = new ArrayList<>();
-//      response.path("docs").forEach(documents::add);
-//
-//      PlexusSearchResponseDto.PlexusSearchResponseDtoBuilder builder = PlexusSearchResponseDto.builder()
-//          .documents(documents)
-//          .totalResults(totalResults)
-//          .start(start)
-//          .rows(documents.size())
-//          .hasMore(start + documents.size() < totalResults);
-//
-//      // Parse highlighting if present
-//      if (root.has("highlighting")) {
-//        // TODO: Parse highlighting structure
-//      }
-//
-//      // Parse facets if present
-//      if (root.has("facet_counts")) {
-//        // TODO: Parse facet structure
-//      }
-//
-//      // Parse next cursor mark if present
-//      if (root.has("nextCursorMark")) {
-//        builder.nextCursorMark(root.path("nextCursorMark").asText());
-//      }
-//
-//      return builder.build();
-//
-//    } catch (Exception e) {
-//      log.error("Failed to parse Solr response", e);
-//      throw new IntegrationDataProcessingException("Failed to parse Solr response: " + e.getMessage());
-//    }
   }
 
 
