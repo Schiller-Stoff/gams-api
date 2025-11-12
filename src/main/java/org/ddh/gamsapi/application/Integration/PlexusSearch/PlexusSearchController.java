@@ -10,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchResponseDto;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -80,21 +82,37 @@ public class PlexusSearchController {
   /**
    * TODO jdoc
    * TODO test
-   * TODO openapi
-   * @param projectAbbr
+   * TODO improve openapi doc
+   * @param project
    * @param request
    * @return
    */
+  @Operation(
+      summary = "Search Plexus indexed project objects",
+      description = "This endpoint performs a search query against the Plexus search index for a specific project."
+  )
+  @PostMapping(
+      produces = {
+        MimeTypeUtils.APPLICATION_JSON_VALUE,
+        MimeTypeUtils.APPLICATION_XML_VALUE
+      },
+      value = PLEXUS_SEARCH_GET_PATH,
+      consumes = {
+        MediaType.APPLICATION_FORM_URLENCODED_VALUE,
+        MediaType.APPLICATION_JSON_VALUE,
+        "application/x-www-form-urlencoded;charset=UTF-8"
+      }
+  )
+  @ResponseBody
   public ResponseEntity<PlexusSearchResponseDto> search(
       @Parameter(description = "Project abbreviation", required = true)
-      @PathVariable String projectAbbr,
-
+      @RequestParam String project,
       @Parameter(description = "Query parameters", required = true)
       @Valid @RequestBody PlexusSearchQueryRequestDto request
   ) {
-    log.info("Plexus search request for project: {}, query: {}", projectAbbr, request.getQuery());
+    log.info("Plexus search request for project: {}, query: {}", project, request.getQuery());
 
-    PlexusSearchResponseDto response = plexusSearchService.search(projectAbbr, request);
+    PlexusSearchResponseDto response = plexusSearchService.search(project, request);
 
     return ResponseEntity.ok(response);
   }

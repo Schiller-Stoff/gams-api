@@ -18,8 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +47,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
 
   @Autowired
   private IProjectRepository projectRepository;
+
+  @Autowired
+  private PlexusSearchService plexusSearchService;
 
   File bagFile;
 
@@ -223,4 +229,49 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
 
   }
 
+  @Nested
+  public class Search {
+
+    @Test
+    public void veryBasicSearchReturns1IndexedObject() throws Exception {
+      // given
+      plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+      final String SIMPLE_SEARCH_QUERY = String.format("%s:%s",
+          PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      String requestBody = String.format("""
+          {
+            "query": "%s"
+          }
+          """, SIMPLE_SEARCH_QUERY);
+
+      // when
+      var response = mockMvc.perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                  .post(PlexusSearchController.PLEXUS_SEARCH_GET_PATH)
+                  .param("project", TestProject.PROJECT_ABBR.getValue())
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(requestBody)
+          )
+          .andExpect(
+              MockMvcResultMatchers.status().isOk()
+          )
+          .andReturn()
+          .getResponse()
+          .getContentAsString();
+
+
+      // then
+      Assertions.assertThat(response)
+          .withFailMessage("Search response should contain at least one result")
+          .contains("\"totalCount\":1")
+      ;
+
+    }
+
+
+  }
 }
