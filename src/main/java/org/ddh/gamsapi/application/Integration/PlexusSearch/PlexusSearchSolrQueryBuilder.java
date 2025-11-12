@@ -56,6 +56,16 @@ public class PlexusSearchSolrQueryBuilder {
       url.append("&facet.limit=").append(request.getFacetLimit());
     }
 
+    // add fields to retrieve
+    if (request.getFields() != null && !request.getFields().isEmpty()) {
+      url.append("&fl=").append(String.join(",", request.getFields()));
+    }
+
+    // add highlight snippet size
+    if (request.getHighlightSnippetSize() != null) {
+      url.append("&hl.snippets=").append(request.getHighlightSnippetSize());
+    }
+
     // Add cursor mark if provided
     if (request.getCursorMark() != null && !request.getCursorMark().isEmpty()) {
       url.append("&cursorMark=").append(encodeQueryParam(request.getCursorMark()));
