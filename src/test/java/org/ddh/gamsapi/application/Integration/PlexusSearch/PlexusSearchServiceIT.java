@@ -179,6 +179,41 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
   }
 
   @Nested
+  public class DeleteIndexedObject {
+
+    @Test
+    public void deleteRemovesASolrDocumentForGivenObjectId(){
+
+      final String TEST_SOLR_DOCUMENT_ID = String.format(
+          "%s.foobar", TestProject.PROJECT_ABBR.getValue()
+      );
+
+      // first index the object
+      SolrDocument testSolrDocument = new SolrDocument();
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_ID.name, TEST_SOLR_DOCUMENT_ID);
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_PROJECT_ABBR.name, TestProject.PROJECT_ABBR.getValue());
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      // posting data to solr
+      solrClient.post(SolrGamsCores.PLEXUS_SEARCH_CORE.value, testSolrDocument);
+
+      // run the deletion
+      plexusSearchService.deleteIndexedObject(
+          TestProject.PROJECT_ABBR.getValue(),
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+      );
+
+      // count of documents in core is now zero
+      var documentsCount = solrClient.countProjectDocuments(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value, Set.of()
+      );
+
+      Assertions.assertThat(documentsCount).isEqualTo(0);
+
+    }
+
+  }
+
+  @Nested
   public class Search {
 
     @BeforeEach

@@ -204,7 +204,15 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
 
-    throw new UnsupportedOperationException("Single object indexing is not supported for PlexusSearch.");
+    final String DELETION_QUERY = String.format("%s:%s",
+        PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+        id
+    );
+
+    solrClient.delete(SolrGamsCores.PLEXUS_SEARCH_CORE.value,  DELETION_QUERY);
+    log.info("Deleted Plexus indexed documents for object ID {} in project {} from core {}",
+        id, projectAbbr, SolrGamsCores.PLEXUS_SEARCH_CORE.value);
+
   }
 
 
