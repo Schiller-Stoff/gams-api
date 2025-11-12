@@ -40,6 +40,18 @@ public class PlexusSearchController {
     plexusSearchService.indexObjects(projectAbbr);
   }
 
+  @Operation(
+      summary = "Add single project object to external plexus-search service",
+      description = "This endpoint indexes a single object of a project in the plexus-search service."
+  )
+  @PostMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  public void indexProjectObject(
+      @PathVariable String projectAbbr,
+      @PathVariable String id
+  ){
+    log.debug("*** Trying to index single project object");
+    plexusSearchService.indexObject(projectAbbr, id);
+  }
 
   @Operation(
       summary = "Delete all project objects from external plexus-search service",
@@ -49,6 +61,19 @@ public class PlexusSearchController {
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     plexusSearchService.deleteIndexedObjects(projectAbbr);
+  }
+
+  @Operation(
+      summary = "Delete single project object from external plexus-search service",
+      description = "This endpoint deletes a single object of a project from the plexus-search service."
+  )
+  @DeleteMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  public void deleteProjectObject(
+      @PathVariable String projectAbbr,
+      @PathVariable String id
+  ){
+    log.trace("*** Trying to delete single project object");
+    plexusSearchService.deleteIndexedObject(projectAbbr, id);
   }
 
 
