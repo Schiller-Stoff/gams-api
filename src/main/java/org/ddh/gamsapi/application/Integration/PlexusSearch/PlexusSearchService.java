@@ -37,7 +37,7 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
   private final IDatastreamContentRepository datastreamContentRepository;
   private final SolrClient solrClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private final PlexusSearchQueryValidator queryValidator;
+  private final PlexusSearchQueryValidator plexusSearchQueryValidator;
 
   private final String SHARED_CORE_NAME = SolrGamsCores.PLEXUS_SEARCH_CORE.value;
 
@@ -214,7 +214,7 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
 
     // 3. Validate query
     // TODO change name of injected field queryValidator to plexusQueryValidator
-    queryValidator.validateQuery(request, projectAbbr);
+    plexusSearchQueryValidator.validateQuery(request, projectAbbr);
 
     // 4. Build Solr query URL (CHANGED: uses shared core)
     // TODO move building solr url to own class PlexusSearchSolrQueryBuilder?
