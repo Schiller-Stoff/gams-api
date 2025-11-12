@@ -190,7 +190,6 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
 
   /**
    * Executes a Plexus search query.
-   *
    * CRITICAL: Always adds mandatory project filter for tenant isolation in shared core.
    *
    * @param projectAbbr Project abbreviation
@@ -201,13 +200,11 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     log.debug("Executing Plexus search for project {} in core {}: {}",
         projectAbbr, SHARED_CORE_NAME, request.getQuery());
 
-    // TODO add more logging to method
-
     long startTime = System.currentTimeMillis();
 
     // 1. Check query quota
-    // TODO not implemented (not taken over atm - implement later if needed)
-    //quotaManager.checkQueryQuota(projectAbbr);
+    // quotaManager.checkQueryQuota(projectAbbr);
+    // TODO implement quota manager later when needed
 
     // 2. Add mandatory project filter (CRITICAL for tenant isolation in shared core)
     List<String> filterQueries = new ArrayList<>(request.getFilterQueries() != null ?
@@ -220,9 +217,10 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     queryValidator.validateQuery(request, projectAbbr);
 
     // 4. Build Solr query URL (CHANGED: uses shared core)
+    // TODO move building solr url to own class PlexusSearchSolrQueryBuilder?
     String solrUrl = buildSolrQueryUrl(SHARED_CORE_NAME, request, filterQueries);
 
-    log.info("Plexus query URL (shared core): {}", solrUrl);
+    log.info("Plexus query URL: {}", solrUrl);
 
     // 5. Execute query
     // TODO would be better if solrClient returns a SolrResponse class?
@@ -232,16 +230,13 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     // 6. Parse response
     var response = PlexusSearchResponseDto.from(responseJson, request);
 
-    // 7. Add metadata
+    // 7. Add metadata to response
     long elapsedMs = System.currentTimeMillis() - startTime;
     response.setExecutionTimeMs(elapsedMs);
-    // TODO warnings not implemented
-    // response.setWarnings(warnings.isEmpty() ? null : warnings);
 
     // 8. Add hints for query optimization
     List<String> hints = generateQueryHints(request, response);
     response.setHints(hints);
-
 
     log.debug("Plexus search completed for project {} in shared core {} in {}ms: {} results",
         projectAbbr, SHARED_CORE_NAME, elapsedMs, response.getTotalCount());
