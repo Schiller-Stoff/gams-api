@@ -10,6 +10,7 @@ import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -145,5 +146,34 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
 
   }
 
+  @Nested
+  public class Search {
+
+    @BeforeEach
+    public void setup(){
+      plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+    }
+
+    @Test
+    public void searchViaFindAllQueryReturnsAtLeast1Result(){
+
+      final String FIND_ALL_QUERY = "*:*";
+
+      var plexusSearchQuery = PlexusSearchQueryRequestDto.builder()
+          .query(FIND_ALL_QUERY)
+          .build();
+
+      var response = plexusSearchService.search(
+          TestProject.PROJECT_ABBR.getValue(),
+          plexusSearchQuery
+      );
+
+      Assertions.assertThat(response.getTotalCount())
+          .isGreaterThan(0);
+
+    }
+
+
+  }
 
 }
