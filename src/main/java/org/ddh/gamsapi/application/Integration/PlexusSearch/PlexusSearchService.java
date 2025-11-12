@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -205,35 +206,31 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     // quotaManager.checkQueryQuota(projectAbbr);
     // TODO implement quota manager later when needed
 
-    // 2. Add mandatory project filter (CRITICAL for tenant isolation in shared core)
-    List<String> filterQueries = new ArrayList<>(request.getFilterQueries() != null ?
-        request.getFilterQueries() : List.of());
-    String projectFilter = PlexusSearchProperties.ENTITY_PROJECT_ABBR.name + ":" + projectAbbr;
-    filterQueries.add(0, projectFilter); // Add as first filter
-
-    // 3. Validate query
-    // TODO change name of injected field queryValidator to plexusQueryValidator
+    // 2. Validate query
     plexusSearchQueryValidator.validateQuery(request, projectAbbr);
 
-    // 4. Build Solr query URL (CHANGED: uses shared core)
-    // TODO move building solr url to own class PlexusSearchSolrQueryBuilder?
-    String solrUrl = PlexusSearchSolrQueryBuilder.buildSolrQueryUrl(SHARED_CORE_NAME, request, filterQueries);
+    // 3. Build Solr query URL
+    String solrUrl = PlexusSearchSolrQueryBuilder.buildSolrQueryUrl(
+        SHARED_CORE_NAME,
+        request,
+        Set.of(projectAbbr)
+    );
 
     log.info("Plexus query URL: {}", solrUrl);
 
-    // 5. Execute query
+    // 4. Execute query
     // TODO would be better if solrClient returns a SolrResponse class?
     // (could be overengineered - because: solr might return different responses for different queries)
     String responseJson = solrClient.get(solrUrl);
 
-    // 6. Parse response
+    // 5. Parse response
     var response = PlexusSearchResponseDto.from(responseJson, request);
 
-    // 7. Add metadata to response
+    // 6. Add metadata to response
     long elapsedMs = System.currentTimeMillis() - startTime;
     response.setExecutionTimeMs(elapsedMs);
 
-    // 8. Add hints for query optimization
+    // 7. Add hints for query optimization
     List<String> hints = generateQueryHints(request, response);
     response.setHints(hints);
 

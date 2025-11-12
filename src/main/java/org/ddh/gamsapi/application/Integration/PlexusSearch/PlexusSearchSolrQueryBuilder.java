@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.PlexusSearch;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.Set;
 
 public class PlexusSearchSolrQueryBuilder {
 
@@ -13,20 +13,26 @@ public class PlexusSearchSolrQueryBuilder {
   public static String buildSolrQueryUrl(
       String coreName,
       PlexusSearchQueryRequestDto request,
-      List<String> filterQueries
+      Set<String> projectAbbrs
   ) {
-    // TODO move logic to own class PlexusSearchSolrQueryBuilder.java?
 
     StringBuilder url = new StringBuilder();
 
-    // TODO use gamsDockerDns or config value
     url.append("/solr/").append(coreName).append("/select");
     url.append("?q=").append(encodeQueryParam(request.getQuery()));
     url.append("&rows=").append(request.getRows());
     url.append("&start=").append(request.getStart());
 
     // Add filter queries (includes mandatory project filter)
-    for (String fq : filterQueries) {
+    // Add project abbreviation filters
+    for( String projectAbbr : projectAbbrs) {
+      url.append("&fq=")
+          .append(
+              encodeQueryParam(PlexusSearchProperties.ENTITY_PROJECT_ABBR.name + ":" + projectAbbr)
+          );
+    }
+    // Add custom filter queries
+    for (String fq : request.getFilterQueries()) {
       url.append("&fq=").append(encodeQueryParam(fq));
     }
 
