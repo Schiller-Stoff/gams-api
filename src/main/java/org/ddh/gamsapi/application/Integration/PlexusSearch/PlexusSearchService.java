@@ -237,16 +237,14 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     response.setExecutionTimeMs(elapsedMs);
     // TODO warnings not implemented
     // response.setWarnings(warnings.isEmpty() ? null : warnings);
-//
-//    // 8. Add hints for query optimization
-//    List<String> hints = generateQueryHints(request, response);
-//    response.setHints(hints.isEmpty() ? null : hints);
-//
-//    log.debug("Plexus search completed for project {} in shared core {} in {}ms: {} results",
-//        projectAbbr, SHARED_CORE_NAME, elapsedMs, response.getTotalResults());
+
+    // 8. Add hints for query optimization
+    List<String> hints = generateQueryHints(request, response);
+    response.setHints(hints);
 
 
-
+    log.debug("Plexus search completed for project {} in shared core {} in {}ms: {} results",
+        projectAbbr, SHARED_CORE_NAME, elapsedMs, response.getTotalCount());
 
     return response;
   }
@@ -353,6 +351,35 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     } catch (Exception e) {
       return value; // Fallback
     }
+  }
+
+  /**
+   * Generates query optimization hints based on query patterns.
+   */
+  private List<String> generateQueryHints(PlexusSearchQueryRequestDto request, PlexusSearchResponseDto response) {
+    List<String> hints = new ArrayList<>();
+
+    // Hint for deep pagination
+    if (request.getStart() > 10000) {
+      hints.add("Deep pagination detected (start > 10000). Consider using cursor-based pagination for better performance.");
+    }
+
+    // Hint for large result sets without filters
+    if (response.getTotalCount() > 100000 &&
+        (request.getFilterQueries() == null || request.getFilterQueries().size() <= 1)) {
+      hints.add("Large result set without filters. Consider adding filter queries to narrow results.");
+    }
+
+    // Hint for slow queries
+    if (response.getExecutionTimeMs() != null && response.getExecutionTimeMs() > 1000) {
+      hints.add("Query took >1s. Consider adding filters, reducing result size, or optimizing query structure.");
+    }
+
+    if(hints.isEmpty()){
+      hints.add("No optimization hints. Query looks good!");
+    }
+
+    return hints;
   }
 
 

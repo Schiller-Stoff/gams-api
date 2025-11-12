@@ -205,6 +205,12 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
 
       }
 
+      @Test
+      public void responseContainsQueryHints(){
+        Assertions.assertThat(plexusSearchResponseDto.getHints())
+            .isNotNull();
+      }
+
     }
 
 
