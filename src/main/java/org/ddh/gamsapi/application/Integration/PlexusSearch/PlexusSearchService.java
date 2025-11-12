@@ -1,10 +1,8 @@
 package org.ddh.gamsapi.application.Integration.PlexusSearch;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
@@ -211,40 +209,35 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     // TODO not implemented (not taken over atm - implement later if needed)
     //quotaManager.checkQueryQuota(projectAbbr);
 
-    // 2. Validate query
-    // TODO this method does not exist
-    // TODO change name of injected field queryValidator to plexusQueryValidator
-    // List<String> warnings = queryValidator.validate(request, projectAbbr);
-
-    // 3. Add mandatory project filter (CRITICAL for tenant isolation in shared core)
+    // 2. Add mandatory project filter (CRITICAL for tenant isolation in shared core)
     List<String> filterQueries = new ArrayList<>(request.getFilterQueries() != null ?
         request.getFilterQueries() : List.of());
     String projectFilter = PlexusSearchProperties.ENTITY_PROJECT_ABBR.name + ":" + projectAbbr;
     filterQueries.add(0, projectFilter); // Add as first filter
 
-    // 4. Validate mandatory filter is present
-    // TODO method does not exist
-    //queryValidator.validateMandatoryProjectFilter(filterQueries, projectAbbr);
+    // 3. Validate query
+    // TODO change name of injected field queryValidator to plexusQueryValidator
+    queryValidator.validateQuery(request, projectAbbr);
 
-    // 5. Build Solr query URL (CHANGED: uses shared core)
+    // 4. Build Solr query URL (CHANGED: uses shared core)
     String solrUrl = buildSolrQueryUrl(SHARED_CORE_NAME, request, filterQueries);
 
     log.info("Plexus query URL (shared core): {}", solrUrl);
 
-    // 6. Execute query
+    // 5. Execute query
     // TODO would be better if solrClient returns a SolrResponse class
     String responseJson = solrClient.get(solrUrl);
 
-    // 7. Parse response
+    // 6. Parse response
     // TODO private method does not work yet
     //PlexusSearchResponseDto response = parseSearchResponse(responseJson, request);
 
-    // 8. Add metadata
+    // 7. Add metadata
 //    long elapsedMs = System.currentTimeMillis() - startTime;
 //    response.setExecutionTimeMs((int) elapsedMs);
 //    response.setWarnings(warnings.isEmpty() ? null : warnings);
 //
-//    // 9. Add hints for query optimization
+//    // 8. Add hints for query optimization
 //    List<String> hints = generateQueryHints(request, response);
 //    response.setHints(hints.isEmpty() ? null : hints);
 //

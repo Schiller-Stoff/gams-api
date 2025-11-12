@@ -11,6 +11,7 @@ import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.exceptions.PlexusSearchForbiddenQueryException;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -155,12 +156,32 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
     }
 
     @Test
-    public void searchViaFindAllQueryReturnsAtLeast1Result(){
+    public void searchFindAllShouldThrowValidationException(){
 
       final String FIND_ALL_QUERY = "*:*";
 
       var plexusSearchQuery = PlexusSearchQueryRequestDto.builder()
           .query(FIND_ALL_QUERY)
+          .build();
+
+      Assertions.assertThatThrownBy(
+          () ->  plexusSearchService.search(
+              TestProject.PROJECT_ABBR.getValue(),
+              plexusSearchQuery),
+"Match everything query should be forbidden / throw"
+      ).isInstanceOf(PlexusSearchForbiddenQueryException.class);
+
+
+    }
+
+    @Test
+    public void simpleExactMatchSearchReturnsAResult(){
+
+      final String SIMPLE_QUERY = String.format("%s:%s", PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()) ;
+
+      var plexusSearchQuery = PlexusSearchQueryRequestDto.builder()
+          .query(SIMPLE_QUERY)
           .build();
 
       var response = plexusSearchService.search(
@@ -169,7 +190,7 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
       );
 
       Assertions.assertThat(response.getTotalCount())
-          .isGreaterThan(0);
+          .isEqualTo(1);
 
     }
 
