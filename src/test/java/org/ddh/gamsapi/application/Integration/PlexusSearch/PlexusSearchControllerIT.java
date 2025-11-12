@@ -96,6 +96,36 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
   }
 
   @Nested
+  public class IndexProjectObject {
+
+    @Test
+    public void indexSingleCreates1SolrDocument() throws Exception {
+      // when
+      mockMvc.perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                  .post(PlexusSearchController.PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH,
+                      TestProject.PROJECT_ABBR.getValue(),
+                      TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+                  )
+          )
+          .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
+
+      // then
+      var numDocs = solrClient.countProjectDocuments(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(numDocs)
+          .withFailMessage("Number of documents returned should be equal to 1")
+          .isEqualTo(1)
+      ;
+
+    }
+
+  }
+
+  @Nested
   public class DeleteProjectObjects {
 
     @Test
@@ -127,6 +157,58 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
               org.springframework.test.web.servlet.request.MockMvcRequestBuilders
                   .delete(PlexusSearchController.PLEXUS_SEARCH_MANAGEMENT_PATH,
                       TestProject.PROJECT_ABBR.getValue())
+          )
+          .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
+
+      // then
+      var numDocsAfterDeletion = solrClient.countProjectDocuments(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(numDocsAfterDeletion)
+          .withFailMessage("Number of documents after deletion should be equal to 0")
+          .isEqualTo(0)
+      ;
+
+    }
+
+  }
+
+  @Nested
+  public class DeleteProjectObject {
+
+    @Test
+    public void deleteRemovesSingleSolrDocument() throws Exception {
+      // given
+      // first index some documents
+      final String TEST_SOLR_DOCUMENT_ID = "test.1111111";
+
+      // first fill data of plexus search core
+      SolrDocument testSolrDocument = new SolrDocument();
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_ID.name, TEST_SOLR_DOCUMENT_ID);
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_PROJECT_ABBR.name, TestProject.PROJECT_ABBR.getValue());
+      testSolrDocument.addProperty(PlexusSearchProperties.ENTITY_OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+      // posting data to solr
+      solrClient.post(SolrGamsCores.PLEXUS_SEARCH_CORE.value, testSolrDocument);
+
+      var numDocsAfterIndexing = solrClient.countProjectDocuments(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
+
+      Assertions.assertThat(numDocsAfterIndexing)
+          .withFailMessage("Number of documents after indexing should be greater than 0")
+          .isGreaterThan(0)
+      ;
+
+      // when
+      mockMvc.perform(
+              org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                  .delete(PlexusSearchController.PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH,
+                      TestProject.PROJECT_ABBR.getValue(),
+                      TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+                  )
           )
           .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
 
