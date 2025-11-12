@@ -11,6 +11,7 @@ import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchQueryRequestDto;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.dto.PlexusSearchResponseDto;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.exceptions.PlexusSearchForbiddenQueryException;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
@@ -171,28 +172,42 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
 "Match everything query should be forbidden / throw"
       ).isInstanceOf(PlexusSearchForbiddenQueryException.class);
 
+    }
+
+    @Nested
+    public class SimpleExactMatchSearch {
+      PlexusSearchResponseDto plexusSearchResponseDto;
+      @BeforeEach
+      public void setup(){
+        final String SIMPLE_QUERY = String.format("%s:%s", PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+            TestDigitalObject.DIGITAL_OBJECT_ID.getValue()) ;
+
+        var plexusSearchQuery = PlexusSearchQueryRequestDto.builder()
+            .query(SIMPLE_QUERY)
+            .build();
+
+        plexusSearchResponseDto = plexusSearchService.search(
+            TestProject.PROJECT_ABBR.getValue(),
+            plexusSearchQuery
+        );
+      }
+
+      @Test
+      public void returnsAResult(){
+        Assertions.assertThat(plexusSearchResponseDto.getTotalCount())
+            .isEqualTo(1);
+      }
+
+      @Test
+      public void responseContainsExecutionTime(){
+        Assertions.assertThat(plexusSearchResponseDto.getExecutionTimeMs())
+            .isNotNull();
+
+      }
 
     }
 
-    @Test
-    public void simpleExactMatchSearchReturnsAResult(){
 
-      final String SIMPLE_QUERY = String.format("%s:%s", PlexusSearchProperties.ENTITY_OBJECT_ID.name,
-          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()) ;
-
-      var plexusSearchQuery = PlexusSearchQueryRequestDto.builder()
-          .query(SIMPLE_QUERY)
-          .build();
-
-      var response = plexusSearchService.search(
-          TestProject.PROJECT_ABBR.getValue(),
-          plexusSearchQuery
-      );
-
-      Assertions.assertThat(response.getTotalCount())
-          .isEqualTo(1);
-
-    }
 
 
   }

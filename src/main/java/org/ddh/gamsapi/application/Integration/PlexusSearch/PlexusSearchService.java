@@ -225,17 +225,18 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
     log.info("Plexus query URL (shared core): {}", solrUrl);
 
     // 5. Execute query
-    // TODO would be better if solrClient returns a SolrResponse class
+    // TODO would be better if solrClient returns a SolrResponse class?
+    // (could be overengineered - because: solr might return different responses for different queries)
     String responseJson = solrClient.get(solrUrl);
 
     // 6. Parse response
-    // TODO private method does not work yet
-    //PlexusSearchResponseDto response = parseSearchResponse(responseJson, request);
+    var response = PlexusSearchResponseDto.from(responseJson, request);
 
     // 7. Add metadata
-//    long elapsedMs = System.currentTimeMillis() - startTime;
-//    response.setExecutionTimeMs((int) elapsedMs);
-//    response.setWarnings(warnings.isEmpty() ? null : warnings);
+    long elapsedMs = System.currentTimeMillis() - startTime;
+    response.setExecutionTimeMs(elapsedMs);
+    // TODO warnings not implemented
+    // response.setWarnings(warnings.isEmpty() ? null : warnings);
 //
 //    // 8. Add hints for query optimization
 //    List<String> hints = generateQueryHints(request, response);
@@ -245,7 +246,7 @@ public class PlexusSearchService implements ClientManagedIntegrationService {
 //        projectAbbr, SHARED_CORE_NAME, elapsedMs, response.getTotalResults());
 
 
-    var response = PlexusSearchResponseDto.from(responseJson, request);
+
 
     return response;
   }
