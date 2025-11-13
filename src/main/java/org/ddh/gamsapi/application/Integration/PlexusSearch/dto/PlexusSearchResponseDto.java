@@ -67,7 +67,7 @@ public class PlexusSearchResponseDto {
 
   /**
    * Parse Solr JSON response into PlexusSearchResponse.
-   *
+   * TODO tests missing
    * @param solrJsonResponse Raw JSON response from Solr
    * @param originalRequest Original query request
    * @return Parsed PlexusSearchResponse
