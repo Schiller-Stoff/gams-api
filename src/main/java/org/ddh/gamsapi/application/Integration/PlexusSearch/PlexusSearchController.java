@@ -4,6 +4,7 @@ package org.ddh.gamsapi.application.Integration.PlexusSearch;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping
@@ -115,6 +119,71 @@ public class PlexusSearchController {
     PlexusSearchResponseDto response = plexusSearchService.search(project, request);
 
     return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Searches the Plexus search index for a specific project using GET parameters.
+   * Uses solr parameters and maps them to PlexusSearchQueryRequestDto.
+   * @return PlexusSearchResponseDto containing the search results.
+   */
+  @Operation(
+      summary = "Search Plexus indexed project objects",
+      description = "This endpoint performs a search query against the Plexus search index for a specific project."
+  )
+  @GetMapping(
+      produces = {
+          MimeTypeUtils.APPLICATION_JSON_VALUE,
+          MimeTypeUtils.APPLICATION_XML_VALUE
+      },
+      value = PLEXUS_SEARCH_GET_PATH
+  )
+  @ResponseBody
+  public ResponseEntity<PlexusSearchResponseDto> searchGET(
+      @RequestParam(name = "q", required = true) String query,
+      @RequestParam(name = "project", required = true) String projectAbbr,
+      @RequestParam(name = "start", required = false, defaultValue = "0") Integer start,
+      @RequestParam(name = "rows", required = false, defaultValue = "20") Integer rows,
+      @RequestParam(name = "sort", required = false, defaultValue = "id desc") String sort,
+      @RequestParam(name = "fq", required = false, defaultValue = "") List<String> filterQueries,
+      @RequestParam(name = "highlight", required = false, defaultValue = "false") Boolean highlight,
+      @RequestParam(name = "highlightFields", required = false, defaultValue = "") List<String> highlightFields,
+      @RequestParam(name = "highlightSnippetSize", required = false, defaultValue = "200") Integer highlightSnippetSize,
+      @RequestParam(name = "facetFields", required = false) List<String> facetFields,
+      @RequestParam(name = "facetLimit", required = false, defaultValue = "10") Integer facetLimit,
+      @RequestParam(name = "facetMinCount", required = false, defaultValue = "1") Integer facetMinCount,
+      @RequestParam(name = "debug", defaultValue = "false") Boolean debug,
+      @RequestParam(name = "fl", required = false, defaultValue = "") List<String> fields,
+      @RequestParam(name = "cursorMark", required = false) String cursorMark,
+      @RequestParam Map<String, String> customParams,
+      HttpServletRequest request
+  ){
+
+    var searchDto = PlexusSearchQueryRequestDto.builder()
+        .query(query)
+        .start(start)
+        .rows(rows)
+        .sort(sort)
+        .filterQueries(filterQueries)
+        .highlight(highlight)
+        .highlightFields(highlightFields)
+        .highlightSnippetSize(highlightSnippetSize)
+        .facetFields(facetFields)
+        .facetLimit(facetLimit)
+        .facetMinCount(facetMinCount)
+        .debug(debug)
+        .fields(fields)
+        .cursorMark(cursorMark)
+        .customParams(customParams)
+        .build();
+
+    log.trace("Mapped GET against {} params to DTO: {}", request.getRequestURI(),  searchDto);
+
+    var responseDto = plexusSearchService.search(
+        projectAbbr,
+        searchDto
+    );
+
+    return ResponseEntity.ok(responseDto);
   }
 
 }

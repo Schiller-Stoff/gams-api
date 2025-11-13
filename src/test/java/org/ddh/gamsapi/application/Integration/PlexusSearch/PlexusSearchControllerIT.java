@@ -232,45 +232,86 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
   @Nested
   public class Search {
 
-    @Test
-    public void veryBasicSearchReturns1IndexedObject() throws Exception {
-      // given
-      plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+    @Nested
+    public class SearchPOST {
+      @Test
+      public void veryBasicSearchReturns1IndexedObject() throws Exception {
+        // given
+        plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
 
-      final String SIMPLE_SEARCH_QUERY = String.format("%s:%s",
-          PlexusSearchProperties.ENTITY_OBJECT_ID.name,
-          TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
-      );
+        final String SIMPLE_SEARCH_QUERY = String.format("%s:%s",
+            PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+            TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+        );
 
-      String requestBody = String.format("""
+        String requestBody = String.format("""
           {
             "query": "%s"
           }
           """, SIMPLE_SEARCH_QUERY);
 
-      // when
-      var response = mockMvc.perform(
-              org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-                  .post(PlexusSearchController.PLEXUS_SEARCH_GET_PATH)
-                  .param("project", TestProject.PROJECT_ABBR.getValue())
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(requestBody)
-          )
-          .andExpect(
-              MockMvcResultMatchers.status().isOk()
-          )
-          .andReturn()
-          .getResponse()
-          .getContentAsString();
+        // when
+        var response = mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .post(PlexusSearchController.PLEXUS_SEARCH_GET_PATH)
+                    .param("project", TestProject.PROJECT_ABBR.getValue())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(requestBody)
+            )
+            .andExpect(
+                MockMvcResultMatchers.status().isOk()
+            )
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
 
 
-      // then
-      Assertions.assertThat(response)
-          .withFailMessage("Search response should contain at least one result")
-          .contains("\"totalCount\":1")
-      ;
+        // then
+        Assertions.assertThat(response)
+            .withFailMessage("Search response should contain at least one result")
+            .contains("\"totalCount\":1")
+        ;
 
+      }
     }
+
+    @Nested
+    public class SearchGET {
+
+      @Test
+      public void veryBasicSearchReturns1IndexedObject() throws Exception {
+        // given
+        plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+        final String SIMPLE_SEARCH_QUERY = String.format("%s:%s",
+            PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+            TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+        );
+
+        // when
+        var response = mockMvc.perform(
+                MockMvcRequestBuilders
+                    .get(PlexusSearchController.PLEXUS_SEARCH_GET_PATH)
+                    .param("project", TestProject.PROJECT_ABBR.getValue())
+                    .param("q", SIMPLE_SEARCH_QUERY)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(
+                MockMvcResultMatchers.status().isOk()
+            )
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        // then
+        Assertions.assertThat(response)
+            .withFailMessage("Search response should contain at least one result")
+            .contains("\"totalCount\":1");
+
+      }
+    }
+
+
 
 
   }
