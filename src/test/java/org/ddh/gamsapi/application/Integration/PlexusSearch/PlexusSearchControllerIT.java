@@ -351,8 +351,6 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
             .getResponse()
             .getContentAsString();
 
-        System.out.println("Response: " + response);
-
         // then
         Assertions.assertThat(response)
             .withFailMessage("Search response should contain at least one result")
