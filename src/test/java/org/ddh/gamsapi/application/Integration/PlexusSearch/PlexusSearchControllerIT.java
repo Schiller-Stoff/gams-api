@@ -309,6 +309,59 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
             .contains("\"totalCount\":1");
 
       }
+
+      @Test
+      public void complexSearchWorksAsExpected() throws Exception {
+
+        // given
+        plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
+
+        final String SIMPLE_SEARCH_QUERY = String.format("%s:%s",
+            PlexusSearchProperties.ENTITY_OBJECT_ID.name,
+            TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+        );
+
+        // when
+        var response = mockMvc.perform(
+                MockMvcRequestBuilders
+                    .get(PlexusSearchController.PLEXUS_SEARCH_GET_PATH)
+                    .param("project", TestProject.PROJECT_ABBR.getValue())
+                    .param("q", SIMPLE_SEARCH_QUERY)
+                    .param("start", "0")
+                    .param("rows", "10")
+                    .param("sort", "id asc")
+                    .param("fq", String.format("%s:%s",
+                        PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
+                        TestProject.PROJECT_ABBR.getValue()
+                    ))
+                    .param("highlight", "true")
+                    .param("highlightFields", PlexusSearchProperties.ENTITY_OBJECT_ID.name)
+                    .param("highlightSnippetSize", "150")
+                    .param("facetFields", PlexusSearchProperties.ENTITY_PROJECT_ABBR.name)
+                    .param("facetLimit", "5")
+                    .param("facetMinCount", "1")
+                    .param("debug", "true")
+                    .param("fl", PlexusSearchProperties.ENTITY_ID.name)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(
+                MockMvcResultMatchers.status().isOk()
+            )
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        System.out.println("Response: " + response);
+
+        // then
+        Assertions.assertThat(response)
+            .withFailMessage("Search response should contain at least one result")
+            .contains("\"totalCount\":1");
+
+
+      }
+
+
     }
 
 
