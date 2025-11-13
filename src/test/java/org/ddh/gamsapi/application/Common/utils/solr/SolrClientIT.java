@@ -266,8 +266,9 @@ public class SolrClientIT extends SolrIntegrationTest {
       solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
-      int documentCount = solrClient.countProjectDocuments(
+      int documentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.TEST_CORE.value,
+          GSearchProperties.PROJECT.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       Assertions.assertThat(documentCount)
@@ -276,8 +277,9 @@ public class SolrClientIT extends SolrIntegrationTest {
 
     @Test
     public void returnsZeroWhenNoDocumentsExist(){
-      int documentCount = solrClient.countProjectDocuments(
+      int documentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.TEST_CORE.value,
+          GSearchProperties.PROJECT.name,
           Set.of("NON_EXISTENT_PROJECT_ABBR")
       );
       Assertions.assertThat(documentCount)
@@ -294,8 +296,9 @@ public class SolrClientIT extends SolrIntegrationTest {
       solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
-      int documentCount = solrClient.countProjectDocuments(
+      int documentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.TEST_CORE.value,
+          GSearchProperties.PROJECT.name,
           Set.of()
       );
       Assertions.assertThat(documentCount)

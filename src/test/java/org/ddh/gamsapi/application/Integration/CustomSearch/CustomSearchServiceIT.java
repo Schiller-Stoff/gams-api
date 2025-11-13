@@ -67,8 +67,9 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
     @Test
     public void customFulltextIndexingIndexesExpectedData(){
 
-      int initialDocumentsCount = solrClient.countProjectDocuments(
+      int initialDocumentsCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -80,7 +81,11 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
           SolrGamsCores.CUSTOM_SEARCH_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
-      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+      int solrDocumentCount = solrClient.countDocumentsByPropertyValues(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
 
       org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
           .isGreaterThan(0);
@@ -101,8 +106,9 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
     @Test
     public void indexSingleObjectIndexesExpectedData(){
 
-      int initialDocumentsCount = solrClient.countProjectDocuments(
+      int initialDocumentsCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -117,7 +123,11 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
           SolrGamsCores.CUSTOM_SEARCH_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
-      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+      int solrDocumentCount = solrClient.countDocumentsByPropertyValues(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
 
       org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
           .isEqualTo(1);
@@ -198,7 +208,11 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
           TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
-      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+      int solrDocumentCount = solrClient.countDocumentsByPropertyValues(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
 
       org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
           .isEqualTo(1);
@@ -208,7 +222,11 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
           TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
-      solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+      solrDocumentCount = solrClient.countDocumentsByPropertyValues(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
 
       org.assertj.core.api.Assertions.assertThat(solrDocumentCount)
           .isEqualTo(0);

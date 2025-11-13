@@ -82,8 +82,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
           .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
 
       // then
-      var numDocs = solrClient.countProjectDocuments(
+      var numDocs = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -113,8 +114,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
           .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
 
       // then
-      var numDocs = solrClient.countProjectDocuments(
+      var numDocs = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -144,8 +146,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
       // posting data to solr
       solrClient.post(SolrGamsCores.PLEXUS_SEARCH_CORE.value, testSolrDocument);
 
-      var numDocsAfterIndexing = solrClient.countProjectDocuments(
+      var numDocsAfterIndexing = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -163,8 +166,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
           .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
 
       // then
-      var numDocsAfterDeletion = solrClient.countProjectDocuments(
+      var numDocsAfterDeletion = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -194,8 +198,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
       // posting data to solr
       solrClient.post(SolrGamsCores.PLEXUS_SEARCH_CORE.value, testSolrDocument);
 
-      var numDocsAfterIndexing = solrClient.countProjectDocuments(
+      var numDocsAfterIndexing = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -215,8 +220,9 @@ public class PlexusSearchControllerIT extends SolrIntegrationTest {
           .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk());
 
       // then
-      var numDocsAfterDeletion = solrClient.countProjectDocuments(
+      var numDocsAfterDeletion = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 

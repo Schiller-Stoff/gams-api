@@ -65,8 +65,9 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
     @Test
     public void indexCreatesAtLeast1SolrDocument(){
 
-      int initialDocumentsCount = solrClient.countProjectDocuments(
+      int initialDocumentsCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -74,8 +75,9 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
 
       // run the indexing
       plexusSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
-      int finalDocumentsCount = solrClient.countProjectDocuments(
+      int finalDocumentsCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // assert expected number of documents created
@@ -157,8 +159,9 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
           solrClient.checkCoreIsEmpty(SolrGamsCores.PLEXUS_SEARCH_CORE.value)
       ).isFalse();
 
-      int documentsCountAfterIndexing = solrClient.countProjectDocuments(
+      int documentsCountAfterIndexing = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of()
       );
 
@@ -167,8 +170,9 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
       // run the deletion
       plexusSearchService.deleteIndexedObjects(TestProject.PROJECT_ABBR.getValue());
 
-      int documentsCountAfterDeletion = solrClient.countProjectDocuments(
+      int documentsCountAfterDeletion = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -203,8 +207,10 @@ public class PlexusSearchServiceIT extends SolrIntegrationTest {
       );
 
       // count of documents in core is now zero
-      var documentsCount = solrClient.countProjectDocuments(
-          SolrGamsCores.PLEXUS_SEARCH_CORE.value, Set.of()
+      var documentsCount = solrClient.countDocumentsByPropertyValues(
+          SolrGamsCores.PLEXUS_SEARCH_CORE.value,
+          PlexusSearchProperties.ENTITY_PROJECT_ABBR.name,
+          Set.of()
       );
 
       Assertions.assertThat(documentsCount).isEqualTo(0);

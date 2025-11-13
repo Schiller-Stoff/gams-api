@@ -72,8 +72,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
     @Test
     public void customIndexCreatesAtLeastOneDocumentInFulltextCore() throws Exception {
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
@@ -87,8 +88,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk());
 
-      int fulltextCoreDocumentCount = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -105,8 +107,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
     @Test
     public void indexSingleObjectCreatesExpectedDocumentInFulltextCore() throws Exception {
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
@@ -125,7 +128,11 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
           SolrGamsCores.CUSTOM_SEARCH_CORE.value, "objectId", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
-      int solrDocumentCount = solrClient.countProjectDocuments(SolrGamsCores.CUSTOM_SEARCH_CORE.value, Set.of(TestProject.PROJECT_ABBR.getValue()));
+      int solrDocumentCount = solrClient.countDocumentsByPropertyValues(
+          SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
+          Set.of(TestProject.PROJECT_ABBR.getValue())
+      );
 
       Assertions.assertThat(solrDocumentCount)
           .isGreaterThan(0);
@@ -147,8 +154,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
       customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
 
       // first index some documents
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -165,8 +173,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk());
 
-      int fulltextCoreDocumentCountAfterDelete = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountAfterDelete = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -186,8 +195,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
       // first index some documents
       customSearchService.indexObjects(TestProject.PROJECT_ABBR.getValue());
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -204,8 +214,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isOk());
 
-      int fulltextCoreDocumentCountAfterDelete = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountAfterDelete = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
 
@@ -222,8 +233,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
     @Test
     public void simpleFulltextSearchReturnContainsExpectedValues() throws Exception {
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
@@ -254,8 +266,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
     @Test
     public void simpleFulltextSearchWithPaginationReturnContainsExpectedValues() throws Exception {
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
@@ -288,8 +301,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
     @Test
     public void complexFulltextSearchReturnContainsExpectedValues() throws Exception {
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
@@ -327,8 +341,9 @@ public class CustomSearchControllerIT extends SolrIntegrationTest {
     @Test
     public void fulltextSearchWithUnkownTagReturnsNoResults() throws Exception {
 
-      int fulltextCoreDocumentCountInitial = solrClient.countProjectDocuments(
+      int fulltextCoreDocumentCountInitial = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.CUSTOM_SEARCH_CORE.value,
+          CustomSearchProperties.ENTITY_PROJECT_ABBR.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       // at first fulltext core should be empty
