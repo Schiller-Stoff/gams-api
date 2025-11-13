@@ -154,10 +154,10 @@ public class PlexusSearchController {
       @RequestParam(name = "debug", defaultValue = "false") Boolean debug,
       @RequestParam(name = "fl", required = false, defaultValue = "") List<String> fields,
       @RequestParam(name = "cursorMark", required = false) String cursorMark,
-      @RequestParam Map<String, String> customParams,
+      //@RequestParam Map<String, String> customParams, // TODO custom params atm not supported in GET
       HttpServletRequest request
   ){
-
+    // construct request DTO from GET parameters
     var searchDto = PlexusSearchQueryRequestDto.builder()
         .query(query)
         .start(start)
@@ -173,7 +173,7 @@ public class PlexusSearchController {
         .debug(debug)
         .fields(fields)
         .cursorMark(cursorMark)
-        .customParams(customParams)
+        //.customParams(customParams)
         .build();
 
     log.trace("Mapped GET against {} params to DTO: {}", request.getRequestURI(),  searchDto);
