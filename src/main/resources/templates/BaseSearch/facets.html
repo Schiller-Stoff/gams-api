@@ -693,8 +693,9 @@
           (function() {
               'use strict';
 
-              // Event delegation for facet items
+              // Event delegation for all facet interactions
               document.addEventListener('click', function(e) {
+                  // Handle facet item clicks (in sidebar facet groups)
                   const facetItem = e.target.closest('.facet-item');
                   if (facetItem) {
                       const facetField = facetItem.dataset.facet;
@@ -704,7 +705,7 @@
                       }
                   }
 
-                  // Remove filter handler
+                  // Handle remove filter clicks (in active filters section)
                   const removeFilter = e.target.closest('.remove-filter');
                   if (removeFilter) {
                       e.preventDefault();
@@ -715,7 +716,7 @@
                       }
                   }
 
-                  // Clear all filters handler
+                  // Handle clear all filters click
                   const clearAll = e.target.closest('.clear-all-filters');
                   if (clearAll) {
                       e.preventDefault();
@@ -723,48 +724,114 @@
                   }
               });
 
+              /**
+               * Toggle facet selection (select/deselect a facet value)
+               *
+               * FIXES:
+               * - Handles whitespace in facet values
+               * - Properly detects selected state
+               * - Correctly removes values on deselect
+               *
+               * @param {string} facetField - Full field name (e.g., "dc.subject")
+               * @param {string} facetValue - Facet value (may contain whitespace)
+               */
               function toggleFacet(facetField, facetValue) {
                   const url = new URL(window.location.href);
                   const params = new URLSearchParams(url.search);
+
+                  // Get all current values for this facet field
                   const currentValues = params.getAll(facetField);
 
-                  if (currentValues.includes(facetValue)) {
+                  // CRITICAL FIX: Normalize both sides for reliable comparison
+                  // This handles URL encoding differences (e.g., "Jugendliche%20Opfer" vs "Jugendliche Opfer")
+                  const normalizedValue = decodeURIComponent(facetValue).trim();
+
+                  // Check if this value is already selected
+                  const isSelected = currentValues.some(v =>
+                      decodeURIComponent(v).trim() === normalizedValue
+                  );
+
+                  if (isSelected) {
+                      // DESELECT: Remove this specific value
                       params.delete(facetField);
-                      currentValues.filter(v => v !== facetValue).forEach(v => {
-                          params.append(facetField, v);
-                      });
+
+                      // Re-add all OTHER values (keep everything except the one we're removing)
+                      currentValues
+                          .filter(v => decodeURIComponent(v).trim() !== normalizedValue)
+                          .forEach(v => params.append(facetField, v));
+
                   } else {
+                      // SELECT: Add this value
+                      // URLSearchParams.append() automatically handles URL encoding
                       params.append(facetField, facetValue);
                   }
 
+                  // Reset to first page when filter changes
                   params.set('pageIndex', '0');
-                  window.location.href = url.pathname + '?' + params.toString();
+
+                  // Navigate to new URL
+                  const queryString = params.toString();
+                  window.location.href = url.pathname + (queryString ? '?' + queryString : '');
               }
 
+              /**
+               * Remove a specific facet filter (from active filters badges)
+               *
+               * FIXES:
+               * - Handles both "subject" and "dc.subject" formats (defensive)
+               * - Normalizes values for comparison (whitespace handling)
+               *
+               * @param {string} facetField - Field name (may or may not have "dc." prefix)
+               * @param {string} facetValue - Facet value to remove
+               */
               function removeFacetFilter(facetField, facetValue) {
                   const url = new URL(window.location.href);
                   const params = new URLSearchParams(url.search);
-                  const fullFieldName = 'dc.' + facetField;
 
+                  // CRITICAL FIX: Handle both "subject" and "dc.subject" formats
+                  // Active filters pass full name "dc.subject", sidebar items pass short name "subject"
+                  const fullFieldName = facetField.startsWith('dc.')
+                      ? facetField
+                      : 'dc.' + facetField;
+
+                  // Get all current values for this field
+                  const currentValues = params.getAll(fullFieldName);
+
+                  // CRITICAL FIX: Normalize for comparison (handles whitespace)
+                  const normalizedValue = decodeURIComponent(facetValue).trim();
+
+                  // Remove all values for this field
                   params.delete(fullFieldName);
-                  const currentValues = url.searchParams.getAll(fullFieldName);
-                  currentValues.filter(v => v !== facetValue).forEach(v => {
-                      params.append(fullFieldName, v);
-                  });
 
+                  // Re-add all values EXCEPT the one we're removing
+                  currentValues
+                      .filter(v => decodeURIComponent(v).trim() !== normalizedValue)
+                      .forEach(v => params.append(fullFieldName, v));
+
+                  // Reset to first page
                   params.set('pageIndex', '0');
-                  window.location.href = url.pathname + '?' + params.toString();
+
+                  // Navigate to new URL
+                  const queryString = params.toString();
+                  window.location.href = url.pathname + (queryString ? '?' + queryString : '');
               }
 
+              /**
+               * Clear all facet filters while preserving search parameters
+               *
+               * This function was already working correctly - no changes needed
+               */
               function clearAllFilters() {
                   const url = new URL(window.location.href);
                   const params = new URLSearchParams(url.search);
 
+                  // Preserve non-facet parameters
                   const projects = params.getAll('projects');
                   const query = params.get('q');
                   const sortBy = params.get('sortBy');
                   const sortDir = params.get('sortDir');
 
+                  // Build new URL with only preserved values
                   const newParams = new URLSearchParams();
                   projects.forEach(p => newParams.append('projects', p));
                   if (query) newParams.set('q', query);
