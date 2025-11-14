@@ -53,7 +53,6 @@ public class FacetQueryBuilderTest extends UnitTest {
 
   }
 
-
   @Nested
   public class BuildSolrFacetDrilldownUrl {
 
@@ -92,5 +91,43 @@ public class FacetQueryBuilderTest extends UnitTest {
 
   }
 
+  @Nested
+  public class BuildSolrFieldQuery {
+
+    @Test
+    public void correctlyHandlesValueWithWhitespaces(){
+
+      var TEST_FIELD = "dc.title";
+      var TEST_VALUE_WITH_SPACES = "This is a test";
+      var expectedQuery = "dc.title:%22This+is+a+test%22";
+
+      var builtQuery = FacetQueryBuilder.buildSolrFieldQuery(
+          TEST_FIELD,
+          TEST_VALUE_WITH_SPACES
+      );
+
+      Assertions.assertThat(builtQuery)
+          .isEqualTo(expectedQuery);
+
+    }
+
+    @Test
+    public void producesExpectedQueryForSimpleValue(){
+
+      var TEST_FIELD = "dc.creator";
+      var TEST_SIMPLE_VALUE = "Alice";
+      var expectedQuery = "dc.creator:%22Alice%22";
+
+      var builtQuery = FacetQueryBuilder.buildSolrFieldQuery(
+          TEST_FIELD,
+          TEST_SIMPLE_VALUE
+      );
+
+      Assertions.assertThat(builtQuery)
+          .isEqualTo(expectedQuery);
+
+    }
+
+  }
 
 }
