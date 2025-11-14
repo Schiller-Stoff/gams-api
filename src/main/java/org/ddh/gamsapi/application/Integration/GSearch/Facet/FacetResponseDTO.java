@@ -34,9 +34,9 @@ public class FacetResponseDTO {
    * Paginated search results with complete pagination metadata.
    * Includes: page number, size, total elements, total pages, hasNext, hasPrevious, isFirst, isLast
    */
-  @JsonProperty("results")
+  @JsonProperty("result")
   @Schema(description = "Paginated search results with complete metadata")
-  private PagedResponse<GSearch> results;
+  private PagedResponse<GSearch> result;
 
   /**
    * Available facet values with their counts for drill-down navigation.
@@ -105,7 +105,7 @@ public class FacetResponseDTO {
 
     // Step 5: Build complete response
     return FacetResponseDTO.builder()
-        .results(pagedResults)
+        .result(pagedResults)
         .availableFacets(facetSolrResponse.getFacets())
         .selectedFacets(selectedFacetsMap)
         .totalUnfilteredCount(totalUnfilteredCount)

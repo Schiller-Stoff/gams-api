@@ -85,7 +85,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      Assertions.assertThat(facetResult.getResults().getContent())
+      Assertions.assertThat(facetResult.getResult().getContent())
           .isNotEmpty();
 
       Assertions.assertThat(facetResult.getAvailableFacets())
@@ -104,7 +104,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      Assertions.assertThat(facetResult.getResults().getContent())
+      Assertions.assertThat(facetResult.getResult().getContent())
           .isNotEmpty()
           .anySatisfy(baseSearch -> {
             Assertions.assertThat(baseSearch.getProperty("id"))
@@ -121,7 +121,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      var returnedBaseSearchElem = facetResult.getResults().getContent().get(0);
+      var returnedBaseSearchElem = facetResult.getResult().getContent().get(0);
       Assertions.assertThat(returnedBaseSearchElem.getProperty(GSearchProperties.FULLTEXT.name))
           .isNull();
     }
@@ -139,10 +139,10 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      Assertions.assertThat(facetResult.getResults().getContent())
+      Assertions.assertThat(facetResult.getResult().getContent())
           .isNotEmpty();
 
-      Assertions.assertThat(facetResult.getResults().getPagination().getTotalElements())
+      Assertions.assertThat(facetResult.getResult().getPagination().getTotalElements())
           .isGreaterThan(0);
 
       Assertions.assertThat(facetResult.getAvailableFacets())
@@ -158,7 +158,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      Assertions.assertThat(facetResult.getResults().getContent())
+      Assertions.assertThat(facetResult.getResult().getContent())
           .isEmpty();
 
       Assertions.assertThat(facetResult.getAvailableFacets())
@@ -181,8 +181,8 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      Assertions.assertThat(facetResultWithNull.getResults().getPagination().getTotalElements())
-          .isEqualTo(facetResultBasic.getResults().getPagination().getTotalElements());
+      Assertions.assertThat(facetResultWithNull.getResult().getPagination().getTotalElements())
+          .isEqualTo(facetResultBasic.getResult().getPagination().getTotalElements());
     }
   }
 
@@ -241,11 +241,11 @@ public class FacetServiceIT extends SolrIntegrationTest {
       );
 
       // Verify content size
-      Assertions.assertThat(facetResult.getResults().getContent().size())
+      Assertions.assertThat(facetResult.getResult().getContent().size())
           .isLessThanOrEqualTo(requestedPageSize);
 
       // NEW: Verify pagination metadata
-      Assertions.assertThat(facetResult.getResults().getPagination().getSize())
+      Assertions.assertThat(facetResult.getResult().getPagination().getSize())
           .isEqualTo(requestedPageSize);
     }
 
@@ -258,7 +258,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      var pagination = facetResult.getResults().getPagination();
+      var pagination = facetResult.getResult().getPagination();
 
       Assertions.assertThat(pagination.getPage()).isEqualTo(0);
       Assertions.assertThat(pagination.isFirst()).isTrue();
@@ -280,7 +280,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(1, 20)  // Second page
       );
 
-      var pagination = facetResult.getResults().getPagination();
+      var pagination = facetResult.getResult().getPagination();
 
       Assertions.assertThat(pagination.getPage()).isEqualTo(1);
       Assertions.assertThat(pagination.isFirst()).isFalse();
@@ -301,7 +301,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      var pagination = facetResult.getResults().getPagination();
+      var pagination = facetResult.getResult().getPagination();
       long totalElements = pagination.getTotalElements();
       int expectedTotalPages = (int) Math.ceil((double) totalElements / 20);
 
@@ -319,7 +319,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 10)
       );
 
-      long totalElements = firstPage.getResults().getPagination().getTotalElements();
+      long totalElements = firstPage.getResult().getPagination().getTotalElements();
 
       // Only test second page if there are enough results
       if (totalElements > 10) {
@@ -331,12 +331,12 @@ public class FacetServiceIT extends SolrIntegrationTest {
         );
 
         // Total elements should be consistent across pages
-        Assertions.assertThat(secondPage.getResults().getPagination().getTotalElements())
+        Assertions.assertThat(secondPage.getResult().getPagination().getTotalElements())
             .isEqualTo(totalElements);
 
         // Page numbers should be correct
-        Assertions.assertThat(firstPage.getResults().getPagination().getPage()).isEqualTo(0);
-        Assertions.assertThat(secondPage.getResults().getPagination().getPage()).isEqualTo(1);
+        Assertions.assertThat(firstPage.getResult().getPagination().getPage()).isEqualTo(0);
+        Assertions.assertThat(secondPage.getResult().getPagination().getPage()).isEqualTo(1);
       }
     }
 
@@ -349,11 +349,11 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      var pagination = facetResult.getResults().getPagination();
+      var pagination = facetResult.getResult().getPagination();
 
       Assertions.assertThat(pagination.getTotalElements()).isEqualTo(0);
       Assertions.assertThat(pagination.getTotalPages()).isEqualTo(0);
-      Assertions.assertThat(facetResult.getResults().getContent()).isEmpty();
+      Assertions.assertThat(facetResult.getResult().getContent()).isEmpty();
       Assertions.assertThat(pagination.isFirst()).isTrue();
       Assertions.assertThat(pagination.isLast()).isTrue();
     }
@@ -372,7 +372,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
 
       // Unfiltered count should be >= filtered count
       Assertions.assertThat(facetResult.getTotalUnfilteredCount())
-          .isGreaterThanOrEqualTo(facetResult.getResults().getPagination().getTotalElements());
+          .isGreaterThanOrEqualTo(facetResult.getResult().getPagination().getTotalElements());
     }
   }
 
@@ -389,9 +389,9 @@ public class FacetServiceIT extends SolrIntegrationTest {
       );
 
       // Verify PagedResponse structure exists
-      Assertions.assertThat(facetResult.getResults()).isNotNull();
-      Assertions.assertThat(facetResult.getResults().getContent()).isNotNull();
-      Assertions.assertThat(facetResult.getResults().getPagination()).isNotNull();
+      Assertions.assertThat(facetResult.getResult()).isNotNull();
+      Assertions.assertThat(facetResult.getResult().getContent()).isNotNull();
+      Assertions.assertThat(facetResult.getResult().getPagination()).isNotNull();
     }
 
     @Test
@@ -403,7 +403,7 @@ public class FacetServiceIT extends SolrIntegrationTest {
           PageRequest.of(0, 20)
       );
 
-      var pagination = facetResult.getResults().getPagination();
+      var pagination = facetResult.getResult().getPagination();
 
       // Verify all pagination fields are present (not null)
       Assertions.assertThat(pagination.getPage()).isNotNull();
