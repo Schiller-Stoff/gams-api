@@ -54,7 +54,8 @@ public class SpringSecurityConfiguration {
           .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
           .permitAll()
           .requestMatchers(HttpMethod.GET, "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/content")
-          .access(datastreamContentAuthorizationManager)
+          //.access(datastreamContentAuthorizationManager)
+          .permitAll()
           // All HEAD and GET after above rules are allowed
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();
