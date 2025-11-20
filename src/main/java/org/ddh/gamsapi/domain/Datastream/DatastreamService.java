@@ -45,13 +45,14 @@ public class DatastreamService implements IDatastreamService {
     if(datastream.getDigitalObject() == null){
       String msg = String.format("Datastream's digital object is unexpectedly null %s . Cannot delete datastream.", datastream);
       log.error(msg);
+      // TODO this exception here is completely wrong - is more about client input validation. Need to define a new exception type?
       throw new DigitalObjectNotFoundException(msg);
     }
 
     if(!datastreamRepository.existsById(datastream.deriveDatastreamId())){
-      String msg = String.format("Datastream with id %s not found. Cannot delete datastream", datastream);
-      log.error(msg);
-      throw new DatastreamNotFoundException(msg);
+      throw new DatastreamNotFoundException(
+          String.format("Datastream with id %s not found. Cannot delete datastream", datastream)
+      );
     }
 
     datastreamRepository.delete(datastream);
@@ -69,16 +70,20 @@ public class DatastreamService implements IDatastreamService {
       );
     }
 
+    // Optional: Log success at DEBUG level for troubleshooting
+    log.debug("Successfully deleted datastream {} from object {}",
+        datastream.getDsid(),
+        datastream.getDigitalObject().getId());
+
   }
 
 
 
   @Override
-  @Transactional
-  public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
+  @Transactional(readOnly = true)
+  public Datastream findById(DatastreamId id) {
     return datastreamRepository.findById(id).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastream with id %s", id);
-      log.info(msg);
+      String msg = String.format("Datastream with id %s not found", id);
       return new DatastreamNotFoundException(msg);
     });
 
@@ -104,8 +109,7 @@ public class DatastreamService implements IDatastreamService {
       datastreamContentRepository.save(data, datastream.deriveDatastreamId());
       return datastreamRepository.save(datastream);
     } else {
-      String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);
-      log.error(msg);
+      String msg = String.format("Digital object with id %s does not exist. Cannot save datastream %s", datastream.getDigitalObject().getId(), datastream);
       throw new DigitalObjectNotFoundException(msg);
     }
   }
@@ -135,7 +139,6 @@ public class DatastreamService implements IDatastreamService {
   public IDatastreamDetailsView findDatastreamDetailsById(DatastreamId datastreamId) throws DatastreamNotFoundException {
     return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid()).orElseThrow(() -> {
       String msg = String.format("Cannot find datastream-details-view via pid %s and dsid %s", datastreamId.getDigitalObject(), datastreamId.getDsid());
-      log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
   }
@@ -145,7 +148,6 @@ public class DatastreamService implements IDatastreamService {
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
       String msg = String.format("Digital object with id %s does not exist. Cannot find datastream via tags.", digitalObjectId);
-      log.error(msg);
       throw new DigitalObjectNotFoundException(msg);
     }
 
@@ -156,7 +158,6 @@ public class DatastreamService implements IDatastreamService {
 
     if (foundDatastreams.isEmpty()) {
       String msg = String.format("No datastream(s) found for digital object %s having the tags: %s", digitalObjectId, tags);
-      log.error(msg);
       throw new DatastreamNotFoundException(msg);
     }
     // method allows only to match a single datastream
@@ -167,7 +168,6 @@ public class DatastreamService implements IDatastreamService {
           .reduce("", (a, b) -> a + ", " + b);
 
       String msg = String.format("Multiple datastreams found for digital object %s having the tags: %s. Matched datastreams are: %s .", digitalObjectId, tags, matchedDsids);
-      log.error(msg);
       throw new DatastreamAmbiguousMatchException(msg);
     }
 
@@ -181,14 +181,12 @@ public class DatastreamService implements IDatastreamService {
 
     DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId).orElseThrow(() -> {
       String msg = String.format("Cannot find digital object with id %s", digitalObjectId);
-      log.info(msg);
       return new DigitalObjectNotFoundException(msg);
     });
 
     // check if mainResource is set
     if (digitalObject.getMainResource() == null || digitalObject.getMainResource().isEmpty()) {
       String msg = String.format("Digital object %s has no mainResource datastream defined. mainResource Property is null or empty.", digitalObject);
-      log.warn(msg);
       throw new DigitalObjectNoMainResourceDatastreamDefinedException(msg);
     }
 
@@ -197,7 +195,6 @@ public class DatastreamService implements IDatastreamService {
         digitalObject.getMainResource()
     ).orElseThrow(() -> {
       String msg = String.format("Cannot find mainResource datastream for digital object %s for mainResource %s", digitalObjectId, digitalObject.getMainResource());
-      log.info(msg);
       return new DatastreamNotFoundException(msg);
     });
 
@@ -220,7 +217,6 @@ public class DatastreamService implements IDatastreamService {
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
       String msg = String.format("Digital object with id %s does not exist. Cannot find datastreams.", digitalObjectId);
-      log.error(msg);
       throw new DigitalObjectNotFoundException(msg);
     }
 

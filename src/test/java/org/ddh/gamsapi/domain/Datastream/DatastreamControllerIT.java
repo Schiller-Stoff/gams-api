@@ -325,7 +325,7 @@ public class DatastreamControllerIT extends IntegrationTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
             )
-            .andExpect(status().is5xxServerError());
+            .andExpect(status().is4xxClientError());
 
 
       }
@@ -565,7 +565,7 @@ public class DatastreamControllerIT extends IntegrationTest {
         mockMvc.perform(
                 MockMvcRequestBuilders.get(URL)
             )
-            .andExpect(status().is5xxServerError());
+            .andExpect(status().is4xxClientError());
       }
 
       @Test

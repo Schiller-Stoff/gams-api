@@ -8,6 +8,6 @@ import org.springframework.http.HttpStatus;
  */
 public class DigitalObjectNoMainResourceDatastreamDefinedException extends DigitalObjectException {
   public DigitalObjectNoMainResourceDatastreamDefinedException(String message) {
-    super(HttpStatus.INTERNAL_SERVER_ERROR, message);
+    super(HttpStatus.CONFLICT, message);
   }
 }
