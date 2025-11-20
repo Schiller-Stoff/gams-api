@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,9 +18,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -35,8 +41,37 @@ public class GlobalExceptionHandler {
     return drillRootErrorCause(ex);
   }
 
+  @ExceptionHandler(ResponseStatusException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleResponseStatusException(
+      ResponseStatusException ex, WebRequest request
+  ) {
+    HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+    // make sure we have a valid status
+    HttpStatus effectiveStatus = status != null ? status : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    // Only ERROR log for 5xx, DEBUG for 4xx (no stack trace)
+    if (effectiveStatus.is5xxServerError()) {
+      log.error("Server error: {} - {}", effectiveStatus, ex.getReason(), ex);
+    } else {
+      log.debug("Client error: {} - {}", effectiveStatus, ex.getReason());
+    }
+
+    GamsAPIErrorResponse errorResponse = new GamsAPIErrorResponse(
+        effectiveStatus,
+        ex.getReason()
+    );
+
+    // Cache 404s for 5 minutes
+    HttpHeaders headers = new HttpHeaders();
+    if (effectiveStatus == HttpStatus.NOT_FOUND) {
+      headers.setCacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES));
+    }
+
+    return ResponseEntity.status(effectiveStatus).headers(headers).body(errorResponse);
+  }
+
   @ExceptionHandler(DataIntegrityViolationException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
+  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
     // TODO implement
     String msg = String.format("DataIntegrityViolationException: %s", ex.getMessage());
     log.error(msg);
@@ -102,10 +137,11 @@ public class GlobalExceptionHandler {
 
   /**
    * Drill down the root cause of given error and return a response entity with the error message.
+   *
    * @param cause the cause of the error
    * @return a response entity with the error message
    */
-  public ResponseEntity<GamsAPIErrorResponse> drillRootErrorCause(Throwable cause){
+  public ResponseEntity<GamsAPIErrorResponse> drillRootErrorCause(Throwable cause) {
     String msg;
     ResponseEntity<GamsAPIErrorResponse> responseEntity = null;
     // TODO refactor following code! (make cleaner!)
@@ -122,7 +158,7 @@ public class GlobalExceptionHandler {
         log.error(msg, cause);
         GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, msg, errors);
         responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
-      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException){
+      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException) {
         msg = "DataIntegrityViolationException in the database layer";
         log.error(msg, cause);
         var errors = new HashMap<String, String>();
