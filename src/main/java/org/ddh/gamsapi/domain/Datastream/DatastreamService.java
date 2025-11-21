@@ -62,6 +62,11 @@ public class DatastreamService implements IDatastreamService {
           datastream.deriveDatastreamId()
       );
     } catch (DatastreamCannotDeleteFileException e){
+      log.error("Failed to delete file content for datastream {} object: {}. Recording deletion failure for cleanup job. Reason: {}",
+          datastream.getDsid(),
+          datastream.getDigitalObject().getId(),
+          e.getMessage(), e);
+
       datastreamContentDeletionFailureRepository.save(
           DatastreamContentDeletionFailure.builder()
               .digitalObjectId(datastream.getDigitalObject().getId())
@@ -92,12 +97,13 @@ public class DatastreamService implements IDatastreamService {
   public Datastream save(Datastream datastream, MultipartFile file) {
 
     // THINK ABOUT: maybe should use input stream instead of byte array?
+    // TODO use streaming instead of byte[]!
     byte[] data;
     try {
       data = file.getBytes();
     } catch (IOException e) {
       throw new DatastreamCannotLoadFileException(
-          "Failed to extract data from given multipart-file for datastream" +  datastream + "from given file " + file
+          "Failed to extract data from given multipart-file for datastream" +  datastream + "from given file " + file + "Original error: " + e
       );
     }
 
