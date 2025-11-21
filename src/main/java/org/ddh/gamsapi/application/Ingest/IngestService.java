@@ -34,6 +34,7 @@ import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,22 +136,20 @@ public class IngestService implements IIngestService {
                 throw new IngestTypeConversionException(msg);
               }
 
-              // things need to be set aside from conversion.
-              // TODO usage of byte[] looks weird - because of streaming - maybe use inputstream?
-              byte[] datastreamContent;
+              // set datastream to point to the saved digital object
+              datastream.setDigitalObject(savedObject);
+
+              // saving the datastream content to the filesystem via streaming
               Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
-              try {
-                datastreamContent = Files.readAllBytes(contentFilePath);
+              try (InputStream inputStream = Files.newInputStream(contentFilePath)) {
+                datastreamContentRepository.save(inputStream, datastream.deriveDatastreamId());
               } catch (IOException e) {
-                String msg = String.format("Failed to read file %s for given ingest %s for object %s for datastream %s. Original error %s", contentFilePath, ingest, digitalObject, datastream, e);
-                log.error(msg);
+                String msg = "Failed to save datastream content from " +
+                    contentFilePath + " for object " + digitalObject.getId();
+                log.error(msg, e);
                 throw new IngestProcessingException(msg);
               }
 
-              datastream.setDigitalObject(savedObject);
-
-              // saving the datastream content to the filesystem
-              datastreamContentRepository.save(datastreamContent, datastream.deriveDatastreamId());
               // save datastream to database
               // make sure that the files are being deleted in any case (if database error occurs).
               try {
@@ -158,8 +157,19 @@ public class IngestService implements IIngestService {
                 log.info("Successfully saved datastream {}", datastream);
 
                 // also save dublin core metadata
+                // TODO dublin core processing - move to integration layer somewhere - this is shaky in my oppinion
                 if(contentFile.getDsid().equals(GAMSDsid.DC.getValue())){
-                  Document dublinCore = XMLUtils.parseXml(datastreamContent);
+                  // read only the datastream content for dublin core
+                  byte[] dublinCoreContent;
+                  Path dcFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
+                  try {
+                    dublinCoreContent = Files.readAllBytes(dcFilePath);
+                  } catch (IOException e) {
+                    String msg = String.format("Failed to read file %s for given ingest %s for object %s for datastream %s. Original error %s", contentFilePath, ingest, digitalObject, datastream, e);
+                    throw new IngestProcessingException(msg);
+                  }
+
+                  Document dublinCore = XMLUtils.parseXml(dublinCoreContent);
                   XMLUtils
                       .extractDCElements(dublinCore)
                       .forEach(dcElement -> {

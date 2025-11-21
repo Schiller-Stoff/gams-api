@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,10 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailureRepository;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAmbiguousMatchException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotDeleteFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -22,6 +19,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFou
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -96,26 +94,33 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public Datastream save(Datastream datastream, MultipartFile file) {
 
-    // THINK ABOUT: maybe should use input stream instead of byte array?
-    // TODO use streaming instead of byte[]!
-    byte[] data;
-    try {
-      data = file.getBytes();
-    } catch (IOException e) {
-      throw new DatastreamCannotLoadFileException(
-          "Failed to extract data from given multipart-file for datastream" +  datastream + "from given file " + file + "Original error: " + e
+    // Validate digital object exists
+    String digitalObjectId = datastream.getDigitalObject().getId();
+    if (!digitalObjectRepository.existsById(digitalObjectId)) {
+      throw new DigitalObjectNotFoundException(
+          "Digital object with id " + digitalObjectId + " not found"
       );
     }
 
-    if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
-      datastreamContentRepository.save(data, datastream.deriveDatastreamId());
-      log.debug("Successfully saved datastream content for datastream {}", datastream);
-      return datastreamRepository.save(datastream);
-    } else {
-      throw new DigitalObjectNotFoundException(
-          "Cannot save datastream content. Digital object does not exist: " + datastream.getDigitalObject().getId()
+    DatastreamId dsId = datastream.deriveDatastreamId();
+
+    // Stream file content directly to disk - NO byte[] intermediate!
+    try (InputStream inputStream = file.getInputStream()) {
+      datastreamContentRepository.save(inputStream, dsId);
+    } catch (IOException e) {
+      log.error("Failed to save file content for datastream {}: {}",
+          dsId, e.getMessage(), e);
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save file content for datastream " + dsId
       );
     }
+
+    // Save entity metadata
+    Datastream savedDatastream = datastreamRepository.save(datastream);
+
+    log.debug("Successfully saved datastream {} with file content", savedDatastream);
+    return savedDatastream;
+
   }
 
   /**

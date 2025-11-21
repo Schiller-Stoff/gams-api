@@ -14,10 +14,14 @@ import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSStorageProperties;
 import org.ddh.gamsapi.infrastructure.System.utils.FileUtils;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -25,6 +29,8 @@ import java.util.stream.Stream;
 @Repository
 @Slf4j
 public class DatastreamContentRepository implements IDatastreamContentRepository {
+
+  private static final int BUFFER_SIZE = 8192; // 8KB buffer
 
    private final int GAMS_FILE_BALANCE_FACTOR = 16;
 
@@ -78,6 +84,69 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
           "Failed to save datastream content. At balanced filepath: " + newFile + ". Datastream: " + datastreamId + ". Original error: " + e
       );
     }
+  }
+
+  /**
+     * Saves data from an InputStream to filesystem.
+     * Uses buffered streaming to minimize memory usage.
+     *
+     * @param inputStream the input stream to read from
+     * @param datastreamId the datastream id
+     * @return the datastream id
+     * @throws IOException if file cannot be written
+     */
+  @Override
+  public DatastreamId save(InputStream inputStream, DatastreamId datastreamId)
+      throws IOException {
+
+    if (!Files.exists(GAMS_FILES_ROOT)) {
+      String msg = "Root location " + GAMS_FILES_ROOT +
+          " does not exist for datastream " + datastreamId;
+      throw new DatastreamCannotLoadFileException(msg);
+    }
+
+    Path targetFile = calcBalancedFilepath(datastreamId);
+
+    // Ensure parent directories exist
+    ZipUtils.ensureParentDir(targetFile);
+
+    // Stream data with buffering - constant memory usage
+    try (BufferedInputStream bis = new BufferedInputStream(inputStream, BUFFER_SIZE);
+         BufferedOutputStream bos = new BufferedOutputStream(
+             Files.newOutputStream(targetFile,
+                 StandardOpenOption.CREATE,
+                 StandardOpenOption.TRUNCATE_EXISTING,
+                 StandardOpenOption.WRITE),
+             BUFFER_SIZE)
+    ) {
+
+      byte[] buffer = new byte[BUFFER_SIZE];
+      int bytesRead;
+
+      while ((bytesRead = bis.read(buffer)) != -1) {
+        bos.write(buffer, 0, bytesRead);
+      }
+
+      bos.flush();
+
+    } catch (IOException e) {
+      log.error("Failed to write file for datastream {}: {}",
+          datastreamId, e.getMessage(), e);
+
+      // Cleanup partial file on failure
+      try {
+        Files.deleteIfExists(targetFile);
+      } catch (IOException cleanupEx) {
+        log.warn("Failed to cleanup partial file {} after write error: {}",
+            targetFile, cleanupEx.getMessage());
+      }
+
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save file for datastream " + datastreamId
+      );
+    }
+
+    return datastreamId;
   }
 
   public InputStreamResource findById(DatastreamId datastreamId) {

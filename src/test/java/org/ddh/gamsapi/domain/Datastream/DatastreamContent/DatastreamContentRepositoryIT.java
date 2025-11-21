@@ -7,6 +7,7 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepo
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSStorageProperties;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -31,6 +32,34 @@ public class DatastreamContentRepositoryIT extends IntegrationTest {
       final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder().digitalObject("testId").dsid("TEST").build();
 
       datastreamContentRepository.save(TEST_DATA, TEST_DATASTREAM_ID);
+
+      Assertions.assertTrue(
+          Files.exists(datastreamContentRepository.calcBalancedFilepath(TEST_DATASTREAM_ID))
+      );
+
+      // cleanup
+      datastreamContentRepository.delete(TEST_DATASTREAM_ID);
+
+    }
+
+  }
+
+  @Nested
+  public class SaveInputStream {
+
+    @Test
+    public void savesExpectedFileToFilesSystem() throws IOException {
+
+      final byte[] TEST_DATA = "test data".getBytes();
+      final DatastreamId TEST_DATASTREAM_ID = DatastreamId.builder()
+          .digitalObject("testId")
+          .dsid("TEST")
+          .build();
+
+      datastreamContentRepository.save(
+          new ByteArrayInputStream(TEST_DATA),
+          TEST_DATASTREAM_ID
+      );
 
       Assertions.assertTrue(
           Files.exists(datastreamContentRepository.calcBalancedFilepath(TEST_DATASTREAM_ID))
