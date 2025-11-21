@@ -39,9 +39,9 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
           Files.createDirectories(GAMS_FILES_ROOT);
           log.info("Created root location for GAMS files at {}", GAMS_FILES_ROOT);
         } catch (IOException e) {
-          String msg = String.format("Could not create root location for GAMS files at %s. Original error: %s", GAMS_FILES_ROOT, e);
-          log.error(msg);
-          throw new DatastreamCannotWriteFileException(msg);
+          throw new DatastreamCannotWriteFileException(
+              "Could not create root location for GAMS files at " + GAMS_FILES_ROOT + ". Original error: " + e
+          );
         }
       }
 
@@ -58,9 +58,9 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     // error if root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
-      String msg = String.format("No files stored in GAMS. The root location %s does not exist and needs to be created first. Make sure to correctly configure the gams-api application. For datastream with id %s", GAMS_FILES_ROOT, datastreamId);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      throw new DatastreamCannotLoadFileException(
+          "Cannot write datastream file. The root location does not exist (and needs to be created first): " + GAMS_FILES_ROOT + " Make sure to correctly configure the gams-api application. For datastream with id " + datastreamId
+      );
     }
 
 
@@ -74,9 +74,9 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       log.info("Successfully wrote datastream {} with balanced path: {}", datastreamId, newFile);
       return datastreamId;
     } catch (IOException e) {
-      String msg = String.format("Could not write datastream %s with balanced path: %s", datastreamId, newFile);
-      log.error(msg, e);
-      throw new DatastreamCannotWriteFileException(msg);
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save datastream content. At balanced filepath: " + newFile + ". Datastream: " + datastreamId + ". Original error: " + e
+      );
     }
   }
 
@@ -84,25 +84,27 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
 
     // error if the root location does not exist
     if(!Files.exists(GAMS_FILES_ROOT)){
-      String msg = String.format("No files stored in GAMS. The root location %s does not exist. Tried to access file for datastream: %s", GAMS_FILES_ROOT, datastreamId);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      throw new DatastreamCannotLoadFileException(
+          "Failed to find datastream file. The GAMS files root location does not exist unexpectedly: " + GAMS_FILES_ROOT + ". For datastream: " + datastreamId
+      );
     }
 
     // error if the file does not exist
     Path expectedPath = calcBalancedFilepath(datastreamId);
     if(!Files.exists(expectedPath)){
-      String msg = String.format("Cannot load datastream file. The file for datastream %s does not exist at path %s", datastreamId, expectedPath);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      // TODO is this exception correct here? - a datastream content might not exist from perspective of this method
+      // TODO new exception DatastreamContentNotFoundException ?
+      throw new DatastreamCannotLoadFileException(
+          "Failed to find datastream file. The expected file does not exist at path: " + expectedPath + ". For datastream: " + datastreamId
+      );
     }
 
     try {
       return new InputStreamResource(new FileSystemResource(expectedPath).getInputStream());
     } catch (Exception e) {
-      String msg = String.format("Could not load file for datastream %s from expected path %s. Original error: %s", datastreamId, expectedPath, e);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+      throw new DatastreamCannotLoadFileException(
+          "Failed to find datastream file. For datastream: " + datastreamId + " From expected path: " + expectedPath +  ". Original error: " + e
+      );
     }
 
   }
@@ -143,9 +145,9 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     try {
       hashedFileName = FileUtils.calcSha256Hex(datastreamId.toString());
     } catch (NoSuchAlgorithmException e) {
-      String msg = String.format("Could not hash file for datastream-id %s. Original error: %s", datastreamId, e);
-      log.error(msg);
-      throw new DatastreamIdHashingException(msg);
+      throw new DatastreamIdHashingException(
+          "Could not hash file for datastream-id " + datastreamId + ". Original error: " + e
+      );
     }
 
     String balamcedFileName = FileUtils.balanceFilenameToFolderHierarchy(hashedFileName, GAMS_FILE_BALANCE_FACTOR);
