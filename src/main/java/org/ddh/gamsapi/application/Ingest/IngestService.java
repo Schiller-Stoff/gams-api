@@ -219,27 +219,26 @@ public class IngestService implements IIngestService {
 
     // 01. fetch data from database
     var digitalObject = digitalObjectRepository.findById(objectId).orElseThrow(
-        () -> {
-          String msg = String.format("Digital object with id %s does not exist. Cannot export non-existing object.", objectId);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
-        }
+        () -> new DigitalObjectNotFoundException(
+            "Failed to export digital object as bag. Digital object does not exist:  " + objectId
+        )
     );
 
     var ingestRecord = bagEntityRepository.findById(objectId).orElseThrow(
         () -> {
-          String msg = String.format("Ingest record for digital object with id %s does not exist. Cannot export non-existing object.", objectId);
-          log.error(msg);
-          return new DigitalObjectNotFoundException(msg);
+          // TODO this is a server error - use different exception?
+          return new DigitalObjectNotFoundException(
+              "Cannot export digital object as bag: " + objectId
+          );
         }
     );
 
     var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
 
     if(datastreams.isEmpty()){
-      String msg = String.format("Digital object with id %s has no datastreams. Cannot export object without datastreams.", objectId);
-      log.error(msg);
-      throw new ExportUnexpectedObjectStateException(msg);
+      throw new ExportUnexpectedObjectStateException(
+          "Cannot export digital object as bag - no datastreams found for object: " + objectId
+      );
     }
 
     // 02. Map data to bag entities
@@ -256,7 +255,6 @@ public class IngestService implements IIngestService {
 
     // 03. write bag
     bag.writeAsZipToStream(outputStream, datastreamContentRepository);
-
 
   }
 
