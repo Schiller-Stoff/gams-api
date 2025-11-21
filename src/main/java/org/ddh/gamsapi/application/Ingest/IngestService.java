@@ -3,13 +3,13 @@ package org.ddh.gamsapi.application.Ingest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Ingest.exceptions.*;
-import org.springframework.boot.info.BuildProperties;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.ddh.gamsapi.application.Ingest.exceptions.*;
+import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.Bag;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagData;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagInfo;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagMeta;
+import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
+import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
@@ -18,19 +18,18 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
-import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.Bag;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagData;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagInfo;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagMeta;
-import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
-import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,7 +37,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.Date;
 
 @Service
@@ -198,13 +196,13 @@ public class IngestService implements IIngestService {
           new DigitalObjectCreatedEvent(this, savedObject)
       );
 
-    } catch (Exception e){
-      // make sure that in any case the temp directory is deleted
-      ZipUtils.deleteDir(bagDirPath);
-      throw e;
     } finally {
-      // cleanup temp directory
-      cleanupTempDirectory(bagDirPath);
+      // cleanup temp directory in any case
+      try {
+        ZipUtils.deleteDir(bagDirPath);
+      } catch (Exception e ){
+        log.error(e.getMessage(), e);
+      }
     }
 
   }
@@ -256,30 +254,6 @@ public class IngestService implements IIngestService {
     // 03. write bag
     bag.writeAsZipToStream(outputStream, datastreamContentRepository);
 
-  }
-
-  /**
-   * Cleans up the temporary directory used for bag processing.
-   * TODO test?
-   * @param tempDir the path to the temporary directory
-   */
-  private void cleanupTempDirectory(Path tempDir) {
-    try {
-      if (tempDir != null && Files.exists(tempDir)) {
-        // TODO try with resouces?
-        Files.walk(tempDir)
-            .sorted(Comparator.reverseOrder())
-            .forEach(path -> {
-              try {
-                Files.delete(path);
-              } catch (IOException e) {
-                log.warn("Failed to delete temp file: {}", path, e);
-              }
-            });
-      }
-    } catch (IOException e) {
-      log.warn("Failed to cleanup temp directory: {}", tempDir, e);
-    }
   }
 
 }
