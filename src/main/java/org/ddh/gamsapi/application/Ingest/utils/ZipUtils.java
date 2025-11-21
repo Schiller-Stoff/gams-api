@@ -224,8 +224,6 @@ public class ZipUtils {
   /**
    * Unzips from input stream directly to temporary directory.
    * Memory-efficient - streams data without loading entire zip into memory.
-   * TODO test!!!
-   * TODO solve todos in method
    * @param zipInputStream input stream of zipped data
    * @return path to temporary directory containing unzipped content
    * @throws IngestProcessingException if unzipping fails
@@ -276,27 +274,15 @@ public class ZipUtils {
     } catch (IOException e) {
       String msg = "Failed to unzip stream: " + e.getMessage();
       log.error(msg, e);
-
-      // Cleanup on failure
       try {
-        // TODO use try - with resources?
-        Files.walk(tempBagDirPath)
-            .sorted(Comparator.reverseOrder())
-            .forEach(path -> {
-              try {
-                Files.delete(path);
-              } catch (IOException ex) {
-                log.warn("Cleanup failed for: {}", path);
-              }
-            });
-      } catch (IOException cleanupEx) {
-        log.warn("Failed to cleanup after error", cleanupEx);
+        deleteDir(tempBagDirPath);
+      } catch (IngestProcessingException cleanupEx) {
+        log.warn("Failed to cleanup after unzip error", cleanupEx);
+        throw cleanupEx;
       }
-
-      throw new IngestProcessingException(msg);
     }
 
-    log.info("Unzipped to temporary directory: {}", tempBagDirPath);
+    log.trace("Unzipped to temporary directory: {}", tempBagDirPath);
     return tempBagDirPath;
   }
 
