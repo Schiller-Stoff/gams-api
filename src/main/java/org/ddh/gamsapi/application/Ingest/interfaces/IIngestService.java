@@ -1,7 +1,6 @@
 package org.ddh.gamsapi.application.Ingest.interfaces;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.ddh.gamsapi.application.Ingest.Ingest;
 
 import java.io.InputStream;
 import java.io.OutputStream;
