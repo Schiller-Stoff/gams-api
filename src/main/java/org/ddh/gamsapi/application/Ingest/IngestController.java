@@ -58,6 +58,7 @@ public class IngestController {
   )
   public void ingest(
       @PathVariable String projectAbbr,
+      // TODO remove expected hardcoded form part name
       @RequestParam("subInfoPackZIP") MultipartFile bagFile
   ) {
 
@@ -90,9 +91,9 @@ public class IngestController {
     try (InputStream inputStream = bagFile.getInputStream()) {
       ingestService.ingest(projectAbbr, inputStream);
     } catch (IOException e) {
-      String msg = String.format("Failed to read uploaded bag file: %s", e.getMessage());
-      log.error(msg, e);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to read uploaded bag file: " + e.getMessage()
+      );
     }
   }
 
@@ -126,7 +127,7 @@ public class IngestController {
                         HttpServletResponse response) {
 
 
-    log.info("Export request for object {} in project {}", id, projectAbbr);
+    log.debug("Export request for object {} in project {}", id, projectAbbr);
 
     // Verify project exists and matches object
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
@@ -142,9 +143,9 @@ public class IngestController {
       ingestService.exportAsBag(id, response.getOutputStream());
       response.flushBuffer();
     } catch (IOException e) {
-      String msg = String.format("I/O error during bag export for object %s in project %s. Original error: %s", id, projectAbbr, e);
-      log.error(msg);
-      throw new ExportProcessingException(msg);
+      throw new ExportProcessingException(
+          "I/O error during bag export for object" + id + "in project" + projectAbbr + ". Original error: " + e
+      );
     }
 
   }
