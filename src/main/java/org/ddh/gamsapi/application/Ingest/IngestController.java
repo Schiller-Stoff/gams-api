@@ -4,22 +4,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import org.ddh.gamsapi.application.Ingest.exceptions.ExportProcessingException;
 import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
-import org.ddh.gamsapi.application.Ingest.utils.IngestStatics;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,7 +30,11 @@ public class IngestController {
   private final IIngestService ingestService;
   private final IProjectService projectService;
 
-  @PostMapping(produces = "application/json", path = { "/api/v1/projects/{projectAbbr}/objects"})
+  @PostMapping(
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = "application/json",
+      path = { "/api/v1/projects/{projectAbbr}/objects"}
+  )
   @ResponseBody
   @Operation(
       summary = "Ingest a zipped bag folder",
@@ -53,34 +56,44 @@ public class IngestController {
           )
       }
   )
-  public void ingest(@ModelAttribute Ingest ingest, HttpServletRequest request) {
+  public void ingest(
+      @PathVariable String projectAbbr,
+      @RequestParam("subInfoPackZIP") MultipartFile bagFile
+  ) {
 
-    byte[] bagAsZip;
-    try {
-      Part zipPart = request.getPart(IngestStatics.FORM_PART_NAME.name);
-      // null check for the case that the form part is not found
-      if(zipPart == null){
-        String msg = String.format("No form part with name %s found in multipart request against %s. Got parts: %s", IngestStatics.FORM_PART_NAME.name, request.getRequestURI(), request.getParts());
-        log.error(msg);
-        throw new IngestProcessingException(msg);
-      }
+    // TODO wrong exception
+//    if (bagFile.isEmpty()) {
+//      throw new IngestProcessingException("Uploaded bag file is empty");
+//    }
 
-      bagAsZip = zipPart.getInputStream().readAllBytes();
-    } catch (IOException e){
-      String msg = String.format("Failed to read given zip-file via multipart form-data request for ingest: %s", ingest);
-      log.error(msg);
+    // TODO risky validation
+    // Validate file size (e.g., max 2GB)
+//    long maxSize = 2L * 1024 * 1024 * 1024; // 2GB
+//    if (bagFile.getSize() > maxSize) {
+//      throw new IngestProcessingException(
+//          String.format("Bag file too large: %d bytes (max: %d bytes)",
+//              bagFile.getSize(), maxSize)
+//      );
+//    }
+
+    // TODO i'm not sure if we should validate the content type here - because: clients might also set octect-stream on zip
+    // Validate content type
+//    String contentType = bagFile.getContentType();
+//    if (!"application/zip".equals(contentType) &&
+//        !"application/x-zip-compressed".equals(contentType)) {
+//      // TODO think about the error here
+//      throw new IngestProcessingException(
+//          String.format("Invalid content type: %s. Expected application/zip", contentType)
+//      );
+//    }
+
+    try (InputStream inputStream = bagFile.getInputStream()) {
+      ingestService.ingest(projectAbbr, inputStream);
+    } catch (IOException e) {
+      String msg = String.format("Failed to read uploaded bag file: %s", e.getMessage());
+      log.error(msg, e);
       throw new IngestProcessingException(msg);
-    } catch (ServletException e){
-      String msg = String.format("Failed to extract form part: %s from multipart request against %s. There might be ", IngestStatics.FORM_PART_NAME.name, request.getRequestURI());
-      log.error(msg);
-      throw new IngestProcessingException(msg);
-
     }
-    ingest.setZippedBagItFolder(bagAsZip);
-    ingestService.ingest(ingest);
-
-    // TODO need to return meaningful information about the ingest (e.g. like a status or a reference to the created object?)
-    // return ingest;
   }
 
 

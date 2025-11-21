@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Date;
 
 @Service
@@ -60,23 +61,21 @@ public class IngestService implements IIngestService {
       // any exception will trigger a rollback
       Exception.class}
   )
-  public void ingest(Ingest ingest) {
+  public void ingest(String projectAbbr, InputStream bagZipStream) {
 
-    var foundProject = projectRepository.findById(ingest.getProjectAbbr()).orElseThrow(
-        () -> {
-          String msg = String.format("Project defined for the ingest operation %s does not exist (defined in given request url - bag's sip.json was not analyzed). Denying ingest operation for ingest %s", ingest.getProjectAbbr(), ingest);
-          log.warn(msg);
-          return new ProjectNotFoundException(msg);
-        }
-    );
+    var foundProject = projectRepository.findById(projectAbbr)
+        .orElseThrow(() -> new ProjectNotFoundException(
+            String.format("Project %s does not exist", projectAbbr)
+        ));
 
-    // 01. unzip bag to temp
+    // Unzip DIRECTLY from stream to temp directory (no byte[] intermediate)
     Path bagDirPath;
     try {
-      bagDirPath = ZipUtils.unzipToTempDir(ingest.getZippedBagItFolder());
-    } catch (IngestProcessingException e){
-      String msg = String.format("Failed to ingest given ingest operation %s. Original error: %s", ingest, e);
-      log.error(msg);
+      bagDirPath = ZipUtils.unzipStreamToTempDir(bagZipStream);
+    } catch (IngestProcessingException e) {
+      String msg = String.format("Failed to unzip bag for project %s: %s",
+          projectAbbr, e.getMessage());
+      log.error(msg, e);
       throw new IngestProcessingException(msg);
     }
 
@@ -84,30 +83,27 @@ public class IngestService implements IIngestService {
       // 02. Bag processing
       Bag bag = new Bag(bagDirPath);
 
-      log.info("Successfully extracted bag: {}", bag.getBAG_DIR_PATH());
-      if(!bag.getBagData().getProject().equals(ingest.getProjectAbbr())){
-        String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bag sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation %s. Happened at BagSipJson: %s", ingest.getProjectAbbr(), bag.getBagData().getProject(), ingest, bag.getBagData());
-        log.error(msg);
+      log.debug("Successfully extracted bag: {}", bag.getBAG_DIR_PATH());
+      if(!bag.getBagData().getProject().equals(projectAbbr)){
+        String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bag sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation. Happened at BagSipJson: %s", projectAbbr, bag.getBagData().getProject(), bag.getBagData());
         throw new IngestAgainstDifferentProjectException(msg);
       }
 
       // 03. build and save digital object from bag-info.txt
       DigitalObject digitalObject = conversionService.convert(bag.getBagData(), DigitalObject.class);
       if(digitalObject == null){
-        String msg = String.format("Digital object is unexpectedly null. Failed to convert bag data %s to digital object for given ingest %s", bag.getBagData(), ingest);
-        log.error(msg);
+        String msg = String.format("Digital object is unexpectedly null. Failed to convert bag data %s to digital object for given ingest against project %s", bag.getBagData(), projectAbbr);
         throw new IngestTypeConversionException(msg);
       }
 
       // abort ingest if digital object already exists
       if(digitalObjectRepository.existsById(digitalObject.getId())){
-        String msg = String.format("Cannot ingest object with id %s. Digital object already exists and must be deleted before another ingest process. Ingest metadata: %s", digitalObject.getId(), ingest);
-        log.error(msg);
+        String msg = String.format("Cannot ingest object with id %s. Digital object already exists and must be deleted before another ingest process. Ingest against project: %s", digitalObject.getId(), projectAbbr);
         throw new IngestObjectAlreadyExistsException(msg);
       }
 
       final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
-      log.info("****** Successfully saved digital object: {} for ingest operation {}", digitalObject, ingest);
+      log.debug("Successfully saved digital object: {} for project {}", digitalObject, projectAbbr);
 
       // logic to save the related BagEntities
       var bagEntity = SubmissionRecord.builder()
@@ -124,15 +120,14 @@ public class IngestService implements IIngestService {
               .build();
 
       bagEntityRepository.save(bagEntity);
-      log.info("****** Successfully saved bag entity: {} for ingest operation {}", bagEntity, ingest);
+      log.debug("Successfully saved bag entity: {} for project {}", bagEntity, projectAbbr);
 
       // 04. build and save datastreams from the bag data
       bag.getBagData().getContentFiles()
             .forEach(contentFile -> {
               Datastream datastream = conversionService.convert(contentFile, Datastream.class);
               if(datastream == null){
-                String msg = String.format("Datastream is unexpectedly null. Failed to convert contentFile %s to datastream for given ingest %s for object %s", contentFile, ingest, digitalObject);
-                log.error(msg);
+                String msg = String.format("Datastream is unexpectedly null. Failed to convert contentFile %s to datastream for project %s for object %s", contentFile, projectAbbr, digitalObject);
                 throw new IngestTypeConversionException(msg);
               }
 
@@ -165,7 +160,7 @@ public class IngestService implements IIngestService {
                   try {
                     dublinCoreContent = Files.readAllBytes(dcFilePath);
                   } catch (IOException e) {
-                    String msg = String.format("Failed to read file %s for given ingest %s for object %s for datastream %s. Original error %s", contentFilePath, ingest, digitalObject, datastream, e);
+                    String msg = String.format("Failed to read file %s for given project %s for object %s for datastream %s. Original error %s", contentFilePath, projectAbbr, digitalObject, datastream, e);
                     throw new IngestProcessingException(msg);
                   }
 
@@ -207,6 +202,9 @@ public class IngestService implements IIngestService {
       // make sure that in any case the temp directory is deleted
       ZipUtils.deleteDir(bagDirPath);
       throw e;
+    } finally {
+      // cleanup temp directory
+      cleanupTempDirectory(bagDirPath);
     }
 
   }
@@ -260,6 +258,30 @@ public class IngestService implements IIngestService {
     bag.writeAsZipToStream(outputStream, datastreamContentRepository);
 
 
+  }
+
+  /**
+   * Cleans up the temporary directory used for bag processing.
+   * TODO test?
+   * @param tempDir the path to the temporary directory
+   */
+  private void cleanupTempDirectory(Path tempDir) {
+    try {
+      if (tempDir != null && Files.exists(tempDir)) {
+        // TODO try with resouces?
+        Files.walk(tempDir)
+            .sorted(Comparator.reverseOrder())
+            .forEach(path -> {
+              try {
+                Files.delete(path);
+              } catch (IOException e) {
+                log.warn("Failed to delete temp file: {}", path, e);
+              }
+            });
+      }
+    } catch (IOException e) {
+      log.warn("Failed to cleanup temp directory: {}", tempDir, e);
+    }
   }
 
 }
