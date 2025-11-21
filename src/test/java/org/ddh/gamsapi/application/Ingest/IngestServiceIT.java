@@ -29,6 +29,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -87,10 +88,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
 
       // get the project after ingest
       var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
@@ -113,10 +114,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
     }
 
     @Test
@@ -305,10 +306,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
 
 
       long eventCont = eventCaptureListener.countEventsOfType(DigitalObjectCreatedEvent.class);
@@ -334,12 +335,11 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-
       Assertions.assertThatThrownBy(
-          () -> ingestService.ingest(ingest)
+          () -> ingestService.ingest(
+              TestProject.PROJECT_ABBR.getValue(),
+              new ByteArrayInputStream(zippedBag)
+          )
       ).isInstanceOf(IngestObjectAlreadyExistsException.class);
 
     }
@@ -357,10 +357,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
 
     }
 

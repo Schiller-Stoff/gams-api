@@ -24,6 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
@@ -59,12 +60,12 @@ public class FacetServiceIT extends SolrIntegrationTest {
         .projectAbbr(TestProject.PROJECT_ABBR.getValue())
         .build());
 
-    // Ingest the bag
+    // ingest the bag
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    Ingest ingest = new Ingest();
-    ingest.setZippedBagItFolder(zippedBag);
-    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-    ingestService.ingest(ingest);
+    ingestService.ingest(
+        TestProject.PROJECT_ABBR.getValue(),
+        new ByteArrayInputStream(zippedBag)
+    );
 
     // Index object
     gSearchService.indexObject(

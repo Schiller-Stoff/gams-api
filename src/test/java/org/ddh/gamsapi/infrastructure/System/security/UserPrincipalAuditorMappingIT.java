@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -86,11 +87,14 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     // data to be send as multipart
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
+    // add content type to the part
+    mockPart.getHeaders().setContentType(MediaType.APPLICATION_OCTET_STREAM);
 
     mockMvc
         .perform(
             multipart(TEST_PROJECT_INGEST_URL)
                 .part(mockPart)
+                .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
                 // there is no need to mock the user as oauth2 user.
                 .with(SecurityMockMvcRequestPostProcessors
                     .oidcLogin()
