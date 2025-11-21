@@ -26,7 +26,7 @@ public class DatastreamId implements Serializable {
   private String digitalObject;
 
   public String toString(){
-    return String.format("%s_%s", digitalObject, dsid);
+    return digitalObject + "_" + dsid;
   }
 
 
