@@ -6,9 +6,12 @@ import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -202,23 +205,50 @@ public class ZipUtils {
 
   /**
    * Deletes given directory and all its subdirectories and files.
-   * @param dirPath path to directory to be deleted.
-   * @throws IngestProcessingException if deletion fails through IOException.
+   * Throws exception if any deletion fails.
+   *
+   * @param dirPath path to directory to be deleted
+   * @throws IngestProcessingException if deletion fails or directory doesn't exist
    */
   public static void deleteDir(Path dirPath) throws IngestProcessingException {
-    // delete temp directory last
-    try (Stream<Path> entries = Files.walk(dirPath)){
-      entries
-          .sorted(Comparator.reverseOrder())
-          .map(Path::toFile)
-          // TODO result of delete returns if deletion was successful - handle failed deletions?
-          .forEach(File::delete);
-      log.trace("Deleted temporary directory: {}", dirPath);
-    } catch (IOException e){
+
+    if (!Files.exists(dirPath)) {
       throw new IngestProcessingException(
-          "Failed to delete temporary directory " + dirPath + ". Original error " + e
+          "Cannot delete directory - path does not exist: " + dirPath
       );
     }
+
+    List<Path> failedDeletions = new ArrayList<>();
+
+    try (Stream<Path> entries = Files.walk(dirPath)) {
+      entries
+          .sorted(Comparator.reverseOrder())
+          .forEach(path -> {
+            try {
+              Files.delete(path);
+              log.trace("Deleted: {}", path);
+            } catch (IOException e) {
+              log.warn("Failed to delete path: {} - Reason: {}", path, e.getMessage());
+              failedDeletions.add(path);
+            }
+          });
+    } catch (IOException e) {
+      throw new IngestProcessingException(
+          "Failed to walk directory tree for deletion: " + dirPath + ". Original error: " + e
+      );
+    }
+
+    if (!failedDeletions.isEmpty()) {
+      String failedPaths = failedDeletions.stream()
+          .map(Path::toString)
+          .collect(Collectors.joining(", "));
+      throw new IngestProcessingException(
+          "Failed to delete " + failedDeletions.size() + " path(s) in directory " + dirPath
+              + ". Failed paths: " + failedPaths
+      );
+    }
+
+    log.trace("Successfully deleted temporary directory: {}", dirPath);
   }
 
 
