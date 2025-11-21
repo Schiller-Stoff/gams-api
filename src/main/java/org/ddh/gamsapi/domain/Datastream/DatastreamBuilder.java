@@ -74,7 +74,7 @@ public class DatastreamBuilder {
 
   public Datastream build() {
     if((datastream.getDsid() == null) || datastream.getDsid().isEmpty()) {
-      String msg = String.format("Encountered null or empty dsid at %s. Datastream identifier must be set during builder process.", this.getClass().getName());
+      String msg = "Encountered null or empty dsid at" + this.getClass().getName() + ". Datastream identifier must be set during builder process.";
       log.error(msg);
       throw new IllegalStateException(msg);
     }
