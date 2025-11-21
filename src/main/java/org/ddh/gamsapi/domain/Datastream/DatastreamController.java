@@ -62,9 +62,9 @@ public class DatastreamController {
   ){
 
     if(!projectService.exists(projectAbbr)){
-      String msg = String.format("Cannot retrieve datastream content. Project %s not found.", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Datastream content not findable. Project does not exist: " + projectAbbr
+      );
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
@@ -116,9 +116,9 @@ public class DatastreamController {
   ){
 
     if(!projectService.exists(projectAbbr)){
-      String msg = String.format("Project %s not found. Cannot retrieve datastream details", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Datastream details not findable. Project does not exist: " + projectAbbr
+      );
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
@@ -161,9 +161,9 @@ public class DatastreamController {
   ) {
 
     if(!projectService.exists(projectAbbr)){
-      String msg = String.format("Project %s not found. Cannot retrieve datastream list", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Datastream list not findable. Project does not exist: " + projectAbbr
+      );
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
@@ -228,9 +228,9 @@ public class DatastreamController {
   ) {
 
     if(!projectService.exists(projectAbbr)){
-      String msg = String.format("Project %s not found. Cannot retrieve datastream details", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Cannot retrieve datastream details. Project does not exist: " + projectAbbr
+      );
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
@@ -274,9 +274,9 @@ public class DatastreamController {
   ){
 
     if(!projectService.exists(projectAbbr)){
-      String msg = String.format("Project %s not found. Cannot retrieve datastream content", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Cannot retrieve datastream content. Project does not exist: " + projectAbbr
+      );
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
