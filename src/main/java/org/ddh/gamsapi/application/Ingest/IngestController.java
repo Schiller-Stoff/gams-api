@@ -92,7 +92,8 @@ public class IngestController {
       ingestService.ingest(projectAbbr, inputStream);
     } catch (IOException e) {
       throw new IngestProcessingException(
-          "Failed to read uploaded bag file: " + e.getMessage()
+          "Failed to read uploaded bag file: " + e.getMessage(),
+          e
       );
     }
   }
@@ -144,7 +145,8 @@ public class IngestController {
       response.flushBuffer();
     } catch (IOException e) {
       throw new ExportProcessingException(
-          "I/O error during bag export for object" + id + "in project" + projectAbbr + ". Original error: " + e
+          "I/O error during bag export for object" + id + "in project" + projectAbbr + ". Original error: " + e.getMessage(),
+          e
       );
     }
 
