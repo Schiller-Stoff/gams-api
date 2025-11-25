@@ -63,7 +63,7 @@ public class IngestService implements IIngestService {
 
     var foundProject = projectRepository.findById(projectAbbr)
         .orElseThrow(() -> new ProjectNotFoundException(
-            String.format("Project %s does not exist", projectAbbr)
+            "Project does not exist: " + projectAbbr
         ));
 
     // Unzip DIRECTLY from stream to temp directory (no byte[] intermediate)
@@ -71,10 +71,9 @@ public class IngestService implements IIngestService {
     try {
       bagDirPath = ZipUtils.unzipStreamToTempDir(bagZipStream);
     } catch (IngestProcessingException e) {
-      String msg = String.format("Failed to unzip bag for project %s: %s",
-          projectAbbr, e.getMessage());
-      log.error(msg, e);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to unzip bag for project " + projectAbbr + ": " + e
+      );
     }
 
     try {
@@ -83,8 +82,11 @@ public class IngestService implements IIngestService {
 
       log.debug("Successfully extracted bag: {}", bag.getBAG_DIR_PATH());
       if(!bag.getBagData().getProject().equals(projectAbbr)){
-        String msg = String.format("The project abbreviation of the ingest %s does not match the project %s in the bag sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation. Happened at BagSipJson: %s", projectAbbr, bag.getBagData().getProject(), bag.getBagData());
-        throw new IngestAgainstDifferentProjectException(msg);
+        throw new IngestAgainstDifferentProjectException(
+            "The project abbreviation of the ingest " + projectAbbr +
+                " does not match the project " + bag.getBagData().getProject() +
+                " in the bag sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation. Happened at BagSipJson: " + bag.getBagData()
+        );
       }
 
       // 03. build and save digital object from bag-info.txt
