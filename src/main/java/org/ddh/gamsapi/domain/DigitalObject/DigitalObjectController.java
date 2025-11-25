@@ -94,9 +94,8 @@ public class DigitalObjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
-        log.error(msg);
-        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST,
+            "Invalid date format for If-modified-since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e);
       }
     }
 
@@ -145,9 +144,8 @@ public class DigitalObjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
-        log.error(msg);
-        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST,
+            "Invalid date format for If-modified-since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e);
       }
     }
 
@@ -204,7 +202,6 @@ public class DigitalObjectController {
     model.addAttribute("pagedDatastreams", pagedDatastreams);
     model.addAttribute("do", foundObject);
     model.addAttribute(project);
-    log.info("Found digital object {} for project {}", foundObject, project.getProjectAbbr());
     return "DigitalObject/show";
   }
 
@@ -283,7 +280,6 @@ public class DigitalObjectController {
     model.addAttribute("searchId", id);
     model.addAttribute("sortBy", sortBy);
 
-    // log.info("Found objects {} for project {}", digitalObjects, project);
     return "DigitalObject/show_all";
   }
 
@@ -303,7 +299,6 @@ public class DigitalObjectController {
         .build();
 
     this.digitalObjectService.delete(digitalObject);
-    log.info("Deleted object {} for project {}", digitalObject, projectAbbr);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
   }
