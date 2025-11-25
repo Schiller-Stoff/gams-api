@@ -1,12 +1,12 @@
 package org.ddh.gamsapi.application.Ingest.exceptions;
 
+import org.ddh.gamsapi.infrastructure.System.exceptions.GamsApiException;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * Error states concerning SubmissionInformationPackages
  */
-public class IngestException extends ResponseStatusException {
+public class IngestException extends GamsApiException {
   public IngestException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
