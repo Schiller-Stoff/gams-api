@@ -41,9 +41,10 @@ public class DatastreamService implements IDatastreamService {
   public void delete(Datastream datastream) {
 
     if(datastream.getDigitalObject() == null){
-      String msg = String.format("Datastream's digital object is unexpectedly null %s . Cannot delete datastream.", datastream);
-      // TODO this exception here is completely wrong - is more about client input validation. Need to define a new exception type?
-      throw new DigitalObjectNotFoundException(msg);
+      // TODO this exception here is wrong? - is more about client input validation. Need to define a new exception type?
+      throw new DigitalObjectNotFoundException(
+          "Datastream's digital object is unexpectedly null " + datastream + " . Cannot delete datastream."
+      );
     }
 
     if(!datastreamRepository.existsById(datastream.deriveDatastreamId())){
