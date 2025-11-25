@@ -102,15 +102,15 @@ public class Bag {
     String sipJsonSHA512 = bagPathSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
 
     if(sipJsonMd5 == null || sipJsonMd5.length() != 32){
-      String msg = String.format("MD5 checksum for sip.json is unexpectedly not valid - Got value %s for bag: %s", sipJsonMd5, bagSipJson);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "MD5 checksum for sip.json is unexpectedly not valid - Got value " + sipJsonMd5 + "for bag: " + bagSipJson.getRecid()
+      );
     }
 
     if(sipJsonSHA512 == null || sipJsonSHA512.length() != 128){
-      String msg = String.format("SHA512 checksum for sip.json is unexpectedly not valid - Got value %s for bag: %s", sipJsonSHA512, bagSipJson);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "SHA512 checksum for sip.json is unexpectedly not valid - Got value " + sipJsonSHA512 + " for bag: " + bagSipJson.getRecid()
+      );
     }
 
     BagData bagData = BagData.builder()
@@ -142,15 +142,15 @@ public class Bag {
       String sha512 = bagPathSha512Map.get(contentFile.getBagpath());
 
       if(md5.length() != 32){
-        String msg = String.format("MD5 checksum for file %s is unexpectedly not valid: %s", contentFile.getBagpath(), md5);
-        log.error(msg);
-        throw new IngestProcessingException(msg);
+        throw new IngestProcessingException(
+            "Md5 checksum for file " + contentFile.getBagpath() + " is unexpectedly not valid: " + md5
+        );
       }
 
       if(sha512.length() != 128){
-        String msg = String.format("SHA512 checksum for file %s is unexpectedly not valid: %s", contentFile.getBagpath(), sha512);
-        log.error(msg);
-        throw new IngestProcessingException(msg);
+        throw new IngestProcessingException(
+            "SHA512 checksum for file " + contentFile.getBagpath() + " is unexpectedly not valid: " + sha512
+        );
       }
 
       BagFile bagFile = BagFile.builder()
@@ -186,6 +186,7 @@ public class Bag {
    * Find a content file by its dsid.
    * @param dsid the dsid to search for
    * @return the BagFile with the given dsid
+   * @throws IngestProcessingException in case no content file with the given dsid is found
    */
   public BagFile findContentFileByDsid(String dsid){
     for(BagFile bagFile : this.bagData.getContentFiles()){
@@ -193,9 +194,10 @@ public class Bag {
         return bagFile;
       }
     }
-    String msg = String.format("No content file with dsid %s found in bag %s", dsid, this.bagData.getId());
-    log.error(msg);
-    throw new NoSuchElementException(msg);
+    // not found
+    throw new IngestProcessingException(
+        "No content file with dsid " + dsid + " found in bag " + this.bagData.getId()
+    );
   }
 
   /**
@@ -228,9 +230,9 @@ public class Bag {
 
 
     } catch (IOException e) {
-      String msg = String.format("Error writing bag %s to zip output stream. Original error: %s", bagData.getId(), e);
-      log.error(msg);
-      throw new ExportProcessingException(msg);
+      throw new ExportProcessingException(
+          "Error writing bag " + bagData.getId() +  " to zip output stream. Original error: " + e.getMessage()
+          , e);
     }
 
   }
@@ -281,9 +283,9 @@ public class Bag {
       try {
         zipOutputStream.putNextEntry(entry);
       } catch (IOException e) {
-        String msg = String.format("Error creating zip entry for %s in bag %s. Original error: %s", bagDatastreamContentAbsolutePath, bagData.getId(), e);
-        log.error(msg);
-        throw new ExportProcessingException(msg);
+        throw new ExportProcessingException(
+            "Error creating zip entry for " + bagDatastreamContentAbsolutePath + " in bag " + bagData.getId() + ". Original error: " + e.getMessage()
+            , e);
       }
 
       DatastreamId datastreamId = DatastreamId.builder()
@@ -300,9 +302,9 @@ public class Bag {
         zipOutputStream.closeEntry();
         log.debug("Finished writing datastream content: {}", bagDatastreamContentAbsolutePath);
       } catch (Exception e) {
-        String msg = String.format("Failed to stream datastream content for %s", datastreamId);
-        log.error(msg, e);
-        throw new ExportProcessingException(msg);
+        throw new ExportProcessingException(
+            "Failed to stream datastream content for " + datastreamId + ". Original error: " + e.getMessage()
+            , e);
       }
     }
 
@@ -340,9 +342,10 @@ public class Bag {
       byte[] md5ChecksumBytes = md5Digest.digest();
       md5Checksum = bytesToHex(md5ChecksumBytes);
     } catch (NoSuchAlgorithmException e) {
-      String msg = String.format("Error calculating SHA-512 checksum for sip.json in bag %s. Original error: %s", bagData.getId(), e);
-      log.error(msg);
-      throw new ExportProcessingException(msg);
+      throw new ExportProcessingException(
+          "Error calculating checksums for sip.json in bag " + bagData.getId() +  ". Original error: " + e.getMessage(),
+          e
+      );
     }
 
     // sip.json manifest entry

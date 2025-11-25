@@ -153,9 +153,9 @@ public class BagData {
       ObjectMapper objectMapper = createObjectMapper();
       return objectMapper.writeValueAsString(this);
     } catch (JsonProcessingException e) {
-      String msg = String.format("Error creating Sip JSON content for BagData related to digital object %s. Original error: %s", this.id, e);
-      log.error(msg);
-      throw new ExportProcessingException(msg);
+      throw new ExportProcessingException(
+          "Error creating Sip JSON content for BagData related to digital object " + this.id + " Original error: " + e.getMessage(),
+          e);
     }
   }
 

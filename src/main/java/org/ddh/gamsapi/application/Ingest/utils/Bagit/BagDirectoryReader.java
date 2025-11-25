@@ -45,26 +45,26 @@ public class BagDirectoryReader {
     checksumPathsMap.forEach(
         (sha512Checksum, bagPath) -> {
            if(bagPathChecksumMap.containsValue(sha512Checksum)){
-            String msg = String.format("Encountered duplicate checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered duplicate checksum" + sha512Checksum + "in sha512 manifest file " + BagFilePaths.MANIFEST_SHA512_FILE_PATH.name
+            );
            }
            if(sha512Checksum.length() != 128) {
-            String msg = String.format("Encountered invalid sha512 checksum for dsid %s in sha512 manifest file %s. Checksum must be 128 characters long.", sha512Checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered invalid sha512 checksum " + sha512Checksum + " in sha512 manifest file " + BagFilePaths.MANIFEST_SHA512_FILE_PATH.name + ". Checksum must be 128 characters long."
+            );
            }
 
           if(bagPath == null){
-            String msg = String.format("Encountered null bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered null bag path for checksum " + sha512Checksum + " in sha512 manifest file " + BagFilePaths.MANIFEST_MD5_FILE_PATH.name + "."
+            );
           }
 
           if(bagPath.isBlank()){
-            String msg = String.format("Encountered empty bag path for checksum %s in sha512 manifest file %s.", sha512Checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered empty bag path for checksum " + sha512Checksum + " in sha512 manifest file " + BagFilePaths.MANIFEST_MD5_FILE_PATH.name + "."
+            );
           }
 
            bagPathChecksumMap.put(bagPath, sha512Checksum);
@@ -89,26 +89,26 @@ public class BagDirectoryReader {
     checksumPathsMap.forEach(
         (checksum, bagPath) -> {
           if(bagPathChecksumMap.containsKey(checksum)){
-            String msg = String.format("Encountered duplicate checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered duplicate checksum " + checksum + " in md5 manifest file " + BagFilePaths.MANIFEST_MD5_FILE_PATH.name + "."
+            );
           }
           if(checksum.length() != 32) {
-            String msg = String.format("Encountered invalid md5 checksum %s in md5 manifest file %s. Checksum must be 32 characters long.", checksum, BagFilePaths.MANIFEST_SHA512_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered invalid md5 checksum " + checksum + " in md5 manifest file " + BagFilePaths.MANIFEST_SHA512_FILE_PATH.name + ". Checksum must be 32 characters long."
+            );
           }
 
           if(bagPath == null){
-            String msg = String.format("Encountered null bag path for checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered null bag path for checksum " + checksum + " in md5 manifest file " + BagFilePaths.MANIFEST_MD5_FILE_PATH.name + "."
+            );
           }
 
           if(bagPath.isBlank()){
-            String msg = String.format("Encountered empty bag path for checksum %s in md5 manifest file %s.", checksum, BagFilePaths.MANIFEST_MD5_FILE_PATH.name);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Encountered empty bag path for checksum " + checksum + " in md5 manifest file " + BagFilePaths.MANIFEST_MD5_FILE_PATH.name + "."
+            );
           }
 
           bagPathChecksumMap.put(bagPath, checksum);
@@ -138,9 +138,10 @@ public class BagDirectoryReader {
               .contactMail(fileValues.get("Contact-Email"))
               .build();
     } catch(NullPointerException e){
-      String msg = String.format("Failed to extract a required key from %s to intern BagInfo class. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to extract a required key from " + BagFilePaths.BAG_INFO_FILE_PATH.name + " to intern BagInfo class. Original error: " + e.getMessage(),
+          e
+      );
     }
 
     // validate sip.json mapping
@@ -148,9 +149,9 @@ public class BagDirectoryReader {
       Validator validator = factory.getValidator();
       Set<ConstraintViolation<BagInfo>> violations = validator.validate(bagInfo);
       if(!violations.isEmpty()){
-          String msg = String.format("Failed to validate bag info file from %s. Original error: %s", BagFilePaths.BAG_INFO_FILE_PATH.name, violations);
-          log.error(msg);
-          throw new IngestProcessingException(msg);
+          throw new IngestProcessingException(
+              "Failed to validate bag info file from " + BagFilePaths.BAG_INFO_FILE_PATH.name + ". Original error: " + violations
+          );
       }
     }
 
@@ -175,9 +176,10 @@ public class BagDirectoryReader {
               .tagFileCharacterEncoding(fileValues.get("Tag-File-Character-Encoding"))
               .build();
     } catch(NullPointerException e){
-      String msg = String.format("Failed to extract a required key from %s to intern BagMeta class. Original error: %s", BagFilePaths.BAG_METADATA_DIR.name, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to extract a required key from " + BagFilePaths.BAG_METADATA_DIR.name + " to intern BagMeta class. Original error: " + e.getMessage(),
+          e
+      );
     }
 
     // bagIt.txt mapping
@@ -185,9 +187,9 @@ public class BagDirectoryReader {
       Validator validator = factory.getValidator();
       Set<ConstraintViolation<BagMeta>> violations = validator.validate(bagMeta);
       if(!violations.isEmpty()){
-          String msg = String.format("Failed to validate bag meta file from %s. Original error: %s", BagFilePaths.BAG_METADATA_DIR.name, violations);
-          log.error(msg);
-          throw new IngestProcessingException(msg);
+          throw new IngestProcessingException(
+              "Failed to validate bag meta file from " + BagFilePaths.BAG_METADATA_DIR.name + ". Original error: " + violations
+          );
       }
     }
 
@@ -227,21 +229,22 @@ public class BagDirectoryReader {
               });
 
       if(lineCount.get() != map.size()){
-        String msg = String.format("Failed to map key value pairs in file %s to map. The number of lines containing the delimiter (%s) does not match the number of entries in the resulting map.", filePath, delimiter);
-        log.error(msg);
-        throw new IngestProcessingException(msg);
+        throw new IngestProcessingException(
+            "Failed to map key value pairs in file "+ filePath + " to map. The number of lines containing the delimiter (" + delimiter + ") does not match the number of entries in the resulting map."
+        );
       }
 
     } catch (IOException e) {
-      String msg = String.format("Failed to map key value pairs in file %s to map. Original error: %s", filePath, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to map key value pairs in file "+ filePath + " to map. Original error: " + e.getMessage(),
+          e
+      );
     }
 
     if(map.isEmpty()){
-      String msg = String.format("Failed to map key value pairs in file %s to map. The resulting map is empty.", filePath);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to map key value pairs in file "+ filePath + " to map."
+      );
     }
 
     return map;
@@ -259,9 +262,9 @@ public class BagDirectoryReader {
     try {
       jsonContent = Files.readAllBytes(pathToBagInfoFile);
     } catch (IOException e){
-      String msg = String.format("Failed to read out sip.json from %s. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to read out sip.json from " + BagFilePaths.BAG_SIP_JSON.name + ". Original error: " + e.getMessage(),
+          e);
     }
 
     BagSipJson bagSipJson;
@@ -271,23 +274,24 @@ public class BagDirectoryReader {
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
       bagSipJson = new ObjectMapper().readValue(jsonContent, BagSipJson.class);
     } catch (IOException e){
-      String msg = String.format("Failed to map sip.json from %s to BagitSipJson class. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, e);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to map sip.json from " + BagFilePaths.BAG_SIP_JSON.name + " to BagitSipJson class. Original error:, " + e.getMessage(),
+          e
+      );
     }
 
     // check if dsids are unique
     Set<String> containedDsids = bagSipJson.getContentFiles().stream().map(BagSipJsonContentFile::getDsid).collect(Collectors.toSet());
     if(containedDsids.size() != bagSipJson.getContentFiles().size()){
-      String msg = String.format("Failed to validate sip.json from %s. Duplicate dsids found in content files. SIPJson: %s", BagFilePaths.BAG_SIP_JSON.name, bagSipJson);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Failed to validate sip.json from " + BagFilePaths.BAG_SIP_JSON.name + ". Duplicate dsids found in content files. SIPJson: " + bagSipJson
+      );
     }
     // check if DC dsid is present - or more in future
     if(!containedDsids.contains(GAMSDsid.DC.getValue())){
-      String msg = String.format("Encountered invalid sip.json from %s. There must be a %s dsid present as contentFile in the sip.json. %s",  BagFilePaths.BAG_SIP_JSON.name, GAMSDsid.DC.getValue(), bagSipJson);
-      log.error(msg);
-      throw new IngestProcessingException(msg);
+      throw new IngestProcessingException(
+          "Encountered invalid sip.json from " + BagFilePaths.BAG_SIP_JSON.name + ". There must be a " + GAMSDsid.DC.getValue() + " dsid present as contentFile in the sip.json. SIPJson: " + bagSipJson
+      );
     }
 
     // validate sip.json mapping
@@ -295,9 +299,9 @@ public class BagDirectoryReader {
       Validator validator = factory.getValidator();
       Set<ConstraintViolation<BagSipJson>> violations = validator.validate(bagSipJson);
         if(!violations.isEmpty()){
-            String msg = String.format("Failed to validate sip.json from %s. Original error: %s", BagFilePaths.BAG_SIP_JSON.name, violations);
-            log.error(msg);
-            throw new IngestProcessingException(msg);
+            throw new IngestProcessingException(
+                "Failed to validate sip.json from " + BagFilePaths.BAG_SIP_JSON.name + ". Original error: " + violations
+            );
         }
     }
 

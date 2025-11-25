@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Ingest.utils.Bagit;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.junit.jupiter.api.*;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.TestUtilities.TestBag;
@@ -30,10 +31,10 @@ public class BagTest extends UnitTest {
     }
 
     @Test
-    public void findContentFileByDsidThrowsNoSuchElementExceptionIfNotFound() {
+    public void findContentFileByDsidThrowsExceptionIfNotFound() {
       var dsid = "non-existing-dsid";
       Assertions.assertThatThrownBy(() -> bag.findContentFileByDsid(dsid)).isInstanceOf(
-          NoSuchElementException.class
+          IngestProcessingException.class
       );
     }
   }

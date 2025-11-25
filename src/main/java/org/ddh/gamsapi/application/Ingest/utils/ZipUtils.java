@@ -58,7 +58,8 @@ public class ZipUtils {
       }
     } catch (IOException e){
       throw new IngestProcessingException(
-          "IOException at walking through the stream representation of given zipped directory. Make sure that given stream is a zipped directory! Got error: " + e
+          "IOException at walking through the stream representation of given zipped directory. Make sure that given stream is a zipped directory! Got error: " + e.getMessage(),
+          e
       );
     }
 
@@ -90,7 +91,8 @@ public class ZipUtils {
       return Files.readAllBytes(tempFile.toPath());
     } catch (IOException e){
       throw new IngestProcessingException(
-          "Failed to zip directory to temp-file. At path: " + sourceFile.getAbsolutePath() + " With reason: " + e
+          "Failed to zip directory to temp-file. At path: " + sourceFile.getAbsolutePath() + " With reason: " + e.getMessage(),
+          e
       );
     }
 
@@ -147,7 +149,8 @@ public class ZipUtils {
       tempBagDirPath = Files.createTempDirectory(UUID.randomUUID().toString());
     } catch (IOException e){
       throw new IngestProcessingException(
-          "Failed to create root temporary directory during unzipping. Original error " + e
+          "Failed to create root temporary directory during unzipping. Original error " + e.getMessage(),
+          e
       );
     }
 
@@ -157,10 +160,11 @@ public class ZipUtils {
       if(zipEntry.isDirectory()){
         try {
           Files.createDirectories(tempFilePath);
-          log.info("Created temporary bag directory: {}", tempFilePath);
+          log.debug("Created temporary bag directory: {}", tempFilePath);
         } catch (IOException e) {
           throw new IngestProcessingException(
-              "Failed to create directory during unzipping. At path: " + tempFilePath + " Original error: " + e
+              "Failed to create directory during unzipping. At path: " + tempFilePath + " Original error: " + e.getMessage(),
+              e
           );
         }
       } else {
@@ -169,10 +173,11 @@ public class ZipUtils {
           ensureParentDir(tempFilePath);
           Files.createFile(tempFilePath);
           Files.write(tempFilePath, byteArrayOutputStream.toByteArray());
-          log.info("Successfully wrote file {} to temporary bag directory: {}", zipEntry.getName(), tempFilePath);
+          log.debug("Successfully wrote file {} to temporary bag directory: {}", zipEntry.getName(), tempFilePath);
         } catch (IOException e) {
           throw new IngestProcessingException(
-              "Failed to create file during unzipping. Filepath: " + tempFilePath + " Original error " + e
+              "Failed to create file during unzipping. Filepath: " + tempFilePath + " Original error " + e.getMessage(),
+              e
           );
         }
       }
@@ -196,7 +201,8 @@ public class ZipUtils {
         Files.createDirectory(path.getParent());
       } catch (IOException e){
         throw new IngestProcessingException(
-            "Failed to verify existence of parent directories from path: " + path + ". Original error: " + e
+            "Failed to verify existence of parent directories from path: " + path + ". Original error: " + e.getMessage(),
+            e
         );
       }
 
@@ -234,7 +240,8 @@ public class ZipUtils {
           });
     } catch (IOException e) {
       throw new IngestProcessingException(
-          "Failed to walk directory tree for deletion: " + dirPath + ". Original error: " + e
+          "Failed to walk directory tree for deletion: " + dirPath + ". Original error: " + e.getMessage(),
+          e
       );
     }
 
@@ -269,7 +276,8 @@ public class ZipUtils {
       tempBagDirPath = Files.createTempDirectory("gams-ingest-");
     } catch (IOException e) {
       throw new IngestProcessingException(
-          "Failed to create temporary directory: " + e.getMessage()
+          "Failed to create temporary directory: " + e.getMessage(),
+          e
       );
     }
 
@@ -308,7 +316,7 @@ public class ZipUtils {
       try {
         deleteDir(tempBagDirPath);
       } catch (IngestProcessingException cleanupEx) {
-        log.warn("Failed to cleanup after unzip error", cleanupEx);
+        log.warn("Failed to cleanup after unzip error {}", cleanupEx.getMessage());
       }
       // CRITICAL: Always throw original exception
       throw new IngestProcessingException(
