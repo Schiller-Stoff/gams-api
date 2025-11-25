@@ -36,14 +36,14 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(TransactionSystemException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleTransactionSystemExceotion(TransactionSystemException ex) {
-    String msg = String.format("TransactionSystemException: %s", ex.getMessage());
-    log.error(msg);
+    log.error("TransactionSystemException occurred: {}", ex.getMessage());
+    // TODO too performance intense - refactor!
     return drillRootErrorCause(ex);
   }
 
-  @ExceptionHandler(ResponseStatusException.class)
+  @ExceptionHandler(GamsApiException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleResponseStatusException(
-      ResponseStatusException ex, WebRequest request
+      GamsApiException ex, WebRequest request
   ) {
     HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
     // make sure we have a valid status
@@ -72,9 +72,8 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-    // TODO implement
-    String msg = String.format("DataIntegrityViolationException: %s", ex.getMessage());
-    log.error(msg);
+    // TODO this is way to performance intense - refactor!
+    log.error("Data integrity violation: {}", ex.getMessage());
     return drillRootErrorCause(ex);
   }
 
