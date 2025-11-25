@@ -58,19 +58,19 @@ public class DigitalObjectBuilder {
 
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
-      String msg = String.format("Digital object ID must not be null or empty! Happened at class %s", this.getClass().getName());
+      String msg = "Digital object ID must not be null or empty! Happened at class " + this.getClass().getName();
       log.error(msg);
       throw new IllegalStateException(msg);
     }
 
     if((digitalObject.getProject() == null) || digitalObject.getProject().getProjectAbbr().isEmpty()){
-      String msg = String.format("DigitalObject's project must not be null or it's abbreviation empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      String msg = "DigitalObject's project must not be null or it's abbreviation empty! Happened at class " + this.getClass().getName() + " and object " + this;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
 
     if((digitalObject.getPublisher() == null) || digitalObject.getPublisher().isEmpty()){
-      String msg = String.format("DigitalObject's publisher must not be null or empty! Happened at class %s and object %s", this.getClass().getName(), this);
+      String msg = "DigitalObject's publisher must not be null or empty! Happened at class " + this.getClass().getName() + " and object " + this;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
