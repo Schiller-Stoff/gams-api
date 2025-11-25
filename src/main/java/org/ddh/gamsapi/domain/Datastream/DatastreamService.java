@@ -237,8 +237,7 @@ public class DatastreamService implements IDatastreamService {
     );
 
     if (foundDatastreamViews.isEmpty()) {
-      String msg = String.format("No datastreams found for digital object with id %s (There should be at least one datastream)", digitalObjectId);
-      log.warn(msg);
+      log.warn("No datastreams found for digital object with id {} (There should be at least one datastream)", digitalObjectId);
     }
 
     return PagedResponse.from(
