@@ -10,4 +10,8 @@ public class DigitalObjectNoMainResourceDatastreamDefinedException extends Digit
   public DigitalObjectNoMainResourceDatastreamDefinedException(String message) {
     super(HttpStatus.CONFLICT, message);
   }
+
+  public DigitalObjectNoMainResourceDatastreamDefinedException(String message, Throwable cause) {
+    super(HttpStatus.CONFLICT, message, cause);
+  }
 }

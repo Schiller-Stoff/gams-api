@@ -11,4 +11,7 @@ public class ProjectNotFoundException extends ProjectException {
     super(HttpStatus.NOT_FOUND, reason);
   }
 
+  public ProjectNotFoundException(String reason, Throwable cause) {
+    super(HttpStatus.NOT_FOUND, reason, cause);
+  }
 }

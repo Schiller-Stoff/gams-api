@@ -10,4 +10,8 @@ public class ProjectException extends ResponseStatusException {
   public ProjectException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
+
+  public ProjectException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
 }

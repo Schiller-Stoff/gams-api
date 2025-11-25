@@ -10,4 +10,9 @@ public class DatastreamException extends ResponseStatusException {
   public DatastreamException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
+
+  public DatastreamException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
+
 }

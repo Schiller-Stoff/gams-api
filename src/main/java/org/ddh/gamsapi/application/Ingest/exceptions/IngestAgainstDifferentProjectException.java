@@ -11,4 +11,10 @@ public class IngestAgainstDifferentProjectException extends IngestException {
     super(HttpStatus.BAD_REQUEST, reason);
   }
 
+  public IngestAgainstDifferentProjectException(String reason, Throwable cause) {
+    super(HttpStatus.BAD_REQUEST, reason, cause);
+  }
+
+
+
 }

@@ -10,4 +10,8 @@ public class IngestException extends ResponseStatusException {
   public IngestException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
+
+  public IngestException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
 }

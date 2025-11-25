@@ -10,4 +10,8 @@ public class DatastreamAmbiguousMatchException extends DatastreamException {
   public DatastreamAmbiguousMatchException(String message) {
     super(HttpStatus.CONFLICT, message);
   }
+
+  public DatastreamAmbiguousMatchException(String message, Throwable cause) {
+    super(HttpStatus.CONFLICT, message, cause);
+  }
 }

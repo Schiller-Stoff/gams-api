@@ -10,4 +10,8 @@ public class PlexusSearchException extends IntegrationException {
   public PlexusSearchException(HttpStatus status, String reason) {
     super(status, reason);
   }
+
+  public PlexusSearchException(HttpStatus status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
 }

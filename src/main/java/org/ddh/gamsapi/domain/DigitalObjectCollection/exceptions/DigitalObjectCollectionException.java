@@ -7,4 +7,8 @@ public class DigitalObjectCollectionException extends ResponseStatusException {
   public DigitalObjectCollectionException(HttpStatus status, String reason) {
     super(status, reason);
   }
+
+  public DigitalObjectCollectionException(HttpStatus status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
 }

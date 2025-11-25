@@ -11,4 +11,8 @@ public class IntegrationServiceException extends IntegrationException {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
 
+  public IntegrationServiceException(String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
+
 }

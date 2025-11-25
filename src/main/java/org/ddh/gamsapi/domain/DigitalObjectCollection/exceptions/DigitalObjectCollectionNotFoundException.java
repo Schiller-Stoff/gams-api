@@ -6,4 +6,8 @@ public class DigitalObjectCollectionNotFoundException extends DigitalObjectColle
   public DigitalObjectCollectionNotFoundException(String reason) {
     super(HttpStatus.NOT_FOUND, reason);
   }
+
+  public DigitalObjectCollectionNotFoundException(String reason, Throwable cause) {
+    super(HttpStatus.NOT_FOUND, reason, cause);
+  }
 }

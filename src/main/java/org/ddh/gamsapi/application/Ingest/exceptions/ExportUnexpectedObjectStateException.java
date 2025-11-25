@@ -11,4 +11,8 @@ public class ExportUnexpectedObjectStateException extends ExportException {
   public ExportUnexpectedObjectStateException(String reason) {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
+
+  public ExportUnexpectedObjectStateException(String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
 }

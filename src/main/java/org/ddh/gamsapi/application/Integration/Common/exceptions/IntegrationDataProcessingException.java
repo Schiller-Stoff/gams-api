@@ -11,4 +11,8 @@ public class IntegrationDataProcessingException extends IntegrationException {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
 
+  public IntegrationDataProcessingException(String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
+
 }

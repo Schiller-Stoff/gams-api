@@ -9,4 +9,8 @@ public class PlexusQueryValidationException extends PlexusSearchException {
   public PlexusQueryValidationException(String reason) {
     super(HttpStatus.BAD_REQUEST, reason);
   }
+
+  public PlexusQueryValidationException(String reason, Throwable cause) {
+    super(HttpStatus.BAD_REQUEST, reason, cause);
+  }
 }

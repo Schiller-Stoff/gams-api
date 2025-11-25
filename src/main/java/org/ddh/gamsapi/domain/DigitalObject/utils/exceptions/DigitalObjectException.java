@@ -10,4 +10,8 @@ public class DigitalObjectException extends ResponseStatusException {
   public DigitalObjectException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
+
+  public DigitalObjectException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
 }

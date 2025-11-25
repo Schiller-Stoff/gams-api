@@ -8,4 +8,8 @@ public class UserException extends ResponseStatusException {
     super(status, reason);
   }
 
+  public UserException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
+
 }

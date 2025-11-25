@@ -9,4 +9,8 @@ public class PlexusSearchForbiddenQueryException extends PlexusSearchException {
   public PlexusSearchForbiddenQueryException(String message) {
     super(HttpStatus.FORBIDDEN, message);
   }
+
+  public PlexusSearchForbiddenQueryException(String message, Throwable cause) {
+    super(HttpStatus.FORBIDDEN, message, cause);
+  }
 }

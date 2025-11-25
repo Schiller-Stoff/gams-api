@@ -14,4 +14,8 @@ public class IntegrationException extends ResponseStatusException {
     super(status, reason);
   }
 
+  public IntegrationException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
+
 }

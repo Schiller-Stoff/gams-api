@@ -12,4 +12,8 @@ public class ExportException extends ResponseStatusException {
   public ExportException(HttpStatusCode status, String reason) {
     super(status, reason);
   }
+
+  public ExportException(HttpStatusCode status, String reason, Throwable cause) {
+    super(status, reason, cause);
+  }
 }

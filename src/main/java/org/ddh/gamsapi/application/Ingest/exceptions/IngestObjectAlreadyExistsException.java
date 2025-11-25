@@ -9,4 +9,8 @@ public class IngestObjectAlreadyExistsException extends IngestException {
   public IngestObjectAlreadyExistsException(String reason) {
     super(HttpStatus.CONFLICT, reason);
   }
+
+  public  IngestObjectAlreadyExistsException(String reason, Throwable cause) {
+    super(HttpStatus.CONFLICT, reason, cause);
+  }
 }
