@@ -60,7 +60,7 @@ public class SubmissionRecordBuilder {
 
     public SubmissionRecord build() {
         if(submissionRecord.getDigitalObject() == null){
-            String msg = String.format("Failed to build BagEntity: DigitalObject is null and must be set. BagEntity: %s", submissionRecord);
+            String msg = "Failed to build SubmissionRecord: DigitalObject is null and must be set. SubmissionRecord: " + submissionRecord;
             log.error(msg);
             throw new IllegalStateException(msg);
         }

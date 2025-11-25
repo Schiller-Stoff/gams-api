@@ -16,8 +16,6 @@ public class SubmissionRecordService implements  ISubmissionRecordService {
   public SubmissionRecord find(String digitalObjectId) {
     return submissionRecordRepository.findById(digitalObjectId).orElseThrow( () -> {
       String msg = "SubmissionRecord not found for DigitalObject ID: " + digitalObjectId;
-      log.error(msg);
-      // TODO better error msg
       return new DigitalObjectNotFoundException(msg);
     });
 
