@@ -20,11 +20,9 @@ public class ProjectModificationService implements IProjectModificationService {
   @Transactional
   @Override
   public ProjectModification findContentLatestModificationDate(String projectAbbr) {
-    var foundProject = projectRepository.findById(projectAbbr).orElseThrow(() -> {
-      String msg = String.format("Project with project-abbreviation %s does not exist", projectAbbr);
-      log.warn(msg);
-      return new ProjectNotFoundException(msg);
-    });
+    var foundProject = projectRepository.findById(projectAbbr).orElseThrow(() -> new ProjectNotFoundException(
+        "Project with project-abbreviation" + projectAbbr + "does not exist"
+    ));
 
     ProjectModification projectModification = new ProjectModification();
     projectModification.setProjectAbbr(projectAbbr);
@@ -35,11 +33,9 @@ public class ProjectModificationService implements IProjectModificationService {
   @Transactional
   public ProjectModification findLatestModificationDate(String projectAbbr) {
 
-    var foundProject = projectRepository.findById(projectAbbr).orElseThrow(() -> {
-      String msg = String.format("Project with project-abbreviation %s does not exist", projectAbbr);
-      log.warn(msg);
-      return new ProjectNotFoundException(msg);
-    });
+    var foundProject = projectRepository.findById(projectAbbr).orElseThrow(() -> new ProjectNotFoundException(
+        "Project with project-abbreviation" + projectAbbr + "does not exist"
+    ));
 
     ProjectModification projectModification = new ProjectModification();
     projectModification.setProjectAbbr(projectAbbr);

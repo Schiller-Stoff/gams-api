@@ -106,8 +106,6 @@ public class ProjectController {
   )
   public void deleteProject(@PathVariable String projectAbbr){
     Project project = projectService.findByAbbr(projectAbbr);
-    String msg = String.format("Project with abbreviation %s was deleted", projectAbbr);
-    log.info(msg);
     projectService.deleteProject(project);
   }
 
@@ -210,9 +208,9 @@ public class ProjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
-        log.error(msg);
-        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST,
+            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e
+        );
       }
     }
 
@@ -257,9 +255,9 @@ public class ProjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
-        log.error(msg);
-        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+        throw new ProjectException(HttpStatus.BAD_REQUEST,
+            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e
+        );
       }
     }
 

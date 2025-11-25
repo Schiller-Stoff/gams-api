@@ -28,14 +28,13 @@ public class ProjectService implements IProjectService {
 
     Optional<Project> projectOptional = projectRepository.findById(project.getProjectAbbr());
     if(projectOptional.isPresent()){
-      String msg = String.format("Project %s does already exist. Aborting creation of project.", project.getProjectAbbr());
-      log.error(msg);
-      throw new ProjectAlreadyExistsException(msg);
+      throw new ProjectAlreadyExistsException(
+          "Project " + project.getProjectAbbr() + " already exists"
+      );
     }
 
     Project savedProject = projectRepository.save(project);
-    log.trace("Saved project {}", project);
-
+    log.info("Saved project {}", project);
     return savedProject;
   }
 
@@ -43,11 +42,9 @@ public class ProjectService implements IProjectService {
   @Override
   @Transactional
   public void deleteProject(Project project) {
-    Project foundProject = projectRepository.findById(project.getProjectAbbr()).orElseThrow(() -> {
-      String msg = String.format("Project %s not found. Cannot delete project", project.getProjectAbbr());
-      log.error(msg);
-      return new ProjectNotFoundException(msg);
-    });
+    Project foundProject = projectRepository.findById(project.getProjectAbbr()).orElseThrow(() -> new ProjectNotFoundException(
+        "Project " + project.getProjectAbbr() + " not found. Cannot delete project"
+    ));
 
     log.trace("Found project {}", foundProject);
     projectRepository.delete(foundProject);
@@ -56,11 +53,9 @@ public class ProjectService implements IProjectService {
 
   @Override
   public Project findProject(String projectAbbr) {
-    return projectRepository.findById(projectAbbr).orElseThrow(() -> {
-      String msg = String.format("Failed to find project %s", projectAbbr);
-      log.error(msg);
-      return new ProjectNotFoundException(msg);
-    });
+    return projectRepository.findById(projectAbbr).orElseThrow(() -> new ProjectNotFoundException(
+        "Failed to find project " + projectAbbr
+    ));
   }
 
   @Override
@@ -78,11 +73,9 @@ public class ProjectService implements IProjectService {
   @Override
   @Transactional
   public Project updateProject(Project project) {
-    Project foundProject =  projectRepository.findById(project.getProjectAbbr()).orElseThrow(() -> {
-      String msg = String.format("Project %s not found. Cannot update project", project.getProjectAbbr());
-      log.error(msg);
-      return new ProjectNotFoundException(msg);
-    });
+    Project foundProject =  projectRepository.findById(project.getProjectAbbr()).orElseThrow(() -> new ProjectNotFoundException(
+        "Project " + project.getProjectAbbr() + " not found. Cannot update project"
+    ));
     foundProject.setDescription(project.getDescription());
     Project savedProject = projectRepository.save(foundProject);
     log.trace("Successfully updated project {}", foundProject);
@@ -97,9 +90,9 @@ public class ProjectService implements IProjectService {
   @Override
   public void verifyProjectAbbrMatchesObjectId(String projectAbbr, String digitalObjectId) {
     if(!digitalObjectId.startsWith(projectAbbr)){
-      String msg = String.format("Project abbreviation %s does not match the digital object ID %s", projectAbbr, digitalObjectId);
-      log.error(msg);
-      throw new ProjectObjectMismatchException(msg);
+      throw new ProjectObjectMismatchException(
+          "Project abbreviation does not match digital object ID: " + digitalObjectId + ". For project: " + projectAbbr
+      );
     }
   }
 

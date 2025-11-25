@@ -27,7 +27,7 @@ public class ProjectBuilder {
 
   public Project build() {
     if((project.getProjectAbbr() == null) || project.getProjectAbbr().isEmpty()){
-      String msg = String.format("Project abbreviation must not be null or empty! Happened at class %s", this.getClass().getName());
+      String msg = "Project abbreviation must not be null or empty!";
       log.error(msg);
       throw new IllegalStateException(msg);
     }
