@@ -53,11 +53,12 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Transactional
   public DigitalObject save(DigitalObject digitalObject) {
     var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
-            () -> {
-              String msg = String.format("Aborting saving of digital object. Cannot find project %s for digital object %s",digitalObject.getProject().getProjectAbbr(), digitalObject );
-              log.error(msg);
-              return new ProjectNotFoundException(msg);
-            }
+            () -> new ProjectNotFoundException(
+                "Aborting saving of digital object. Cannot find project "
+                    + digitalObject.getProject().getProjectAbbr()
+                    + " for digital object "
+                    + digitalObject
+            )
     );
 
     DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
@@ -73,11 +74,11 @@ public class DigitalObjectService implements IDigitalObjectService {
   public PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
     // TODO write unit + integration tests!
     projectRepository.findById(projectAbbr).orElseThrow(
-            () -> {
-              String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
-              log.error(msg);
-              return new ProjectNotFoundException(msg);
-            }
+            () -> new ProjectNotFoundException(
+                "Aborting find all digital objects via project abbreviation. Cannot find project "
+                    + projectAbbr
+                    + "."
+            )
     );
     return PagedResponse.from(
         digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable)
@@ -97,12 +98,10 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Override
   @Transactional
   public DigitalObject findById(String id) throws DigitalObjectNotFoundException {
-    DigitalObject foundObject =  digitalObjectRepository.findById(id).orElseThrow(() -> {
-      String msg = String.format("Cannot find digital object via id: %s", id);
-      log.info(msg);
-      return new DigitalObjectNotFoundException(msg);
-    });
-    log.info("Found object in database {}", foundObject);
+    DigitalObject foundObject =  digitalObjectRepository.findById(id).orElseThrow(() -> new DigitalObjectNotFoundException(
+        "Cannot find digital object via id: " + id
+    ));
+    log.info("Found object {}", foundObject);
     return foundObject;
   }
 
@@ -111,17 +110,21 @@ public class DigitalObjectService implements IDigitalObjectService {
   public void delete(DigitalObject digitalObject) {
 
     var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
-        () -> {
-          String msg = String.format("Cannot delete digital object %s. Project %s does not exist!", digitalObject, digitalObject.getProject().getProjectAbbr());
-          log.error(msg);
-          return new ProjectNotFoundException(msg);
-        }
+        () -> new ProjectNotFoundException(
+            "Cannot delete digital object "
+                + digitalObject
+                + ". Project "
+                + digitalObject.getProject().getProjectAbbr()
+                + " does not exist!"
+        )
     );
 
     if(!digitalObjectRepository.existsById(digitalObject.getId())){
-      String msg = String.format("Failed to delete digital object with id %s. It does not exist!", digitalObject.getId());
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      throw new DigitalObjectNotFoundException(
+          "Failed to delete digital object with id "
+              + digitalObject.getId()
+              + ". It does not exist!"
+      );
     }
 
     bagEntityRepository.deleteById(digitalObject.getId());
@@ -149,11 +152,11 @@ public class DigitalObjectService implements IDigitalObjectService {
     @Transactional
     public PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, Optional<String> objectType, Pageable pageable) {
         projectRepository.findById(projectAbbr).orElseThrow(
-                () -> {
-                    String msg = String.format("Aborting find all digital objects via project abbreviation. Cannot find project %s.",projectAbbr);
-                    log.error(msg);
-                    return new ProjectNotFoundException(msg);
-                }
+                () -> new ProjectNotFoundException(
+                    "Aborting find all digital objects via project abbreviation. Cannot find project "
+                        + projectAbbr
+                        + "."
+                )
         );
 
         // search for all objects
@@ -173,21 +176,18 @@ public class DigitalObjectService implements IDigitalObjectService {
     @Override
     public DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String digitalObjectId) {
       var foundObject = digitalObjectRepository.findDigitalObjectById(digitalObjectId).orElseThrow(
-          () -> {
-            String msg = String.format("Cannot find digital object via id: %s", digitalObjectId);
-            log.info(msg);
-            return new DigitalObjectNotFoundException(msg);
-          });
+          () -> new DigitalObjectNotFoundException(
+              "Cannot find digital object via id: " + digitalObjectId
+          ));
 
       // converting details view to compactDTO
       DigitalObjectCompactDTO digitalObjectCompactDTO = conversionService.convert(foundObject,
           DigitalObjectCompactDTO.class);
       if (digitalObjectCompactDTO == null) {
-        String msg = String.format(
-            "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object %s",
-            digitalObjectId);
-        log.error(msg);
-        throw new DigitalObjectConversionException(msg);
+        throw new DigitalObjectConversionException(
+            "Failed to convert DigitalObjectDetailsView to DigitalObjectCompactDTO. For object "
+                + digitalObjectId
+        );
       }
 
       // setting main resource if it exists
@@ -272,9 +272,9 @@ public class DigitalObjectService implements IDigitalObjectService {
       // Convert to DTO
       var dto = conversionService.convert(digitalObject, DigitalObjectSearchResultDTO.class);
       if (dto == null) {
-        String msg = String.format("Failed to convert DigitalObject to DigitalObjectCompactDTO for object %s", digitalObject.getId());
-        log.error(msg);
-        throw new DigitalObjectConversionException(msg);
+        throw new DigitalObjectConversionException(
+            "Failed to convert DigitalObject to DigitalObjectCompactDTO for object " + digitalObject.getId()
+        );
       }
 
       // Set Dublin Core entries
