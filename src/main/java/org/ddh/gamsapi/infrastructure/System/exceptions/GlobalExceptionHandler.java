@@ -19,7 +19,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +79,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
 
-    String msg = String.format("HttpMessageNotReadableException: Message not readable exception in %s. Original cause:  %s", this.getClass().getName(), ex);
-    log.error(msg);
+    log.error("HttpMessageNotReadableException: Message not readable exception in {}. Original cause: {}", this.getClass().getName(),ex.getMessage(), ex);
 
     String errorMessage = "Invalid request body";
     Throwable cause = ex.getCause();
@@ -90,7 +88,7 @@ public class GlobalExceptionHandler {
     if (cause instanceof JsonParseException) {
       errorMessage = "Malformed JSON request";
     } else if (cause instanceof UnrecognizedPropertyException upe) {
-      errorMessage = String.format("Unknown property: '%s'", upe.getPropertyName());
+      errorMessage = "Unknown property: " + upe.getPropertyName();
     } else if (cause instanceof InvalidFormatException ife) {
       errorMessage = String.format("Invalid value for property: '%s'",
           ife.getPath().stream()
@@ -174,7 +172,7 @@ public class GlobalExceptionHandler {
     }
 
     if (responseEntity == null) {
-      String errMsg = String.format("Response entity is unexpectedly null - for cause %s", cause);
+      String errMsg = "Response entity is unexpectedly null - for cause " + cause;
       log.error(errMsg);
       GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errMsg);
       responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
