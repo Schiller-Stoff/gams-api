@@ -39,7 +39,7 @@ public class MetadataBaseEntityBuilder {
 
   public MetadataBaseEntityBuilder sha512Checksum(String sha512Checksum) {
     if(sha512Checksum.length() != 128){
-      String msg = String.format("sha512Checksum must be 128 characters long! Happened at class %s", this.getClass().getName());
+      String msg = "sha512Checksum must be 128 characters long! Happened at class " + this.getClass().getName();
       log.error(msg);
       throw new IllegalArgumentException(msg);
     }
@@ -49,19 +49,19 @@ public class MetadataBaseEntityBuilder {
 
   public MetadataBaseEntity build() {
     if((metadataBaseEntity.getTitle() == null) || metadataBaseEntity.getTitle().isEmpty()){
-      String msg = String.format("MetadataBaseEntity's title must not be null or empty! Happened at class %s", this.getClass().getName());
+      String msg = "MetadataBaseEntity's title must not be null or empty! Happened at class " + this.getClass().getName();
       log.error(msg);
       throw new IllegalStateException(msg);
     }
 
     if((metadataBaseEntity.getRights() == null) || metadataBaseEntity.getRights().isEmpty()){
-      String msg = String.format("MetadataBaseEntity's rights must not be null or empty! Happened at class %s", this.getClass().getName());
+      String msg = "MetadataBaseEntity's rights must not be null or empty! Happened at class " + this.getClass().getName();
       log.error(msg);
       throw new IllegalStateException(msg);
     }
 
     if((metadataBaseEntity.getCreator() == null) || metadataBaseEntity.getCreator().isEmpty()){
-      String msg = String.format("MetadataBaseEntity's creator must not be null or empty! Happened at class %s", this.getClass().getName());
+      String msg = "MetadataBaseEntity's creator must not be null or empty! Happened at class " + this.getClass().getName();
       log.error(msg);
       throw new IllegalStateException(msg);
     }
