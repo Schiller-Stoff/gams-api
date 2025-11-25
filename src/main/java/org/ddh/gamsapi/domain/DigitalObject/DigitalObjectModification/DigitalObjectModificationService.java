@@ -24,15 +24,15 @@ public class DigitalObjectModificationService  implements IDigitalObjectModifica
 
   public DigitalObjectModification findLatestModificationDate(String projectAbbr, String digitalObjectId) {
     if(!projectRepository.existsById(projectAbbr)){
-      String msg = String.format("Project with id %s does not exist", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Project with id " + projectAbbr + " does not exist"
+      );
     }
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
-      String msg = String.format("DigitalObject with id %s does not exist", digitalObjectId);
-      log.warn(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      throw new DigitalObjectNotFoundException(
+          "DigitalObject with id " + digitalObjectId + " does not exist"
+      );
     }
 
     DigitalObjectModification digitalObjectModification = calculateLatestModificationDate(digitalObjectId);
@@ -43,17 +43,15 @@ public class DigitalObjectModificationService  implements IDigitalObjectModifica
   @Override
   public DigitalObjectModification findLastModifiedDate(String projectAbbr, String digitalObjectId) {
     if(!projectRepository.existsById(projectAbbr)){
-      String msg = String.format("Project with id %s does not exist", projectAbbr);
-      log.error(msg);
-      throw new ProjectNotFoundException(msg);
+      throw new ProjectNotFoundException(
+          "Project with id " + projectAbbr + " does not exist"
+      );
     }
 
     var foundDigitalObject = digitalObjectRepository.findDigitalObjectById(digitalObjectId)
-        .orElseThrow(() -> {
-          String msg = String.format("DigitalObject with id %s does not exist", digitalObjectId);
-          log.warn(msg);
-          return new DigitalObjectNotFoundException(msg);
-        });
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "DigitalObject with id " + digitalObjectId + " does not exist"
+        ));
 
     DigitalObjectModification digitalObjectModification = new DigitalObjectModification();
     digitalObjectModification.setId(digitalObjectId);
@@ -72,9 +70,9 @@ public class DigitalObjectModificationService  implements IDigitalObjectModifica
     Optional<DigitalObject> digitalObjectOptional = digitalObjectRepository.findById(digitalObjectId);
 
     if(digitalObjectOptional.isEmpty()) {
-      String msg = String.format("DigitalObject with id %s does not exist", digitalObjectId);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      throw new DigitalObjectNotFoundException(
+          "DigitalObject with id " + digitalObjectId + " does not exist"
+      );
     }
 
     DigitalObject foundDigitalObject = digitalObjectOptional.get();
@@ -83,8 +81,7 @@ public class DigitalObjectModificationService  implements IDigitalObjectModifica
 
     // return last modified (if no datastreams are available)
     if(datastreamLastModifiedDate.isEmpty()) {
-       String msg = String.format("No datastreams found for digital object with id %s", digitalObjectId);
-       log.debug(msg);
+       log.debug("No datastreams found for digital object with id {}", digitalObjectId);
        digitalObjectModification.setLatestModificationDate(foundDigitalObject.getModified());
        return digitalObjectModification;
     }
