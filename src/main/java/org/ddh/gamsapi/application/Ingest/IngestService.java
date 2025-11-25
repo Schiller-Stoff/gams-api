@@ -72,7 +72,8 @@ public class IngestService implements IIngestService {
       bagDirPath = ZipUtils.unzipStreamToTempDir(bagZipStream);
     } catch (IngestProcessingException e) {
       throw new IngestProcessingException(
-          "Failed to unzip bag for project " + projectAbbr + ": " + e
+          "Failed to unzip bag for project " + projectAbbr + ": " + e.getMessage(),
+          e
       );
     }
 
@@ -92,14 +93,16 @@ public class IngestService implements IIngestService {
       // 03. build and save digital object from bag-info.txt
       DigitalObject digitalObject = conversionService.convert(bag.getBagData(), DigitalObject.class);
       if(digitalObject == null){
-        String msg = String.format("Digital object is unexpectedly null. Failed to convert bag data %s to digital object for given ingest against project %s", bag.getBagData(), projectAbbr);
-        throw new IngestTypeConversionException(msg);
+        throw new IngestTypeConversionException(
+            "Digital object is unexpectedly null. Failed to convert bag data " + bag.getBagData() + " to digital object for given ingest against project " + projectAbbr
+        );
       }
 
       // abort ingest if digital object already exists
       if(digitalObjectRepository.existsById(digitalObject.getId())){
-        String msg = String.format("Cannot ingest object with id %s. Digital object already exists and must be deleted before another ingest process. Ingest against project: %s", digitalObject.getId(), projectAbbr);
-        throw new IngestObjectAlreadyExistsException(msg);
+        throw new IngestObjectAlreadyExistsException(
+            "Cannot ingest object with id " + digitalObject.getId() + ". Digital object already exists and must be deleted before another ingest process. Ingest against project: " + projectAbbr
+        );
       }
 
       final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
@@ -127,8 +130,11 @@ public class IngestService implements IIngestService {
             .forEach(contentFile -> {
               Datastream datastream = conversionService.convert(contentFile, Datastream.class);
               if(datastream == null){
-                String msg = String.format("Datastream is unexpectedly null. Failed to convert contentFile %s to datastream for project %s for object %s", contentFile, projectAbbr, digitalObject);
-                throw new IngestTypeConversionException(msg);
+                throw new IngestTypeConversionException(
+                    "Datastream is unexpectedly null. Failed to convert contentFile " + contentFile +
+                        " to datastream for project " + projectAbbr +
+                        " for object " + digitalObject
+                );
               }
 
               // set datastream to point to the saved digital object
@@ -139,10 +145,11 @@ public class IngestService implements IIngestService {
               try (InputStream inputStream = Files.newInputStream(contentFilePath)) {
                 datastreamContentRepository.save(inputStream, datastream.deriveDatastreamId());
               } catch (IOException e) {
-                String msg = "Failed to save datastream content from " +
-                    contentFilePath + " for object " + digitalObject.getId();
-                log.error(msg, e);
-                throw new IngestProcessingException(msg);
+                throw new IngestProcessingException(
+                    "Failed to save datastream content from " +
+                        contentFilePath + " for object " + digitalObject.getId(),
+                    e
+                );
               }
 
               // save datastream to database
@@ -160,8 +167,14 @@ public class IngestService implements IIngestService {
                   try {
                     dublinCoreContent = Files.readAllBytes(dcFilePath);
                   } catch (IOException e) {
-                    String msg = String.format("Failed to read file %s for given project %s for object %s for datastream %s. Original error %s", contentFilePath, projectAbbr, digitalObject, datastream, e);
-                    throw new IngestProcessingException(msg);
+                    throw new IngestProcessingException(
+                        "Failed to read file " + contentFilePath +
+                            " for given project " + projectAbbr +
+                            " for object " + digitalObject +
+                            " for datastream " + datastream +
+                            ". Original error " + e.getMessage(),
+                        e
+                    );
                   }
 
                   Document dublinCore = XMLUtils.parseXml(dublinCoreContent);
@@ -184,7 +197,8 @@ public class IngestService implements IIngestService {
               } catch (Exception e){
                 // make sure that in any case the file on the filesystem is being deleted
                 if(datastreamContentRepository.exists(datastream.deriveDatastreamId())){
-                  String msg = String.format("Failed to save datastream %s. For datastream file with name %s", datastream, datastream.deriveDatastreamId());
+                  String msg = "Failed to save datastream " + datastream +
+                      ". Deleting associated datastream content with id " + datastream.deriveDatastreamId() + " from filesystem to avoid orphaned content.";
                   log.error(msg);
                   datastreamContentRepository.delete(datastream.deriveDatastreamId());
                 }
