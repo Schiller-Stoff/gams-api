@@ -412,7 +412,7 @@ public class SolrClient {
    */
   public String retrieveSolrDocumentByProperty(String coreName, String propertyName, String propertyValue) {
 
-    final String CORE_QUERY_URL = String.format("%s/%s/select?q=%s:%s", SOLR_SINGLE_CORE_API_ENDPOINT, coreName, propertyName, propertyValue);
+    final String CORE_QUERY_URL = SOLR_SINGLE_CORE_API_ENDPOINT +  "/" + coreName + "/select?q=" + propertyName + ":" +  propertyValue;
     log.trace("Retrieving document from core {} with property {}={}", coreName, propertyName, propertyValue);
 
     try {
@@ -423,15 +423,17 @@ public class SolrClient {
           .block();
     } catch (WebClientResponseException e) {
       String errorResponseBody = e.getResponseBodyAsString();
-      String msg = String.format("Failed to retrieve document from solr core %s with property %s=%s. Via url: %s Status: %s. Error response from solr: %s",
-          coreName, propertyName, propertyValue, CORE_QUERY_URL, e.getStatusCode(), errorResponseBody);
-      log.error(msg);
-      throw new IntegrationServiceException(msg);
+      String msg = "Failed to retrieve document from solr core " + coreName + " with property " + propertyName + "=" + propertyValue +
+          ". Via url: " + CORE_QUERY_URL + ". Status: " + e.getStatusCode() +
+          ". Error response from solr: " + errorResponseBody + " Original error: " + e.getMessage();
+      log.error(msg, e);
+      throw new IntegrationServiceException(msg, e);
     } catch (Exception e) {
-      String msg = String.format("Failed to retrieve document from solr core %s with property %s=%s. Via url: %s Cause: %s Original error: %s",
-          coreName, propertyName, propertyValue, CORE_QUERY_URL, e.getMessage(), e);
-      log.error(msg);
-      throw new IntegrationServiceException(msg);
+      String msg = "Failed to retrieve document from solr core " + coreName + " with property " + propertyName + "=" + propertyValue +
+          ". Via url: " + CORE_QUERY_URL +
+          ". Cause: " + e.getMessage();
+      log.error(msg, e);
+      throw new IntegrationServiceException(msg, e);
     }
 
   }
