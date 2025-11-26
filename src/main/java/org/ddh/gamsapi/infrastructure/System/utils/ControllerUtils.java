@@ -33,7 +33,7 @@ public class ControllerUtils {
 
         String forwardedHostname = requestHeaders.get(xForwardedHostHeader);
         String forwardProtocol = requestHeaders.get("x-forwarded-proto");
-        String resolvedProxyOrigin = String.format("%s://%s/",forwardProtocol, forwardedHostname);
+        String resolvedProxyOrigin = forwardProtocol + "://" + forwardedHostname + "/";
         log.trace("Found {} header with value {} at incoming request. Resolving origin to just '/'", xForwardedHostHeader, forwardedHostname);
         log.trace("Found {} header with value {} at incoming request. Resolving origin to just '/'", xForwardedProtoHeader, forwardProtocol);
 

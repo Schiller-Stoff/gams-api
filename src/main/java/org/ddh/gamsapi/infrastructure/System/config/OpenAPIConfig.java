@@ -91,33 +91,4 @@ public class OpenAPIConfig {
             .email("sebastian.schiller-stoff@uni-graz.at")
             .url("https://zimlab.uni-graz.at/gams5"));
   }
-
-  private List<Server> getServers() {
-    // TODO hardcoded urls should be replaced with properties or environment variables
-    return List.of(
-        new Server()
-            .url("http://localhost:" + serverPort)
-            .description("Development server"),
-        new Server()
-            .url("https://gams.uni-graz.at")
-            .description("Production server")
-    );
-  }
-
-  private SecurityScheme createOAuth2Scheme() {
-    return new SecurityScheme()
-        .type(SecurityScheme.Type.OAUTH2)
-        .description("OAuth2 authentication via Keycloak")
-        .flows(new io.swagger.v3.oas.models.security.OAuthFlows()
-            .authorizationCode(new io.swagger.v3.oas.models.security.OAuthFlow()
-                // TODO keycloak URLs should be configured via properties
-                //.authorizationUrl("http://localhost:18085/api/v1/auth")
-                .authorizationUrl("http://localhost:8182/realms/gams-realm/protocol/openid-connect/auth")
-                // TODO token url should be configured via properties
-                //.tokenUrl("http://localhost:8182/realms/gams-realm")
-                .tokenUrl("http://localhost:8182/realms/gams-realm/protocol/openid-connect/token")
-                .scopes(new io.swagger.v3.oas.models.security.Scopes()
-                    .addString("read", "Read access")
-                    .addString("write", "Write access"))));
-  }
 }

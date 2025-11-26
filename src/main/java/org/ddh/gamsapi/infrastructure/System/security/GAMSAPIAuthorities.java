@@ -80,7 +80,7 @@ public enum GAMSAPIAuthorities {
    */
   public static String extractProjectAbbrFromAuthority(String authority) throws AuthorizationConfigurationException {
     if(!authority.contains(GAMSAPIAuthorities.ROLE_PREFIX.name)) {
-      String msg = String.format("Authority %s does not contain the role prefix %s. Every authority should have ben mapped to the role prefix handled by this app. Cannot extract project abbreviation.", authority, GAMSAPIAuthorities.ROLE_PREFIX.name);
+      String msg = "Authority " + authority +  " does not contain the role prefix " + GAMSAPIAuthorities.ROLE_PREFIX.name  + " . Every authority should have been mapped to the role prefix handled by this app. Cannot extract project abbreviation.";
       log.trace(msg);
       return null;
     }
@@ -137,7 +137,7 @@ public enum GAMSAPIAuthorities {
     }
 
     if(!authority.startsWith(GAMSAPIAuthorities.ROLE_PREFIX.name)){
-      String msg = String.format("Authority string is invalid. Authority string %s has no role prefix %s. Cannot convert to role (because it is already a role?).", authority, GAMSAPIAuthorities.ROLE_PREFIX.name);
+      String msg = "Authority string is invalid. Authority string " + authority + " has no role prefix " + GAMSAPIAuthorities.ROLE_PREFIX.name + ". Cannot convert to role (because it is already a role?).";
       log.error(msg);
       throw new IllegalStateException(msg);
     }
