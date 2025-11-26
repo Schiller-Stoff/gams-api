@@ -581,19 +581,16 @@ public class SolrClient {
     } catch (WebClientResponseException e) {
       String errorResponseBody = e.getResponseBodyAsString();
       assert e.getRequest() != null;
-      String msg = String.format(
-          "Failed to execute Solr query via url %s. Status: %s, Error: %s",
-          e.getRequest().getURI(), e.getStatusCode(), errorResponseBody
-      );
-      log.error(msg);
-      throw new IntegrationServiceException(msg);
+      String msg = "Failed to execute Solr query via url " + url +
+          ". Status: " + e.getStatusCode() +
+          ", Error: " + errorResponseBody + " Original error: " + e.getMessage();
+      log.error(msg, e);
+      throw new IntegrationServiceException(msg, e);
     } catch (WebClientException e) {
-      String msg = String.format(
-          "Failed to execute Solr query. Path: %s, Cause: %s",
-          url, e.getMessage()
-      );
-      log.error(msg);
-      throw new IntegrationServiceException(msg);
+      String msg = "Failed to execute Solr query via url " + url +
+          ". Cause: " + e.getMessage();
+      log.error(msg,e);
+      throw new IntegrationServiceException(msg,e);
     }
   }
 
