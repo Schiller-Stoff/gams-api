@@ -143,6 +143,7 @@ public class FulltextQueryBuilder {
         GSearchProperties.CREATOR.name,
         GSearchProperties.PUBLISHER.name,
         GSearchProperties.RIGHTS.name,
+        GSearchProperties.TAGS.name,
         "dc.*"
     );
     url.append("&fl=").append(String.join(",", fieldsToReturn));

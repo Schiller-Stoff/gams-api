@@ -19,7 +19,9 @@ public enum GSearchProperties {
 
   PUBLISHER("objectPublisher"),
 
-  RIGHTS("objectRights");
+  RIGHTS("objectRights"),
+
+  TAGS("objectTags");
 
 
   public final String name;

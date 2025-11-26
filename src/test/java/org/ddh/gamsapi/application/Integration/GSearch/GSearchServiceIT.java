@@ -152,8 +152,6 @@ public class GSearchServiceIT extends SolrIntegrationTest {
           SolrGamsCores.GAMS_CORE.value, GSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
       );
 
-      System.out.println("*** Response: " + response);
-
       // solr also returns the initial query info, so we just check that the id is contained in the response
       org.assertj.core.api.Assertions.assertThat(response)
           .isNotNull()
@@ -193,6 +191,10 @@ public class GSearchServiceIT extends SolrIntegrationTest {
               "dc.rights"
           )
       ;
+
+    }
+
+    public void containsExpectedDigitalObjectTagsInResponse(){
 
     }
 

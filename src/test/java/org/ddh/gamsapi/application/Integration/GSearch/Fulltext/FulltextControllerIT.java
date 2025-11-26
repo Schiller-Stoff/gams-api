@@ -115,6 +115,19 @@ public class FulltextControllerIT extends SolrIntegrationTest {
 
     }
 
+    @Test
+    public void responseContainsExpectedObjectTags(){
+      Assertions.assertThat(fulltextResponse)
+          .isNotNull()
+          .isNotEmpty();
+
+      TestBag.TestBagSipJson.DIGITAL_OBJECT_TAGS.forEach(tag ->
+          Assertions.assertThat(fulltextResponse)
+              .contains(tag)
+      );
+
+    }
+
   }
 
   @Nested

@@ -46,7 +46,7 @@ public class FulltextQueryBuilderTest extends UnitTest {
       final String EXPECTED_ENCODED_FULLTEXT_QUERY = "q=objectFulltext:some+fulltext+query%20AND%20objectProjectAbbr:test";
       final String EXPECTED_DC_TITLE_FILTER_QUERY = "dc.title_txt:Test+Title";
       final String EXPECTED_DC_SUBJECT_FILTER_QUERY = "dc.subject_txt:Subject+One";
-      final String EXPECTED_FL_URL_PART = "fl=id,objectProjectAbbr,objectDatastreams,objectType,objectTitle,objectDesc,objectCreator,objectPublisher,objectRights,dc.*";
+      final String EXPECTED_FL_URL_PART = "fl=id,objectProjectAbbr,objectDatastreams,objectType,objectTitle,objectDesc,objectCreator,objectPublisher,objectRights,objectTags,dc.*";
 
       Assertions.assertThat(builtSolrUrl)
           .contains(

@@ -131,7 +131,7 @@ public class DigitalObject {
   /**
    * Tags for a digital object.
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   @Column(name = TAGS_TABLE_NAME)
   private Set<String> tags = new HashSet<>();
