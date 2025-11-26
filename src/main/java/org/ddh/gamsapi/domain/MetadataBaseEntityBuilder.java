@@ -29,7 +29,7 @@ public class MetadataBaseEntityBuilder {
 
   public MetadataBaseEntityBuilder md5Checksum(String md5Checksum) {
     if(md5Checksum.length() != 32){
-      String msg = String.format("md5Checksum must be 32 characters long! Happened at class %s", this.getClass().getName());
+      String msg = "md5Checksum must be 32 characters long! Happened at class " + this.getClass().getName();
       log.error(msg);
       throw new IllegalArgumentException(msg);
     }
