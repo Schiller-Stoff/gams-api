@@ -604,8 +604,7 @@ public class SolrClient {
   public void commit(String coreName) {
     log.debug("Committing core: {}", coreName);
 
-    String commitUrl = String.format("%s/%s/update?commit=true",
-        SOLR_SINGLE_CORE_API_ENDPOINT, coreName);
+    String commitUrl = SOLR_SINGLE_CORE_API_ENDPOINT + "/" + coreName + "/update?commit=true";
 
     try {
       webClient.post()
@@ -619,16 +618,15 @@ public class SolrClient {
 
     } catch (WebClientResponseException e) {
       String errorBody = e.getResponseBodyAsString();
-      String msg = String.format(
-          "Failed to commit core %s. Status: %s. Solr error: %s",
-          coreName, e.getStatusCode(), errorBody
-      );
-      log.error(msg);
-      throw new IntegrationServiceException(msg);
+      String msg = "Failed to commit core " + coreName + ". Status: " + e.getStatusCode() +
+          ". Error response from solr: " + errorBody + " Original error: " + e.getMessage();
+      log.error(msg,e);
+      throw new IntegrationServiceException(msg,e);
     } catch (WebClientException e) {
-      String msg = String.format("Network error committing core %s: %s", coreName, e.getMessage());
+      String msg = "Failed to commit core " + coreName +
+          ". Cause: " + e.getMessage();
       log.error(msg, e);
-      throw new IntegrationServiceException(msg);
+      throw new IntegrationServiceException(msg, e);
     }
   }
 
