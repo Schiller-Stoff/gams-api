@@ -156,7 +156,6 @@ public class ConstraintViolationTest extends UnitTest {
           DigitalObject digitalObject = TestDigitalObject.generate();
           String objectId = String.format(id, digitalObject.getProject().getProjectAbbr());
           digitalObject.setId(objectId);
-          System.out.println("Testing invalid ID: " + objectId);
           org.assertj.core.api.Assertions
               .assertThat(validator.validate(digitalObject).size())
               .withFailMessage(" Supposedly invalid ID is unexpectedly valid: " + objectId)
@@ -252,6 +251,16 @@ public class ConstraintViolationTest extends UnitTest {
       public void shouldRaiseIfIdContainsUppercasedAChar() {
         DigitalObject digitalObject = TestDigitalObject.generate();
         digitalObject.setId(digitalObject.getId() + "A");
+        Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
+        assertThat(violationSet.size(), is(1));
+      }
+
+      @Test
+      public void shouldRaiseConstraintViolationIfTagsIsBiggerThan100() {
+        DigitalObject digitalObject = TestDigitalObject.generate();
+        for(int i = 0; i < 101; i++) {
+          digitalObject.getTags().add("tag" + i);
+        }
         Set<ConstraintViolation<DigitalObject>> violationSet = validator.validate(digitalObject);
         assertThat(violationSet.size(), is(1));
       }

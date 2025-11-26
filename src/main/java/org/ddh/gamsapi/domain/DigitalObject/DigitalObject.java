@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.CreationTimestamp;
@@ -134,6 +136,7 @@ public class DigitalObject {
   @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   @Column(name = TAGS_TABLE_NAME)
+  @Size(max = 100, message = "Maximum 100 tags allowed per digital object")
   private Set<String> tags = new HashSet<>();
 
   /**

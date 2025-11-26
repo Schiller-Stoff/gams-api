@@ -143,6 +143,7 @@ public class Datastream {
   @ElementCollection
   @NotNull
   @Column(name = Datastream.TAGS_TABLE_NAME)
+  @Size(max = 100, message = "Maximum 100 tags allowed per datastream")
   private Set<String> tags = new HashSet<>();
 
   /**
@@ -151,6 +152,7 @@ public class Datastream {
   @ElementCollection
   @NotNull
   @Column(name = Datastream.LANG_TABLE_NAME)
+  @Size(max = 100, message = "Maximum 100 lang allowed per datastream")
   private Set<String> lang;
 
   /**
