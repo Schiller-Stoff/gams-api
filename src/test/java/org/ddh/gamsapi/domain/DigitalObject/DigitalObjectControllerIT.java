@@ -435,6 +435,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               testDataSet.digitalObject().getPublisher()
           );
 
+      // contains digital object tags
+      for (String tag : testDataSet.digitalObject().getTags()) {
+        org.assertj.core.api.Assertions.assertThat(response)
+            .contains(tag);
+      }
+
     }
 
 
