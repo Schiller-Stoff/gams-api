@@ -5,6 +5,9 @@ import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Slf4j
 public class DigitalObjectBuilder {
 
@@ -56,6 +59,11 @@ public class DigitalObjectBuilder {
     return this;
   }
 
+  public DigitalObjectBuilder tags(Set<String> tags) {
+    digitalObject.setTags(tags);
+    return this;
+  }
+
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
       String msg = "Digital object ID must not be null or empty! Happened at class " + this.getClass().getName();
@@ -73,6 +81,11 @@ public class DigitalObjectBuilder {
       String msg = "DigitalObject's publisher must not be null or empty! Happened at class " + this.getClass().getName() + " and object " + this;
       log.error(msg);
       throw new IllegalStateException(msg);
+    }
+
+    // ensure that a hashset is created for the tags
+    if(digitalObject.getTags() == null){
+      digitalObject.setTags(new HashSet<>());
     }
 
     return digitalObject;

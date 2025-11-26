@@ -124,6 +124,7 @@ public class Bag {
         .publisher(bagSipJson.getPublisher())
         .funder(bagSipJson.getFunder())
         .mainResource(bagSipJson.getMainResource())
+        .tags(bagSipJson.getTags())
         .contentFiles(new HashSet<>())  // this is being populated below
         .md5Checksum(sipJsonMd5)
         .sha512Checksum(sipJsonSHA512)

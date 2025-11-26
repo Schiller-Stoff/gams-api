@@ -538,6 +538,11 @@ public class IngestControllerIT extends IntegrationTest {
                 // does not contain createdBy because the ingest user is different from the bag-creator - is the gams-api in this case
                 .doesNotContain(testDataSet.submissionRecord().getBagCreatedBy());
 
+            // assertions for digital object tags
+            testDataSet.digitalObject().getTags().forEach(tag -> {
+              Assertions.assertThat(sipJson).contains(tag);
+            });
+
             // assertions for content files
             org.assertj.core.api.Assertions.assertThat(sipJson)
                 .contains(testDataSet.mainDatastream().getDsid())

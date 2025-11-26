@@ -160,6 +160,15 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
+    @Transactional
+    public void createsDigitalObjectWithExpectedTagsSize(){
+        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+        Assertions.assertThat(digitalObject.getTags().size())
+            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_TAGS.size());
+    }
+
+    @Test
     public void createsExpectedDublinCoreEntryNamesForTestDigitalObject() {
 
       var dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(TestDigitalObject.generate());
@@ -421,6 +430,11 @@ public class IngestServiceIT extends IntegrationTest {
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PUBLISHER);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.FUNDER);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.MAIN_RESOURCE);
+              // tags contained in sip json
+              TestBag.TestBagSipJson.DIGITAL_OBJECT_TAGS.forEach(tag -> {
+                Assertions.assertThat(sipJsonContent).contains(tag);
+              });
+
 
               // assertions about test datastream
               Assertions.assertThat(sipJsonContent)

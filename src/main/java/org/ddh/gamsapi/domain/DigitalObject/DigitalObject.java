@@ -19,7 +19,9 @@ import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Domain object representing a digital object in sense of OAIS.
@@ -38,12 +40,14 @@ import java.util.Objects;
 public class DigitalObject {
 
   public static final String ENTITY_TABLE_NAME = "digital_object";
+  public static final String TAGS_TABLE_NAME = "datastream_tags";
 
   /**
    * Contains all table names in the order they should be deleted / created.
    */
   public static final String[] ORDERED_MANAGED_TABLES = new String[]{
       ENTITY_TABLE_NAME,
+      TAGS_TABLE_NAME
   };
 
   /**
@@ -123,6 +127,14 @@ public class DigitalObject {
    */
   @Column(name = "main_resource")
   private String mainResource;
+
+  /**
+   * Tags for a digital object.
+   */
+  @ElementCollection
+  @NotNull
+  @Column(name = TAGS_TABLE_NAME)
+  private Set<String> tags = new HashSet<>();
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

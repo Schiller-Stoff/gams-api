@@ -90,7 +90,7 @@ public class IngestService implements IIngestService {
         );
       }
 
-      // 03. build and save digital object from bag-info.txt
+      // 03. build and save digital object from bag data
       DigitalObject digitalObject = conversionService.convert(bag.getBagData(), DigitalObject.class);
       if(digitalObject == null){
         throw new IngestTypeConversionException(

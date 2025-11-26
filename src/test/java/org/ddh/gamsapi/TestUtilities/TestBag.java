@@ -5,6 +5,7 @@ import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagInfo;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * Utility class for loading test bag files.
@@ -61,6 +62,7 @@ public class TestBag {
     public static final String PROJECT = TestProject.PROJECT_ABBR.getValue();
     public static final String OBJECT_TYPE = TestDigitalObject.DIGITAL_OBJECT_TYPE.getValue();
     public static final String FUNDER = TestDigitalObject.DIGITAL_OBJECT_FUNDER.getValue();
+    public static final Set<String> DIGITAL_OBJECT_TAGS = TestDigitalObject.DIGITAL_OBJECT_TAGS;
   }
 
 }

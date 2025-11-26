@@ -67,6 +67,12 @@ public class BagData {
   @JsonProperty("mainResource")
   private String mainResource;
 
+  /**
+   * Tags associated with the digital object.
+   */
+  @JsonProperty("tags")
+  private Set<String> tags;
+
   @JsonProperty("contentFiles")
   private Set<BagFile> contentFiles = new HashSet<>();
 
@@ -111,6 +117,7 @@ public class BagData {
               .publisher(digitalObject.getPublisher())
               .funder(digitalObject.getFunder())
               .mainResource(digitalObject.getMainResource())
+              .tags(digitalObject.getTags())
               .contentFiles(contentFiles)
               .md5Checksum(digitalObject.getBaseMetadata().getMd5Checksum())
               .sha512Checksum(digitalObject.getBaseMetadata().getSha512Checksum())

@@ -56,6 +56,8 @@ public class BagSipJson {
 
     private Set<String> types = new HashSet<>();
 
+    private Set<String> tags = new HashSet<>();
+
     @JsonProperty("$schema")
     @NotEmpty
     private String schema;

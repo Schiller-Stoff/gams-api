@@ -83,6 +83,9 @@ public class BagDirectoryReaderTest extends UnitTest {
             Assertions.assertThat(bagSipJson.getMainResource())
                     .isEqualTo(TestBag.TestBagSipJson.MAIN_RESOURCE);
 
+            Assertions.assertThat(bagSipJson.getTags())
+                .containsAll(TestBag.TestBagSipJson.DIGITAL_OBJECT_TAGS);
+
       }
 
       @Test
