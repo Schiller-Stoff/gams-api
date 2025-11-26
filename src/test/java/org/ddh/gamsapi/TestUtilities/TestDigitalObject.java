@@ -2,6 +2,7 @@ package org.ddh.gamsapi.TestUtilities;
 
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
+import java.util.Set;
 
 /**
  * Enum for test digital object.
@@ -22,8 +23,8 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_MD5_CHECKSUM(TestMetadataBaseEntity.MD5_CHECKSUM),
     DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM);
 
-
     private final String value;
+    public static final Set<String> DIGITAL_OBJECT_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
 
     TestDigitalObject(String value) {
         this.value = value;

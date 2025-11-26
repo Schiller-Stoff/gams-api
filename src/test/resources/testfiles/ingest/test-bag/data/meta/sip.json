@@ -104,5 +104,6 @@
   "recid": "test.test",
   "project": "test",
   "objectType": "TEI",
-  "funder": "test-funder"
+  "funder": "test-funder",
+  "tags": ["test-tag1", "test-tag2", "test-tag3"]
 }
