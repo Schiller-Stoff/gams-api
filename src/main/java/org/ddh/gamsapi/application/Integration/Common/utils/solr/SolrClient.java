@@ -293,7 +293,7 @@ public class SolrClient {
    */
   public void removeCore(String coreName) {
 
-    final String URL = String.format("%s?action=UNLOAD&core=%s&deleteInstanceDir=true", SOLR_CORE_ADMIN_API_ENDPOINT, coreName);
+    final String URL = SOLR_CORE_ADMIN_API_ENDPOINT + "?action=UNLOAD&core=" + coreName + "&deleteInstanceDir=true";
 
     try {
       webClient.post()
