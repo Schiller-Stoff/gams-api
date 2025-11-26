@@ -6,6 +6,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Project.ProjectModification.IProjectModificationService;
+import org.ddh.gamsapi.domain.Project.ProjectModification.ProjectModification;
+import org.ddh.gamsapi.domain.Project.exceptions.ProjectInvalidDateFormatException;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
+import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
+import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -14,12 +20,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
-import org.ddh.gamsapi.domain.Project.ProjectModification.IProjectModificationService;
-import org.ddh.gamsapi.domain.Project.ProjectModification.ProjectModification;
-import org.ddh.gamsapi.domain.Project.exceptions.ProjectException;
-import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
-import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
-import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -208,8 +208,9 @@ public class ProjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        throw new ProjectException(HttpStatus.BAD_REQUEST,
-            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e
+        throw new ProjectInvalidDateFormatException(
+            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e.getMessage(),
+            e
         );
       }
     }
@@ -255,8 +256,9 @@ public class ProjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        throw new ProjectException(HttpStatus.BAD_REQUEST,
-            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e
+        throw new ProjectInvalidDateFormatException(
+            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e.getMessage(),
+            e
         );
       }
     }
