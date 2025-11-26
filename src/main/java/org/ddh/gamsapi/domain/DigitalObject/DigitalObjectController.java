@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectInvalidDateFormatException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -94,8 +95,10 @@ public class DigitalObjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        throw new ProjectException(HttpStatus.BAD_REQUEST,
-            "Invalid date format for If-modified-since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e);
+        throw new DigitalObjectInvalidDateFormatException(
+            "Invalid date format for If-Modified-Since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e.getMessage(),
+            e
+        );
       }
     }
 
@@ -144,8 +147,10 @@ public class DigitalObjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        throw new ProjectException(HttpStatus.BAD_REQUEST,
-            "Invalid date format for If-modified-since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e);
+        throw new DigitalObjectInvalidDateFormatException(
+            "Invalid date format for If-Modified-Since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e.getMessage(),
+            e
+        );
       }
     }
 
