@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.converter;
 
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
@@ -7,6 +8,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetail
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.UnitTest;
 import java.util.Date;
+import java.util.Set;
 
 public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest extends UnitTest {
 
@@ -40,6 +42,8 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     Assertions.assertEquals(digitalObjectCompactDTO.getPublished(), testObjectDetailsView.getPublished());
 
     Assertions.assertEquals(digitalObjectCompactDTO.getFunder(), testObjectDetailsView.getFunder());
+
+    Assertions.assertEquals(digitalObjectCompactDTO.getTags(), testObjectDetailsView.getTags());
 
   }
 
@@ -110,6 +114,11 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     @Override
     public String getFunder() {
       return "test";
+    }
+
+    @Override
+    public Set<String> getTags() {
+      return TestDigitalObject.DIGITAL_OBJECT_TAGS;
     }
 
     @Override

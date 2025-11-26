@@ -173,8 +173,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsDigitalObjectWithExpectedProperties(){
-
-
       DigitalObject foundObject = digitalObjectService.findById(testDataSet.digitalObject().getId());
       Assertions.assertThat(foundObject.getFunder()).isEqualTo(testDataSet.digitalObject().getFunder());
       Assertions.assertThat(foundObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
@@ -186,6 +184,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // cannot be equal is being assigned by the database
       Assertions.assertThat(foundObject.getModified()).isNotEqualTo(testDataSet.digitalObject().getModified());
       Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(testDataSet.digitalObject().getCreated());
+
+      Assertions.assertThat(
+          foundObject.getTags()
+      ).containsAll(
+          testDataSet.digitalObject().getTags()
+      );
 
     }
 

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 
+import java.util.HashSet;
+
 @Component
 public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implements Converter<DigitalObjectDetailsView, DigitalObjectCompactDTO> {
     @Override
@@ -21,6 +23,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .modifiedBy(source.getModifiedBy())
                 .publisher(source.getPublisher())
                 .funder(source.getFunder())
+                .tags(source.getTags() != null ? source.getTags() : new HashSet<>())
                 .build();
     }
 }

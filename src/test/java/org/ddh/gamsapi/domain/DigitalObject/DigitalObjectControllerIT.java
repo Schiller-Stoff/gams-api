@@ -393,6 +393,14 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contains(testDataSet.digitalObject().getBaseMetadata().getSha512Checksum());
       }
 
+      @Test
+      public void getDigitalObjectContainsExpectedTags(){
+        for (String tag : testDataSet.digitalObject().getTags()) {
+          org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
+              .contains(tag);
+        }
+      }
+
     }
 
   }
