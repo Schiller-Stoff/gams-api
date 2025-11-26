@@ -24,7 +24,7 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM);
 
     private final String value;
-    public static final Set<String> DIGITAL_OBJECT_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
+    public static final Set<String> DIGITAL_OBJECT_TAGS = Set.of("object-test-tag1", "object-test-tag2", "object-test-tag3");
 
     TestDigitalObject(String value) {
         this.value = value;

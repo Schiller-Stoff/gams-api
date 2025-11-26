@@ -105,5 +105,5 @@
   "project": "test",
   "objectType": "TEI",
   "funder": "test-funder",
-  "tags": ["test-tag1", "test-tag2", "test-tag3"]
+  "tags": ["object-test-tag1", "object-test-tag2", "object-test-tag3"]
 }
