@@ -82,19 +82,23 @@ public class SolrUrlBuilder {
       String escapedFulltext = SolrUrlBuilder.escapeSolrValue(fulltextQuery.trim());
       // URL encode the fulltext value
       String encodedFulltext = urlEncode(escapedFulltext);
-      queryParts.add(String.format("%s:%s", GSearchProperties.FULLTEXT.name, encodedFulltext));
+      queryParts.add(
+          GSearchProperties.FULLTEXT.name + ":" + encodedFulltext
+      );
     }
 
     if(projectAbbrs.isEmpty()){
-      queryParts.add(String.format("%s:*", GSearchProperties.PROJECT.name));
+      queryParts.add(
+          GSearchProperties.PROJECT.name + ":*"
+      );
     } else if (projectAbbrs.size() == 1) {
       String project = SolrUrlBuilder.escapeSolrValue(projectAbbrs.iterator().next());
-      queryParts.add(String.format("%s:%s", GSearchProperties.PROJECT.name, project));
+      queryParts.add(
+          GSearchProperties.PROJECT.name + ":" + project
+      );
     } else {
       String projectQuery = projectAbbrs.stream()
-          .map(abbr -> String.format("%s:%s",
-              GSearchProperties.PROJECT.name,
-              SolrUrlBuilder.escapeSolrValue(abbr)))
+          .map(abbr -> GSearchProperties.PROJECT.name + ":" + SolrUrlBuilder.escapeSolrValue(abbr))
           .collect(Collectors.joining(" OR "));
       queryParts.add("(" + projectQuery + ")");
     }
