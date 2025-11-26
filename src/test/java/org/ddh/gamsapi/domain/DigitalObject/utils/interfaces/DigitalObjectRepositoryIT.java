@@ -2,24 +2,23 @@ package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
-import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
+import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.Project.Project;
+import org.ddh.gamsapi.domain.Project.ProjectBuilder;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
-import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.domain.Project.Project;
-import org.ddh.gamsapi.domain.Project.ProjectBuilder;
-import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.ddh.gamsapi.TestUtilities.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -34,9 +33,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
     @Autowired
     IProjectRepository projectRepository;
-
-    @Autowired
-    IDigitalObjectCollectionRepository collectionRepository;
 
     @Autowired
     private TestDataBuilder testDataBuilder;
@@ -275,51 +271,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
 
         }
 
-        // TODO update collection section? via using testDataSet class and testDataBuilder?
-
-        @Nested
-        public class FindObjectsByCollection {
-
-            DigitalObject testObject;
-            DigitalObjectCollection testDigitalObjectCollection;
-
-            @BeforeEach
-            public void setup() {
-                testObject = TestDigitalObject.generate();
-                digitalObjectRepository.save(testObject);
-                testDigitalObjectCollection = TestGAMSCollection.generate();
-                collectionRepository.save(testDigitalObjectCollection);
-            }
-
-            @Test
-            public void findsExpectedGamsCollectionObjectCount(){
-                var foundObjects = digitalObjectRepository.findDigitalObjectsByCollectionId(
-                    testDigitalObjectCollection.getId(),
-                    PageRequest.of(0,1000)
-                );
-
-                Assertions.assertThat(foundObjects.getTotalElements())
-                    .isEqualTo(1);
-            }
-
-            @Test
-            @Transactional
-            public void findsExpectedGamsCollectionObject(){
-                var foundObjects = digitalObjectRepository.findDigitalObjectsByCollectionId(
-                    testDigitalObjectCollection.getId(),
-                    PageRequest.of(0,1000)
-                );
-
-                // get first object
-                var foundObject = foundObjects.getContent().get(0);
-                Assertions.assertThat(foundObject.getId())
-                    .isEqualTo(
-                        // object in the test-collection
-                        testDigitalObjectCollection.getDigitalObjects().iterator().next().getId()
-                    );
-            }
-
-        }
 
     }
 

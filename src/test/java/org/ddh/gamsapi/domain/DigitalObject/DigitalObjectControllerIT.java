@@ -1,5 +1,9 @@
 package org.ddh.gamsapi.domain.DigitalObject;
 
+import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
+import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,14 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
-import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
-import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.TestUtilities.TestGAMSCollection;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,9 +32,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  private IDigitalObjectCollectionRepository collectionRepository;
 
   @MockitoBean
   private AuditingHandler auditingHandler;
@@ -70,28 +63,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               testDataSet.digitalObject().getId())
           )
             .isNotPresent();
-
-    }
-
-    @Test
-    public void mayDeleteADigitalObjectReferencedByAGamsCollection() throws Exception {
-
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-
-      // test collection references the test object automatically
-      DigitalObjectCollection digitalObjectCollection = TestGAMSCollection.generate();
-      collectionRepository.save(digitalObjectCollection);
-
-      // Act
-      mockMvc.perform(
-          MockMvcRequestBuilders.delete(
-              "/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testDataSet.project().getProjectAbbr(),
-                  digitalObject.getId())
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is4xxClientError());
 
     }
 

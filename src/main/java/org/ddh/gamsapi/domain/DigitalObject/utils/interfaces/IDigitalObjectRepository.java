@@ -92,18 +92,5 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   @Query("SELECT MAX(do.modified) FROM DigitalObject do WHERE do.project.projectAbbr = :projectAbbr")
   Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
-  /**
-   * Finds all digital objects for a given collection.
-   * @param collectionId identifier of the collection
-   * @param pageable pagination
-   * @return a page of digital objects as projection
-   */
-  @Query("SELECT do FROM DigitalObjectCollection c JOIN c.digitalObjects do WHERE c.id = :collectionId")
-  Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(
-      @Param("collectionId") String collectionId,
-      Pageable pageable
-  );
-
-
 
 }

@@ -10,7 +10,6 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -39,9 +38,6 @@ public class TestDataBuilder {
 
   @Autowired
   private ISubmissionRecordRepository bagEntityRepository;
-
-  @Autowired
-  private IDigitalObjectCollectionRepository gamsCollectionRepository;
 
   @Transactional
   public void removeAllExceptProjects(TestDataSet testDataSet) {

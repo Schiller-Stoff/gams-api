@@ -16,8 +16,6 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.EventCaptureListener;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -45,8 +43,6 @@ public class TestCleanupService {
   @Autowired
   private IProjectRepository projectRepository;
   @Autowired
-  private IDigitalObjectCollectionRepository collectionRepostory;
-  @Autowired
   private ISubmissionRecordRepository bagEntityRepository;
 
   public TestCleanupService(DatastreamContentRepository datastreamContentRepository) {
@@ -63,7 +59,6 @@ public class TestCleanupService {
     datastreamContentRepository.deleteAll();
     dublinCoreElementRepository.deleteAll();
     datastreamRepository.deleteAll();
-    collectionRepostory.deleteAll();
     bagEntityRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
@@ -89,7 +84,6 @@ public class TestCleanupService {
       // Delete in any order since FK checks are disabled
       executeDeleteAllQuery(DatastreamContentDeletionFailure.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DublinCoreEntry.ORDERED_MANAGED_TABLES);
-      executeDeleteAllQuery(DigitalObjectCollection.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Datastream.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DigitalObject.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Project.ORDERED_MANAGED_TABLES);
@@ -129,7 +123,6 @@ public class TestCleanupService {
       log.debug("Starting safe test data cleanup");
       executeDeleteAllQuery(DatastreamContentDeletionFailure.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DublinCoreEntry.ORDERED_MANAGED_TABLES);
-      executeDeleteAllQuery(DigitalObjectCollection.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Datastream.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(DigitalObject.ORDERED_MANAGED_TABLES);
       executeDeleteAllQuery(Project.ORDERED_MANAGED_TABLES);
