@@ -108,17 +108,16 @@ public class DatastreamService implements IDatastreamService {
     try (InputStream inputStream = file.getInputStream()) {
       datastreamContentRepository.save(inputStream, dsId);
     } catch (IOException e) {
-      log.error("Failed to save file content for datastream {}: {}",
-          dsId, e.getMessage(), e);
       throw new DatastreamCannotWriteFileException(
-          "Failed to save file content for datastream " + dsId
+          "Failed to save file content for datastream " + dsId + "At digital object: " + digitalObjectId + " Original error: " + e.getMessage(),
+          e
       );
     }
 
     // Save entity metadata
     Datastream savedDatastream = datastreamRepository.save(datastream);
 
-    log.debug("Successfully saved datastream {} with file content", savedDatastream);
+    log.info("Successfully saved datastream {} with file content", savedDatastream);
     return savedDatastream;
 
   }

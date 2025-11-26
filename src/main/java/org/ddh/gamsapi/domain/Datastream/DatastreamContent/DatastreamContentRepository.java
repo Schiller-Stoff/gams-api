@@ -46,7 +46,8 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
           log.info("Created root location for GAMS files at {}", GAMS_FILES_ROOT);
         } catch (IOException e) {
           throw new DatastreamCannotWriteFileException(
-              "Could not create root location for GAMS files at " + GAMS_FILES_ROOT + ". Original error: " + e
+              "Could not create root location for GAMS files at " + GAMS_FILES_ROOT + ". Original error: " + e.getMessage(),
+              e
           );
         }
       }
@@ -81,7 +82,8 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       return datastreamId;
     } catch (IOException e) {
       throw new DatastreamCannotWriteFileException(
-          "Failed to save datastream content. At balanced filepath: " + newFile + ". Datastream: " + datastreamId + ". Original error: " + e
+          "Failed to save datastream content. At balanced filepath: " + newFile + ". Datastream: " + datastreamId + ". Original error: " + e.getMessage(),
+          e
       );
     }
   }
@@ -138,11 +140,12 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
         Files.deleteIfExists(targetFile);
       } catch (IOException cleanupEx) {
         log.warn("Failed to cleanup partial file {} after write error: {}",
-            targetFile, cleanupEx.getMessage());
+            targetFile, cleanupEx.getMessage(), cleanupEx);
       }
 
       throw new DatastreamCannotWriteFileException(
-          "Failed to save file for datastream " + datastreamId
+          "Failed to save file for datastream " + datastreamId + " Original error: " + e.getMessage(),
+          e
       );
     }
 
@@ -172,7 +175,8 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       return new InputStreamResource(new FileSystemResource(expectedPath).getInputStream());
     } catch (Exception e) {
       throw new DatastreamCannotLoadFileException(
-          "Failed to find datastream file. For datastream: " + datastreamId + " From expected path: " + expectedPath +  ". Original error: " + e
+          "Failed to find datastream file. For datastream: " + datastreamId + " From expected path: " + expectedPath +  ". Original error: " + e.getMessage(),
+          e
       );
     }
 
@@ -197,9 +201,12 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       Files.delete(fileToDelete);
       log.trace("Successfully deleted file for datastream {} at balanced location {}", datastreamId, fileToDelete);
     } catch (IOException e) {
-      String msg = String.format("Could not delete file at balanced filepath %s. For datastream-id: %s Original error: %s", fileToDelete, datastreamId, e);
-      log.error(msg);
-      throw new DatastreamCannotDeleteFileException(msg);
+      String msg = "Could not delete file at balanced filepath " + fileToDelete + ". For datastream-id: " + datastreamId + " Original error: " + e.getMessage();
+      log.error(msg, e);
+      throw new DatastreamCannotDeleteFileException(
+          msg,
+          e
+      );
     }
   }
 
@@ -215,7 +222,8 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
       hashedFileName = FileUtils.calcSha256Hex(datastreamId.toString());
     } catch (NoSuchAlgorithmException e) {
       throw new DatastreamIdHashingException(
-          "Could not hash file for datastream-id " + datastreamId + ". Original error: " + e
+          "Could not hash file for datastream-id " + datastreamId + ". Original error: " + e.getMessage(),
+          e
       );
     }
 
@@ -232,15 +240,17 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
         try {
           Files.delete(path);
         } catch (IOException e) {
-          String msg = String.format("Could not delete file %s in GAMS. Original error: %s", path, e);
-          log.error(msg);
-          throw new DatastreamCannotDeleteFileException(msg);
+          throw new DatastreamCannotDeleteFileException(
+              "Could not delete file " + path + " in GAMS. Original error: " + e.getMessage(),
+              e
+          );
         }
       });
     } catch (IOException e) {
-      String msg = String.format("Could not delete all files in GAMS. Original error: %s", e);
-      log.error(msg);
-      throw new DatastreamCannotDeleteFileException(msg);
+      throw new DatastreamCannotDeleteFileException(
+          "Could not delete all files in GAMS. Original error: " + e.getMessage(),
+          e
+      );
     }
 
 
