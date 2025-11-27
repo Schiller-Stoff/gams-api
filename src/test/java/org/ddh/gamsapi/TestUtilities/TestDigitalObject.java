@@ -74,6 +74,7 @@ public enum TestDigitalObject {
             .objectType(DIGITAL_OBJECT_TYPE.getValue())
             .funder(DIGITAL_OBJECT_FUNDER.getValue())
             .mainResource(DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
+            .tags(TestDigitalObject.DIGITAL_OBJECT_TAGS)
             .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 
