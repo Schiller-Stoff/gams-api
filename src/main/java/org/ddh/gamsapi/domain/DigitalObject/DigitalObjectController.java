@@ -26,6 +26,7 @@ import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -363,6 +364,17 @@ public class DigitalObjectController {
         project.getProjectAbbr(),
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
+  }
+
+  @GetMapping(path = "/tags", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  @Operation(
+      summary = "Get all unique tags used in project",
+      description = "Returns a list of all distinct tags used by digital objects in the project. " +
+          "Useful for tag filters, autocomplete, or tag clouds."
+  )
+  public Set<String> getProjectTags(@PathVariable String projectAbbr) {
+    return digitalObjectService.findDistinctTagsByProject(projectAbbr);
   }
 
 }

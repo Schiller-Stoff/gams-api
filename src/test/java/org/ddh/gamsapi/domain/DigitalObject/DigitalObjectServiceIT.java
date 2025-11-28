@@ -439,4 +439,27 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class FindDistinctTagsByProject {
+
+    @Test
+    public void returnsDistinctTagsForProject(){
+
+      // adding two additional digital objects to the test data set
+      testDataBuilder.addRandomObject(testDataSet);
+      testDataBuilder.addRandomObject(testDataSet);
+
+      var distinctTags = digitalObjectService.findDistinctTagsByProject(
+          testDataSet.project().getProjectAbbr()
+      );
+
+      Assertions.assertThat(distinctTags)
+          .isNotNull()
+          .isNotEmpty()
+          .containsAll(TestDigitalObject.getTags());
+
+    }
+
+  }
+
 }

@@ -113,4 +113,21 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
       Pageable pageable
   );
 
+
+  /**
+   * Finds all distinct tags used by digital objects in a project.
+   * PERFORMANCE: Uses index on (digital_object_id, datastream_tags) and GROUP BY optimization.
+   *
+   * @param projectAbbr Project abbreviation
+   * @return Set of unique tag strings used in the project
+   */
+  @Query(value =
+      "SELECT DISTINCT dt.digital_object_tags " +
+          "FROM digital_object_tags dt " +
+          "INNER JOIN digital_object dobj ON dt.digital_object_id = dobj.id " +
+          "WHERE dobj.project_project_abbr = :projectAbbr " +
+          "ORDER BY dt.digital_object_tags ASC",
+      nativeQuery = true)
+  Set<String> findDistinctTagsByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+
 }

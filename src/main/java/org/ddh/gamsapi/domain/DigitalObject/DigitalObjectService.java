@@ -333,5 +333,18 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
 
+  @Override
+  @Transactional(readOnly = true)
+  public Set<String> findDistinctTagsByProject(String projectAbbr) {
+    if (!projectRepository.existsById(projectAbbr)) {
+      throw new ProjectNotFoundException(
+          "Cannot find tags. Project does not exist: " + projectAbbr
+      );
+    }
+
+    return digitalObjectRepository.findDistinctTagsByProjectAbbr(projectAbbr);
+  }
+
+
 
 }

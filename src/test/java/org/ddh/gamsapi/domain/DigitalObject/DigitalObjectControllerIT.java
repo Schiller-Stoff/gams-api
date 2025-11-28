@@ -433,6 +433,35 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     }
 
+    @Nested
+    public class GETProjectTags {
+
+      @Test
+      public void getProjectTagsReturnsExpectedTags() throws Exception {
+
+        String url = String.format("/api/v1/projects/%s/objects/tags", testDataSet.project().getProjectAbbr());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+
+        // contains digital object tags
+        for (String tag : testDataSet.digitalObject().getTags()) {
+          org.assertj.core.api.Assertions.assertThat(response)
+              .contains(tag);
+        }
+
+      }
+
+
+    }
+
   }
 
   @Nested

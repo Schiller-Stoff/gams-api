@@ -90,4 +90,12 @@ public interface IDigitalObjectService {
       Pageable pageable
   );
 
+
+  /**
+   * Find distinct tags for a given project.
+   * @param projectAbbr project abbreviation
+   * @return set of distinct tags
+   */
+  Set<String> findDistinctTagsByProject(String projectAbbr);
+
 }
