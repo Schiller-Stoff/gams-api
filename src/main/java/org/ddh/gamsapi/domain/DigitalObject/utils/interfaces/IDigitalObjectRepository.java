@@ -12,6 +12,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String>, JpaSpecificationExecutor<DigitalObject> {
 
@@ -92,5 +93,24 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   @Query("SELECT MAX(do.modified) FROM DigitalObject do WHERE do.project.projectAbbr = :projectAbbr")
   Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
+  /**
+   * Finds digital objects by project and tags using AND logic.
+   * All specified tags must be present on the digital object.
+   *
+   * @param projectAbbr Project abbreviation
+   * @param tags Set of tags (all must match)
+   * @param tagCount Number of tags (must equal tags.size() for AND logic)
+   * @param pageable Pagination
+   * @return Page of digital objects matching ALL tags
+   */
+  @Query("SELECT d FROM DigitalObject d " +
+      "WHERE d.project.projectAbbr = :projectAbbr " +
+      "AND (SELECT COUNT(DISTINCT t) FROM d.tags t WHERE t IN :tags) = :tagCount")
+  Page<DigitalObjectListItemView> findByProject_ProjectAbbrAndTagsIn(
+      @Param("projectAbbr") String projectAbbr,
+      @Param("tags") Set<String> tags,
+      @Param("tagCount") long tagCount,
+      Pageable pageable
+  );
 
 }

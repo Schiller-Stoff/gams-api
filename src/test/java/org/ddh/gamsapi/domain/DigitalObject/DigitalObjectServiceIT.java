@@ -410,4 +410,33 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class FindAllByProjectAndTags {
+
+    @Test
+    public void returnsDigitalObjectsWithExpectedTags(){
+
+      var TAG_TO_FIND = TestDigitalObject.getTags();
+
+      // adding two additional digital objects to the test data set
+      var foundObjects = digitalObjectService.findAllByProjectAndTags(
+          testDataSet.project().getProjectAbbr(),
+          TAG_TO_FIND,
+          PageRequest.of(0,100)
+      );
+
+      Assertions.assertThat(foundObjects.getPagination().getTotalElements())
+          .isGreaterThan(0);
+
+      var firstFoundObject = foundObjects.getContent().get(0);
+
+      Assertions.assertThat(firstFoundObject.getTags())
+          .isNotNull()
+          .isNotEmpty()
+          .containsAll(TAG_TO_FIND);
+
+    }
+
+  }
+
 }

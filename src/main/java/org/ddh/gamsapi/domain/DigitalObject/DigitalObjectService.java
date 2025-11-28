@@ -306,5 +306,32 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
 
+  public PagedResponse<DigitalObjectListItemView> findAllByProjectAndTags(
+      String projectAbbr,
+      Set<String> tags,
+      Pageable pageable
+  ) {
+
+    if (!projectRepository.existsById(projectAbbr)) {
+      throw new ProjectNotFoundException(
+          "Cannot find digital objects. Project does not exist: " + projectAbbr
+      );
+    }
+
+    if (tags == null || tags.isEmpty()) {
+      // No tags = return all objects in project
+      return PagedResponse.from(
+          digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbr(projectAbbr, pageable)
+      );
+    }
+
+    // AND-based tag filtering
+    Page<DigitalObjectListItemView> result = digitalObjectRepository
+        .findByProject_ProjectAbbrAndTagsIn(projectAbbr, tags, tags.size(), pageable);
+
+    return PagedResponse.from(result);
+  }
+
+
 
 }

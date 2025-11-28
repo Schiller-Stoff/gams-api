@@ -77,4 +77,17 @@ public interface IDigitalObjectService {
       Pageable pageable);
 
 
+  /**
+   * Find all digital objects for a given project and set of tags.
+   * @param projectAbbr project the digital objects belong to
+   * @param tags set of tags the digital objects must have
+   * @param pageable pagination information
+   * @return page of digital objects matching the criteria
+   */
+  PagedResponse<DigitalObjectListItemView> findAllByProjectAndTags(
+      String projectAbbr,
+      Set<String> tags,
+      Pageable pageable
+  );
+
 }
