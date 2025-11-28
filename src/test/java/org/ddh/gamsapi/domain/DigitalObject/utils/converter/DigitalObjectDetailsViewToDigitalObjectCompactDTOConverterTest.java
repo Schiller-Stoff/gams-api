@@ -118,7 +118,7 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
 
     @Override
     public Set<String> getTags() {
-      return TestDigitalObject.DIGITAL_OBJECT_TAGS;
+      return TestDigitalObject.getTags();
     }
 
     @Override

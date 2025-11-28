@@ -165,7 +165,7 @@ public class IngestServiceIT extends IntegrationTest {
         var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
             .orElseThrow( () -> new RuntimeException("Digital object not found"));
         Assertions.assertThat(digitalObject.getTags().size())
-            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_TAGS.size());
+            .isEqualTo(TestDigitalObject.getTags().size());
     }
 
     @Test
