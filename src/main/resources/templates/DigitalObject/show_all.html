@@ -62,6 +62,7 @@
               <th scope="col">
                 <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
               </th>
+              <th scope="col">tags</th>
               <!--          <th scope="col">-->
               <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
               <!--          </th>-->
@@ -79,6 +80,24 @@
               ></a></td>
               <td><span th:title="${do.getBaseMetadata().getTitle()}" th:if="${do.baseMetadata}" th:text="${#strings.abbreviate(do.baseMetadata.title, 50)}"></span></td>
               <td><span th:text="${do.modified}"></span></td>
+              <td>
+                <th:block th:each="tag, iterStat : ${do.tags}">
+                  <a th:if="${iterStat.index < 5}"
+                     th:href="@{/api/v1/projects/{projectAbbr}/objects(
+                       projectAbbr=${project.projectAbbr},
+                       q=${param.q},
+                       pageIndex=${param.pageIndex},
+                       pageSize=${param.pageSize},
+                       sortBy=${param.sortBy},
+                       sortDir=${param.sortDir},
+                       tag=${tag})}"
+                     class="text-decoration-none">
+                    <span class="badge bg-secondary me-1 mb-1" th:text="${tag}"></span>
+                  </a>
+                </th:block>
+                <span th:if="${#lists.size(do.tags) > 5}"
+                      class="badge bg-secondary me-1 mb-1">...</span>
+              </td>
               <!--          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>-->
   <!--            <td><div>-->
   <!--              &lt;!&ndash;<a th:href="${do.metaAddress}" target="_blank">Fedora6 profile</a> &ndash;&gt;-->
