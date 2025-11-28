@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.ValidDatastreamId;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
@@ -39,6 +40,7 @@ import java.util.Set;
 @Slf4j
 @IdClass(DatastreamId.class)
 @JacksonXmlRootElement(localName = "datastream")
+@ValidDatastreamId
 public class Datastream {
 
   public static final String ENTITY_TABLE_NAME = "datastream";
@@ -70,7 +72,6 @@ public class Datastream {
   @Column(name = "dsid")
   @NotEmpty
   @Id
-  @Pattern(regexp = "^[a-zA-Z0-9._]*$")
   @Size(max = 256, min = 1)
   private String dsid;
 
@@ -210,17 +211,6 @@ public class Datastream {
   @Override
   public int hashCode() {
     return Objects.hash(digitalObject, dsid);
-  }
-
-  @AssertTrue(message = "The dsid must contain a valid file extension string, like 'DC.xml' or 'SOMETHING.pdf'")
-  public boolean isDsidContainingADot(){
-    if(dsid == null) {
-      String msg = "Encountered unexpected null value when validating dsid: dsid is null. " + this;
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    String fileExtension = StringUtils.getFilenameExtension(dsid);
-    return fileExtension != null;
   }
 
   public String getFileName(){
