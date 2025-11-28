@@ -4,21 +4,20 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
+import org.ddh.gamsapi.domain.MetadataBaseEntity;
+import org.ddh.gamsapi.domain.Project.Project;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
-import org.ddh.gamsapi.domain.MetadataBaseEntity;
-import org.ddh.gamsapi.domain.Project.Project;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -42,7 +41,7 @@ import java.util.Set;
 public class DigitalObject {
 
   public static final String ENTITY_TABLE_NAME = "digital_object";
-  public static final String TAGS_TABLE_NAME = "datastream_tags";
+  public static final String TAGS_TABLE_NAME = ENTITY_TABLE_NAME + "_tags";
 
   /**
    * Contains all table names in the order they should be deleted / created.
