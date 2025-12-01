@@ -135,7 +135,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void findsDigitalObjectViaContainedInId(){
+    public void findsDigitalObjectExactId(){
 
       digitalObjectService.findAllByProjectAbbr(
               testDataSet.project().getProjectAbbr(),
@@ -144,6 +144,23 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .getContent()
           .forEach(digitalObject -> {
             Assertions.assertThat(digitalObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
+            Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
+          });
+
+    }
+
+    @Test
+    public void findsDigitalObjectStartsWithId(){
+
+      String idStartsWith = testDataSet.digitalObject().getId().substring(0,5);
+
+      digitalObjectService.findAllByProjectAbbr(
+              testDataSet.project().getProjectAbbr(),
+              idStartsWith,
+              PageRequest.of(0,100))
+          .getContent()
+          .forEach(digitalObject -> {
+            Assertions.assertThat(digitalObject.getId()).startsWith(idStartsWith);
             Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
           });
 

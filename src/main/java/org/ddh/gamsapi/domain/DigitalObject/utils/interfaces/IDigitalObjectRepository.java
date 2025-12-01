@@ -130,4 +130,21 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
       nativeQuery = true)
   Set<String> findDistinctTagsByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
+
+  /**
+   * Find digital objects by project where ID starts with the given prefix.
+   * PERFORMANCE: Uses primary key index efficiently. O(log n) complexity.
+   * Case-sensitive for maximum performance.
+   *
+   * @param projectAbbr Project abbreviation
+   * @param idPrefix Prefix to match (e.g., "mhdbdb.manuscript")
+   * @param pageable Pagination
+   * @return Page of matching digital objects
+   */
+  Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndIdStartingWith(
+      String projectAbbr,
+      String idPrefix,
+      Pageable pageable
+  );
+
 }

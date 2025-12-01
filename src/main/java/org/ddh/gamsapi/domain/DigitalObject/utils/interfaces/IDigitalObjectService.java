@@ -20,11 +20,11 @@ public interface IDigitalObjectService {
   /**
    * Find all digital objects for a given project (with project abbreviation). Substring filter for digital object's id.
    * @param projectAbbr identifier of the project
-   * @param containedInPid substring filter for digital object's id
+   * @param idSearchTerm startswith filter for digital object's id
    * @param pageable pagination
    * @return a page of digital objects as projection
    */
-  PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInPid, Pageable pageable);
+  PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String idSearchTerm, Pageable pageable);
 
   /**
    * Find all digital objects for a given project (with project abbreviation). Filter by object type.

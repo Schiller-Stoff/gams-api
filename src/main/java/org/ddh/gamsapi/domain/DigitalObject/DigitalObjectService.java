@@ -71,17 +71,25 @@ public class DigitalObjectService implements IDigitalObjectService {
 
   @Override
   @Transactional
-  public PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String containedInId, Pageable pageable) {
-    // TODO write unit + integration tests!
-    projectRepository.findById(projectAbbr).orElseThrow(
-            () -> new ProjectNotFoundException(
-                "Aborting find all digital objects via project abbreviation. Cannot find project "
-                    + projectAbbr
-                    + "."
-            )
-    );
+  public PagedResponse<DigitalObjectListItemView> findAllByProjectAbbr(String projectAbbr, String idSearchTerm, Pageable pageable) {
+    if(!projectRepository.existsById(projectAbbr)){
+      throw new ProjectNotFoundException(
+          "Aborting find all digital objects via project abbreviation. Cannot find project "
+              + projectAbbr
+              + "."
+      );
+    }
+
+    // Normalize search term
+    String normalized = idSearchTerm.trim();
+
+    // Strategy 2: Prefix search (fast, uses index)
     return PagedResponse.from(
-        digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndIdIsContainingIgnoreCase(projectAbbr, containedInId, pageable)
+        digitalObjectRepository.findDigitalObjectsByProject_ProjectAbbrAndIdStartingWith(
+            projectAbbr,
+            normalized,
+            pageable
+        )
     );
   }
 
@@ -235,6 +243,7 @@ public class DigitalObjectService implements IDigitalObjectService {
    * @param searchMode Search mode (EXACT_MATCH, CONTAINS, FULLTEXT)
    * @param pageable Pagination information
    * @return Page of digital objects matching the criteria
+   * TODO remove outdated method?
    */
   public PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
       MultiValueMap<String, String> dublinCoreFilters,
