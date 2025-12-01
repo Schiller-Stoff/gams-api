@@ -1,13 +1,14 @@
 # Makefile for building gams-api images
 #
 # Commands:
-#  - 'make' without targets builds gams-api Docker image
+#  - 'make' runs tests and builds gams-api Docker image
+#  - 'make build-skip-tests' builds without running tests
+#  - 'make test' runs unit tests only
+#  - 'make integration-test' runs integration tests only
+#  - 'make verify' runs all tests
 #  - 'make push' pushes the default build
 #  - 'make build-native' builds the native image
 #  - 'make push-native' pushes the native build
-#
-# After build and push a new image don't forget to update 
-# the docker-compose.yml in the project 'production'
 #
 VERSION = $(shell cat .release)
 IMAGENAME ?= gams-api
@@ -15,7 +16,7 @@ PREFIX ?= zimgraz
 IMAGE ?= $(IMAGENAME):$(VERSION)
 FULL_IMAGE_TAG = "$(PREFIX)/$(IMAGE)"
 
-# allows to pass through cli arguments to ./mvnw call during pre-tag. Like -DskipTests
+# allows to pass through cli arguments to ./mvnw call
 MVN_OPTIONS ?=
 
 all: pre-tag build
@@ -26,14 +27,41 @@ pre-tag:
 	@echo "*** Building with java version ***"
 	java --version
 
+# Run all tests (unit + integration) and build image
 build: pre-tag
+	@echo "*** Running all tests ***"
+	./mvnw verify $(MVN_OPTIONS)
 	@echo "*** Building image $(FULL_IMAGE_TAG) ***"
-	./mvnw spring-boot:build-image $(MVN_OPTIONS)
+	./mvnw spring-boot:build-image -DskipTests $(MVN_OPTIONS)
 	@echo "*** Tagging $(IMAGENAME) as $(FULL_IMAGE_TAG)"
 	docker tag $(IMAGENAME) $(FULL_IMAGE_TAG)
 
+# Build without running tests (for quick iterations)
+build-skip-tests: pre-tag
+	@echo "*** Building image $(FULL_IMAGE_TAG) (SKIPPING TESTS) ***"
+	./mvnw spring-boot:build-image -DskipTests $(MVN_OPTIONS)
+	@echo "*** Tagging $(IMAGENAME) as $(FULL_IMAGE_TAG)"
+	docker tag $(IMAGENAME) $(FULL_IMAGE_TAG)
+
+# Run unit tests only
+test:
+	@echo "*** Running unit tests ***"
+	./mvnw test $(MVN_OPTIONS)
+
+# Run integration tests only
+integration-test:
+	@echo "*** Running integration tests ***"
+	./mvnw integration-test $(MVN_OPTIONS)
+
+# Run all tests
+verify:
+	@echo "*** Running all tests (unit + integration) ***"
+	./mvnw verify $(MVN_OPTIONS)
+
 build-native: pre-tag
-	@echo "*** Building image $(FULL_IMAGE_TAG) ***"
+	@echo "*** Running integration tests ***"
+	./mvnw verify -DskipTests $(MVN_OPTIONS)
+	@echo "*** Building native image $(FULL_IMAGE_TAG) ***"
 	./mvnw -Pnative spring-boot:build-image -DskipTests $(MVN_OPTIONS)
 	@echo "*** Tagging $(IMAGENAME) as $(FULL_IMAGE_TAG)"
 	docker tag $(IMAGENAME) $(FULL_IMAGE_TAG).native
@@ -46,8 +74,7 @@ push-native:
 	@echo "*** Pushing image $(FULL_IMAGE_TAG) ***"
 	docker push $(FULL_IMAGE_TAG).native
 
-.PHONY: clean
+.PHONY: clean test integration-test verify
 clean: pre-tag
 	@echo "*** Removing image $(FULL_IMAGE_TAG) ***"
 	docker image rm $(FULL_IMAGE_TAG)
-	
