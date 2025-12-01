@@ -2,14 +2,6 @@ package org.ddh.gamsapi.domain.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.MultiValueMap;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
@@ -18,21 +10,25 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
-import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectConversionException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectService;
-import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -227,93 +223,6 @@ public class DigitalObjectService implements IDigitalObjectService {
       digitalObjectCompactDTO.setDublinCore(dcMap);
       return digitalObjectCompactDTO;
     }
-
-
-  /**
-   * Advanced Dublin Core search using Criteria API for complex multi-field queries.
-   * This method supports:
-   * - Multiple Dublin Core fields with multiple values each
-   * - Different search modes (exact, contains, fulltext)
-   * - Project filtering
-   * - Type-safe query building
-   * Use this for complex search scenarios with multiple criteria.
-   *
-   * @param dublinCoreFilters MultiValueMap of DC field names to search values
-   * @param projectAbbrs Set of project abbreviations to filter by
-   * @param searchMode Search mode (EXACT_MATCH, CONTAINS, FULLTEXT)
-   * @param pageable Pagination information
-   * @return Page of digital objects matching the criteria
-   * TODO remove outdated method?
-   */
-  public PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
-      MultiValueMap<String, String> dublinCoreFilters,
-      Set<String> projectAbbrs,
-      DigitalObjectDublinCoreSpecification.SearchMode searchMode,
-      Pageable pageable) {
-
-    // TODO TESTS!
-
-    log.debug("Searching digital objects with DC criteria: {}, projects: {}, mode: {}",
-        dublinCoreFilters, projectAbbrs, searchMode);
-
-    Specification<DigitalObject> spec = new DigitalObjectDublinCoreSpecification(
-        dublinCoreFilters, projectAbbrs, searchMode);
-    Page<DigitalObject> digitalObjects = digitalObjectRepository.findAll(spec, pageable);
-
-    // Additionally fetch dublin core entries and the main datastreams
-
-    // Extract IDs for batch fetching
-    Set<String> digitalObjectIds = digitalObjects.getContent()
-        .stream()
-        .map(DigitalObject::getId)
-        .collect(Collectors.toSet());
-
-    Map<String, IDatastreamMainResourceView> mainDatastreams = datastreamRepository
-        .findMainDatastreamsByDigitalObjectIds(digitalObjectIds)
-        .stream()
-        .collect(Collectors.toMap(
-            ds -> ds.getDigitalObject().getId(),
-            ds -> ds
-        ));
-
-
-    var mappedObjects = digitalObjects.map(digitalObject -> {
-      // Convert to DTO
-      var dto = conversionService.convert(digitalObject, DigitalObjectSearchResultDTO.class);
-      if (dto == null) {
-        throw new DigitalObjectConversionException(
-            "Failed to convert DigitalObject to DigitalObjectCompactDTO for object " + digitalObject.getId()
-        );
-      }
-
-      // Set Dublin Core entries
-      Map<String, List<DublinCoreEntryCompactDTO>> dcMap = new HashMap<>();
-      dublinCoreEntryRepository.findByDigitalObjectId(digitalObject.getId())
-          .forEach(entry -> {
-            DublinCoreEntryCompactDTO converted = conversionService.convert(entry, DublinCoreEntryCompactDTO.class);
-            dcMap.computeIfAbsent(entry.getName(), k -> new ArrayList<>()).add(converted);
-          });
-      dto.setDublinCore(dcMap);
-
-      var foundMainDatastream = mainDatastreams
-          .getOrDefault(digitalObject.getId(), null);
-      if (foundMainDatastream != null) {
-        // Set main resource if available
-        dto.setMainResource(
-            conversionService.convert(foundMainDatastream, DatastreamMainResourceDto.class)
-        );
-      }
-
-
-      return dto;
-    });
-
-
-
-
-    return PagedResponse.from(mappedObjects);
-  }
-
 
   public PagedResponse<DigitalObjectListItemView> findAllByProjectAndTags(
       String projectAbbr,

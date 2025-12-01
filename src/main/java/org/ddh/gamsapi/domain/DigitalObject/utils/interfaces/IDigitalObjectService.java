@@ -1,13 +1,10 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.util.MultiValueMap;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectDublinCoreSpecification;
-import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectSearchResultDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.Set;
@@ -62,19 +59,6 @@ public interface IDigitalObjectService {
    */
   DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String id);
 
-  /**
-   * Search digital objects by Dublin Core criteria.
-   * @param dublinCoreFilters a map of Dublin Core filters where the key is the Dublin Core element name and the value is a list of values to match
-   * @param projectAbbrs a set of project abbreviations to filter the digital objects by their associated projects
-   * @param searchMode the search mode to use (e.g., exact match, fulltext)
-   * @param pageable pagination information
-   * @return a page of DigitalObjectSearchResultDTO containing the search results
-   */
-  PagedResponse<DigitalObjectSearchResultDTO> searchDigitalObjectsByDublinCoreCriteria(
-      MultiValueMap<String, String> dublinCoreFilters,
-      Set<String> projectAbbrs,
-      DigitalObjectDublinCoreSpecification.SearchMode searchMode,
-      Pageable pageable);
 
 
   /**

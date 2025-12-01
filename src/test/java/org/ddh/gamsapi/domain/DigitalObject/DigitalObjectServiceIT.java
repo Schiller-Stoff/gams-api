@@ -368,38 +368,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
-
-  @Nested
-  public class SearchByDublinCoreCriteria {
-
-    @Test
-    @Transactional
-    public void findsExpectedDigitalObject(){
-
-      var dcFilters = Map.of(
-          testDataSet.dublinCoreEntry().getName(),
-          List.of(testDataSet.dublinCoreEntry().getValue())
-      );
-
-      var foundObjects = digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
-          MultiValueMap.fromMultiValue(dcFilters),
-          Set.of(testDataSet.project().getProjectAbbr()),
-          DigitalObjectDublinCoreSpecification.SearchMode.FULLTEXT,
-          PageRequest.of(0,100)
-      );
-
-      Assertions.assertThat(foundObjects.getContent())
-          .isNotNull()
-          .isNotEmpty()
-          .hasSize(1)
-          .allSatisfy(digitalObject -> {
-            Assertions.assertThat(digitalObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
-            Assertions.assertThat(digitalObject.getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
-          });
-
-    }
-  }
-
   @Nested
   public class FindAllIdsByProjectAbbr {
 
