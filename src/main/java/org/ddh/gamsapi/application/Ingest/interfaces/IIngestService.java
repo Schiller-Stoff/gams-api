@@ -1,17 +1,18 @@
 package org.ddh.gamsapi.application.Ingest.interfaces;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.ddh.gamsapi.application.Ingest.Ingest;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface IIngestService {
 
   /**
-   * Handles ingest of one singular digital object with contained datastreams.
-   * @param ingest Submission Information Package to be ingested
+   * Handles ingest from a zipped BagIt input stream.
+   * @param projectAbbr project abbreviation
+   * @param bagZipStream input stream of zipped bag (will be closed by caller)
    */
-  void ingest(Ingest ingest);
+  void ingest(String projectAbbr, InputStream bagZipStream);
 
   /**
    * Export a digital object as a zipped BagIt package and write it to the provided OutputStream.

@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -10,10 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailureRepository;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAmbiguousMatchException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotDeleteFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -22,6 +19,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFou
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -43,15 +41,16 @@ public class DatastreamService implements IDatastreamService {
   public void delete(Datastream datastream) {
 
     if(datastream.getDigitalObject() == null){
-      String msg = String.format("Datastream's digital object is unexpectedly null %s . Cannot delete datastream.", datastream);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      // TODO this exception here is wrong? - is more about client input validation. Need to define a new exception type?
+      throw new DigitalObjectNotFoundException(
+          "Datastream's digital object is unexpectedly null " + datastream + " . Cannot delete datastream."
+      );
     }
 
     if(!datastreamRepository.existsById(datastream.deriveDatastreamId())){
-      String msg = String.format("Datastream with id %s not found. Cannot delete datastream", datastream);
-      log.error(msg);
-      throw new DatastreamNotFoundException(msg);
+      throw new DatastreamNotFoundException(
+          "Cannot delete datastream. Datastream not found: " + datastream
+      );
     }
 
     datastreamRepository.delete(datastream);
@@ -61,6 +60,11 @@ public class DatastreamService implements IDatastreamService {
           datastream.deriveDatastreamId()
       );
     } catch (DatastreamCannotDeleteFileException e){
+      log.error("Failed to delete file content for datastream {} object: {}. Recording deletion failure for cleanup job. Reason: {}",
+          datastream.getDsid(),
+          datastream.getDigitalObject().getId(),
+          e.getMessage(), e);
+
       datastreamContentDeletionFailureRepository.save(
           DatastreamContentDeletionFailure.builder()
               .digitalObjectId(datastream.getDigitalObject().getId())
@@ -69,18 +73,20 @@ public class DatastreamService implements IDatastreamService {
       );
     }
 
+    log.debug("Successfully deleted datastream {} from object {}",
+        datastream.getDsid(),
+        datastream.getDigitalObject().getId());
+
   }
 
 
 
   @Override
-  @Transactional
-  public Datastream findById(DatastreamId id) throws DatastreamNotFoundException {
-    return datastreamRepository.findById(id).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastream with id %s", id);
-      log.info(msg);
-      return new DatastreamNotFoundException(msg);
-    });
+  @Transactional(readOnly = true)
+  public Datastream findById(DatastreamId id) {
+    return datastreamRepository.findById(id).orElseThrow(() -> new DatastreamNotFoundException(
+        "Cannot find datastream. Datastream does not exist: " + id
+    ));
 
   }
 
@@ -88,26 +94,32 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public Datastream save(Datastream datastream, MultipartFile file) {
 
-    // THINK ABOUT: maybe should use input stream instead of byte array?
-    byte[] data;
-    try {
-      data = file.getBytes();
-    } catch (IOException e) {
-      String msg = String.format("Failed to extract data from given multipart-file for datastream %s from given file %s",datastream, file);
-      log.error(msg);
-      throw new DatastreamCannotLoadFileException(msg);
+    // Validate digital object exists
+    String digitalObjectId = datastream.getDigitalObject().getId();
+    if (!digitalObjectRepository.existsById(digitalObjectId)) {
+      throw new DigitalObjectNotFoundException(
+          "Digital object with id " + digitalObjectId + " not found"
+      );
     }
 
-    if(digitalObjectRepository.existsById(datastream.getDigitalObject().getId())){
-      String msg = String.format("Found digital object with id %s. Saving datastream %s", datastream.getDigitalObject().getId(), datastream);
-      log.info(msg);
-      datastreamContentRepository.save(data, datastream.deriveDatastreamId());
-      return datastreamRepository.save(datastream);
-    } else {
-      String msg = String.format("Digital object with id %s does not exist. Cannnot save datastream %s", datastream.getDigitalObject().getId(), datastream);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+    DatastreamId dsId = datastream.deriveDatastreamId();
+
+    // Stream file content directly to disk - NO byte[] intermediate!
+    try (InputStream inputStream = file.getInputStream()) {
+      datastreamContentRepository.save(inputStream, dsId);
+    } catch (IOException e) {
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save file content for datastream " + dsId + "At digital object: " + digitalObjectId + " Original error: " + e.getMessage(),
+          e
+      );
     }
+
+    // Save entity metadata
+    Datastream savedDatastream = datastreamRepository.save(datastream);
+
+    log.info("Successfully saved datastream {} with file content", savedDatastream);
+    return savedDatastream;
+
   }
 
   /**
@@ -133,20 +145,20 @@ public class DatastreamService implements IDatastreamService {
   @Override
   @Transactional
   public IDatastreamDetailsView findDatastreamDetailsById(DatastreamId datastreamId) throws DatastreamNotFoundException {
-    return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(datastreamId.getDigitalObject(), datastreamId.getDsid()).orElseThrow(() -> {
-      String msg = String.format("Cannot find datastream-details-view via pid %s and dsid %s", datastreamId.getDigitalObject(), datastreamId.getDsid());
-      log.info(msg);
-      return new DatastreamNotFoundException(msg);
-    });
+    return datastreamRepository.findDatastreamDetailsViewByDigitalObject_IdAndDsid(
+        datastreamId.getDigitalObject(), datastreamId.getDsid()).orElseThrow(
+            () -> new DatastreamNotFoundException(
+        "Cannot find datastream details view. For: " + datastreamId
+    ));
   }
 
   @Override
   public IDatastreamDetailsView findSingularDatastreamDetailsViewByObjectIdAndTags(String digitalObjectId, Set<String> tags) {
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
-      String msg = String.format("Digital object with id %s does not exist. Cannot find datastream via tags.", digitalObjectId);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      throw new DigitalObjectNotFoundException(
+          "Cannot find datastream via tags. Digital object with id does not exist: " + digitalObjectId
+      );
     }
 
     var foundDatastreams = datastreamRepository.findDatastreamsPaginatedByDigitalObject_IdAndTagsIn(
@@ -155,20 +167,16 @@ public class DatastreamService implements IDatastreamService {
         PageRequest.of(0, 1));
 
     if (foundDatastreams.isEmpty()) {
-      String msg = String.format("No datastream(s) found for digital object %s having the tags: %s", digitalObjectId, tags);
-      log.error(msg);
-      throw new DatastreamNotFoundException(msg);
+      throw new DatastreamNotFoundException(
+          "Cannot find datastream via tags. No datastreams found for object: " + digitalObjectId + " with tags: " + tags
+      );
     }
+
     // method allows only to match a single datastream
     if (foundDatastreams.getTotalElements() > 1) {
-      // concatenate all dsids (were given tags matched)
-      String matchedDsids = foundDatastreams.stream()
-          .map(IDatastreamDetailsView::getDsid)
-          .reduce("", (a, b) -> a + ", " + b);
-
-      String msg = String.format("Multiple datastreams found for digital object %s having the tags: %s. Matched datastreams are: %s .", digitalObjectId, tags, matchedDsids);
-      log.error(msg);
-      throw new DatastreamAmbiguousMatchException(msg);
+      throw new DatastreamAmbiguousMatchException(
+          "Multiple datastreams found for digital object " + digitalObjectId + ". For tags: " + tags
+      );
     }
 
     // return the first datastream found
@@ -180,26 +188,24 @@ public class DatastreamService implements IDatastreamService {
   public IDatastreamDetailsView findMainDatastreamByDigitalObjectId(String digitalObjectId) {
 
     DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId).orElseThrow(() -> {
-      String msg = String.format("Cannot find digital object with id %s", digitalObjectId);
-      log.info(msg);
-      return new DigitalObjectNotFoundException(msg);
+      return new DigitalObjectNotFoundException(
+          "Cannot find main resource datastream - Parent digital object not found: " + digitalObjectId
+      );
     });
 
     // check if mainResource is set
     if (digitalObject.getMainResource() == null || digitalObject.getMainResource().isEmpty()) {
-      String msg = String.format("Digital object %s has no mainResource datastream defined. mainResource Property is null or empty.", digitalObject);
-      log.warn(msg);
-      throw new DigitalObjectNoMainResourceDatastreamDefinedException(msg);
+      throw new DigitalObjectNoMainResourceDatastreamDefinedException(
+          "Cannot find main resource datastream - No mainResource defined for digital object " + digitalObjectId
+      );
     }
 
     return datastreamRepository.findDatastreamByDigitalObject_IdAndDsid(
         digitalObjectId,
         digitalObject.getMainResource()
-    ).orElseThrow(() -> {
-      String msg = String.format("Cannot find mainResource datastream for digital object %s for mainResource %s", digitalObjectId, digitalObject.getMainResource());
-      log.info(msg);
-      return new DatastreamNotFoundException(msg);
-    });
+    ).orElseThrow(() -> new DatastreamNotFoundException(
+        "Cannot find main resource datastream: Expected datastream does not exist. Digital object: " + digitalObjectId + " mainResource: " + digitalObject.getMainResource()
+    ));
 
   }
 
@@ -219,9 +225,9 @@ public class DatastreamService implements IDatastreamService {
   public PagedResponse<String> findAllIds(String digitalObjectId, Pageable pageable) throws DigitalObjectNotFoundException {
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
-      String msg = String.format("Digital object with id %s does not exist. Cannot find datastreams.", digitalObjectId);
-      log.error(msg);
-      throw new DigitalObjectNotFoundException(msg);
+      throw new DigitalObjectNotFoundException(
+          "Cannot find datastream ids. Digital object does not exist: " + digitalObjectId
+      );
     }
 
     var foundDatastreamViews = datastreamRepository.findAllDatastreamIdViewsByDigitalObjectId(
@@ -230,8 +236,7 @@ public class DatastreamService implements IDatastreamService {
     );
 
     if (foundDatastreamViews.isEmpty()) {
-      String msg = String.format("No datastreams found for digital object with id %s (There should be at least one datastream)", digitalObjectId);
-      log.warn(msg);
+      log.warn("No datastreams found for digital object with id {} (There should be at least one datastream)", digitalObjectId);
     }
 
     return PagedResponse.from(

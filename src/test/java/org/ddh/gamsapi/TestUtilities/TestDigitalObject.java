@@ -3,6 +3,9 @@ package org.ddh.gamsapi.TestUtilities;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Enum for test digital object.
  */
@@ -22,8 +25,8 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_MD5_CHECKSUM(TestMetadataBaseEntity.MD5_CHECKSUM),
     DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM);
 
-
     private final String value;
+    private static final Set<String> DIGITAL_OBJECT_TAGS = Set.of("object-test-tag1", "object-test-tag2", "object-test-tag3");
 
     TestDigitalObject(String value) {
         this.value = value;
@@ -51,6 +54,14 @@ public enum TestDigitalObject {
     }
 
     /**
+     * Returns a copied set of tags for the test digital object.
+     * @return The set of tags.
+     */
+    public static Set<String> getTags() {
+        return new HashSet<>(DIGITAL_OBJECT_TAGS);
+    }
+
+    /**
      * Generates a test digital object using the values defined in the enum.
      * @param projectAbbr The abbreviation of the project.
      * @param id The id of the digital object to be created.
@@ -73,6 +84,7 @@ public enum TestDigitalObject {
             .objectType(DIGITAL_OBJECT_TYPE.getValue())
             .funder(DIGITAL_OBJECT_FUNDER.getValue())
             .mainResource(DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
+            .tags(TestDigitalObject.getTags())
             .baseMetadata(TestMetadataBaseEntity.generate())
             .build();
 

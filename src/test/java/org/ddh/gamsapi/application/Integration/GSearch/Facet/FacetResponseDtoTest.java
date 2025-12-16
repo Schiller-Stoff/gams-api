@@ -53,7 +53,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      Assertions.assertThat(mapped.getResults().getContent())
+      Assertions.assertThat(mapped.getResult().getContent())
           .hasSize(numDocuments);
     }
 
@@ -114,7 +114,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      var pagination = result.getResults().getPagination();
+      var pagination = result.getResult().getPagination();
 
       Assertions.assertThat(pagination.getPage()).isEqualTo(0);
       Assertions.assertThat(pagination.getSize()).isEqualTo(20);
@@ -139,7 +139,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      var pagination = result.getResults().getPagination();
+      var pagination = result.getResult().getPagination();
 
       Assertions.assertThat(pagination.getPage()).isEqualTo(2);
       Assertions.assertThat(pagination.getSize()).isEqualTo(20);
@@ -164,7 +164,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      var pagination = result.getResults().getPagination();
+      var pagination = result.getResult().getPagination();
 
       Assertions.assertThat(pagination.getPage()).isEqualTo(7);
       Assertions.assertThat(pagination.getSize()).isEqualTo(20);
@@ -176,7 +176,7 @@ public class FacetResponseDtoTest extends UnitTest {
       Assertions.assertThat(pagination.isLast()).isTrue();
 
       // Verify content size matches partial last page
-      Assertions.assertThat(result.getResults().getContent()).hasSize(16);
+      Assertions.assertThat(result.getResult().getContent()).hasSize(16);
     }
 
     @Test
@@ -192,7 +192,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      var pagination = result.getResults().getPagination();
+      var pagination = result.getResult().getPagination();
 
       Assertions.assertThat(pagination.getPage()).isEqualTo(0);
       Assertions.assertThat(pagination.getTotalPages()).isEqualTo(1);
@@ -215,11 +215,11 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      var pagination = result.getResults().getPagination();
+      var pagination = result.getResult().getPagination();
 
       Assertions.assertThat(pagination.getTotalElements()).isEqualTo(0);
       Assertions.assertThat(pagination.getTotalPages()).isEqualTo(0);
-      Assertions.assertThat(result.getResults().getContent()).isEmpty();
+      Assertions.assertThat(result.getResult().getContent()).isEmpty();
     }
   }
 
@@ -239,7 +239,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      Assertions.assertThat(result.getResults().getPagination().getTotalPages())
+      Assertions.assertThat(result.getResult().getPagination().getTotalPages())
           .isEqualTo(5);
     }
 
@@ -256,7 +256,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      Assertions.assertThat(result.getResults().getPagination().getTotalPages())
+      Assertions.assertThat(result.getResult().getPagination().getTotalPages())
           .isEqualTo(1);
     }
 
@@ -273,7 +273,7 @@ public class FacetResponseDtoTest extends UnitTest {
           pageable
       );
 
-      Assertions.assertThat(result.getResults().getPagination().getTotalPages())
+      Assertions.assertThat(result.getResult().getPagination().getTotalPages())
           .isEqualTo(100);
     }
 
@@ -317,14 +317,14 @@ public class FacetResponseDtoTest extends UnitTest {
       );
 
       // Verify filtered vs unfiltered counts
-      Assertions.assertThat(result.getResults().getPagination().getTotalElements())
+      Assertions.assertThat(result.getResult().getPagination().getTotalElements())
           .isEqualTo(45);  // 45 match filters
       Assertions.assertThat(result.getTotalUnfilteredCount())
           .isEqualTo(1000);  // 1000 total in project
 
       // Verify pagination
-      Assertions.assertThat(result.getResults().getPagination().getPage()).isEqualTo(1);
-      Assertions.assertThat(result.getResults().getPagination().getTotalPages()).isEqualTo(3);
+      Assertions.assertThat(result.getResult().getPagination().getPage()).isEqualTo(1);
+      Assertions.assertThat(result.getResult().getPagination().getTotalPages()).isEqualTo(3);
 
       // Verify facets
       Assertions.assertThat(result.getSelectedFacets())

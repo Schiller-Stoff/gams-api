@@ -6,7 +6,6 @@ import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
 import org.ddh.gamsapi.TestUtilities.TestProject;
-import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.GSearch.GSearchService;
@@ -22,6 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -57,12 +57,12 @@ public class FulltextControllerIT extends SolrIntegrationTest {
         .projectAbbr(TestProject.PROJECT_ABBR.getValue())
         .build());
 
-    // Ingest the bag
+    // ingest the bag
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    Ingest ingest = new Ingest();
-    ingest.setZippedBagItFolder(zippedBag);
-    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-    ingestService.ingest(ingest);
+    ingestService.ingest(
+        TestProject.PROJECT_ABBR.getValue(),
+        new ByteArrayInputStream(zippedBag)
+    );
 
     // Index object
     gSearchService.indexObject(
@@ -112,6 +112,19 @@ public class FulltextControllerIT extends SolrIntegrationTest {
       final String EXPECTED_DIGITAL_OBJECT_ID_STRING = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
       Assertions.assertThat(fulltextResponse)
           .contains(EXPECTED_DIGITAL_OBJECT_ID_STRING);
+
+    }
+
+    @Test
+    public void responseContainsExpectedObjectTags(){
+      Assertions.assertThat(fulltextResponse)
+          .isNotNull()
+          .isNotEmpty();
+
+      TestBag.TestBagSipJson.DIGITAL_OBJECT_TAGS.forEach(tag ->
+          Assertions.assertThat(fulltextResponse)
+              .contains(tag)
+      );
 
     }
 

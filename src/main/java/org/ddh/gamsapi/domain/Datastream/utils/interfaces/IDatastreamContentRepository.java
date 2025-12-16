@@ -3,6 +3,9 @@ package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 import org.springframework.core.io.InputStreamResource;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotDeleteFileException;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -39,5 +42,16 @@ public interface IDatastreamContentRepository {
    * Deletes all datastream content.
    */
   void deleteAll();
+
+
+  /**
+   * Saves the input stream as datastream content.
+   * @param inputStream the input stream to save
+   * @param datastreamId the datastream id to save the input stream to
+   * @return the datastream id
+   * @throws IOException if an I/O error occurs
+   */
+  DatastreamId save(InputStream inputStream, DatastreamId datastreamId)
+      throws IOException;
 
 }

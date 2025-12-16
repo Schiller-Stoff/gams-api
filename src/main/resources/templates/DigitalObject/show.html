@@ -258,6 +258,14 @@
                   <p th:text="${do.id}"></p>
                 </li>
                 <li class="list-group-item">
+                  <small>object tags</small>
+                  <div>
+                    <th:block th:each="tag, iterStat : ${do.tags}">
+                      <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
+                    </th:block>
+                  </div>
+                </li>
+                <li class="list-group-item">
                   <small>object type</small>
                   <p th:text="${do.objectType}"></p>
                 </li>

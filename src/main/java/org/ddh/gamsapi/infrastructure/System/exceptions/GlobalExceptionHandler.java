@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -16,9 +18,12 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -30,24 +35,51 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(TransactionSystemException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleTransactionSystemExceotion(TransactionSystemException ex) {
-    String msg = String.format("TransactionSystemException: %s", ex.getMessage());
-    log.error(msg);
+    log.error("TransactionSystemException occurred: {}", ex.getMessage());
+    // TODO too performance intense - refactor!
     return drillRootErrorCause(ex);
   }
 
+  @ExceptionHandler(GamsApiException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleResponseStatusException(
+      GamsApiException ex, WebRequest request
+  ) {
+    HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+    // make sure we have a valid status
+    HttpStatus effectiveStatus = status != null ? status : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    // Only ERROR log for 5xx, DEBUG for 4xx (no stack trace)
+    if (effectiveStatus.is5xxServerError()) {
+      log.error("Server error: {} - {}", effectiveStatus, ex.getReason(), ex);
+    } else {
+      log.debug("Client error: {} - {}", effectiveStatus, ex.getReason());
+    }
+
+    GamsAPIErrorResponse errorResponse = new GamsAPIErrorResponse(
+        effectiveStatus,
+        ex.getReason()
+    );
+
+    // Cache 404s for 5 minutes
+    HttpHeaders headers = new HttpHeaders();
+    if (effectiveStatus == HttpStatus.NOT_FOUND) {
+      headers.setCacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES));
+    }
+
+    return ResponseEntity.status(effectiveStatus).headers(headers).body(errorResponse);
+  }
+
   @ExceptionHandler(DataIntegrityViolationException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex){
-    // TODO implement
-    String msg = String.format("DataIntegrityViolationException: %s", ex.getMessage());
-    log.error(msg);
+  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    // TODO this is way to performance intense - refactor!
+    log.error("Data integrity violation: {}", ex.getMessage());
     return drillRootErrorCause(ex);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<GamsAPIErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
 
-    String msg = String.format("HttpMessageNotReadableException: Message not readable exception in %s. Original cause:  %s", this.getClass().getName(), ex);
-    log.error(msg);
+    log.error("HttpMessageNotReadableException: Message not readable exception in {}. Original cause: {}", this.getClass().getName(),ex.getMessage(), ex);
 
     String errorMessage = "Invalid request body";
     Throwable cause = ex.getCause();
@@ -56,7 +88,7 @@ public class GlobalExceptionHandler {
     if (cause instanceof JsonParseException) {
       errorMessage = "Malformed JSON request";
     } else if (cause instanceof UnrecognizedPropertyException upe) {
-      errorMessage = String.format("Unknown property: '%s'", upe.getPropertyName());
+      errorMessage = "Unknown property: " + upe.getPropertyName();
     } else if (cause instanceof InvalidFormatException ife) {
       errorMessage = String.format("Invalid value for property: '%s'",
           ife.getPath().stream()
@@ -102,10 +134,11 @@ public class GlobalExceptionHandler {
 
   /**
    * Drill down the root cause of given error and return a response entity with the error message.
+   *
    * @param cause the cause of the error
    * @return a response entity with the error message
    */
-  public ResponseEntity<GamsAPIErrorResponse> drillRootErrorCause(Throwable cause){
+  public ResponseEntity<GamsAPIErrorResponse> drillRootErrorCause(Throwable cause) {
     String msg;
     ResponseEntity<GamsAPIErrorResponse> responseEntity = null;
     // TODO refactor following code! (make cleaner!)
@@ -122,7 +155,7 @@ public class GlobalExceptionHandler {
         log.error(msg, cause);
         GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, msg, errors);
         responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
-      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException){
+      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException) {
         msg = "DataIntegrityViolationException in the database layer";
         log.error(msg, cause);
         var errors = new HashMap<String, String>();
@@ -139,7 +172,7 @@ public class GlobalExceptionHandler {
     }
 
     if (responseEntity == null) {
-      String errMsg = String.format("Response entity is unexpectedly null - for cause %s", cause);
+      String errMsg = "Response entity is unexpectedly null - for cause " + cause;
       log.error(errMsg);
       GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errMsg);
       responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());

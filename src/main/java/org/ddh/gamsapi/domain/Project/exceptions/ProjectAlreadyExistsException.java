@@ -11,4 +11,8 @@ public class ProjectAlreadyExistsException extends  ProjectException {
     super(HttpStatus.CONFLICT, reason);
   }
 
+  public ProjectAlreadyExistsException(String reason, Throwable cause) {
+    super(HttpStatus.CONFLICT, reason, cause);
+  }
+
 }

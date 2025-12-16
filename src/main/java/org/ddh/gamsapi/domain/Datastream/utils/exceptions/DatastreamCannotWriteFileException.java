@@ -11,4 +11,8 @@ public class DatastreamCannotWriteFileException extends DatastreamException {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
 
+  public DatastreamCannotWriteFileException(String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
+
 }

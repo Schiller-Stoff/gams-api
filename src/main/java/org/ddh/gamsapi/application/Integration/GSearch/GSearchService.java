@@ -18,9 +18,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
@@ -75,6 +73,16 @@ public class GSearchService implements IIntegrationService {
     // index datastream ids
     if(!foundDatastreams.isEmpty()){
       solrDocument.addProperty(GSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
+    }
+
+    // index tags if present
+    if(!digitalObject.getTags().isEmpty()){
+      solrDocument.addProperty(
+          GSearchProperties.TAGS.name,
+          digitalObject.getTags()
+              .stream()
+              .toList()
+      );
     }
 
     // These fields might differ from the dublin core!

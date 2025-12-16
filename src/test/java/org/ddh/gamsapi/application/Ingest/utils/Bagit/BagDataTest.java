@@ -19,6 +19,7 @@ public class BagDataTest {
     public class From {
 
         final DigitalObject TEST_DIGITAL_OBJECT = TestDigitalObject.generate();
+        // TODO rename field to TEST_SUBMISSION_RECORD
         final SubmissionRecord TEST_INGEST_RECORD = TestSubmissionRecord.generate(TEST_DIGITAL_OBJECT);
         final Datastream TEST_DATASTREAM = TestDatastream.generate(TEST_DIGITAL_OBJECT);
 
@@ -54,6 +55,10 @@ public class BagDataTest {
             Assertions.assertThat(testBagdata.getSchema()).isEqualTo(TEST_INGEST_RECORD.getBagSchema());
             Assertions.assertThat(testBagdata.getCreatedBy()).isEqualTo(TEST_INGEST_RECORD.getBagCreatedBy());
             Assertions.assertThat(testBagdata.getSource()).isEqualTo(TEST_INGEST_RECORD.getBagSource());
+            // Assert tags
+            testBagdata.getTags().forEach(tag -> {
+                Assertions.assertThat(TEST_DIGITAL_OBJECT.getTags()).contains(tag);
+            });
         }
 
     }

@@ -266,8 +266,9 @@ public class SolrClientIT extends SolrIntegrationTest {
       solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
-      int documentCount = solrClient.countProjectDocuments(
+      int documentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.TEST_CORE.value,
+          GSearchProperties.PROJECT.name,
           Set.of(TestProject.PROJECT_ABBR.getValue())
       );
       Assertions.assertThat(documentCount)
@@ -276,8 +277,9 @@ public class SolrClientIT extends SolrIntegrationTest {
 
     @Test
     public void returnsZeroWhenNoDocumentsExist(){
-      int documentCount = solrClient.countProjectDocuments(
+      int documentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.TEST_CORE.value,
+          GSearchProperties.PROJECT.name,
           Set.of("NON_EXISTENT_PROJECT_ABBR")
       );
       Assertions.assertThat(documentCount)
@@ -294,12 +296,36 @@ public class SolrClientIT extends SolrIntegrationTest {
       solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
       solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
 
-      int documentCount = solrClient.countProjectDocuments(
+      int documentCount = solrClient.countDocumentsByPropertyValues(
           SolrGamsCores.TEST_CORE.value,
+          GSearchProperties.PROJECT.name,
           Set.of()
       );
       Assertions.assertThat(documentCount)
           .isGreaterThan(0);
+    }
+
+  }
+
+  @Nested
+  public class RetrieveSolrDocumentById {
+
+    @Test
+    public void returnsExpectedDocument(){
+      String TEST_SOLR_DOCUMENT_ID = "unique-doc-id-12345";
+
+      final SolrDocument solrDocument = new SolrDocument();
+      solrDocument.addProperty("id", TEST_SOLR_DOCUMENT_ID);
+      solrClient.post(SolrGamsCores.TEST_CORE.value, solrDocument);
+
+      SolrDocument retrievedDocument = solrClient.retrieveSolrDocumentById(
+          SolrGamsCores.TEST_CORE.value,
+          TEST_SOLR_DOCUMENT_ID
+      );
+      Assertions.assertThat(retrievedDocument)
+          .isNotNull();
+      Assertions.assertThat(retrievedDocument.getProperty("id"))
+          .isEqualTo(TEST_SOLR_DOCUMENT_ID);
     }
 
   }

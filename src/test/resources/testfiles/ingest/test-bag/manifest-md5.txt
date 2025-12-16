@@ -5,3 +5,4 @@
 540193d9633d8449ee1bff28030fe045 data/meta/sip.json
 640193d9633d8449ee1bff28030fe045 data/content/test.xml
 740193d9633d8449ee1bff28030fe045 data/content/CUSTOM_SEARCH.json
+840193d9633d8449ee1bff28030fe045 data/content/CUSTOM_PLEXUS_SEARCH.json

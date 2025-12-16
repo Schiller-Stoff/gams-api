@@ -242,20 +242,22 @@ public class FacetQueryBuilder {
    * CRITICAL: URL-encodes the value so special characters like quotes
    * don't cause "Illegal character" errors in URIs.
    */
-  private static String buildSolrFieldQuery(String fieldName, String value) {
+  public static String buildSolrFieldQuery(String fieldName, String value) {
     if (value == null || value.trim().isEmpty()) {
       throw new IntegrationDataProcessingException("Search value cannot be null or empty");
     }
 
-    // TODO test / think about
-
-    // STEP 1: Escape for Solr syntax (adds quotes around value)
+    // STEP 1: Escape for Solr syntax
     String escapedValue = SolrUrlBuilder.escapeSolrValue(value.trim());
 
-    // STEP 2: URL-encode to handle special characters like quotes, backslashes
-    String urlEncodedValue = urlEncode(escapedValue);
+    // STEP 2: Wrap in quotes for phrase matching
+    // CRITICAL: Quotes ensure multi-word values are treated as phrases
+    String quotedValue = "\"" + escapedValue + "\"";
 
-    // STEP 3: Build query - value is already quoted and URL-encoded
+    // STEP 3: URL-encode to handle special characters
+    String urlEncodedValue = urlEncode(quotedValue);
+
+    // STEP 4: Build query - value is now quoted and URL-encoded
     return String.format("%s:%s", fieldName, urlEncodedValue);
   }
 

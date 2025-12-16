@@ -10,4 +10,8 @@ public class ProjectObjectMismatchException extends ProjectException {
   public  ProjectObjectMismatchException(String reason) {
     super(HttpStatus.CONFLICT, reason);
   }
+
+  public ProjectObjectMismatchException(String reason, Throwable cause) {
+    super(HttpStatus.CONFLICT, reason, cause);
+  }
 }

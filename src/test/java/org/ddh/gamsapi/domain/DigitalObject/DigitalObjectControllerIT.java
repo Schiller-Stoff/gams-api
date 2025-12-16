@@ -1,5 +1,9 @@
 package org.ddh.gamsapi.domain.DigitalObject;
 
+import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
+import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -10,14 +14,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.DigitalObjectCollection;
-import org.ddh.gamsapi.domain.DigitalObjectCollection.IDigitalObjectCollectionRepository;
-import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
-import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.TestUtilities.TestGAMSCollection;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -36,9 +32,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
-
-  @Autowired
-  private IDigitalObjectCollectionRepository collectionRepository;
 
   @MockitoBean
   private AuditingHandler auditingHandler;
@@ -70,28 +63,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
               testDataSet.digitalObject().getId())
           )
             .isNotPresent();
-
-    }
-
-    @Test
-    public void mayDeleteADigitalObjectReferencedByAGamsCollection() throws Exception {
-
-      // Arrange
-      DigitalObject digitalObject = TestDigitalObject.generate();
-      digitalObjectRepository.save(digitalObject);
-
-      // test collection references the test object automatically
-      DigitalObjectCollection digitalObjectCollection = TestGAMSCollection.generate();
-      collectionRepository.save(digitalObjectCollection);
-
-      // Act
-      mockMvc.perform(
-          MockMvcRequestBuilders.delete(
-              "/api/v1/projects/{projectAbbr}/objects/{id}",
-                  testDataSet.project().getProjectAbbr(),
-                  digitalObject.getId())
-              .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is4xxClientError());
 
     }
 
@@ -363,6 +334,36 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .andExpect(status().isNotFound());
       }
 
+      @Test
+      public void tagFilterReturnsExpectedDigitalObject() throws Exception {
+        final String TAG_FILTER_REQUEST_URL = String.format(
+            "%s?tag=%s",
+            REQUEST_URL,
+            testDataSet.digitalObject().getTags().iterator().next()
+        );
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(TAG_FILTER_REQUEST_URL)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        // Assert
+        String response = mvcResult.getResponse().getContentAsString();
+
+        org.assertj.core.api.Assertions.assertThat(response)
+            .contains(testDataSet.digitalObject().getId())
+            .contains(testDataSet.digitalObject().getProject().getProjectAbbr());
+
+        // assert that all tags are present in the response
+        testDataSet.digitalObject().getTags().forEach(tag -> {
+          org.assertj.core.api.Assertions.assertThat(response)
+              .contains(tag);
+        });
+      }
+
     }
 
     @Nested
@@ -422,6 +423,43 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             .contains(testDataSet.digitalObject().getBaseMetadata().getSha512Checksum());
       }
 
+      @Test
+      public void getDigitalObjectContainsExpectedTags(){
+        for (String tag : testDataSet.digitalObject().getTags()) {
+          org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
+              .contains(tag);
+        }
+      }
+
+    }
+
+    @Nested
+    public class GETProjectTags {
+
+      @Test
+      public void getProjectTagsReturnsExpectedTags() throws Exception {
+
+        String url = String.format("/api/v1/projects/%s/objects/tags", testDataSet.project().getProjectAbbr());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+
+        // contains digital object tags
+        for (String tag : testDataSet.digitalObject().getTags()) {
+          org.assertj.core.api.Assertions.assertThat(response)
+              .contains(tag);
+        }
+
+      }
+
+
     }
 
   }
@@ -429,138 +467,178 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Nested
   public class WebclientTests {
 
-
-    @Test
-    public void getDigitalObjectRendersExpectedViewValues() throws Exception {
-
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
-
-      MvcResult mvcResult = mockMvc.perform(
-            MockMvcRequestBuilders.get(url)
-                .accept(MediaType.TEXT_HTML)
-                .contentType(MediaType.TEXT_HTML)
-          )
-          .andExpect(status().isOk())
-          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-          .andReturn();
-
-      String response = mvcResult.getResponse().getContentAsString();
-      org.assertj.core.api.Assertions.assertThat(response)
-          .contains(
-              testDataSet.digitalObject().getId(),
-              testDataSet.project().getProjectAbbr(),
-              testDataSet.digitalObject().getObjectType(),
-              testDataSet.digitalObject().getFunder(),
-              testDataSet.digitalObject().getPublisher()
-          );
-
-    }
+    @Nested
+    public class SingularObject {
 
 
-    @Test
-    public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
-
-      var additionalDatastream = testDataBuilder.addRandomDatastream(testDataSet);
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
-
-      MvcResult mvcResult = mockMvc.perform(
-            MockMvcRequestBuilders.get(url)
-                .accept(MediaType.TEXT_HTML)
-                .contentType(MediaType.TEXT_HTML)
-          )
-          .andExpect(status().isOk())
-          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-          .andReturn();
-
-      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-          .contains(
-              testDataSet.mainDatastream().getDsid(),
-              additionalDatastream.getDsid()
-          );
-
-    }
-
-    @Test
-    public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
+      @Test
+      public void getDigitalObjectRendersExpectedViewValues() throws Exception {
 
 
-      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
-
-      MvcResult mvcResult = mockMvc.perform(
-            MockMvcRequestBuilders.get(url)
-                .accept(MediaType.TEXT_HTML)
-                .contentType(MediaType.TEXT_HTML)
-          )
-          .andExpect(status().isOk())
-          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-          .andReturn();
-
-      // all values of the metadata base entity should be present in the view
-      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-          .contains(
-              testDataSet.digitalObject().getId(),
-              testDataSet.digitalObject().getBaseMetadata().getTitle(),
-              testDataSet.digitalObject().getBaseMetadata().getDescription(),
-              testDataSet.digitalObject().getBaseMetadata().getCreator(),
-              testDataSet.digitalObject().getBaseMetadata().getRights(),
-              testDataSet.digitalObject().getPublisher(),
-              testDataSet.digitalObject().getObjectType(),
-              testDataSet.digitalObject().getProject().getProjectAbbr(),
-              testDataSet.digitalObject().getFunder()
-          );
-
-
-    }
-
-    @Test
-    public void getDigitalObjectContainsExpectedFunder() throws Exception {
-
-      String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
-
-      MvcResult mvcResult = mockMvc.perform(
-              MockMvcRequestBuilders.get(url)
-                  .accept(MediaType.TEXT_HTML)
-                  .contentType(MediaType.TEXT_HTML)
-          )
-          .andExpect(status().isOk())
-          .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-          .andReturn();
-
-      // funder should be present in returned view
-      org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-          .contains(
-              testDataSet.digitalObject().getFunder()
-          );
-
-
-    }
-
-    @Test
-    public void getDigitalDigitalObjectContainsExpectedChecksums() throws Exception {
         String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         MvcResult mvcResult = mockMvc.perform(
-                        MockMvcRequestBuilders.get(url)
-                                .accept(MediaType.TEXT_HTML)
-                                .contentType(MediaType.TEXT_HTML)
-                )
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-                .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-                .andReturn();
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+        org.assertj.core.api.Assertions.assertThat(response)
+            .contains(
+                testDataSet.digitalObject().getId(),
+                testDataSet.project().getProjectAbbr(),
+                testDataSet.digitalObject().getObjectType(),
+                testDataSet.digitalObject().getFunder(),
+                testDataSet.digitalObject().getPublisher()
+            );
+
+        // contains digital object tags
+        for (String tag : testDataSet.digitalObject().getTags()) {
+          org.assertj.core.api.Assertions.assertThat(response)
+              .contains(tag);
+        }
+
+      }
+
+
+      @Test
+      public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
+
+        var additionalDatastream = testDataBuilder.addRandomDatastream(testDataSet);
+
+        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
+
+        org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(
+                testDataSet.mainDatastream().getDsid(),
+                additionalDatastream.getDsid()
+            );
+
+      }
+
+      @Test
+      public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
+
+
+        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
+
+        // all values of the metadata base entity should be present in the view
+        org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(
+                testDataSet.digitalObject().getId(),
+                testDataSet.digitalObject().getBaseMetadata().getTitle(),
+                testDataSet.digitalObject().getBaseMetadata().getDescription(),
+                testDataSet.digitalObject().getBaseMetadata().getCreator(),
+                testDataSet.digitalObject().getBaseMetadata().getRights(),
+                testDataSet.digitalObject().getPublisher(),
+                testDataSet.digitalObject().getObjectType(),
+                testDataSet.digitalObject().getProject().getProjectAbbr(),
+                testDataSet.digitalObject().getFunder()
+            );
+
+
+      }
+
+      @Test
+      public void getDigitalObjectContainsExpectedFunder() throws Exception {
+
+        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
+
+        // funder should be present in returned view
+        org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+            .contains(
+                testDataSet.digitalObject().getFunder()
+            );
+
+
+      }
+
+      @Test
+      public void getDigitalDigitalObjectContainsExpectedChecksums() throws Exception {
+        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
 
         // both checksums should be present in returned view
         org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-                .contains(
-                        testDataSet.digitalObject().getBaseMetadata().getMd5Checksum(),
-                        testDataSet.digitalObject().getBaseMetadata().getSha512Checksum()
-                );
+            .contains(
+                testDataSet.digitalObject().getBaseMetadata().getMd5Checksum(),
+                testDataSet.digitalObject().getBaseMetadata().getSha512Checksum()
+            );
+      }
+
+    }
+
+
+    @Nested
+    public class DigitalObjectOverview {
+
+      @Test
+      public void getDigitalObjectsContainsExpectedTags() throws Exception {
+
+        String url = String.format("/api/v1/projects/%s/objects", testDataSet.project().getProjectAbbr());
+
+        MvcResult mvcResult = mockMvc.perform(
+                MockMvcRequestBuilders.get(url)
+                    .accept(MediaType.TEXT_HTML)
+                    .contentType(MediaType.TEXT_HTML)
+            )
+            .andExpect(status().isOk())
+            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show_all"))
+            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
+            .andReturn();
+
+        // contains digital object tags
+        for (String tag : testDataSet.digitalObject().getTags()) {
+          org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+              .contains(tag);
+        }
+
+      }
+
     }
 
   }

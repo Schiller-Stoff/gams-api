@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
-import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
@@ -26,6 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -58,10 +58,10 @@ public class GSearchServiceIT extends SolrIntegrationTest {
 
     // ingest the bag
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    Ingest ingest = new Ingest();
-    ingest.setZippedBagItFolder(zippedBag);
-    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-    ingestService.ingest(ingest);
+    ingestService.ingest(
+        TestProject.PROJECT_ABBR.getValue(),
+        new ByteArrayInputStream(zippedBag)
+    );
   }
 
 
@@ -152,8 +152,6 @@ public class GSearchServiceIT extends SolrIntegrationTest {
           SolrGamsCores.GAMS_CORE.value, GSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
       );
 
-      System.out.println("*** Response: " + response);
-
       // solr also returns the initial query info, so we just check that the id is contained in the response
       org.assertj.core.api.Assertions.assertThat(response)
           .isNotNull()
@@ -193,6 +191,10 @@ public class GSearchServiceIT extends SolrIntegrationTest {
               "dc.rights"
           )
       ;
+
+    }
+
+    public void containsExpectedDigitalObjectTagsInResponse(){
 
     }
 

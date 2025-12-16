@@ -20,6 +20,7 @@ public class BagDataToDigitalObjectConverter implements Converter<BagData, Digit
                 .publisher(source.getPublisher())
                 .funder(source.getFunder())
                 .mainResource(source.getMainResource())
+                .tags(source.getTags())
                 .baseMetadata(new MetadataBaseEntityBuilder()
                         .title(source.getTitle())
                         .creator(source.getCreator())

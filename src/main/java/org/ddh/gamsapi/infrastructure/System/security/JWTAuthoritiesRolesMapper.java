@@ -49,20 +49,20 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
         try {
           roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
         } catch (ClassCastException e) {
-          String msg = "Roles claim is not a collection of strings. Please configure keycloak to include roles in the token!";
-          log.error(msg);
-          throw new AuthorizationConfigurationException(msg);
+          String msg = "Roles claim is not a collection of strings. Please configure keycloak to include roles in the token! Original error: " + e.getMessage();
+          throw new AuthorizationConfigurationException(
+              msg,
+              e
+          );
         }
 
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
         log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
       } else if (userInfo.hasClaim(GROUPS)) {
         String msg = "User has no realm access claim but groups claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
-        log.error(msg);
         throw new AuthorizationConfigurationException(msg);
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token! (activate mapper and assign role)";
-        log.error(msg);
         throw new AuthorizationConfigurationException(msg);
       }
     } else {
@@ -76,25 +76,28 @@ public class JWTAuthoritiesRolesMapper implements GrantedAuthoritiesMapper {
         try {
           realmAccess = (Map<String, Object>) userAttributes.get(REALM_ACCESS_CLAIM);
         } catch (ClassCastException e) {
-          String msg = "Realm access claim is not a map. Please configure keycloak to include roles in the token!";
-          log.error(msg);
-          throw new AuthorizationConfigurationException(msg);
+          String msg = "Realm access claim is not a map. Please configure keycloak to include roles in the token! Original error: " + e.getMessage();
+          throw new AuthorizationConfigurationException(
+              msg,
+              e
+          );
         }
         // extract roles from realm access claim
         Collection<String> roles;
         try {
           roles = (Collection<String>) realmAccess.get(ROLES_CLAIM);
         } catch (ClassCastException e) {
-          String msg = "Roles claim is not a collection of strings. Please configure keycloak to include roles in the token!";
-          log.error(msg);
-          throw new AuthorizationConfigurationException(msg);
+          String msg = "Roles claim is not a collection of strings. Please configure keycloak to include roles in the token! Original error: " + e.getMessage();
+          throw new AuthorizationConfigurationException(
+              msg,
+              e
+          );
         }
 
         mappedAuthorities.addAll(generateAuthoritiesFromClaim(roles));
         log.trace("Successfully mapped jwt authorities to spring security authorities: " + mappedAuthorities);
       } else {
         String msg = "User has no realm access claim. Please configure keycloak to include roles in the token!";
-        log.error(msg);
         throw new AuthorizationConfigurationException(msg);
       }
     }

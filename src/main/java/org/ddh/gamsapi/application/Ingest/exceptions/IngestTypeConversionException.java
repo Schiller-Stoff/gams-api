@@ -7,8 +7,13 @@ import org.springframework.http.HttpStatus;
  * E.g. when mapping a bagit sip.json to a digital object.
 
  */
-public class IngestTypeConversionException extends IngestException {
+public class IngestTypeConversionException extends IngestProcessingException {
   public IngestTypeConversionException(String reason) {
-    super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
+    super(reason);
   }
+
+  public IngestTypeConversionException(String reason, Throwable cause) {
+    super(reason, cause);
+  }
+
 }

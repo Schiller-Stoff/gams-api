@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
+import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -83,8 +85,10 @@ public class FacetService {
     FacetSolrResponse parsedResponse = FacetSolrResponse.from(solrResponse);
 
     // STEP 4: Get baseline total count for these projects (unfiltered)
-    int projectDocumentsCount = solrClient.countProjectDocuments(
-        SolrGamsCores.GAMS_CORE.value, projectAbbrs);
+    int projectDocumentsCount = solrClient.countDocumentsByPropertyValues(
+        SolrGamsCores.GAMS_CORE.value,
+        GSearchProperties.PROJECT.name,
+        projectAbbrs);
 
     long totalTime = System.currentTimeMillis() - startTime;
 

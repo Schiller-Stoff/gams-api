@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Integration.GSearch;
 import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
-import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
@@ -16,6 +15,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -50,10 +50,10 @@ public class GSearchControllerIT extends SolrIntegrationTest {
 
     // ingest the bag
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    Ingest ingest = new Ingest();
-    ingest.setZippedBagItFolder(zippedBag);
-    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-    ingestService.ingest(ingest);
+    ingestService.ingest(
+        TestProject.PROJECT_ABBR.getValue(),
+        new ByteArrayInputStream(zippedBag)
+    );
 
     // index object
     gSearchService.indexObject(

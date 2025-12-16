@@ -480,6 +480,7 @@
   <field name="objectCreator" type="string"/>
   <field name="objectPublisher" type="string"/>
   <field name="objectRights" type="string"/>
+  <field name="objectTags" type="strings"/>
 
 
     <!-- Dublin Core fields in alphabetical order -->

@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * Spring Data JPA Projection Interface for a singular DigitalObject.
@@ -35,6 +36,8 @@ public interface DigitalObjectDetailsView {
     String getFunder();
 
     String getMainResource();
+
+    Set<String> getTags();
 
     interface ProjectView {
         String getProjectAbbr();

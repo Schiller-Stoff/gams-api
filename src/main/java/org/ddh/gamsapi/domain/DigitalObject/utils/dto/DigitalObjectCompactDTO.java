@@ -42,6 +42,8 @@ public class DigitalObjectCompactDTO {
 
     private String funder;
 
+    private Set<String> tags;
+
     private DatastreamMainResourceDto mainResource;
 
     /**

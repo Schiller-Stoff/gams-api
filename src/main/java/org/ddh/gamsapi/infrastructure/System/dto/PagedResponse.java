@@ -134,7 +134,7 @@ public class PagedResponse<T> {
     ResponseMetadata metadata = ResponseMetadata.builder()
         .searchTerm(searchTerm)
         .processingTimeMs(processingTimeMs)
-        .resultSummary(String.format("Found %d results", page.getTotalElements()))
+        .resultSummary("Found" + page.getTotalElements() + " results")
         .build();
 
     return from(page, metadata);

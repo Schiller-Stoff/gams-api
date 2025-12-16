@@ -50,9 +50,10 @@ public class XMLUtils {
       );
     } catch (ParserConfigurationException | SAXException | IOException e){
       String xml = new String(source, StandardCharsets.UTF_8);
-      String msg = "Failed to parse given source datastream as XML." + e + "\n For XML: \n" + xml;
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to parse given source datastream as XML." + e + "\n For XML: \n" + xml + " Original error: " + e.getMessage(),
+          e
+      );
     }
   }
 
@@ -71,9 +72,10 @@ public class XMLUtils {
           new InputSource(new InputStreamReader(source, StandardCharsets.UTF_8))
       );
     } catch (ParserConfigurationException | SAXException | IOException e){
-      String msg = "Failed to parse given source datastream as XML." + e + "\n";
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to parse given source datastream as XML." + e.getMessage(),
+          e
+      );
     }
   }
 
@@ -98,9 +100,10 @@ public class XMLUtils {
       transformer.setOutputProperty(OutputKeys.ENCODING, StandardCharsets.UTF_8.name());
       transformer.transform(source, result);
     } catch (TransformerException e){
-      String msg = String.format("Failed to transform given XML Document to byte[] with cause: %s", e);
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to transform given XML Document to byte[] with cause: " + e.getMessage(),
+          e
+      );
     }
     return bos.toByteArray();
   }
@@ -118,15 +121,17 @@ public class XMLUtils {
     try {
       NodeList nodeList = (NodeList)xPath.compile(givenXpath).evaluate(document, XPathConstants.NODESET);
       if((nodeList == null) || (nodeList.getLength() == 0)){
-        String msg = String.format("Found no (or at least one element!) %s  inside given document.",givenXpath);
-        log.error(msg);
-        throw new IntegrationDataProcessingException(msg);
+        String msg = "Found no elements for xpath " + givenXpath + " inside given document.";
+        throw new IntegrationDataProcessingException(
+            msg
+        );
       }
-      return  nodeList;
+      return nodeList;
     } catch (XPathExpressionException e){
-      String msg = String.format("XPath on xml document failed. Got xpath: %s -  Original error: %s", givenXpath, e);
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "XPath on xml document failed. Got xpath: " + givenXpath + " -  Original error: " + e.getMessage(),
+          e
+      );
     }
 
   }
@@ -158,9 +163,10 @@ public class XMLUtils {
       result = result.replaceAll("\\s+", " ");
       return result;
     } catch (XPathExpressionException e){
-      String msg = String.format("XPath on xml document failed. Got xpath: %s -  Original error: %s", extractTextXpath, e);
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "XPath on xml document failed. Got xpath: " + extractTextXpath + " -  Original error: " + e.getMessage(),
+          e
+      );
     }
   }
 
@@ -175,37 +181,37 @@ public class XMLUtils {
   public static String extractAttributeValue(String attributeName, Node sourceNode) throws IntegrationDataProcessingException {
     // TODO how to build a propper error message?
     if((attributeName == null) || (attributeName.isEmpty())){
-      String msg = "Given attributename is null or empty";
-      //log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Given attributename is null or empty"
+      );
     }
 
     String nodeName = sourceNode.getNodeName();
     if((nodeName == null) || (nodeName.isEmpty())){
-        String msg = String.format("Cannot extract attribute %s from given node without tagname.", attributeName);
-        //log.error(msg);
-        throw new IntegrationDataProcessingException(msg);
+        throw new IntegrationDataProcessingException(
+            "Cannot extract attribute " + attributeName + " from given node without tagname."
+        );
     }
 
     NamedNodeMap attributes = sourceNode.getAttributes();
     if((attributes == null) || (attributes.getLength() == 0)){
-      String msg = String.format("Failed to extract attribute %s from given node with name %s", attributeName, nodeName);
-      //log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to extract attribute " + attributeName + " from given node " + nodeName + ". Node has no attributes."
+      );
     }
 
     Node attribute = attributes.getNamedItem(attributeName);
     if(attribute == null){
-      String msg = String.format("Failed to extract attribute %s from node %s. Attribute is null (not available)", attributeName, nodeName);
-      //log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to extract attribute " + attributeName + " from given node " + nodeName + ". Attribute is null (not available)."
+      );
     }
 
     String attributeValue = attribute.getTextContent();
     if((attributeValue == null) || (attributeValue.isEmpty())){
-      String msg = String.format("Failed to extract attribute %s from node %s. Attribute is defined but it's value is null or empty.", attributeValue, attributeName);
-      //log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to extract attribute " + attributeName + " from given node " + nodeName + ". Attribute is defined but it's value is null or empty."
+      );
     }
 
     return attributeValue;
@@ -222,21 +228,21 @@ public class XMLUtils {
    */
   public static Node applyAttributeValue(String attributeName, String attributeValue, Node sourceNode) throws IntegrationDataProcessingException {
     if((attributeName == null) || (attributeName.isEmpty())){
-      String msg = "Failed to set attribute because given attribute name is null or empty";
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to set attribute because given attribute name is null or empty"
+      );
     }
 
     if((attributeValue == null) || (attributeValue.isEmpty())){
-      String msg = "Failed to set attribute because given attribute value is null or empty";
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to set attribute because given attribute value is null or empty"
+      );
     }
 
     if(sourceNode == null){
-      String msg = "Failed to set attribute because given xml-node is null";
-      log.error(msg);
-      throw new IntegrationDataProcessingException(msg);
+      throw new IntegrationDataProcessingException(
+          "Failed to set attribute because given xml-node is null"
+      );
     }
 
     ((Element)sourceNode).setAttribute(attributeName, attributeValue);

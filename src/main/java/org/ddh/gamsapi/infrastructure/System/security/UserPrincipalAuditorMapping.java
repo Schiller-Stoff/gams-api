@@ -26,15 +26,13 @@ public class UserPrincipalAuditorMapping implements IUserPrincipalAuditorMapping
 
     // if auth fails
     if((authentication == null)){
-      String msg = String.format("Tried to map UserPrincipal to Auditor but failed. Authentication is null. Happened in class %s ", this.getClass().getName());
-      log.error(msg);
+      String msg = "Tried to map UserPrincipal to Auditor but failed. Authentication is null.";
       throw new UserAuthenticationRequiredException(msg);
     }
 
     // if user is not authenticated (mapping can only be done if user is authenticated)
     if (!authentication.isAuthenticated()){
-      String msg = String.format("Tried to map UserPrincipal to Auditor but failed. User is not authenticated. %s", authentication);
-      log.error(msg);
+      String msg = "Tried to map UserPrincipal to Auditor but failed. User is not authenticated. Authentication: " + authentication;
       throw new UserAuthenticationRequiredException(msg);
     }
 
@@ -44,14 +42,15 @@ public class UserPrincipalAuditorMapping implements IUserPrincipalAuditorMapping
       String userName = user.getSubject();
       if (userName == null) {
         String msg = "User subject is null. Failed to extract user's subject from given token. Make sure that you have defined a subject in the keycloak instance.";
-        log.error(msg);
         throw new AuthorizationConfigurationException(msg);
       }
       return Optional.of(userName);
     } catch (ClassCastException e){
-      String msg = String.format("Failed to extract user principal from given authentication. Mapping from UserPrincipal to Auditor aborted. Is there a valid oauth2 token available? Original error %s", e);
-      log.error(msg);
-      throw new UserAuthenticationRequiredException(msg);
+      String msg = "Failed to extract user principal from given authentication. Mapping from UserPrincipal to Auditor aborted. Is there a valid oauth2 token available? Original error: " + e.getMessage();
+      throw new UserAuthenticationRequiredException(
+          msg,
+          e
+      );
     }
 
   }

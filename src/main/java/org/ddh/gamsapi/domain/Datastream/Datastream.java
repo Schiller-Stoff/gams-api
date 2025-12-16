@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.ValidDatastreamId;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
@@ -39,6 +40,7 @@ import java.util.Set;
 @Slf4j
 @IdClass(DatastreamId.class)
 @JacksonXmlRootElement(localName = "datastream")
+@ValidDatastreamId
 public class Datastream {
 
   public static final String ENTITY_TABLE_NAME = "datastream";
@@ -70,7 +72,6 @@ public class Datastream {
   @Column(name = "dsid")
   @NotEmpty
   @Id
-  @Pattern(regexp = "^[a-zA-Z0-9._]*$")
   @Size(max = 256, min = 1)
   private String dsid;
 
@@ -143,6 +144,7 @@ public class Datastream {
   @ElementCollection
   @NotNull
   @Column(name = Datastream.TAGS_TABLE_NAME)
+  @Size(max = 100, message = "Maximum 100 tags allowed per datastream")
   private Set<String> tags = new HashSet<>();
 
   /**
@@ -151,6 +153,7 @@ public class Datastream {
   @ElementCollection
   @NotNull
   @Column(name = Datastream.LANG_TABLE_NAME)
+  @Size(max = 100, message = "Maximum 100 lang allowed per datastream")
   private Set<String> lang;
 
   /**
@@ -160,13 +163,13 @@ public class Datastream {
    */
   public DatastreamId deriveDatastreamId() {
     if(dsid == null || digitalObject == null) {
-      String msg = String.format("Encountered unexpected null value - Tried to derive DatastreamId from Datastream with dsid: %s and digitalObject: %s", dsid, digitalObject);
+      String msg = "Encountered unexpected null value - Tried to derive DatastreamId from Datastream with dsid: "  + dsid  + " and digitalObject: " + digitalObject;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
 
     if(dsid.isEmpty() || digitalObject.getId().isEmpty()){
-      String msg = String.format("Encountered unexpected empty value - Tried to derive DatastreamId from Datastream with dsid: %s and digitalObject: %s", dsid, digitalObject);
+      String msg = "Encountered unexpected empty value - Tried to derive DatastreamId from Datastream with dsid: " + dsid + " and digitalObject: " + digitalObject;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
@@ -191,17 +194,15 @@ public class Datastream {
 
     Datastream that = (Datastream) o;
     if(digitalObject == null || that.digitalObject == null) {
-      String msg = String.format("Encountered unexpected null value when comparing two digital objects via .equals of a datastream: First %s and that.digitalObject: %s", digitalObject, that.digitalObject);
+      String msg = "Encountered unexpected null value when comparing two digital objects via .equals of a datastream: First " + digitalObject + " and that.digitalObject: " + that.digitalObject;
       log.error(msg);
       throw new IllegalStateException(msg);
-      //return false;
     }
 
     if(dsid == null || that.dsid == null) {
-      String msg = String.format("Encountered unexpected null value when comparing two dsids via .equals of a datastream: First %s and that.dsid: %s", dsid, that.dsid);
+      String msg = "Encountered unexpected null value when comparing two dsids via .equals of a datastream: First " + dsid + " and that.dsid: " + that.dsid;
       log.error(msg);
       throw new IllegalStateException(msg);
-      //return false;
     }
 
     return Objects.equals(digitalObject, that.digitalObject) && Objects.equals(dsid, that.dsid);
@@ -212,24 +213,28 @@ public class Datastream {
     return Objects.hash(digitalObject, dsid);
   }
 
-  @AssertTrue(message = "The dsid must contain a valid file extension string, like 'DC.xml' or 'SOMETHING.pdf'")
-  public boolean isDsidContainingADot(){
-    if(dsid == null) {
-      String msg = String.format("Encountered unexpected null value when validating dsid: dsid is null. %s", this);
-      log.error(msg);
-      throw new IllegalStateException(msg);
-    }
-    String fileExtension = StringUtils.getFilenameExtension(dsid);
-    return fileExtension != null;
-  }
-
   public String getFileName(){
     if(bagPath == null) {
-      String msg = String.format("Encountered unexpected null value when getting filename from dsid: dsid is null. %s", this);
+      String msg = "Encountered unexpected null value when getting filename from dsid: dsid is null. %s" + this;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
     return StringUtils.getFilename(bagPath);
+  }
+
+  // implement to String method for better logging
+  @Override
+  public String toString() {
+    return "Datastream{" +
+            "digitalObject=" + (digitalObject != null ? digitalObject.getId() : "null") +
+            ", dsid='" + dsid + '\'' +
+            ", mimeType='" + mimeType + '\'' +
+            ", bagPath='" + bagPath + '\'' +
+            ", size=" + size +
+            ", type='" + type + '\'' +
+            ", created=" + created +
+            ", modified=" + modified +
+            '}';
   }
 
 }

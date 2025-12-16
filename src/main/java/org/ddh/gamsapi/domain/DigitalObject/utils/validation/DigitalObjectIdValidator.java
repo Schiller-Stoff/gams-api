@@ -59,7 +59,7 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     // If project abbreviation is null, let project validation handle it
     if (projectAbbr == null || projectAbbr.isEmpty()) {
-      String msg = String.format("Digital object project abbr is null or empty. %s", digitalObject);
+      String msg = "Digital object project abbr is null or empty. " + digitalObject;
       log.trace(msg);
       addViolation(context, msg);
       return false;
@@ -70,14 +70,14 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     int minLength = 5;
     if(id.length() < minLength){
-      String msg = String.format("Digital object id is too short (shorter than %s). Got id: %s",minLength,  digitalObject.getId());
+      String msg = "Digital object id is too short (shorter than " + minLength + "). Got id: " +  digitalObject.getId();
       addViolation(context, msg);
       return false;
     }
 
     int maxLength = 64;
     if(id.length() > maxLength){
-      String msg = String.format("Digital object id is too long (bigger than %s). Got id: %s", maxLength, digitalObject.getId());
+      String msg = "Digital object id is too long (longer than " + maxLength + "). Got id: " +  digitalObject.getId();
       addViolation(context, msg);
       return false;
     }
@@ -92,8 +92,7 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     // Rule 1: Must start with project abbreviation + dot
     if (!validateProjectPrefix(projectAbbrWithLocalId, projectAbbr, context)) {
-      String msg = String.format("Digital object id does not start with the expected project abbreviation. Expected to start with: %s - but got: %s",
-          projectAbbr + ".", projectAbbrWithLocalId);
+      String msg = "Digital object id does not start with the expected project abbreviation. Expected to start with: " + projectAbbr + ". - but got: " + projectAbbrWithLocalId;
       log.trace(msg);
       addViolation(context, msg);
       return false;
@@ -104,7 +103,7 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     // Rule 2: No consecutive dots
     if (localId.contains("..")) {
-      String msg = String.format("Digital object id contains consecutive dots. Digital object id: %s", digitalObject.getId());
+      String msg = "Digital object id contains consecutive dots (..). Digital object id: " + digitalObject.getId();
       log.trace(msg);
       addViolation(context, msg);
       return false;
@@ -112,7 +111,7 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     // Rule 3: No underscores (per documentation)
     if (localId.contains("_")) {
-      String msg = String.format("Digital object id contains underscores (_). Digital object id: %s", digitalObject.getId());
+      String msg = "Digital object id contains underscores (_). Digital object id: " + digitalObject.getId();
       log.trace(msg);
       addViolation(context, msg);
       return false;
@@ -120,7 +119,7 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     // Rule 4: No consecutive dashes
     if (localId.contains("--")) {
-      String msg = String.format("Digital object id contains consecutive dashes (--). Digital object id: %s", digitalObject.getId());
+      String msg = "Digital object id contains consecutive dashes (--). Digital object id: " + digitalObject.getId();
       log.trace(msg);
       addViolation(context, msg);
       return false;
@@ -128,7 +127,7 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
 
     // Rule 5: Local ID must match pattern (starts with letter/number, followed by valid chars)
     if (!localId.matches(LOCAL_ID_PATTERN)) {
-      String msg = String.format("Digital object id contains invalid characters. Digital object id: %s", digitalObject.getId());
+      String msg = "Digital object id contains invalid characters. Digital object id: " + digitalObject.getId();
       log.trace(msg);
       addViolation(context, msg);
       return false;
@@ -166,11 +165,8 @@ public class DigitalObjectIdValidator implements ConstraintValidator<ValidDigita
     String expectedPrefix = projectAbbr + ".";
 
     if (!idPart.startsWith(expectedPrefix)) {
-      addViolation(context, String.format(
-          "Digital object ID must start with project abbreviation '%s' followed by a dot. " +
-              "Expected to start with: '%s' but got: '%s'",
-          projectAbbr, expectedPrefix, idPart
-      ));
+      String msg = "Digital object ID must start with project abbreviation '" + projectAbbr + "' followed by a dot. Expected to start with: '" + expectedPrefix + "' but got: '" + idPart + "'";
+      addViolation(context, msg);
       return false;
     }
 

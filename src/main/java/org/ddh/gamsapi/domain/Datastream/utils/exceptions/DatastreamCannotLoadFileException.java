@@ -10,4 +10,8 @@ public class DatastreamCannotLoadFileException extends DatastreamException {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
 
+  public DatastreamCannotLoadFileException(String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
+
 }

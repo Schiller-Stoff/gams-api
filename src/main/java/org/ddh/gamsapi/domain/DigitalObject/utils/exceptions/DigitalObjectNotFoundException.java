@@ -10,4 +10,8 @@ public class DigitalObjectNotFoundException extends DigitalObjectException {
   public DigitalObjectNotFoundException(String reason) {
     super(HttpStatus.NOT_FOUND, reason);
   }
+
+  public DigitalObjectNotFoundException(String reason, Throwable cause) {
+    super(HttpStatus.NOT_FOUND, reason, cause);
+  }
 }

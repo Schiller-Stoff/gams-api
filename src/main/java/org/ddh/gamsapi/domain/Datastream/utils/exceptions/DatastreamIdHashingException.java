@@ -12,4 +12,8 @@ public class DatastreamIdHashingException extends DatastreamException {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
 
+  public DatastreamIdHashingException(String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
+
 }

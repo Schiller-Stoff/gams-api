@@ -11,4 +11,8 @@ public class UserAuthenticationRequiredException extends SecurityException {
     super(HttpStatus.UNAUTHORIZED, reason);
   }
 
+  public UserAuthenticationRequiredException(String reason, Throwable cause) {
+    super(HttpStatus.UNAUTHORIZED, reason, cause);
+  }
+
 }

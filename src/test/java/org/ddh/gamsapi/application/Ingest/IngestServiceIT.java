@@ -2,6 +2,8 @@ package org.ddh.gamsapi.application.Ingest;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
+import org.ddh.gamsapi.application.Integration.PlexusSearch.PlexusSearchProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -85,10 +88,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
 
       // get the project after ingest
       var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
@@ -111,10 +114,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
     }
 
     @Test
@@ -125,7 +128,7 @@ public class IngestServiceIT extends IntegrationTest {
       var datastreams = datastreamRepository.findAll();
       Assertions.assertThat(datastreams)
           .isNotEmpty()
-          .hasSize(6);
+          .hasSize(7);
 
       // assert that expected datastream content exists on the fileystem
       datastreams.forEach(datastream -> {
@@ -154,6 +157,15 @@ public class IngestServiceIT extends IntegrationTest {
         Assertions.assertThat(digitalObject.getBaseMetadata().getSha512Checksum())
             .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
 
+    }
+
+    @Test
+    @Transactional
+    public void createsDigitalObjectWithExpectedTagsSize(){
+        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+        Assertions.assertThat(digitalObject.getTags().size())
+            .isEqualTo(TestDigitalObject.getTags().size());
     }
 
     @Test
@@ -216,7 +228,7 @@ public class IngestServiceIT extends IntegrationTest {
       var datastreams = datastreamRepository.findAll();
       Assertions.assertThat(datastreams)
           .isNotEmpty()
-          .hasSize(6);
+          .hasSize(7);
 
     }
 
@@ -303,10 +315,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
 
 
       long eventCont = eventCaptureListener.countEventsOfType(DigitalObjectCreatedEvent.class);
@@ -332,12 +344,11 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-
       Assertions.assertThatThrownBy(
-          () -> ingestService.ingest(ingest)
+          () -> ingestService.ingest(
+              TestProject.PROJECT_ABBR.getValue(),
+              new ByteArrayInputStream(zippedBag)
+          )
       ).isInstanceOf(IngestObjectAlreadyExistsException.class);
 
     }
@@ -355,10 +366,10 @@ public class IngestServiceIT extends IntegrationTest {
 
       // ingest the bag
       byte[] zippedBag = ZipUtils.zipDir(bagFile);
-      Ingest ingest = new Ingest();
-      ingest.setZippedBagItFolder(zippedBag);
-      ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-      ingestService.ingest(ingest);
+      ingestService.ingest(
+          TestProject.PROJECT_ABBR.getValue(),
+          new ByteArrayInputStream(zippedBag)
+      );
 
     }
 
@@ -419,6 +430,11 @@ public class IngestServiceIT extends IntegrationTest {
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.PUBLISHER);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.FUNDER);
               Assertions.assertThat(sipJsonContent).contains(TestBag.TestBagSipJson.MAIN_RESOURCE);
+              // tags contained in sip json
+              TestBag.TestBagSipJson.DIGITAL_OBJECT_TAGS.forEach(tag -> {
+                Assertions.assertThat(sipJsonContent).contains(tag);
+              });
+
 
               // assertions about test datastream
               Assertions.assertThat(sipJsonContent)
@@ -467,7 +483,7 @@ public class IngestServiceIT extends IntegrationTest {
         });
 
 
-        Assertions.assertThat(entryNames.size()).isEqualTo(11);
+        Assertions.assertThat(entryNames.size()).isEqualTo(12);
 
         // Assert presence of generated files
         Assertions.assertThat(entryNames).contains(
@@ -485,7 +501,8 @@ public class IngestServiceIT extends IntegrationTest {
             String.format("%s/data/content/test.xml", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/data/content/test.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/data/content/manifest.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
-            String.format("%s/data/content/search.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+            String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), CustomSearchProperties.DATASTREAM_DSID.name),
+            String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), PlexusSearchProperties.DATASTREAM_DSID.name)
         );
 
 

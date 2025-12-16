@@ -41,16 +41,20 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     
     log.trace("Checking custom authorization process for datastream content {}", dsid);
 
-    Datastream datastream = datastreamRepository.findById(
+    // TODO this should use own projection to only load the content restrictions!
+    // PERFORMANCE critical: load datastream only with content restrictions
+    var datastreamOpt = datastreamRepository.findById(
         DatastreamId.builder()
             .digitalObject(digitalObjectId)
             .dsid(dsid)
             .build()
-    ).orElseThrow(() -> {
-      String msg = String.format("Authorization missing datastream metadata: Requested datastream %s not found for digital object %s for project: %s. At url: %s", dsid, digitalObjectId, projectAbbr, authorizationContext.getRequest().getRequestURI());
-      log.info(msg);
-      return new DatastreamNotFoundException(msg);
-    });
+    );
+
+    if(datastreamOpt.isEmpty()){
+      return new AuthorizationDecision(false);
+    }
+
+    var datastream = datastreamOpt.get();
 
     // without content restrictions, always allow access
     if(datastream.getContentRestrictions().isEmpty()){

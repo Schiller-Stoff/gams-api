@@ -7,4 +7,8 @@ public class UserNotFoundException extends UserException {
     super(HttpStatus.NOT_FOUND, reason);
   }
 
+  public UserNotFoundException(String reason, Throwable cause) {
+    super(HttpStatus.NOT_FOUND, reason, cause);
+  }
+
 }

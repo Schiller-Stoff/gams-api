@@ -95,6 +95,13 @@ see deployment section
 
 ## Deployment
 
+### Installation requirements
+- Docker installed and running
+- Docker Hub account with push rights to zimgraz/gams-api repository
+- Make installed
+- Java required version installed
+- Maven installed
+
 ### Automatic via make
 
 1. Increment version in .release

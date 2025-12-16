@@ -135,7 +135,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void findsDigitalObjectViaContainedInId(){
+    public void findsDigitalObjectExactId(){
 
       digitalObjectService.findAllByProjectAbbr(
               testDataSet.project().getProjectAbbr(),
@@ -144,6 +144,23 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .getContent()
           .forEach(digitalObject -> {
             Assertions.assertThat(digitalObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
+            Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
+          });
+
+    }
+
+    @Test
+    public void findsDigitalObjectStartsWithId(){
+
+      String idStartsWith = testDataSet.digitalObject().getId().substring(0,5);
+
+      digitalObjectService.findAllByProjectAbbr(
+              testDataSet.project().getProjectAbbr(),
+              idStartsWith,
+              PageRequest.of(0,100))
+          .getContent()
+          .forEach(digitalObject -> {
+            Assertions.assertThat(digitalObject.getId()).startsWith(idStartsWith);
             Assertions.assertThat(digitalObject.getProject().getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
           });
 
@@ -173,8 +190,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void returnsDigitalObjectWithExpectedProperties(){
-
-
       DigitalObject foundObject = digitalObjectService.findById(testDataSet.digitalObject().getId());
       Assertions.assertThat(foundObject.getFunder()).isEqualTo(testDataSet.digitalObject().getFunder());
       Assertions.assertThat(foundObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
@@ -186,6 +201,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       // cannot be equal is being assigned by the database
       Assertions.assertThat(foundObject.getModified()).isNotEqualTo(testDataSet.digitalObject().getModified());
       Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(testDataSet.digitalObject().getCreated());
+
+      Assertions.assertThat(
+          foundObject.getTags()
+      ).containsAll(
+          testDataSet.digitalObject().getTags()
+      );
 
     }
 
@@ -347,38 +368,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
-
-  @Nested
-  public class SearchByDublinCoreCriteria {
-
-    @Test
-    @Transactional
-    public void findsExpectedDigitalObject(){
-
-      var dcFilters = Map.of(
-          testDataSet.dublinCoreEntry().getName(),
-          List.of(testDataSet.dublinCoreEntry().getValue())
-      );
-
-      var foundObjects = digitalObjectService.searchDigitalObjectsByDublinCoreCriteria(
-          MultiValueMap.fromMultiValue(dcFilters),
-          Set.of(testDataSet.project().getProjectAbbr()),
-          DigitalObjectDublinCoreSpecification.SearchMode.FULLTEXT,
-          PageRequest.of(0,100)
-      );
-
-      Assertions.assertThat(foundObjects.getContent())
-          .isNotNull()
-          .isNotEmpty()
-          .hasSize(1)
-          .allSatisfy(digitalObject -> {
-            Assertions.assertThat(digitalObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
-            Assertions.assertThat(digitalObject.getProjectAbbr()).isEqualTo(testDataSet.project().getProjectAbbr());
-          });
-
-    }
-  }
-
   @Nested
   public class FindAllIdsByProjectAbbr {
 
@@ -401,6 +390,58 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(paginatedIds.getContent())
           .hasSize(EXPECTED_OBJECT_COUNT)
           .contains(digitalObject1.getId(), digitalObject2.getId());
+
+    }
+
+  }
+
+  @Nested
+  public class FindAllByProjectAndTags {
+
+    @Test
+    public void returnsDigitalObjectsWithExpectedTags(){
+
+      var TAG_TO_FIND = TestDigitalObject.getTags();
+
+      // adding two additional digital objects to the test data set
+      var foundObjects = digitalObjectService.findAllByProjectAndTags(
+          testDataSet.project().getProjectAbbr(),
+          TAG_TO_FIND,
+          PageRequest.of(0,100)
+      );
+
+      Assertions.assertThat(foundObjects.getPagination().getTotalElements())
+          .isGreaterThan(0);
+
+      var firstFoundObject = foundObjects.getContent().get(0);
+
+      Assertions.assertThat(firstFoundObject.getTags())
+          .isNotNull()
+          .isNotEmpty()
+          .containsAll(TAG_TO_FIND);
+
+    }
+
+  }
+
+  @Nested
+  public class FindDistinctTagsByProject {
+
+    @Test
+    public void returnsDistinctTagsForProject(){
+
+      // adding two additional digital objects to the test data set
+      testDataBuilder.addRandomObject(testDataSet);
+      testDataBuilder.addRandomObject(testDataSet);
+
+      var distinctTags = digitalObjectService.findDistinctTagsByProject(
+          testDataSet.project().getProjectAbbr()
+      );
+
+      Assertions.assertThat(distinctTags)
+          .isNotNull()
+          .isNotEmpty()
+          .containsAll(TestDigitalObject.getTags());
 
     }
 

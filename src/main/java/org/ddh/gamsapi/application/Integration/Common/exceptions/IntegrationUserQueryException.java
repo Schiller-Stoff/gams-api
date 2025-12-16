@@ -10,4 +10,8 @@ public class IntegrationUserQueryException extends IntegrationException {
   public IntegrationUserQueryException(String reason) {
     super(HttpStatus.BAD_REQUEST, reason);
   }
+
+  public IntegrationUserQueryException(String reason, Throwable cause) {
+    super(HttpStatus.BAD_REQUEST, reason, cause);
+  }
 }

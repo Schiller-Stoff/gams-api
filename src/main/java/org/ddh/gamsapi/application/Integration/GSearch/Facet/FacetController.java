@@ -165,7 +165,7 @@ public class FacetController {
       );
 
       // Add search results and facet data to model
-      model.addAttribute("searchResults", response.getResults());
+      model.addAttribute("searchResults", response.getResult());
       model.addAttribute("availableFacets", response.getAvailableFacets());
       model.addAttribute("selectedFacets", response.getSelectedFacets());
       model.addAttribute("totalUnfilteredCount", response.getTotalUnfilteredCount());

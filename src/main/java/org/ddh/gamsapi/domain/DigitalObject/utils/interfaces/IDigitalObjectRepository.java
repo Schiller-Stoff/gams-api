@@ -12,6 +12,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, String>, JpaSpecificationExecutor<DigitalObject> {
 
@@ -93,17 +94,57 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
   Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
   /**
-   * Finds all digital objects for a given collection.
-   * @param collectionId identifier of the collection
-   * @param pageable pagination
-   * @return a page of digital objects as projection
+   * Finds digital objects by project and tags using AND logic.
+   * All specified tags must be present on the digital object.
+   *
+   * @param projectAbbr Project abbreviation
+   * @param tags Set of tags (all must match)
+   * @param tagCount Number of tags (must equal tags.size() for AND logic)
+   * @param pageable Pagination
+   * @return Page of digital objects matching ALL tags
    */
-  @Query("SELECT do FROM DigitalObjectCollection c JOIN c.digitalObjects do WHERE c.id = :collectionId")
-  Page<DigitalObjectListItemView> findDigitalObjectsByCollectionId(
-      @Param("collectionId") String collectionId,
+  @Query("SELECT d FROM DigitalObject d " +
+      "WHERE d.project.projectAbbr = :projectAbbr " +
+      "AND (SELECT COUNT(DISTINCT t) FROM d.tags t WHERE t IN :tags) = :tagCount")
+  Page<DigitalObjectListItemView> findByProject_ProjectAbbrAndTagsIn(
+      @Param("projectAbbr") String projectAbbr,
+      @Param("tags") Set<String> tags,
+      @Param("tagCount") long tagCount,
       Pageable pageable
   );
 
 
+  /**
+   * Finds all distinct tags used by digital objects in a project.
+   * PERFORMANCE: Uses index on (digital_object_id, datastream_tags) and GROUP BY optimization.
+   *
+   * @param projectAbbr Project abbreviation
+   * @return Set of unique tag strings used in the project
+   */
+  @Query(value =
+      "SELECT DISTINCT dt.digital_object_tags " +
+          "FROM digital_object_tags dt " +
+          "INNER JOIN digital_object dobj ON dt.digital_object_id = dobj.id " +
+          "WHERE dobj.project_project_abbr = :projectAbbr " +
+          "ORDER BY dt.digital_object_tags ASC",
+      nativeQuery = true)
+  Set<String> findDistinctTagsByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+
+
+  /**
+   * Find digital objects by project where ID starts with the given prefix.
+   * PERFORMANCE: Uses primary key index efficiently. O(log n) complexity.
+   * Case-sensitive for maximum performance.
+   *
+   * @param projectAbbr Project abbreviation
+   * @param idPrefix Prefix to match (e.g., "mhdbdb.manuscript")
+   * @param pageable Pagination
+   * @return Page of matching digital objects
+   */
+  Page<DigitalObjectListItemView> findDigitalObjectsByProject_ProjectAbbrAndIdStartingWith(
+      String projectAbbr,
+      String idPrefix,
+      Pageable pageable
+  );
 
 }

@@ -9,28 +9,29 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.*;
 import org.ddh.gamsapi.domain.Datastream.DatastreamService;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectInvalidDateFormatException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
-import org.ddh.gamsapi.domain.Project.exceptions.ProjectException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -94,9 +95,10 @@ public class DigitalObjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
-        log.error(msg);
-        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+        throw new DigitalObjectInvalidDateFormatException(
+            "Invalid date format for If-Modified-Since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e.getMessage(),
+            e
+        );
       }
     }
 
@@ -145,9 +147,10 @@ public class DigitalObjectController {
           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
         }
       } catch (DateTimeParseException e) {
-        String msg = String.format("Invalid date format for If-modified-since header: %s. Original error: %s", ifModifiedSince, e);
-        log.error(msg);
-        throw new ProjectException(HttpStatus.BAD_REQUEST, msg);
+        throw new DigitalObjectInvalidDateFormatException(
+            "Invalid date format for If-Modified-Since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e.getMessage(),
+            e
+        );
       }
     }
 
@@ -204,7 +207,6 @@ public class DigitalObjectController {
     model.addAttribute("pagedDatastreams", pagedDatastreams);
     model.addAttribute("do", foundObject);
     model.addAttribute(project);
-    log.info("Found digital object {} for project {}", foundObject, project.getProjectAbbr());
     return "DigitalObject/show";
   }
 
@@ -224,13 +226,18 @@ public class DigitalObjectController {
   )
   public PagedResponse<DigitalObjectListItemView> getProjectObjectsJson(
       @PathVariable String projectAbbr,
-      Model model,
       // for pagination
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "20") int pageSize,
+      @RequestParam(defaultValue = "id") String sortBy,
       // optional parameters searching for explicit types?
       @Nullable @RequestParam Optional<String> objectType,
-      @RequestParam Optional<Set<String>> types) {
+      @RequestParam Optional<Set<String>> types,
+      @RequestParam(required = false, name = "tag", defaultValue = "") Set<String> tags
+      ) {
+
+    // TODO add sort direction?
+
     // limit page size
     if (pageSize >= 20) {
       pageSize = 20;
@@ -241,12 +248,21 @@ public class DigitalObjectController {
         .description("")
         .build();
 
-    model.addAttribute(project);
+    PagedResponse<DigitalObjectListItemView> digitalObjects;
+    if(tags.isEmpty()){
+      digitalObjects = digitalObjectService.findAllByProjectAbbr(
+          project.getProjectAbbr(),
+          objectType,
+          PageRequest.of(pageIndex, pageSize, Sort.by("id"))
+      );
+    } else {
+      digitalObjects = digitalObjectService.findAllByProjectAndTags(
+          project.getProjectAbbr(),
+          tags,
+          PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
+    }
 
-    return digitalObjectService.findAllByProjectAbbr(
-        project.getProjectAbbr(),
-        objectType,
-        PageRequest.of(pageIndex, pageSize, Sort.by("id")));
+    return digitalObjects;
 
   }
 
@@ -258,18 +274,29 @@ public class DigitalObjectController {
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "25") int pageSize,
       @RequestParam(defaultValue = "") String id,
+      @RequestParam(required = false, name = "tag", defaultValue = "") Set<String> tags,
       @RequestParam(defaultValue = "id") String sortBy
 
   ) {
+    // TODO add sort direction?
+
     // limit pageSize to max 100
     if (pageSize >= 100) {
       pageSize = 100;
     }
 
-    var digitalObjects = digitalObjectService.findAllByProjectAbbr(
-        project.getProjectAbbr(),
-        id,
-        PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
+    PagedResponse<DigitalObjectListItemView> digitalObjects;
+    if(tags.isEmpty()){
+      digitalObjects = digitalObjectService.findAllByProjectAbbr(
+          project.getProjectAbbr(),
+          id,
+          PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
+    } else {
+      digitalObjects = digitalObjectService.findAllByProjectAndTags(
+          project.getProjectAbbr(),
+          tags,
+          PageRequest.of(pageIndex, pageSize, Sort.by(sortBy)));
+    }
 
     // retrieve project info from database
     Project foundProject = projectService.findProject(project.getProjectAbbr());
@@ -283,7 +310,6 @@ public class DigitalObjectController {
     model.addAttribute("searchId", id);
     model.addAttribute("sortBy", sortBy);
 
-    // log.info("Found objects {} for project {}", digitalObjects, project);
     return "DigitalObject/show_all";
   }
 
@@ -303,7 +329,6 @@ public class DigitalObjectController {
         .build();
 
     this.digitalObjectService.delete(digitalObject);
-    log.info("Deleted object {} for project {}", digitalObject, projectAbbr);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
   }
@@ -341,7 +366,15 @@ public class DigitalObjectController {
     );
   }
 
-
-
+  @GetMapping(path = "/tags", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
+  @Operation(
+      summary = "Get all unique tags used in project",
+      description = "Returns a list of all distinct tags used by digital objects in the project. " +
+          "Useful for tag filters, autocomplete, or tag clouds."
+  )
+  public Set<String> getProjectTags(@PathVariable String projectAbbr) {
+    return digitalObjectService.findDistinctTagsByProject(projectAbbr);
+  }
 
 }

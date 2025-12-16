@@ -25,6 +25,7 @@ public class BagDataToDigitalObjectConverterTest extends UnitTest {
             .source(TestBag.TestBagSipJson.SOURCE)
             .schema(TestBag.TestBagSipJson.SCHEMA)
             .createdBy(TestBag.TestBagSipJson.CREATED_BY)
+            .tags(TestBag.TestBagSipJson.DIGITAL_OBJECT_TAGS)
             .build();
 
     @Test
@@ -48,6 +49,8 @@ public class BagDataToDigitalObjectConverterTest extends UnitTest {
         Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getSha512Checksum()).isEqualTo(TEST_BAG_DATA.getSha512Checksum());
 
         Assertions.assertThat(convertedDigitalObject.getFunder()).isEqualTo(TEST_BAG_DATA.getFunder());
+        Assertions.assertThat(convertedDigitalObject.getTags())
+            .containsAll(TEST_BAG_DATA.getTags());
     }
 
     @Test

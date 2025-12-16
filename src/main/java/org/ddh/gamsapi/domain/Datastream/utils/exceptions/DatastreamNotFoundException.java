@@ -9,4 +9,8 @@ public class DatastreamNotFoundException  extends DatastreamException {
   public DatastreamNotFoundException(String reason) {
     super(HttpStatus.NOT_FOUND, reason);
   }
+
+  public DatastreamNotFoundException(String reason, Throwable cause) {
+    super(HttpStatus.NOT_FOUND, reason, cause);
+  }
 }

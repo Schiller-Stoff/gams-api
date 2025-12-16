@@ -6,7 +6,6 @@ import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
 import org.ddh.gamsapi.TestUtilities.TestProject;
-import org.ddh.gamsapi.application.Ingest.Ingest;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
@@ -21,6 +20,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -55,12 +55,12 @@ public class FulltextServiceIT extends SolrIntegrationTest {
         .projectAbbr(TestProject.PROJECT_ABBR.getValue())
         .build());
 
-    // Ingest the bag
+    // ingest the bag
     byte[] zippedBag = ZipUtils.zipDir(bagFile);
-    Ingest ingest = new Ingest();
-    ingest.setZippedBagItFolder(zippedBag);
-    ingest.setProjectAbbr(TestProject.PROJECT_ABBR.getValue());
-    ingestService.ingest(ingest);
+    ingestService.ingest(
+        TestProject.PROJECT_ABBR.getValue(),
+        new ByteArrayInputStream(zippedBag)
+    );
 
     // Index object
     gSearchService.indexObject(

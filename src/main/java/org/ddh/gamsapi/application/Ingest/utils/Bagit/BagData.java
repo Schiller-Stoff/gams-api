@@ -67,6 +67,12 @@ public class BagData {
   @JsonProperty("mainResource")
   private String mainResource;
 
+  /**
+   * Tags associated with the digital object.
+   */
+  @JsonProperty("tags")
+  private Set<String> tags;
+
   @JsonProperty("contentFiles")
   private Set<BagFile> contentFiles = new HashSet<>();
 
@@ -111,6 +117,7 @@ public class BagData {
               .publisher(digitalObject.getPublisher())
               .funder(digitalObject.getFunder())
               .mainResource(digitalObject.getMainResource())
+              .tags(digitalObject.getTags())
               .contentFiles(contentFiles)
               .md5Checksum(digitalObject.getBaseMetadata().getMd5Checksum())
               .sha512Checksum(digitalObject.getBaseMetadata().getSha512Checksum())
@@ -153,9 +160,9 @@ public class BagData {
       ObjectMapper objectMapper = createObjectMapper();
       return objectMapper.writeValueAsString(this);
     } catch (JsonProcessingException e) {
-      String msg = String.format("Error creating Sip JSON content for BagData related to digital object %s. Original error: %s", this.id, e);
-      log.error(msg);
-      throw new ExportProcessingException(msg);
+      throw new ExportProcessingException(
+          "Error creating Sip JSON content for BagData related to digital object " + this.id + " Original error: " + e.getMessage(),
+          e);
     }
   }
 

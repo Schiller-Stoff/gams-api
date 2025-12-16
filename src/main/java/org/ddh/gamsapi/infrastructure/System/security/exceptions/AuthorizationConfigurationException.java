@@ -10,4 +10,8 @@ public class AuthorizationConfigurationException extends SecurityException {
   public AuthorizationConfigurationException( String reason) {
     super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
   }
+
+  public AuthorizationConfigurationException( String reason, Throwable cause) {
+    super(HttpStatus.INTERNAL_SERVER_ERROR, reason, cause);
+  }
 }
