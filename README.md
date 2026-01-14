@@ -114,14 +114,23 @@ see deployment section
 # 01. increment version in pom.xml
 nano pom.xml
 
-# 02. build new image
+# 02. COMMIT everything
+git commit -m "commit_message"
+
+# 03. create and publish the release (docker hub + git tag)
+make release
+
+
+### Local Testing
+
+# 02. build new image (for local testing)
 make
 
-# 03. push new version 
+# (03. push new version by hand to docker hub) 
 make push
 
 
-## Alternative workflow (native) 
+## Native workflow 
 
 # 01b. increment version in pom.xml
 nano pom.xml
