@@ -3,7 +3,7 @@
 # spring.datasource.hikari.connectionTimeout=20000
 # spring.datasource.hikari.maximumPoolSize=5
 
-# includes version of software in actuator
+# includes version of software in actuator (and health endpoints)
 management:
   endpoints:
     web:
