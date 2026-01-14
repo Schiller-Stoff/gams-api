@@ -8,7 +8,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: "info"
+        include:
+          - "info"
+          - "health"
   info:
     build:
       enabled: true
