@@ -10,7 +10,9 @@
 #  - 'make build-native' builds the native image
 #  - 'make push-native' pushes the native build
 #
-VERSION = $(shell cat .release)
+
+# (read out version from pom.xml)
+VERSION = $(shell ./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
 IMAGENAME ?= gams-api
 PREFIX ?= zimgraz
 IMAGE ?= $(IMAGENAME):$(VERSION)
