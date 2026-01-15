@@ -16,7 +16,6 @@ import java.util.Map;
 
 /**
  * Request DTO for Plexus Search queries.
- *
  * Allows projects to specify custom Solr queries with validation and safety limits.
  */
 @Data
@@ -26,7 +25,8 @@ import java.util.Map;
 @Schema(description = "Custom Solr query request for Plexus Search")
 public class PlexusSearchQueryRequestDto {
 
-  // ✅ Define defaults as constants
+  // required in conjunction with @JsonCreator constructor to force jackson to use this constructor with default values when deserializing
+  // TODO could avoid default value duplication (on class fields and in constructor) if I'd introduce an own builder class
   private static final int DEFAULT_ROWS = 10;
   private static final int DEFAULT_START = 0;
   private static final int DEFAULT_HIGHLIGHT_SNIPPET_SIZE = 200;
