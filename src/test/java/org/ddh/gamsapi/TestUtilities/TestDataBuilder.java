@@ -125,9 +125,11 @@ public class TestDataBuilder {
             testDataSet.project().getProjectAbbr(), randomDigitalObjectId
     );
 
-    bagEntityRepository.save(TestSubmissionRecord.generate(digitalObjectToBeSaved));
+    var savedObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
-    return digitalObjectRepository.save(digitalObjectToBeSaved);
+    bagEntityRepository.save(TestSubmissionRecord.generate(savedObject));
+
+    return savedObject;
   }
 
   @Transactional

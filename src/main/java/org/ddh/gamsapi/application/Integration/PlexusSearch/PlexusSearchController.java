@@ -18,7 +18,6 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping
@@ -114,7 +113,7 @@ public class PlexusSearchController {
       @Parameter(description = "Query parameters", required = true)
       @Valid @RequestBody PlexusSearchQueryRequestDto request
   ) {
-    log.info("Plexus search request for project: {}, query: {}", project, request.getQuery());
+    log.info("Plexus search request for project: {}, query: {}", project, request);
 
     PlexusSearchResponseDto response = plexusSearchService.search(project, request);
 
