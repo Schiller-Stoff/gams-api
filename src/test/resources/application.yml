@@ -10,7 +10,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        show_sql: true
+        # show_sql: true # shows generated SQL statements in console
 
 # ensures that testcontainers reuses started containers
 # (not sure if properties actually do something)
@@ -22,6 +22,10 @@ testcontainers:
 gams:
   storage:
     rootPath: ${GAMS_FILES_ROOT_PATH:gams-test}
+  solr:
+    auto-commit: true # this is necessary to directly reflect changes in solr during tests
+    batch-size: 100
+    commit-interval: 5
 
 
 ########
@@ -31,8 +35,8 @@ logging:
   file:
     name: ${LOG_FILE:log/test.log}
   level:
-    org.zim.gamsapi: ${LOG_LEVEL:DEBUG}
-    org.zim.gamsapi.System.security: ${SECURITY_LOG_LEVEL:DEBUG}
+    org.ddh.gamsapi: ${LOG_LEVEL:DEBUG}
+    org.ddh.gamsapi.System.security: ${SECURITY_LOG_LEVEL:DEBUG}
     org.springframework.security: ${SECURITY_LOG_LEVEL:DEBUG}
   logback:
     # cleans log file on startup

@@ -1,0 +1,103 @@
+package org.ddh.gamsapi.domain.DigitalObject;
+
+import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.MetadataBaseEntity;
+import org.ddh.gamsapi.domain.Project.Project;
+import org.ddh.gamsapi.domain.Project.ProjectBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
+
+@Slf4j
+public class DigitalObjectBuilder {
+
+  private final DigitalObject digitalObject = new DigitalObject();
+
+  public DigitalObjectBuilder id(String id) {
+    digitalObject.setId(id);
+    return this;
+  }
+
+  public DigitalObjectBuilder objectType(String objectType) {
+    digitalObject.setObjectType(objectType);
+    return this;
+  }
+
+  public DigitalObjectBuilder published(java.util.Date published) {
+    digitalObject.setPublished(published);
+    return this;
+  }
+
+  //TODO remove this? - there might be contradicting information in the project object
+  public DigitalObjectBuilder project(Project project) {
+    digitalObject.setProject(project);
+    return this;
+  }
+
+  public DigitalObjectBuilder project(String project) {
+    digitalObject.setProject(ProjectBuilder.builder().projectAbbr(project).build());
+    return this;
+  }
+
+  public DigitalObjectBuilder baseMetadata(MetadataBaseEntity baseMetadata) {
+    digitalObject.setBaseMetadata(baseMetadata);
+    return this;
+  }
+
+  public DigitalObjectBuilder publisher(String publisher) {
+    digitalObject.setPublisher(publisher);
+    return this;
+  }
+
+  public DigitalObjectBuilder funder(String funder) {
+    digitalObject.setFunder(funder);
+    return this;
+  }
+
+  public DigitalObjectBuilder mainResource(String mainResource) {
+    digitalObject.setMainResource(mainResource);
+    return this;
+  }
+
+  public DigitalObjectBuilder tags(Set<String> tags) {
+    digitalObject.setTags(tags);
+    return this;
+  }
+
+  public DigitalObject build() {
+    if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
+      String msg = "Digital object ID must not be null or empty! Happened at class " + this.getClass().getName();
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getProject() == null) || digitalObject.getProject().getProjectAbbr().isEmpty()){
+      String msg = "DigitalObject's project must not be null or it's abbreviation empty! Happened at class " + this.getClass().getName() + " and object " + this;
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if((digitalObject.getPublisher() == null) || digitalObject.getPublisher().isEmpty()){
+      String msg = "DigitalObject's publisher must not be null or empty! Happened at class " + this.getClass().getName() + " and object " + this;
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    // ensure that a hashset is created for the tags
+    if(digitalObject.getTags() == null){
+      digitalObject.setTags(new HashSet<>());
+    }
+
+    return digitalObject;
+  }
+
+  /**
+   * Helper method to create a new DigitalObjectBuilder.
+   * @return A new DigitalObjectBuilder.
+   */
+  public static DigitalObjectBuilder builder(){
+    return new DigitalObjectBuilder();
+  }
+
+
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "objectProjectAbbr": "test",
+    "objectId": "test.test",
+    "id": "test.9124719230",
+    "foo_s": "bar",
+    "foo_ss": [
+      "bar1",
+      "bar2",
+      "bar3"
+    ],
+    "foo_b": true
+  }
+]

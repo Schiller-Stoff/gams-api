@@ -1,0 +1,13 @@
+[
+  {
+    "objectProjectAbbr": "test",
+    "objectId": "test.test",
+    "id": "test.9124719230",
+    "entityFulltext": "This is a sample fulltext content for testing purposes.",
+    "entityTags": [
+      "test"
+    ],
+    "entityStartDate": "2015-09-01T00:00:00Z",
+    "entityEndDate": "2015-09-01T23:59:59Z"
+  }
+]

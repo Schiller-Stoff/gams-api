@@ -8,7 +8,7 @@
   "contentFiles": [
     {
       "size": 498,
-      "bagpath": "/data/content/manifest.json",
+      "bagpath": "data/content/manifest.json",
       "dsid": "manifest.json",
       "mimetype": "application/json",
       "title": "Datastream containing the manifest.json file",
@@ -28,13 +28,13 @@
       "rights": "Creative Commons Attribution-NonCommercial 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)",
       "publisher": "Gams",
       "size": 1107,
-      "bagpath": "/data/content/DC.xml",
+      "bagpath": "data/content/DC.xml",
       "tags": ["test-tag1", "test-tag2", "test-tag3"],
       "lang": ["test-lang1", "test-lang2", "test-lang3"]
     },
     {
       "size": 193,
-      "bagpath": "/data/content/search.json",
+      "bagpath": "data/content/search.json",
       "dsid": "search.json",
       "mimetype": "application/json",
       "title": "Datastream containing the search.json file",
@@ -47,7 +47,7 @@
     },
     {
       "size": 22226,
-      "bagpath": "/data/content/test.xml",
+      "bagpath": "data/content/test.xml",
       "dsid": "test.xml",
       "mimetype": "application/xml",
       "title": "Datastream containing the test.xml file",
@@ -60,13 +60,39 @@
     },
     {
       "size": 1000,
-      "bagpath": "/data/content/test.txt",
+      "bagpath": "data/content/test.txt",
       "dsid": "test.txt",
       "mimetype": "text/plain",
       "title": "test-title",
       "description": "test-description",
       "creator": "test-creator",
       "rights": "test-rights",
+      "publisher": "test GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "size": 1000,
+      "bagpath": "data/content/CUSTOM_SEARCH.json",
+      "dsid": "CUSTOM_SEARCH.json",
+      "mimetype": "application/json",
+      "title": "Fulltext index",
+      "description": "Contains the fulltext index for search functionality.",
+      "creator": "Foo bar",
+      "rights": "Rights foo",
+      "publisher": "test GAMS project",
+      "tags": ["test-tag1", "test-tag2", "test-tag3"],
+      "lang": ["test-lang1", "test-lang2", "test-lang3"]
+    },
+    {
+      "size": 1000,
+      "bagpath": "data/content/CUSTOM_PLEXUS_SEARCH.json",
+      "dsid": "CUSTOM_PLEXUS_SEARCH.json",
+      "mimetype": "application/json",
+      "title": "Plexus search indices",
+      "description": "Contains the plexus index for search functionality.",
+      "creator": "Foo bar",
+      "rights": "Rights foo",
       "publisher": "test GAMS project",
       "tags": ["test-tag1", "test-tag2", "test-tag3"],
       "lang": ["test-lang1", "test-lang2", "test-lang3"]
@@ -78,5 +104,6 @@
   "recid": "test.test",
   "project": "test",
   "objectType": "TEI",
-  "funder": "test-funder"
+  "funder": "test-funder",
+  "tags": ["object-test-tag1", "object-test-tag2", "object-test-tag3"]
 }

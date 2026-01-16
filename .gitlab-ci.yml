@@ -33,7 +33,7 @@ build:
 test:
   stage: test
   script:
-    - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS test
+    - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS verify
 
 build-native:
   stage: deploy

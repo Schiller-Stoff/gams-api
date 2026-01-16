@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/general.html :: headtemplate}" />
+
+<!-- Custom Styles for Fulltext Search Table -->
+<style>
+    /* Align all table cells to top */
+    .fulltext-results-table tbody {
+        vertical-align: top;
+    }
+
+    /* Set max-width and enable text wrapping/truncation for specific columns */
+    .fulltext-results-table td {
+        max-width: 250px;
+        max-height: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+    }
+
+    /* ID column - narrow */
+    .fulltext-results-table td:nth-child(1) {
+        max-width: 100px;
+    }
+
+    /* Object title - medium */
+    .fulltext-results-table td:nth-child(2) {
+        max-width: 100px;
+    }
+
+    /* DC.Title - medium */
+    .fulltext-results-table td:nth-child(3) {
+        max-width: 400px;
+    }
+
+    /* Matches/Highlighting - wider for snippets */
+    .fulltext-results-table td:nth-child(4) {
+        max-width: 300px;
+        overflow-y: auto;
+    }
+
+    /* Project badge - narrow */
+    .fulltext-results-table td:nth-child(5) {
+        max-width: 120px;
+    }
+
+    /* Dublin Core Metadata - medium */
+    .fulltext-results-table td:nth-child(6) {
+        max-width: 250px;
+    }
+
+    /* Actions - narrow, no wrapping */
+    .fulltext-results-table td:nth-child(7) {
+        max-width: 100px;
+        white-space: nowrap;
+    }
+
+    /* Highlighting snippets styling */
+    .highlighting-snippets {
+        max-height: 100px;
+        overflow-y: auto;
+        padding: 0.25rem 0;
+    }
+
+    .highlighting-snippets mark {
+        background-color: #fff3cd;
+        padding: 0.1em 0.3em;
+        border-radius: 0.2em;
+        font-weight: 500;
+    }
+
+    /* Custom scrollbar for overflow content */
+    .highlighting-snippets::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .highlighting-snippets::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .highlighting-snippets::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 3px;
+    }
+
+    .highlighting-snippets::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* Compact form styling */
+    #searchForm .form-label {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+    }
+
+    #searchForm .form-text {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Make project select box more compact */
+    #projects {
+        min-height: 80px;
+    }
+
+    /* Accordion styling */
+    #advancedOptions {
+        margin-top: 1rem;
+    }
+
+    .accordion-button {
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f3ff;
+        color: #0066cc;
+    }
+
+    /* DC Criteria rows more compact */
+    .dc-criteria-row {
+        padding: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 0.25rem;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .dc-criteria-row:last-of-type {
+        margin-bottom: 0 !important;
+    }
+</style>
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+
+      <!-- Breadcrumb Navigation -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item active">Fulltext Search</li>
+        </ol>
+      </nav>
+
+
+      <h2 class="display-6 fw-bold text-primary mb-3">Fulltext Search</h2>
+      <p class="text-muted">Fulltext search across digital objects using Dublin Core metadata fields.</p>
+
+
+      <!-- Search Form -->
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h3 class="mb-0 h5">
+                <i class="ti ti-search me-2"></i>Search
+              </h3>
+              <div>
+                <a class="mb-0 me-1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')">
+                  <i class="ti ti-file-type-xml"></i> XML
+                </a>
+                <a class="mb-0 me-1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')">
+                  <i class="ti ti-file-type-json"></i> JSON
+                </a>
+              </div>
+            </div>
+            <div class="card-body">
+              <form id="searchForm" method="GET" action="/api/v1/integration/gsearch/fulltext">
+
+                <!-- PRIMARY SEARCH FIELDS (Always Visible) -->
+                <div class="row g-3 mb-3">
+                  <!-- Fulltext Query -->
+                  <div class="col-md-6">
+                    <label for="fulltextQuery" class="form-label">Query String</label>
+                    <input type="text"
+                           class="form-control form-control-lg"
+                           id="fulltextQuery"
+                           name="q"
+                           th:value="${fulltextQuery}"
+                           placeholder="Enter search terms...">
+                    <div class="form-text mb-2">Search across all indexed content</div>
+                    <!-- Search Button (Primary Action) -->
+                    <div class="row mb-3">
+                      <div class="col-12">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                          <i class="ti ti-search me-2"></i>Search
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="clearForm">
+                          <i class="ti ti-refresh me-2"></i>Clear
+                        </button>
+                        <button type="button"
+                                class="btn btn-outline-secondary ms-2"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#advancedOptions"
+                                aria-expanded="false"
+                                aria-controls="advancedOptions">
+                          <i class="ti ti-adjustments me-2"></i>Advanced Options
+                        </button>
+                      </div>
+                    </div>
+                    <!-- ADVANCED OPTIONS (Collapsible Accordion) -->
+                    <div class="collapse" id="advancedOptions">
+                      <div class="card card-body bg-light">
+                        <div class="accordion" id="advancedOptionsAccordion">
+
+                          <!-- Dublin Core Filters -->
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingDC">
+                              <button class="accordion-button collapsed"
+                                      type="button"
+                                      data-bs-toggle="collapse"
+                                      data-bs-target="#collapseDC"
+                                      aria-expanded="false"
+                                      aria-controls="collapseDC">
+                                <i class="ti ti-filter me-2"></i>Dublin Core Filters
+                              </button>
+                            </h2>
+                            <div id="collapseDC"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="headingDC"
+                                 data-bs-parent="#advancedOptionsAccordion">
+                              <div class="accordion-body">
+                                <div id="dcCriteriaContainer">
+                                  <!-- Initial empty row if no criteria exist -->
+                                  <div class="dc-criteria-row row g-2 mb-2" th:if="${dcCriteria == null || dcCriteria.isEmpty()}">
+                                    <div class="col-md-4">
+                                      <select class="form-select dc-field-select" name="dcField">
+                                        <option value="">Select DC Field</option>
+                                        <option value="dc.title">Title</option>
+                                        <option value="dc.creator">Creator</option>
+                                        <option value="dc.subject">Subject</option>
+                                        <option value="dc.description">Description</option>
+                                        <option value="dc.publisher">Publisher</option>
+                                        <option value="dc.contributor">Contributor</option>
+                                        <option value="dc.date">Date</option>
+                                        <option value="dc.type">Type</option>
+                                        <option value="dc.format">Format</option>
+                                        <option value="dc.identifier">Identifier</option>
+                                        <option value="dc.source">Source</option>
+                                        <option value="dc.language">Language</option>
+                                        <option value="dc.relation">Relation</option>
+                                        <option value="dc.coverage">Coverage</option>
+                                        <option value="dc.rights">Rights</option>
+                                      </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <input type="text"
+                                             class="form-control dc-value-input"
+                                             placeholder="Enter value..."
+                                             name="dcValue">
+                                    </div>
+                                    <div class="col-md-2">
+                                      <button type="button"
+                                              class="btn btn-outline-danger remove-criteria-btn w-100"
+                                              disabled>
+                                        <i class="ti ti-trash"></i>
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <!-- Pre-populate existing criteria -->
+                                  <div th:each="entry : ${dcCriteria}" class="dc-criteria-row row g-2 mb-2">
+                                    <div class="col-md-4">
+                                      <select class="form-select dc-field-select" name="dcField">
+                                        <option value="">Select DC Field</option>
+                                        <option value="dc.title" th:selected="${entry.key == 'dc.title'}">Title</option>
+                                        <option value="dc.creator" th:selected="${entry.key == 'dc.creator'}">Creator</option>
+                                        <option value="dc.subject" th:selected="${entry.key == 'dc.subject'}">Subject</option>
+                                        <option value="dc.description" th:selected="${entry.key == 'dc.description'}">Description</option>
+                                        <option value="dc.publisher" th:selected="${entry.key == 'dc.publisher'}">Publisher</option>
+                                        <option value="dc.contributor" th:selected="${entry.key == 'dc.contributor'}">Contributor</option>
+                                        <option value="dc.date" th:selected="${entry.key == 'dc.date'}">Date</option>
+                                        <option value="dc.type" th:selected="${entry.key == 'dc.type'}">Type</option>
+                                        <option value="dc.format" th:selected="${entry.key == 'dc.format'}">Format</option>
+                                        <option value="dc.identifier" th:selected="${entry.key == 'dc.identifier'}">Identifier</option>
+                                        <option value="dc.source" th:selected="${entry.key == 'dc.source'}">Source</option>
+                                        <option value="dc.language" th:selected="${entry.key == 'dc.language'}">Language</option>
+                                        <option value="dc.relation" th:selected="${entry.key == 'dc.relation'}">Relation</option>
+                                        <option value="dc.coverage" th:selected="${entry.key == 'dc.coverage'}">Coverage</option>
+                                        <option value="dc.rights" th:selected="${entry.key == 'dc.rights'}">Rights</option>
+                                      </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <input type="text"
+                                             class="form-control dc-value-input"
+                                             name="dcValue"
+                                             th:value="${#strings.listJoin(entry.value, ', ')}">
+                                    </div>
+                                    <div class="col-md-2">
+                                      <button type="button"
+                                              class="btn btn-outline-danger remove-criteria-btn w-100">
+                                        <i class="ti ti-trash"></i>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm mt-2"
+                                        id="addCriteriaBtn">
+                                  <i class="ti ti-plus me-1"></i>Add Filter
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- Pagination & Sorting Settings -->
+                          <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingPagination">
+                              <button class="accordion-button collapsed"
+                                      type="button"
+                                      data-bs-toggle="collapse"
+                                      data-bs-target="#collapsePagination"
+                                      aria-expanded="false"
+                                      aria-controls="collapsePagination">
+                                <i class="ti ti-layout-list me-2"></i>Display Options
+                              </button>
+                            </h2>
+                            <div id="collapsePagination"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="headingPagination"
+                                 data-bs-parent="#advancedOptionsAccordion">
+                              <div class="accordion-body">
+                                <div class="row g-3">
+                                  <div class="col-md-4">
+                                    <label for="pageSize" class="form-label">Results per page</label>
+                                    <select class="form-select" id="pageSize" name="pageSize">
+                                      <option value="10" th:selected="${pageSize == 10}">10</option>
+                                      <option value="20" th:selected="${pageSize == null || pageSize == 20}">20 (default)</option>
+                                      <option value="50" th:selected="${pageSize == 50}">50</option>
+                                    </select>
+                                  </div>
+
+                                  <div class="col-md-4">
+                                    <label for="sortBy" class="form-label">Sort by</label>
+                                    <select class="form-select" id="sortBy" name="sortBy">
+                                      <option value="dc.title" th:selected="${sortBy == null || sortBy == 'dc.title'}">Title</option>
+                                      <option value="dc.date" th:selected="${sortBy == 'dc.date'}">Date</option>
+                                      <option value="dc.creator" th:selected="${sortBy == 'dc.creator'}">Creator</option>
+                                      <option value="id" th:selected="${sortBy == 'id'}">ID</option>
+                                    </select>
+                                  </div>
+
+                                  <div class="col-md-4">
+                                    <label for="sortDir" class="form-label">Sort direction</label>
+                                    <select class="form-select" id="sortDir" name="sortDir">
+                                      <option value="asc" th:selected="${sortDir == null || sortDir == 'asc'}">Ascending</option>
+                                      <option value="desc" th:selected="${sortDir == 'desc'}">Descending</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Project Selection -->
+                  <div class="col-md-6">
+                    <label for="projects" class="form-label">
+                      Projects <span class="text-danger">*</span>
+                    </label>
+                    <select multiple
+                            class="form-select form-select-lg"
+                            id="projects"
+                            name="projects"
+                            size="3">
+                      <option th:each="projectAbbr : ${projectAbbrs}"
+                              th:value="${projectAbbr}"
+                              th:text="${projectAbbr}"
+                              th:selected="${selectedProjects != null && selectedProjects.contains(projectAbbr)}">
+                      </option>
+                    </select>
+                    <div class="form-text">Hold Ctrl/Cmd to select multiple</div>
+                  </div>
+                </div>
+
+
+
+
+
+
+              </form>
+
+              <!-- Search results -->
+              <span class="badge bg-light text-dark">
+                                Total: <span th:text="${searchResults.getPagination().getTotalElements()}">0</span> objects
+                                (Page <span th:text="${searchResults.getPagination().getPage() + 1}">1</span> of <span th:text="${searchResults.getPagination().getTotalPages()}">1</span>)
+                            </span>
+              <div th:if="${searchResults.isEmpty()}" class="text-center py-5">
+                <i class="ti ti-search-off display-4 text-muted"></i>
+                <h4 class="text-muted mt-3">No results found</h4>
+                <p class="text-muted">Try adjusting your search criteria or search mode.</p>
+              </div>
+              <div th:if="${!searchResults.isEmpty()}" class="table-responsive">
+                <table class="table table-hover mb-0 fulltext-results-table table-sm">
+                  <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>Object title</th>
+                    <th>Matches</th>
+                    <th>Project</th>
+                    <th>Dublin Core Metadata</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="result : ${searchResults.content}">
+                    <td>
+                      <a th:text="${result.getProperty('id')}" target="_blank"
+                         th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}">o:gams.123</a>
+                    </td>
+                    <td>
+                      <strong th:text="${result.getProperty('objectTitle') ?: '...'}">Object title</strong>
+                    </td>
+                    <td>
+                      <div th:if="${result.getProperty('highlighting')}"
+                           class="highlighting-snippets">
+                        <small th:utext="${result.getProperty('highlighting')}">Matches...</small>
+                      </div>
+                      <div th:unless="${result.getProperty('highlighting')}"
+                           class="text-muted">
+                        <small>No matches</small>
+                      </div>
+                    </td>
+                    <td>
+                      <a target="_blank" th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects'" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</a>
+                    </td>
+                    <td>
+                      <!-- Dublin Core Metadata Display -->
+                      <div class="dublin-core-metadata">
+                        <div class="mb-1">
+                          <small class="text-muted">dc:title</small>:
+                          <span class="badge bg-light text-dark me-1">
+                <span th:text="${#strings.abbreviate(result.getProperty('dc.title'), 50)}">value</span>
+              </span>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <!--
+              STRICTLY 10-BOX PAGINATION - SIMPLEST VERSION (NO TYPE ISSUES)
+
+              This version removes the problematic "Showing 1-20 of 156" counter
+              and uses a simpler "Page X of Y (Z total)" format instead.
+
+              ZERO type casting issues!
+              -->
+
+              <!-- Results Summary - Simple Format -->
+              <div th:if="${!searchResults.isEmpty()}" class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted">
+                  <small>
+                    Page <strong th:text="${searchResults.getPagination().getPage() + 1}">1</strong>
+                    of <strong th:text="${searchResults.getPagination().getTotalPages()}">8</strong>
+                    (<strong th:text="${searchResults.getPagination().getTotalElements()}">156</strong> total results)
+                  </small>
+                </div>
+              </div>
+
+              <!-- Pagination Controls -->
+              <div th:if="${!searchResults.isEmpty() && searchResults.getPagination().getTotalPages() > 1}"
+                   class="d-flex justify-content-center mt-4">
+                <nav aria-label="Search results pagination">
+                  <ul class="pagination">
+
+                    <!-- Previous Page Button -->
+                    <li class="page-item"
+                        th:classappend="${searchResults.getPagination().isFirst()} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}"
+                         aria-label="Previous page">
+                        <i class="ti ti-chevron-left"></i> Previous
+                      </a>
+                    </li>
+
+                    <th:block th:with="currentPage=${searchResults.getPagination().getPage()},
+                         totalPages=${searchResults.getPagination().getTotalPages()}">
+
+                      <!-- Case 1: 10 or fewer pages - Show all pages -->
+                      <th:block th:if="${totalPages <= 10}">
+                        <li th:each="page : ${#numbers.sequence(0, totalPages - 1)}"
+                            class="page-item"
+                            th:classappend="${page == currentPage} ? 'active'">
+                          <a class="page-link"
+                             th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:text="${page + 1}"
+                             th:aria-label="${'Page ' + (page + 1)}"
+                             th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                        </li>
+                      </th:block>
+
+                      <!-- Case 2: More than 10 pages - Optimized smart pagination -->
+                      <th:block th:if="${totalPages > 10}">
+
+                        <!-- Sub-case A: Current page in first 4 pages (0, 1, 2, 3) -->
+                        <!-- Show: [1] [2] [3] [4] [5] [...] [98] [99] [100] -->
+                        <th:block th:if="${currentPage <= 3}">
+                          <th:block th:each="page : ${#numbers.sequence(0, 4)}">
+                            <li class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}"
+                                 th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+                        </th:block>
+
+                        <!-- Sub-case B: Current page in last 4 pages -->
+                        <!-- Show: [1] [2] [3] [...] [96] [97] [98] [99] [100] -->
+                        <th:block th:if="${currentPage >= totalPages - 4 and currentPage > 3}">
+                          <th:block th:each="page : ${#numbers.sequence(0, 2)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(totalPages - 5, totalPages - 1)}">
+                            <li class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}"
+                                 th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                            </li>
+                          </th:block>
+                        </th:block>
+
+                        <!-- Sub-case C: Current page in middle -->
+                        <!-- Show: [1] [2] [...] [49] [50] [51] [...] [99] [100] -->
+                        <th:block th:if="${currentPage > 3 and currentPage < totalPages - 4}">
+                          <th:block th:each="page : ${#numbers.sequence(0, 1)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(currentPage - 1, currentPage + 1)}">
+                            <li class="page-item"
+                                th:classappend="${page == currentPage} ? 'active'">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}"
+                                 th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
+                            </li>
+                          </th:block>
+
+                          <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">...</span>
+                          </li>
+
+                          <th:block th:each="page : ${#numbers.sequence(totalPages - 2, totalPages - 1)}">
+                            <li class="page-item">
+                              <a class="page-link"
+                                 th:href="@{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:text="${page + 1}"
+                                 th:aria-label="${'Page ' + (page + 1)}">1</a>
+                            </li>
+                          </th:block>
+                        </th:block>
+
+                      </th:block>
+                    </th:block>
+
+                    <!-- Next Page Button -->
+                    <li class="page-item"
+                        th:classappend="${searchResults.getPagination().isLast()} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/integration/gsearch/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}"
+                         aria-label="Next page">
+                        Next <i class="ti ti-chevron-right"></i>
+                      </a>
+                    </li>
+
+                  </ul>
+                </nav>
+              </div>
+
+              <!--
+                EXAMPLE OUTPUT:
+                "Page 3 of 8 (156 total results)"
+
+                Clean, simple, no type casting issues!
+              -->
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
+<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/sidebarmenu.js"></script>
+<script src="/assets/js/app.min.js"></script>
+<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+
+<!-- Custom DC Search JavaScript -->
+<script>
+    $(document).ready(function() {
+
+        // Add new Dublin Core criteria row
+        $('#addCriteriaBtn').click(function() {
+            const newRow = `
+            <div class="dc-criteria-row row mb-2">
+                <div class="col-md-4">
+                    <select class="form-select dc-field-select" name="dcField">
+                        <option value="">Select DC Field</option>
+                        <option value="dc.title">Title</option>
+                        <option value="dc.creator">Creator</option>
+                        <option value="dc.subject">Subject</option>
+                        <option value="dc.description">Description</option>
+                        <option value="dc.publisher">Publisher</option>
+                        <option value="dc.contributor">Contributor</option>
+                        <option value="dc.date">Date</option>
+                        <option value="dc.type">Type</option>
+                        <option value="dc.format">Format</option>
+                        <option value="dc.identifier">Identifier</option>
+                        <option value="dc.source">Source</option>
+                        <option value="dc.language">Language</option>
+                        <option value="dc.relation">Relation</option>
+                        <option value="dc.coverage">Coverage</option>
+                        <option value="dc.rights">Rights</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" class="form-control dc-value-input"
+                           placeholder="Enter search value..." name="dcValue">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger remove-criteria-btn">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+            $('#dcCriteriaContainer').append(newRow);
+            updateRemoveButtons();
+        });
+
+        // Remove Dublin Core criteria row
+        $(document).on('click', '.remove-criteria-btn', function() {
+            $(this).closest('.dc-criteria-row').remove();
+            updateRemoveButtons();
+        });
+
+        // Update remove button states
+        function updateRemoveButtons() {
+            const rows = $('.dc-criteria-row');
+            if (rows.length <= 1) {
+                $('.remove-criteria-btn').prop('disabled', true);
+            } else {
+                $('.remove-criteria-btn').prop('disabled', false);
+            }
+        }
+
+        // Form submission handling
+        $('#searchForm').submit(function(e) {
+            e.preventDefault();
+
+            // Build the query parameters
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+
+            // Add projects
+            const projects = formData.getAll('projects');
+            projects.forEach(project => {
+                if (project) params.append('projects', project);
+            });
+
+            params.append('q', formData.get('q'));
+            params.append('pageSize', formData.get('pageSize'));
+            params.append('pageIndex', '0'); // Always start from first page
+
+            // Process Dublin Core criteria
+            const dcFields = formData.getAll('dcField');
+            const dcValues = formData.getAll('dcValue');
+
+            for (let i = 0; i < dcFields.length; i++) {
+                if (dcFields[i] && dcValues[i]) {
+                    // Handle multiple values separated by comma
+                    const values = dcValues[i].split(',').map(v => v.trim()).filter(v => v);
+                    values.forEach(value => {
+                        params.append(dcFields[i], value);
+                    });
+                }
+            }
+
+            window.location.href = '/api/v1/integration/gsearch/fulltext?' + params.toString();
+        });
+
+        // Clear form
+        $('#clearForm').click(function() {
+            window.location.href = '/api/v1/integration/gsearch/fulltext';
+        });
+
+        // Initialize remove button states
+        updateRemoveButtons();
+    });
+</script>
+
+<style>
+    .dublin-core-metadata {
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 0.875rem;
+    }
+
+    .dc-criteria-row {
+        border: 1px solid #e9ecef;
+        border-radius: 0.375rem;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        background-color: #f8f9fa;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.375rem;
+        margin: 0 0.125rem;
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    @media (max-width: 768px) {
+        .dc-criteria-row .col-md-4,
+        .dc-criteria-row .col-md-6,
+        .dc-criteria-row .col-md-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+</style>
+
+</body>
+</html>
