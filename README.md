@@ -104,27 +104,36 @@ see deployment section
 
 ### Automatic via make
 
-1. Increment version in .release
+1. Increment version in pom.xml
 
 2. Run make command (take a look at Makefile on root) - either native or default profile.
 
 
 ```shell
 
-# 01. increment version in .release
-nano .release
+# 01. increment version in pom.xml
+nano pom.xml
 
-# 02. build new image
+# 02. COMMIT everything
+git commit -m "commit_message"
+
+# 03. create and publish the release (docker hub + git tag)
+make release
+
+
+### Local Testing
+
+# 02. build new image (for local testing)
 make
 
-# 03. push new version 
+# (03. push new version by hand to docker hub) 
 make push
 
 
-## Alternative workflow (native) 
+## Native workflow 
 
-# 01b. increment version in .release
-nano .release
+# 01b. increment version in pom.xml
+nano pom.xml
 
 # 02b. native workflow
 make build-native

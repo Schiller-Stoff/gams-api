@@ -302,6 +302,27 @@ public class IngestServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void ingestCreatesObjectWithExpectedTags(){
+
+      var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+          .orElseThrow(
+              () -> new RuntimeException("Digital object not found")
+          );
+
+      Assertions.assertThat(digitalObject.getTags())
+          .isNotEmpty();
+
+      Assertions.assertThat(digitalObject.getTags().size())
+          .isEqualTo(TestDigitalObject.getTags().size());
+
+      digitalObject.getTags().forEach(
+          tag -> Assertions.assertThat(TestDigitalObject.getTags()).contains(tag)
+      );
+
+
+    }
+
   }
 
   @Nested

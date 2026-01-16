@@ -205,6 +205,11 @@ public class IngestControllerIT extends IntegrationTest {
       }
 
       @Test
+      public void digitalObjectViewContainsExpectedTags(){
+        TestDigitalObject.getTags().forEach(tag -> Assertions.assertThat(response).contains(tag));
+      }
+
+      @Test
       public void digitalObjectViewContainsExpectedMainResourceTwice(){
         // check if label of main resource is there
         Assertions.assertThat(response).contains("main resource");
