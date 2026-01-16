@@ -8,6 +8,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Ingest.exceptions.IngestBagDuplicatedChecksumException;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJsonContentFile;
@@ -224,13 +225,20 @@ public class BagDirectoryReader {
                 // remove possible ending and leading whitespaces
                 key = key.trim();
                 value = value.trim();
+
+                if(map.containsKey(key)){
+                  throw new IngestBagDuplicatedChecksumException(
+                      "Encountered duplicate checksum " + key + " in file "+ filePath
+                  );
+                }
+
                 map.put(key, value);
                 lineCount.getAndIncrement();
               });
 
       if(lineCount.get() != map.size()){
         throw new IngestProcessingException(
-            "Failed to map key value pairs in file "+ filePath + " to map. The number of lines containing the delimiter (" + delimiter + ") does not match the number of entries in the resulting map."
+            "Failed to map key value pairs in file "+ filePath + " to map. The number of lines containing the delimiter (" + delimiter + ") does not match the number of entries in the resulting map. Got line count: " + lineCount.get() + " and map size: " + map.size() + ". The map is: " + map
         );
       }
 
@@ -269,6 +277,7 @@ public class BagDirectoryReader {
 
     BagSipJson bagSipJson;
     try {
+      // TODO every time new instantiation seems a lot of overhead
       ObjectMapper objectMapper = new ObjectMapper();
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

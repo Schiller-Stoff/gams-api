@@ -31,10 +31,13 @@ public class PlexusSearchSolrQueryBuilder {
               encodeQueryParam(PlexusSearchProperties.ENTITY_PROJECT_ABBR.name + ":" + projectAbbr)
           );
     }
+
     // Add custom filter queries
     for (String fq : request.getFilterQueries()) {
       url.append("&fq=").append(encodeQueryParam(fq));
     }
+
+
 
     // Add sort
     if (request.getSort() != null && !request.getSort().isEmpty()) {
