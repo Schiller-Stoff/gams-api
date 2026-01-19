@@ -65,6 +65,9 @@ spring:
     multipart:
       max-file-size: 10GB
       max-request-size: 10GB
+  web:
+    error:
+      include-stacktrace: on_param
 
 
 ########
@@ -78,9 +81,6 @@ logging:
     org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:
-  error:
-    # includes stacktrace on error ( devtools will include it in dev)
-    include-stacktrace: always
   # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
   # Needed to consider reverse-proxy / api-gateway in front
   forward-headers-strategy: framework
