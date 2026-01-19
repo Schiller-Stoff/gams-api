@@ -66,12 +66,12 @@ public class IngestService implements IIngestService {
 
   public void ingest(String projectAbbr, InputStream bagZipStream){
 
-    // PHASE 0: validation against project
-    // TODO unused variable
-    var foundProject = projectRepository.findById(projectAbbr)
-        .orElseThrow(() -> new ProjectNotFoundException(
-            "Project does not exist: " + projectAbbr
-        ));
+    // PHASE 0: check if project exists
+    if(!projectRepository.existsById(projectAbbr)){
+      throw new ProjectNotFoundException(
+          "Project does not exist: " + projectAbbr
+      );
+    }
 
     // preparation
     Path bagDirPath = null;
@@ -213,6 +213,7 @@ public class IngestService implements IIngestService {
 
     // 3. Save Datastreams (Metadata only)
     // TODO some calls look weird - refactor!
+    // TODO also this dc logic could be done outside the db transaction logic
     for (Datastream ds : datastreams) {
       ds.setDigitalObject(savedObject); // Re-attach managed entity
       datastreamRepository.save(ds);
