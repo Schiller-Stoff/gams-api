@@ -64,10 +64,10 @@ public class IngestService implements IIngestService {
   private IngestService self;
 
 
-  public void ingest(String projectAbbr, InputStream bagZipStream){
+  public void ingest(String projectAbbr, InputStream bagZipStream) {
 
     // PHASE 0: check if project exists
-    if(!projectRepository.existsById(projectAbbr)){
+    if (!projectRepository.existsById(projectAbbr)) {
       throw new ProjectNotFoundException(
           "Project does not exist: " + projectAbbr
       );
@@ -101,7 +101,7 @@ public class IngestService implements IIngestService {
       // 4. Convert to Entities (CPU only, no DB)
       // We create the objects here to derive IDs for file storage
       DigitalObject digitalObject = conversionService.convert(bag.getBagData(), DigitalObject.class);
-      if(digitalObject == null){
+      if (digitalObject == null) {
         throw new IngestProcessingException(
             "Digital object domain object is unexpectedly null after conversion from bag data. Object id: " + objectId
         );
@@ -111,7 +111,7 @@ public class IngestService implements IIngestService {
 
       for (var contentFile : bag.getBagData().getContentFiles()) {
         Datastream ds = conversionService.convert(contentFile, Datastream.class);
-        if(ds == null){
+        if (ds == null) {
           throw new IngestProcessingException(
               "Datastream domain object is unexpectedly null after conversion from bag data . At Object: " + objectId + ". Datastream: " + contentFile.getDsid() + ". Bagpath: " + contentFile.getBagpath()
           );
@@ -123,8 +123,10 @@ public class IngestService implements IIngestService {
       // --- PHASE 2: HEAVY IO (No DB Transaction) ---
       log.info("Starting file persistence for object {}", objectId);
 
-      // TODO looks weird - separation of concerns!
+      List<DublinCoreEntry> dublinCoreEntries = new ArrayList<>();
+
       for (Datastream ds : datastreams) {
+        // TODO looks weird - separation of concerns!
         // Find the source file in the temp bag
         BagFile bagFile = bag.findContentFileByDsid(ds.getDsid());
         Path sourcePath = bagDirPath.resolve(bagFile.getBagpath());
@@ -134,12 +136,48 @@ public class IngestService implements IIngestService {
           datastreamContentRepository.save(in, ds.deriveDatastreamId());
           // Track success for potential rollback
           writtenFiles.add(ds.deriveDatastreamId());
+
+          // TODO think about dublin core extraction logic
+          // if dublin core -> don't save on filesystem (do the processing)
+          if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
+            // read only the datastream content for dublin core
+            byte[] dublinCoreContent;
+            var contentFile = bag.findContentFileByDsid(ds.getDsid());
+            Path dcFilePath = bagDirPath.resolve(contentFile.getBagpath());
+            try {
+              dublinCoreContent = Files.readAllBytes(dcFilePath);
+            } catch (IOException e) {
+              throw new IngestProcessingException(
+                  "Failed to read file " + contentFile.getBagpath() +
+                      " for given project " + projectAbbr +
+                      " for object " + digitalObject +
+                      " for datastream " + ds +
+                      ". Original error " + e.getMessage(),
+                  e
+              );
+            }
+
+            Document dublinCore = XMLUtils.parseXml(dublinCoreContent);
+            XMLUtils
+                .extractDCElements(dublinCore)
+                .forEach(dcElement -> {
+                  DublinCoreEntry dublinCoreEntry = DublinCoreEntry
+                      .builder()
+                      .name(dcElement.getName())
+                      .value(dcElement.getValue())
+                      .language(dcElement.getLanguage())
+                      .build();
+                  dublinCoreEntries.add(dublinCoreEntry);
+                });
+          }
+
         }
+
       }
 
       // --- PHASE 3: METADATA PERSISTENCE (Transactional) ---
       // Now the DB transaction will be very short (milliseconds)
-      self.ingestTransactional(projectAbbr, digitalObject, datastreams, bag);
+      self.ingestTransactional(projectAbbr, digitalObject, datastreams, dublinCoreEntries, bag);
 
     } catch (Exception e) {
       // --- COMPENSATION: MANUAL ROLLBACK ---
@@ -174,9 +212,9 @@ public class IngestService implements IIngestService {
   public void ingestTransactional(String projectAbbr,
                                   DigitalObject digitalObject,
                                   List<Datastream> datastreams,
+                                  List<DublinCoreEntry> dublinCoreEntries,
                                   Bag bag) {
 
-    // TODO redundant
     var foundProject = projectRepository.findById(projectAbbr)
         .orElseThrow(() -> new ProjectNotFoundException(
             "Project does not exist: " + projectAbbr
@@ -184,7 +222,7 @@ public class IngestService implements IIngestService {
 
     // Double check existence (optimistic locking pattern) in case of race condition
     // abort ingest if digital object already exists
-    if(digitalObjectRepository.existsById(digitalObject.getId())){
+    if (digitalObjectRepository.existsById(digitalObject.getId())) {
       throw new IngestObjectAlreadyExistsException(
           "Cannot ingest object with id " + digitalObject.getId() + ". Digital object already exists and must be deleted before another ingest process. Ingest against project: " + projectAbbr
       );
@@ -196,62 +234,31 @@ public class IngestService implements IIngestService {
 
     // logic to save the related BagEntities
     var bagEntity = SubmissionRecord.builder()
-            .digitalObject(savedObject)
-            .createdBy(bag.getBagData().getCreatedBy())
-            .source(bag.getBagData().getSource())
-            .schema(bag.getBagData().getSchema())
-            .contactMail(bag.getBagInfo().getContactMail())
-            .baggingDate(bag.getBagInfo().getDate())
-            .externalDescription(bag.getBagInfo().getExternalDescription())
-            .payloadOxum(bag.getBagInfo().getPayloadOxum())
-            .bagVersion(bag.getBagMeta().getBagItVersion())
-            .tagFileCharacterEncoding(bag.getBagMeta().getTagFileCharacterEncoding())
-            .build();
+        .digitalObject(savedObject)
+        .createdBy(bag.getBagData().getCreatedBy())
+        .source(bag.getBagData().getSource())
+        .schema(bag.getBagData().getSchema())
+        .contactMail(bag.getBagInfo().getContactMail())
+        .baggingDate(bag.getBagInfo().getDate())
+        .externalDescription(bag.getBagInfo().getExternalDescription())
+        .payloadOxum(bag.getBagInfo().getPayloadOxum())
+        .bagVersion(bag.getBagMeta().getBagItVersion())
+        .tagFileCharacterEncoding(bag.getBagMeta().getTagFileCharacterEncoding())
+        .build();
 
     bagEntityRepository.save(bagEntity);
     log.debug("Successfully saved bag entity: {} for project {}", bagEntity, projectAbbr);
 
     // 3. Save Datastreams (Metadata only)
-    // TODO some calls look weird - refactor!
-    // TODO also this dc logic could be done outside the db transaction logic
     for (Datastream ds : datastreams) {
       ds.setDigitalObject(savedObject); // Re-attach managed entity
       datastreamRepository.save(ds);
+    }
 
-      // Dublin Core logic (if applicable) can go here
-      if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
-        // read only the datastream content for dublin core
-        byte[] dublinCoreContent;
-        var contentFile = bag.findContentFileByDsid(ds.getDsid());
-        Path dcFilePath = Path.of(bag.getBAG_DIR_PATH() + File.separator + contentFile.getBagpath());
-        try {
-          dublinCoreContent = Files.readAllBytes(dcFilePath);
-        } catch (IOException e) {
-          throw new IngestProcessingException(
-              "Failed to read file " + contentFile.getBagpath() +
-                  " for given project " + projectAbbr +
-                  " for object " + digitalObject +
-                  " for datastream " + ds +
-                  ". Original error " + e.getMessage(),
-              e
-          );
-        }
-
-        Document dublinCore = XMLUtils.parseXml(dublinCoreContent);
-        XMLUtils
-            .extractDCElements(dublinCore)
-            .forEach(dcElement -> {
-              DublinCoreEntry dublinCoreEntry = DublinCoreEntry
-                  .builder()
-                  .name(dcElement.getName())
-                  .value(dcElement.getValue())
-                  .language(dcElement.getLanguage())
-                  .digitalObject(savedObject)
-                  .build();
-              dublinCoreElementRepository.save(dublinCoreEntry);
-              log.info("Successfully saved dublinCoreEntry: {}", dublinCoreEntry);
-            });
-      }
+    // 4. save dublin core
+    for (DublinCoreEntry dc : dublinCoreEntries) {
+      dc.setDigitalObject(savedObject); // Re-attach managed entity
+      dublinCoreElementRepository.save(dc);
     }
 
     // tracks modification date of the content
@@ -265,7 +272,8 @@ public class IngestService implements IIngestService {
 
   /**
    * Export a digital object as a zipped BagIt package and write it to the provided OutputStream.
-   * @param objectId the id of the digital object to export
+   *
+   * @param objectId     the id of the digital object to export
    * @param outputStream the OutputStream to write the zipped BagIt package to
    */
   @Transactional
@@ -289,7 +297,7 @@ public class IngestService implements IIngestService {
 
     var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
 
-    if(datastreams.isEmpty()){
+    if (datastreams.isEmpty()) {
       throw new ExportUnexpectedObjectStateException(
           "Cannot export digital object as bag - no datastreams found for object: " + objectId
       );
@@ -297,14 +305,14 @@ public class IngestService implements IIngestService {
 
     // 02. Map data to bag entities
     BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
-    BagMeta bagMeta =  BagMeta.from(ingestRecord);
+    BagMeta bagMeta = BagMeta.from(ingestRecord);
     BagInfo bagInfo = BagInfo.from(ingestRecord);
 
     // create bag from database entities
     Bag bag = new Bag(bagInfo, bagMeta, bagData);
 
     // sert bag data entry to indicate that the bag was created by the gams-api
-    String createdBy = String.format("%s %s",buildProperties.getName(), buildProperties.getVersion());
+    String createdBy = String.format("%s %s", buildProperties.getName(), buildProperties.getVersion());
     bag.getBagData().setCreatedBy(createdBy);
 
     // 03. write bag
