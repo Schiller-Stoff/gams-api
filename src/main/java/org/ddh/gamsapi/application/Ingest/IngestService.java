@@ -30,8 +30,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -131,44 +129,21 @@ public class IngestService implements IIngestService {
         BagFile bagFile = bag.findContentFileByDsid(ds.getDsid());
         Path sourcePath = bagDirPath.resolve(bagFile.getBagpath());
 
+        //TODO simplify for dublin core!
+
         try (InputStream in = Files.newInputStream(sourcePath)) {
           // HEAVY IO HAPPENS HERE - NO DB CONNECTION HELD
           datastreamContentRepository.save(in, ds.deriveDatastreamId());
           // Track success for potential rollback
           writtenFiles.add(ds.deriveDatastreamId());
 
-          // TODO think about dublin core extraction logic
           // if dublin core -> don't save on filesystem (do the processing)
           if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
-            // read only the datastream content for dublin core
-            byte[] dublinCoreContent;
-            var contentFile = bag.findContentFileByDsid(ds.getDsid());
-            Path dcFilePath = bagDirPath.resolve(contentFile.getBagpath());
-            try {
-              dublinCoreContent = Files.readAllBytes(dcFilePath);
-            } catch (IOException e) {
-              throw new IngestProcessingException(
-                  "Failed to read file " + contentFile.getBagpath() +
-                      " for given project " + projectAbbr +
-                      " for object " + digitalObject +
-                      " for datastream " + ds +
-                      ". Original error " + e.getMessage(),
-                  e
-              );
-            }
-
-            Document dublinCore = XMLUtils.parseXml(dublinCoreContent);
-            XMLUtils
-                .extractDCElements(dublinCore)
-                .forEach(dcElement -> {
-                  DublinCoreEntry dublinCoreEntry = DublinCoreEntry
-                      .builder()
-                      .name(dcElement.getName())
-                      .value(dcElement.getValue())
-                      .language(dcElement.getLanguage())
-                      .build();
-                  dublinCoreEntries.add(dublinCoreEntry);
-                });
+            dublinCoreEntries = parseDublinCore(
+                Files.readAllBytes(sourcePath),
+                digitalObject,
+                projectAbbr
+            );
           }
 
         }
@@ -318,6 +293,31 @@ public class IngestService implements IIngestService {
     // 03. write bag
     bag.writeAsZipToStream(outputStream, datastreamContentRepository);
 
+  }
+
+  /**
+   * Helper to parse Dublin Core outside of the main loop.
+   */
+  private List<DublinCoreEntry> parseDublinCore(byte[] xmlContent, DigitalObject digitalObject, String projectAbbr) {
+    try {
+      Document dublinCore = XMLUtils.parseXml(xmlContent);
+      List<DublinCoreEntry> entries = new ArrayList<>();
+
+      XMLUtils.extractDCElements(dublinCore).forEach(dcElement -> {
+        entries.add(DublinCoreEntry.builder()
+            .name(dcElement.getName())
+            .value(dcElement.getValue())
+            .language(dcElement.getLanguage())
+            // We don't set .digitalObject(savedObject) here yet,
+            // because the object isn't saved. We do that in Phase 3.
+            .build());
+      });
+      return entries;
+    } catch (Exception e) {
+      throw new IngestProcessingException(
+          "Failed to parse Dublin Core XML for project " + projectAbbr + ". Error: " + e.getMessage(), e
+      );
+    }
   }
 
 }
