@@ -30,6 +30,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -124,28 +126,39 @@ public class IngestService implements IIngestService {
       List<DublinCoreEntry> dublinCoreEntries = new ArrayList<>();
 
       for (Datastream ds : datastreams) {
-        // TODO looks weird - separation of concerns!
+
         // Find the source file in the temp bag
         BagFile bagFile = bag.findContentFileByDsid(ds.getDsid());
         Path sourcePath = bagDirPath.resolve(bagFile.getBagpath());
 
-        //TODO simplify for dublin core!
+        // SPECIAL HANDLING: DUBLIN CORE (Read to RAM once, use twice)
+        if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
+          try {
+            // 1. Read bytes into memory (DC is small, so this is safe)
+            byte[] dcBytes = Files.readAllBytes(sourcePath);
 
-        try (InputStream in = Files.newInputStream(sourcePath)) {
-          // HEAVY IO HAPPENS HERE - NO DB CONNECTION HELD
-          datastreamContentRepository.save(in, ds.deriveDatastreamId());
-          // Track success for potential rollback
-          writtenFiles.add(ds.deriveDatastreamId());
+            // 2. Save to Repository using bytes (avoid re-reading from disk)
+            // Note: Ensure your repository has a save(byte[], id) method, or wrap in ByteArrayInputStream
+            datastreamContentRepository.save(new ByteArrayInputStream(dcBytes), ds.deriveDatastreamId());
+            writtenFiles.add(ds.deriveDatastreamId());
 
-          // if dublin core -> don't save on filesystem (do the processing)
-          if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
-            dublinCoreEntries = parseDublinCore(
-                Files.readAllBytes(sourcePath),
-                digitalObject,
-                projectAbbr
+            // 3. Parse XML from memory
+            dublinCoreEntries.addAll(
+                parseDublinCore(dcBytes, digitalObject, projectAbbr)
             );
-          }
 
+          } catch (IOException e) {
+            throw new IngestProcessingException("Failed to process DC file: " + sourcePath, e);
+          }
+        }
+        // STANDARD HANDLING: ALL OTHER FILES (Stream to avoid OOM)
+        else {
+          try (InputStream in = Files.newInputStream(sourcePath)) {
+            datastreamContentRepository.save(in, ds.deriveDatastreamId());
+            writtenFiles.add(ds.deriveDatastreamId());
+          } catch (IOException e) {
+            throw new IngestProcessingException("Failed to stream file: " + sourcePath, e);
+          }
         }
 
       }
@@ -296,7 +309,7 @@ public class IngestService implements IIngestService {
   }
 
   /**
-   * Helper to parse Dublin Core outside of the main loop.
+   * Helper to parse Dublin Core outside the main loop.
    */
   private List<DublinCoreEntry> parseDublinCore(byte[] xmlContent, DigitalObject digitalObject, String projectAbbr) {
     try {
@@ -315,7 +328,7 @@ public class IngestService implements IIngestService {
       return entries;
     } catch (Exception e) {
       throw new IngestProcessingException(
-          "Failed to parse Dublin Core XML for project " + projectAbbr + ". Error: " + e.getMessage(), e
+          "Failed to parse Dublin Core XML for project " + projectAbbr + ". Digital object: " + digitalObject.getId() + ". Error: " + e.getMessage(), e
       );
     }
   }
