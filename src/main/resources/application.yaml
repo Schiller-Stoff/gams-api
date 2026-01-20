@@ -26,10 +26,7 @@ spring:
       # set to create if you want to drop existing data on app startup
       # value "none" would require to initialize a schema via SQL via extra file
       ddl-auto: update
-      properties:
-        # TODO both properties are outdated?
-        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-        hibernate.jdbc.lob.non_contextual_creation: true
+
   # oauth2 integration with keycloak
   security:
     oauth2:
