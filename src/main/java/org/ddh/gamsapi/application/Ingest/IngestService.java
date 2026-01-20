@@ -13,19 +13,13 @@ import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
-import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
-import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +32,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -51,19 +44,13 @@ public class IngestService implements IIngestService {
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
   private final IDatastreamContentRepository datastreamContentRepository;
-  private final IDublinCoreEntryRepository dublinCoreElementRepository;
-  private final ApplicationEventPublisher applicationEventPublisher;
   private final ISubmissionRecordRepository bagEntityRepository;
   private final BuildProperties buildProperties;
 
-  // Self-injection required to call the transactional method from within the same class
-  // via the Spring proxy. Field injection used here to maintain @RequiredArgsConstructor for other dependencies.
-  // the ingest method is then split in two (1. Heavy IO  2. Database transaction)
-  // TODO field injection is discouraged by spring
-  @Lazy
-  @Autowired
-  private IngestService self;
-
+  // the persistence logic (@transactional) is in a separate service (called here) to ensure isolation
+  // of heavy IO and database operations afterward (reason: performance - depletion of database connections).
+  // self injecting to use a separate service method won't work for native builds!
+  private final IngestPersistenceService ingestPersistenceService;
 
   public void ingest(String projectAbbr, InputStream bagZipStream) {
 
@@ -166,7 +153,13 @@ public class IngestService implements IIngestService {
 
       // --- PHASE 3: METADATA PERSISTENCE (Transactional) ---
       // Now the DB transaction will be very short (milliseconds)
-      self.ingestTransactional(projectAbbr, digitalObject, datastreams, dublinCoreEntries, bag);
+      ingestPersistenceService.persistIngest(
+          projectAbbr,
+          digitalObject,
+          datastreams,
+          new ArrayList<>(dublinCoreEntries),
+          bag
+      );
 
     } catch (Exception e) {
       // --- COMPENSATION: MANUAL ROLLBACK ---
@@ -191,71 +184,6 @@ public class IngestService implements IIngestService {
       if (bagDirPath != null) ZipUtils.deleteDir(bagDirPath);
     }
 
-
-  }
-
-  @Transactional(rollbackFor = {
-      // any exception will trigger a rollback
-      Exception.class}
-  )
-  public void ingestTransactional(String projectAbbr,
-                                  DigitalObject digitalObject,
-                                  List<Datastream> datastreams,
-                                  List<DublinCoreEntry> dublinCoreEntries,
-                                  Bag bag) {
-
-    var foundProject = projectRepository.findById(projectAbbr)
-        .orElseThrow(() -> new ProjectNotFoundException(
-            "Project does not exist: " + projectAbbr
-        ));
-
-    // Double check existence (optimistic locking pattern) in case of race condition
-    // abort ingest if digital object already exists
-    if (digitalObjectRepository.existsById(digitalObject.getId())) {
-      throw new IngestObjectAlreadyExistsException(
-          "Cannot ingest object with id " + digitalObject.getId() + ". Digital object already exists and must be deleted before another ingest process. Ingest against project: " + projectAbbr
-      );
-    }
-
-    // 1. Save Digital Object
-    final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
-    log.debug("Successfully saved digital object: {} for project {}", digitalObject, projectAbbr);
-
-    // logic to save the related BagEntities
-    var bagEntity = SubmissionRecord.builder()
-        .digitalObject(savedObject)
-        .createdBy(bag.getBagData().getCreatedBy())
-        .source(bag.getBagData().getSource())
-        .schema(bag.getBagData().getSchema())
-        .contactMail(bag.getBagInfo().getContactMail())
-        .baggingDate(bag.getBagInfo().getDate())
-        .externalDescription(bag.getBagInfo().getExternalDescription())
-        .payloadOxum(bag.getBagInfo().getPayloadOxum())
-        .bagVersion(bag.getBagMeta().getBagItVersion())
-        .tagFileCharacterEncoding(bag.getBagMeta().getTagFileCharacterEncoding())
-        .build();
-
-    bagEntityRepository.save(bagEntity);
-    log.debug("Successfully saved bag entity: {} for project {}", bagEntity, projectAbbr);
-
-    // 3. Save Datastreams (Metadata only)
-    for (Datastream ds : datastreams) {
-      ds.setDigitalObject(savedObject); // Re-attach managed entity
-      datastreamRepository.save(ds);
-    }
-
-    // 4. save dublin core
-    for (DublinCoreEntry dc : dublinCoreEntries) {
-      dc.setDigitalObject(savedObject); // Re-attach managed entity
-      dublinCoreElementRepository.save(dc);
-    }
-
-    // tracks modification date of the content
-    foundProject.setContentLastModified(new Date());
-    // publish creation event
-    applicationEventPublisher.publishEvent(
-        new DigitalObjectCreatedEvent(this, savedObject)
-    );
 
   }
 
