@@ -59,6 +59,7 @@ public class IngestService implements IIngestService {
   // Self-injection required to call the transactional method from within the same class
   // via the Spring proxy. Field injection used here to maintain @RequiredArgsConstructor for other dependencies.
   // the ingest method is then split in two (1. Heavy IO  2. Database transaction)
+  // TODO field injection is discouraged by spring
   @Lazy
   @Autowired
   private IngestService self;
