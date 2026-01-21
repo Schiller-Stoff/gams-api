@@ -28,6 +28,8 @@ pre-tag:
 	@echo "*** Release version: $(VERSION) ***"
 	@echo "*** Building with java version ***"
 	java --version
+	@echo "*** Cleaning maven cache..."
+	./mvnw clean
 
 # Run all tests (unit + integration) and build image
 build: pre-tag

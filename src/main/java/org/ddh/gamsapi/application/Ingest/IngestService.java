@@ -4,40 +4,35 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Ingest.exceptions.*;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.Bag;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagData;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagInfo;
-import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagMeta;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.*;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
+import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
-import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
-import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.springframework.boot.info.BuildProperties;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -49,183 +44,153 @@ public class IngestService implements IIngestService {
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
   private final IDatastreamContentRepository datastreamContentRepository;
-  private final IDublinCoreEntryRepository dublinCoreElementRepository;
-  private final ApplicationEventPublisher applicationEventPublisher;
   private final ISubmissionRecordRepository bagEntityRepository;
   private final BuildProperties buildProperties;
 
-  @Override
-  @Transactional(rollbackFor = {
-      // any exception will trigger a rollback
-      Exception.class}
-  )
+  // the persistence logic (@transactional) is in a separate service (called here) to ensure isolation
+  // of heavy IO and database operations afterward (reason: performance - depletion of database connections).
+  // self injecting to use a separate service method won't work for native builds!
+  private final IngestPersistenceService ingestPersistenceService;
+
   public void ingest(String projectAbbr, InputStream bagZipStream) {
 
-    var foundProject = projectRepository.findById(projectAbbr)
-        .orElseThrow(() -> new ProjectNotFoundException(
-            "Project does not exist: " + projectAbbr
-        ));
-
-    // Unzip DIRECTLY from stream to temp directory (no byte[] intermediate)
-    Path bagDirPath;
-    try {
-      bagDirPath = ZipUtils.unzipStreamToTempDir(bagZipStream);
-    } catch (IngestProcessingException e) {
-      throw new IngestProcessingException(
-          "Failed to unzip bag for project " + projectAbbr + ": " + e.getMessage(),
-          e
+    // PHASE 0: check if project exists
+    if (!projectRepository.existsById(projectAbbr)) {
+      throw new ProjectNotFoundException(
+          "Project does not exist: " + projectAbbr
       );
     }
 
+    // preparation
+    Path bagDirPath = null;
+    List<DatastreamId> writtenFiles = new ArrayList<>(); // Track for rollback
+
     try {
-      // 02. Bag processing
+      // --- PHASE 1: PREPARATION (No DB Connection) ---
+
+      // 1. Unzip + parse bag
+      bagDirPath = ZipUtils.unzipStreamToTempDir(bagZipStream);
       Bag bag = new Bag(bagDirPath);
 
-      log.debug("Successfully extracted bag: {}", bag.getBAG_DIR_PATH());
-      if(!bag.getBagData().getProject().equals(projectAbbr)){
+      // 2. Logic Validation
+      if (!bag.getBagData().getProject().equals(projectAbbr)) {
         throw new IngestAgainstDifferentProjectException(
-            "The project abbreviation of the ingest " + projectAbbr +
-                " does not match the project " + bag.getBagData().getProject() +
-                " in the bag sip.json. (Make sure that your bags describe the same project as your ingest request). Aborting ingest operation. Happened at BagSipJson: " + bag.getBagData()
+            "Bag contains different project abbr than requested project. Bag value: " + bag.getBagData().getProject() + ". Requested project: " + projectAbbr + "."
         );
       }
 
-      // 03. build and save digital object from bag data
+      // 3. Pre-check DB conditions (Fast, Read-Only)
+      // We check this NOW to avoid doing heavy File IO if the object already exists.
+      String objectId = bag.getBagData().getId();
+      if (digitalObjectRepository.existsById(objectId)) {
+        throw new IngestObjectAlreadyExistsException(objectId);
+      }
+
+      // 4. Convert to Entities (CPU only, no DB)
+      // We create the objects here to derive IDs for file storage
       DigitalObject digitalObject = conversionService.convert(bag.getBagData(), DigitalObject.class);
-      if(digitalObject == null){
-        throw new IngestTypeConversionException(
-            "Digital object is unexpectedly null. Failed to convert bag data " + bag.getBagData() + " to digital object for given ingest against project " + projectAbbr
+      if (digitalObject == null) {
+        throw new IngestProcessingException(
+            "Digital object domain object is unexpectedly null after conversion from bag data. Object id: " + objectId
         );
       }
 
-      // abort ingest if digital object already exists
-      if(digitalObjectRepository.existsById(digitalObject.getId())){
-        throw new IngestObjectAlreadyExistsException(
-            "Cannot ingest object with id " + digitalObject.getId() + ". Digital object already exists and must be deleted before another ingest process. Ingest against project: " + projectAbbr
-        );
+      List<Datastream> datastreams = new ArrayList<>();
+
+      for (var contentFile : bag.getBagData().getContentFiles()) {
+        Datastream ds = conversionService.convert(contentFile, Datastream.class);
+        if (ds == null) {
+          throw new IngestProcessingException(
+              "Datastream domain object is unexpectedly null after conversion from bag data . At Object: " + objectId + ". Datastream: " + contentFile.getDsid() + ". Bagpath: " + contentFile.getBagpath()
+          );
+        }
+        ds.setDigitalObject(digitalObject); // Needed to derive ID
+        datastreams.add(ds);
       }
 
-      final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
-      log.debug("Successfully saved digital object: {} for project {}", digitalObject, projectAbbr);
+      // --- PHASE 2: HEAVY IO (No DB Transaction) ---
+      log.info("Starting file persistence for object {}", objectId);
 
-      // logic to save the related BagEntities
-      var bagEntity = SubmissionRecord.builder()
-              .digitalObject(savedObject)
-              .createdBy(bag.getBagData().getCreatedBy())
-              .source(bag.getBagData().getSource())
-              .schema(bag.getBagData().getSchema())
-              .contactMail(bag.getBagInfo().getContactMail())
-              .baggingDate(bag.getBagInfo().getDate())
-              .externalDescription(bag.getBagInfo().getExternalDescription())
-              .payloadOxum(bag.getBagInfo().getPayloadOxum())
-              .bagVersion(bag.getBagMeta().getBagItVersion())
-              .tagFileCharacterEncoding(bag.getBagMeta().getTagFileCharacterEncoding())
-              .build();
+      List<DublinCoreEntry> dublinCoreEntries = new ArrayList<>();
 
-      bagEntityRepository.save(bagEntity);
-      log.debug("Successfully saved bag entity: {} for project {}", bagEntity, projectAbbr);
+      for (Datastream ds : datastreams) {
 
-      // 04. build and save datastreams from the bag data
-      bag.getBagData().getContentFiles()
-            .forEach(contentFile -> {
-              Datastream datastream = conversionService.convert(contentFile, Datastream.class);
-              if(datastream == null){
-                throw new IngestTypeConversionException(
-                    "Datastream is unexpectedly null. Failed to convert contentFile " + contentFile +
-                        " to datastream for project " + projectAbbr +
-                        " for object " + digitalObject
-                );
-              }
+        // Find the source file in the temp bag
+        BagFile bagFile = bag.findContentFileByDsid(ds.getDsid());
+        Path sourcePath = bagDirPath.resolve(bagFile.getBagpath());
 
-              // set datastream to point to the saved digital object
-              datastream.setDigitalObject(savedObject);
+        // SPECIAL HANDLING: DUBLIN CORE (Read to RAM once, use twice)
+        if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
+          try {
+            // 1. Read bytes into memory (DC is small, so this is safe)
+            byte[] dcBytes = Files.readAllBytes(sourcePath);
 
-              // saving the datastream content to the filesystem via streaming
-              Path contentFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
-              try (InputStream inputStream = Files.newInputStream(contentFilePath)) {
-                datastreamContentRepository.save(inputStream, datastream.deriveDatastreamId());
-              } catch (IOException e) {
-                throw new IngestProcessingException(
-                    "Failed to save datastream content from " +
-                        contentFilePath + " for object " + digitalObject.getId(),
-                    e
-                );
-              }
+            // 2. Save to Repository using bytes (avoid re-reading from disk)
+            // Note: Ensure your repository has a save(byte[], id) method, or wrap in ByteArrayInputStream
+            datastreamContentRepository.save(new ByteArrayInputStream(dcBytes), ds.deriveDatastreamId());
+            writtenFiles.add(ds.deriveDatastreamId());
 
-              // save datastream to database
-              // make sure that the files are being deleted in any case (if database error occurs).
-              try {
-                datastreamRepository.save(datastream);
-                log.info("Successfully saved datastream {}", datastream);
+            // 3. Parse XML from memory
+            dublinCoreEntries.addAll(
+                parseDublinCore(dcBytes, digitalObject, projectAbbr)
+            );
 
-                // also save dublin core metadata
-                // TODO dublin core processing - move to integration layer somewhere - this is shaky in my oppinion
-                if(contentFile.getDsid().equals(GAMSDsid.DC.getValue())){
-                  // read only the datastream content for dublin core
-                  byte[] dublinCoreContent;
-                  Path dcFilePath = Path.of(bagDirPath + File.separator + contentFile.getBagpath());
-                  try {
-                    dublinCoreContent = Files.readAllBytes(dcFilePath);
-                  } catch (IOException e) {
-                    throw new IngestProcessingException(
-                        "Failed to read file " + contentFilePath +
-                            " for given project " + projectAbbr +
-                            " for object " + digitalObject +
-                            " for datastream " + datastream +
-                            ". Original error " + e.getMessage(),
-                        e
-                    );
-                  }
+          } catch (IOException e) {
+            throw new IngestProcessingException("Failed to process DC file: " + sourcePath, e);
+          }
+        }
+        // STANDARD HANDLING: ALL OTHER FILES (Stream to avoid OOM)
+        else {
+          try (InputStream in = Files.newInputStream(sourcePath)) {
+            datastreamContentRepository.save(in, ds.deriveDatastreamId());
+            writtenFiles.add(ds.deriveDatastreamId());
+          } catch (IOException e) {
+            throw new IngestProcessingException("Failed to stream file: " + sourcePath, e);
+          }
+        }
 
-                  Document dublinCore = XMLUtils.parseXml(dublinCoreContent);
-                  XMLUtils
-                      .extractDCElements(dublinCore)
-                      .forEach(dcElement -> {
-                        DublinCoreEntry dublinCoreEntry = DublinCoreEntry
-                            .builder()
-                            .name(dcElement.getName())
-                            .value(dcElement.getValue())
-                            .language(dcElement.getLanguage())
-                            .digitalObject(savedObject)
-                            .build();
-                        dublinCoreElementRepository.save(dublinCoreEntry);
-                        log.info("Successfully saved dublinCoreEntry: {}", dublinCoreEntry);
-                      });
+      }
 
-                }
-
-              } catch (Exception e){
-                // make sure that in any case the file on the filesystem is being deleted
-                if(datastreamContentRepository.exists(datastream.deriveDatastreamId())){
-                  String msg = "Failed to save datastream " + datastream +
-                      ". Deleting associated datastream content with id " + datastream.deriveDatastreamId() + " from filesystem to avoid orphaned content.";
-                  log.error(msg);
-                  datastreamContentRepository.delete(datastream.deriveDatastreamId());
-                }
-                throw e;
-              }
-            });
-
-      // tracks modification date of the content
-      foundProject.setContentLastModified(new Date());
-      applicationEventPublisher.publishEvent(
-          new DigitalObjectCreatedEvent(this, savedObject)
+      // --- PHASE 3: METADATA PERSISTENCE (Transactional) ---
+      // Now the DB transaction will be very short (milliseconds)
+      ingestPersistenceService.persistIngest(
+          projectAbbr,
+          digitalObject,
+          datastreams,
+          new ArrayList<>(dublinCoreEntries),
+          bag
       );
 
-    } finally {
-      // cleanup temp directory in any case
-      try {
-        ZipUtils.deleteDir(bagDirPath);
-      } catch (Exception e ){
-        log.error(e.getMessage(), e);
+    } catch (Exception e) {
+      // --- COMPENSATION: MANUAL ROLLBACK ---
+      log.error("Ingest failed. Rolling back {} written files.", writtenFiles.size());
+      for (DatastreamId dsId : writtenFiles) {
+        try {
+          datastreamContentRepository.delete(dsId);
+        } catch (Exception deleteEx) {
+          log.error("Failed to cleanup orphaned file: {}", dsId, deleteEx);
+        }
       }
+
+      if (e instanceof IngestException) {
+        // These are custom unchecked exceptions or already wrapped exceptions, re-throw directly
+        throw (IngestException) e;
+      }
+
+      throw new IngestProcessingException("An unexpected error occurred during ingest: " + e.getMessage(), e);
+
+    } finally {
+      // Cleanup temp dir
+      if (bagDirPath != null) ZipUtils.deleteDir(bagDirPath);
     }
+
 
   }
 
   /**
    * Export a digital object as a zipped BagIt package and write it to the provided OutputStream.
-   * @param objectId the id of the digital object to export
+   *
+   * @param objectId     the id of the digital object to export
    * @param outputStream the OutputStream to write the zipped BagIt package to
    */
   @Transactional
@@ -249,7 +214,7 @@ public class IngestService implements IIngestService {
 
     var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
 
-    if(datastreams.isEmpty()){
+    if (datastreams.isEmpty()) {
       throw new ExportUnexpectedObjectStateException(
           "Cannot export digital object as bag - no datastreams found for object: " + objectId
       );
@@ -257,19 +222,44 @@ public class IngestService implements IIngestService {
 
     // 02. Map data to bag entities
     BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
-    BagMeta bagMeta =  BagMeta.from(ingestRecord);
+    BagMeta bagMeta = BagMeta.from(ingestRecord);
     BagInfo bagInfo = BagInfo.from(ingestRecord);
 
     // create bag from database entities
     Bag bag = new Bag(bagInfo, bagMeta, bagData);
 
     // sert bag data entry to indicate that the bag was created by the gams-api
-    String createdBy = String.format("%s %s",buildProperties.getName(), buildProperties.getVersion());
+    String createdBy = String.format("%s %s", buildProperties.getName(), buildProperties.getVersion());
     bag.getBagData().setCreatedBy(createdBy);
 
     // 03. write bag
     bag.writeAsZipToStream(outputStream, datastreamContentRepository);
 
+  }
+
+  /**
+   * Helper to parse Dublin Core outside the main loop.
+   */
+  private List<DublinCoreEntry> parseDublinCore(byte[] xmlContent, DigitalObject digitalObject, String projectAbbr) {
+    try {
+      Document dublinCore = XMLUtils.parseXml(xmlContent);
+      List<DublinCoreEntry> entries = new ArrayList<>();
+
+      XMLUtils.extractDCElements(dublinCore).forEach(dcElement -> {
+        entries.add(DublinCoreEntry.builder()
+            .name(dcElement.getName())
+            .value(dcElement.getValue())
+            .language(dcElement.getLanguage())
+            // We don't set .digitalObject(savedObject) here yet,
+            // because the object isn't saved. We do that in Phase 3.
+            .build());
+      });
+      return entries;
+    } catch (Exception e) {
+      throw new IngestProcessingException(
+          "Failed to parse Dublin Core XML for project " + projectAbbr + ". Digital object: " + digitalObject.getId() + ". Error: " + e.getMessage(), e
+      );
+    }
   }
 
 }
