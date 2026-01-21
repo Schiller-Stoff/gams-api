@@ -55,7 +55,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
-      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // Assert
       assertTrue(decision.isGranted());
@@ -69,7 +69,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
-      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // Assert
       assertTrue(decision.isGranted());
@@ -84,7 +84,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertThrows(AccessDeniedException.class, () -> {
-        manager.check(() -> authentication, authorizationContext);
+        manager.authorize(() -> authentication, authorizationContext);
       });
 
     }
@@ -97,7 +97,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
-        manager.check(() -> authentication, authorizationContext);
+        manager.authorize(() -> authentication, authorizationContext);
       });
     }
 
@@ -109,7 +109,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertDoesNotThrow(() -> {
-        manager.check(() -> authentication, authorizationContext);
+        manager.authorize(() -> authentication, authorizationContext);
       });
     }
 
@@ -139,7 +139,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Assert
       Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
-        manager.check(() -> authentication, authorizationContext);
+        manager.authorize(() -> authentication, authorizationContext);
       });
 
       Mockito.verify(authentication).getAuthorities();
@@ -155,7 +155,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // make sure that this was actually called
       Mockito.verify(authentication).getAuthorities();
@@ -172,7 +172,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Act
       Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
-        manager.check(() -> authentication, authorizationContext);
+        manager.authorize(() -> authentication, authorizationContext);
       });
 
       // verify that related method was actually called
@@ -195,7 +195,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Act
       Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
-        manager.check(() -> authentication, authorizationContext);
+        manager.authorize(() -> authentication, authorizationContext);
       });
 
       Mockito.verify(authorizationContext).getVariables();
@@ -218,7 +218,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
-      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // Assert
       assertTrue(decision.isGranted());
@@ -240,7 +240,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
-      AuthorizationDecision decision = manager.check(() -> authentication, authorizationContext);
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // Assert
       assertTrue(decision.isGranted());

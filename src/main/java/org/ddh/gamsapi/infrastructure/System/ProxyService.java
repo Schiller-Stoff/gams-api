@@ -89,7 +89,7 @@ public class ProxyService implements IProxyService {
     } catch (HttpStatusCodeException e) {
       String msg = String.format("Failed to proxy to integrated service via %s. Original error message: %s", targetUrl, e);
       log.error(msg);
-      return ResponseEntity.status(e.getRawStatusCode())
+      return ResponseEntity.status(e.getStatusCode())
               .headers(e.getResponseHeaders())
               .body(e.getResponseBodyAsString());
     } catch (ResourceAccessException e) {

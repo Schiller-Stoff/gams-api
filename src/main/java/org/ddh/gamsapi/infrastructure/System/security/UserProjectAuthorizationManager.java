@@ -2,6 +2,7 @@ package org.ddh.gamsapi.infrastructure.System.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -28,8 +29,9 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 @Slf4j
 public class UserProjectAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+
   @Override
-  public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+  public AuthorizationDecision authorize(Supplier<? extends @Nullable Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 
     log.trace("*** Checking custom authorization process...");
     String requestMethod = authorizationContext.getRequest().getMethod();

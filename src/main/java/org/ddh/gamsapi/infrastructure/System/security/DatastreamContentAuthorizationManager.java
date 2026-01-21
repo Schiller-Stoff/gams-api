@@ -2,9 +2,11 @@ package org.ddh.gamsapi.infrastructure.System.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.authorization.AuthorizationResult;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
@@ -27,7 +29,7 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
 
 
   @Override
-  public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext authorizationContext) {
+  public AuthorizationDecision authorize(Supplier<? extends @Nullable Authentication> authentication, RequestAuthorizationContext authorizationContext) {
 
     // TODO write tests!
 
