@@ -3,7 +3,6 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.stereotype.Service;
@@ -28,9 +27,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     final String DIGITAL_OBJECT_ID = archivalRecordCreateDto.getDigitalObjectId();
 
-    if(!digitalObjectRepository.existsById(DIGITAL_OBJECT_ID)){
+    if (!digitalObjectRepository.existsById(DIGITAL_OBJECT_ID)) {
       throw new DigitalObjectNotFoundException(
-          "Cannot save archival record " + archivalRecordCreateDto  + ". The digital object with id does not exist: " + DIGITAL_OBJECT_ID
+          "Cannot save archival record " + archivalRecordCreateDto + ". The digital object with id does not exist: " + DIGITAL_OBJECT_ID
       );
     }
 
