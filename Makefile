@@ -28,6 +28,8 @@ pre-tag:
 	@echo "*** Release version: $(VERSION) ***"
 	@echo "*** Building with java version ***"
 	java --version
+	@echo "*** Building with mvnw version ***"
+    ./mvnw --version
 	@echo "*** Cleaning maven cache..."
 	./mvnw clean
 
