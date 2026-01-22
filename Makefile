@@ -26,6 +26,8 @@ pre-tag:
 	@echo "*** Release version: $(VERSION) ***"
 	@echo "*** Building with java version ***"
 	java --version
+	@echo "*** Building with mvnw version ***"
+	./mvnw --version
 
 # Run all tests (unit + integration) and build image
 build: pre-tag
