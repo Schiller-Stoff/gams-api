@@ -43,8 +43,7 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ConversionService conversionService;
-  // TODO rename to submissionRecordRepository!
-  private final ISubmissionRecordRepository bagEntityRepository;
+  private final ISubmissionRecordRepository submissionRecordRepository;
   private final IArchivalRecordRepository archivalRecordRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
 
@@ -134,7 +133,7 @@ public class DigitalObjectService implements IDigitalObjectService {
       );
     }
 
-    bagEntityRepository.deleteById(digitalObject.getId());
+    submissionRecordRepository.deleteById(digitalObject.getId());
 
     archivalRecordRepository.deleteAllByDigitalObjectId(digitalObject.getId());
 

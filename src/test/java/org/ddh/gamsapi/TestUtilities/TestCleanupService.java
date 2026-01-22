@@ -44,9 +44,8 @@ public class TestCleanupService {
   @Autowired
   private IProjectRepository projectRepository;
 
-  // TODO rename to submissionRecordRepository
   @Autowired
-  private ISubmissionRecordRepository bagEntityRepository;
+  private ISubmissionRecordRepository submissionRecordRepository;
 
   @Autowired
   private IArchivalRecordRepository archivalRecordRepository;
@@ -65,8 +64,7 @@ public class TestCleanupService {
     datastreamContentRepository.deleteAll();
     dublinCoreElementRepository.deleteAll();
     datastreamRepository.deleteAll();
-    // TODO rename to submissionRecordRepository
-    bagEntityRepository.deleteAll();
+    submissionRecordRepository.deleteAll();
     archivalRecordRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
