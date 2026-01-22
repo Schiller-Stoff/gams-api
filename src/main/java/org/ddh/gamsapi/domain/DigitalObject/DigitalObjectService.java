@@ -7,6 +7,7 @@ import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMainResourceView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
@@ -42,7 +43,9 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ConversionService conversionService;
+  // TODO rename to submissionRecordRepository!
   private final ISubmissionRecordRepository bagEntityRepository;
+  private final IArchivalRecordRepository archivalRecordRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
@@ -132,6 +135,8 @@ public class DigitalObjectService implements IDigitalObjectService {
     }
 
     bagEntityRepository.deleteById(digitalObject.getId());
+
+    archivalRecordRepository.deleteAllByDigitalObjectId(digitalObject.getId());
 
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);

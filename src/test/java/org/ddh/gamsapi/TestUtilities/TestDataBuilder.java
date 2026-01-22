@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,15 +37,21 @@ public class TestDataBuilder {
   @Autowired
   private DatastreamContentRepository datastreamContentRepository;
 
+  // TODO rename to submissionRecordRepository
   @Autowired
   private ISubmissionRecordRepository bagEntityRepository;
+
+  @Autowired
+  private IArchivalRecordRepository archivalRecordRepository;
 
   @Transactional
   public void removeAllExceptProjects(TestDataSet testDataSet) {
     datastreamContentRepository.delete(testDataSet.mainDatastream().deriveDatastreamId());
     dublinCoreEntryRepository.delete(testDataSet.dublinCoreEntry());
     datastreamRepository.delete(testDataSet.mainDatastream());
+    // TODO rename to submissionRecordRepository
     bagEntityRepository.delete(testDataSet.submissionRecord());
+    archivalRecordRepository.delete(testDataSet.archivalRecord());
     digitalObjectRepository.delete(testDataSet.digitalObject());
   }
 
@@ -125,7 +132,10 @@ public class TestDataBuilder {
             testDataSet.project().getProjectAbbr(), randomDigitalObjectId
     );
 
+    // TODO rename to submissionRecord
     bagEntityRepository.save(TestSubmissionRecord.generate(digitalObjectToBeSaved));
+
+    archivalRecordRepository.save(TestArchivalRecord.generate(digitalObjectToBeSaved));
 
     return digitalObjectRepository.save(digitalObjectToBeSaved);
   }
@@ -142,9 +152,17 @@ public class TestDataBuilder {
 
     var persistedDigitalObject = digitalObjectRepository.save(digitalObjectToBeSaved);
 
+    // TODO rename to submissio record
     var bagEntityToBeSaved = TestSubmissionRecord.generate(persistedDigitalObject);
 
+    // TODO rename to submissionRecordRepository
     var persistedBagEntity = bagEntityRepository.save(bagEntityToBeSaved);
+
+
+    var archivalRecordToBeSaved = TestArchivalRecord.generate(persistedDigitalObject);
+
+    var persistedArchivalRecord = archivalRecordRepository.save(archivalRecordToBeSaved);
+
 
     var datastreamToBeSaved = TestDatastream.generate(persistedDigitalObject);
 
@@ -163,7 +181,9 @@ public class TestDataBuilder {
     return new TestDataSet(
         persistedProject,
         persistedDigitalObject,
+        //TODO rename submissionREcord
         persistedBagEntity,
+        persistedArchivalRecord,
         persistedDatastream,
         persistedDublinCoreEntry
     );

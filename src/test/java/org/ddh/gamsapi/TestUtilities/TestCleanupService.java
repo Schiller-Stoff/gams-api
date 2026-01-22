@@ -3,6 +3,7 @@ package org.ddh.gamsapi.TestUtilities;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,8 +43,13 @@ public class TestCleanupService {
   private IDatastreamRepository datastreamRepository;
   @Autowired
   private IProjectRepository projectRepository;
+
+  // TODO rename to submissionRecordRepository
   @Autowired
   private ISubmissionRecordRepository bagEntityRepository;
+
+  @Autowired
+  private IArchivalRecordRepository archivalRecordRepository;
 
   public TestCleanupService(DatastreamContentRepository datastreamContentRepository) {
     this.datastreamContentRepository = datastreamContentRepository;
@@ -59,7 +65,9 @@ public class TestCleanupService {
     datastreamContentRepository.deleteAll();
     dublinCoreElementRepository.deleteAll();
     datastreamRepository.deleteAll();
+    // TODO rename to submissionRecordRepository
     bagEntityRepository.deleteAll();
+    archivalRecordRepository.deleteAll();
     digitalObjectRepository.deleteAll();
     projectRepository.deleteAll();
   }
