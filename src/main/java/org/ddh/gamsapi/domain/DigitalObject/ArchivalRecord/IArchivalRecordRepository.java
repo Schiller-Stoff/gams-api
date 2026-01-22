@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Repository interface for managing ArchivalRecord entities.
  */
-public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord, String> {
+public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord, Long> {
 
   /**
    * Find ArchivalRecord by DigitalObject ID.

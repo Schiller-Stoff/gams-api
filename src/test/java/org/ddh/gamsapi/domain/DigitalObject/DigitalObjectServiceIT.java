@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.DigitalObject;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IDublinCoreEntryRepository dublinCoreEntryRepository;
+
+  @Autowired
+  IArchivalRecordRepository archivalRecordRepository;
 
   @Autowired
   IngestService ingestService;
@@ -277,6 +281,14 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           dublinCoreEntryRepository.existsById(testDataSet.dublinCoreEntry().getId())
       ).isFalse();
 
+    }
+
+    @Test
+    public void deletesRelatedArchivalRecord(){
+      digitalObjectService.delete(testDataSet.digitalObject());
+      Assertions.assertThat(
+          archivalRecordRepository.existsById(testDataSet.archivalRecord().getId())
+      ).isFalse();
     }
 
     @Test
