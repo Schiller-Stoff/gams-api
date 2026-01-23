@@ -9,10 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,6 +39,27 @@ public class ArchivalRecordController {
   ) {
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
     return archivalRecordService.findForObject(id);
+  }
+
+  @PostMapping
+  @ResponseBody
+  @Operation(
+      summary = "Create a an archival record for a digital object",
+      description = "Allows to create an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Project successfully created",
+              content = @Content)
+      }
+  )
+  public void createArchivalRecord(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestBody ArchivalRecordCreateDto archivalRecord
+  ){
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    archivalRecord.setDigitalObjectId(id);
+    archivalRecordService.save(archivalRecord);
   }
 
 

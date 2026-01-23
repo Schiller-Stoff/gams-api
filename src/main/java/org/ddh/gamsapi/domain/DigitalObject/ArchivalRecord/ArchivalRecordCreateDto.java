@@ -10,7 +10,9 @@ import java.time.Instant;
  */
 @Data
 public class ArchivalRecordCreateDto {
-  @NotEmpty
+  /**
+   * This might be empty because digitalObjectId must be defined by the endpoint
+   */
   private String digitalObjectId;
   @NotEmpty
   private String pid;
