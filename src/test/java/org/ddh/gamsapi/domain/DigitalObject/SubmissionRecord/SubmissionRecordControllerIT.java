@@ -49,7 +49,7 @@ public class SubmissionRecordControllerIT extends IntegrationTest {
     public void returnsExpectedSubmissionRecord() throws Exception {
 
       String REQUEST_URL = String.format(
-          "/api/v1/projects/%s/objects/%s/record",
+          "/api/v1/projects/%s/objects/%s/submission-record",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );

@@ -16,7 +16,7 @@ import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects/{id}/record" })
+@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects/{id}/submission-record" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)

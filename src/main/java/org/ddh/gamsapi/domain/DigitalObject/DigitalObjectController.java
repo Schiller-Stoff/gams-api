@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamService;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;
@@ -54,6 +55,7 @@ public class DigitalObjectController {
   private final IProjectService projectService;
   private final IDigitalObjectModificationService digitalObjectModificationService;
   private final ISubmissionRecordService submissionRecordService;
+  private final IArchivalRecordService archivalRecordService;
 
 
   @Operation(
@@ -194,6 +196,9 @@ public class DigitalObjectController {
 
     var submissionRecord = submissionRecordService.find(digitalObject.getId());
     model.addAttribute("submissionRecord", submissionRecord);
+
+    var archivalRecords = archivalRecordService.findForObject(digitalObject.getId());
+    model.addAttribute("archivalRecords", archivalRecords);
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(

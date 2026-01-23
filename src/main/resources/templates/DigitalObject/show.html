@@ -24,12 +24,32 @@
             <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
           </ol>
         </nav>
-        <h2 class="display-6 fw-bold text-primary mb-3" th:text="${do.id}"></h2>
+        <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+          <span th:text="${do.id}"></span>
+
+          <i th:if="${!archivalRecords.isEmpty()}"
+             class="ti ti-discount-check-filled text-success"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Archived: This object has associated archival records.">
+          </i>
+
+          <i th:unless="${!archivalRecords.isEmpty()}"
+             class="ti ti-database-off text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Not Archived: This object has no archival records.">
+          </i>
+
+        </h2>
         <p>
           Overview over a singular digital object
         </p>
         <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/record'">Submission metadata</a>
+        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
+        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h5">
