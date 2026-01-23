@@ -44,6 +44,38 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
   }
 
   @Nested
+  public class GET {
+
+    @Nested
+    public class JSONResponse {
+
+      @Test
+      public void jsonContainsExpectedPid() throws Exception {
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/v1/projects/%s/objects/%s/archival-records",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(responseBody)
+            .isNotNull()
+            .contains(
+                testDataSet.archivalRecord().getPid()
+            );
+
+      }
+
+    }
+
+  }
+
+  @Nested
   public class POST {
 
     @Test
@@ -67,9 +99,9 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
                   .content(TEST_REQUEST_BODY)
           ).andExpect(status().isOk());
 
-      // perform test
-
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(testDataSet.digitalObject().getId());
+      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
+          testDataSet.digitalObject().getId()
+      );
 
       // now an additional archival record should exist (next to the one in the test data set)
       Assertions.assertThat(foundRecords).hasSize(2);
