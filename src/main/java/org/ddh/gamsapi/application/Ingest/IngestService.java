@@ -44,7 +44,7 @@ public class IngestService implements IIngestService {
   private final IDatastreamRepository datastreamRepository;
   private final ConversionService conversionService;
   private final IDatastreamContentRepository datastreamContentRepository;
-  private final ISubmissionRecordRepository bagEntityRepository;
+  private final ISubmissionRecordRepository submissionRecordRepository;
   private final BuildProperties buildProperties;
 
   // the persistence logic (@transactional) is in a separate service (called here) to ensure isolation
@@ -203,7 +203,7 @@ public class IngestService implements IIngestService {
         )
     );
 
-    var ingestRecord = bagEntityRepository.findById(objectId).orElseThrow(
+    var submissionRecord = submissionRecordRepository.findById(objectId).orElseThrow(
         () -> {
           // TODO this is a server error - use different exception?
           return new DigitalObjectNotFoundException(
@@ -221,9 +221,9 @@ public class IngestService implements IIngestService {
     }
 
     // 02. Map data to bag entities
-    BagData bagData = BagData.from(digitalObject, datastreams, ingestRecord);
-    BagMeta bagMeta = BagMeta.from(ingestRecord);
-    BagInfo bagInfo = BagInfo.from(ingestRecord);
+    BagData bagData = BagData.from(digitalObject, datastreams, submissionRecord);
+    BagMeta bagMeta = BagMeta.from(submissionRecord);
+    BagInfo bagInfo = BagInfo.from(submissionRecord);
 
     // create bag from database entities
     Bag bag = new Bag(bagInfo, bagMeta, bagData);

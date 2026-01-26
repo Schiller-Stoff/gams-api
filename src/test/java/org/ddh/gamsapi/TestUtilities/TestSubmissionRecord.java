@@ -15,6 +15,7 @@ public class TestSubmissionRecord {
     public static final String TAG_FILE_CHARACTER_ENCODING = TestBag.BagitTxt.TAG_FILE_CHARACTER_ENCODING;
     public static final String BAGGING_DATE = TestBag.TestBagInfo.BAGGING_DATE;
     public static final String CONTACT_EMAIL = TestBag.TestBagInfo.CONTACT_EMAIL;
+    public static final String GAMS_API_VERSION = "0.0.10";
 
     /**
      * Generates a BagEntity for testing purposes.
@@ -33,6 +34,7 @@ public class TestSubmissionRecord {
                 .payloadOxum(TestSubmissionRecord.PAYLOAD_OXUM)
                 .bagVersion(TestSubmissionRecord.BAG_VERSION)
                 .tagFileCharacterEncoding(TestSubmissionRecord.TAG_FILE_CHARACTER_ENCODING)
+                .gamsApiVersion(GAMS_API_VERSION)
                 .build();
     }
 

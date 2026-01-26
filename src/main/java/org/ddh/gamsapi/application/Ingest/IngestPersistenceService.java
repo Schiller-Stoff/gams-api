@@ -15,6 +15,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.Bag;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,8 +37,9 @@ public class IngestPersistenceService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IDublinCoreEntryRepository dublinCoreElementRepository;
-  private final ISubmissionRecordRepository bagEntityRepository;
+  private final ISubmissionRecordRepository submissionRecordRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
+  private final BuildProperties buildProperties;
 
   @Transactional(rollbackFor = Exception.class)
   public void persistIngest(String projectAbbr,
@@ -63,8 +65,8 @@ public class IngestPersistenceService {
     final DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
     log.debug("Successfully saved digital object: {} for project {}", digitalObject, projectAbbr);
 
-    // logic to save the related BagEntities
-    var bagEntity = SubmissionRecord.builder()
+    // logic to save the related submission record
+    var submissionRecord = SubmissionRecord.builder()
         .digitalObject(savedObject)
         .createdBy(bag.getBagData().getCreatedBy())
         .source(bag.getBagData().getSource())
@@ -75,10 +77,11 @@ public class IngestPersistenceService {
         .payloadOxum(bag.getBagInfo().getPayloadOxum())
         .bagVersion(bag.getBagMeta().getBagItVersion())
         .tagFileCharacterEncoding(bag.getBagMeta().getTagFileCharacterEncoding())
+        .gamsApiVersion(buildProperties.getVersion())
         .build();
 
-    bagEntityRepository.save(bagEntity);
-    log.debug("Successfully saved bag entity: {} for project {}", bagEntity, projectAbbr);
+    submissionRecordRepository.save(submissionRecord);
+    log.debug("Successfully saved bag entity: {} for project {}", submissionRecord, projectAbbr);
 
     // 3. Save Datastreams (Metadata only)
     for (Datastream ds : datastreams) {

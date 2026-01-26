@@ -131,6 +131,7 @@ create table submission_record
     bag_tag_file_character_encoding varchar(255) not null,
     bag_version                     varchar(255) not null,
     bagging_date                    varchar(255) not null,
+    gams_api_version                varchar(255) not null,
     primary key (digital_object_id)
 );
 
