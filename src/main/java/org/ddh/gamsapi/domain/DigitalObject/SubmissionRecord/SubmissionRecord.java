@@ -118,6 +118,13 @@ public class SubmissionRecord {
     private String bagTagFileCharacterEncoding;
 
     /**
+     * The version of the GAMS-API that processed the ingest.
+     * Captured from server-side BuildProperties.
+     */
+    @Column
+    private String gamsApiVersion;
+
+    /**
      * Proper equals/hashCode for entities with assigned IDs.
      * Based on the pattern you use in your codebase.
      */
