@@ -5,7 +5,7 @@ spring:
   jpa:
     hibernate:
       # delete database on application startup during tests
-      ddl-auto: create
+      ddl-auto: validate
     # format SQL statements
     properties:
       hibernate:

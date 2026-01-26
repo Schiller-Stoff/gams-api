@@ -25,7 +25,10 @@ spring:
     hibernate:
       # set to create if you want to drop existing data on app startup
       # value "none" would require to initialize a schema via SQL via extra file
-      ddl-auto: update
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
 
   # oauth2 integration with keycloak
   security:
@@ -75,7 +78,7 @@ logging:
   file:
     name: ${LOG_FILE:log/app.log}
   level:
-    org.ddh.gamsapi: ${LOG_LEVEL:WARN}
+    org.ddh.gamsapi: ${LOG_LEVEL:TRACE}
     org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
 
 server:

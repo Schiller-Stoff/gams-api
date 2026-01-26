@@ -57,11 +57,6 @@ public class DatastreamBuilder {
     return this;
   }
 
-  public DatastreamBuilder contentRestrictions(Set<String> contentRestrictions){
-    datastream.setContentRestrictions(contentRestrictions);
-    return this;
-  }
-
   public DatastreamBuilder tags(Set<String> tags){
     datastream.setTags(tags);
     return this;

@@ -59,9 +59,9 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     var datastream = datastreamOpt.get();
 
     // without content restrictions, always allow access
-    if(datastream.getContentRestrictions().isEmpty()){
-      return new AuthorizationDecision(true);
-    }
+//    if(datastream.getContentRestrictions().isEmpty()){
+//      return new AuthorizationDecision(true);
+//    }
 
     if(!authentication.get().isAuthenticated()){
       String msg = String.format("User authentication is required displaying the datastream content. Against url %s for method: %s", authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
@@ -117,14 +117,14 @@ public class DatastreamContentAuthorizationManager implements AuthorizationManag
     }
 
     // fine grained control
-    for (String contentRestriction : datastream.getContentRestrictions()) {
-      // TODO validate somehow?
-      String contentRestrictionRole = GAMSAPIAuthorities.buildProjectViewerContentRestricted(projectAbbr, contentRestriction);
-      if(userAuthorities.contains(contentRestrictionRole)){
-        log.trace("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, contentRestriction, authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
-        return new AuthorizationDecision(true);
-      }
-    }
+//    for (String contentRestriction : datastream.getContentRestrictions()) {
+//      // TODO validate somehow?
+//      String contentRestrictionRole = GAMSAPIAuthorities.buildProjectViewerContentRestricted(projectAbbr, contentRestriction);
+//      if(userAuthorities.contains(contentRestrictionRole)){
+//        log.trace("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, contentRestriction, authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod());
+//        return new AuthorizationDecision(true);
+//      }
+//    }
 
     // TODO better message
     String msg = String.format("User %s is not allowed to see the requested datastream content. The user is missing the required roles. Url: %s Method: %s. Has authorities: %s", username, authorizationContext.getRequest().getRequestURI(), authorizationContext.getRequest().getMethod(), userAuthorities);
