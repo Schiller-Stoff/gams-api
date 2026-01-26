@@ -38,13 +38,6 @@ create table datastream_content_deletion_failure
     primary key (id)
 );
 
-create table datastream_content_restrictions
-(
-    datastream_digital_object_id    varchar(255) not null,
-    datastream_dsid                 varchar(255) not null,
-    datastream_content_restrictions varchar(255)
-);
-
 create table datastream_lang
 (
     datastream_digital_object_id varchar(255) not null,

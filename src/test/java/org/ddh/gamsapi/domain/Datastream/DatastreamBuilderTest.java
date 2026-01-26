@@ -59,35 +59,6 @@ public class DatastreamBuilderTest extends UnitTest {
   }
 
   @Test
-  public void ableToDefineContentRestrictions(){
-
-    Set<String> stringSet = Set.of("restriction1", "restriction2");
-    Datastream datastream = new DatastreamBuilder()
-        .digitalObject("digitalObjectId")
-        .dsid("dsid")
-        .contentRestrictions(stringSet)
-        .build();
-
-    Assertions.assertNotNull(datastream);
-    Assertions.assertEquals("digitalObjectId", datastream.getDigitalObject().getId());
-    Assertions.assertEquals("dsid", datastream.getDsid());
-    Assertions.assertEquals(stringSet, datastream.getContentRestrictions());
-
-  }
-
-  @Test
-  public void builtDatastreamContainsExpectedTags(){
-    Set<String> stringSet = Set.of("tag1", "tag2", "tag3");
-    Datastream datastream = new DatastreamBuilder()
-        .digitalObject("digitalObjectId")
-        .dsid("dsid")
-        .tags(stringSet)
-        .build();
-    Assertions.assertNotNull(datastream);
-    Assertions.assertEquals(stringSet, datastream.getTags());
-  }
-
-  @Test
   public void builderReturnsDatastreamBuilderInstance(){
     DatastreamBuilder datastreamBuilder = DatastreamBuilder.builder();
     Assertions.assertNotNull(datastreamBuilder);

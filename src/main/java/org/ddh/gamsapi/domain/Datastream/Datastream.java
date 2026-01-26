@@ -131,14 +131,6 @@ public class Datastream {
   private String modifiedBy;
 
   /**
-   * Allows to restrict the content of the datastream to specific users.
-   */
-  @ElementCollection(fetch = FetchType.EAGER)
-  @NotNull
-  @Column(name = Datastream.CONTENT_RESTRICTIONS_TABLE_NAME)
-  private Set<String> contentRestrictions = new HashSet<>();
-
-  /**
    * Tags for the datastream.
    */
   @ElementCollection
