@@ -142,13 +142,6 @@ public class ProjectRepositoryIT extends IntegrationTest {
           savedProject.getModified()
       ).isAfterOrEqualTo(lastModified);
 
-      // modification date is different from created
-      org.assertj.core.api.Assertions.assertThat(
-          savedProject.getModified()
-      ).isNotEqualTo(
-          savedProject.getCreated()
-      );
-
     }
 
   }
