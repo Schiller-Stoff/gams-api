@@ -68,8 +68,6 @@ public class SubmissionRecordControllerIT extends IntegrationTest {
       // Assert
       String response = mvcResult.getResponse().getContentAsString();
 
-      System.out.println("Response: " + response);
-
       Assertions.assertThat(response)
           .contains(
               testDataSet.submissionRecord().getId(),
@@ -81,7 +79,8 @@ public class SubmissionRecordControllerIT extends IntegrationTest {
               testDataSet.submissionRecord().getBagExternalDescription(),
               testDataSet.submissionRecord().getBagPayloadOxum(),
               testDataSet.submissionRecord().getBagVersion(),
-              testDataSet.submissionRecord().getBagTagFileCharacterEncoding()
+              testDataSet.submissionRecord().getBagTagFileCharacterEncoding(),
+              testDataSet.submissionRecord().getGamsApiVersion()
           );
 
     }
