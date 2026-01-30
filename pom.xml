@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>org.ddh</groupId>
 	<artifactId>gams-api</artifactId>
-	<version>0.0.60</version>
+	<version>0.0.7</version>
 	<name>gams-api</name>
 	<description>REST-API for GAMS4+ </description>
 	<properties>
