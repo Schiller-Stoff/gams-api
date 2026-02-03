@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- Namespace for Thymeleaf tags! Beyond nearly standard html -->
 <html lang="en" xmlns:th="http://thymeleaf.org">
-<head th:replace="fragments/general.html :: head" />
+<head th:replace="~{fragments/general.html :: head}" />
 
 
 
@@ -10,10 +10,10 @@
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
-    <aside th:replace="fragments/general.html :: aside"></aside>
+    <aside th:replace="~{fragments/general.html :: aside}"></aside>
 
     <div class="body-wrapper">
-        <header th:replace="fragments/general.html :: header"></header>
+        <header th:replace="~{fragments/general.html :: header}"></header>
         <div class="container-fluid" style="min-height: 100vh">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -35,11 +35,11 @@
             </div>
 
         </div>
-        <footer th:replace="fragments/general.html :: footer"></footer>
+        <footer th:replace="~{fragments/general.html :: footer}"></footer>
     </div>
 </div>
 </div>
 </div>
-<footer th:replace="fragments/general.html :: footer"></footer>
+<footer th:replace="~{fragments/general.html :: footer}"></footer>
 </body>
 </html>

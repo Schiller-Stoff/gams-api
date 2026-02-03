@@ -1,18 +1,18 @@
 <!doctype html>
 <html lang="en">
 
-<head th:replace="fragments/general.html :: headtemplate" />
+<head th:replace="~{fragments/general.html :: headtemplate}" />
 
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
   <!-- Sidebar Start -->
-  <aside th:replace="fragments/general.html :: aside"></aside>
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
   <!--  Sidebar End -->
   <!--  Main wrapper -->
   <div class="body-wrapper">
-    <header th:replace="fragments/general.html :: header"></header>
+    <header th:replace="~{fragments/general.html :: header}"></header>
     <br/>
     <br/>
     <br/>
@@ -255,7 +255,7 @@
       </div>
 
     </div>
-    <footer th:replace="fragments/general.html :: footer"></footer>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
   </div>
 </div>
 
