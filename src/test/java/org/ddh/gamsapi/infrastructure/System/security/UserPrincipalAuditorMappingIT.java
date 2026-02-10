@@ -72,6 +72,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     // first create a project
     mockMvc.perform(
         MockMvcRequestBuilders.put(TEST_PROJECT_URL)
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
             .with(SecurityMockMvcRequestPostProcessors
               .oidcLogin()
               .authorities(new SimpleGrantedAuthority(testGlobalAdminAuthority))
@@ -100,6 +101,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
                     .oidcLogin()
                     .authorities(new SimpleGrantedAuthority(testProjectAdminAuthority))
                 )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         )
         .andExpect(status().isOk());
 

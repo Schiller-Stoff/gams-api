@@ -1,5 +1,9 @@
 package org.ddh.gamsapi.infrastructure.System.security;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -9,6 +13,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.*;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 /**
  * Spring security configuration
@@ -79,10 +87,17 @@ public class SpringSecurityConfiguration {
 
     );
 
-    // TODO configure csrf protection?
+
     http.csrf(httpSecurityCsrfConfigurer -> {
-      httpSecurityCsrfConfigurer.disable();
+      httpSecurityCsrfConfigurer
+          .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler());
     });
+
+    // Force CSRF token to be generated on every response
+    http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
+
+
 
     // TODO check if this works
     http.headers(httpSecurityHeadersConfigurer -> {
@@ -93,6 +108,28 @@ public class SpringSecurityConfiguration {
 
     return http.build();
 
+  }
+
+  /**
+   * Eagerly loads the CSRF token on every request so the cookie is always set.
+   * Without this, Spring Security 6 defers token generation until something
+   * explicitly accesses it (e.g., a Thymeleaf form rendering {@code ${_csrf.token}}).
+   * JavaScript clients that read the CSRF cookie need it present before any
+   * form page is visited.
+   */
+  static class CsrfCookieFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+        throws ServletException, IOException {
+      CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+      if (csrfToken != null) {
+        // Accessing the token value forces generation + cookie writing
+        csrfToken.getToken();
+      }
+      filterChain.doFilter(request, response);
+    }
   }
 
   @Bean
