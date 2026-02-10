@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.*;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -91,7 +92,12 @@ public class SpringSecurityConfiguration {
     http.csrf(httpSecurityCsrfConfigurer -> {
       httpSecurityCsrfConfigurer
           .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler());
+          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+          .ignoringRequestMatchers(
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/integration/rdf"),
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/integration/search/**")
+          )
+      ;
     });
 
     // Force CSRF token to be generated on every response
