@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class CustomSearchController {
     customSearchService.indexObjects(projectAbbr);
   }
 
+  @Hidden
   @PostMapping(value = CUSTOM_SEARCH_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String indexProjectObjectsHtml(@PathVariable String projectAbbr) {
     log.debug("*** Trying to index project objects for project: {}", projectAbbr);
@@ -75,6 +77,7 @@ public class CustomSearchController {
     customSearchService.deleteIndexedObjects(projectAbbr);
   }
 
+  @Hidden
   @DeleteMapping(value = CUSTOM_SEARCH_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String deleteProjectObjectsHtml(@PathVariable String projectAbbr) {
     log.trace("*** Trying to delete project objects");

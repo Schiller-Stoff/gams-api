@@ -258,29 +258,57 @@
             <i class="ti ti-refresh me-2"></i>Integration Services
           </h3>
         </div>
-        <div class="card-body d-flex gap-2 flex-wrap">
+        <div class="card-body">
 
-          <!-- Index all objects in c-search -->
-          <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects'}"
-                method="POST"
-                class="d-inline"
-                onsubmit="return confirm('This will index all objects for this project in the custom search service. Continue?');">
-            <button type="submit" class="btn btn-outline-primary btn-sm">
-              <i class="ti ti-search me-1"></i>Index c-search
-            </button>
-          </form>
+          <div>
+            <h4 class="h6">C-search</h4>
+            <!-- Index all objects in c-search -->
+            <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects'}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('This will index all objects for this project in the custom search service. Continue?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
 
-          <!-- Delete all objects from c-search -->
-          <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects'}"
-                method="POST"
-                class="d-inline"
-                onsubmit="return confirm('This will DELETE all indexed objects for this project from the custom search service. Continue?');">
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit" class="btn btn-outline-danger btn-sm">
-              <i class="ti ti-trash me-1"></i>Clear c-search index
-            </button>
-          </form>
+            <!-- Delete all objects from c-search -->
+            <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects'}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('This will DELETE all indexed objects for this project from the custom search service. Continue?');">
+              <input type="hidden" name="_method" value="DELETE" />
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Clear index
+              </button>
+            </form>
+          </div>
 
+          <br/>
+
+          <div>
+            <h4 class="h6">Plexus search</h4>
+            <!-- Index all objects in plexus-search -->
+            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('This will index all objects for this project in the plexus search service. Continue?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+
+            <!-- Delete all objects from plexus-search -->
+            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('This will DELETE all indexed objects for this project from the plexus search service. Continue?');">
+              <input type="hidden" name="_method" value="DELETE" />
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Clear index
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
