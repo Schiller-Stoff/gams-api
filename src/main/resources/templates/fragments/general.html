@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
 
   <head th:fragment="headtemplate">
     <meta charset="utf-8">
@@ -40,6 +40,43 @@
               <span class="d-none d-md-inline ms-1">Search</span>
             </button>
           </form>
+
+          <!-- Auth controls -->
+          <div class="ms-3 d-flex align-items-center">
+
+            <!-- Not authenticated: show login button -->
+            <div sec:authorize="isAnonymous()">
+              <a href="/api/v1/auth" class="btn btn-outline-primary">
+                <i class="ti ti-login me-1"></i>Login
+              </a>
+            </div>
+
+            <!-- Authenticated: show user info + logout -->
+            <div sec:authorize="isAuthenticated()" class="dropdown">
+              <button class="btn btn-outline-secondary dropdown-toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false">
+                <i class="ti ti-user me-1"></i>
+                <span sec:authentication="name">User</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="/api/v1/userinfo">
+                    <i class="ti ti-list me-1"></i>My roles
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                  <form th:action="@{/logout}" method="POST" class="d-inline">
+                    <button type="submit" class="dropdown-item">
+                      <i class="ti ti-logout me-1"></i>Logout
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </nav>
     </header>
@@ -124,18 +161,18 @@
 <!--                <span class="hide-menu">Overview</span>-->
 <!--              </a>-->
 <!--            </li>-->
-            <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Users</span>
-            </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="/api/v1/userinfo" aria-expanded="false">
-                <span>
-                  <i class="ti ti-list"></i>
-                </span>
-                <span class="hide-menu">User info</span>
-              </a>
-            </li>
+<!--            <li class="nav-small-cap">-->
+<!--              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>-->
+<!--              <span class="hide-menu">Users</span>-->
+<!--            </li>-->
+<!--            <li class="sidebar-item">-->
+<!--              <a class="sidebar-link" href="/api/v1/userinfo" aria-expanded="false">-->
+<!--                <span>-->
+<!--                  <i class="ti ti-list"></i>-->
+<!--                </span>-->
+<!--                <span class="hide-menu">User info</span>-->
+<!--              </a>-->
+<!--            </li>-->
             <!--          <li class="sidebar-item">-->
             <!--            <a class="sidebar-link" href="./authentication-register.html" aria-expanded="false">-->
             <!--                <span>-->
@@ -146,7 +183,7 @@
             <!--          </li>-->
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">EXTRA</span>
+              <span class="hide-menu">ABOUT</span>
             </li>
             <li class="sidebar-item">
               <a class="sidebar-link external" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" target="_blank" aria-expanded="false">
@@ -211,7 +248,7 @@
             <p>Zentrum für Informationsmodellierung -
               Austrian Centre for Digital Humanities
               Karl-Franzens-Universität Graz</p>
-            <p>zim@uni-graz.at</p>
+            <p>dh@uni-graz.at</p>
             <p><a href="http://informationsmodellierung.uni-graz.at" target="_blank">http://informationsmodellierung.uni-graz.at</a></p>
             <p>Theme designed and developed by <a href="https://adminmart.com/" target="_blank" class="pe-1 text-primary text-decoration-underline">AdminMart.com</a> Distributed by <a href="https://themewagon.com">ThemeWagon</a></p>
           </div>

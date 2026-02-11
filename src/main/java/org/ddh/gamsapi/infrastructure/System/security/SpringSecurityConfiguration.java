@@ -12,6 +12,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.*;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
@@ -30,6 +32,8 @@ public class SpringSecurityConfiguration {
   private final UserProjectAuthorizationManager userProjectAuthorizationManager;
 
   private final DatastreamContentAuthorizationManager datastreamContentAuthorizationManager;
+
+  private final ClientRegistrationRepository clientRegistrationRepository;
 
   /**
    * Combined spring security matchers.
@@ -103,6 +107,10 @@ public class SpringSecurityConfiguration {
     // Force CSRF token to be generated on every response
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
 
+    // handling logout
+    http.logout(logout -> logout
+        .logoutSuccessHandler(oidcLogoutSuccessHandler())
+    );
 
 
     // TODO check if this works
@@ -141,6 +149,17 @@ public class SpringSecurityConfiguration {
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+
+  /**
+   * Method configures the logout process via open-id-connect
+   * @return configured handler
+   */
+  private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
+    var handler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
+    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1/");
+    return handler;
   }
 
 }
