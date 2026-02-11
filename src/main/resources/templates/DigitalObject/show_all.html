@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head th:replace="~{fragments/general.html :: headtemplate}" />
 
@@ -252,7 +252,7 @@
       </div>
 
       <!-- Integration actions — only visible for authenticated users with project roles -->
-      <div th:if="${#authorization.expression('isAuthenticated()')}" class="card mb-3">
+      <div sec:authorize="isAuthenticated()" class="card mb-3">
         <div class="card-header">
           <h3 class="mb-0 h5">
             <i class="ti ti-refresh me-2"></i>Integration Services
