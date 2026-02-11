@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.Project;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +16,7 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -90,6 +92,36 @@ public class ProjectController {
           );
     });
 
+  }
+
+  /**
+   * Creates a project from a Thymeleaf form submission.
+   * Redirects back to the projects overview after creation.
+   */
+  @Hidden
+  @PutMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String createProjectFromForm(
+      @PathVariable String projectAbbr,
+      @RequestParam(required = false) String description
+  ) {
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description(description)
+        .build();
+    projectService.save(project);
+    return "redirect:/api/v1/projects";
+  }
+
+  /**
+   * Deletes a project and redirects back to the projects overview.
+   *
+   */
+  @Hidden
+  @DeleteMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String deleteProjectFromForm(@PathVariable String projectAbbr) {
+    Project project = projectService.findByAbbr(projectAbbr);
+    projectService.deleteProject(project);
+    return "redirect:/api/v1/projects";
   }
 
   @DeleteMapping(path = "/{projectAbbr}")
