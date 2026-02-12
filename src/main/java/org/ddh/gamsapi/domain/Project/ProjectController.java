@@ -40,7 +40,7 @@ public class ProjectController {
   private final IProjectService projectService;
   private final IProjectModificationService projectModificationService;
 
-  @PatchMapping(path = "/{projectAbbr}")
+  @PatchMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Change a project's metadata",
@@ -59,6 +59,20 @@ public class ProjectController {
     // project abbreviation is set via path variable and not via json
     project.setProjectAbbr(projectAbbr);
     return projectService.updateProject(project);
+  }
+
+  @Hidden
+  @PatchMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String changeProjectFromForm(
+      @PathVariable String projectAbbr,
+      @RequestParam String description
+  ) {
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description(description)
+        .build();
+    projectService.updateProject(project);
+    return "redirect:/api/v1/projects";
   }
 
   @PutMapping(path = "/{projectAbbr}")
