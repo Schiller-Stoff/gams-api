@@ -65,6 +65,7 @@
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
                 </th>
                 <th scope="col">tags</th>
+                <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 <!--          <th scope="col">-->
                 <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
                 <!--          </th>-->
@@ -100,6 +101,17 @@
                   </th:block>
                   <span th:if="${#lists.size(do.tags) > 5}"
                         class="badge bg-secondary me-1 mb-1">...</span>
+                </td>
+                <td sec:authorize="isAuthenticated()">
+                  <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                        method="POST"
+                        class="d-inline"
+                        th:attr="onsubmit='return confirm(\'Delete object ' + ${do.id} + '? This cannot be undone.\')'">
+                    <input type="hidden" name="_method" value="DELETE" />
+                    <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1">
+                      <i class="ti ti-trash"></i>
+                    </button>
+                  </form>
                 </td>
                 <!--          <td><span th:if="${do.baseMetadata}" th:text="${do.baseMetadata.type}"></span></td>-->
                 <!--            <td><div>-->
