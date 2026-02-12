@@ -512,6 +512,7 @@
         let successCount = 0;
         let failCount = 0;
         const errors = [];
+        let skippedCount = 0;
 
         for (let i = 0; i < objectIds.length; i++) {
             const objectId = objectIds[i];
@@ -519,6 +520,37 @@
             const progress = `(${i + 1}/${objectIds.length})`;
 
             try {
+                // Step 0: Check if ingest is needed by comparing modification dates
+                const localLastModified = Math.max(...objectFiles.map(f => f.file.lastModified));
+                const localDate = new Date(localLastModified);
+                // RFC 1123 format as expected by If-Modified-Since header
+                const ifModifiedSince = localDate.toUTCString();
+
+                const headResponse = await fetch(
+                    `/api/v1/projects/${projectAbbr}/objects/${objectId}/datastreams`,
+                    {
+                        method: 'HEAD',
+                        headers: { 'If-Modified-Since': ifModifiedSince },
+                        credentials: 'include'
+                    }
+                );
+
+                let serverLastModified = headResponse.headers.get("Last-Modified");
+
+                if (headResponse.status === 200) {
+                    skippedCount++;
+                    console.log(`[INGEST] ${progress} Skipped: ${objectId} Local object files are older than server files (local: ${ifModifiedSince}, server: ${serverLastModified})`);
+                    continue;
+                }
+
+                if (headResponse.status === 404) {
+                    console.log(`[INGEST] ${progress} New object: ${objectId}`);
+                    // No delete needed, proceed directly to zip + ingest
+                } else {
+                    console.log(`[INGEST] ${progress} Modified, re-ingesting: ${objectId} Local object files are newer than server files (local: ${ifModifiedSince}, server: ${serverLastModified})`);
+                }
+
+
                 // Step 1: Delete existing object (ignore 404)
                 console.log(`[INGEST] ${progress} Deleting existing object: ${objectId}`);
                 let deleteResponse;
@@ -592,7 +624,7 @@
         }
 
         // Report results
-        let resultMsg = `Ingest complete.\nSucceeded: ${successCount}\nFailed: ${failCount}\nTotal: ${objectIds.length}`;
+        let resultMsg = `Ingest complete.\nIngested: ${successCount}\nSkipped (unchanged): ${skippedCount}\nFailed: ${failCount}\nTotal: ${objectIds.length}`;;
         if (errors.length > 0) {
             resultMsg += '\n\nErrors:\n' + errors.slice(0, 10).join('\n');
             if (errors.length > 10) {
