@@ -521,14 +521,19 @@
             try {
                 // Step 1: Delete existing object (ignore 404)
                 console.log(`[INGEST] ${progress} Deleting existing object: ${objectId}`);
-                const deleteResponse = await fetch(
-                    `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
-                    {
-                        method: 'DELETE',
-                        headers: { [csrfHeader]: csrfToken },
-                        credentials: 'include'
-                    }
-                );
+                let deleteResponse;
+                try {
+                    deleteResponse = await fetch(
+                        `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
+                        {
+                            method: 'DELETE',
+                            headers: { [csrfHeader]: csrfToken },
+                            credentials: 'include'
+                        }
+                    );
+                } catch (e){
+
+                }
 
                 if (deleteResponse.ok) {
                     console.log(`[INGEST] ${progress} Deleted existing object: ${objectId}`);
