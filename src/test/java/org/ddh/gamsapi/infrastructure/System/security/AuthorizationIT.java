@@ -48,6 +48,7 @@ public class AuthorizationIT extends IntegrationTest {
                       .user("UNKNOWN_USER")
                       .roles("UNKNOWN_ROLE")
                   )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is4xxClientError());
     });
@@ -72,6 +73,7 @@ public class AuthorizationIT extends IntegrationTest {
                     .user("SOME_USER")
                     .roles(testProjectAdminRole)
                 )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         )
         .andExpect(
             status().isNotFound()
@@ -95,6 +97,7 @@ public class AuthorizationIT extends IntegrationTest {
                     .user("SOME_USER")
                     .roles(globalAdminRole)
                 )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         )
         .andExpect(
             status().isNotFound()
@@ -119,6 +122,7 @@ public class AuthorizationIT extends IntegrationTest {
                       .user("SOME_USER")
                       .roles(differentProjectAdminRole)
                   )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           ).andExpect(status().is4xxClientError());
     });
 
@@ -137,6 +141,7 @@ public class AuthorizationIT extends IntegrationTest {
           .perform(
               MockMvcRequestBuilders.post(TEST_URL)
                   .with(SecurityMockMvcRequestPostProcessors.anonymous())
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is3xxRedirection());
     }
@@ -153,6 +158,7 @@ public class AuthorizationIT extends IntegrationTest {
                   .with(
                       SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(new SimpleGrantedAuthority(GAMSAPIAuthorities.getAdmin()))
                   )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           ).andExpect(status().is2xxSuccessful());
 
       org.assertj.core.api.Assertions.assertThat(projectRepository.findById(TEST_PROJECT_ABBR))
@@ -173,6 +179,7 @@ public class AuthorizationIT extends IntegrationTest {
           .perform(
               MockMvcRequestBuilders.delete(TEST_URL)
                   .with(SecurityMockMvcRequestPostProcessors.anonymous())
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is3xxRedirection());
     }

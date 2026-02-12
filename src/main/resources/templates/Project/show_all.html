@@ -1,218 +1,277 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
-<head th:replace="~{fragments/general.html :: headtemplate}" />
+<head th:replace="~{fragments/general.html :: headtemplate}"/>
 
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
-    <aside th:replace="~{fragments/general.html :: aside}"></aside>
-    <div class="body-wrapper">
-        <header th:replace="~{fragments/general.html :: header}"></header>
-        <br/>
-        <br/>
-        <br/>
-        <div class="p-md-5 p-3" style="min-height: 100vh">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-                    <li class="breadcrumb-item">Projects</li>
-                </ol>
-            </nav>
-            <h2 class="display-6 fw-bold text-primary mb-3">GAMS Projects</h2>
-            <p>List of all GAMS projects.</p>
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item">Projects</li>
+        </ol>
+      </nav>
+      <h2 class="display-6 fw-bold text-primary mb-3">GAMS Projects</h2>
+      <p>List of all GAMS projects.</p>
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-list-search me-2"></i>Project overview
-                    </h3>
-                    <div>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
-                    </div>
-                </div>
-                <div class="card-body">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0 h5">
+            <i class="ti ti-list-search me-2"></i>Project overview
+          </h3>
+          <div>
+            <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i
+                    class="ti ti-file"></i>XML</a>
+            <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
+                    class="ti ti-file"></i>JSON</a>
+          </div>
+        </div>
+        <div class="card-body">
 
-            <ul class="list-group" style="list-style: none;">
-                <li th:each="project : ${projects}" class="list-group-item">
-                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr}"></a>
-                    <p th:text="${project.getDescription()}"></p>
+          <ul class="list-group" style="list-style: none;">
+            <li th:each="project : ${projects}" class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"
+                   th:text="${project.projectAbbr}"></a>
+                <p th:text="${project.getDescription()}" class="mb-0 text-muted small"></p>
+              </div>
+
+              <!-- Edit form (hidden by default) — only for admins -->
+              <div sec:authorize="hasAuthority('ROLE_admin')"
+                   th:id="'desc-edit-' + ${project.projectAbbr}"
+                   style="display: none;">
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr}}"
+                      method="POST"
+                      class="mt-1">
+                  <input type="hidden" name="_method" value="PATCH" />
+                  <div class="input-group input-group-sm">
+                    <input type="text" class="form-control" name="description"
+                           th:value="${project.getDescription()}"
+                           placeholder="Project description"
+                           maxlength="500" />
+                    <button type="submit" class="btn btn-outline-success btn-sm">
+                      <i class="ti ti-check"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                            th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
+                      <i class="ti ti-x"></i>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Action buttons — only for admins -->
+              <div sec:authorize="hasAuthority('ROLE_admin')" class="ms-2 d-flex gap-1">
+                <button class="btn btn-outline-primary btn-sm"
+                        th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
+                  <i class="ti ti-pencil"></i>
+                </button>
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr}}"
+                      method="POST"
+                      class="d-inline"
+                      th:attr="onsubmit='return confirm(\'Delete project ' + ${project.projectAbbr} + '? This cannot be undone.\')'">
+                  <input type="hidden" name="_method" value="DELETE" />
+                  <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </li>
+          </ul>
+          <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+
+            <!-- Results Info - Simple approach -->
+            <div class="text-muted">
+              <span th:text="'Page ' + ${pageIndex + 1} + ' of ' + ${totalPages} + ' (' + ${totalItems} + ' total items)'"></span>
+            </div>
+
+            <!-- Enhanced Pagination Controls with Smart Page Numbers -->
+            <nav aria-label="Page navigation">
+              <ul class="pagination pagination-sm mb-0">
+
+                <!-- First Page -->
+                <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
+                  <a class="page-link"
+                     th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + '/objects?pageIndex=0&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                    First
+                  </a>
                 </li>
-            </ul>
-            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
 
-                <!-- Results Info - Simple approach -->
-                <div class="text-muted">
-                    <span th:text="'Page ' + ${pageIndex + 1} + ' of ' + ${totalPages} + ' (' + ${totalItems} + ' total items)'"></span>
-                </div>
+                <!-- Previous Page -->
+                <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
+                  <a class="page-link"
+                     th:href="${pageIndex == 0} ? '#' : '/api/v1/projects?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                    Previous
+                  </a>
+                </li>
 
-                <!-- Enhanced Pagination Controls with Smart Page Numbers -->
-                <nav aria-label="Page navigation">
-                    <ul class="pagination pagination-sm mb-0">
+                <!-- Smart Page Numbers -->
+                <th:block th:if="${totalPages <= 7}">
+                  <!-- Show all pages if 7 or fewer -->
+                  <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                      <a class="page-link"
+                         th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                         th:text="${i + 1}"></a>
+                    </li>
+                  </th:block>
+                </th:block>
 
-                        <!-- First Page -->
-                        <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
-                            <a class="page-link"
-                               th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + '/objects?pageIndex=0&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
-                                First
-                            </a>
-                        </li>
+                <th:block th:if="${totalPages > 7}">
+                  <!-- Show smart pagination for many pages -->
 
-                        <!-- Previous Page -->
-                        <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
-                            <a class="page-link"
-                               th:href="${pageIndex == 0} ? '#' : '/api/v1/projects?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
-                                Previous
-                            </a>
-                        </li>
+                  <!-- First 3 pages (1, 2, 3) -->
+                  <th:block th:each="i : ${#numbers.sequence(0, 2)}">
+                    <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                      <a class="page-link"
+                         th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                         th:text="${i + 1}"></a>
+                    </li>
+                  </th:block>
 
-                        <!-- Smart Page Numbers -->
-                        <th:block th:if="${totalPages <= 7}">
-                            <!-- Show all pages if 7 or fewer -->
-                            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                                <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
-                                    <a class="page-link"
-                                       th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
-                                       th:text="${i + 1}"></a>
-                                </li>
-                            </th:block>
-                        </th:block>
+                  <!-- Ellipsis after first pages (only if current page is far from start) -->
+                  <li th:if="${pageIndex > 4}" class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
 
-                        <th:block th:if="${totalPages > 7}">
-                            <!-- Show smart pagination for many pages -->
+                  <!-- Current page and neighbors (if not already shown) -->
+                  <th:block th:if="${pageIndex > 3 and pageIndex < totalPages - 4}">
+                    <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
+                      <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                        <a class="page-link"
+                           th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                           th:text="${i + 1}"></a>
+                      </li>
+                    </th:block>
+                  </th:block>
 
-                            <!-- First 3 pages (1, 2, 3) -->
-                            <th:block th:each="i : ${#numbers.sequence(0, 2)}">
-                                <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
-                                    <a class="page-link"
-                                       th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
-                                       th:text="${i + 1}"></a>
-                                </li>
-                            </th:block>
+                  <!-- Ellipsis before last pages (only if current page is far from end) -->
+                  <li th:if="${pageIndex < totalPages - 5}" class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
 
-                            <!-- Ellipsis after first pages (only if current page is far from start) -->
-                            <li th:if="${pageIndex > 4}" class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
+                  <!-- Last 3 pages -->
+                  <th:block th:each="i : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
+                    <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
+                      <a class="page-link"
+                         th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                         th:text="${i + 1}"></a>
+                    </li>
+                  </th:block>
 
-                            <!-- Current page and neighbors (if not already shown) -->
-                            <th:block th:if="${pageIndex > 3 and pageIndex < totalPages - 4}">
-                                <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
-                                    <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
-                                        <a class="page-link"
-                                           th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
-                                           th:text="${i + 1}"></a>
-                                    </li>
-                                </th:block>
-                            </th:block>
+                </th:block>
 
-                            <!-- Ellipsis before last pages (only if current page is far from end) -->
-                            <li th:if="${pageIndex < totalPages - 5}" class="page-item disabled">
-                                <span class="page-link">...</span>
-                            </li>
+                <!-- Next Page -->
+                <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
+                  <a class="page-link"
+                     th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                    Next
+                  </a>
+                </li>
 
-                            <!-- Last 3 pages -->
-                            <th:block th:each="i : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
-                                <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
-                                    <a class="page-link"
-                                       th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
-                                       th:text="${i + 1}"></a>
-                                </li>
-                            </th:block>
+                <!-- Last Page -->
+                <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
+                  <a class="page-link"
+                     th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects?pageIndex=' + ${totalPages - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                    Last
+                  </a>
+                </li>
 
-                        </th:block>
+              </ul>
+            </nav>
 
-                        <!-- Next Page -->
-                        <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
-                            <a class="page-link"
-                               th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
-                                Next
-                            </a>
-                        </li>
-
-                        <!-- Last Page -->
-                        <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
-                            <a class="page-link"
-                               th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects?pageIndex=' + ${totalPages - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
-                                Last
-                            </a>
-                        </li>
-
-                    </ul>
-                </nav>
-
-                <!-- Page Size Selector -->
-                <div>
-                    <form method="GET" class="d-inline">
-                        <select name="pageSize" class="form-select form-select-sm d-inline" style="width: auto;" onchange="this.form.submit()">
-                            <option value="10" th:selected="${pageSize == 10}">10 per page</option>
-                            <option value="25" th:selected="${pageSize == 25}">25 per page</option>
-                            <option value="50" th:selected="${pageSize == 50}">50 per page</option>
-                            <option value="100" th:selected="${pageSize == 100}">100 per page</option>
-                        </select>
-                        <input type="hidden" name="pageIndex" value="0">
-                        <input type="hidden" name="id" th:value="${searchId}">
-                        <input type="hidden" name="sortBy" th:value="${sortBy}">
-                    </form>
-                </div>
-
+            <!-- Page Size Selector -->
+            <div>
+              <form method="GET" class="d-inline">
+                <select name="pageSize" class="form-select form-select-sm d-inline" style="width: auto;"
+                        onchange="this.form.submit()">
+                  <option value="10" th:selected="${pageSize == 10}">10 per page</option>
+                  <option value="25" th:selected="${pageSize == 25}">25 per page</option>
+                  <option value="50" th:selected="${pageSize == 50}">50 per page</option>
+                  <option value="100" th:selected="${pageSize == 100}">100 per page</option>
+                </select>
+                <input type="hidden" name="pageIndex" value="0">
+                <input type="hidden" name="id" th:value="${searchId}">
+                <input type="hidden" name="sortBy" th:value="${sortBy}">
+              </form>
             </div>
+          </div>
+        </div>
+      </div>
 
 
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-<!--                    <br/>-->
-
-<!--                    <h5 class="card-title fw-semibold mb-4">Buttons</h5>-->
-<!--                    <div class="card">-->
-<!--                      <div class="card-body p-4">-->
-<!--                        <button type="button" class="btn btn-primary m-1">Primary</button>-->
-<!--                        <button type="button" class="btn btn-secondary m-1">Secondary</button>-->
-<!--                        <button type="button" class="btn btn-success m-1">Success</button>-->
-<!--                        <button type="button" class="btn btn-danger m-1">Danger</button>-->
-<!--                        <button type="button" class="btn btn-warning m-1">Warning</button>-->
-<!--                        <button type="button" class="btn btn-info m-1">Info</button>-->
-<!--                        <button type="button" class="btn btn-light m-1">Light</button>-->
-<!--                        <button type="button" class="btn btn-dark m-1">Dark</button>-->
-<!--                        <button type="button" class="btn btn-link m-1">Link</button>-->
-<!--                      </div>-->
-<!--                    </div>-->
-<!--                    <h5 class="card-title fw-semibold mb-4">Outline buttons</h5>-->
-<!--                    <div class="card mb-0">-->
-<!--                      <div class="card-body p-4">-->
-<!--                        <button type="button" class="btn btn-outline-primary m-1">Primary</button>-->
-<!--                        <button type="button" class="btn btn-outline-secondary m-1">Secondary</button>-->
-<!--                        <button type="button" class="btn btn-outline-success m-1">Success</button>-->
-<!--                        <button type="button" class="btn btn-outline-danger m-1">Danger</button>-->
-<!--                        <button type="button" class="btn btn-outline-warning m-1">Warning</button>-->
-<!--                        <button type="button" class="btn btn-outline-info m-1">Info</button>-->
-<!--                        <button type="button" class="btn btn-outline-light m-1">Light</button>-->
-<!--                        <button type="button" class="btn btn-outline-dark m-1">Dark</button>-->
-<!--                        <button type="button" class="btn btn-outline-link m-1">Link</button>-->
-<!--                      </div>-->
-<!--                    </div>-->
-                    </div>
+      <!-- Create project form — only visible to global admins -->
+      <div sec:authorize="hasAuthority('ROLE_admin')" class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0 h6">
+            <i class="ti ti-plus me-1"></i>Create new project
+          </h5>
+        </div>
+        <div class="card-body">
+          <form id="createProjectForm" method="POST"
+                onsubmit="return submitCreateProject(this);">
+            <input type="hidden" name="_method" value="PUT" />
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="row g-2 align-items-end">
+              <div class="col-md-4">
+                <label for="newProjectAbbr" class="form-label">Project abbreviation</label>
+                <input type="text" class="form-control" id="newProjectAbbr"
+                       required minlength="2" maxlength="50"
+                       title="Must start with a letter, only letters, numbers, hyphens and underscores"
+                       placeholder="e.g. my-project" />
+              </div>
+              <div class="col-md-5">
+                <label for="newProjectDescription" class="form-label">Description (optional)</label>
+                <input type="text" class="form-control" id="newProjectDescription" name="description"
+                       maxlength="500"
+                       placeholder="Short project description" />
+              </div>
+              <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="ti ti-plus me-1"></i>Create
+                </button>
+              </div>
             </div>
+          </form>
+
+          <script th:inline="javascript">
+              function submitCreateProject(form) {
+                  const abbr = document.getElementById('newProjectAbbr').value.trim();
+                  if (!abbr) return false;
+                  if (!confirm('Create project "' + abbr + '"?')) return false;
+                  form.action = '/api/v1/projects/' + encodeURIComponent(abbr);
+                  return true;
+              }
+
+              function toggleDescriptionEdit(projectAbbr) {
+                  const display = document.getElementById('desc-display-' + projectAbbr);
+                  const edit = document.getElementById('desc-edit-' + projectAbbr);
+                  if (edit.style.display === 'none') {
+                      edit.style.display = 'block';
+                      display.style.display = 'none';
+                      edit.querySelector('input[name="description"]').focus();
+                  } else {
+                      edit.style.display = 'none';
+                      display.style.display = 'block';
+                  }
+              }
+          </script>
+        </div>
+      </div>
 
     </div>
-        <footer th:replace="~{fragments/general.html :: footer}"></footer>
-    </div>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
+  </div>
 </div>
 </div>
 </body>

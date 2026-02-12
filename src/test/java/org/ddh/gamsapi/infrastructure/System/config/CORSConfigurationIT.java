@@ -3,6 +3,7 @@ package org.ddh.gamsapi.infrastructure.System.config;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -37,7 +38,9 @@ public class CORSConfigurationIT extends IntegrationTest {
 
   @Test
   public void corsActualRequest_integrationEndpoint_allowsPublicAccess() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/integration/rdf")
+    mockMvc.perform(
+        MockMvcRequestBuilders.post("/api/v1/integration/rdf")
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
             .header("Origin", "http://localhost:3000")
             .content(""))
         .andExpect(MockMvcResultMatchers.header().string("Access-Control-Allow-Origin", "http://localhost:3000"));

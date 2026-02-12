@@ -318,9 +318,8 @@ public class DigitalObjectController {
     return "DigitalObject/show_all";
   }
 
-  @DeleteMapping(value = { "/{id}" })
-  @Operation(summary = "Delete a digital object by its ID",
-      description = "Deletes a digital object from the specified project. This operation is irreversible.")
+  @DeleteMapping(value = { "/{id}" }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  @Hidden
   public String deleteObject(
       @PathVariable String id,
       @PathVariable String projectAbbr,
@@ -336,6 +335,24 @@ public class DigitalObjectController {
     this.digitalObjectService.delete(digitalObject);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+  }
+
+  @DeleteMapping(value = { "/{id}" })
+  @Operation(summary = "Delete a digital object by its ID",
+      description = "Deletes a digital object from the specified project. This operation is irreversible.")
+  @ResponseBody
+  public void deleteObjectJson(
+      @PathVariable String id,
+      @PathVariable String projectAbbr) {
+
+    DigitalObject digitalObject = DigitalObjectBuilder
+        .builder()
+        .id(id)
+        .project(projectAbbr)
+        .publisher("_")
+        .build();
+
+    this.digitalObjectService.delete(digitalObject);
   }
 
 
