@@ -16,7 +16,7 @@ public class GAMSAPIAuthoritiesTest extends UnitTest {
   @Test
   public void testGetProjectAdmin() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_admin";
+    String expectedRole = "ROLE_testProject_projectadmin";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectAdmin(projectAbbr));
   }
 
