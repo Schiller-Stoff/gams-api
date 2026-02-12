@@ -8,6 +8,8 @@
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
   <aside th:replace="~{fragments/general.html :: aside}"></aside>
   <div class="body-wrapper">
     <header th:replace="~{fragments/general.html :: header}"></header>
@@ -35,6 +37,19 @@
                     class="ti ti-file"></i>XML</a>
             <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
                     class="ti ti-file"></i>JSON</a>
+
+            <!-- Ingest objects — only for authenticated users -->
+            <div sec:authorize="isAuthenticated()" class="d-inline">
+              <button type="button" class="btn btn-outline-primary btn ms-2"
+                      onclick="document.getElementById('ingestFolderInput').click()">
+                <i class="ti ti-upload me-1"></i>Ingest folder
+              </button>
+              <input type="file" id="ingestFolderInput"
+                     webkitdirectory directory multiple
+                     style="display: none;"
+                     onchange="handleIngestFolder(this)" />
+            </div>
+
             <!-- Delete all objects — only for authenticated users -->
             <div sec:authorize="isAuthenticated()" class="d-inline">
               <button type="button" class="btn btn-outline-danger btn ms-2"
@@ -449,6 +464,181 @@
         }
 
         return allIds;
+    }
+</script>
+
+<script th:inline="javascript">
+    async function handleIngestFolder(input) {
+        const projectAbbr = /*[[${project.projectAbbr}]]*/ '';
+        const csrfToken = /*[[${_csrf.token}]]*/ '';
+        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+
+        const files = input.files;
+        if (!files || files.length === 0) {
+            return;
+        }
+
+        // Group files by subfolder (= object ID)
+        const sipMap = buildSipMap(files);
+        const objectIds = Object.keys(sipMap);
+
+        if (objectIds.length === 0) {
+            alert('No valid object folders found. Each subfolder name represents an object ID.');
+            input.value = '';
+            return;
+        }
+
+        const msg = `Found ${objectIds.length} object(s) to ingest:\n\n`
+            + objectIds.join('\n')
+            + `\n\nExisting objects will be deleted first. Continue?`;
+
+        if (!confirm(msg)) {
+            input.value = '';
+            return;
+        }
+
+        console.log(`[INGEST] Starting ingest of ${objectIds.length} objects for project: ${projectAbbr}`);
+
+        let successCount = 0;
+        let failCount = 0;
+        const errors = [];
+
+        for (let i = 0; i < objectIds.length; i++) {
+            const objectId = objectIds[i];
+            const objectFiles = sipMap[objectId];
+            const progress = `(${i + 1}/${objectIds.length})`;
+
+            try {
+                // Step 1: Delete existing object (ignore 404)
+                console.log(`[INGEST] ${progress} Deleting existing object: ${objectId}`);
+                const deleteResponse = await fetch(
+                    `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
+                    {
+                        method: 'DELETE',
+                        headers: { [csrfHeader]: csrfToken },
+                        credentials: 'include'
+                    }
+                );
+
+                if (deleteResponse.ok) {
+                    console.log(`[INGEST] ${progress} Deleted existing object: ${objectId}`);
+                } else if (deleteResponse.status === 404) {
+                    console.log(`[INGEST] ${progress} Object does not exist yet: ${objectId}`);
+                } else {
+                    console.warn(`[INGEST] ${progress} Delete returned HTTP ${deleteResponse.status} for: ${objectId}`);
+                }
+
+                // Step 2: Zip the folder
+                console.log(`[INGEST] ${progress} Zipping ${objectFiles.length} files for: ${objectId}`);
+                const zip = new JSZip();
+                objectFiles.forEach(file => {
+                    // Files go directly at zip root, no object ID prefix.
+                    // This matches how the backend handles the zip
+                    zip.file(file.relativePath, file.file);
+                });
+
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                console.log(`[INGEST] ${progress} Zip created: ${(zipBlob.size / 1024).toFixed(1)} KB`);
+
+                // Step 3: POST to ingest endpoint
+                const formData = new FormData();
+                formData.append('subInfoPackZIP', zipBlob, objectId + '.zip');
+
+                console.log(`[INGEST] ${progress} Uploading: ${objectId}`);
+                const ingestResponse = await fetch(
+                    `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects`,
+                    {
+                        method: 'POST',
+                        body: formData,
+                        headers: { [csrfHeader]: csrfToken },
+                        credentials: 'include'
+                    }
+                );
+
+                if (ingestResponse.ok) {
+                    successCount++;
+                    console.log(`[INGEST] ${progress} Successfully ingested: ${objectId}`);
+                } else {
+                    failCount++;
+                    let reason = `HTTP ${ingestResponse.status}`;
+                    try {
+                        const errBody = await ingestResponse.json();
+                        reason += ` — ${errBody.message || ''}`;
+                    } catch (_) {}
+                    errors.push(`${objectId}: ${reason}`);
+                    console.error(`[INGEST] ${progress} Failed to ingest: ${objectId} — ${reason}`);
+                }
+
+            } catch (err) {
+                failCount++;
+                errors.push(`${objectId}: ${err.message}`);
+                console.error(`[INGEST] ${progress} Error processing ${objectId}:`, err);
+            }
+        }
+
+        // Report results
+        let resultMsg = `Ingest complete.\nSucceeded: ${successCount}\nFailed: ${failCount}\nTotal: ${objectIds.length}`;
+        if (errors.length > 0) {
+            resultMsg += '\n\nErrors:\n' + errors.slice(0, 10).join('\n');
+            if (errors.length > 10) {
+                resultMsg += `\n... and ${errors.length - 10} more (check console)`;
+            }
+        }
+        console.log(`[INGEST] ${resultMsg}`);
+        alert(resultMsg);
+
+        // Reset file input and reload
+        input.value = '';
+        //window.location.reload();
+    }
+
+    /**
+     * Groups files from a directory input by their immediate subfolder name (= object ID).
+     *
+     * Expected structure:
+     *   selected-folder/
+     *     object-id-1/
+     *       file1.xml
+     *       file2.json
+     *     object-id-2/
+     *       file1.xml
+     *
+     * Returns: { "object-id-1": [{file, relativePath}], "object-id-2": [...] }
+     */
+    function buildSipMap(files) {
+        const sipMap = {};
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const pathParts = file.webkitRelativePath.split('/');
+
+            // pathParts[0] = selected root folder name (irrelevant)
+            // pathParts[1] = object ID (subfolder name)
+            // pathParts[2+] = file path within the object folder
+
+            if (pathParts.length < 3) {
+                // File directly in root folder — skip (not a valid SIP)
+                console.warn(`[INGEST] Skipping root-level file: ${file.webkitRelativePath}`);
+                continue;
+            }
+
+            const objectId = pathParts[1];
+            // Path within the object folder (e.g., "data/file.xml" or just "file.xml")
+            const relativePath = pathParts.slice(2).join('/');
+
+            if (!sipMap[objectId]) {
+                sipMap[objectId] = [];
+            }
+
+            sipMap[objectId].push({ file: file, relativePath: relativePath });
+        }
+
+        // Log summary
+        Object.keys(sipMap).forEach(id => {
+            console.log(`[INGEST] SIP "${id}": ${sipMap[id].length} files`);
+        });
+
+        return sipMap;
     }
 </script>
 
