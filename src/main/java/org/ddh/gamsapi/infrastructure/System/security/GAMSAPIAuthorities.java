@@ -13,11 +13,15 @@ public enum GAMSAPIAuthorities {
 
   ANONYMOUS("anonymous"),
 
-  PROJECT_ADMINISTRATOR("admin"),
+  /**
+   * Administrator of a GAMS project
+   * Has all rights that are applicable for a project ()
+   */
+  PROJECT_ADMINISTRATOR("project-admin"),
 
-  PROJECT_EDITOR("editor"),
+  PROJECT_EDITOR("project-editor"),
 
-  PROJECT_VIEWER("viewer"),
+  PROJECT_VIEWER("project-viewer"),
 
   ROLE_DELIMITER("_"),
 

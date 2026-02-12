@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Integration.PlexusSearch;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +24,6 @@ import java.util.List;
 @RequestMapping
 @Slf4j
 @RequiredArgsConstructor
-@RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class PlexusSearchController {
 
@@ -40,9 +40,18 @@ public class PlexusSearchController {
       description = "This endpoint indexes all objects of a project in the plexus-search service."
   )
   @PostMapping(PLEXUS_SEARCH_MANAGEMENT_PATH)
+  @ResponseBody
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
     plexusSearchService.indexObjects(projectAbbr);
+  }
+
+  @Hidden
+  @PostMapping(value = PLEXUS_SEARCH_MANAGEMENT_PATH, produces = MediaType.TEXT_HTML_VALUE)
+  public String indexProjectObjectsHtml(@PathVariable String projectAbbr){
+    log.debug("*** Trying to index project objects");
+    plexusSearchService.indexObjects(projectAbbr);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -50,6 +59,7 @@ public class PlexusSearchController {
       description = "This endpoint indexes a single object of a project in the plexus-search service."
   )
   @PostMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @ResponseBody
   public void indexProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id
@@ -63,9 +73,18 @@ public class PlexusSearchController {
       description = "This endpoint deletes all objects of a project from the plexus-search service."
   )
   @DeleteMapping(PLEXUS_SEARCH_MANAGEMENT_PATH)
+  @ResponseBody
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     plexusSearchService.deleteIndexedObjects(projectAbbr);
+  }
+
+  @Hidden
+  @DeleteMapping(value = PLEXUS_SEARCH_MANAGEMENT_PATH, produces =  MediaType.TEXT_HTML_VALUE)
+  public String deleteProjectObjectsHtml(@PathVariable String projectAbbr){
+    log.trace("*** Trying to delete project objects");
+    plexusSearchService.deleteIndexedObjects(projectAbbr);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -73,6 +92,7 @@ public class PlexusSearchController {
       description = "This endpoint deletes a single object of a project from the plexus-search service."
   )
   @DeleteMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @ResponseBody
   public void deleteProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id

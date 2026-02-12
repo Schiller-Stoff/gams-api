@@ -1,5 +1,9 @@
 package org.ddh.gamsapi.infrastructure.System.security;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +12,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.*;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 /**
  * Spring security configuration
@@ -21,6 +32,8 @@ public class SpringSecurityConfiguration {
   private final UserProjectAuthorizationManager userProjectAuthorizationManager;
 
   private final DatastreamContentAuthorizationManager datastreamContentAuthorizationManager;
+
+  private final ClientRegistrationRepository clientRegistrationRepository;
 
   /**
    * Combined spring security matchers.
@@ -79,10 +92,26 @@ public class SpringSecurityConfiguration {
 
     );
 
-    // TODO configure csrf protection?
+
     http.csrf(httpSecurityCsrfConfigurer -> {
-      httpSecurityCsrfConfigurer.disable();
+      httpSecurityCsrfConfigurer
+          .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+          .ignoringRequestMatchers(
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/integration/rdf"),
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/integration/search/**")
+          )
+      ;
     });
+
+    // Force CSRF token to be generated on every response
+    http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
+
+    // handling logout
+    http.logout(logout -> logout
+        .logoutSuccessHandler(oidcLogoutSuccessHandler())
+    );
+
 
     // TODO check if this works
     http.headers(httpSecurityHeadersConfigurer -> {
@@ -95,9 +124,42 @@ public class SpringSecurityConfiguration {
 
   }
 
+  /**
+   * Eagerly loads the CSRF token on every request so the cookie is always set.
+   * Without this, Spring Security 6 defers token generation until something
+   * explicitly accesses it (e.g., a Thymeleaf form rendering {@code ${_csrf.token}}).
+   * JavaScript clients that read the CSRF cookie need it present before any
+   * form page is visited.
+   */
+  static class CsrfCookieFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+        throws ServletException, IOException {
+      CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
+      if (csrfToken != null) {
+        // Accessing the token value forces generation + cookie writing
+        csrfToken.getToken();
+      }
+      filterChain.doFilter(request, response);
+    }
+  }
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
+  }
+
+
+  /**
+   * Method configures the logout process via open-id-connect
+   * @return configured handler
+   */
+  private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
+    var handler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
+    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1/");
+    return handler;
   }
 
 }

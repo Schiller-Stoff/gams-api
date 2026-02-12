@@ -50,7 +50,7 @@ public class AuthenticationIT extends IntegrationTest {
     // test works if redirected to oauth2 login page!
     mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)
         // csrf would be needed if turned on.
-        //.with(SecurityMockMvcRequestPostProcessors.csrf())
+        .with(SecurityMockMvcRequestPostProcessors.csrf())
         .with(SecurityMockMvcRequestPostProcessors.anonymous()))
         // redirects to the oauth2 login page
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection()
@@ -62,7 +62,9 @@ public class AuthenticationIT extends IntegrationTest {
   public void userCreationRequiresAuthentication_redirects() throws Exception {
     final String USER_CREATION_URL = "/api/v1/user/";
     mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)
-        .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+          .with(SecurityMockMvcRequestPostProcessors.anonymous())
+          .with(SecurityMockMvcRequestPostProcessors.csrf())
+        )
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection()
     );
   }
@@ -70,7 +72,10 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   public void objectCreationRequiresAuthentication_redirects() throws Exception {
     final String USER_CREATION_URL = "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/demo";
-    mockMvc.perform(MockMvcRequestBuilders.put(USER_CREATION_URL)).andExpect(
+    mockMvc.perform(
+        MockMvcRequestBuilders.put(USER_CREATION_URL)
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
+    ).andExpect(
             MockMvcResultMatchers.status().is3xxRedirection()
     );
   }
@@ -79,7 +84,9 @@ public class AuthenticationIT extends IntegrationTest {
   public void ingestRequiresAuthentication_redirects() throws Exception {
     final String INGEST_ENDPOINT =  "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/";
     mockMvc.perform(MockMvcRequestBuilders.post(INGEST_ENDPOINT).content(new byte[0])
-            .with(SecurityMockMvcRequestPostProcessors.anonymous()))
+            .with(SecurityMockMvcRequestPostProcessors.anonymous())
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
+        )
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection());
   }
 

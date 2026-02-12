@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -53,9 +54,11 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     public void deleteDigitalObjectWhenItExists() throws Exception {
 
       // Act
-      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+              )
           .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is3xxRedirection());
+          .andExpect(status().isOk());
 
       // Assert
       org.assertj.core.api.Assertions.assertThat(
@@ -200,6 +203,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             MockMvcRequestBuilders.head(
                 "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
             )
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
         ).andReturn().getResponse().getHeader("Last-Modified");
 
         // Assert

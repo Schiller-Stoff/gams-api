@@ -16,21 +16,21 @@ public class GAMSAPIAuthoritiesTest extends UnitTest {
   @Test
   public void testGetProjectAdmin() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_admin";
+    String expectedRole = "ROLE_testProject_project-admin";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectAdmin(projectAbbr));
   }
 
   @Test
   public void testGetProjectEditor() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_editor";
+    String expectedRole = "ROLE_testProject_project-editor";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectEditor(projectAbbr));
   }
 
   @Test
   public void testGetProjectViewer() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_viewer";
+    String expectedRole = "ROLE_testProject_project-viewer";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectViewer(projectAbbr));
   }
 
