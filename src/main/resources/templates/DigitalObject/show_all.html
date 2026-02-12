@@ -362,8 +362,13 @@
 <script th:inline="javascript">
     async function deleteAllProjectObjects() {
         const projectAbbr = /*[[${project.projectAbbr}]]*/ '';
-        const csrfToken = /*[[${_csrf.token}]]*/ '';
-        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+        const csrfToken = /*[[${_csrf?.token}]]*/ '';
+        const csrfHeader = /*[[${_csrf?.headerName}]]*/ '';
+
+        if(!csrfToken || !csrfHeader){
+            console.error("BackendError: Csrf token / header name not present on current page - but the backend should've returned it.")
+            return;
+        }
 
         const totalObjects = /*[[${totalItems}]]*/ 0;
 
@@ -470,8 +475,13 @@
 <script th:inline="javascript">
     async function handleIngestFolder(input) {
         const projectAbbr = /*[[${project.projectAbbr}]]*/ '';
-        const csrfToken = /*[[${_csrf.token}]]*/ '';
-        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+        const csrfToken = /*[[${_csrf?.token}]]*/ '';
+        const csrfHeader = /*[[${_csrf?.headerName}]]*/ '';
+
+        if(!csrfToken || !csrfHeader){
+            console.error("BackendError: Csrf token / header name not present on current page - but the backend should've returned it.")
+            return;
+        }
 
         const files = input.files;
         if (!files || files.length === 0) {

@@ -54,9 +54,11 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     public void deleteDigitalObjectWhenItExists() throws Exception {
 
       // Act
-      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+              )
           .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is3xxRedirection());
+          .andExpect(status().isOk());
 
       // Assert
       org.assertj.core.api.Assertions.assertThat(
