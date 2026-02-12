@@ -35,6 +35,14 @@
                     class="ti ti-file"></i>XML</a>
             <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
                     class="ti ti-file"></i>JSON</a>
+            <!-- Delete all objects — only for authenticated users -->
+            <div sec:authorize="isAuthenticated()" class="d-inline">
+              <button type="button" class="btn btn-outline-danger btn ms-2"
+                      onclick="deleteAllProjectObjects()"
+                      th:attr="data-project-abbr=${project.projectAbbr}">
+                <i class="ti ti-trash me-1"></i>Delete all objects
+              </button>
+            </div>
           </div>
         </div>
         <div class="card-body">
@@ -335,6 +343,115 @@
 </div>
 </div>
 </div>
+
+<script th:inline="javascript">
+    async function deleteAllProjectObjects() {
+        const projectAbbr = /*[[${project.projectAbbr}]]*/ '';
+        const csrfToken = /*[[${_csrf.token}]]*/ '';
+        const csrfHeader = /*[[${_csrf.headerName}]]*/ '';
+
+        const totalObjects = /*[[${totalItems}]]*/ 0;
+
+        if (!confirm(`Delete ALL ${totalObjects} objects from project "${projectAbbr}"? This cannot be undone.`)) {
+            return;
+        }
+
+        // Double confirmation for safety
+        if (!confirm(`Are you SURE? This will permanently delete all digital objects and their datastreams.`)) {
+            return;
+        }
+
+        console.log(`[DELETE-ALL] Starting deletion of all objects for project: ${projectAbbr}`);
+
+        try {
+            // 1. Fetch all object IDs (paginated)
+            const allIds = await fetchAllObjectIds(projectAbbr);
+            console.log(`[DELETE-ALL] Retrieved ${allIds.length} object IDs`);
+
+            if (allIds.length === 0) {
+                alert('No objects found to delete.');
+                return;
+            }
+
+            // 2. Delete each object sequentially
+            let successCount = 0;
+            let failCount = 0;
+
+            for (let i = 0; i < allIds.length; i++) {
+                const objectId = allIds[i];
+                try {
+                    const response = await fetch(
+                        `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
+                        {
+                            method: 'DELETE',
+                            headers: { [csrfHeader]: csrfToken },
+                            credentials: 'include',
+                            redirect: 'follow'
+                        }
+                    );
+
+                    if (response.ok) {
+                        successCount++;
+                        console.log(`[DELETE-ALL] (${i + 1}/${allIds.length}) Deleted: ${objectId}`);
+                    } else {
+                        failCount++;
+                        console.error(`[DELETE-ALL] (${i + 1}/${allIds.length}) Failed: ${objectId} — HTTP ${response.status}`);
+                    }
+                } catch (err) {
+                    failCount++;
+                    console.error(`[DELETE-ALL] (${i + 1}/${allIds.length}) Error deleting ${objectId}:`, err);
+                }
+            }
+
+            // 3. Report results
+            const message = `Deletion complete.\nSucceeded: ${successCount}\nFailed: ${failCount}\nTotal: ${allIds.length}`;
+            console.log(`[DELETE-ALL] ${message}`);
+            alert(message);
+
+            // 4. Reload page to reflect changes
+            window.location.reload();
+
+        } catch (err) {
+            console.error('[DELETE-ALL] Fatal error:', err);
+            alert('Deletion failed: ' + err.message);
+        }
+    }
+
+    async function fetchAllObjectIds(projectAbbr) {
+        const PAGE_SIZE = 10000;
+        const allIds = [];
+        let pageIndex = 0;
+        let hasMore = true;
+
+        while (hasMore) {
+            const url = `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/ids`
+                + `?pageIndex=${pageIndex}&pageSize=${PAGE_SIZE}`;
+
+            console.log(`[DELETE-ALL] Fetching IDs page ${pageIndex}...`);
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch object IDs: HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            const ids = data.results || [];
+            allIds.push(...ids);
+
+            console.log(`[DELETE-ALL] Page ${pageIndex}: fetched ${ids.length} IDs (total so far: ${allIds.length})`);
+
+            hasMore = data.pagination && data.pagination.hasNext;
+            pageIndex++;
+        }
+
+        return allIds;
+    }
+</script>
+
 </body>
 
 </html>
