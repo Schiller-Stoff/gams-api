@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
+import org.ddh.gamsapi.domain.DigitalObject.utils.IngestState;
 import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
@@ -137,6 +139,14 @@ public class DigitalObject {
   @Column(name = TAGS_TABLE_NAME)
   @Size(max = 100, message = "Maximum 100 tags allowed per digital object")
   private Set<String> tags = new HashSet<>();
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private IngestState ingestState = IngestState.INGESTED;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private ArchiveState archiveState = ArchiveState.NOT_ARCHIVED;
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs
