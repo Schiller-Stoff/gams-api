@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
-import org.ddh.gamsapi.domain.DigitalObject.utils.IngestState;
+import org.ddh.gamsapi.domain.DigitalObject.utils.DataOrigin;
 import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
@@ -142,7 +142,7 @@ public class DigitalObject {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private IngestState ingestState = IngestState.INGESTED;
+  private DataOrigin dataOrigin = DataOrigin.BAG_INGEST;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)

@@ -71,7 +71,7 @@ create table digital_object
     published            timestamp(6),
     publisher            varchar(255) not null,
     project_project_abbr varchar(255) not null,
-    ingest_state         varchar(255) default 'INGESTED'      not null,
+    data_origin         varchar(255) default 'BAG_INGEST'      not null,
     archive_state        varchar(255) default 'NOT_ARCHIVED'   not null,
     primary key (id)
 );
