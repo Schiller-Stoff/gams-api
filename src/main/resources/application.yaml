@@ -122,6 +122,8 @@ gams:
 #    auto-commit: false # whether to auto-commit changes to solr (in production should be false)
 #    batch-size: 500 # number of documents to be indexed in a batch
 #    commit-interval: 10 # in seconds
+  environment:
+    allow-direct-modifications: ${GAMS_ALLOW_DIRECT_MODIFICATIONS:true}
 
 # swagger ui base path
 springdoc:
