@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 
+import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
 import org.springframework.core.io.InputStreamResource;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotDeleteFileException;
@@ -12,6 +13,27 @@ import java.nio.file.Path;
  * Handles storing files on the filesystem.
  */
 public interface IDatastreamContentRepository {
+
+  /**
+   * Saves the input stream as datastream content while computing checksums.
+   * Returns the computed checksums along with the datastream id.
+   *
+   * @param inputStream the input stream to save
+   * @param datastreamId the datastream id to save the input stream to
+   * @return WriteResult containing datastreamId and computed checksums
+   * @throws IOException if an I/O error occurs
+   */
+  WriteResult saveWithChecksums(InputStream inputStream, DatastreamId datastreamId)
+      throws IOException;
+
+  /**
+   * Computes checksums over the given byte array and saves to filesystem.
+   *
+   * @param data the data to save
+   * @param datastreamId the datastream id
+   * @return WriteResult containing datastreamId and computed checksums
+   */
+  WriteResult saveWithChecksums(byte[] data, DatastreamId datastreamId);
 
   DatastreamId save(byte[] data, DatastreamId datastreamId);
 

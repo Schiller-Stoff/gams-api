@@ -104,21 +104,21 @@ public class BagFile {
     * @param datastream the datastream to convert
     * @return the created BagFile
     */
-  public static BagFile from(Datastream datastream){
+    public static BagFile from(Datastream datastream) {
       return BagFile.builder()
-              .size(datastream.getSize())
-              .bagpath(datastream.getBagPath())
-              .dsid(datastream.getDsid())
-              .mimetype(datastream.getMimeType())
-              .title(datastream.getBaseMetadata().getTitle())
-              .description(datastream.getBaseMetadata().getDescription())
-              .creator(datastream.getBaseMetadata().getCreator())
-              .rights(datastream.getBaseMetadata().getRights())
-              .tags(datastream.getTags())
-              .lang(datastream.getLang())
-              .md5Checksum(datastream.getBaseMetadata().getMd5Checksum())
-              .sha512Checksum(datastream.getBaseMetadata().getSha512Checksum())
-              .build();
-  }
+          .size(datastream.getSize())
+          .bagpath(datastream.getBagPath())
+          .dsid(datastream.getDsid())
+          .mimetype(datastream.getMimeType())
+          .title(datastream.getBaseMetadata().getTitle())
+          .description(datastream.getBaseMetadata().getDescription())
+          .creator(datastream.getBaseMetadata().getCreator())
+          .rights(datastream.getBaseMetadata().getRights())
+          .tags(datastream.getTags())
+          .lang(datastream.getLang())
+          .md5Checksum(datastream.getMd5Checksum())
+          .sha512Checksum(datastream.getSha512Checksum())
+          .build();
+    }
 
 }

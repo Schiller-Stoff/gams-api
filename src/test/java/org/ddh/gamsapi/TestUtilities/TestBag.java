@@ -22,6 +22,9 @@ public class TestBag {
     throw new IllegalStateException("Utility class");
   }
 
+  public static final String SIP_JSON_MD5_CHECKSUM = "540193d9633d8449ee1bff28030fe045";
+  public static final String SIP_JSON_SHA512_CHECKSUM = "61eb68db4754a8349405f9355e86a72f32b00e17b747662c06c1c3027997d26d3cb1907e5f3ee3ec8299d67d97dc7c7ff4844dc70db8c5226666faf121540009";
+
   public static File loadFile() throws IOException {
     return new ClassPathResource(FOLDER_LOCATION).getFile();
   }

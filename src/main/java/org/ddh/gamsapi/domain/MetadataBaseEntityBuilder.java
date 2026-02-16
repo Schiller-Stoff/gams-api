@@ -26,27 +26,7 @@ public class MetadataBaseEntityBuilder {
     metadataBaseEntity.setDescription(description);
     return this;
   }
-
-  public MetadataBaseEntityBuilder md5Checksum(String md5Checksum) {
-    if(md5Checksum.length() != 32){
-      String msg = "md5Checksum must be 32 characters long! Happened at class " + this.getClass().getName();
-      log.error(msg);
-      throw new IllegalArgumentException(msg);
-    }
-    metadataBaseEntity.setMd5Checksum(md5Checksum);
-    return this;
-  }
-
-  public MetadataBaseEntityBuilder sha512Checksum(String sha512Checksum) {
-    if(sha512Checksum.length() != 128){
-      String msg = "sha512Checksum must be 128 characters long! Happened at class " + this.getClass().getName();
-      log.error(msg);
-      throw new IllegalArgumentException(msg);
-    }
-    metadataBaseEntity.setSha512Checksum(sha512Checksum);
-    return this;
-  }
-
+  
   public MetadataBaseEntity build() {
     if((metadataBaseEntity.getTitle() == null) || metadataBaseEntity.getTitle().isEmpty()){
       String msg = "MetadataBaseEntity's title must not be null or empty! Happened at class " + this.getClass().getName();

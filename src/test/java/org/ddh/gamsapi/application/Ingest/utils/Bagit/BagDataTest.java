@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Ingest.utils.Bagit;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestBag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,8 +51,8 @@ public class BagDataTest {
             Assertions.assertThat(testBagdata.getMainResource()).isEqualTo(TEST_DIGITAL_OBJECT.getMainResource());
             Assertions.assertThat(testBagdata.getContentFiles()).hasSize(1);
             Assertions.assertThat(testBagdata.getContentFiles().iterator().next().getDsid()).isEqualTo(TEST_DATASTREAM.getDsid());
-            Assertions.assertThat(testBagdata.getMd5Checksum()).isEqualTo(TEST_DIGITAL_OBJECT.getBaseMetadata().getMd5Checksum());
-            Assertions.assertThat(testBagdata.getSha512Checksum()).isEqualTo(TEST_DIGITAL_OBJECT.getBaseMetadata().getSha512Checksum());
+            Assertions.assertThat(testBagdata.getMd5Checksum()).isEqualTo(TestBag.SIP_JSON_MD5_CHECKSUM);
+            Assertions.assertThat(testBagdata.getSha512Checksum()).isEqualTo(TestBag.SIP_JSON_SHA512_CHECKSUM);
             Assertions.assertThat(testBagdata.getSchema()).isEqualTo(TEST_INGEST_RECORD.getBagSchema());
             Assertions.assertThat(testBagdata.getCreatedBy()).isEqualTo(TEST_INGEST_RECORD.getBagCreatedBy());
             Assertions.assertThat(testBagdata.getSource()).isEqualTo(TEST_INGEST_RECORD.getBagSource());

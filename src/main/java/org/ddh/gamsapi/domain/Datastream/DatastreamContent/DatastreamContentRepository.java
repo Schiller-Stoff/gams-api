@@ -22,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.stream.Stream;
 
 @Repository
@@ -254,6 +256,119 @@ public class DatastreamContentRepository implements IDatastreamContentRepository
     }
 
 
+  }
+
+
+  /**
+   * Saves data from an InputStream to filesystem while computing checksums.
+   * Checksums are computed during the same stream read — zero extra I/O.
+   */
+  @Override
+  public WriteResult saveWithChecksums(InputStream inputStream, DatastreamId datastreamId)
+      throws IOException {
+
+    if (!Files.exists(GAMS_FILES_ROOT)) {
+      throw new DatastreamCannotLoadFileException(
+          "Root location " + GAMS_FILES_ROOT +
+              " does not exist for datastream " + datastreamId);
+    }
+
+    Path targetFile = calcBalancedFilepath(datastreamId);
+    ZipUtils.ensureParentDir(targetFile);
+
+    MessageDigest md5;
+    MessageDigest sha512;
+    try {
+      md5 = MessageDigest.getInstance("MD5");
+      sha512 = MessageDigest.getInstance("SHA-512");
+    } catch (NoSuchAlgorithmException e) {
+      // Should never happen — MD5 and SHA-512 are guaranteed by the JVM spec
+      throw new IllegalStateException("Required digest algorithm not available", e);
+    }
+
+    try (BufferedInputStream bis = new BufferedInputStream(inputStream, BUFFER_SIZE);
+         BufferedOutputStream bos = new BufferedOutputStream(
+             Files.newOutputStream(targetFile,
+                 StandardOpenOption.CREATE,
+                 StandardOpenOption.TRUNCATE_EXISTING,
+                 StandardOpenOption.WRITE),
+             BUFFER_SIZE)) {
+
+      byte[] buffer = new byte[BUFFER_SIZE];
+      int bytesRead;
+
+      while ((bytesRead = bis.read(buffer)) != -1) {
+        md5.update(buffer, 0, bytesRead);
+        sha512.update(buffer, 0, bytesRead);
+        bos.write(buffer, 0, bytesRead);
+      }
+
+      bos.flush();
+
+    } catch (IOException e) {
+      log.error("Failed to write file for datastream {}: {}",
+          datastreamId, e.getMessage(), e);
+
+      try {
+        Files.deleteIfExists(targetFile);
+      } catch (IOException cleanupEx) {
+        log.warn("Failed to cleanup partial file {} after write error: {}",
+            targetFile, cleanupEx.getMessage(), cleanupEx);
+      }
+
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save file for datastream " + datastreamId +
+              " Original error: " + e.getMessage(), e);
+    }
+
+    String md5Hex = HexFormat.of().formatHex(md5.digest());
+    String sha512Hex = HexFormat.of().formatHex(sha512.digest());
+
+    log.info("Successfully wrote datastream {} with checksums md5={}, sha512={}",
+        datastreamId, md5Hex, sha512Hex);
+
+    return new WriteResult(datastreamId, md5Hex, sha512Hex);
+  }
+
+  /**
+   * Saves byte array to filesystem while computing checksums.
+   */
+  @Override
+  public WriteResult saveWithChecksums(byte[] data, DatastreamId datastreamId) {
+
+    if (!Files.exists(GAMS_FILES_ROOT)) {
+      throw new DatastreamCannotLoadFileException(
+          "Cannot write datastream file. Root location does not exist: " +
+              GAMS_FILES_ROOT + " For datastream: " + datastreamId);
+    }
+
+    Path newFile = calcBalancedFilepath(datastreamId);
+    ZipUtils.ensureParentDir(newFile);
+
+    try {
+      Files.write(newFile, data);
+    } catch (IOException e) {
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save datastream content at: " + newFile +
+              " Datastream: " + datastreamId + " Error: " + e.getMessage(), e);
+    }
+
+    // Compute checksums over the byte array
+    String md5Hex;
+    String sha512Hex;
+    try {
+      md5Hex = HexFormat.of().formatHex(
+          MessageDigest.getInstance("MD5").digest(data));
+      sha512Hex = HexFormat.of().formatHex(
+          MessageDigest.getInstance("SHA-512").digest(data));
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("Required digest algorithm not available", e);
+    }
+
+    log.info("Successfully wrote datastream {} with checksums md5={}, sha512={}",
+        datastreamId, md5Hex, sha512Hex);
+
+    return new WriteResult(datastreamId, md5Hex, sha512Hex);
   }
 
 }

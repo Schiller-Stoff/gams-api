@@ -149,6 +149,22 @@ public class Datastream {
   private Set<String> lang;
 
   /**
+   * MD5 checksum of the datastream content on the server.
+   * Computed during file write.
+   */
+  @Column(name = "md5_checksum")
+  @NotEmpty
+  private String md5Checksum;
+
+  /**
+   * SHA-512 checksum of the datastream content on the server.
+   * Computed during file write.
+   */
+  @Column(name = "sha512_checksum")
+  @NotEmpty
+  private String sha512Checksum;
+
+  /**
    * Derives the DatastreamId from the current Datastream object.
    * Follows the pattern of the DatastreamId class which represents the logic stored in the database.
    * @return

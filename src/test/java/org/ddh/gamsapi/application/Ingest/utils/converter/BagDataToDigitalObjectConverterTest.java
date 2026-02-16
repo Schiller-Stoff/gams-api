@@ -45,9 +45,6 @@ public class BagDataToDigitalObjectConverterTest extends UnitTest {
         Assertions.assertThat(convertedDigitalObject.getPublisher()).isEqualTo(TEST_BAG_DATA.getPublisher());
         Assertions.assertThat(convertedDigitalObject.getMainResource()).isEqualTo(TEST_BAG_DATA.getMainResource());
 
-        Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getMd5Checksum()).isEqualTo(TEST_BAG_DATA.getMd5Checksum());
-        Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getSha512Checksum()).isEqualTo(TEST_BAG_DATA.getSha512Checksum());
-
         Assertions.assertThat(convertedDigitalObject.getFunder()).isEqualTo(TEST_BAG_DATA.getFunder());
         Assertions.assertThat(convertedDigitalObject.getTags())
             .containsAll(TEST_BAG_DATA.getTags());
