@@ -77,16 +77,6 @@ public class BagData {
   private Set<BagFile> contentFiles = new HashSet<>();
 
   @NotEmpty
-  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String md5Checksum;
-
-  @NotEmpty
-  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String sha512Checksum;
-
-  @NotEmpty
   @JsonProperty("$schema")
   private String schema;
 
@@ -127,8 +117,6 @@ public class BagData {
         .mainResource(digitalObject.getMainResource())
         .tags(digitalObject.getTags())
         .contentFiles(contentFiles)
-        .md5Checksum("") // placeholder — calculated during export
-        .sha512Checksum("") // placeholder — calculated during export
         .schema(submissionRecord.getBagSchema())
         .createdBy(submissionRecord.getBagCreatedBy())
         .source(submissionRecord.getBagSource())

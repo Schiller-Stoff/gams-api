@@ -39,8 +39,6 @@ public class BagDataTest {
         @Test
         public void fromCreatesExpectedBagDataObject(){
             var testBagdata = BagData.from(TEST_DIGITAL_OBJECT, Set.of(TEST_DATASTREAM), TEST_INGEST_RECORD);
-            testBagdata.setMd5Checksum(TestDatastream.MD5_CHECKSUM);
-            testBagdata.setSha512Checksum(TestDatastream.SHA512_CHECKSUM);
 
             Assertions.assertThat(testBagdata.getId()).isEqualTo(TEST_DIGITAL_OBJECT.getId());
             Assertions.assertThat(testBagdata.getProject()).isEqualTo(TEST_DIGITAL_OBJECT.getProject().getProjectAbbr());
@@ -54,8 +52,6 @@ public class BagDataTest {
             Assertions.assertThat(testBagdata.getMainResource()).isEqualTo(TEST_DIGITAL_OBJECT.getMainResource());
             Assertions.assertThat(testBagdata.getContentFiles()).hasSize(1);
             Assertions.assertThat(testBagdata.getContentFiles().iterator().next().getDsid()).isEqualTo(TEST_DATASTREAM.getDsid());
-            Assertions.assertThat(testBagdata.getMd5Checksum()).isEqualTo(TestDatastream.MD5_CHECKSUM);
-            Assertions.assertThat(testBagdata.getSha512Checksum()).isEqualTo(TestDatastream.SHA512_CHECKSUM);
             Assertions.assertThat(testBagdata.getSchema()).isEqualTo(TEST_INGEST_RECORD.getBagSchema());
             Assertions.assertThat(testBagdata.getCreatedBy()).isEqualTo(TEST_INGEST_RECORD.getBagCreatedBy());
             Assertions.assertThat(testBagdata.getSource()).isEqualTo(TEST_INGEST_RECORD.getBagSource());
@@ -79,9 +75,6 @@ public class BagDataTest {
       public void beforeEach() {
           // Nothing to set up before each test in this case
           testBagdata = BagData.from(TEST_DIGITAL_OBJECT, Set.of(TEST_DATASTREAM), TEST_INGEST_RECORD);
-          // this needs to be set extra at the moment
-          testBagdata.setMd5Checksum(TestDatastream.MD5_CHECKSUM);
-          testBagdata.setSha512Checksum(TestDatastream.SHA512_CHECKSUM);
       }
 
       @Test
@@ -127,8 +120,8 @@ public class BagDataTest {
         var jsonString = testBagdata.toSipJsonContent();
         Assertions.assertThat(jsonString)
             .doesNotContain(
-                testBagdata.getMd5Checksum(),
-                testBagdata.getSha512Checksum()
+                "md5",
+                "sha-512"
             );
       }
 
