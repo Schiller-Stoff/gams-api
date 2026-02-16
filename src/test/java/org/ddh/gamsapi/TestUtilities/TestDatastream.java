@@ -22,8 +22,8 @@ public enum TestDatastream {
     public static final Set<String> DATASTREAM_TAGS = Set.of("test-tag1", "test-tag2", "test-tag3");
     public static final Set<String> DATASTREAM_LANG = Set.of("test-lang1", "test-lang2", "test-lang3");
 
-    public static final String MD5_CHECKSUM = "240193d9633d8449ee1bff28030fe045";
-    public static final String SHA512_CHECKSUM = "31eb68db4754a8349405f9355e86a72f32b00e17b747662c06c1c3027997d26d3cb1907e5f3ee3ec8299d67d97dc7c7ff4844dc70db8c5226666faf121540009";
+    public static final String MD5_CHECKSUM = "827ccb0eea8a706c4c34a16891f84e7b";
+    public static final String SHA512_CHECKSUM = "3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79";
 
     public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestMetadataBaseEntity.generate();
 

@@ -494,12 +494,13 @@ public class IngestServiceIT extends IntegrationTest {
               String manifestMd5Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.BAG_SIP_JSON.name);
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
-              Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
+              Assertions.assertThat(manifestMd5Content).contains(TestDatastream.MD5_CHECKSUM);
             }
             case "manifest-sha512.txt" -> {
               String manifestSha512Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.BAG_SIP_JSON.name);
+              Assertions.assertThat(manifestSha512Content).contains(TestDatastream.SHA512_CHECKSUM);
             }
 
             default -> {

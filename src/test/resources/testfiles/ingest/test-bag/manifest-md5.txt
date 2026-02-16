@@ -1,5 +1,5 @@
 140193d9633d8449ee1bff28030fe045 data/content/DC.xml
-240193d9633d8449ee1bff28030fe045 data/content/test.txt
+827ccb0eea8a706c4c34a16891f84e7b data/content/test.txt
 340193d9633d8449ee1bff28030fe045 data/content/manifest.json
 440193d9633d8449ee1bff28030fe045 data/content/search.json
 540193d9633d8449ee1bff28030fe045 data/meta/sip.json
