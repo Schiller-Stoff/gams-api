@@ -43,7 +43,7 @@ public class SubmissionRecordController {
       @PathVariable String id
   ) {
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    return submissionRecordService.find(id);
+    return submissionRecordService.find(id).orElseThrow(() -> new SubmissionRecordNotFoundException("Submission record not found for digital object with ID: " + id));
   }
 
 }
