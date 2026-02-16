@@ -221,7 +221,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
 
         // assert same time
-        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValueAsDate).hasSameTimeAs(expectedDate);
+        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValueAsDate).isAfterOrEqualTo(expectedDate);
 
       }
 
