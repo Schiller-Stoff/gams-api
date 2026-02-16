@@ -146,17 +146,22 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsDigitalObjectWithExpectedChecksums(){
+    @Transactional
+    public void createsDatastreamsWithServerComputedChecksums() {
+      var datastreams = datastreamRepository.findAll();
+      Assertions.assertThat(datastreams).isNotEmpty();
 
-        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+      datastreams.forEach(ds -> {
+        Assertions.assertThat(ds.getMd5Checksum())
+            .isNotNull()
+            .isNotEmpty()
+            .hasSize(32);
 
-        Assertions.assertThat(digitalObject.getBaseMetadata().getMd5Checksum())
-            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
-
-        Assertions.assertThat(digitalObject.getBaseMetadata().getSha512Checksum())
-            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
-
+        Assertions.assertThat(ds.getSha512Checksum())
+            .isNotNull()
+            .isNotEmpty()
+            .hasSize(128);
+      });
     }
 
     @Test
@@ -269,11 +274,11 @@ public class IngestServiceIT extends IntegrationTest {
       Assertions.assertThat(foundDatastream.getLang().size()).isEqualTo(TestDatastream.DATASTREAM_LANG.size());
       Assertions.assertThat(foundDatastream.getTags().size()).isEqualTo(TestDatastream.DATASTREAM_TAGS.size());
 
-      Assertions.assertThat(foundDatastream.getBaseMetadata().getMd5Checksum())
-          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getMd5Checksum());
+      Assertions.assertThat(foundDatastream.getMd5Checksum())
+          .isEqualTo(TestDatastream.MD5_CHECKSUM);
 
-      Assertions.assertThat(foundDatastream.getBaseMetadata().getSha512Checksum())
-          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getSha512Checksum());
+      Assertions.assertThat(foundDatastream.getSha512Checksum())
+          .isEqualTo(TestDatastream.SHA512_CHECKSUM);
 
 
     }
@@ -489,12 +494,13 @@ public class IngestServiceIT extends IntegrationTest {
               String manifestMd5Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.BAG_SIP_JSON.name);
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
-              Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
+              Assertions.assertThat(manifestMd5Content).contains(TestDatastream.MD5_CHECKSUM);
             }
             case "manifest-sha512.txt" -> {
               String manifestSha512Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.BAG_SIP_JSON.name);
+              Assertions.assertThat(manifestSha512Content).contains(TestDatastream.SHA512_CHECKSUM);
             }
 
             default -> {

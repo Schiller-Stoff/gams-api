@@ -8,6 +8,7 @@ import org.ddh.gamsapi.application.Ingest.utils.Bagit.*;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
+import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
@@ -115,22 +116,25 @@ public class IngestService implements IIngestService {
 
       for (Datastream ds : datastreams) {
 
-        // Find the source file in the temp bag
         BagFile bagFile = bag.findContentFileByDsid(ds.getDsid());
         Path sourcePath = bagDirPath.resolve(bagFile.getBagpath());
 
         // SPECIAL HANDLING: DUBLIN CORE (Read to RAM once, use twice)
         if (ds.getDsid().equals(GAMSDsid.DC.getValue())) {
           try {
-            // 1. Read bytes into memory (DC is small, so this is safe)
             byte[] dcBytes = Files.readAllBytes(sourcePath);
 
-            // 2. Save to Repository using bytes (avoid re-reading from disk)
-            // Note: Ensure your repository has a save(byte[], id) method, or wrap in ByteArrayInputStream
-            datastreamContentRepository.save(new ByteArrayInputStream(dcBytes), ds.deriveDatastreamId());
+            WriteResult result = datastreamContentRepository.saveWithChecksums(
+                new ByteArrayInputStream(dcBytes), ds.deriveDatastreamId());
             writtenFiles.add(ds.deriveDatastreamId());
 
-            // 3. Parse XML from memory
+            // Set server-computed checksums on the datastream
+            ds.setMd5Checksum(result.md5Checksum());
+            ds.setSha512Checksum(result.sha512Checksum());
+
+            // Verify against bag manifest
+            verifyChecksums(ds.getDsid(), result, bagFile);
+
             dublinCoreEntries.addAll(
                 parseDublinCore(dcBytes, digitalObject, projectAbbr)
             );
@@ -142,13 +146,22 @@ public class IngestService implements IIngestService {
         // STANDARD HANDLING: ALL OTHER FILES (Stream to avoid OOM)
         else {
           try (InputStream in = Files.newInputStream(sourcePath)) {
-            datastreamContentRepository.save(in, ds.deriveDatastreamId());
+
+            WriteResult result = datastreamContentRepository.saveWithChecksums(
+                in, ds.deriveDatastreamId());
             writtenFiles.add(ds.deriveDatastreamId());
+
+            // Set server-computed checksums on the datastream
+            ds.setMd5Checksum(result.md5Checksum());
+            ds.setSha512Checksum(result.sha512Checksum());
+
+            // Verify against bag manifest
+            verifyChecksums(ds.getDsid(), result, bagFile);
+
           } catch (IOException e) {
             throw new IngestProcessingException("Failed to stream file: " + sourcePath, e);
           }
         }
-
       }
 
       // --- PHASE 3: METADATA PERSISTENCE (Transactional) ---
@@ -260,6 +273,30 @@ public class IngestService implements IIngestService {
           "Failed to parse Dublin Core XML for project " + projectAbbr + ". Digital object: " + digitalObject.getId() + ". Error: " + e.getMessage(), e
       );
     }
+  }
+
+  /**
+   * Verifies server-computed checksums against the bag manifest values.
+   * Throws IngestProcessingException if checksums don't match.
+   *
+   * @param dsid datastream identifier (for error messages)
+   * @param result server-computed checksums from the file write
+   * @param bagFile bag manifest entry with expected checksums
+   */
+  private void verifyChecksums(String dsid, WriteResult result, BagFile bagFile) {
+    if (!result.md5Checksum().equals(bagFile.getMd5Checksum())) {
+      throw new IngestChecksumMismatchException(
+          "MD5 checksum mismatch for datastream '" + dsid + "': " + " bag manifest=" + bagFile.getMd5Checksum() + ", server computed=" + result.md5Checksum()
+      );
+    }
+
+    if (!result.sha512Checksum().equals(bagFile.getSha512Checksum())) {
+      throw new IngestChecksumMismatchException(
+          "SHA-512 checksum mismatch for datastream '" + dsid + "': " + " bag manifest=" + bagFile.getSha512Checksum() + ", server computed=" + result.sha512Checksum()
+      );
+    }
+
+    log.trace("Checksum verification passed for datastream '{}'", dsid);
   }
 
 }

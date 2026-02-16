@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Ingest.utils.Bagit;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Ingest.exceptions.ExportProcessingException;
-import org.ddh.gamsapi.application.Ingest.exceptions.IngestException;
 import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
@@ -16,7 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -54,6 +55,20 @@ public class Bag {
    * on the local filesystem
    */
   final private Path BAG_DIR_PATH;
+
+  /**
+   * MD5 checksum of the sip.json as declared in the bag manifest.
+   * Only populated during ingest (read from manifest-md5.txt).
+   * Null during export (computed on-the-fly in writeManifests).
+   */
+  private String sipJsonMd5Checksum;
+
+  /**
+   * SHA-512 checksum of the sip.json as declared in the bag manifest.
+   * Only populated during ingest (read from manifest-sha512.txt).
+   * Null during export (computed on-the-fly in writeManifests).
+   */
+  private String sipJsonSha512Checksum;
 
   /**
    * Constructor that takes the path to a local bag directory.
@@ -124,6 +139,10 @@ public class Bag {
       );
     }
 
+    // store on Bag itself — these are manifest/transport metadata
+    this.sipJsonMd5Checksum = sipJsonMd5;
+    this.sipJsonSha512Checksum = sipJsonSHA512;
+
     BagData bagData = BagData.builder()
         .id(bagSipJson.getRecid())
         .project(bagSipJson.getProject())
@@ -137,8 +156,6 @@ public class Bag {
         .mainResource(bagSipJson.getMainResource())
         .tags(bagSipJson.getTags())
         .contentFiles(new HashSet<>())  // this is being populated below
-        .md5Checksum(sipJsonMd5)
-        .sha512Checksum(sipJsonSHA512)
         // bag related fields
         .schema(bagSipJson.getSchema())
         .createdBy(bagSipJson.getCreated_by())

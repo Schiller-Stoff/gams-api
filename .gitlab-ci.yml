@@ -28,16 +28,19 @@ stages:
 build:
   stage: build
   script:
+    - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS clean
     - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS compile
 
 test:
   stage: test
   script:
+    - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS clean
     - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS verify
 
 build-native:
   stage: deploy
   script:
+    - ./mvnw $MAVEN_CLI_OPTS $MAVEN_OPTS clean
     - ./mvnw $MAVEN_CLI_OPTS -Pnative spring-boot:build-image -DskipTests
   only:
     - main

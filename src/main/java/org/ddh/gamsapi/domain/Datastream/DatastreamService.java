@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.springframework.data.domain.PageRequest;
@@ -94,7 +95,6 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public Datastream save(Datastream datastream, MultipartFile file) {
 
-    // Validate digital object exists
     String digitalObjectId = datastream.getDigitalObject().getId();
     if (!digitalObjectRepository.existsById(digitalObjectId)) {
       throw new DigitalObjectNotFoundException(
@@ -104,22 +104,24 @@ public class DatastreamService implements IDatastreamService {
 
     DatastreamId dsId = datastream.deriveDatastreamId();
 
-    // Stream file content directly to disk - NO byte[] intermediate!
+    // Stream file content to disk WITH checksum computation
     try (InputStream inputStream = file.getInputStream()) {
-      datastreamContentRepository.save(inputStream, dsId);
+      WriteResult result = datastreamContentRepository.saveWithChecksums(inputStream, dsId);
+
+      // Set server-computed checksums
+      datastream.setMd5Checksum(result.md5Checksum());
+      datastream.setSha512Checksum(result.sha512Checksum());
+
     } catch (IOException e) {
       throw new DatastreamCannotWriteFileException(
-          "Failed to save file content for datastream " + dsId + "At digital object: " + digitalObjectId + " Original error: " + e.getMessage(),
-          e
-      );
+          "Failed to save file content for datastream " + dsId +
+              " At digital object: " + digitalObjectId +
+              " Original error: " + e.getMessage(), e);
     }
 
-    // Save entity metadata
     Datastream savedDatastream = datastreamRepository.save(datastream);
-
     log.info("Successfully saved datastream {} with file content", savedDatastream);
     return savedDatastream;
-
   }
 
   /**

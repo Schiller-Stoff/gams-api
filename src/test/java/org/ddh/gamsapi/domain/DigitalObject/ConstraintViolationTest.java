@@ -186,7 +186,7 @@ public class ConstraintViolationTest extends UnitTest {
       public void shouldRaiseConstraintViolationIfMetadataIsEmpty() {
         MetadataBaseEntity metadataBaseEntity = new MetadataBaseEntity();
         Set<ConstraintViolation<MetadataBaseEntity>> violationSet = validator.validate(metadataBaseEntity);
-        assertThat(violationSet.size(), is(5));
+        assertThat(violationSet.size(), is(3));
       }
 
       @Test

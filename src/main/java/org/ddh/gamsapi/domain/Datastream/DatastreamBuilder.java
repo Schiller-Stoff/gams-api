@@ -67,6 +67,16 @@ public class DatastreamBuilder {
     return this;
   }
 
+  public DatastreamBuilder md5Checksum(String md5Checksum) {
+    datastream.setMd5Checksum(md5Checksum);
+    return this;
+  }
+
+  public DatastreamBuilder sha512Checksum(String sha512Checksum) {
+    datastream.setSha512Checksum(sha512Checksum);
+    return this;
+  }
+
   public Datastream build() {
     if((datastream.getDsid() == null) || datastream.getDsid().isEmpty()) {
       String msg = "Encountered null or empty dsid at" + this.getClass().getName() + ". Datastream identifier must be set during builder process.";

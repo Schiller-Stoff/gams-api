@@ -22,6 +22,7 @@ public class TestBag {
     throw new IllegalStateException("Utility class");
   }
 
+
   public static File loadFile() throws IOException {
     return new ClassPathResource(FOLDER_LOCATION).getFile();
   }

@@ -43,10 +43,4 @@ public class MetadataBaseEntity {
   @Size(max = 2000)
   private String description;
 
-  @NotEmpty
-  private String md5Checksum;
-
-  @NotEmpty
-  private String sha512Checksum;
-
 }

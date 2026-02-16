@@ -510,7 +510,7 @@ public class IngestControllerIT extends IntegrationTest {
           case "manifest-md5.txt" -> {
             String manifestMd5Txt = bos.toString();
             org.assertj.core.api.Assertions.assertThat(manifestMd5Txt)
-                .contains(testDataSet.mainDatastream().getBaseMetadata().getMd5Checksum())
+                .contains(testDataSet.mainDatastream().getMd5Checksum())
                 .contains(testDataSet.mainDatastream().getDsid())
                 .contains(BagFilePaths.BAG_SIP_JSON.name)
             ;
@@ -518,7 +518,7 @@ public class IngestControllerIT extends IntegrationTest {
           case "manifest-sha512.txt" -> {
             String manifestSha512Txt = bos.toString();
             org.assertj.core.api.Assertions.assertThat(manifestSha512Txt)
-                .contains(testDataSet.mainDatastream().getBaseMetadata().getSha512Checksum())
+                .contains(testDataSet.mainDatastream().getSha512Checksum())
                 .contains(testDataSet.mainDatastream().getDsid())
                 .contains(BagFilePaths.BAG_SIP_JSON.name)
             ;

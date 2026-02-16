@@ -77,16 +77,6 @@ public class BagData {
   private Set<BagFile> contentFiles = new HashSet<>();
 
   @NotEmpty
-  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String md5Checksum;
-
-  @NotEmpty
-  // WRITE_ONLY means: can be deserialized FROM JSON, but NOT serialized TO JSON
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String sha512Checksum;
-
-  @NotEmpty
   @JsonProperty("$schema")
   private String schema;
 
@@ -98,34 +88,39 @@ public class BagData {
   @JsonProperty("source")
   private String source;
 
-  public static BagData from(DigitalObject digitalObject, Set<Datastream> datastreams, SubmissionRecord submissionRecord){
+  /**
+   *
+   * @param digitalObject
+   * @param datastreams
+   * @param submissionRecord
+   * @return
+   */
+  public static BagData from(DigitalObject digitalObject, Set<Datastream> datastreams,
+                             SubmissionRecord submissionRecord) {
 
-      Set<BagFile> contentFiles = new HashSet<>();
-      datastreams.forEach(datastream -> {
-          BagFile bagFile = BagFile.from(datastream);
-          contentFiles.add(bagFile);
-      });
+    Set<BagFile> contentFiles = new HashSet<>();
+    datastreams.forEach(datastream -> {
+      BagFile bagFile = BagFile.from(datastream);
+      contentFiles.add(bagFile);
+    });
 
-      return BagData.builder()
-              .id(digitalObject.getId())
-              .project(digitalObject.getProject().getProjectAbbr())
-              .title(digitalObject.getBaseMetadata().getTitle())
-              .objectType(digitalObject.getObjectType())
-              .description(digitalObject.getBaseMetadata().getDescription())
-              .creator(digitalObject.getBaseMetadata().getCreator())
-              .rights(digitalObject.getBaseMetadata().getRights())
-              .publisher(digitalObject.getPublisher())
-              .funder(digitalObject.getFunder())
-              .mainResource(digitalObject.getMainResource())
-              .tags(digitalObject.getTags())
-              .contentFiles(contentFiles)
-              .md5Checksum(digitalObject.getBaseMetadata().getMd5Checksum())
-              .sha512Checksum(digitalObject.getBaseMetadata().getSha512Checksum())
-              .schema(submissionRecord.getBagSchema())
-              .createdBy(submissionRecord.getBagCreatedBy())
-              .source(submissionRecord.getBagSource())
-              .build();
-
+    return BagData.builder()
+        .id(digitalObject.getId())
+        .project(digitalObject.getProject().getProjectAbbr())
+        .title(digitalObject.getBaseMetadata().getTitle())
+        .objectType(digitalObject.getObjectType())
+        .description(digitalObject.getBaseMetadata().getDescription())
+        .creator(digitalObject.getBaseMetadata().getCreator())
+        .rights(digitalObject.getBaseMetadata().getRights())
+        .publisher(digitalObject.getPublisher())
+        .funder(digitalObject.getFunder())
+        .mainResource(digitalObject.getMainResource())
+        .tags(digitalObject.getTags())
+        .contentFiles(contentFiles)
+        .schema(submissionRecord.getBagSchema())
+        .createdBy(submissionRecord.getBagCreatedBy())
+        .source(submissionRecord.getBagSource())
+        .build();
   }
 
   /**
