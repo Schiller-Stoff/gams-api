@@ -285,24 +285,18 @@ public class IngestService implements IIngestService {
    */
   private void verifyChecksums(String dsid, WriteResult result, BagFile bagFile) {
     if (!result.md5Checksum().equals(bagFile.getMd5Checksum())) {
-      // TODO better exception
-      throw new IngestProcessingException(
-          String.format("MD5 checksum mismatch for datastream '%s': " +
-                  "bag manifest=%s, server computed=%s",
-              dsid, bagFile.getMd5Checksum(), result.md5Checksum())
+      throw new IngestChecksumMismatchException(
+          "MD5 checksum mismatch for datastream '" + dsid + "': " + " bag manifest=" + bagFile.getMd5Checksum() + ", server computed=" + result.md5Checksum()
       );
     }
 
     if (!result.sha512Checksum().equals(bagFile.getSha512Checksum())) {
-      // TODO better exception
-      throw new IngestProcessingException(
-          String.format("SHA-512 checksum mismatch for datastream '%s': " +
-                  "bag manifest=%s, server computed=%s",
-              dsid, bagFile.getSha512Checksum(), result.sha512Checksum())
+      throw new IngestChecksumMismatchException(
+          "SHA-512 checksum mismatch for datastream '" + dsid + "': " + " bag manifest=" + bagFile.getSha512Checksum() + ", server computed=" + result.sha512Checksum()
       );
     }
 
-    log.debug("Checksum verification passed for datastream '{}'", dsid);
+    log.trace("Checksum verification passed for datastream '{}'", dsid);
   }
 
 }
