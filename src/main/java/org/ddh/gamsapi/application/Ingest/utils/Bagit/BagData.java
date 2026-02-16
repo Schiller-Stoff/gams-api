@@ -98,6 +98,13 @@ public class BagData {
   @JsonProperty("source")
   private String source;
 
+  /**
+   *
+   * @param digitalObject
+   * @param datastreams
+   * @param submissionRecord
+   * @return
+   */
   public static BagData from(DigitalObject digitalObject, Set<Datastream> datastreams,
                              SubmissionRecord submissionRecord) {
 
