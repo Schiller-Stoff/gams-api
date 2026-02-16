@@ -1,8 +1,8 @@
-721173c0786e2870f0e8d52a2ec17ebc data/content/DC.xml
+310def22018d3a6608f133630748ddfc data/content/DC.xml
 827ccb0eea8a706c4c34a16891f84e7b data/content/test.txt
-e97960ba3f1c837b96cc62b76b4ad97b data/content/manifest.json
-8c2ee9d6844c51f298fd4bc2e0940f38 data/content/search.json
-2474b86378b330004d692a55ec00596c data/meta/sip.json
-6fd15234a1834f37e325dddad3308342 data/content/test.xml
-e13d62b19218c73e5885a3dc4f259d8f data/content/CUSTOM_SEARCH.json
-4408270a99d82c9a62cfd25ccb0e1ee8 data/content/CUSTOM_PLEXUS_SEARCH.json
+ecf45e9ff90d35083f8f50163f765352 data/content/manifest.json
+71b6d6d5b10ddbf1b9d3165a864680a1 data/content/search.json
+8f2defdc0c3ace42f69fa45b24219532 data/meta/sip.json
+b3ec558e074f24d11362e053539a9634 data/content/test.xml
+958f19f3b10e3514505c1022772965c4 data/content/CUSTOM_SEARCH.json
+e4004527a39ecd88bc6802b2f7ce220f data/content/CUSTOM_PLEXUS_SEARCH.json
