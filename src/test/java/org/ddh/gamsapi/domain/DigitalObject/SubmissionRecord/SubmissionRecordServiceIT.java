@@ -39,14 +39,17 @@ public class SubmissionRecordServiceIT extends IntegrationTest {
     @Test
     public void foundSubmissionRecordIsNotNullAndHasNoNullFields() {
       var foundRecord = submissionRecordService.find(testDataSet.digitalObject().getId());
-      Assertions.assertThat(foundRecord).isNotNull();
-      Assertions.assertThat(foundRecord).hasNoNullFieldsOrProperties();
+      Assertions.assertThat(foundRecord)
+          .isNotNull()
+          .isPresent();
+      Assertions.assertThat(foundRecord.get()).hasNoNullFieldsOrProperties();
     }
 
     @Test
     public void findsExpectedSubmissionRecord() {
       var expectedRecord = submissionRecordService.find(testDataSet.digitalObject().getId());
-      Assertions.assertThat(expectedRecord).isEqualTo(testDataSet.submissionRecord());
+      Assertions.assertThat(expectedRecord).isPresent();
+      Assertions.assertThat(expectedRecord.get()).isEqualTo(testDataSet.submissionRecord());
     }
 
   }
