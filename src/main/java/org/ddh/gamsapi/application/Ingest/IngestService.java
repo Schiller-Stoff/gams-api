@@ -133,8 +133,7 @@ public class IngestService implements IIngestService {
             ds.setSha512Checksum(result.sha512Checksum());
 
             // Verify against bag manifest
-            // TODO renable checksum test
-            //verifyChecksums(ds.getDsid(), result, bagFile);
+            verifyChecksums(ds.getDsid(), result, bagFile);
 
             dublinCoreEntries.addAll(
                 parseDublinCore(dcBytes, digitalObject, projectAbbr)
@@ -157,8 +156,7 @@ public class IngestService implements IIngestService {
             ds.setSha512Checksum(result.sha512Checksum());
 
             // Verify against bag manifest
-            // TODO reenable
-            //verifyChecksums(ds.getDsid(), result, bagFile);
+            verifyChecksums(ds.getDsid(), result, bagFile);
 
           } catch (IOException e) {
             throw new IngestProcessingException("Failed to stream file: " + sourcePath, e);
