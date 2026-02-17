@@ -45,6 +45,8 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
 
     Assertions.assertEquals(digitalObjectCompactDTO.getTags(), testObjectDetailsView.getTags());
 
+    Assertions.assertEquals(digitalObjectCompactDTO.isIngested(), testObjectDetailsView.isIngested());
+
   }
 
   /**
@@ -124,6 +126,11 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     @Override
     public String getMainResource() {
       return "test-mainresource";
+    }
+
+    @Override
+    public boolean isIngested(){
+      return true;
     }
 
   }

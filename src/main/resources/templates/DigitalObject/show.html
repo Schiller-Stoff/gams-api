@@ -27,8 +27,24 @@
         <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
           <span th:text="${do.id}"></span>
 
+          <i th:if="${do.isIngested()}"
+             class="ti ti-file-check text-success"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Object was created via ingest">
+          </i>
+
+          <i th:unless="${do.isIngested()}"
+             class="ti ti-file-off text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Object was not created via ingest">
+          </i>
+
           <i th:if="${!archivalRecords.isEmpty()}"
-             class="ti ti-discount-check-filled text-success"
+             class="ti ti-shield-check text-success"
              style="font-size: 0.5em;"
              data-bs-toggle="tooltip"
              data-bs-placement="right"
@@ -284,6 +300,10 @@
                       <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
                     </th:block>
                   </div>
+                </li>
+                <li class="list-group-item">
+                  <small>ingested</small>
+                  <p th:text="${do.isIngested()}"></p>
                 </li>
                 <li class="list-group-item">
                   <small>object type</small>

@@ -39,6 +39,8 @@ public interface DigitalObjectDetailsView {
 
     Set<String> getTags();
 
+    boolean isIngested();
+
     interface ProjectView {
         String getProjectAbbr();
     }
