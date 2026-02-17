@@ -26,7 +26,6 @@
         </nav>
         <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
           <span th:text="${do.id}"></span>
-
           <i th:if="${do.isIngested()}"
              class="ti ti-file-check text-success"
              style="font-size: 0.5em;"
@@ -34,7 +33,6 @@
              data-bs-placement="right"
              title="Ingested: Object was created via ingest">
           </i>
-
           <i th:unless="${do.isIngested()}"
              class="ti ti-file-off text-warning"
              style="font-size: 0.5em;"
@@ -66,29 +64,16 @@
         <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
         <a th:if="${submissionRecord}" class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
         <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
-              <i class="ti ti-id me-2"></i>Identifiers
-            </h3>
-          </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
-                    <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
-                </ul>
-                <br/>
-            </div>
-        </div>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
+
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
               <i class="ti ti-list-details me-2"></i>Datastreams
             </h3>
           </div>
-          <div class="card-body">
-              <table class="table table-hover border border-2">
-                <thead class="">
+          <div class="mb-3">
+              <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
+                <thead>
                 <tr>
                   <th scope="col">
                     <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?searchDsid=' + ${searchDsid} + '&sortBy=dsid'">dsid</a>
@@ -236,6 +221,23 @@
           </div>
 
           <br/>
+          <br/>
+
+        <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-id me-2"></i>Identifiers
+            </h3>
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
+              <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
+            </ul>
+            <br/>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h5">
