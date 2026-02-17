@@ -174,6 +174,19 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
+    public void ingestCreatesDigitalObjectWithIngestedPropertyTrue(){
+      var ingestedObject =  digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+      Assertions.assertThat(ingestedObject)
+          .isNotNull()
+          .isPresent();
+
+      Assertions.assertThat(ingestedObject.get().isIngested())
+          .isTrue();
+
+    }
+
+    @Test
     public void createsExpectedDublinCoreEntryNamesForTestDigitalObject() {
 
       var dublinCoreEntries = dublinCoreElementRepository.findByDigitalObject(TestDigitalObject.generate());

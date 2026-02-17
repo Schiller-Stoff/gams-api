@@ -10,7 +10,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
-import org.ddh.gamsapi.domain.DigitalObject.utils.DataOrigin;
 import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
@@ -140,10 +139,16 @@ public class DigitalObject {
   @Size(max = 100, message = "Maximum 100 tags allowed per digital object")
   private Set<String> tags = new HashSet<>();
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private DataOrigin dataOrigin = DataOrigin.BAG_INGEST;
+  /**
+   * Tracks if the object was created via ingest.
+   * Immutable history track.
+   */
+  @Column(name = "ingested", nullable = false, updatable = false)
+  private boolean ingested = false;
 
+  /**
+   * Tracks if an object was moved to an archive / repository.
+   */
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ArchiveState archiveState = ArchiveState.NOT_ARCHIVED;

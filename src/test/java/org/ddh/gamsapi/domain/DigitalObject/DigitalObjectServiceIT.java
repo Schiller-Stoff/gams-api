@@ -95,6 +95,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(savedDigitalObject).isNotNull();
       Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
       Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testDataSet.project());
+
+      // assert that ingest property is auto set to false
+      Assertions.assertThat(savedDigitalObject.isIngested()).isFalse();
+
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
 
