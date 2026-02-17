@@ -180,7 +180,7 @@
                 <th scope="col">tags</th>
                 <th sec:authorize="isAuthenticated()">
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">ingest</a>/<br/>
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">archived</a>/<br/>
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=archiveState'">archived</a>/<br/>
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">changed</a><br/>
                 </th>
                 <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
@@ -235,6 +235,22 @@
                        data-bs-placement="right"
                        title="Not Ingested: Object was not created via ingest">
                     </i>
+
+                    <i th:if="${do.archiveState.equals('ARCHIVED')}"
+                       class="ti ti-shield-check text-success"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Archived: This object has associated archival records.">
+                    </i>
+                    <i th:unless="${do.archiveState.equals('ARCHIVED')}"
+                       class="ti ti-database-off text-warning"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Rearchiving required: This object has no archival records or needs rearchiving.">
+                    </i>
+
                 </td>
                 <td sec:authorize="isAuthenticated()">
                   <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"

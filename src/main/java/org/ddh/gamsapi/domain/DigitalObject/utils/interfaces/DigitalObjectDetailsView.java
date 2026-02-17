@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
+import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import java.util.Date;
 import java.util.Set;
@@ -40,6 +41,8 @@ public interface DigitalObjectDetailsView {
     Set<String> getTags();
 
     boolean isIngested();
+
+    ArchiveState  getArchiveState();
 
     interface ProjectView {
         String getProjectAbbr();
