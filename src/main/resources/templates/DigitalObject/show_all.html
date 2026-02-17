@@ -27,6 +27,119 @@
       <h2 class="display-6 fw-bold text-primary mb-3" th:text="${project.projectAbbr}"></h2>
       <p><span>Projektbeschreibung: </span><span th:text="${project.getDescription()}"></span></p>
 
+      <div class="card" sec:authorize="isAuthenticated()">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0 h5">
+            <i class="ti ti-list-details me-2"></i>Project management
+          </h3>
+        </div>
+        <div class="card-body">
+          <div sec:authorize="isAuthenticated()" class="d-inline">
+            <button type="button" class="btn btn-outline-primary btn"
+                    data-bs-toggle="collapse" data-bs-target="#createObjectForm">
+              <i class="ti ti-plus me-1"></i>Create object
+            </button>
+
+            <div class="collapse m-2" id="createObjectForm">
+              <div class="mt-2">
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects'}"
+                      method="POST">
+
+                  <!-- ID with project prefix shown -->
+                  <div class="mb-3">
+                    <label class="form-label">Object ID</label>
+                    <div class="input-group">
+                      <span class="input-group-text" th:text="${project.projectAbbr} + '.'"></span>
+                      <input type="text" name="idSuffix" class="form-control"
+                             placeholder="e.g. manuscript_001" required
+                             pattern="^[a-zA-Z0-9._-]+$"
+                             th:value="${formData?.idSuffix}">
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" name="title" class="form-control" required
+                           th:value="${formData?.title}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Creator *</label>
+                    <input type="text" name="creator" class="form-control" required
+                           th:value="${formData?.creator}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Rights *</label>
+                    <input type="text" name="rights" class="form-control" required
+                           th:value="${formData?.rights}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Publisher *</label>
+                    <input type="text" name="publisher" class="form-control" required
+                           th:value="${formData?.publisher}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3"
+                              th:text="${formData?.description}"></textarea>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Object Type</label>
+                      <input type="text" name="objectType" class="form-control"
+                             placeholder="e.g. TEI"
+                             th:value="${formData?.objectType}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Funder</label>
+                      <input type="text" name="funder" class="form-control"
+                             th:value="${formData?.funder}">
+                    </div>
+                  </div>
+
+                  <!-- Error display -->
+                  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                  <div th:if="${errors}" class="alert alert-danger">
+                    <ul class="mb-0">
+                      <li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
+                    </ul>
+                  </div>
+
+                  <button type="submit" class="btn btn-success">
+                    <i class="ti ti-check me-1"></i>Create
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ingest objects — only for authenticated users -->
+          <div sec:authorize="isAuthenticated()" class="d-inline">
+            <button type="button" class="btn btn-outline-primary btn ms-2"
+                    onclick="document.getElementById('ingestFolderInput').click()">
+              <i class="ti ti-upload me-1"></i>Ingest object
+            </button>
+            <input type="file" id="ingestFolderInput"
+                   webkitdirectory directory multiple
+                   style="display: none;"
+                   onchange="handleIngestFolder(this)" />
+          </div>
+
+          <!-- Delete all objects — only for authenticated users -->
+          <div sec:authorize="isAuthenticated()" class="d-inline">
+            <button type="button" class="btn btn-outline-danger btn ms-2"
+                    onclick="deleteAllProjectObjects()"
+                    th:attr="data-project-abbr=${project.projectAbbr}">
+              <i class="ti ti-trash me-1"></i>Delete all objects
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0 h5">
@@ -39,109 +152,7 @@
                     class="ti ti-file"></i>JSON</a>
 
             <!-- Create Digital Object Form — only in staging for authenticated users -->
-            <div sec:authorize="isAuthenticated()" class="d-inline">
-              <button type="button" class="btn btn-outline-primary btn ms-2"
-                      data-bs-toggle="collapse" data-bs-target="#createObjectForm">
-                <i class="ti ti-plus me-1"></i>Create object
-              </button>
 
-              <div class="collapse mt-2" id="createObjectForm">
-                <div class="card card-body">
-                  <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects'}"
-                        method="POST">
-
-                    <!-- ID with project prefix shown -->
-                    <div class="mb-3">
-                      <label class="form-label">Object ID</label>
-                      <div class="input-group">
-                        <span class="input-group-text" th:text="${project.projectAbbr} + '.'"></span>
-                        <input type="text" name="idSuffix" class="form-control"
-                               placeholder="e.g. manuscript_001" required
-                               pattern="^[a-zA-Z0-9._-]+$"
-                               th:value="${formData?.idSuffix}">
-                      </div>
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Title *</label>
-                      <input type="text" name="title" class="form-control" required
-                             th:value="${formData?.title}">
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Creator *</label>
-                      <input type="text" name="creator" class="form-control" required
-                             th:value="${formData?.creator}">
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Rights *</label>
-                      <input type="text" name="rights" class="form-control" required
-                             th:value="${formData?.rights}">
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Publisher *</label>
-                      <input type="text" name="publisher" class="form-control" required
-                             th:value="${formData?.publisher}">
-                    </div>
-
-                    <div class="mb-3">
-                      <label class="form-label">Description</label>
-                      <textarea name="description" class="form-control" rows="3"
-                                th:text="${formData?.description}"></textarea>
-                    </div>
-
-                    <div class="row">
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label">Object Type</label>
-                        <input type="text" name="objectType" class="form-control"
-                               placeholder="e.g. TEI"
-                               th:value="${formData?.objectType}">
-                      </div>
-                      <div class="col-md-6 mb-3">
-                        <label class="form-label">Funder</label>
-                        <input type="text" name="funder" class="form-control"
-                               th:value="${formData?.funder}">
-                      </div>
-                    </div>
-
-                    <!-- Error display -->
-                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-                    <div th:if="${errors}" class="alert alert-danger">
-                      <ul class="mb-0">
-                        <li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
-                      </ul>
-                    </div>
-
-                    <button type="submit" class="btn btn-success">
-                      <i class="ti ti-check me-1"></i>Create
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-
-            <!-- Ingest objects — only for authenticated users -->
-            <div sec:authorize="isAuthenticated()" class="d-inline">
-              <button type="button" class="btn btn-outline-primary btn ms-2"
-                      onclick="document.getElementById('ingestFolderInput').click()">
-                <i class="ti ti-upload me-1"></i>Ingest folder
-              </button>
-              <input type="file" id="ingestFolderInput"
-                     webkitdirectory directory multiple
-                     style="display: none;"
-                     onchange="handleIngestFolder(this)" />
-            </div>
-
-            <!-- Delete all objects — only for authenticated users -->
-            <div sec:authorize="isAuthenticated()" class="d-inline">
-              <button type="button" class="btn btn-outline-danger btn ms-2"
-                      onclick="deleteAllProjectObjects()"
-                      th:attr="data-project-abbr=${project.projectAbbr}">
-                <i class="ti ti-trash me-1"></i>Delete all objects
-              </button>
-            </div>
           </div>
         </div>
         <div class="card-body">
@@ -390,7 +401,7 @@
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the custom search service. Continue?');">
-              <button type="submit" class="btn btn-outline-primary btn-sm">
+              <button type="submit" class="btn btn-outline-primary btn">
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
@@ -401,7 +412,7 @@
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the custom search service. Continue?');">
               <input type="hidden" name="_method" value="DELETE"/>
-              <button type="submit" class="btn btn-outline-danger btn-sm">
+              <button type="submit" class="btn btn-outline-danger btn">
                 <i class="ti ti-trash me-1"></i>Clear index
               </button>
             </form>
@@ -416,7 +427,7 @@
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the plexus search service. Continue?');">
-              <button type="submit" class="btn btn-outline-primary btn-sm">
+              <button type="submit" class="btn btn-outline-primary btn">
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
@@ -427,7 +438,7 @@
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the plexus search service. Continue?');">
               <input type="hidden" name="_method" value="DELETE"/>
-              <button type="submit" class="btn btn-outline-danger btn-sm">
+              <button type="submit" class="btn btn-outline-danger btn">
                 <i class="ti ti-trash me-1"></i>Clear index
               </button>
             </form>
