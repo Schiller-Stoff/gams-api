@@ -29,6 +29,8 @@ public interface DigitalObjectListItemView {
 
     Set<String> getTags();
 
+    Boolean isIngested();
+
     interface ProjectView {
         String getProjectAbbr();
     }

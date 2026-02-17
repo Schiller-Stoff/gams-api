@@ -171,7 +171,7 @@
           </div>
           <div class="webcirilo-box">
             <table class="table table-hover table-striped">
-              <thead>
+              <thead class="border">
               <tr>
                 <th scope="col">
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=id'">ID</a>
@@ -183,6 +183,11 @@
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
                 </th>
                 <th scope="col">tags</th>
+                <th sec:authorize="isAuthenticated()">
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">ingest</a>/<br/>
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">archived</a>/<br/>
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">changed</a><br/>
+                </th>
                 <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 <!--          <th scope="col">-->
                 <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
@@ -219,6 +224,22 @@
                   </th:block>
                   <span th:if="${#lists.size(do.tags) > 5}"
                         class="badge bg-secondary me-1 mb-1">...</span>
+                </td>
+                <td sec:authorize="isAuthenticated()">
+                    <i th:if="${do.isIngested()}"
+                       class="ti ti-file-check"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Ingested: Object was created via ingest">
+                    </i>
+                    <i th:unless="${do.isIngested()}"
+                       class="ti ti-file-off text-warning"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Not Ingested: Object was not created via ingest">
+                    </i>
                 </td>
                 <td sec:authorize="isAuthenticated()">
                   <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
