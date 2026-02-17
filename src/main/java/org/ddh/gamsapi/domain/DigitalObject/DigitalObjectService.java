@@ -281,6 +281,12 @@ public class DigitalObjectService implements IDigitalObjectService {
   }
 
 
+  /**
+   * TODO test is missing
+   * @param projectAbbr project abbreviation
+   * @param dto command object to create a digital object
+   * @return saved digital object
+   */
   @Transactional
   public DigitalObject create(String projectAbbr, DigitalObjectCreateDto dto) {
 
