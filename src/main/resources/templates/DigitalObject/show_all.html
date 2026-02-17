@@ -170,8 +170,8 @@
 
           </div>
           <div class="webcirilo-box">
-            <table class="table table-hover table-striped">
-              <thead class="border">
+            <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
+              <thead>
               <tr>
                 <th scope="col">
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=id'">ID</a>
