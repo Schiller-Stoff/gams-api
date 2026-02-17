@@ -24,7 +24,7 @@
       <h2 class="display-6 fw-bold text-primary mb-3">Projects</h2>
       <p>List of all GAMS projects.</p>
 
-      <div class="card">
+      <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0 h5">
             <i class="ti ti-list-search me-2"></i>Project overview
@@ -211,7 +211,7 @@
 
 
       <!-- Create project form — only visible to global admins -->
-      <div sec:authorize="hasAuthority('ROLE_admin')" class="card mb-3">
+      <div sec:authorize="hasAuthority('ROLE_admin')" class="card shadow-none rounded-0 mb-3" style="border: 1px solid lightgrey;">
         <div class="card-header">
           <h5 class="mb-0 h6">
             <i class="ti ti-plus me-1"></i>Create new project
