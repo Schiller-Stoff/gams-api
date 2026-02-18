@@ -41,6 +41,21 @@
              title="Not Ingested: Object was not created via ingest">
           </i>
 
+          <i th:if="${!do.isModifiedAfterCreation()}"
+             class="ti ti-shield-check"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Unmodified: This object's creation date is the same as modified.">
+          </i>
+          <i th:if="${do.isModifiedAfterCreation()}"
+             class="ti ti-shield text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Modified: This object has been modified after it's creation.">
+          </i>
+
           <i th:if="${!archivalRecords.isEmpty()}"
              class="ti ti-shield-check text-success"
              style="font-size: 0.5em;"
@@ -56,6 +71,8 @@
              data-bs-placement="right"
              title="Not Archived: This object has no archival records.">
           </i>
+
+
 
         </h2>
         <p>

@@ -50,6 +50,8 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
 
     Assertions.assertEquals(digitalObjectCompactDTO.getArchiveState(), testObjectDetailsView.getArchiveState());
 
+    Assertions.assertEquals(digitalObjectCompactDTO.isModifiedAfterCreation(), testObjectDetailsView.isModifiedAfterCreation());
+
   }
 
   /**
@@ -141,6 +143,10 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
       return ArchiveState.NOT_ARCHIVED;
     }
 
+    @Override
+    public boolean isModifiedAfterCreation() {
+      return false;
+    }
   }
 
 
