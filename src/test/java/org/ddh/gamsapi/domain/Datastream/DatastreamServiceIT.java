@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.Datastream;
 
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
@@ -15,6 +16,8 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFou
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
 
+import java.util.Date;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {
 
@@ -26,6 +29,9 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   @Autowired
   IDatastreamContentRepository datastreamContentRepository;
+
+  @Autowired
+  IDigitalObjectRepository  digitalObjectRepository;
 
   @MockitoBean
   private AuditingHandler auditingHandler;
@@ -112,6 +118,38 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void saveDatastreamChangesModifiedDateOfParentObject(){
+
+      // first assert that expected property is false by default
+      org.assertj.core.api.Assertions.assertThat(testDataSet.digitalObject().isModifiedAfterCreation())
+          .isFalse();
+
+      // capture the original modified date of the parent digital object
+      Date originalModified = testDataSet.digitalObject().getModified();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // save a new datastream
+      final String RANDOM_DSID = "MODIFICATION_TEST.txt";
+      Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), RANDOM_DSID);
+      datastreamService.save(datastream, TEST_MULTIPART_FILE);
+
+      // re-fetch the parent from DB to get the updated modified date
+      DigitalObject refreshedParent = digitalObjectRepository
+          .findById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      // modified date should be after created
+      org.assertj.core.api.Assertions.assertThat(refreshedParent.getModified())
+          .isAfter(originalModified);
+
+      // createdAfterModification property should be true now
+      org.assertj.core.api.Assertions.assertThat(refreshedParent.isModifiedAfterCreation())
+          .isTrue();
+
+    }
 
   }
 

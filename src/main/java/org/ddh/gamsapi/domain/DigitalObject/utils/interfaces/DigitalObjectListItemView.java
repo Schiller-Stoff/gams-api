@@ -34,6 +34,8 @@ public interface DigitalObjectListItemView {
 
     ArchiveState getArchiveState();
 
+    boolean isModifiedAfterCreation();
+
     interface ProjectView {
         String getProjectAbbr();
     }

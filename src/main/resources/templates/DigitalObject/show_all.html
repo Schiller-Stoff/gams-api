@@ -181,7 +181,7 @@
                 <th sec:authorize="isAuthenticated()">
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">ingest</a>/<br/>
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=archiveState'">archived</a>/<br/>
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">changed</a><br/>
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modifiedAfterCreation'">changed</a><br/>
                 </th>
                 <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 <!--          <th scope="col">-->
@@ -234,6 +234,21 @@
                        data-bs-toggle="tooltip"
                        data-bs-placement="right"
                        title="Not Ingested: Object was not created via ingest">
+                    </i>
+
+                    <i th:if="${!do.isModifiedAfterCreation()}"
+                       class="ti ti-shield-check"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Unmodified: This object's creation date is the same as modified.">
+                    </i>
+                    <i th:if="${do.isModifiedAfterCreation()}"
+                       class="ti ti-shield text-warning"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Modified: This object has been modified after it's creation.">
                     </i>
 
                     <i th:if="${do.archiveState.equals('ARCHIVED')}"

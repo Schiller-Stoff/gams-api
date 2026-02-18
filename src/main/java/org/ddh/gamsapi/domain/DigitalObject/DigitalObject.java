@@ -14,6 +14,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectI
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
@@ -152,6 +153,14 @@ public class DigitalObject {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ArchiveState archiveState = ArchiveState.NOT_ARCHIVED;
+
+  /**
+   * Describes if a digital object was changed after it's creation
+   * (computed property! created < modified) not meant to be set by hand.
+   */
+  @GeneratedColumn("modified > created")
+  @Column(name = "modified_after_creation", insertable = false, updatable = false)
+  private boolean modifiedAfterCreation;
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

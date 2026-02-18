@@ -104,6 +104,31 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void savingExistingObjectChangesCreationAfterModified(){
+
+      var savedObject = digitalObjectRepository.findById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      var oldModificationDate = testDataSet.digitalObject().getModified();
+
+      Assertions.assertThat(savedObject.isModifiedAfterCreation())
+          .isFalse();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // change something
+      savedObject.setObjectType("DEMO VALUE");
+      savedObject = digitalObjectRepository.save(savedObject);
+      Assertions.assertThat(savedObject.isModifiedAfterCreation())
+          .isTrue();
+
+      var newModificationDate = savedObject.getModified();
+      Assertions.assertThat(oldModificationDate).isBefore(newModificationDate);
+
+    }
+
   }
 
   @Nested
