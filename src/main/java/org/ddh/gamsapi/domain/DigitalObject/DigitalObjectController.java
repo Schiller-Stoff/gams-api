@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamService;
@@ -16,6 +17,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.DigitalObj
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectInvalidDateFormatException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.Project.Project;
@@ -50,6 +52,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
 public class DigitalObjectController {
 
+  // TODO inject interfaces instead of implementations
   private final DigitalObjectService digitalObjectService;
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
@@ -194,8 +197,9 @@ public class DigitalObjectController {
     // first query digital object projection dto
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
-    var submissionRecord = submissionRecordService.find(digitalObject.getId());
-    model.addAttribute("submissionRecord", submissionRecord);
+    submissionRecordService.find(digitalObject.getId()).ifPresent(submissionRecord -> {
+      model.addAttribute("submissionRecord", submissionRecord);
+    });
 
     var archivalRecords = archivalRecordService.findForObject(digitalObject.getId());
     model.addAttribute("archivalRecords", archivalRecords);
@@ -397,6 +401,22 @@ public class DigitalObjectController {
   )
   public Set<String> getProjectTags(@PathVariable String projectAbbr) {
     return digitalObjectService.findDistinctTagsByProject(projectAbbr);
+  }
+
+
+  // In DigitalObjectController.java
+
+  @Hidden // hide from OpenAPI — this is webclient-only
+  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String createObjectFromForm(
+      @PathVariable String projectAbbr,
+      @Valid DigitalObjectCreateDto dto,
+      @RequestHeader Map<String, String> requestHeader
+  ) {
+
+    digitalObjectService.create(projectAbbr, dto);
+    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
+    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
   }
 
 }

@@ -19,16 +19,45 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
+            <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
             <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
             <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
           </ol>
         </nav>
         <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
           <span th:text="${do.id}"></span>
+          <i th:if="${do.isIngested()}"
+             class="ti ti-file-check"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Ingested: Object was created via ingest">
+          </i>
+          <i th:unless="${do.isIngested()}"
+             class="ti ti-file-off text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Not Ingested: Object was not created via ingest">
+          </i>
+
+          <i th:if="${!do.isModifiedAfterCreation()}"
+             class="ti ti-shield-check"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Unmodified: This object's creation date is the same as modified.">
+          </i>
+          <i th:if="${do.isModifiedAfterCreation()}"
+             class="ti ti-shield text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Modified: This object has been modified after it's creation.">
+          </i>
 
           <i th:if="${!archivalRecords.isEmpty()}"
-             class="ti ti-discount-check-filled text-success"
+             class="ti ti-shield-check text-success"
              style="font-size: 0.5em;"
              data-bs-toggle="tooltip"
              data-bs-placement="right"
@@ -43,36 +72,25 @@
              title="Not Archived: This object has no archival records.">
           </i>
 
+
+
         </h2>
         <p>
           Overview over a singular digital object
         </p>
         <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
+        <a th:if="${submissionRecord}" class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
         <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
-              <i class="ti ti-id me-2"></i>Identifiers
-            </h3>
-          </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
-                    <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
-                </ul>
-                <br/>
-            </div>
-        </div>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
+
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
               <i class="ti ti-list-details me-2"></i>Datastreams
             </h3>
           </div>
-          <div class="card-body">
-              <table class="table table-hover border border-2">
-                <thead class="">
+          <div class="mb-3">
+              <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
+                <thead>
                 <tr>
                   <th scope="col">
                     <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?searchDsid=' + ${searchDsid} + '&sortBy=dsid'">dsid</a>
@@ -220,7 +238,24 @@
           </div>
 
           <br/>
-        <div class="card">
+          <br/>
+
+        <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 h5">
+              <i class="ti ti-id me-2"></i>Identifiers
+            </h3>
+          </div>
+          <div class="card-body">
+            <ul class="list-group">
+              <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
+              <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
+            </ul>
+            <br/>
+          </div>
+        </div>
+
+        <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h5">
               <i class="ti ti-database me-2"></i>Technical &amp; administrative metadata
@@ -284,6 +319,10 @@
                       <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
                     </th:block>
                   </div>
+                </li>
+                <li class="list-group-item">
+                  <small>ingested</small>
+                  <p th:text="${do.isIngested()}"></p>
                 </li>
                 <li class="list-group-item">
                   <small>object type</small>
@@ -362,7 +401,7 @@
           </div>
         </div>
 
-        <div class="card">
+        <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;" th:if="${submissionRecord}">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0 h5">
               <i class="ti ti-submarine me-2"></i>Submission data
@@ -372,43 +411,43 @@
             <ul class="list-group">
               <li class="list-group-item">
                 <small>schema</small>
-                <p th:text="${submissionRecord.getBagSchema()}"></p>
+                <p th:text="${submissionRecord?.getBagSchema()}"></p>
               </li>
               <li class="list-group-item">
                 <small>created by</small>
-                <p th:text="${submissionRecord.getBagCreatedBy()}"></p>
+                <p th:text="${submissionRecord?.getBagCreatedBy()}"></p>
               </li>
               <li class="list-group-item">
                 <small>source</small>
-                <p th:text="${submissionRecord.getBagSource()}"></p>
+                <p th:text="${submissionRecord?.getBagSource()}"></p>
               </li>
               <li class="list-group-item">
                 <small>bagging date</small>
-                <p th:text="${submissionRecord.getBaggingDate()}"></p>
+                <p th:text="${submissionRecord?.getBaggingDate()}"></p>
               </li>
               <li class="list-group-item">
                 <small>contact-mail</small>
-                <p th:text="${submissionRecord.getBagContactMail()}"></p>
+                <p th:text="${submissionRecord?.getBagContactMail()}"></p>
               </li>
               <li class="list-group-item">
                 <small>external description</small>
-                <p th:text="${submissionRecord.getBagExternalDescription()}"></p>
+                <p th:text="${submissionRecord?.getBagExternalDescription()}"></p>
               </li>
               <li class="list-group-item">
                 <small>source payload-oxum</small>
-                <p th:text="${submissionRecord.getBagPayloadOxum()}"></p>
+                <p th:text="${submissionRecord?.getBagPayloadOxum()}"></p>
               </li>
               <li class="list-group-item">
                 <small>bag version</small>
-                <p th:text="${submissionRecord.getBagVersion()}"></p>
+                <p th:text="${submissionRecord?.getBagVersion()}"></p>
               </li>
               <li class="list-group-item">
                 <small>character encoding</small>
-                <p th:text="${submissionRecord.getBagTagFileCharacterEncoding()}"></p>
+                <p th:text="${submissionRecord?.getBagTagFileCharacterEncoding()}"></p>
               </li>
               <li class="list-group-item">
                 <small>gams-api version</small>
-                <p th:text="${submissionRecord.getGamsApiVersion()}"></p>
+                <p th:text="${submissionRecord?.getGamsApiVersion()}"></p>
               </li>
             </ul>
           </div>

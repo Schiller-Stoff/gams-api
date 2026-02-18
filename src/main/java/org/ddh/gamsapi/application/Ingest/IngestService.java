@@ -96,6 +96,9 @@ public class IngestService implements IIngestService {
         );
       }
 
+      // digital object is being created during ingest process
+      digitalObject.setIngested(true);
+
       List<Datastream> datastreams = new ArrayList<>();
 
       for (var contentFile : bag.getBagData().getContentFiles()) {
