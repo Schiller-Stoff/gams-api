@@ -2,7 +2,10 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
+import org.ddh.gamsapi.infrastructure.System.security.UserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.mock.web.MockMultipartFile;
@@ -17,6 +20,7 @@ import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
 
 import java.util.Date;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {
@@ -33,8 +37,13 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
 
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Autowired
   private TestDataBuilder testDataBuilder;
@@ -46,6 +55,9 @@ public class DatastreamServiceIT extends IntegrationTest {
   @BeforeEach
   public void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing datastreams
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of("test-user"));
   }
 
   @Nested

@@ -20,10 +20,12 @@ import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
@@ -63,9 +65,13 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @Autowired
   IngestService ingestService;
 
-  // Deactivates the auditing process.
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Autowired
   private TestDataBuilder testDataBuilder;
@@ -75,6 +81,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @BeforeEach
   public void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing datastreams
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of("test-user"));
   }
 
   @Nested
