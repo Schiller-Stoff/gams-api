@@ -257,6 +257,13 @@
       <script src="/api-assets/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
       <script src="/api-assets/lib/template/js/sidebarmenu.js"></script>
       <script src="/api-assets/lib/template/js/app.min.js"></script>
+
+      <script>
+          (() => {
+              const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+              const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+          })();
+      </script>
     </footer>
   </body>
 </html>

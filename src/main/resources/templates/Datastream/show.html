@@ -18,7 +18,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
+                    <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
                     <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
                     <li class="breadcrumb-item"><a th:text="${datastream.digitalObject.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a></li>
                     <li class="breadcrumb-item"><a th:text="${datastream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a></li>

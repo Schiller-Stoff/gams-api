@@ -64,6 +64,11 @@ public class DigitalObjectBuilder {
     return this;
   }
 
+  public DigitalObjectBuilder ingested(boolean ingested) {
+    digitalObject.setIngested(ingested);
+    return this;
+  }
+
   public DigitalObject build() {
     if((digitalObject.getId() == null) || digitalObject.getId().isEmpty()){
       String msg = "Digital object ID must not be null or empty! Happened at class " + this.getClass().getName();

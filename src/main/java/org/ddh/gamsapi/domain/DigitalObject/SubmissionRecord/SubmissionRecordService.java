@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 
+import java.util.Optional;
+
 
 @Service
 @Slf4j
@@ -13,12 +15,8 @@ public class SubmissionRecordService implements  ISubmissionRecordService {
 
   private final ISubmissionRecordRepository submissionRecordRepository;
 
-  public SubmissionRecord find(String digitalObjectId) {
-    return submissionRecordRepository.findById(digitalObjectId).orElseThrow( () -> {
-      String msg = "SubmissionRecord not found for DigitalObject ID: " + digitalObjectId;
-      return new DigitalObjectNotFoundException(msg);
-    });
-
+  public Optional<SubmissionRecord> find(String digitalObjectId) {
+    return submissionRecordRepository.findById(digitalObjectId);
   }
 
 }

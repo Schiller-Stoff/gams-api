@@ -95,8 +95,37 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(savedDigitalObject).isNotNull();
       Assertions.assertThat(savedDigitalObject.getId()).isNotNull();
       Assertions.assertThat(savedDigitalObject.getProject()).isEqualTo(testDataSet.project());
+
+      // assert that ingest property is auto set to false
+      Assertions.assertThat(savedDigitalObject.isIngested()).isFalse();
+
       // considered equal because of same id
       Assertions.assertThat(savedDigitalObject).isEqualTo(digitalObject);
+
+    }
+
+    @Test
+    public void savingExistingObjectChangesCreationAfterModified(){
+
+      var savedObject = digitalObjectRepository.findById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      var oldModificationDate = testDataSet.digitalObject().getModified();
+
+      Assertions.assertThat(savedObject.isModifiedAfterCreation())
+          .isFalse();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // change something
+      savedObject.setObjectType("DEMO VALUE");
+      savedObject = digitalObjectRepository.save(savedObject);
+      Assertions.assertThat(savedObject.isModifiedAfterCreation())
+          .isTrue();
+
+      var newModificationDate = savedObject.getModified();
+      Assertions.assertThat(oldModificationDate).isBefore(newModificationDate);
 
     }
 

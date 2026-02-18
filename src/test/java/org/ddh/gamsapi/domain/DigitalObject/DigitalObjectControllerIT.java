@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.DigitalObject;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -584,8 +585,48 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
 
       }
-    }
 
+      @Nested
+      public class CreateObjectFromForm {
+
+        @Test
+        public void createsExpectedObject() throws Exception {
+
+          final String ID_SUFFIX = "demo123";
+          final String TEST_OBJECT_ID = testDataSet.project().getProjectAbbr() + "." + ID_SUFFIX;
+          final String URL = "/api/v1/projects/" + testDataSet.project().getProjectAbbr() + "/objects";
+
+          mockMvc.perform(
+              MockMvcRequestBuilders.post(URL)
+                  .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                  .param("idSuffix", ID_SUFFIX)
+                  .param("title", TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue())
+                  .param("creator", TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue())
+                  .param("rights", TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue())
+                  .param("publisher", TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
+                  .param("description", TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue())
+          )
+              .andExpect(status().is3xxRedirection());
+
+          // Verify object was persisted
+          var created = digitalObjectRepository.findById(TEST_OBJECT_ID);
+          org.assertj.core.api.Assertions.assertThat(created).isPresent();
+
+          var digitalObject = created.get();
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getId()).isEqualTo(TEST_OBJECT_ID);
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getTitle()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getCreator()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getRights()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getPublisher()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getDescription()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getProject().getProjectAbbr())
+              .isEqualTo(testDataSet.project().getProjectAbbr());
+
+        }
+
+      }
+
+    }
 
     @Nested
     public class DigitalObjectOverview {

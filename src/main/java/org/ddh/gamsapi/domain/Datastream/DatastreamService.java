@@ -21,6 +21,7 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -95,12 +96,13 @@ public class DatastreamService implements IDatastreamService {
   @Transactional
   public Datastream save(Datastream datastream, MultipartFile file) {
 
+    // TODO check direct modification property + test
+
     String digitalObjectId = datastream.getDigitalObject().getId();
-    if (!digitalObjectRepository.existsById(digitalObjectId)) {
-      throw new DigitalObjectNotFoundException(
-          "Digital object with id " + digitalObjectId + " not found"
-      );
-    }
+
+    var foundParentObject = digitalObjectRepository.findById(digitalObjectId).orElseThrow(() -> new DigitalObjectNotFoundException(
+        "Digital object with id " + digitalObjectId + " not found"
+    ));
 
     DatastreamId dsId = datastream.deriveDatastreamId();
 
@@ -120,6 +122,11 @@ public class DatastreamService implements IDatastreamService {
     }
 
     Datastream savedDatastream = datastreamRepository.save(datastream);
+
+    // TODO also other audit properties must be changed (modifiedBy!)
+    foundParentObject.setModified(new Date());
+
+
     log.info("Successfully saved datastream {} with file content", savedDatastream);
     return savedDatastream;
   }

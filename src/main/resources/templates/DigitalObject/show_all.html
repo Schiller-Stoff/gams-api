@@ -20,48 +20,129 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-          <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
+          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
           <li class="breadcrumb-item" th:text="${project.projectAbbr}"></li>
         </ol>
       </nav>
       <h2 class="display-6 fw-bold text-primary mb-3" th:text="${project.projectAbbr}"></h2>
       <p><span>Projektbeschreibung: </span><span th:text="${project.getDescription()}"></span></p>
 
-      <div class="card">
+      <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;" sec:authorize="isAuthenticated()">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0 h5">
-            <i class="ti ti-list-details me-2"></i>Project objects
+            <i class="ti ti-list-details me-2"></i>Project management
           </h3>
-          <div>
-            <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i
-                    class="ti ti-file"></i>XML</a>
-            <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
-                    class="ti ti-file"></i>JSON</a>
-
-            <!-- Ingest objects — only for authenticated users -->
-            <div sec:authorize="isAuthenticated()" class="d-inline">
-              <button type="button" class="btn btn-outline-primary btn ms-2"
-                      onclick="document.getElementById('ingestFolderInput').click()">
-                <i class="ti ti-upload me-1"></i>Ingest folder
-              </button>
-              <input type="file" id="ingestFolderInput"
-                     webkitdirectory directory multiple
-                     style="display: none;"
-                     onchange="handleIngestFolder(this)" />
-            </div>
-
-            <!-- Delete all objects — only for authenticated users -->
-            <div sec:authorize="isAuthenticated()" class="d-inline">
-              <button type="button" class="btn btn-outline-danger btn ms-2"
-                      onclick="deleteAllProjectObjects()"
-                      th:attr="data-project-abbr=${project.projectAbbr}">
-                <i class="ti ti-trash me-1"></i>Delete all objects
-              </button>
-            </div>
-          </div>
         </div>
         <div class="card-body">
-          <div>
+          <div sec:authorize="isAuthenticated()" class="d-inline">
+            <button type="button" class="btn btn-outline-primary btn"
+                    data-bs-toggle="collapse" data-bs-target="#createObjectForm">
+              <i class="ti ti-plus me-1"></i>Create object
+            </button>
+
+            <div class="collapse m-2" id="createObjectForm">
+              <div class="mt-2">
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects'}"
+                      method="POST">
+
+                  <!-- ID with project prefix shown -->
+                  <div class="mb-3">
+                    <label class="form-label">Object ID</label>
+                    <div class="input-group">
+                      <span class="input-group-text" th:text="${project.projectAbbr} + '.'"></span>
+                      <input type="text" name="idSuffix" class="form-control"
+                             placeholder="e.g. manuscript_001" required
+                             pattern="^[a-zA-Z0-9._-]+$"
+                             th:value="${formData?.idSuffix}">
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" name="title" class="form-control" required
+                           th:value="${formData?.title}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Creator *</label>
+                    <input type="text" name="creator" class="form-control" required
+                           th:value="${formData?.creator}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Rights *</label>
+                    <input type="text" name="rights" class="form-control" required
+                           th:value="${formData?.rights}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Publisher *</label>
+                    <input type="text" name="publisher" class="form-control" required
+                           th:value="${formData?.publisher}">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="3"
+                              th:text="${formData?.description}"></textarea>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Object Type</label>
+                      <input type="text" name="objectType" class="form-control"
+                             placeholder="e.g. TEI"
+                             th:value="${formData?.objectType}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Funder</label>
+                      <input type="text" name="funder" class="form-control"
+                             th:value="${formData?.funder}">
+                    </div>
+                  </div>
+
+                  <!-- Error display -->
+                  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                  <div th:if="${errors}" class="alert alert-danger">
+                    <ul class="mb-0">
+                      <li th:each="err : ${errors}" th:text="${err.defaultMessage}"></li>
+                    </ul>
+                  </div>
+
+                  <button type="submit" class="btn btn-success">
+                    <i class="ti ti-check me-1"></i>Create
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ingest objects — only for authenticated users -->
+          <div sec:authorize="isAuthenticated()" class="d-inline">
+            <button type="button" class="btn btn-outline-primary btn ms-2"
+                    onclick="document.getElementById('ingestFolderInput').click()">
+              <i class="ti ti-upload me-1"></i>Ingest object
+            </button>
+            <input type="file" id="ingestFolderInput"
+                   webkitdirectory directory multiple
+                   style="display: none;"
+                   onchange="handleIngestFolder(this)" />
+          </div>
+
+          <!-- Delete all objects — only for authenticated users -->
+          <div sec:authorize="isAuthenticated()" class="d-inline">
+            <button type="button" class="btn btn-outline-danger btn ms-2"
+                    onclick="deleteAllProjectObjects()"
+                    th:attr="data-project-abbr=${project.projectAbbr}">
+              <i class="ti ti-trash me-1"></i>Delete all objects
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
             <form id="idSearchForm" class="form w-50">
               <div class="input-group mb-3">
                 <button class="btn btn-light-primary" type="submit" id="button-addon1">Search</button>
@@ -72,10 +153,19 @@
                 <input name="pageIndex" th:value="0" type="hidden" class="form-control">
               </div>
             </form>
+            <div>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i
+                      class="ti ti-file"></i>XML</a>
+              <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
+                      class="ti ti-file"></i>JSON</a>
+
+              <!-- Create Digital Object Form — only in staging for authenticated users -->
+
+            </div>
 
           </div>
           <div class="webcirilo-box">
-            <table class="table table-hover table-striped">
+            <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
               <thead>
               <tr>
                 <th scope="col">
@@ -88,6 +178,11 @@
                   <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
                 </th>
                 <th scope="col">tags</th>
+                <th sec:authorize="isAuthenticated()">
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">ingest</a>/<br/>
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=archiveState'">archived</a>/<br/>
+                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modifiedAfterCreation'">changed</a><br/>
+                </th>
                 <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 <!--          <th scope="col">-->
                 <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
@@ -124,6 +219,53 @@
                   </th:block>
                   <span th:if="${#lists.size(do.tags) > 5}"
                         class="badge bg-secondary me-1 mb-1">...</span>
+                </td>
+                <td sec:authorize="isAuthenticated()">
+                    <i th:if="${do.isIngested()}"
+                       class="ti ti-file-check"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Ingested: Object was created via ingest">
+                    </i>
+                    <i th:unless="${do.isIngested()}"
+                       class="ti ti-file-off text-warning"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Not Ingested: Object was not created via ingest">
+                    </i>
+
+                    <i th:if="${!do.isModifiedAfterCreation()}"
+                       class="ti ti-shield-check"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Unmodified: This object's creation date is the same as modified.">
+                    </i>
+                    <i th:if="${do.isModifiedAfterCreation()}"
+                       class="ti ti-shield text-warning"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Modified: This object has been modified after it's creation.">
+                    </i>
+
+                    <i th:if="${do.archiveState.equals('ARCHIVED')}"
+                       class="ti ti-shield-check text-success"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Archived: This object has associated archival records.">
+                    </i>
+                    <i th:unless="${do.archiveState.equals('ARCHIVED')}"
+                       class="ti ti-database-off text-warning"
+                       style="font-size: 1.5em;"
+                       data-bs-toggle="tooltip"
+                       data-bs-placement="right"
+                       title="Rearchiving required: This object has no archival records or needs rearchiving.">
+                    </i>
+
                 </td>
                 <td sec:authorize="isAuthenticated()">
                   <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
@@ -291,7 +433,7 @@
       </div>
 
       <!-- Integration actions — only visible for authenticated users with project roles -->
-      <div sec:authorize="isAuthenticated()" class="card mb-3">
+      <div sec:authorize="isAuthenticated()" class="card shadow-none rounded-0 mb-3 mt-5" style="border: 1px solid lightgrey;">
         <div class="card-header">
           <h3 class="mb-0 h5">
             <i class="ti ti-refresh me-2"></i>Integration Services
@@ -306,7 +448,7 @@
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the custom search service. Continue?');">
-              <button type="submit" class="btn btn-outline-primary btn-sm">
+              <button type="submit" class="btn btn-outline-primary btn">
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
@@ -317,7 +459,7 @@
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the custom search service. Continue?');">
               <input type="hidden" name="_method" value="DELETE"/>
-              <button type="submit" class="btn btn-outline-danger btn-sm">
+              <button type="submit" class="btn btn-outline-danger btn">
                 <i class="ti ti-trash me-1"></i>Clear index
               </button>
             </form>
@@ -332,7 +474,7 @@
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the plexus search service. Continue?');">
-              <button type="submit" class="btn btn-outline-primary btn-sm">
+              <button type="submit" class="btn btn-outline-primary btn">
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
@@ -343,7 +485,7 @@
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the plexus search service. Continue?');">
               <input type="hidden" name="_method" value="DELETE"/>
-              <button type="submit" class="btn btn-outline-danger btn-sm">
+              <button type="submit" class="btn btn-outline-danger btn">
                 <i class="ti ti-trash me-1"></i>Clear index
               </button>
             </form>
