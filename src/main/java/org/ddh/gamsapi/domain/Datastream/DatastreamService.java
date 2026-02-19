@@ -74,7 +74,6 @@ public class DatastreamService implements IDatastreamService {
           datastream.getDsid(),
           datastream.getDigitalObject().getId(),
           e.getMessage(), e);
-
       datastreamContentDeletionFailureRepository.save(
           DatastreamContentDeletionFailure.builder()
               .digitalObjectId(datastream.getDigitalObject().getId())
@@ -82,6 +81,20 @@ public class DatastreamService implements IDatastreamService {
               .build()
       );
     }
+
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save datastream " + datastream + " Current user is not logged in - cannot retrieve username")
+    );
+
+    // publish event
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(datastream.getDigitalObject().getId()),
+            new Date(),
+            currentUser
+        )
+    );
 
     log.debug("Successfully deleted datastream {} from object {}",
         datastream.getDsid(),

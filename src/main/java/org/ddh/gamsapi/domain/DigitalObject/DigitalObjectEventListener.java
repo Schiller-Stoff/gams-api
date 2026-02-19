@@ -30,6 +30,7 @@ public class DigitalObjectEventListener {
 
     foundObject.setModified(digitalObjectModifiedEvent.getOccurredAt());
     foundObject.setModifiedBy(digitalObjectModifiedEvent.getPrincipal());
+    foundObject.setModifiedAfterCreation(true);
 
     var foundProject = projectRepository.findById(digitalObjectModifiedEvent.getObjectId().deriveProjectAbbr())
         .orElseThrow(() -> new ProjectNotFoundException("Cannot update modified digital object because it's parent project was not found " + digitalObjectModifiedEvent.getObjectId().getId()));
