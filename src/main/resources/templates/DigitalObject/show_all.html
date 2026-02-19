@@ -669,7 +669,7 @@
                 const ifModifiedSince = localDate.toUTCString();
 
                 const headResponse = await fetch(
-                    `/api/v1/projects/${projectAbbr}/objects/${objectId}/datastreams`,
+                    `/api/v1/projects/${projectAbbr}/objects/${objectId}`,
                     {
                         method: 'HEAD',
                         headers: { 'If-Modified-Since': ifModifiedSince },
