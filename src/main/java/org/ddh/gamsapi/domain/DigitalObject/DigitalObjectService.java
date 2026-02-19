@@ -388,10 +388,19 @@ public class DigitalObjectService implements IDigitalObjectService {
           e);
     }
 
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save object " + digitalObject + " Current user is not logged in")
+    );
 
-    // TODO missing auditing info
     applicationEventPublisher.publishEvent(
-        new DigitalObjectCreatedEvent(this, savedObject));
+        new DigitalObjectCreatedEvent(
+            this,
+            new DigitalObjectId(digitalObject.getId()),
+            new Date(),
+            currentUser,
+            digitalObject
+        )
+    );
 
     return savedObject;
   }

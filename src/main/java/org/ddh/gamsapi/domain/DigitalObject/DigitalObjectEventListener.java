@@ -23,12 +23,11 @@ public class DigitalObjectEventListener {
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   public void handleDigitalObjectCreatedEvent(DigitalObjectCreatedEvent event) {
-    var foundProject = projectRepository.findById(new DigitalObjectId(event.getDigitalObject().getId()).deriveProjectAbbr())
-        .orElseThrow(() -> new ProjectNotFoundException("Cannot update modified project because it was not found: For object: " + event.getDigitalObject().getId()));
+    var foundProject = projectRepository.findById(new DigitalObjectId(event.getObjectId().getId()).deriveProjectAbbr())
+        .orElseThrow(() -> new ProjectNotFoundException("Cannot update modified project because it was not found: For object: " + event.getObjectId().getId()));
 
-    foundProject.setModified(event.getDigitalObject().getModified());
-    // TODO also set modifiedBy
-
+    foundProject.setModified(event.getOccurredAt());
+    foundProject.setModifiedBy(event.getPrincipal());
   }
 
 
