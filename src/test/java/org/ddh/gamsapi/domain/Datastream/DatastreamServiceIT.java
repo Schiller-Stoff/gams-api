@@ -59,7 +59,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     testDataSet = testDataBuilder.buildTestDataSet();
     // needed when changing datastreams
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
-        .thenReturn(Optional.of("test-user"));
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -286,6 +286,24 @@ public class DatastreamServiceIT extends IntegrationTest {
           .isAfter(originalModified);
 
 
+    }
+
+    @Test
+    public void deleteDatastreamChangesModifiedByOfParentProject(){
+      // capture the original modified date of the parent digital object
+      String originalModifiedBy = testDataSet.project().getModifiedBy();
+
+      org.assertj.core.api.Assertions.assertThat(originalModifiedBy)
+          .isNotEqualTo(TestUser.USERNAME.getValue());
+
+      // delete test datastream
+      datastreamService.delete(testDataSet.mainDatastream());
+
+      var refreshedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
+          .orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshedProject.getModifiedBy())
+          .isEqualTo(TestUser.USERNAME.getValue());
     }
 
   }

@@ -2,11 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
-import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
-import org.ddh.gamsapi.application.Ingest.IngestService;
+import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
@@ -62,8 +58,6 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @Autowired
   IArchivalRecordRepository archivalRecordRepository;
 
-  @Autowired
-  IngestService ingestService;
 
   /**
    * Classes need to mock authenticated users when changing datastreams
@@ -83,7 +77,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     testDataSet = testDataBuilder.buildTestDataSet();
     // needed when changing datastreams
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
-        .thenReturn(Optional.of("test-user"));
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -120,9 +114,11 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .orElseThrow();
 
       var oldModificationDate = testDataSet.digitalObject().getModified();
-
       Assertions.assertThat(savedObject.isModifiedAfterCreation())
           .isFalse();
+
+      var oldModifiedBy =  testDataSet.digitalObject().getModifiedBy();
+      Assertions.assertThat(oldModifiedBy).isNotEqualTo(TestUser.USERNAME.getValue());
 
       // small delay to ensure timestamp difference
       try { Thread.sleep(50); } catch (InterruptedException ignored) {}
@@ -135,6 +131,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       var newModificationDate = savedObject.getModified();
       Assertions.assertThat(oldModificationDate).isBefore(newModificationDate);
+
+      // modified by
+      Assertions.assertThat(savedObject.getModifiedBy()).isEqualTo(TestUser.USERNAME.getValue());
 
     }
 

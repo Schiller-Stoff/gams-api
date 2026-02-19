@@ -79,15 +79,15 @@ public class IngestServiceIT extends IntegrationTest {
   @BeforeEach
   public void setup(){
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
-        .thenReturn(Optional.of("test-user"));
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
-  public class IngestUpdatesProjectContentLastModified {
+  public class IngestUpdatesProjectModified {
 
 
     @Test
-    public void ingestUpdatesProjectContentModified() throws IOException {
+    public void ingestUpdatesProjectModifiedProperties() throws IOException {
 
       projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
 
@@ -113,6 +113,12 @@ public class IngestServiceIT extends IntegrationTest {
       Assertions.assertThat(lastModifiedAfterIngest)
           .isNotNull()
           .isAfter(lastModifiedBeforeIngest);
+
+      // check if modifiedBy was updated
+      final var ORIGINAL_MODIFIED_BY = project.getModifiedBy();
+      Assertions.assertThat(ORIGINAL_MODIFIED_BY).isNotEqualTo(TestUser.USERNAME.getValue());
+      Assertions.assertThat(updatedProject.getModifiedBy())
+          .isEqualTo(TestUser.USERNAME.getValue());
     }
   }
 
