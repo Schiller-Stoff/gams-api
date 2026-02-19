@@ -387,9 +387,8 @@ public class DigitalObjectService implements IDigitalObjectService {
           e);
     }
 
-    // 4. Update project timestamp
-    project.setContentLastModified(new Date());
 
+    // TODO missing auditing info
     applicationEventPublisher.publishEvent(
         new DigitalObjectCreatedEvent(this, savedObject));
 

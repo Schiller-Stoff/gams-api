@@ -75,14 +75,14 @@ public class IngestServiceIT extends IntegrationTest {
 
 
     @Test
-    public void ingestUpdatesProjectContentLastModified() throws IOException {
+    public void ingestUpdatesProjectContentModified() throws IOException {
 
       projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
 
       // get the project before ingest
       var project = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
           .orElseThrow( () -> new RuntimeException("GAMS Project not found"));
-      var lastModifiedBeforeIngest = project.getContentLastModified();
+      var lastModifiedBeforeIngest = project.getModified();
 
       bagFile = TestBag.loadFile();
 
@@ -96,7 +96,7 @@ public class IngestServiceIT extends IntegrationTest {
       // get the project after ingest
       var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
           .orElseThrow();
-      var lastModifiedAfterIngest = updatedProject.getContentLastModified();
+      var lastModifiedAfterIngest = updatedProject.getModified();
 
       Assertions.assertThat(lastModifiedAfterIngest)
           .isNotNull()

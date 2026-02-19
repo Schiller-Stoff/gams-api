@@ -26,7 +26,7 @@ public class ProjectModificationService implements IProjectModificationService {
 
     ProjectModification projectModification = new ProjectModification();
     projectModification.setProjectAbbr(projectAbbr);
-    projectModification.setLatestModificationDate(foundProject.getContentLastModified());
+    projectModification.setLatestModificationDate(foundProject.getModified());
     return projectModification;
   }
 

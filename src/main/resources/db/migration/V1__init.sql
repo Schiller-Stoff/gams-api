@@ -110,7 +110,6 @@ create table integration_failure
 create table project
 (
     project_abbr          varchar(10) not null,
-    content_last_modified timestamp(6),
     created               timestamp(6),
     created_by            varchar(255),
     description           varchar(5000),

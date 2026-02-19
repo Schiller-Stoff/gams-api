@@ -20,6 +20,16 @@ public class DigitalObjectEventListener {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IProjectRepository projectRepository;
 
+  @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+  public void handleDigitalObjectCreatedEvent(DigitalObjectCreatedEvent event) {
+    var foundProject = projectRepository.findById(new DigitalObjectId(event.getDigitalObject().getId()).deriveProjectAbbr())
+        .orElseThrow(() -> new ProjectNotFoundException("Cannot update modified project because it was not found: For object: " + event.getDigitalObject().getId()));
+
+    foundProject.setModified(event.getDigitalObject().getModified());
+    // TODO also set modifiedBy
+
+  }
+
 
   @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
   public void handleDigitalObjectModifiedEvent(DigitalObjectModifiedEvent digitalObjectModifiedEvent) {
@@ -48,10 +58,6 @@ public class DigitalObjectEventListener {
 
     foundProject.setModified(digitalObjectDeletedEvent.getOccurredAt());
     foundProject.setModifiedBy(digitalObjectDeletedEvent.getPrincipal());
-
-    // TODO remove this field? replace through boolean / harmonize with DigitalObject!
-    foundProject.setContentLastModified(digitalObjectDeletedEvent.getOccurredAt());
-
 
   }
 

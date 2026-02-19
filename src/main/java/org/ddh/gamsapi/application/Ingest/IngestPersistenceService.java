@@ -95,9 +95,8 @@ public class IngestPersistenceService {
       dublinCoreElementRepository.save(dc);
     }
 
-    // tracks modification date of the content
-    foundProject.setContentLastModified(new Date());
     // publish creation event
+    // TODO missing auditing info
     applicationEventPublisher.publishEvent(
         new DigitalObjectCreatedEvent(this, savedObject)
     );

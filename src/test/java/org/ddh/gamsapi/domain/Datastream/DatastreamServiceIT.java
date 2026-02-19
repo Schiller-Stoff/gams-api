@@ -165,6 +165,31 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void saveDatastreamChangesModifiedOfParentProject(){
+
+      // capture the original modified date of the parent digital object
+      Date originalModified = testDataSet.project().getModified();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // save a new datastream
+      final String RANDOM_DSID = "MODIFICATION_TEST.txt";
+      Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), RANDOM_DSID);
+      datastreamService.save(datastream, TEST_MULTIPART_FILE);
+
+      // re-fetch the parent project from DB to get the updated modified date
+      var refreshedParentProject = projectRepository
+          .findById(testDataSet.project().getProjectAbbr())
+          .orElseThrow();
+
+      // modified date should be after created
+      org.assertj.core.api.Assertions.assertThat(refreshedParentProject.getModified())
+          .isAfter(originalModified);
+
+    }
+
   }
 
   @Nested

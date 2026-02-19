@@ -333,14 +333,14 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
 
-      Date projectContentLastModifiedBeforeDelete = testDataSet.project().getContentLastModified();
+      Date projectContentLastModifiedBeforeDelete = testDataSet.project().getModified();
 
       digitalObjectService.delete(testDataSet.digitalObject());
 
       var updatedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
           .orElseThrow(() ->  new ProjectNotFoundException(testDataSet.project().getProjectAbbr()));
 
-      Date projectContentLastModifiedAfterDelete = updatedProject.getContentLastModified();
+      Date projectContentLastModifiedAfterDelete = updatedProject.getModified();
 
       Assertions.assertThat(projectContentLastModifiedAfterDelete)
           .isNotNull()
