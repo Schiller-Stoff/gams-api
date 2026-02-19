@@ -18,6 +18,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;

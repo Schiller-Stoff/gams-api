@@ -6,7 +6,7 @@ import org.ddh.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsEx
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
@@ -20,7 +20,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 /**

@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;

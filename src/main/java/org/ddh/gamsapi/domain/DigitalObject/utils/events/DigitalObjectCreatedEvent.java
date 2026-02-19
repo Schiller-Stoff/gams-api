@@ -1,6 +1,7 @@
-package org.ddh.gamsapi.domain.DigitalObject;
+package org.ddh.gamsapi.domain.DigitalObject.utils.events;
 
 import lombok.Getter;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.springframework.context.ApplicationEvent;
 
 /**
