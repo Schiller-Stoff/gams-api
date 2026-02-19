@@ -5,7 +5,9 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
@@ -21,6 +23,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,8 +38,13 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   private TestDataSet testDataSet;
 
@@ -46,6 +54,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @BeforeEach
   public void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing digital objects
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of("test-user"));
   }
 
   @Nested

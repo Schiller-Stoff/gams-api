@@ -18,6 +18,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectConversionException;
@@ -143,15 +144,15 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Transactional
   public void delete(DigitalObject digitalObject) {
 
-    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
-        () -> new ProjectNotFoundException(
-            "Cannot delete digital object "
-                + digitalObject
-                + ". Project "
-                + digitalObject.getProject().getProjectAbbr()
-                + " does not exist!"
-        )
-    );
+    if(!projectRepository.existsById(digitalObject.getProject().getProjectAbbr())){
+      throw new ProjectNotFoundException(
+          "Cannot delete digital object "
+              + digitalObject
+              + ". Project "
+              + digitalObject.getProject().getProjectAbbr()
+              + " does not exist!"
+      );
+    }
 
     if(!digitalObjectRepository.existsById(digitalObject.getId())){
       throw new DigitalObjectNotFoundException(
@@ -178,7 +179,18 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     digitalObjectRepository.delete(digitalObject);
 
-    foundProject.setContentLastModified(new Date());
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save object " + digitalObject + " Current user is not logged in (cannot extract user name for modification tracking)")
+    );
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectDeletedEvent(
+            this,
+            new DigitalObjectId(digitalObject.getId()),
+            new Date(),
+            currentUser
+        )
+    );
 
     log.info("Successfully deleted digital object {}", digitalObject.getId());
   }
