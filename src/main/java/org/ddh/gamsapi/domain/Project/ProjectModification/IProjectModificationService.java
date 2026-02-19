@@ -9,11 +9,6 @@ public interface IProjectModificationService {
    */
   ProjectModification findLatestModificationDate(String projectAbbr);
 
-  /**
-   * Finds the latest modification date of a project's content.
-   * @param projectAbbr The project abbreviation.
-   * @return The latest modification date of the content.
-   */
-  ProjectModification findContentLatestModificationDate(String projectAbbr);
+
 
 }
