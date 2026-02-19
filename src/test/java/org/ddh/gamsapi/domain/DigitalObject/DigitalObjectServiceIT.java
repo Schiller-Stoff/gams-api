@@ -129,7 +129,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
       // change something
       savedObject.setObjectType("DEMO VALUE");
-      savedObject = digitalObjectRepository.save(savedObject);
+      savedObject = digitalObjectService.save(savedObject);
       Assertions.assertThat(savedObject.isModifiedAfterCreation())
           .isTrue();
 
