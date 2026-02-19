@@ -80,6 +80,7 @@ public class Project {
 
   /**
    * Date when the content of the project was last modified
+   * Reflects changes on digital objects and datastreams on project level.
    */
   @Column(name = "content_last_modified")
   private Date contentLastModified = new Date();
