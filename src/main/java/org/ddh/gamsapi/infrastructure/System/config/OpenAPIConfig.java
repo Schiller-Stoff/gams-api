@@ -4,9 +4,6 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,12 +29,8 @@ public class OpenAPIConfig {
   public static final String INTEGRATION_TAG_DESCRIPTION = "Integration services for non-core systems";
   public static final String INGEST_TAG = "Ingest";
   public static final String INGEST_TAG_DESCRIPTION = "Ingest digital objects and datastreams in bulk";
-  public static final String GAMS_COLLECTIONS_TAG = "Collections";
-  public static final String GAMS_COLLECTIONS_TAG_DESCRIPTION = "Collections containing digital objects and additional metadata";
   public static final String USER_TAG = "User";
   public static final String USER_TAG_DESCRIPTION = "User management and authentication operations";
-  public static final String FACET_TAG = "Facets";
-  public static final String FACET_TAG_DESCRIPTION = "Faceted search based on digital objects and dublin core";
 
   @Value("${server.port:18085}")
   private String serverPort;
@@ -60,9 +53,7 @@ public class OpenAPIConfig {
             new Tag().name(SEARCH_TAG).description(SEARCH_TAG_DESCRIPTION),
             new Tag().name(INTEGRATION_TAG).description(INTEGRATION_TAG_DESCRIPTION),
             new Tag().name(INGEST_TAG).description(INGEST_TAG_DESCRIPTION),
-            new Tag().name(GAMS_COLLECTIONS_TAG).description(GAMS_COLLECTIONS_TAG_DESCRIPTION),
-            new Tag().name(USER_TAG).description(USER_TAG_DESCRIPTION),
-            new Tag().name(FACET_TAG).description(FACET_TAG_DESCRIPTION)
+            new Tag().name(USER_TAG).description(USER_TAG_DESCRIPTION)
         ));
   }
 
