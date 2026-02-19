@@ -211,10 +211,10 @@
 
 
       <!-- Create project form — only visible to global admins -->
-      <div sec:authorize="hasAuthority('ROLE_admin')" class="card shadow-none rounded-0 mb-3 mt-3" style="border: 1px solid lightgrey;">
-        <div class="card-header">
-          <h5 class="mb-0 h6">
-            <i class="ti ti-plus me-1"></i>Create new project
+      <div sec:authorize="hasAuthority('ROLE_admin')" class="mb-3 mt-5">
+        <div>
+          <h5 class="h5">
+            <i class="ti ti-plus me-1 text-primary"></i>Create new project
           </h5>
         </div>
         <div class="card-body">
