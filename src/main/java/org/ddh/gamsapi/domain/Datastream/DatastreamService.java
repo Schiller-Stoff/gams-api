@@ -5,6 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectId;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
+import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserAuthenticationRequiredException;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailure;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentDeletionFailureRepository;
-import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
@@ -37,6 +41,10 @@ public class DatastreamService implements IDatastreamService {
   private final IDatastreamContentRepository datastreamContentRepository;
 
   private final DatastreamContentDeletionFailureRepository datastreamContentDeletionFailureRepository;
+
+  private final ApplicationEventPublisher applicationEventPublisher;
+
+  private final IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Override
   @Transactional
@@ -66,7 +74,6 @@ public class DatastreamService implements IDatastreamService {
           datastream.getDsid(),
           datastream.getDigitalObject().getId(),
           e.getMessage(), e);
-
       datastreamContentDeletionFailureRepository.save(
           DatastreamContentDeletionFailure.builder()
               .digitalObjectId(datastream.getDigitalObject().getId())
@@ -74,6 +81,20 @@ public class DatastreamService implements IDatastreamService {
               .build()
       );
     }
+
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save datastream " + datastream + " Current user is not logged in - cannot retrieve username")
+    );
+
+    // publish event
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(datastream.getDigitalObject().getId()),
+            new Date(),
+            currentUser
+        )
+    );
 
     log.debug("Successfully deleted datastream {} from object {}",
         datastream.getDsid(),
@@ -100,9 +121,10 @@ public class DatastreamService implements IDatastreamService {
 
     String digitalObjectId = datastream.getDigitalObject().getId();
 
-    var foundParentObject = digitalObjectRepository.findById(digitalObjectId).orElseThrow(() -> new DigitalObjectNotFoundException(
-        "Digital object with id " + digitalObjectId + " not found"
-    ));
+    if(!digitalObjectRepository.existsById(digitalObjectId)){
+      throw new DigitalObjectNotFoundException("Digital object with id " + digitalObjectId + " not found");
+    }
+
 
     DatastreamId dsId = datastream.deriveDatastreamId();
 
@@ -123,8 +145,19 @@ public class DatastreamService implements IDatastreamService {
 
     Datastream savedDatastream = datastreamRepository.save(datastream);
 
-    // TODO also other audit properties must be changed (modifiedBy!)
-    foundParentObject.setModified(new Date());
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save datastream " + datastream + " Current user is not logged in")
+    );
+
+    // publish event
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(dsId.getDigitalObject()),
+            new Date(),
+            currentUser
+        )
+    );
 
 
     log.info("Successfully saved datastream {} with file content", savedDatastream);

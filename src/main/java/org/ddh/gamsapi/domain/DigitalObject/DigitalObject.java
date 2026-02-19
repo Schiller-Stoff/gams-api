@@ -156,11 +156,10 @@ public class DigitalObject {
 
   /**
    * Describes if a digital object was changed after it's creation
-   * (computed property! created < modified) not meant to be set by hand.
+   * (Handled by by the application - not meant to be set by users).
    */
-  @GeneratedColumn("modified > created")
-  @Column(name = "modified_after_creation", insertable = false, updatable = false)
-  private boolean modifiedAfterCreation;
+  @Column(name = "modified_after_creation")
+  private boolean modifiedAfterCreation = false;
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

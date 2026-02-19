@@ -18,6 +18,9 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectConversionException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
@@ -30,6 +33,8 @@ import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
+import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserAuthenticationRequiredException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
@@ -59,24 +64,36 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final ISubmissionRecordRepository submissionRecordRepository;
   private final IArchivalRecordRepository archivalRecordRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
+  private final IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Override
   @Transactional
   public DigitalObject save(DigitalObject digitalObject) {
-    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
-            () -> new ProjectNotFoundException(
-                "Aborting saving of digital object. Cannot find project "
-                    + digitalObject.getProject().getProjectAbbr()
-                    + " for digital object "
-                    + digitalObject
-            )
-    );
+
+    if(!projectRepository.existsById(digitalObject.getProject().getProjectAbbr())){
+      throw new ProjectNotFoundException(
+          "Aborting saving of digital object. Cannot find project "
+              + digitalObject.getProject().getProjectAbbr()
+              + " for digital object "
+              + digitalObject
+      );
+    }
 
     DigitalObject savedObject = digitalObjectRepository.save(digitalObject);
-    foundProject.setContentLastModified(new Date());
-    applicationEventPublisher.publishEvent(
-        new DigitalObjectCreatedEvent(this, savedObject)
+
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save object " + digitalObject + " Current user is not logged in")
     );
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(digitalObject.getId()),
+            new Date(),
+            currentUser
+        )
+    );
+
     return savedObject;
   }
 
@@ -128,15 +145,15 @@ public class DigitalObjectService implements IDigitalObjectService {
   @Transactional
   public void delete(DigitalObject digitalObject) {
 
-    var foundProject = projectRepository.findById(digitalObject.getProject().getProjectAbbr()).orElseThrow(
-        () -> new ProjectNotFoundException(
-            "Cannot delete digital object "
-                + digitalObject
-                + ". Project "
-                + digitalObject.getProject().getProjectAbbr()
-                + " does not exist!"
-        )
-    );
+    if(!projectRepository.existsById(digitalObject.getProject().getProjectAbbr())){
+      throw new ProjectNotFoundException(
+          "Cannot delete digital object "
+              + digitalObject
+              + ". Project "
+              + digitalObject.getProject().getProjectAbbr()
+              + " does not exist!"
+      );
+    }
 
     if(!digitalObjectRepository.existsById(digitalObject.getId())){
       throw new DigitalObjectNotFoundException(
@@ -163,7 +180,18 @@ public class DigitalObjectService implements IDigitalObjectService {
 
     digitalObjectRepository.delete(digitalObject);
 
-    foundProject.setContentLastModified(new Date());
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save object " + digitalObject + " Current user is not logged in (cannot extract user name for modification tracking)")
+    );
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectDeletedEvent(
+            this,
+            new DigitalObjectId(digitalObject.getId()),
+            new Date(),
+            currentUser
+        )
+    );
 
     log.info("Successfully deleted digital object {}", digitalObject.getId());
   }
@@ -360,11 +388,19 @@ public class DigitalObjectService implements IDigitalObjectService {
           e);
     }
 
-    // 4. Update project timestamp
-    project.setContentLastModified(new Date());
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save object " + digitalObject + " Current user is not logged in")
+    );
 
     applicationEventPublisher.publishEvent(
-        new DigitalObjectCreatedEvent(this, savedObject));
+        new DigitalObjectCreatedEvent(
+            this,
+            new DigitalObjectId(digitalObject.getId()),
+            new Date(),
+            currentUser,
+            digitalObject
+        )
+    );
 
     return savedObject;
   }

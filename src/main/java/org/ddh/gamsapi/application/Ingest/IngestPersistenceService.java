@@ -6,7 +6,8 @@ import org.ddh.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsEx
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectId;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
@@ -15,10 +16,13 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.Bag;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
+import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserAuthenticationRequiredException;
 import org.springframework.boot.info.BuildProperties;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Date;
 import java.util.List;
@@ -40,6 +44,7 @@ public class IngestPersistenceService {
   private final ISubmissionRecordRepository submissionRecordRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final BuildProperties buildProperties;
+  private final IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Transactional(rollbackFor = Exception.class)
   public void persistIngest(String projectAbbr,
@@ -95,11 +100,20 @@ public class IngestPersistenceService {
       dublinCoreElementRepository.save(dc);
     }
 
-    // tracks modification date of the content
-    foundProject.setContentLastModified(new Date());
     // publish creation event
+
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save object " + digitalObject + " Current user is not logged in")
+    );
+
     applicationEventPublisher.publishEvent(
-        new DigitalObjectCreatedEvent(this, savedObject)
+        new DigitalObjectCreatedEvent(
+            this,
+            new DigitalObjectId(digitalObject.getId()),
+            new Date(),
+            currentUser,
+            digitalObject
+        )
     );
 
     log.debug("Successfully persisted object {} for project {}", savedObject.getId(), projectAbbr);

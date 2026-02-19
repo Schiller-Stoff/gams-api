@@ -53,6 +53,41 @@ public class DatastreamTest extends UnitTest {
   }
 
   @Nested
+  public class DeriveProjectAbbr {
+
+    @Test
+    public void derivesExpectedProjectAbbr(){
+
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+      datastream.setDigitalObject(
+          TestDigitalObject.generate()
+      );
+     String projectAbbr = datastream.deriveProjectAbbr();
+     Assertions.assertEquals(TestDigitalObject.DIGITAL_OBJECT_PROJECT_ABBR.getValue(), projectAbbr);
+    }
+
+    @Test
+    public void derivesExpectedProjectAbbrWhenMultipleDots(){
+
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+
+      final String TEST_PROJECT_ABBR = "testmal";
+      final String TEST_OBJECT_ID =  TEST_PROJECT_ABBR + ".rudi1.5.4";
+
+      var testObject = TestDigitalObject.generate(TEST_PROJECT_ABBR, TEST_OBJECT_ID);
+
+      datastream.setDigitalObject(testObject);
+
+      String derivedProjectAbbr = datastream.deriveProjectAbbr();
+      Assertions.assertEquals(TEST_PROJECT_ABBR, derivedProjectAbbr);
+
+    }
+
+  }
+
+  @Nested
   public class DeriveDatastreamId {
 
     @Test

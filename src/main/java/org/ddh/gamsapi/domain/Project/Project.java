@@ -78,12 +78,6 @@ public class Project {
   @LastModifiedBy
   private String modifiedBy;
 
-  /**
-   * Date when the content of the project was last modified
-   */
-  @Column(name = "content_last_modified")
-  private Date contentLastModified = new Date();
-
 
   @Override
   public boolean equals(Object o) {

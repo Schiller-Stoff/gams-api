@@ -186,6 +186,21 @@ public class Datastream {
   }
 
   /**
+   * Allows to return the project abbreviation of the current datastream (is known because digital object is being fetched)
+   * @return projectAbbr of the datastream
+   */
+  public String deriveProjectAbbr(){
+    if(dsid == null || digitalObject == null) {
+      String msg = "Encountered unexpected null value - Tried to derive DatastreamId from Datastream with dsid: "  + dsid  + " and digitalObject: " + digitalObject;
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    // return everything before first "."
+    return digitalObject.getId().substring(0, digitalObject.getId().indexOf("."));
+  }
+
+  /**
    * Two datastreams are considered equal if they have the same digital object and dsid.
    * @param o
    * @return

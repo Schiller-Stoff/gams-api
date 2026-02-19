@@ -2,11 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
-import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
-import org.ddh.gamsapi.application.Ingest.IngestService;
+import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
@@ -20,10 +16,12 @@ import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
@@ -60,12 +58,14 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @Autowired
   IArchivalRecordRepository archivalRecordRepository;
 
-  @Autowired
-  IngestService ingestService;
 
-  // Deactivates the auditing process.
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Autowired
   private TestDataBuilder testDataBuilder;
@@ -75,6 +75,9 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   @BeforeEach
   public void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing datastreams
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -111,21 +114,26 @@ public class DigitalObjectServiceIT extends IntegrationTest {
           .orElseThrow();
 
       var oldModificationDate = testDataSet.digitalObject().getModified();
-
       Assertions.assertThat(savedObject.isModifiedAfterCreation())
           .isFalse();
+
+      var oldModifiedBy =  testDataSet.digitalObject().getModifiedBy();
+      Assertions.assertThat(oldModifiedBy).isNotEqualTo(TestUser.USERNAME.getValue());
 
       // small delay to ensure timestamp difference
       try { Thread.sleep(50); } catch (InterruptedException ignored) {}
 
       // change something
       savedObject.setObjectType("DEMO VALUE");
-      savedObject = digitalObjectRepository.save(savedObject);
+      savedObject = digitalObjectService.save(savedObject);
       Assertions.assertThat(savedObject.isModifiedAfterCreation())
           .isTrue();
 
       var newModificationDate = savedObject.getModified();
       Assertions.assertThat(oldModificationDate).isBefore(newModificationDate);
+
+      // modified by
+      Assertions.assertThat(savedObject.getModifiedBy()).isEqualTo(TestUser.USERNAME.getValue());
 
     }
 
@@ -324,17 +332,16 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
 
-      Date projectContentLastModifiedBeforeDelete = testDataSet.project().getContentLastModified();
+      Date projectContentLastModifiedBeforeDelete = testDataSet.project().getModified();
 
-      // this is a side effect of the delete operation, but we want to ensure that it works
       digitalObjectService.delete(testDataSet.digitalObject());
 
       var updatedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
           .orElseThrow(() ->  new ProjectNotFoundException(testDataSet.project().getProjectAbbr()));
 
-      Date projectContentLastModifedAfterDelete = updatedProject.getContentLastModified();
+      Date projectContentLastModifiedAfterDelete = updatedProject.getModified();
 
-      Assertions.assertThat(projectContentLastModifedAfterDelete)
+      Assertions.assertThat(projectContentLastModifiedAfterDelete)
           .isNotNull()
           .isAfter(projectContentLastModifiedBeforeDelete);
 
