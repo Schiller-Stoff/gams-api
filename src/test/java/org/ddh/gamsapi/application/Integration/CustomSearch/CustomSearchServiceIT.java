@@ -12,9 +12,11 @@ import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -41,14 +44,21 @@ public class CustomSearchServiceIT extends SolrIntegrationTest {
   @Autowired
   private GAMSDockerDNS gamsDockerDNS;
 
-  // disables auditing
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   File bagFile;
 
   @BeforeEach
   public void setup() throws IOException {
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of("test-user"));
+
     bagFile = TestBag.loadFile();
     projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
 

@@ -27,13 +27,8 @@
       <h2 class="display-6 fw-bold text-primary mb-3" th:text="${project.projectAbbr}"></h2>
       <p><span>Projektbeschreibung: </span><span th:text="${project.getDescription()}"></span></p>
 
-      <div class="card shadow-none rounded-0" style="border: 1px solid lightgrey;" sec:authorize="isAuthenticated()">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h3 class="mb-0 h5">
-            <i class="ti ti-list-details me-2"></i>Project management
-          </h3>
-        </div>
-        <div class="card-body">
+      <div class="mb-3" sec:authorize="isAuthenticated()">
+        <div>
           <div sec:authorize="isAuthenticated()" class="d-inline">
             <button type="button" class="btn btn-outline-primary btn"
                     data-bs-toggle="collapse" data-bs-target="#createObjectForm">
@@ -121,7 +116,7 @@
           <div sec:authorize="isAuthenticated()" class="d-inline">
             <button type="button" class="btn btn-outline-primary btn ms-2"
                     onclick="document.getElementById('ingestFolderInput').click()">
-              <i class="ti ti-upload me-1"></i>Ingest object
+              <i class="ti ti-upload me-1"></i>Ingest objects
             </button>
             <input type="file" id="ingestFolderInput"
                    webkitdirectory directory multiple
@@ -214,7 +209,7 @@
                        sortDir=${param.sortDir},
                        tag=${tag})}"
                        class="text-decoration-none">
-                      <span class="badge bg-secondary me-1 mb-1" th:text="${tag}"></span>
+                      <span class="badge bg-light me-1 mb-1 text-dark" th:text="${tag}"></span>
                     </a>
                   </th:block>
                   <span th:if="${#lists.size(do.tags) > 5}"
@@ -433,13 +428,13 @@
       </div>
 
       <!-- Integration actions — only visible for authenticated users with project roles -->
-      <div sec:authorize="isAuthenticated()" class="card shadow-none rounded-0 mb-3 mt-5" style="border: 1px solid lightgrey;">
-        <div class="card-header">
-          <h3 class="mb-0 h5">
-            <i class="ti ti-refresh me-2"></i>Integration Services
+      <div sec:authorize="isAuthenticated()" class="mb-3 mt-5">
+        <div>
+          <h3 class="h5">
+            <i class="ti ti-refresh me-2 text-primary"></i>Integration Services
           </h3>
         </div>
-        <div class="card-body">
+        <div>
 
           <div>
             <h4 class="h6">C-search</h4>
@@ -669,7 +664,7 @@
                 const ifModifiedSince = localDate.toUTCString();
 
                 const headResponse = await fetch(
-                    `/api/v1/projects/${projectAbbr}/objects/${objectId}/datastreams`,
+                    `/api/v1/projects/${projectAbbr}/objects/${objectId}`,
                     {
                         method: 'HEAD',
                         headers: { 'If-Modified-Since': ifModifiedSince },

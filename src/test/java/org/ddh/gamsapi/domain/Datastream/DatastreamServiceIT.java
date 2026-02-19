@@ -1,22 +1,25 @@
 package org.ddh.gamsapi.domain.Datastream;
 
+import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamService;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
-import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
+import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Date;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {
@@ -33,8 +36,16 @@ public class DatastreamServiceIT extends IntegrationTest {
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
 
+  @Autowired
+  IProjectRepository projectRepository;
+
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Autowired
   private TestDataBuilder testDataBuilder;
@@ -46,6 +57,9 @@ public class DatastreamServiceIT extends IntegrationTest {
   @BeforeEach
   public void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing datastreams
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -151,6 +165,31 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    public void saveDatastreamChangesModifiedOfParentProject(){
+
+      // capture the original modified date of the parent digital object
+      Date originalModified = testDataSet.project().getModified();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // save a new datastream
+      final String RANDOM_DSID = "MODIFICATION_TEST.txt";
+      Datastream datastream = TestDatastream.generate(testDataSet.digitalObject(), RANDOM_DSID);
+      datastreamService.save(datastream, TEST_MULTIPART_FILE);
+
+      // re-fetch the parent project from DB to get the updated modified date
+      var refreshedParentProject = projectRepository
+          .findById(testDataSet.project().getProjectAbbr())
+          .orElseThrow();
+
+      // modified date should be after created
+      org.assertj.core.api.Assertions.assertThat(refreshedParentProject.getModified())
+          .isAfter(originalModified);
+
+    }
+
   }
 
   @Nested
@@ -199,6 +238,73 @@ public class DatastreamServiceIT extends IntegrationTest {
       );
     }
 
+    @Test
+    public void deleteDatastreamShouldChangeModifiedOfDigitalObject(){
+      // first assert that expected property is false by default
+      org.assertj.core.api.Assertions.assertThat(testDataSet.digitalObject().isModifiedAfterCreation())
+          .isFalse();
+
+      // capture the original modified date of the parent digital object
+      Date originalModified = testDataSet.digitalObject().getModified();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // delete test datastream
+      datastreamService.delete(testDataSet.mainDatastream());
+
+      // re-fetch the parent from DB to get the updated modified date
+      DigitalObject refreshedParent = digitalObjectRepository
+          .findById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      // modified date should be after created
+      org.assertj.core.api.Assertions.assertThat(refreshedParent.getModified())
+          .isAfter(originalModified);
+
+      // createdAfterModification property should be true now
+      org.assertj.core.api.Assertions.assertThat(refreshedParent.isModifiedAfterCreation())
+          .isTrue();
+    }
+
+    @Test
+    public void deleteDatastreamShouldChangeParentProjectModified(){
+
+      // capture the original modified date of the parent digital object
+      Date originalModified = testDataSet.project().getModified();
+
+      // small delay to ensure timestamp difference
+      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+
+      // delete test datastream
+      datastreamService.delete(testDataSet.mainDatastream());
+
+      var refreshedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
+          .orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshedProject.getModified())
+          .isAfter(originalModified);
+
+
+    }
+
+    @Test
+    public void deleteDatastreamChangesModifiedByOfParentProject(){
+      // capture the original modified date of the parent digital object
+      String originalModifiedBy = testDataSet.project().getModifiedBy();
+
+      org.assertj.core.api.Assertions.assertThat(originalModifiedBy)
+          .isNotEqualTo(TestUser.USERNAME.getValue());
+
+      // delete test datastream
+      datastreamService.delete(testDataSet.mainDatastream());
+
+      var refreshedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
+          .orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshedProject.getModifiedBy())
+          .isEqualTo(TestUser.USERNAME.getValue());
+    }
 
   }
 

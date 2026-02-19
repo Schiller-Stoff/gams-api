@@ -71,7 +71,7 @@ create table digital_object
     project_project_abbr varchar(255) not null,
     ingested             boolean       not null default false,
     archive_state        varchar(255) default 'NOT_ARCHIVED'   not null,
-    modified_after_creation boolean generated always as (modified > created) stored,
+    modified_after_creation boolean default false,
     primary key (id)
 );
 
@@ -110,7 +110,6 @@ create table integration_failure
 create table project
 (
     project_abbr          varchar(10) not null,
-    content_last_modified timestamp(6),
     created               timestamp(6),
     created_by            varchar(255),
     description           varchar(5000),
