@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.infrastructure.System.security;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.ddh.gamsapi.infrastructure.System.configproperties.GamsEnvironmentProperties;
 import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -32,9 +33,15 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
   @Mock
   HttpServletRequest request;
 
+  UserProjectAuthorizationManager manager;
+
 
   @BeforeEach
   public void setUp() {
+    var gamsEnvironmentProperties = new GamsEnvironmentProperties();
+    gamsEnvironmentProperties.setAllowDirectModifications(true);
+    manager =  new UserProjectAuthorizationManager(gamsEnvironmentProperties);
+
     // makes sure that mock request is returned
     when(authorizationContext.getRequest()).thenReturn(request);
     // mockig a valid request uri
@@ -52,8 +59,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       when(request.getMethod()).thenReturn(HttpMethod.HEAD.name());
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-
       // Act
       AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
@@ -65,8 +70,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     public void GETRequestsAreAuthorizedInAnyCase() {
 
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
-
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
@@ -81,8 +84,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       when(authentication.isAuthenticated()).thenReturn(false);
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-
       Assertions.assertThrows(AccessDeniedException.class, () -> {
         manager.authorize(() -> authentication, authorizationContext);
       });
@@ -94,8 +95,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
       when(request.getRequestURI()).thenReturn("/noProjectAbbr");
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-
       Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
         manager.authorize(() -> authentication, authorizationContext);
       });
@@ -105,8 +104,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     public void doesNotThrowWhenProjectAbbrInRequest() {
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
       when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
-
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       Assertions.assertDoesNotThrow(() -> {
         manager.authorize(() -> authentication, authorizationContext);
@@ -135,8 +132,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-
       // Assert
       Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
         manager.authorize(() -> authentication, authorizationContext);
@@ -154,7 +149,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
       AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // make sure that this was actually called
@@ -167,8 +161,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     public void throwsIfProjectAbbrIsNotSetInRequest() {
       // return empty map for variables (projectAbbr)
       when(authorizationContext.getVariables()).thenReturn(Map.of());
-
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       Assertions.assertThrows(AuthorizationConfigurationException.class, () -> {
@@ -190,8 +182,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
           new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin("otherProject"))
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
-
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
 
       // Act
       Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
@@ -215,8 +205,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-
       // Act
       AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
@@ -237,14 +225,163 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      UserProjectAuthorizationManager manager = new UserProjectAuthorizationManager();
-
       // Act
       AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
 
       // Assert
       assertTrue(decision.isGranted());
 
+    }
+
+    @Test
+    public void projectEditorIsStillAuthorizedForPOSTIfAllowDirectModificationIsFalse() {
+
+      var properties = new GamsEnvironmentProperties();
+      properties.setAllowDirectModifications(false);
+      manager = new UserProjectAuthorizationManager(properties);
+
+      final String PROJECT_ABBR = "test";
+
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
+      // Assert
+      assertTrue(decision.isGranted());
+
+    }
+  }
+
+  @Nested
+  public class AllowDirectModificationsFalseRoleModelIncrement {
+
+    @BeforeEach
+    public void setUp(){
+      when(authentication.isAuthenticated()).thenReturn(true);
+      when(request.getRemoteUser()).thenReturn("test");
+      when(request.getSession()).thenReturn(new MockHttpSession());
+
+      // setting allowDirectModifications to false
+      var gamsEnvironmentProperties = new GamsEnvironmentProperties();
+      gamsEnvironmentProperties.setAllowDirectModifications(false);
+      manager =  new UserProjectAuthorizationManager(gamsEnvironmentProperties);
+    }
+
+    @Test
+    public void denyProjectEditorPATCHObject(){
+      // mocking a valid request uri
+      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+      when(request.getMethod()).thenReturn(HttpMethod.PATCH.name());
+
+      final String PROJECT_ABBR = "test";
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      // Act
+      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
+        manager.authorize(() -> authentication, authorizationContext);
+      });
+    }
+
+    @Test
+    public void stillAllowProjectEditorDELETEObject(){
+      // mocking a valid request uri
+      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+      when(request.getMethod()).thenReturn(HttpMethod.DELETE.name());
+
+      final String PROJECT_ABBR = "test";
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      // Act
+      var decision = manager.authorize(() -> authentication, authorizationContext);
+      Assertions.assertTrue(decision.isGranted());
+    }
+
+    @Test
+    public void stillAllowProjectEditorINGESTObject(){
+      // mocking a valid request uri
+      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects");
+      when(request.getMethod()).thenReturn(HttpMethod.POST.name());
+
+      final String PROJECT_ABBR = "test";
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      // Act
+      var decision = manager.authorize(() -> authentication, authorizationContext);
+      Assertions.assertTrue(decision.isGranted());
+    }
+
+    @Test
+    public void denyProjectEditorDeleteDatastream(){
+      // mocking a valid request uri
+      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test/datastreams/text.xml");
+      when(request.getMethod()).thenReturn(HttpMethod.DELETE.name());
+
+      final String PROJECT_ABBR = "test";
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      var gamsEnvironmentProperties = new GamsEnvironmentProperties();
+      gamsEnvironmentProperties.setAllowDirectModifications(false);
+      manager =  new UserProjectAuthorizationManager(gamsEnvironmentProperties);
+
+      // Act
+      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
+        manager.authorize(() -> authentication, authorizationContext);
+      });
+    }
+
+    @Test
+    public void denyProjectEditorPUTDatastream(){
+      // mocking a valid request uri
+      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test/datastreams/text.xml");
+      when(request.getMethod()).thenReturn(HttpMethod.PUT.name());
+
+      final String PROJECT_ABBR = "test";
+      when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(PROJECT_ABBR))
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      var gamsEnvironmentProperties = new GamsEnvironmentProperties();
+      gamsEnvironmentProperties.setAllowDirectModifications(false);
+      manager =  new UserProjectAuthorizationManager(gamsEnvironmentProperties);
+
+      // Act
+      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
+        manager.authorize(() -> authentication, authorizationContext);
+      });
     }
   }
 }
