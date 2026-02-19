@@ -24,7 +24,7 @@ public class DigitalObjectModifiedEvent extends ApplicationEvent {
     this.principal = principal;
   }
 
-  public DigitalObjectModifiedEvent(Object source, Clock clock,DigitalObjectId objectId, String projectAbbr, Date occurredAt, String principal) {
+  public DigitalObjectModifiedEvent(Object source, Clock clock,DigitalObjectId objectId, Date occurredAt, String principal) {
     super(source, clock);
     this.objectId = objectId;
     this.occurredAt = occurredAt;
