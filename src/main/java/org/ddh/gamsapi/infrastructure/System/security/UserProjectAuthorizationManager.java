@@ -2,6 +2,7 @@ package org.ddh.gamsapi.infrastructure.System.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.infrastructure.System.configproperties.GamsEnvironmentProperties;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,6 +30,8 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 @Slf4j
 public class UserProjectAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+
+  private final GamsEnvironmentProperties  gamsEnvironmentProperties;
 
   @Override
   public AuthorizationDecision authorize(Supplier<? extends @Nullable Authentication> authentication, RequestAuthorizationContext authorizationContext) {
@@ -132,11 +135,28 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       return new AuthorizationDecision(true);
     }
 
-    // if project editor (what to allow here?)
+    // if project editor
+
     String projectEditorRole = GAMSAPIAuthorities.getProjectEditor(projectAbbr);
     if(userAuthorities.contains(projectEditorRole)){
       log.debug("ACCESS GRANTED - User {} is authorized for project {} and has required {} role. Url: {} Method: {}. User authorities: {}", username, projectAbbr, GAMSAPIAuthorities.PROJECT_EDITOR.name, requestUri, requestMethod, userAuthorities);
+
+      if(gamsEnvironmentProperties.isAllowDirectModifications()) return new AuthorizationDecision(true);
+
+      if(requestMethod.equals(HttpMethod.PATCH.name()) || requestMethod.equals(HttpMethod.PUT.name())){
+        String msg = "Project editor must not change project data when property 'allow-direct-modifications' is false. Url: ' " + requestUri + "' Method: '" + requestMethod + "'";
+        log.trace(msg);
+        throw new UserNotAuthorizedException(msg);
+      }
+
+      if( requestUri.contains("/datastreams/") && requestMethod.equals(HttpMethod.DELETE.name())) {
+        String msg = "Project editor must not delete a singular datastream when property 'allow-direct-modifications' is false. Url: ' " + requestUri + "' Method: '" + requestMethod + "'";
+        log.trace(msg);
+        throw new UserNotAuthorizedException(msg);
+      }
+
       return new AuthorizationDecision(true);
+
     }
 
     // if project viewer
