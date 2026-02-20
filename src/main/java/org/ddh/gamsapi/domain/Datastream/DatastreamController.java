@@ -400,5 +400,74 @@ public class DatastreamController {
     return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
+  @DeleteMapping(value = "/datastreams/{dsid}")
+  @ResponseBody
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(
+      summary = "Delete a datastream by its DSID",
+      description = "Permanently deletes a datastream and its file content from the specified digital object. "
+          + "This operation is irreversible. Requires authentication and project membership.",
+      responses = {
+          @ApiResponse(responseCode = "204", description = "Datastream deleted successfully"),
+          @ApiResponse(responseCode = "404", description = "Project, digital object, or datastream not found",
+              content = @Content),
+          @ApiResponse(responseCode = "401", description = "Authentication required", content = @Content)
+      }
+  )
+  @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "dsid", description = "ID of the datastream to delete", required = true)
+  public void deleteDatastreamJson(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @PathVariable String dsid
+  ) {
+    if (!projectService.exists(projectAbbr)) {
+      throw new ProjectNotFoundException(
+          "Cannot delete datastream. Project does not exist: " + projectAbbr
+      );
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    Datastream datastream = datastreamService.findById(
+        DatastreamId.builder()
+            .digitalObject(id)
+            .dsid(dsid)
+            .build()
+    );
+
+    datastreamService.delete(datastream);
+  }
+
+  @Hidden
+  @DeleteMapping(value = "/datastreams/{dsid}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String deleteDatastreamHtml(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @PathVariable String dsid,
+      @RequestHeader Map<String, String> requestHeader
+  ) {
+    if (!projectService.exists(projectAbbr)) {
+      throw new ProjectNotFoundException(
+          "Cannot delete datastream. Project does not exist: " + projectAbbr
+      );
+    }
+
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    Datastream datastream = datastreamService.findById(
+        DatastreamId.builder()
+            .digitalObject(id)
+            .dsid(dsid)
+            .build()
+    );
+
+    datastreamService.delete(datastream);
+
+    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
+    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
+  }
+
 
 }

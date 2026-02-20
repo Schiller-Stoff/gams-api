@@ -153,7 +153,6 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  @Disabled("The current version of the REST-API does not support the deletion of individual datastreams. Only digital objects might be deleted.")
   public class DELETEDatastream {
 
     @Test
@@ -167,13 +166,13 @@ public class DatastreamControllerIT extends IntegrationTest {
           testDataSet.mainDatastream().getDsid()
       );
       mockMvc.perform(
-          MockMvcRequestBuilders.delete(url))
-          .andExpect(status().is3xxRedirection());
+              MockMvcRequestBuilders.delete(url))
+          .andExpect(status().is2xxSuccessful());
 
       // assertions
       org.junit.jupiter.api.Assertions.assertThrows(
-            DatastreamNotFoundException.class,
-            () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId()
+          DatastreamNotFoundException.class,
+          () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId()
           )
       );
 
@@ -181,6 +180,62 @@ public class DatastreamControllerIT extends IntegrationTest {
           .isNotNull()
           .isEmpty();
 
+    }
+
+    @Test
+    public void deleteDatastreamViaFormRedirectsToObject() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete(url)
+                  .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+          .andExpect(status().is3xxRedirection());
+
+      org.junit.jupiter.api.Assertions.assertThrows(
+          DatastreamNotFoundException.class,
+          () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId())
+      );
+    }
+
+    @Test
+    public void deleteDatastreamViaJsonReturns204() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete(url)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNoContent());
+
+      org.junit.jupiter.api.Assertions.assertThrows(
+          DatastreamNotFoundException.class,
+          () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId())
+      );
+
+      Assertions.assertThat(datastreamService.findAll(testDataSet.digitalObject()))
+          .isNotNull()
+          .isEmpty();
+    }
+
+    @Test
+    public void deleteNonExistentDatastreamReturns404() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          "NON_EXISTENT_DSID"
+      );
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete(url)
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().isNotFound());
     }
   }
 
