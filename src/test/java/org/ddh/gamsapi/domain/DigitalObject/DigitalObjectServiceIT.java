@@ -8,7 +8,9 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectService;
@@ -29,9 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -494,6 +494,273 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     }
 
+  }
+
+
+  @Nested
+  public class UpdateDigitalObject {
+
+    @Test
+    public void updatesTitle() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("New Title");
+
+      var result = digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      Assertions.assertThat(result.getBaseMetadata().getTitle()).isEqualTo("New Title");
+
+      // verify via repository
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getBaseMetadata().getTitle()).isEqualTo("New Title");
+    }
+
+    @Test
+    public void updatesMultipleFieldsSimultaneously() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("Updated Title");
+      patch.setDescription("Updated Description");
+      patch.setRights("Updated Rights");
+      patch.setFunder("Updated Funder");
+      patch.setObjectType("Updated Type");
+
+      var result = digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      Assertions.assertThat(result.getBaseMetadata().getTitle()).isEqualTo("Updated Title");
+      Assertions.assertThat(result.getBaseMetadata().getDescription()).isEqualTo("Updated Description");
+      Assertions.assertThat(result.getBaseMetadata().getRights()).isEqualTo("Updated Rights");
+      Assertions.assertThat(result.getFunder()).isEqualTo("Updated Funder");
+      Assertions.assertThat(result.getObjectType()).isEqualTo("Updated Type");
+    }
+
+    @Test
+    public void preservesUnchangedFields() {
+      String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
+      String originalCreator = testDataSet.digitalObject().getBaseMetadata().getCreator();
+      String originalPublisher = testDataSet.digitalObject().getPublisher();
+      String originalFunder = testDataSet.digitalObject().getFunder();
+
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("Only title changes");
+
+      digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getBaseMetadata().getTitle()).isEqualTo("Only title changes");
+      Assertions.assertThat(persisted.getBaseMetadata().getRights()).isEqualTo(originalRights);
+      Assertions.assertThat(persisted.getBaseMetadata().getCreator()).isEqualTo(originalCreator);
+      Assertions.assertThat(persisted.getPublisher()).isEqualTo(originalPublisher);
+      Assertions.assertThat(persisted.getFunder()).isEqualTo(originalFunder);
+    }
+
+    @Test
+    public void updatesTags() {
+      Set<String> newTags = Set.of("new-tag1", "new-tag2");
+
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTags(newTags);
+
+      digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getTags())
+          .containsExactlyInAnyOrder("new-tag1", "new-tag2");
+    }
+
+    @Test
+    public void removesAllTags() {
+      // precondition
+      Assertions.assertThat(testDataSet.digitalObject().getTags()).isNotEmpty();
+
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTags(new HashSet<>());
+
+      digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getTags()).isEmpty();
+    }
+
+    @Test
+    public void tagsUnchangedWhenNotInPatch() {
+      Set<String> originalTags = Set.copyOf(testDataSet.digitalObject().getTags());
+
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("Tags should survive");
+
+      digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getTags())
+          .containsExactlyInAnyOrderElementsOf(originalTags);
+    }
+
+    @Test
+    public void throwsNotFoundForNonExistentObject() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("irrelevant");
+
+      Assertions.assertThatThrownBy(
+          () -> digitalObjectService.updateDigitalObject("nonexistent.id", patch)
+      ).isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
+    public void rejectsEmptyTitle() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("");
+
+      Assertions.assertThatThrownBy(
+              () -> digitalObjectService.updateDigitalObject(
+                  testDataSet.digitalObject().getId(), patch
+              )
+          ).isInstanceOf(DigitalObjectValidationException.class)
+          .hasMessageContaining("Title");
+    }
+
+    @Test
+    public void rejectsEmptyRights() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setRights("");
+
+      Assertions.assertThatThrownBy(
+              () -> digitalObjectService.updateDigitalObject(
+                  testDataSet.digitalObject().getId(), patch
+              )
+          ).isInstanceOf(DigitalObjectValidationException.class)
+          .hasMessageContaining("Rights");
+    }
+
+    @Test
+    public void rejectsEmptyCreator() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setCreator("");
+
+      Assertions.assertThatThrownBy(
+              () -> digitalObjectService.updateDigitalObject(
+                  testDataSet.digitalObject().getId(), patch
+              )
+          ).isInstanceOf(DigitalObjectValidationException.class)
+          .hasMessageContaining("Creator");
+    }
+
+    @Test
+    public void rejectsEmptyPublisher() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setPublisher("");
+
+      Assertions.assertThatThrownBy(
+              () -> digitalObjectService.updateDigitalObject(
+                  testDataSet.digitalObject().getId(), patch
+              )
+          ).isInstanceOf(DigitalObjectValidationException.class)
+          .hasMessageContaining("Publisher");
+    }
+
+    @Test
+    public void reportsMultipleViolationsAtOnce() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("");
+      patch.setRights("");
+      patch.setCreator("");
+
+      Assertions.assertThatThrownBy(
+              () -> digitalObjectService.updateDigitalObject(
+                  testDataSet.digitalObject().getId(), patch
+              )
+          ).isInstanceOf(DigitalObjectValidationException.class)
+          .hasMessageContaining("Title")
+          .hasMessageContaining("Rights")
+          .hasMessageContaining("Creator");
+    }
+
+    @Test
+    public void updatesModificationTimestamp() throws InterruptedException {
+      Date beforeUpdate = new Date();
+      Thread.sleep(50);
+
+      digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(),
+          new DigitalObjectUpdateDto() {{
+            setTitle("Timestamp test");
+          }}
+      );
+
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getModified()).isAfter(beforeUpdate);
+    }
+
+    @Test
+    public void returnsCompactDTOWithUpdatedValues() {
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("DTO check title");
+      patch.setFunder("DTO check funder");
+
+      var result = digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      Assertions.assertThat(result).isNotNull();
+      Assertions.assertThat(result.getId()).isEqualTo(testDataSet.digitalObject().getId());
+      Assertions.assertThat(result.getBaseMetadata().getTitle()).isEqualTo("DTO check title");
+      Assertions.assertThat(result.getFunder()).isEqualTo("DTO check funder");
+    }
+
+    @Test
+    public void allowsEmptyDescription() {
+      // description is optional — setting it to empty should not throw
+      var patch = new DigitalObjectUpdateDto();
+      patch.setDescription("");
+
+      var result = digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      Assertions.assertThat(result.getBaseMetadata().getDescription()).isEmpty();
+    }
+
+    @Test
+    public void allowsNullDescription() {
+      // null description in patch means "don't change" — original should be preserved
+      String originalDescription = testDataSet.digitalObject().getBaseMetadata().getDescription();
+
+      var patch = new DigitalObjectUpdateDto();
+      patch.setTitle("Desc null test");
+      // description intentionally not set (stays null)
+
+      digitalObjectService.updateDigitalObject(
+          testDataSet.digitalObject().getId(), patch
+      );
+
+      DigitalObject persisted = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getBaseMetadata().getDescription())
+          .isEqualTo(originalDescription);
+    }
   }
 
 }

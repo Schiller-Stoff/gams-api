@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head th:replace="~{fragments/general.html :: headtemplate}" />
 
@@ -78,10 +78,11 @@
         <p>
           Overview over a singular digital object
         </p>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
-        <a th:if="${submissionRecord}" class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
-
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
+        <a th:if="${submissionRecord}" class="btn btn-outline-primary" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
+        <br/>
+        <br/>
         <div>
           <div class="d-flex justify-content-between align-items-center">
             <h3 class="h5">
@@ -240,20 +241,7 @@
           <br/>
           <br/>
 
-        <div class="mt-2">
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="h5">
-              <i class="ti ti-id me-2 text-primary"></i>Identifiers
-            </h3>
-          </div>
-          <div>
-            <ul class="list-group border">
-              <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
-              <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
-            </ul>
-            <br/>
-          </div>
-        </div>
+
 
         <div class="mt-2">
           <div class="d-flex justify-content-between align-items-center">
@@ -273,7 +261,7 @@
                       Main resource
                     </button>
                   </h2>
-                  <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                  <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
 
                       <ul>
@@ -307,97 +295,103 @@
                   </div>
                 </div>
               </div>
-              <ul class="list-group border">
-                <li class="list-group-item">
-                  <small>identifier</small>
-                  <p th:text="${do.id}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>object tags</small>
-                  <div>
-                    <th:block th:each="tag, iterStat : ${do.tags}">
-                      <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
-                    </th:block>
+
+            <!-- Add after the existing metadata display, inside the sec:authorize="isAuthenticated()" guard -->
+            <div class="mt-2 mb-3">
+              <div id="metadata-edit-form" class="mt-3">
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                      method="POST">
+                  <input type="hidden" name="_method" value="PATCH" />
+
+                  <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control" required
+                           th:value="${do.baseMetadata.title}">
                   </div>
-                </li>
-                <li class="list-group-item">
-                  <small>ingested</small>
-                  <p th:text="${do.isIngested()}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>object type</small>
-                  <p th:text="${do.objectType}"></p>
-                </li>
-                  <li class="list-group-item">
-                      <small>main resource</small>
-                      <p>
-                        <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
-                      </p>
-                  </li>
-              </ul>
-              <ul class="list-group mt-2 border" th:if="${do.baseMetadata}">
-                <li class="list-group-item">
-                  <small>title</small>
-                  <p th:text="${do.baseMetadata.title}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>creator</small>
-                  <p th:text="${do.baseMetadata.creator}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>description</small>
-                  <p th:text="${do.baseMetadata.description}"></p>
-                </li>
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:subject</small>-->
-                <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
-                <!--          </li>-->
-                <li class="list-group-item">
-                  <small>publisher</small>
-                  <p th:text="${do.publisher}"></p>
-                </li>
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:contributor</small>-->
-                <!--            <p th:text="${do.baseMetadata.contributor}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:date</small>-->
-                <!--            <p th:text="${do.baseMetadata.date}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:type</small>-->
-                <!--            <p th:text="${do.baseMetadata.type}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:format</small>-->
-                <!--            <p th:text="${do.baseMetadata.format}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:source</small>-->
-                <!--            <p th:text="${do.baseMetadata.source}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:language</small>-->
-                <!--            <p th:text="${do.baseMetadata.language}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:relation</small>-->
-                <!--            <p th:text="${do.baseMetadata.relation}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:coverage</small>-->
-                <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
-                <!--          </li>-->
-                <li class="list-group-item">
-                  <small>rights</small>
-                  <p th:text="${do.baseMetadata.rights}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>funder</small>
-                    <p th:text="${do.funder}"></p>
-                </li>
-              </ul>
-              <br/>
+                  <div class="mb-3">
+                    <label class="form-label">Creator *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="creator" class="form-control" required
+                           th:value="${do.baseMetadata.creator}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea th:readonly="${!isAuthenticated}" name="description" class="form-control" rows="3"
+                              th:text="${do.baseMetadata.description}"></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Rights *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="rights" class="form-control" required
+                           th:value="${do.baseMetadata.rights}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Publisher *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="publisher" class="form-control" required
+                           th:value="${do.publisher}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Funder</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="funder" class="form-control"
+                           th:value="${do.funder}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Object Type</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="objectType" class="form-control"
+                           th:value="${do.objectType}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Object Tags</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="tagsCommaSeparated"
+                           class="form-control"
+                           th:value="${sortedTagsCsv}"
+                           placeholder="tag1, tag2, tag3" />
+                  </div>
+                  <div sec:authorize="isAuthenticated()">
+                    <button  type="submit" class="btn btn-primary">
+                      <i class="ti ti-check me-1"></i>Save changes
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+            <br/>
+          </div>
+        </div>
+
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
+              <i class="ti ti-id me-2 text-primary"></i>Auditing metadata
+            </h3>
+          </div>
+          <div>
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>object id</small>
+                <p th:text="${do.id}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>owned by project</small>
+                <p th:text="${project.projectAbbr}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>Created:</small>
+                <p th:text="${do.getCreated()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>created by</small>
+                <p th:text="${do.getCreatedBy()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>modified</small>
+                <p th:text="${do.getModified()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>modified by</small>
+                <p th:text="${do.getModifiedBy()}"></p>
+              </li>
+            </ul>
+            <br/>
           </div>
         </div>
 

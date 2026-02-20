@@ -18,6 +18,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalOb
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectInvalidDateFormatException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.Project.Project;
@@ -31,6 +32,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
@@ -41,9 +44,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
@@ -131,6 +136,7 @@ public class DigitalObjectController {
       DigitalObject digitalObject,
       Project project,
       Model model,
+      Authentication authentication,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "10") int pageSize,
       @RequestParam(defaultValue = "dsid") String sortBy,
@@ -156,6 +162,7 @@ public class DigitalObjectController {
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
         foundObject.getId(), PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
+
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("sortDir", sortDir);
@@ -164,6 +171,16 @@ public class DigitalObjectController {
     model.addAttribute("pagedDatastreams", pagedDatastreams);
     model.addAttribute("do", foundObject);
     model.addAttribute(project);
+
+    // TODO can this be done via global controller advice?
+    boolean canEdit = authentication != null && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
+    model.addAttribute("isAuthenticated", canEdit);
+
+    // tags of object sorted
+    model.addAttribute("sortedTagsCsv",
+        foundObject.getTags().stream().sorted().collect(Collectors.joining(", ")));
+
     return "DigitalObject/show";
   }
 
@@ -365,6 +382,60 @@ public class DigitalObjectController {
     digitalObjectService.create(projectAbbr, dto);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+  }
+
+
+  @PatchMapping(
+      value = "/{id}",
+      consumes = MimeTypeUtils.APPLICATION_JSON_VALUE,
+      produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+  )
+  @ResponseBody
+  @Operation(
+      summary = "Update a digital object's metadata",
+      description = "Partially updates a digital object's metadata. Only fields present in the "
+          + "request body are updated; omitted fields remain unchanged. Fields like title, rights, "
+          + "creator, and publisher cannot be set to empty as they are required.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital object updated successfully"),
+          @ApiResponse(responseCode = "400", description = "Invalid patch data or would violate constraints",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Digital object not found",
+              content = @Content)
+      }
+  )
+  public DigitalObjectCompactDTO patchDigitalObject(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestBody DigitalObjectUpdateDto patch
+  ) {
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+    return digitalObjectService.updateDigitalObject(id, patch);
+  }
+
+  @Hidden
+  @PatchMapping(
+      value = "/{id}",
+      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+  )
+  public String patchDigitalObjectFromForm(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @ModelAttribute DigitalObjectUpdateDto patch
+  ) {
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    // Parse comma-separated tags from form into the tags Set
+    if (patch.getTagsCommaSeparated() != null) {
+      Set<String> parsedTags = Arrays.stream(patch.getTagsCommaSeparated().split(","))
+          .map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .collect(Collectors.toSet());
+      patch.setTags(parsedTags);
+    }
+
+    digitalObjectService.updateDigitalObject(id, patch);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 }
