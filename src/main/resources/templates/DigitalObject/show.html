@@ -458,20 +458,14 @@
                            placeholder="tag1, tag2, tag3" />
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Main Resource (Datastream)</label>
-                    <select th:disabled="${!isAuthenticated}" name="mainResource" class="form-select">
-                      <option value=""
-                              th:selected="${do.mainResource == null}">
-                        — none —
-                      </option>
-                      <option th:each="ds : ${pagedDatastreams.content}"
-                              th:value="${ds.dsid}"
-                              th:text="${ds.dsid} + ' (' + ${ds.mimeType} + ')'"
-                              th:selected="${do.mainResource != null and do.mainResource.dsid == ds.dsid}">
-                      </option>
-                    </select>
+                    <label class="form-label">Main Resource (DSID)</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="mainResource" class="form-control"
+                           th:value="${do.mainResource?.dsid}"
+                           pattern="[a-zA-Z0-9._]*"
+                           maxlength="256"
+                           placeholder="e.g. TEI_SOURCE">
                     <small class="text-muted">
-                      Select which datastream serves as the main resource for this digital object.
+                      Case-sensitive datastream identifier. Leave empty to clear.
                     </small>
                   </div>
                   <div sec:authorize="isAuthenticated()">
