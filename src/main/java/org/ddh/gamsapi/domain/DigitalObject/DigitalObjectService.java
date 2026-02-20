@@ -518,7 +518,7 @@ public class DigitalObjectService implements IDigitalObjectService {
       existing.setObjectType(patch.getObjectType());
     }
     if (patch.getTags() != null) {
-      existing.setTags(patch.getTags());
+      existing.setTags(new HashSet<>(patch.getTags()));
     }
   }
 
