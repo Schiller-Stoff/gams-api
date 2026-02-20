@@ -135,7 +135,7 @@ public class DatastreamControllerIT extends IntegrationTest {
           .contains(
               testDataSet.mainDatastream().getDsid(),
               testDataSet.mainDatastream().getMimeType(),
-              testDataSet.mainDatastream().getBagPath(),
+              testDataSet.mainDatastream().getFilePath(),
               testDataSet.mainDatastream().getBaseMetadata().getTitle(),
               testDataSet.mainDatastream().getBaseMetadata().getDescription(),
               testDataSet.mainDatastream().getBaseMetadata().getCreator()
@@ -266,7 +266,7 @@ public class DatastreamControllerIT extends IntegrationTest {
               testDataSet.mainDatastream().getDsid(),
               testDataSet.digitalObject().getId(),
               testDataSet.mainDatastream().getSize().toString(),
-              testDataSet.mainDatastream().getBagPath()
+              testDataSet.mainDatastream().getFilePath()
           );
     }
 
@@ -445,7 +445,7 @@ public class DatastreamControllerIT extends IntegrationTest {
                 testDataSet.mainDatastream().getDsid(),
                 testDataSet.digitalObject().getId(),
                 testDataSet.mainDatastream().getSize().toString(),
-                testDataSet.mainDatastream().getBagPath()
+                testDataSet.mainDatastream().getFilePath()
             );
 
       }
@@ -486,7 +486,7 @@ public class DatastreamControllerIT extends IntegrationTest {
                 testDataSet.mainDatastream().getDsid(),
                 testDataSet.digitalObject().getId(),
                 testDataSet.mainDatastream().getSize().toString(),
-                testDataSet.mainDatastream().getBagPath()
+                testDataSet.mainDatastream().getFilePath()
             )
             .doesNotContain(
                 datastream2.getDsid()
@@ -723,13 +723,13 @@ public class DatastreamControllerIT extends IntegrationTest {
               testDataSet.mainDatastream().getDsid(),
               testDataSet.digitalObject().getId(),
               testDataSet.mainDatastream().getSize().toString(),
-              testDataSet.mainDatastream().getBagPath()
+              testDataSet.mainDatastream().getFilePath()
           )
           .contains(
               datastream2.getDsid(),
               testDataSet.digitalObject().getId(),
               datastream2.getSize().toString(),
-              datastream2.getBagPath()
+              datastream2.getFilePath()
           );
 
     }
@@ -811,7 +811,7 @@ public class DatastreamControllerIT extends IntegrationTest {
               datastream2.getDsid(),
               testDataSet.digitalObject().getId(),
               datastream2.getSize().toString(),
-              datastream2.getBagPath()
+              datastream2.getFilePath()
           );
 
     }

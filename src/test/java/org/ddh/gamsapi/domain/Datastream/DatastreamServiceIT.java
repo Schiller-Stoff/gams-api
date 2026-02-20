@@ -442,7 +442,7 @@ public class DatastreamServiceIT extends IntegrationTest {
           new MockMultipartFile("file", "photo.jpg", "image/jpeg", "data".getBytes())
       );
 
-      org.assertj.core.api.Assertions.assertThat(created.getBagPath()).isEqualTo("photo.jpg");
+      org.assertj.core.api.Assertions.assertThat(created.getFilePath()).isEqualTo("photo.jpg");
     }
 
     @Test

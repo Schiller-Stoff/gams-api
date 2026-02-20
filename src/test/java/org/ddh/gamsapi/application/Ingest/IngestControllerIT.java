@@ -25,7 +25,7 @@ import org.ddh.gamsapi.application.Ingest.utils.IngestStatics;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.ddh.gamsapi.TestUtilities.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -559,7 +559,7 @@ public class IngestControllerIT extends IntegrationTest {
                 .contains(testDataSet.mainDatastream().getLang())
                 .contains(testDataSet.mainDatastream().getMimeType())
                 .contains(testDataSet.mainDatastream().getSize().toString())
-                .contains(testDataSet.mainDatastream().getBagPath());
+                .contains(testDataSet.mainDatastream().getFilePath());
 
             var datastreamLang = testDataSet.mainDatastream().getLang();
             for (String lang : datastreamLang) {
