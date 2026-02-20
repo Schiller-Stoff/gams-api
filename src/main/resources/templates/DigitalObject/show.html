@@ -363,92 +363,12 @@
 
             <ul class="list-group border">
                 <li class="list-group-item">
-                  <small>identifier</small>
-                  <p th:text="${do.id}"></p>
-                </li>
-                <li class="list-group-item">
                   <small>object tags</small>
                   <div>
                     <th:block th:each="tag, iterStat : ${do.tags}">
                       <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
                     </th:block>
                   </div>
-                </li>
-                <li class="list-group-item">
-                  <small>ingested</small>
-                  <p th:text="${do.isIngested()}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>object type</small>
-                  <p th:text="${do.objectType}"></p>
-                </li>
-                  <li class="list-group-item">
-                      <small>main resource</small>
-                      <p>
-                        <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
-                      </p>
-                  </li>
-              </ul>
-              <ul class="list-group mt-2 border" th:if="${do.baseMetadata}">
-                <li class="list-group-item">
-                  <small>title</small>
-                  <p th:text="${do.baseMetadata.title}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>creator</small>
-                  <p th:text="${do.baseMetadata.creator}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>description</small>
-                  <p th:text="${do.baseMetadata.description}"></p>
-                </li>
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:subject</small>-->
-                <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
-                <!--          </li>-->
-                <li class="list-group-item">
-                  <small>publisher</small>
-                  <p th:text="${do.publisher}"></p>
-                </li>
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:contributor</small>-->
-                <!--            <p th:text="${do.baseMetadata.contributor}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:date</small>-->
-                <!--            <p th:text="${do.baseMetadata.date}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:type</small>-->
-                <!--            <p th:text="${do.baseMetadata.type}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:format</small>-->
-                <!--            <p th:text="${do.baseMetadata.format}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:source</small>-->
-                <!--            <p th:text="${do.baseMetadata.source}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:language</small>-->
-                <!--            <p th:text="${do.baseMetadata.language}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:relation</small>-->
-                <!--            <p th:text="${do.baseMetadata.relation}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:coverage</small>-->
-                <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
-                <!--          </li>-->
-                <li class="list-group-item">
-                  <small>rights</small>
-                  <p th:text="${do.baseMetadata.rights}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>funder</small>
-                    <p th:text="${do.funder}"></p>
                 </li>
               </ul>
               <br/>
