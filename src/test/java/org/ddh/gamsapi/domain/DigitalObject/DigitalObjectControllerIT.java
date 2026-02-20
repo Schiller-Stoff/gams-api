@@ -24,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -628,6 +629,205 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
       }
 
+    }
+
+    @Nested
+    public class PatchDigitalObjectFromForm {
+
+      private String buildUrl() {
+        return String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+      }
+
+      private String buildRedirectUrl() {
+        return "/api/v1/projects/" + testDataSet.project().getProjectAbbr()
+            + "/objects/" + testDataSet.digitalObject().getId();
+      }
+
+      @Test
+      public void updatesTitleAndRedirects() throws Exception {
+        final String NEW_TITLE = "Updated via form";
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", NEW_TITLE)
+            )
+            .andExpect(status().is3xxRedirection())
+            .andExpect(MockMvcResultMatchers.redirectedUrl(buildRedirectUrl()));
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo(NEW_TITLE);
+      }
+
+      @Test
+      public void updatesMultipleFieldsSimultaneously() throws Exception {
+        final String NEW_TITLE = "Form Title";
+        final String NEW_DESCRIPTION = "Form Description";
+        final String NEW_FUNDER = "Form Funder";
+        final String NEW_RIGHTS = "CC BY 4.0";
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", NEW_TITLE)
+                    .param("description", NEW_DESCRIPTION)
+                    .param("funder", NEW_FUNDER)
+                    .param("rights", NEW_RIGHTS)
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo(NEW_TITLE);
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getDescription()).isEqualTo(NEW_DESCRIPTION);
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getRights()).isEqualTo(NEW_RIGHTS);
+        org.assertj.core.api.Assertions.assertThat(updated.getFunder()).isEqualTo(NEW_FUNDER);
+      }
+
+      @Test
+      public void preservesUnchangedFields() throws Exception {
+        String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
+        String originalCreator = testDataSet.digitalObject().getBaseMetadata().getCreator();
+        String originalPublisher = testDataSet.digitalObject().getPublisher();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "Only title changes")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo("Only title changes");
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getRights()).isEqualTo(originalRights);
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getCreator()).isEqualTo(originalCreator);
+        org.assertj.core.api.Assertions.assertThat(updated.getPublisher()).isEqualTo(originalPublisher);
+      }
+
+      @Test
+      public void parsesCommaSeparatedTagsCorrectly() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("tagsCommaSeparated", "alpha, beta, gamma")
+                    .param("tagsPresent", "true")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags())
+            .containsExactlyInAnyOrder("alpha", "beta", "gamma");
+      }
+
+      @Test
+      public void handlesWhitespaceAndEmptyEntriesInTags() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("tagsCommaSeparated", " tag1 ,  tag2 ,, , tag3 ")
+                    .param("tagsPresent", "true")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags())
+            .containsExactlyInAnyOrder("tag1", "tag2", "tag3");
+      }
+
+      @Test
+      public void removesAllTagsWhenInputIsEmpty() throws Exception {
+        // Precondition: object has tags
+        org.assertj.core.api.Assertions.assertThat(testDataSet.digitalObject().getTags()).isNotEmpty();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("tagsCommaSeparated", "")
+                    .param("tagsPresent", "true")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags()).isEmpty();
+      }
+
+      @Test
+      public void tagsUnchangedWhenTagsNotSubmitted() throws Exception {
+        Set<String> originalTags = testDataSet.digitalObject().getTags();
+
+        // No tagsCommaSeparated and no tagsPresent param
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "Tag preservation test")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags())
+            .containsExactlyInAnyOrderElementsOf(originalTags);
+      }
+
+      @Test
+      public void rejectsEmptyRequiredFields() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "")
+            )
+            .andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void returns404ForNonExistentObject() throws Exception {
+        String url = String.format(
+            "/api/v1/projects/%s/objects/%s.nonexistent",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.project().getProjectAbbr()
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(url)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "irrelevant")
+            )
+            .andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void updatesModificationTimestamp() throws Exception {
+        Date beforeUpdate = new Date();
+        Thread.sleep(50);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "Timestamp form test")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
+      }
     }
 
   }
