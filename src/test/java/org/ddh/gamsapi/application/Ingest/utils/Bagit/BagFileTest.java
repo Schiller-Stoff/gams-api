@@ -34,7 +34,7 @@ public class BagFileTest extends UnitTest {
             Assertions.assertThat(bagFile.getSize()).isEqualTo(TEST_DATASTREAM.getSize());
             Assertions.assertThat(bagFile.getTitle()).isEqualTo(TEST_DATASTREAM.getBaseMetadata().getTitle());
             Assertions.assertThat(bagFile.getDescription()).isEqualTo(TEST_DATASTREAM.getBaseMetadata().getDescription());
-            Assertions.assertThat(bagFile.getBagpath()).isEqualTo(TEST_DATASTREAM.getBagPath());
+            Assertions.assertThat(bagFile.getBagpath()).isEqualTo(TEST_DATASTREAM.getFilePath());
             Assertions.assertThat(bagFile.getMd5Checksum()).isEqualTo(TEST_DATASTREAM.getMd5Checksum());
             Assertions.assertThat(bagFile.getSha512Checksum()).isEqualTo(TEST_DATASTREAM.getSha512Checksum());
             Assertions.assertThat(bagFile.getCreator()).isEqualTo(TEST_DATASTREAM.getBaseMetadata().getCreator());

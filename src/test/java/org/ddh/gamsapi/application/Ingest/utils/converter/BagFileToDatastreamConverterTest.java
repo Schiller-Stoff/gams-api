@@ -57,7 +57,7 @@ public class BagFileToDatastreamConverterTest extends UnitTest {
         Assertions.assertThat(convertedDatastream.getTags()).isEqualTo(TEST_BAG_FILE.getTags());
         Assertions.assertThat(convertedDatastream.getLang()).isEqualTo(TEST_BAG_FILE.getLang());
 
-        Assertions.assertThat(convertedDatastream.getBagPath()).isEqualTo(TEST_BAG_FILE.getBagpath());
+        Assertions.assertThat(convertedDatastream.getFilePath()).isEqualTo(TEST_BAG_FILE.getBagpath());
         Assertions.assertThat(convertedDatastream.getMimeType()).isEqualTo(TEST_BAG_FILE.getMimetype());
 
     }

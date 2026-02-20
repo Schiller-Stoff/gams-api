@@ -82,14 +82,14 @@ public class Datastream {
   @NotEmpty
   private String mimeType;
 
-    /**
-     * Relative path of a datastream from the source bag
-     * Contains the original filename of the datastream
-     * Example: data/content/TEI_SOURCE.xml
-     */
-  @Column(name = "bag_path")
+  /**
+   * Original path of a file from upload
+   * Also contains the original filename
+   * Example: data/content/TEI_SOURCE.xml for given file.
+   */
+  @Column(name = "file_path")
   @NotEmpty
-  private String bagPath;
+  private String filePath;
 
   @Column
   @NotNull
@@ -237,12 +237,12 @@ public class Datastream {
   }
 
   public String getFileName(){
-    if(bagPath == null) {
+    if(filePath == null) {
       String msg = "Encountered unexpected null value when getting filename from dsid: dsid is null. %s" + this;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-    return StringUtils.getFilename(bagPath);
+    return StringUtils.getFilename(filePath);
   }
 
   // implement to String method for better logging
@@ -252,7 +252,7 @@ public class Datastream {
             "digitalObject=" + (digitalObject != null ? digitalObject.getId() : "null") +
             ", dsid='" + dsid + '\'' +
             ", mimeType='" + mimeType + '\'' +
-            ", bagPath='" + bagPath + '\'' +
+            ", bagPath='" + filePath + '\'' +
             ", size=" + size +
             ", type='" + type + '\'' +
             ", created=" + created +

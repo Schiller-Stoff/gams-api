@@ -311,7 +311,7 @@ public class IngestServiceIT extends IntegrationTest {
       Assertions.assertThat(foundDatastream.getBaseMetadata().getRights())
           .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getRights());
 
-      Assertions.assertThat(foundDatastream.getBagPath())
+      Assertions.assertThat(foundDatastream.getFilePath())
           .isEqualTo(TestDatastream.BAG_PATH.getValue());
 
       Assertions.assertThat(foundDatastream.getLang().size()).isEqualTo(TestDatastream.DATASTREAM_LANG.size());

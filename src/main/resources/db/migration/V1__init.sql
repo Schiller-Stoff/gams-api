@@ -10,7 +10,7 @@ create table archival_record
 create table datastream
 (
     dsid              varchar(255) not null,
-    bag_path          varchar(255) not null,
+    file_path          varchar(255) not null,
     creator           varchar(255) not null,
     description       varchar(2000),
     md5_checksum      varchar(255) not null,
