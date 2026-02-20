@@ -1,7 +1,6 @@
 package org.ddh.gamsapi.domain.Datastream.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 public class DatastreamValidationException extends DatastreamException {
   public DatastreamValidationException(String reason) {

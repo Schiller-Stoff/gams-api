@@ -3,10 +3,12 @@ package org.ddh.gamsapi.domain.Datastream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectId;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
+import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserAuthenticationRequiredException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,6 +28,7 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -285,5 +288,159 @@ public class DatastreamService implements IDatastreamService {
         foundDatastreamViews.map(IDatastreamIdView::getDsid)
     );
 
+  }
+
+  @Override
+  @Transactional
+  public Datastream createFromUpload(String digitalObjectId, DatastreamCreateDto dto,
+                                     MultipartFile file) {
+
+    // 1. Validate digital object exists
+    DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "Cannot create datastream. Digital object not found: " + digitalObjectId
+        ));
+
+    // 2. Validate file is present
+    if (file == null || file.isEmpty()) {
+      throw new DatastreamValidationException(
+          "Cannot create datastream " + dto + ". Uploaded file was empty or null"
+      );
+    }
+
+    // 3. Derive DSID from original filename
+    String originalFilename = file.getOriginalFilename();
+    if (originalFilename == null || originalFilename.isBlank()) {
+      throw new DatastreamValidationException(
+          "Cannot create datastream " + dto + ". Uploaded file must have a filename"
+      );
+    }
+    String dsid = sanitizeDsid(originalFilename);
+
+    // 4. Check for duplicate
+    DatastreamId datastreamId = new DatastreamId(dsid, digitalObjectId);
+    if (datastreamRepository.existsById(datastreamId)) {
+      throw new DatastreamAlreadyExistsException(
+          "Datastream with dsid '" + dsid + "' already exists on digital object "
+              + digitalObjectId
+      );
+    }
+
+    // 5. Stream file to disk WITH checksum computation
+    WriteResult writeResult;
+    try (InputStream inputStream = file.getInputStream()) {
+      writeResult = datastreamContentRepository.saveWithChecksums(inputStream, datastreamId);
+    } catch (IOException e) {
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save file content for datastream " + datastreamId
+              + " at digital object: " + digitalObjectId
+              + " Original error: " + e.getMessage(), e);
+    }
+
+    // 6. Build and persist datastream entity with server-computed values
+    MetadataBaseEntity metadata = new MetadataBaseEntity();
+    metadata.setTitle(dto.getTitle());
+    metadata.setDescription(dto.getDescription());
+    metadata.setCreator(dto.getCreator());
+    metadata.setRights(dto.getRights());
+
+    Datastream datastream = new DatastreamBuilder()
+        .dsid(dsid)
+        .digitalObject(digitalObject)
+        .baseMetadata(metadata)
+        .mimeType(resolveMimeType(file))
+        .size(file.getSize())
+        .bagPath("upload/" + dsid)
+        .md5Checksum(writeResult.md5Checksum())
+        .sha512Checksum(writeResult.sha512Checksum())
+        .tags(new HashSet<>())
+        .lang(new HashSet<>())
+        .build();
+
+    Datastream savedDatastream = datastreamRepository.save(datastream);
+
+    // 7. Publish modification event (updates parent timestamps)
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException(
+            "Failed to create datastream " + dsid + ". Current user is not logged in"
+        )
+    );
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(digitalObjectId),
+            new Date(),
+            currentUser
+        )
+    );
+
+    log.info("Successfully created datastream {} via direct upload on object {}",
+        dsid, digitalObjectId);
+    return savedDatastream;
+  }
+
+  /**
+   * Sanitizes a filename to a valid DSID.
+   * Allowed characters: [a-zA-Z0-9._]
+   * Replaces spaces with underscores, strips everything else.
+   */
+  private String sanitizeDsid(String filename) {
+    // Take only the filename part (strip any path separators)
+    String name = filename;
+    int lastSep = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+    if (lastSep >= 0) {
+      name = name.substring(lastSep + 1);
+    }
+
+    // Replace spaces/hyphens with underscores, strip invalid chars
+    name = name.replace(' ', '_').replace('-', '_');
+    name = name.replaceAll("[^a-zA-Z0-9._]", "");
+
+    // Ensure not empty after sanitization
+    if (name.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Filename '" + filename + "' contains no valid characters for a DSID. "
+              + "Allowed: letters, digits, dots, underscores."
+      );
+    }
+
+    // Enforce max length from @Size constraint
+    if (name.length() > 256) {
+      name = name.substring(0, 256);
+    }
+
+    return name;
+  }
+
+  /**
+   * Resolves MIME type for uploaded file.
+   * Falls back to application/octet-stream if detection fails.
+   */
+  private String resolveMimeType(MultipartFile file) {
+    // First: try the content type from the upload
+    String contentType = file.getContentType();
+    if (contentType != null && !contentType.isBlank()
+        && !contentType.equals("application/octet-stream")) {
+      return contentType;
+    }
+
+    // Second: try Java's built-in detection based on filename extension
+    String filename = file.getOriginalFilename();
+    if (filename != null) {
+      try {
+        String detected = java.nio.file.Files.probeContentType(
+            java.nio.file.Path.of(filename)
+        );
+        if (detected != null) {
+          return detected;
+        }
+      } catch (IOException e) {
+        log.warn("MIME type probe failed for {}: {}", filename, e.getMessage());
+      }
+    }
+
+    // Final fallback
+    return "application/octet-stream";
   }
 }

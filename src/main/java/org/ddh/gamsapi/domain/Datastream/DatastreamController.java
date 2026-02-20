@@ -1,21 +1,15 @@
 package org.ddh.gamsapi.domain.Datastream;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.*;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentService;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamService;
@@ -25,7 +19,20 @@ import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.MimeTypeUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -322,6 +329,80 @@ public class DatastreamController {
         id,
         PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
+  }
+
+  /**
+   * REST API: Create a new datastream via file upload.
+   * Checksums (MD5 + SHA-512) are computed server-side during file write.
+   */
+  @PostMapping(
+      path = "/datastreams",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+  )
+  @ResponseBody
+  @Operation(
+      summary = "Create a new datastream",
+      description = "Uploads a file as a new datastream for the specified digital object. "
+          + "The DSID is derived from the uploaded filename. "
+          + "Checksums (MD5, SHA-512) are computed server-side during file write. "
+          + "Requires authentication.",
+      responses = {
+          @ApiResponse(responseCode = "201", description = "Datastream created successfully",
+              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
+          @ApiResponse(responseCode = "400", description = "Invalid input or file missing",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Project or digital object not found",
+              content = @Content),
+          @ApiResponse(responseCode = "409", description = "Datastream with this DSID already exists",
+              content = @Content)
+      }
+  )
+  @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
+  @Parameter(name = "id", description = "ID of the digital object", required = true)
+  public ResponseEntity<IDatastreamDetailsView> createDatastreamJson(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @Valid DatastreamCreateDto dto,
+      @RequestParam("file") MultipartFile file
+  ) {
+    if (!projectService.exists(projectAbbr)) {
+      throw new ProjectNotFoundException(
+          "Cannot create datastream. Project does not exist: " + projectAbbr
+      );
+    }
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    Datastream created = datastreamService.createFromUpload(id, dto, file);
+
+    IDatastreamDetailsView view = datastreamService
+        .findDatastreamDetailsById(created.deriveDatastreamId());
+
+    return ResponseEntity
+        .status(HttpStatus.CREATED)
+        .body(view);
+  }
+
+  /**
+   * Webclient: Create a new datastream via HTML form.
+   */
+  @Hidden
+  @PostMapping(
+      path = "/datastreams",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+      produces = MimeTypeUtils.TEXT_HTML_VALUE
+  )
+  public String createDatastreamFromForm(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @Valid DatastreamCreateDto dto,
+      @RequestParam("file") MultipartFile file,
+      @RequestHeader Map<String, String> requestHeader
+  ) {
+
+    datastreamService.createFromUpload(id, dto, file);
+    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
+    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 

@@ -1,7 +1,6 @@
 package org.ddh.gamsapi.domain.Datastream.utils.exceptions;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 
 /**
  * Thrown when attempting to create a datastream with a dsid

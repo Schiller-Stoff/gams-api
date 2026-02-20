@@ -1,5 +1,8 @@
 package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAlreadyExistsException;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotWriteFileException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
@@ -80,4 +83,17 @@ public interface IDatastreamService {
    */
   PagedResponse<String> findAllIds(String digitalObjectId, Pageable pageable) throws DigitalObjectNotFoundException;
 
+  /**
+   * Creates a new datastream from a direct file upload (bypassing BagIt workflow).
+   * Derives DSID from filename, computes checksums server-side.
+   *
+   * @param digitalObjectId the parent digital object ID
+   * @param dto metadata provided by the user
+   * @param file the uploaded file
+   * @return the created datastream
+   * @throws DigitalObjectNotFoundException if the digital object doesn't exist
+   * @throws DatastreamAlreadyExistsException if a datastream with the derived DSID already exists
+   * @throws DatastreamCannotWriteFileException if file write fails
+   */
+  Datastream createFromUpload(String digitalObjectId, DatastreamCreateDto dto, MultipartFile file);
 }

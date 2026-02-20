@@ -241,6 +241,75 @@
           <br/>
           <br/>
 
+        <!-- Create Datastream Form — only for authenticated users -->
+        <div sec:authorize="isAuthenticated()" class="mt-4">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="mb-0 h5">
+                <i class="ti ti-upload me-2 text-primary"></i>Add Datastream
+              </h3>
+            </div>
+            <div class="card-body">
+
+<!--              &lt;!&ndash; Success message &ndash;&gt;-->
+<!--              <div th:if="${datastreamCreateSuccess}" class="alert alert-success alert-dismissible fade show">-->
+<!--                <span th:text="${datastreamCreateSuccess}"></span>-->
+<!--                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--              </div>-->
+
+<!--              &lt;!&ndash; Error message &ndash;&gt;-->
+<!--              <div th:if="${datastreamCreateError}" class="alert alert-danger alert-dismissible fade show">-->
+<!--                <span th:text="${datastreamCreateError}"></span>-->
+<!--                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>-->
+<!--              </div>-->
+
+              <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams'}"
+                    method="POST"
+                    enctype="multipart/form-data">
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">File *</label>
+                    <input type="file" name="file" class="form-control" required>
+                    <small class="text-muted">
+                      The filename will be used as the datastream identifier (DSID).
+                      Checksums are computed automatically on the server.
+                    </small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Title *</label>
+                    <input type="text" name="title" class="form-control" required maxlength="255"
+                           placeholder="e.g. Front page photograph">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Creator *</label>
+                    <input type="text" name="creator" class="form-control" required maxlength="255"
+                           placeholder="e.g. John Doe">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Rights *</label>
+                    <input type="text" name="rights" class="form-control" required maxlength="255"
+                           placeholder="e.g. CC BY 4.0">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Description *</label>
+                  <textarea required name="description" class="form-control" rows="2" maxlength="2000"
+                            placeholder="Optional description"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                  <i class="ti ti-upload me-1"></i>Upload Datastream
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
 
 
         <div class="mt-2">
