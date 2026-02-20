@@ -366,11 +366,30 @@
           </div>
           <div>
             <ul class="list-group border">
-              <li class="list-group-item"><b>Object id:</b> <span th:text="${do.id}"></span></li>
-              <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
-              <li class="list-group-item"><b>Created:</b> <span th:text="${do.getCreated()}"></span></li>
-              <li class="list-group-item"><b>Created by:</b> <span th:text="${do.getCreatedBy()}"></span></li>
-              <li class="list-group-item"><b>Modified by:</b> <span th:text="${do.getModifiedBy()}"></span></li>
+              <li class="list-group-item">
+                <small>object id</small>
+                <p th:text="${do.id}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>owned by project</small>
+                <p th:text="${project.projectAbbr}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>Created:</small>
+                <p th:text="${do.getCreated()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>created by</small>
+                <p th:text="${do.getCreatedBy()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>modified</small>
+                <p th:text="${do.getModified()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>modified by</small>
+                <p th:text="${do.getModifiedBy()}"></p>
+              </li>
             </ul>
             <br/>
           </div>
