@@ -457,6 +457,17 @@
                            th:value="${sortedTagsCsv}"
                            placeholder="tag1, tag2, tag3" />
                   </div>
+                  <div class="mb-3">
+                    <label class="form-label">Main Resource (DSID)</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="mainResource" class="form-control"
+                           th:value="${do.mainResource?.dsid}"
+                           pattern="[a-zA-Z0-9._]*"
+                           maxlength="256"
+                           placeholder="e.g. TEI_SOURCE">
+                    <small class="text-muted">
+                      Case-sensitive datastream identifier. Leave empty to clear.
+                    </small>
+                  </div>
                   <div sec:authorize="isAuthenticated()">
                     <button  type="submit" class="btn btn-primary">
                       <i class="ti ti-check me-1"></i>Save changes
