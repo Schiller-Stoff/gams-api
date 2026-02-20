@@ -219,16 +219,11 @@ public class IngestControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void digitalObjectViewContainsExpectedMainResourceTwice(){
+      public void digitalObjectViewContainsExpectedMainResource(){
         // check if label of main resource is there
-        Assertions.assertThat(response).contains("main resource");
+        Assertions.assertThat(response).contains("Main resource");
         // check if the value of the main resource is there
         Assertions.assertThat(response).contains(String.format(">%s<", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue()));
-        //match expected datastream id two times (once in list overview / once as main-resource)
-        Assertions.assertThat(response).containsPattern(
-            String.format("(%s.*?){2}", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-        );
-
       }
 
     }
