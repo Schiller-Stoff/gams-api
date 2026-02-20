@@ -4,6 +4,7 @@ import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestUser;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
@@ -57,7 +58,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     testDataSet = testDataBuilder.buildTestDataSet();
     // needed when changing digital objects
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
-        .thenReturn(Optional.of("test-user"));
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested

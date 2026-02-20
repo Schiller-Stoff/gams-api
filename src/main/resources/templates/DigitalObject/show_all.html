@@ -213,7 +213,7 @@
                     </a>
                   </th:block>
                   <span th:if="${#lists.size(do.tags) > 5}"
-                        class="badge bg-secondary me-1 mb-1">...</span>
+                        class="badge bg-light me-1 mb-1 text-dark">...</span>
                 </td>
                 <td sec:authorize="isAuthenticated()">
                     <i th:if="${do.isIngested()}"
