@@ -85,15 +85,18 @@ public interface IDatastreamService {
 
   /**
    * Creates a new datastream from a direct file upload (bypassing BagIt workflow).
-   * Derives DSID from filename, computes checksums server-side.
+   * The dsid is provided explicitly by the caller.
+   * Checksums (MD5 + SHA-512) are computed server-side during file write.
    *
    * @param digitalObjectId the parent digital object ID
+   * @param dsid the datastream identifier (from path variable)
    * @param dto metadata provided by the user
    * @param file the uploaded file
    * @return the created datastream
    * @throws DigitalObjectNotFoundException if the digital object doesn't exist
-   * @throws DatastreamAlreadyExistsException if a datastream with the derived DSID already exists
+   * @throws DatastreamAlreadyExistsException if a datastream with this dsid already exists
    * @throws DatastreamCannotWriteFileException if file write fails
    */
-  Datastream createFromUpload(String digitalObjectId, DatastreamCreateDto dto, MultipartFile file);
+  Datastream createFromUpload(String digitalObjectId, String dsid, DatastreamCreateDto dto,
+                              MultipartFile file);
 }

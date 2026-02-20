@@ -292,8 +292,8 @@ public class DatastreamService implements IDatastreamService {
 
   @Override
   @Transactional
-  public Datastream createFromUpload(String digitalObjectId, DatastreamCreateDto dto,
-                                     MultipartFile file) {
+  public Datastream createFromUpload(String digitalObjectId, String dsid,
+                                     DatastreamCreateDto dto, MultipartFile file) {
 
     // 1. Validate digital object exists
     DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
@@ -303,21 +303,17 @@ public class DatastreamService implements IDatastreamService {
 
     // 2. Validate file is present
     if (file == null || file.isEmpty()) {
-      throw new DatastreamValidationException(
-          "Cannot create datastream " + dto + ". Uploaded file was empty or null"
-      );
+      // TODO exception
+      throw new IllegalArgumentException("File must not be empty");
     }
 
-    // 3. Derive DSID from original filename
-    String originalFilename = file.getOriginalFilename();
-    if (originalFilename == null || originalFilename.isBlank()) {
-      throw new DatastreamValidationException(
-          "Cannot create datastream " + dto + ". Uploaded file must have a filename"
-      );
+    // 3. Validate dsid
+    if (dsid == null || dsid.isBlank()) {
+      // TODO exception
+      throw new IllegalArgumentException("Datastream identifier (dsid) must not be empty");
     }
-    String dsid = sanitizeDsid(originalFilename);
 
-    // 4. Check for duplicate
+    // 4. Check for duplicate — explicit check for clear 409 error
     DatastreamId datastreamId = new DatastreamId(dsid, digitalObjectId);
     if (datastreamRepository.existsById(datastreamId)) {
       throw new DatastreamAlreadyExistsException(
@@ -359,7 +355,7 @@ public class DatastreamService implements IDatastreamService {
 
     Datastream savedDatastream = datastreamRepository.save(datastream);
 
-    // 7. Publish modification event (updates parent timestamps)
+    // 7. Publish modification event (updates parent object + project timestamps)
     String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
         () -> new UserAuthenticationRequiredException(
             "Failed to create datastream " + dsid + ". Current user is not logged in"
@@ -378,39 +374,6 @@ public class DatastreamService implements IDatastreamService {
     log.info("Successfully created datastream {} via direct upload on object {}",
         dsid, digitalObjectId);
     return savedDatastream;
-  }
-
-  /**
-   * Sanitizes a filename to a valid DSID.
-   * Allowed characters: [a-zA-Z0-9._]
-   * Replaces spaces with underscores, strips everything else.
-   */
-  private String sanitizeDsid(String filename) {
-    // Take only the filename part (strip any path separators)
-    String name = filename;
-    int lastSep = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
-    if (lastSep >= 0) {
-      name = name.substring(lastSep + 1);
-    }
-
-    // Replace spaces/hyphens with underscores, strip invalid chars
-    name = name.replace(' ', '_').replace('-', '_');
-    name = name.replaceAll("[^a-zA-Z0-9._]", "");
-
-    // Ensure not empty after sanitization
-    if (name.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Filename '" + filename + "' contains no valid characters for a DSID. "
-              + "Allowed: letters, digits, dots, underscores."
-      );
-    }
-
-    // Enforce max length from @Size constraint
-    if (name.length() > 256) {
-      name = name.substring(0, 256);
-    }
-
-    return name;
   }
 
   /**
@@ -443,4 +406,5 @@ public class DatastreamService implements IDatastreamService {
     // Final fallback
     return "application/octet-stream";
   }
+
 }

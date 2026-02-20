@@ -331,22 +331,19 @@ public class DatastreamController {
     );
   }
 
-  /**
-   * REST API: Create a new datastream via file upload.
-   * Checksums (MD5 + SHA-512) are computed server-side during file write.
-   */
-  @PostMapping(
-      path = "/datastreams",
+  @PutMapping(
+      path = "/datastreams/{dsid}",
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       produces = MimeTypeUtils.APPLICATION_JSON_VALUE
   )
   @ResponseBody
   @Operation(
       summary = "Create a new datastream",
-      description = "Uploads a file as a new datastream for the specified digital object. "
-          + "The DSID is derived from the uploaded filename. "
+      description = "Creates a new datastream with the given DSID on the specified digital object. "
+          + "The file content is uploaded as multipart. "
           + "Checksums (MD5, SHA-512) are computed server-side during file write. "
-          + "Requires authentication.",
+          + "Returns 409 Conflict if a datastream with this DSID already exists. "
+          + "Requires authentication and project membership.",
       responses = {
           @ApiResponse(responseCode = "201", description = "Datastream created successfully",
               content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
@@ -360,9 +357,11 @@ public class DatastreamController {
   )
   @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
   @Parameter(name = "id", description = "ID of the digital object", required = true)
+  @Parameter(name = "dsid", description = "Datastream identifier (e.g. my_image.jpg)", required = true)
   public ResponseEntity<IDatastreamDetailsView> createDatastreamJson(
       @PathVariable String projectAbbr,
       @PathVariable String id,
+      @PathVariable String dsid,
       @Valid DatastreamCreateDto dto,
       @RequestParam("file") MultipartFile file
   ) {
@@ -373,7 +372,7 @@ public class DatastreamController {
     }
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
-    Datastream created = datastreamService.createFromUpload(id, dto, file);
+    Datastream created = datastreamService.createFromUpload(id, dsid, dto, file);
 
     IDatastreamDetailsView view = datastreamService
         .findDatastreamDetailsById(created.deriveDatastreamId());
@@ -383,24 +382,20 @@ public class DatastreamController {
         .body(view);
   }
 
-  /**
-   * Webclient: Create a new datastream via HTML form.
-   */
   @Hidden
   @PostMapping(
       path = "/datastreams",
-      consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-      produces = MimeTypeUtils.TEXT_HTML_VALUE
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE
   )
   public String createDatastreamFromForm(
       @PathVariable String projectAbbr,
       @PathVariable String id,
+      @RequestParam("dsid") String dsid,
       @Valid DatastreamCreateDto dto,
       @RequestParam("file") MultipartFile file,
       @RequestHeader Map<String, String> requestHeader
   ) {
-
-    datastreamService.createFromUpload(id, dto, file);
+    datastreamService.createFromUpload(id, dsid, dto, file);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
     return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
