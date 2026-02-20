@@ -107,7 +107,7 @@ public class BagFile {
     public static BagFile from(Datastream datastream) {
       return BagFile.builder()
           .size(datastream.getSize())
-          .bagpath(datastream.getBagPath())
+          .bagpath(datastream.getFilePath())
           .dsid(datastream.getDsid())
           .mimetype(datastream.getMimeType())
           .title(datastream.getBaseMetadata().getTitle())

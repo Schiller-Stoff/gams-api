@@ -175,6 +175,7 @@
                   <th scope="col">
                     <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=mimeType'">mimetype</a>
                   </th>
+                  <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -187,6 +188,17 @@
                   ></a></td>
                   <td><span th:title="${datastream.getBaseMetadata().getTitle()}" th:if="${datastream.baseMetadata}" th:text="${#strings.abbreviate(datastream.baseMetadata.title, 50)}"></span></td>
                   <td><span th:text="${datastream.getMimeType()}"></span></td>
+                  <td sec:authorize="isAuthenticated()">
+                    <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}}"
+                          method="POST"
+                          class="d-inline"
+                          th:attr="onsubmit='return confirm(\'Delete datastream ' + ${datastream.getDsid()} + '? This cannot be undone.\')'">
+                      <input type="hidden" name="_method" value="DELETE" />
+                      <button type="submit" class="btn btn-outline-danger btn-sm py-0 px-1">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </form>
+                  </td>
                 </tr>
                 </tbody>
               </table>

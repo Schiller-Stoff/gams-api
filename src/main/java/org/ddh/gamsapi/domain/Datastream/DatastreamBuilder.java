@@ -38,7 +38,7 @@ public class DatastreamBuilder {
   }
 
   public DatastreamBuilder bagPath(String bagPath) {
-    datastream.setBagPath(bagPath);
+    datastream.setFilePath(bagPath);
     return this;
   }
 
