@@ -89,6 +89,79 @@
               <i class="ti ti-list-details me-2 text-primary"></i>Datastreams
             </h3>
           </div>
+
+          <div sec:authorize="isAuthenticated()" class="mb-3">
+            <button type="button" class="btn btn-outline-primary"
+                    data-bs-toggle="collapse" data-bs-target="#createDatastreamForm">
+              <i class="ti ti-upload me-1"></i>Add datastream
+            </button>
+
+            <div class="collapse m-2" id="createDatastreamForm">
+              <div class="mt-2">
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr}
+                + '/objects/' + ${do.id} + '/datastreams'}"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">File *</label>
+                      <input type="file" name="file" id="datastreamFileInput"
+                             class="form-control" required>
+                      <small class="text-muted">
+                        Checksums (MD5, SHA-512) are computed automatically on the server.
+                      </small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">DSID (Datastream Identifier) *</label>
+                      <input type="text" name="dsid" id="datastreamDsidInput"
+                             class="form-control" required
+                             maxlength="256" pattern="[a-zA-Z0-9._]+"
+                             title="Only letters, digits, dots, and underscores"
+                             placeholder="e.g. my_image.jpg">
+                      <small class="text-muted">
+                        Must be unique per digital object. Auto-filled from filename.
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Title *</label>
+                      <input type="text" name="title" class="form-control" required
+                             maxlength="255" placeholder="e.g. Front page photograph">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Creator *</label>
+                      <input type="text" name="creator" class="form-control" required
+                             maxlength="255" placeholder="e.g. John Doe">
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Rights *</label>
+                      <input type="text" name="rights" class="form-control" required
+                             maxlength="255" placeholder="e.g. CC BY 4.0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Description *</label>
+                      <textarea required name="description" class="form-control" rows="1"
+                                maxlength="2000" placeholder="Optional description"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Error display for server-side validation -->
+                  <div th:if="${datastreamCreateError}" class="alert alert-danger"
+                       th:text="${datastreamCreateError}"></div>
+
+                  <button type="submit" class="btn btn-success">
+                    <i class="ti ti-check me-1"></i>Create
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
           <div class="mb-3">
               <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
                 <thead>
@@ -240,6 +313,33 @@
 
           <br/>
           <br/>
+
+
+
+        <!-- Auto-fill DSID from filename -->
+        <script th:inline="javascript">
+            document.getElementById('datastreamFileInput')
+                .addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        let filename = this.files[0].name;
+                        let dsid = filename.replace(/[\s\-]/g, '_').replace(/[^a-zA-Z0-9._]/g, '');
+                        document.getElementById('datastreamDsidInput').value = dsid;
+                    }
+                });
+        </script>
+
+        <!-- Auto-fill DSID from filename -->
+        <script th:inline="javascript">
+            document.getElementById('datastreamFileInput')
+                .addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        let filename = this.files[0].name;
+                        // sanitize: replace spaces/hyphens with underscores, strip invalid chars
+                        let dsid = filename.replace(/[\s\-]/g, '_').replace(/[^a-zA-Z0-9._]/g, '');
+                        document.getElementById('datastreamDsidInput').value = dsid;
+                    }
+                });
+        </script>
 
 
 

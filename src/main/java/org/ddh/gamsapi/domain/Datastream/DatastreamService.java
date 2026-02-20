@@ -3,10 +3,12 @@ package org.ddh.gamsapi.domain.Datastream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectId;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
+import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserAuthenticationRequiredException;
 import org.springframework.context.ApplicationEventPublisher;
@@ -26,6 +28,7 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -286,4 +289,122 @@ public class DatastreamService implements IDatastreamService {
     );
 
   }
+
+  @Override
+  @Transactional
+  public Datastream createFromUpload(String digitalObjectId, String dsid,
+                                     DatastreamCreateDto dto, MultipartFile file) {
+
+    // 1. Validate digital object exists
+    DigitalObject digitalObject = digitalObjectRepository.findById(digitalObjectId)
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "Cannot create datastream. Digital object not found: " + digitalObjectId
+        ));
+
+    // 2. Validate file is present
+    if (file == null || file.isEmpty()) {
+      // TODO exception
+      throw new IllegalArgumentException("File must not be empty");
+    }
+
+    // 3. Validate dsid
+    if (dsid == null || dsid.isBlank()) {
+      // TODO exception
+      throw new IllegalArgumentException("Datastream identifier (dsid) must not be empty");
+    }
+
+    // 4. Check for duplicate — explicit check for clear 409 error
+    DatastreamId datastreamId = new DatastreamId(dsid, digitalObjectId);
+    if (datastreamRepository.existsById(datastreamId)) {
+      throw new DatastreamAlreadyExistsException(
+          "Datastream with dsid '" + dsid + "' already exists on digital object "
+              + digitalObjectId
+      );
+    }
+
+    // 5. Stream file to disk WITH checksum computation
+    WriteResult writeResult;
+    try (InputStream inputStream = file.getInputStream()) {
+      writeResult = datastreamContentRepository.saveWithChecksums(inputStream, datastreamId);
+    } catch (IOException e) {
+      throw new DatastreamCannotWriteFileException(
+          "Failed to save file content for datastream " + datastreamId
+              + " at digital object: " + digitalObjectId
+              + " Original error: " + e.getMessage(), e);
+    }
+
+    // 6. Build and persist datastream entity with server-computed values
+    MetadataBaseEntity metadata = new MetadataBaseEntity();
+    metadata.setTitle(dto.getTitle());
+    metadata.setDescription(dto.getDescription());
+    metadata.setCreator(dto.getCreator());
+    metadata.setRights(dto.getRights());
+
+    Datastream datastream = new DatastreamBuilder()
+        .dsid(dsid)
+        .digitalObject(digitalObject)
+        .baseMetadata(metadata)
+        .mimeType(resolveMimeType(file))
+        .size(file.getSize())
+        .bagPath("upload/" + dsid)
+        .md5Checksum(writeResult.md5Checksum())
+        .sha512Checksum(writeResult.sha512Checksum())
+        .tags(new HashSet<>())
+        .lang(new HashSet<>())
+        .build();
+
+    Datastream savedDatastream = datastreamRepository.save(datastream);
+
+    // 7. Publish modification event (updates parent object + project timestamps)
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException(
+            "Failed to create datastream " + dsid + ". Current user is not logged in"
+        )
+    );
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(digitalObjectId),
+            new Date(),
+            currentUser
+        )
+    );
+
+    log.info("Successfully created datastream {} via direct upload on object {}",
+        dsid, digitalObjectId);
+    return savedDatastream;
+  }
+
+  /**
+   * Resolves MIME type for uploaded file.
+   * Falls back to application/octet-stream if detection fails.
+   */
+  private String resolveMimeType(MultipartFile file) {
+    // First: try the content type from the upload
+    String contentType = file.getContentType();
+    if (contentType != null && !contentType.isBlank()
+        && !contentType.equals("application/octet-stream")) {
+      return contentType;
+    }
+
+    // Second: try Java's built-in detection based on filename extension
+    String filename = file.getOriginalFilename();
+    if (filename != null) {
+      try {
+        String detected = java.nio.file.Files.probeContentType(
+            java.nio.file.Path.of(filename)
+        );
+        if (detected != null) {
+          return detected;
+        }
+      } catch (IOException e) {
+        log.warn("MIME type probe failed for {}: {}", filename, e.getMessage());
+      }
+    }
+
+    // Final fallback
+    return "application/octet-stream";
+  }
+
 }

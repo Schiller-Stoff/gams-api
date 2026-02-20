@@ -1,11 +1,17 @@
 package org.ddh.gamsapi.domain.Datastream;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestUser;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -23,6 +29,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.TestUtilities.TestDatastreamContent;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,8 +54,13 @@ public class DatastreamControllerIT extends IntegrationTest {
   @Autowired
   private IDatastreamContentRepository datastreamContentRepository;
 
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Autowired
   private TestDataBuilder testDataBuilder;
@@ -58,6 +70,9 @@ public class DatastreamControllerIT extends IntegrationTest {
   @BeforeEach
   public void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing digital objects
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -746,6 +761,187 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     }
 
+  }
+
+  @Nested
+  public class PUTDatastreams {
+
+    @Test
+    @WithMockUser
+    public void putReturns201WithCreatedDatastream() throws Exception {
+      MockMultipartFile file = new MockMultipartFile(
+          "file", "new_upload.txt", "text/plain", "test content".getBytes()
+      );
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          "new_upload.txt"
+      );
+
+      // MockMvc: multipart defaults to POST, override to PUT
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(file)
+                  .param("title", "Test Title")
+                  .param("creator", "Test Creator")
+                  .param("rights", "CC BY 4.0")
+                  .param("description", "Test Description")
+                  .with(request -> { request.setMethod("PUT"); return request; })
+                  .accept(MediaType.APPLICATION_JSON)
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          )
+          .andExpect(status().isCreated())
+          .andExpect(MockMvcResultMatchers.jsonPath("$.dsid").value("new_upload.txt"));
+    }
+
+    @Test
+    @WithMockUser
+    public void putReturns409OnDuplicateDsid() throws Exception {
+      MockMultipartFile file = new MockMultipartFile(
+          "file",
+          testDataSet.mainDatastream().getDsid(),
+          "text/plain",
+          "data".getBytes()
+      );
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(file)
+                  .param("title", "Test")
+                  .param("creator", "Creator")
+                  .param("rights", "Rights")
+                  .with(request -> { request.setMethod("PUT"); return request; })
+                  .accept(MediaType.APPLICATION_JSON)
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          )
+          .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void putRequiresAuthentication() throws Exception {
+      MockMultipartFile file = new MockMultipartFile(
+          "file", "test.txt", "text/plain", "data".getBytes()
+      );
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          "test.txt"
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(file)
+                  .param("title", "Test")
+                  .param("creator", "Creator")
+                  .param("rights", "Rights")
+                  .with(request -> { request.setMethod("PUT"); return request; })
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+                  .with(SecurityMockMvcRequestPostProcessors.anonymous())
+          )
+          .andExpect(status().is4xxClientError());
+    }
+
+    // === Webclient (POST form) ===
+
+    @Test
+    @WithMockUser
+    public void formPostRedirectsAfterSuccessfulCreation() throws Exception {
+      MockMultipartFile file = new MockMultipartFile(
+          "file", "webclient_upload.txt", "text/plain", "data".getBytes()
+      );
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(file)
+                  .param("dsid", "webclient_upload.txt")
+                  .param("title", "Test Title")
+                  .param("creator", "Test Creator")
+                  .param("rights", "CC BY 4.0")
+                  .param("description", "Test Description")
+                  .accept(MediaType.TEXT_HTML)
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          )
+          .andExpect(status().is3xxRedirection());
+
+      // Verify the datastream was actually persisted
+      DatastreamId dsId = new DatastreamId(
+          "webclient_upload.txt",
+          testDataSet.digitalObject().getId()
+      );
+      Assertions.assertThat(datastreamRepository.findById(dsId)).isPresent();
+    }
+
+    @Test
+    @WithMockUser
+    public void formPostFailsOnDuplicate() throws Exception {
+      MockMultipartFile file = new MockMultipartFile(
+          "file",
+          testDataSet.mainDatastream().getDsid(),
+          "text/plain",
+          "data".getBytes()
+      );
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(file)
+                  .param("dsid", testDataSet.mainDatastream().getDsid())
+                  .param("title", "Test")
+                  .param("creator", "Creator")
+                  .param("rights", "Rights")
+                  .accept(MediaType.TEXT_HTML)
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          )
+          .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @WithMockUser
+    public void formPostFailsOnValidationError() throws Exception {
+      MockMultipartFile file = new MockMultipartFile(
+          "file", "test.txt", "text/plain", "data".getBytes()
+      );
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      // Missing required 'title' field
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(file)
+                  .param("dsid", "test.txt")
+                  .param("creator", "Creator")
+                  .param("rights", "Rights")
+                  .accept(MediaType.TEXT_HTML)
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          )
+          .andExpect(status().is4xxClientError());
+    }
   }
 
 }

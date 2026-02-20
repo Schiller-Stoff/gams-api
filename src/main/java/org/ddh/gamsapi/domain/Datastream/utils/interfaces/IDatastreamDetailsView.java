@@ -44,6 +44,10 @@ public interface IDatastreamDetailsView {
 
     Set<String> getLang();
 
+    String getMd5Checksum();
+
+    String getSha512Checksum();
+
     interface DigitalObjectView {
         String getId();
     }

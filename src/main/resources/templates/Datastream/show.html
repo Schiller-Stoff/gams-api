@@ -1,167 +1,138 @@
 <!doctype html>
 <html lang="en">
 
-<head th:replace="~{fragments/general.html :: headtemplate}" />
+<head th:replace="~{fragments/general.html :: headtemplate}"/>
 
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
-    <aside th:replace="~{fragments/general.html :: aside}"></aside>
-    <div class="body-wrapper">
-        <header th:replace="~{fragments/general.html :: header}"></header>
-        <br/>
-        <br/>
-        <br/>
-        <div class="p-md-5 p-3" style="min-height: 100vh">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
-                    <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
-                    <li class="breadcrumb-item"><a th:text="${datastream.digitalObject.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a></li>
-                    <li class="breadcrumb-item"><a th:text="${datastream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a></li>
-                </ol>
-            </nav>
-            <h2 class="display-6 fw-bold text-primary mb-3" th:text="${datastream.dsid}"></h2>
-            <p>
-                Overview over a singular datastream
-            </p>
-
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-id me-2"></i>Identifier(s)
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item"><b>Dsid: </b><span th:text="${datastream.getDsid()}"></span></li>
-                        <li class="list-group-item"><b>Digital object id: </b><span th:text="${datastream.getDigitalObject().getId()}"></span></li>
-                        <li class="list-group-item"><b>Owning project: </b><span th:text="${project.getProjectAbbr()}"></span></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-database-export me-2"></i>Content
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
-                        <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
-                        <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
-                    </ul>
-
-            <div class="mt-2">
-                <a target="_blank" class="btn btn-light-primary mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
-            </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-database me-2"></i>Metadata
-                    </h3>
-                    <div>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
-                    </div>
-                </div>
-                <div class="card-body">
-            <h4 class="h5 mt-1">Metadata</h4>
-            <ul class="list-group" th:if="${datastream.baseMetadata}">
-                <li class="list-group-item">
-                    <small>title</small>
-                    <p th:text="${datastream.baseMetadata.title}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>creator</small>
-                    <p th:text="${datastream.baseMetadata.creator}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>description</small>
-                    <p th:text="${datastream.baseMetadata.description}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>tags</small>
-                    <p th:text="${datastream.getTags}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>languages</small>
-                    <p th:text="${datastream.getLang}"></p>
-                </li>
-<!--                <li class="list-group-item">-->
-<!--                  <small>md5 checksum</small>-->
-<!--                  <p th:text="${datastream.getmd5Checksum}"></p>-->
-<!--                </li>-->
-<!--                <li class="list-group-item">-->
-<!--                  <small>sha-512 checksum</small>-->
-<!--                  <p th:text="${datastream.sha512Checksum}"></p>-->
-<!--                </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:subject</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.subject}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>contributor</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.contributor}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>date</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.date}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:type</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.type}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:format</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.format}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:source</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.source}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:language</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.language}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:relation</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.relation}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:coverage</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.coverage}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:rights</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.rights}"></p>-->
-                <!--        </li>-->
-            </ul>
-            </div>
-            </div>
-            <br/>
-<!--            <h4>Content preview</h4>-->
-<!--            <div class="border border-2">-->
-<!--                <embed-->
-<!--                        th:src="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"-->
-<!--                        width="100%"-->
-<!--                        height="600px"-->
-<!--                        th:type="${datastream.mimeType}"-->
-<!--                ></embed>-->
-<!--            </div>-->
-                </div>
-            </div>
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
+          <li class="breadcrumb-item"><a th:text="${project.projectAbbr}"
+                                         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
+          <li class="breadcrumb-item"><a th:text="${datastream.digitalObject.id}"
+                                         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a>
+          </li>
+          <li class="breadcrumb-item"><a th:text="${datastream.dsid}"
+                                         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a>
+          </li>
+        </ol>
+      </nav>
+      <h2 class="display-6 fw-bold text-primary mb-3" th:text="${datastream.dsid}"></h2>
+      <p>
+        Overview over a singular datastream
+      </p>
+      <div class="mt-2">
+        <a target="_blank" class="btn btn-outline-primary mb-3"
+           th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">View content</a>
+      </div>
+      <h3 class="h5">
+        <i class="ti ti-database-export me-2 text-primary"></i>Content metadata
+      </h3>
+      <div>
+        <div>
+          <ul class="list-group border">
+            <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
+            <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
+            <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
+            <li class="list-group-item"><b>MD5:</b> <span th:text="${datastream.getMd5Checksum()}"></span></li>
+            <li class="list-group-item"><b>SHA-512:</b> <span th:text="${datastream.getSha512Checksum()}"></span></li>
+          </ul>
         </div>
+      </div>
 
-        <footer th:replace="~{fragments/general.html :: footer}"></footer>
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <h3 class="h5">
+          <i class="text-primary ti ti-database me-2"></i>Technical &amp; administrative metadata
+        </h3>
+        <div>
+          <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i
+                  class="ti ti-file"></i>XML</a>
+          <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
+                  class="ti ti-file"></i>JSON</a>
+        </div>
+      </div>
+      <div>
+
+        <div>
+          <ul class="list-group border" th:if="${datastream.baseMetadata}">
+            <li class="list-group-item">
+              <small>title</small>
+              <p th:text="${datastream.baseMetadata.title}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>creator</small>
+              <p th:text="${datastream.baseMetadata.creator}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>description</small>
+              <p th:text="${datastream.baseMetadata.description}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>tags</small>
+              <p th:text="${datastream.getTags}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>languages</small>
+              <p th:text="${datastream.getLang}"></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <br/>
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-id me-2 text-primary"></i>Auditing metadata
+          </h3>
+        </div>
+        <div>
+          <ul class="list-group border">
+            <li class="list-group-item">
+              <small>object id</small>
+              <p th:text="${datastream.getDsid()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>owned by project</small>
+              <p th:text="${project.projectAbbr}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>Created:</small>
+              <p th:text="${datastream.getCreated()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>created by</small>
+              <p th:text="${datastream.getCreatedBy()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified</small>
+              <p th:text="${datastream.getModified()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified by</small>
+              <p th:text="${datastream.getModifiedBy()}"></p>
+            </li>
+          </ul>
+          <br/>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
+
+<footer th:replace="~{fragments/general.html :: footer}"></footer>
+</div>
 </div>
 </body>
 
