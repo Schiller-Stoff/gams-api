@@ -42,6 +42,8 @@
             <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
             <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
             <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
+            <li class="list-group-item"><b>MD5:</b> <span th:text="${datastream.getMd5Checksum()}"></span></li>
+            <li class="list-group-item"><b>SHA-512:</b> <span th:text="${datastream.getSha512Checksum()}"></span></li>
           </ul>
           <div class="mt-2">
             <a target="_blank" class="btn btn-outline-primary mb-3"
