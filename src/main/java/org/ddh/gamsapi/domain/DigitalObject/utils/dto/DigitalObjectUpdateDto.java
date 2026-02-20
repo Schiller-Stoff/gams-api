@@ -32,4 +32,11 @@ public class DigitalObjectUpdateDto {
   private String funder;
   private String objectType;
   private Set<String> tags;
+
+  /**
+   * Comma-separated tags string from form submission.
+   * Parsed into the tags Set in the controller/service layer.
+   * The JSON API should use the 'tags' field directly.
+   */
+  private String tagsCommaSeparated;
 }

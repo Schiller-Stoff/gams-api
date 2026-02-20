@@ -44,9 +44,11 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
@@ -174,6 +176,10 @@ public class DigitalObjectController {
     boolean canEdit = authentication != null && authentication.isAuthenticated()
         && !(authentication instanceof AnonymousAuthenticationToken);
     model.addAttribute("isAuthenticated", canEdit);
+
+    // tags of object sorted
+    model.addAttribute("sortedTagsCsv",
+        foundObject.getTags().stream().sorted().collect(Collectors.joining(", ")));
 
     return "DigitalObject/show";
   }
@@ -418,6 +424,16 @@ public class DigitalObjectController {
       @ModelAttribute DigitalObjectUpdateDto patch
   ) {
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    // Parse comma-separated tags from form into the tags Set
+    if (patch.getTagsCommaSeparated() != null) {
+      Set<String> parsedTags = Arrays.stream(patch.getTagsCommaSeparated().split(","))
+          .map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .collect(Collectors.toSet());
+      patch.setTags(parsedTags);
+    }
+
     digitalObjectService.updateDigitalObject(id, patch);
     return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }

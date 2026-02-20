@@ -351,27 +351,23 @@
                     <input th:readonly="${!isAuthenticated}" type="text" name="objectType" class="form-control"
                            th:value="${do.objectType}">
                   </div>
-
+                  <div class="mb-3">
+                    <label class="form-label">Object Tags</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="tagsCommaSeparated"
+                           class="form-control"
+                           th:value="${sortedTagsCsv}"
+                           placeholder="tag1, tag2, tag3" />
+                  </div>
                   <div sec:authorize="isAuthenticated()">
                     <button  type="submit" class="btn btn-primary">
                       <i class="ti ti-check me-1"></i>Save changes
                     </button>
                   </div>
+
                 </form>
               </div>
             </div>
-
-            <ul class="list-group border">
-                <li class="list-group-item">
-                  <small>object tags</small>
-                  <div>
-                    <th:block th:each="tag, iterStat : ${do.tags}">
-                      <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
-                    </th:block>
-                  </div>
-                </li>
-              </ul>
-              <br/>
+            <br/>
           </div>
         </div>
 
