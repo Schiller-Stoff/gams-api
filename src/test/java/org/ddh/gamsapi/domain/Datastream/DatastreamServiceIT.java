@@ -2,6 +2,8 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAlreadyExistsException;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
@@ -378,5 +380,225 @@ public class DatastreamServiceIT extends IntegrationTest {
 
   }
 
+
+  @Nested
+  public class CreateFromUpload {
+
+    @Test
+    public void createsDatastreamWithServerComputedChecksums() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test Image");
+      dto.setCreator("Test Creator");
+      dto.setRights("CC BY 4.0");
+      dto.setDescription("Test description");
+
+      Datastream created = datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          "uploaded_file.txt",
+          dto,
+          TEST_MULTIPART_FILE
+      );
+
+      org.assertj.core.api.Assertions.assertThat(created).isNotNull();
+      org.assertj.core.api.Assertions.assertThat(created.getDsid()).isEqualTo("uploaded_file.txt");
+      org.assertj.core.api.Assertions.assertThat(created.getMd5Checksum()).isNotEmpty();
+      org.assertj.core.api.Assertions.assertThat(created.getSha512Checksum()).isNotEmpty();
+      org.assertj.core.api.Assertions.assertThat(created.getSize()).isEqualTo(TEST_MULTIPART_FILE.getSize());
+    }
+
+    @Test
+    public void setsMetadataFromDto() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("My Title");
+      dto.setCreator("My Creator");
+      dto.setRights("CC BY 4.0");
+      dto.setDescription("My Description");
+
+      Datastream created = datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          "metadata_test.txt",
+          dto,
+          TEST_MULTIPART_FILE
+      );
+
+      org.assertj.core.api.Assertions.assertThat(created.getBaseMetadata().getTitle()).isEqualTo("My Title");
+      org.assertj.core.api.Assertions.assertThat(created.getBaseMetadata().getCreator()).isEqualTo("My Creator");
+      org.assertj.core.api.Assertions.assertThat(created.getBaseMetadata().getRights()).isEqualTo("CC BY 4.0");
+      org.assertj.core.api.Assertions.assertThat(created.getBaseMetadata().getDescription()).isEqualTo("My Description");
+    }
+
+    @Test
+    public void setsSyntheticBagPath() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      Datastream created = datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          "photo.jpg",
+          dto,
+          new MockMultipartFile("file", "photo.jpg", "image/jpeg", "data".getBytes())
+      );
+
+      org.assertj.core.api.Assertions.assertThat(created.getBagPath()).isEqualTo("upload/photo.jpg");
+    }
+
+    @Test
+    public void throwsIfDigitalObjectNotFound() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.createFromUpload(
+              "nonexistent.id", "test.txt", dto, TEST_MULTIPART_FILE
+          )
+      ).isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
+    public void throwsIfDuplicateDsid() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      // Use the same dsid as the existing main datastream
+      String existingDsid = testDataSet.mainDatastream().getDsid();
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.createFromUpload(
+              testDataSet.digitalObject().getId(),
+              existingDsid,
+              dto,
+              TEST_MULTIPART_FILE
+          )
+      ).isInstanceOf(DatastreamAlreadyExistsException.class);
+    }
+
+    @Test
+    public void throwsIfFileIsEmpty() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      MockMultipartFile emptyFile = new MockMultipartFile(
+          "file", "empty.txt", "text/plain", new byte[0]
+      );
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.createFromUpload(
+              testDataSet.digitalObject().getId(),
+              "empty.txt",
+              dto,
+              emptyFile
+          )
+      ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void throwsIfDsidIsBlank() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.createFromUpload(
+              testDataSet.digitalObject().getId(),
+              "   ",
+              dto,
+              TEST_MULTIPART_FILE
+          )
+      ).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void defaultsTagsAndLangToEmptySets() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      Datastream created = datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          "empty_collections.txt",
+          dto,
+          TEST_MULTIPART_FILE
+      );
+
+      org.assertj.core.api.Assertions.assertThat(created.getTags()).isNotNull().isEmpty();
+      org.assertj.core.api.Assertions.assertThat(created.getLang()).isNotNull().isEmpty();
+    }
+
+    @Test
+    public void updatesParentObjectModifiedTimestamp() throws InterruptedException {
+      Date originalModified = testDataSet.digitalObject().getModified();
+      Thread.sleep(50);
+
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          "timestamp_test.txt",
+          dto,
+          TEST_MULTIPART_FILE
+      );
+
+      DigitalObject refreshed = digitalObjectRepository
+          .findById(testDataSet.digitalObject().getId()).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshed.getModified()).isAfter(originalModified);
+    }
+
+    @Test
+    public void updatesParentProjectModifiedTimestamp() throws InterruptedException {
+      Date originalModified = testDataSet.project().getModified();
+      Thread.sleep(50);
+
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          "project_ts_test.txt",
+          dto,
+          TEST_MULTIPART_FILE
+      );
+
+      var refreshedProject = projectRepository
+          .findById(testDataSet.project().getProjectAbbr()).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshedProject.getModified()).isAfter(originalModified);
+    }
+
+    @Test
+    public void fileContentIsPersisted() {
+      DatastreamCreateDto dto = new DatastreamCreateDto();
+      dto.setTitle("Test");
+      dto.setCreator("Creator");
+      dto.setRights("Rights");
+
+      final String DSID = "persisted_content.txt";
+
+      datastreamService.createFromUpload(
+          testDataSet.digitalObject().getId(),
+          DSID,
+          dto,
+          TEST_MULTIPART_FILE
+      );
+
+      DatastreamId dsId = new DatastreamId(DSID, testDataSet.digitalObject().getId());
+      org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(dsId)).isTrue();
+    }
+  }
 
 }
