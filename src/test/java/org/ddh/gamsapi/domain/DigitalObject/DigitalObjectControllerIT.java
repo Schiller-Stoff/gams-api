@@ -474,6 +474,165 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
+  public class PATCHDigitalObject {
+
+    @Nested
+    public class PatchDigitalObject {
+
+      @Test
+      public void PATCHAllowsToUpdateTitle() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        final String NEW_TITLE = "Updated title";
+        final String body = "{\"title\": \"" + NEW_TITLE + "\"}";
+
+        String response = mockMvc.perform(
+                MockMvcRequestBuilders.patch(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        org.assertj.core.api.Assertions.assertThat(response).contains(NEW_TITLE);
+
+        // Verify via repository
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions. assertThat(
+                updated.getBaseMetadata().getTitle())
+            .isEqualTo(NEW_TITLE);
+      }
+
+      @Test
+      public void PATCHPreservesUnchangedFields() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
+        String originalPublisher = testDataSet.digitalObject().getPublisher();
+
+        // Only update description
+        final String body = "{\"description\": \"new desc\"}";
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getDescription()).isEqualTo("new desc");
+        org.assertj.core.api.Assertions. assertThat(updated.getBaseMetadata().getRights()).isEqualTo(originalRights);
+        org.assertj.core.api.Assertions.assertThat(updated.getPublisher()).isEqualTo(originalPublisher);
+      }
+
+      @Test
+      public void PATCHRejectsEmptyTitle() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        final String body = "{\"title\": \"\"}";
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void PATCHRequiresRequestBody() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+        ).andExpect(status().is4xxClientError());
+      }
+
+      @Test
+      public void PATCHReturns404ForNonExistentObject() throws Exception {
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch("/api/v1/projects/test/objects/test.nonexistent")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\": \"test\"}")
+        ).andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void PATCHAllowsToUpdateMultipleFields() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        final String body = """
+            {
+                "title": "New Title",
+                "description": "New Description",
+                "funder": "New Funder"
+            }
+            """;
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo("New Title");
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getDescription()).isEqualTo("New Description");
+        org.assertj.core.api.Assertions.assertThat(updated.getFunder()).isEqualTo("New Funder");
+      }
+
+      @Test
+      public void PATCHUpdatesModificationTimestamp() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        Date beforeUpdate = new Date();
+        Thread.sleep(50); // ensure timestamp difference
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\": \"Timestamp Test\"}")
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
+      }
+
+    }
+
+  }
+
+  @Nested
   public class WebclientTests {
 
     @Nested
