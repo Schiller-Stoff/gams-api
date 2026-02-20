@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.DatastreamBuilder;
+import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotWriteFileException;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMainResourceView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
@@ -520,6 +522,26 @@ public class DigitalObjectService implements IDigitalObjectService {
     if (patch.getTags() != null) {
       existing.setTags(new HashSet<>(patch.getTags()));
     }
+
+    // NEW: mainResource handling
+    if (patch.getMainResource() != null) {
+      if (patch.getMainResource().isEmpty()) {
+        // Allow clearing the main resource
+        existing.setMainResource(null);
+      } else {
+        // Validate the referenced datastream exists
+        DatastreamId dsId = new DatastreamId(patch.getMainResource(), existing.getId());
+        if (!datastreamRepository.existsById(dsId)) {
+          throw new DigitalObjectValidationException(
+              "Cannot set main resource. Datastream with dsid '"
+                  + patch.getMainResource()
+                  + "' does not exist on digital object " + existing.getId()
+          );
+        }
+        existing.setMainResource(patch.getMainResource());
+      }
+    }
+
   }
 
   private void validateInvariants(DigitalObject object) {

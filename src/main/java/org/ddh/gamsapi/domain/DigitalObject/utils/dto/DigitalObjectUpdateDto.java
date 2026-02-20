@@ -39,4 +39,12 @@ public class DigitalObjectUpdateDto {
    * The JSON API should use the 'tags' field directly.
    */
   private String tagsCommaSeparated;
+
+  /**
+   * The dsid of the main resource datastream.
+   * Set to a valid dsid to define/change the main datastream.
+   * Set to empty string "" to clear the main resource.
+   * Omit (null) to leave unchanged.
+   */
+  private String mainResource;
 }

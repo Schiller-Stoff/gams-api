@@ -761,6 +761,93 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(persisted.getBaseMetadata().getDescription())
           .isEqualTo(originalDescription);
     }
+
+
+    @Nested
+    public class UpdateMainResource {
+
+      @Test
+      public void setsMainResourceToExistingDatastream() {
+        var patch = new DigitalObjectUpdateDto();
+        patch.setMainResource(testDataSet.mainDatastream().getDsid());
+
+        var result = digitalObjectService.updateDigitalObject(
+            testDataSet.digitalObject().getId(), patch
+        );
+
+        Assertions.assertThat(result.getMainResource()).isNotNull();
+        Assertions.assertThat(result.getMainResource().getDsid())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
+
+        // Verify persistence
+        DigitalObject persisted = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        Assertions.assertThat(persisted.getMainResource())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
+      }
+
+      @Test
+      public void rejectsNonExistentDatastreamAsDsid() {
+        var patch = new DigitalObjectUpdateDto();
+        patch.setMainResource("DOES_NOT_EXIST");
+
+        Assertions.assertThatThrownBy(
+                () -> digitalObjectService.updateDigitalObject(
+                    testDataSet.digitalObject().getId(), patch
+                )
+            ).isInstanceOf(DigitalObjectValidationException.class)
+            .hasMessageContaining("DOES_NOT_EXIST")
+            .hasMessageContaining("does not exist");
+      }
+
+      @Test
+      public void clearsMainResourceWithEmptyString() {
+        // First set a main resource
+        DigitalObject obj = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        obj.setMainResource(testDataSet.mainDatastream().getDsid());
+        digitalObjectRepository.save(obj);
+
+        // Then clear it
+        var patch = new DigitalObjectUpdateDto();
+        patch.setMainResource("");
+
+        digitalObjectService.updateDigitalObject(
+            testDataSet.digitalObject().getId(), patch
+        );
+
+        DigitalObject persisted = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        Assertions.assertThat(persisted.getMainResource()).isNull();
+      }
+
+      @Test
+      public void preservesMainResourceWhenNotInPatch() {
+        // Set a main resource first
+        DigitalObject obj = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        obj.setMainResource(testDataSet.mainDatastream().getDsid());
+        digitalObjectRepository.save(obj);
+
+        // Patch something else
+        var patch = new DigitalObjectUpdateDto();
+        patch.setTitle("Unrelated change");
+
+        digitalObjectService.updateDigitalObject(
+            testDataSet.digitalObject().getId(), patch
+        );
+
+        DigitalObject persisted = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        Assertions.assertThat(persisted.getMainResource())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
+      }
+    }
   }
 
 }

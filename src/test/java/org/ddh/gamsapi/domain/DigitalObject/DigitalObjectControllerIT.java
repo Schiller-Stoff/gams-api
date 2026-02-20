@@ -630,6 +630,74 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
       }
 
+      @Test
+      public void setsMainResourceViaJson() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String body = String.format(
+            "{\"mainResource\": \"%s\"}",
+            testDataSet.mainDatastream().getDsid()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getMainResource())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
+      }
+
+      @Test
+      public void rejectsInvalidDsid() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"mainResource\": \"NONEXISTENT_DSID\"}")
+        ).andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void clearsMainResourceViaEmptyString() throws Exception {
+        // Pre-set mainResource
+        DigitalObject obj = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        obj.setMainResource(testDataSet.mainDatastream().getDsid());
+        digitalObjectRepository.save(obj);
+
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"mainResource\": \"\"}")
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getMainResource()).isNull();
+      }
+
     }
 
     @Nested
@@ -828,6 +896,28 @@ public class DigitalObjectControllerIT extends IntegrationTest {
             testDataSet.digitalObject().getId()
         ).orElseThrow();
         org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
+      }
+
+      @Test
+      public void setsMainResourceViaForm() throws Exception {
+        final String url = String.format(
+            "/api/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(url)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("mainResource", testDataSet.mainDatastream().getDsid())
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getMainResource())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
       }
     }
 
