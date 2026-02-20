@@ -3,12 +3,17 @@ package org.ddh.gamsapi.domain.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.Datastream.Datastream;
+import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
@@ -496,6 +501,312 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  public class CreateDigitalObject {
+
+    private DigitalObjectCreateDto buildValidDto() {
+      var dto = new DigitalObjectCreateDto();
+      dto.setIdSuffix("democreate");
+      dto.setTitle("Created Title");
+      dto.setCreator("Created Creator");
+      dto.setRights("CC BY 4.0");
+      dto.setPublisher("Created Publisher");
+      dto.setDescription("Created Description");
+      dto.setObjectType("TEI");
+      dto.setFunder("Created Funder");
+      return dto;
+    }
+
+    @Test
+    public void createsDigitalObjectWithExpectedId() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result).isNotNull();
+      Assertions.assertThat(result.getId()).isEqualTo(expectedId);
+    }
+
+    @Test
+    public void persistsDigitalObjectInDatabase() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      var persisted = digitalObjectRepository.findById(expectedId);
+      Assertions.assertThat(persisted).isPresent();
+    }
+
+    @Test
+    public void createdObjectHasExpectedMetadata() {
+      var dto = buildValidDto();
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result.getBaseMetadata().getTitle()).isEqualTo(dto.getTitle());
+      Assertions.assertThat(result.getBaseMetadata().getCreator()).isEqualTo(dto.getCreator());
+      Assertions.assertThat(result.getBaseMetadata().getRights()).isEqualTo(dto.getRights());
+      Assertions.assertThat(result.getBaseMetadata().getDescription()).isEqualTo(dto.getDescription());
+      Assertions.assertThat(result.getPublisher()).isEqualTo(dto.getPublisher());
+      Assertions.assertThat(result.getFunder()).isEqualTo(dto.getFunder());
+      Assertions.assertThat(result.getObjectType()).isEqualTo(dto.getObjectType());
+    }
+
+    @Test
+    public void createdObjectBelongsToExpectedProject() {
+      var dto = buildValidDto();
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result.getProject().getProjectAbbr())
+          .isEqualTo(testDataSet.project().getProjectAbbr());
+    }
+
+    @Test
+    public void createsTimestamps() {
+      var dto = buildValidDto();
+      Date beforeCreate = new Date();
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      // re-fetch to get DB-generated timestamps
+      var persisted = digitalObjectRepository.findById(result.getId()).orElseThrow();
+      Assertions.assertThat(persisted.getCreated()).isNotNull();
+      // modified may be null or equal to created depending on Hibernate behavior
+    }
+
+    // --- Dublin Core entries ---
+
+    @Test
+    public void createsDublinCoreEntries() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(expectedId);
+      // Should have at least title, creator, rights, publisher (+ optional description)
+      Assertions.assertThat(dcEntries).isNotEmpty();
+      Assertions.assertThat(dcEntries.size()).isGreaterThanOrEqualTo(4);
+    }
+
+    @Test
+    public void createsDublinCoreEntryForTitle() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(expectedId);
+      Assertions.assertThat(dcEntries)
+          .anySatisfy(entry -> {
+            Assertions.assertThat(entry.getName()).isEqualTo("title");
+            Assertions.assertThat(entry.getValue()).isEqualTo(dto.getTitle());
+          });
+    }
+
+    @Test
+    public void createsDublinCoreEntryForDescription() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(expectedId);
+      Assertions.assertThat(dcEntries)
+          .anySatisfy(entry -> {
+            Assertions.assertThat(entry.getName()).isEqualTo("description");
+            Assertions.assertThat(entry.getValue()).isEqualTo(dto.getDescription());
+          });
+    }
+
+    @Test
+    public void skipsDublinCoreDescriptionWhenEmpty() {
+      var dto = buildValidDto();
+      dto.setDescription(null);
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(expectedId);
+      Assertions.assertThat(dcEntries)
+          .noneSatisfy(entry ->
+              Assertions.assertThat(entry.getName()).isEqualTo("description")
+          );
+    }
+
+    // --- DC.xml datastream ---
+
+    @Test
+    public void createsDcXmlDatastream() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      DatastreamId dcDsId = new DatastreamId(GAMSDsid.DC.getValue(), expectedId);
+      Assertions.assertThat(datastreamRepository.existsById(dcDsId)).isTrue();
+    }
+
+    @Test
+    public void dcXmlDatastreamHasExpectedMimeType() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      DatastreamId dcDsId = new DatastreamId(GAMSDsid.DC.getValue(), expectedId);
+      Datastream dcDs = datastreamRepository.findById(dcDsId).orElseThrow();
+      Assertions.assertThat(dcDs.getMimeType()).isEqualTo("application/xml");
+    }
+
+    @Test
+    public void dcXmlDatastreamHasChecksums() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      DatastreamId dcDsId = new DatastreamId(GAMSDsid.DC.getValue(), expectedId);
+      Datastream dcDs = datastreamRepository.findById(dcDsId).orElseThrow();
+      Assertions.assertThat(dcDs.getMd5Checksum()).isNotEmpty();
+      Assertions.assertThat(dcDs.getSha512Checksum()).isNotEmpty();
+    }
+
+    @Test
+    public void dcXmlDatastreamFileExistsOnDisk() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      DatastreamId dcDsId = new DatastreamId(GAMSDsid.DC.getValue(), expectedId);
+      Assertions.assertThat(datastreamContentRepository.exists(dcDsId)).isTrue();
+    }
+
+    @Test
+    public void dcXmlDatastreamHasPositiveSize() {
+      var dto = buildValidDto();
+      String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
+
+      digitalObjectService.create(testDataSet.project().getProjectAbbr(), dto);
+
+      DatastreamId dcDsId = new DatastreamId(GAMSDsid.DC.getValue(), expectedId);
+      Datastream dcDs = datastreamRepository.findById(dcDsId).orElseThrow();
+      Assertions.assertThat(dcDs.getSize()).isGreaterThan(0);
+    }
+
+    // --- Validation / error cases ---
+
+    @Test
+    public void throwsWhenProjectDoesNotExist() {
+      var dto = buildValidDto();
+
+      Assertions.assertThatThrownBy(
+          () -> digitalObjectService.create("nonexistent", dto)
+      ).isInstanceOf(ProjectNotFoundException.class);
+    }
+
+    @Test
+    public void throwsWhenObjectAlreadyExists() {
+      // The testDataSet already has a digital object with id "test.test"
+      var dto = buildValidDto();
+      // Use the existing object's id suffix
+      String existingIdSuffix = testDataSet.digitalObject().getId()
+          .replace(testDataSet.project().getProjectAbbr() + ".", "");
+      dto.setIdSuffix(existingIdSuffix);
+
+      Assertions.assertThatThrownBy(
+          () -> digitalObjectService.create(
+              testDataSet.project().getProjectAbbr(), dto
+          )
+      ).isInstanceOf(DigitalObjectAlreadyExistsException.class);
+    }
+
+    @Test
+    public void doesNotPersistObjectWhenDuplicateIdDetected() {
+      var dto = buildValidDto();
+      String existingIdSuffix = testDataSet.digitalObject().getId()
+          .replace(testDataSet.project().getProjectAbbr() + ".", "");
+      dto.setIdSuffix(existingIdSuffix);
+
+      Assertions.assertThatThrownBy(
+          () -> digitalObjectService.create(
+              testDataSet.project().getProjectAbbr(), dto
+          )
+      ).isInstanceOf(DigitalObjectAlreadyExistsException.class);
+
+      // Verify original object is unchanged
+      var original = digitalObjectRepository.findById(
+          testDataSet.digitalObject().getId()
+      ).orElseThrow();
+      Assertions.assertThat(original.getBaseMetadata().getTitle())
+          .isEqualTo(testDataSet.digitalObject().getBaseMetadata().getTitle());
+    }
+
+    // --- Optional fields ---
+
+    @Test
+    public void createsObjectWithNullDescription() {
+      var dto = buildValidDto();
+      dto.setDescription(null);
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result.getBaseMetadata().getDescription()).isNull();
+    }
+
+    @Test
+    public void createsObjectWithNullFunder() {
+      var dto = buildValidDto();
+      dto.setFunder(null);
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result.getFunder()).isNull();
+    }
+
+    @Test
+    public void createsObjectWithNullObjectType() {
+      var dto = buildValidDto();
+      dto.setObjectType(null);
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result.getObjectType()).isNull();
+    }
+
+    // --- ID composition ---
+
+    @Test
+    public void composesIdFromProjectAbbrAndIdSuffix() {
+      var dto = buildValidDto();
+      dto.setIdSuffix("my.complex-suffix-123");
+
+      DigitalObject result = digitalObjectService.create(
+          testDataSet.project().getProjectAbbr(), dto
+      );
+
+      Assertions.assertThat(result.getId())
+          .isEqualTo(testDataSet.project().getProjectAbbr() + ".my.complex-suffix-123");
+    }
+  }
 
   @Nested
   public class UpdateDigitalObject {
