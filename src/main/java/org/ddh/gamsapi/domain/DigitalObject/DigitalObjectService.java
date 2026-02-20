@@ -18,16 +18,19 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectConversionException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectService;
+import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.MetadataBaseEntityBuilder;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
@@ -450,6 +453,98 @@ public class DigitalObjectService implements IDigitalObjectService {
         .replace(">", "&gt;")
         .replace("\"", "&quot;")
         .replace("'", "&apos;");
+  }
+
+
+
+
+  @Override
+  @Transactional
+  public DigitalObjectCompactDTO updateDigitalObject(String id, DigitalObjectUpdateDto patch) {
+    DigitalObject existing = digitalObjectRepository.findById(id)
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "Cannot update digital object. Object not found: " + id
+        ));
+
+    // Merge: only apply non-null fields from patch
+    applyPatch(existing, patch);
+
+    // Validate invariants after merge
+    // Bean validation won't catch this because the patch DTO doesn't have @NotEmpty
+    validateInvariants(existing);
+
+    DigitalObject saved = digitalObjectRepository.save(existing);
+
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor()
+        .orElseThrow(() -> new UserAuthenticationRequiredException(
+            "Failed to update object " + id + ". Current user is not logged in."
+        ));
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(saved.getId()),
+            new Date(),
+            currentUser
+        )
+    );
+
+    log.info("Successfully updated digital object {}", id);
+    return findDigitalObjectCompactDTOById(id);
+  }
+
+  private void applyPatch(DigitalObject existing, DigitalObjectUpdateDto patch) {
+    MetadataBaseEntity metadata = existing.getBaseMetadata();
+
+    if (patch.getTitle() != null) {
+      metadata.setTitle(patch.getTitle());
+    }
+    if (patch.getDescription() != null) {
+      metadata.setDescription(patch.getDescription());
+    }
+    if (patch.getRights() != null) {
+      metadata.setRights(patch.getRights());
+    }
+    if (patch.getCreator() != null) {
+      metadata.setCreator(patch.getCreator());
+    }
+    if (patch.getPublisher() != null) {
+      existing.setPublisher(patch.getPublisher());
+    }
+    if (patch.getFunder() != null) {
+      existing.setFunder(patch.getFunder());
+    }
+    if (patch.getObjectType() != null) {
+      existing.setObjectType(patch.getObjectType());
+    }
+    if (patch.getTags() != null) {
+      existing.setTags(patch.getTags());
+    }
+  }
+
+  private void validateInvariants(DigitalObject object) {
+    List<String> violations = new ArrayList<>();
+
+    MetadataBaseEntity metadata = object.getBaseMetadata();
+    if (metadata.getTitle() == null || metadata.getTitle().isEmpty()) {
+      violations.add("Title must not be empty");
+    }
+    if (metadata.getRights() == null || metadata.getRights().isEmpty()) {
+      violations.add("Rights must not be empty");
+    }
+    if (metadata.getCreator() == null || metadata.getCreator().isEmpty()) {
+      violations.add("Creator must not be empty");
+    }
+    if (object.getPublisher() == null || object.getPublisher().isEmpty()) {
+      violations.add("Publisher must not be empty");
+    }
+
+    if (!violations.isEmpty()) {
+      throw new DigitalObjectValidationException(
+          "PATCH would violate constraints on object " + object.getId() + ": "
+              + String.join(", ", violations)
+      );
+    }
   }
 
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head th:replace="~{fragments/general.html :: headtemplate}" />
 
@@ -78,10 +78,11 @@
         <p>
           Overview over a singular digital object
         </p>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
-        <a th:if="${submissionRecord}" class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
-
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
+        <a th:if="${submissionRecord}" class="btn btn-outline-primary" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
+        <br/>
+        <br/>
         <div>
           <div class="d-flex justify-content-between align-items-center">
             <h3 class="h5">
@@ -273,7 +274,7 @@
                       Main resource
                     </button>
                   </h2>
-                  <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                  <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
 
                       <ul>
@@ -307,7 +308,60 @@
                   </div>
                 </div>
               </div>
-              <ul class="list-group border">
+
+            <!-- Add after the existing metadata display, inside the sec:authorize="isAuthenticated()" guard -->
+            <div class="mt-2 mb-3">
+              <div id="metadata-edit-form" class="mt-3">
+                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                      method="POST">
+                  <input type="hidden" name="_method" value="PATCH" />
+
+                  <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control" required
+                           th:value="${do.baseMetadata.title}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Creator *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="creator" class="form-control" required
+                           th:value="${do.baseMetadata.creator}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea th:readonly="${!isAuthenticated}" name="description" class="form-control" rows="3"
+                              th:text="${do.baseMetadata.description}"></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Rights *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="rights" class="form-control" required
+                           th:value="${do.baseMetadata.rights}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Publisher *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="publisher" class="form-control" required
+                           th:value="${do.publisher}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Funder</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="funder" class="form-control"
+                           th:value="${do.funder}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Object Type</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="objectType" class="form-control"
+                           th:value="${do.objectType}">
+                  </div>
+
+                  <div sec:authorize="isAuthenticated()">
+                    <button  type="submit" class="btn btn-primary">
+                      <i class="ti ti-check me-1"></i>Save changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <ul class="list-group border">
                 <li class="list-group-item">
                   <small>identifier</small>
                   <p th:text="${do.id}"></p>
