@@ -5,6 +5,7 @@ import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAlreadyExistsException;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamValidationException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamService;
@@ -441,7 +442,7 @@ public class DatastreamServiceIT extends IntegrationTest {
           new MockMultipartFile("file", "photo.jpg", "image/jpeg", "data".getBytes())
       );
 
-      org.assertj.core.api.Assertions.assertThat(created.getBagPath()).isEqualTo("upload/photo.jpg");
+      org.assertj.core.api.Assertions.assertThat(created.getBagPath()).isEqualTo("photo.jpg");
     }
 
     @Test
@@ -496,7 +497,7 @@ public class DatastreamServiceIT extends IntegrationTest {
               dto,
               emptyFile
           )
-      ).isInstanceOf(IllegalArgumentException.class);
+      ).isInstanceOf(DatastreamValidationException.class);
     }
 
     @Test
@@ -513,7 +514,7 @@ public class DatastreamServiceIT extends IntegrationTest {
               dto,
               TEST_MULTIPART_FILE
           )
-      ).isInstanceOf(IllegalArgumentException.class);
+      ).isInstanceOf(DatastreamValidationException.class);
     }
 
     @Test

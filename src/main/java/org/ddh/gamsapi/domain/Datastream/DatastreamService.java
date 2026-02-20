@@ -301,16 +301,18 @@ public class DatastreamService implements IDatastreamService {
             "Cannot create datastream. Digital object not found: " + digitalObjectId
         ));
 
-    // 2. Validate file is present
-    if (file == null || file.isEmpty()) {
-      // TODO exception
-      throw new IllegalArgumentException("File must not be empty");
+    // 2. Validate dsid
+    if (dsid == null || dsid.isBlank()) {
+      throw new DatastreamValidationException(
+          "Cannot create datastream for object: " + digitalObjectId + ". Datastream identifier (dsid) must not be empty"
+      );
     }
 
-    // 3. Validate dsid
-    if (dsid == null || dsid.isBlank()) {
-      // TODO exception
-      throw new IllegalArgumentException("Datastream identifier (dsid) must not be empty");
+    // 3. Validate file is present
+    if (file == null || file.isEmpty()) {
+      throw new DatastreamValidationException(
+          "Cannot create datastream: " + dsid + " for object: " + digitalObjectId + ".  Sent file must not be empty"
+      );
     }
 
     // 4. Check for duplicate — explicit check for clear 409 error
@@ -346,7 +348,7 @@ public class DatastreamService implements IDatastreamService {
         .baseMetadata(metadata)
         .mimeType(resolveMimeType(file))
         .size(file.getSize())
-        .bagPath("upload/" + dsid)
+        .bagPath(dsid)
         .md5Checksum(writeResult.md5Checksum())
         .sha512Checksum(writeResult.sha512Checksum())
         .tags(new HashSet<>())
