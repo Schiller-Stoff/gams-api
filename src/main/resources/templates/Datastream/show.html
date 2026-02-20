@@ -33,6 +33,10 @@
       <p>
         Overview over a singular datastream
       </p>
+      <div class="mt-2">
+        <a target="_blank" class="btn btn-outline-primary mb-3"
+           th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">View content</a>
+      </div>
       <h3 class="h5">
         <i class="ti ti-database-export me-2 text-primary"></i>Content metadata
       </h3>
@@ -45,14 +49,10 @@
             <li class="list-group-item"><b>MD5:</b> <span th:text="${datastream.getMd5Checksum()}"></span></li>
             <li class="list-group-item"><b>SHA-512:</b> <span th:text="${datastream.getSha512Checksum()}"></span></li>
           </ul>
-          <div class="mt-2">
-            <a target="_blank" class="btn btn-outline-primary mb-3"
-               th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">View content</a>
-          </div>
         </div>
       </div>
 
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex justify-content-between align-items-center mt-3">
         <h3 class="h5">
           <i class="text-primary ti ti-database me-2"></i>Technical &amp; administrative metadata
         </h3>
@@ -65,7 +65,7 @@
       </div>
       <div>
 
-        <div class="card-body">
+        <div>
           <ul class="list-group border" th:if="${datastream.baseMetadata}">
             <li class="list-group-item">
               <small>title</small>
