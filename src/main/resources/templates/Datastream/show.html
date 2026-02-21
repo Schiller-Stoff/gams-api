@@ -44,30 +44,12 @@
            th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">View content</a>
       </div>
 
-
       <!-- ================================================================== -->
-      <!-- CONTENT METADATA (read-only) -->
-      <!-- ================================================================== -->
-      <h3 class="h5">
-        <i class="ti ti-database-export me-2 text-primary"></i>Content metadata
-      </h3>
-      <div>
-        <ul class="list-group border">
-          <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
-          <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
-          <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
-          <li class="list-group-item"><b>MD5:</b> <span th:text="${datastream.getMd5Checksum()}"></span></li>
-          <li class="list-group-item"><b>SHA-512:</b> <span th:text="${datastream.getSha512Checksum()}"></span></li>
-        </ul>
-      </div>
-
-
-      <!-- ================================================================== -->
-      <!-- TECHNICAL & ADMINISTRATIVE METADATA (display + edit form) -->
+      <!-- ADMINISTRATIVE METADATA (display + edit form) -->
       <!-- ================================================================== -->
       <div class="d-flex justify-content-between align-items-center mt-3">
         <h3 class="h5">
-          <i class="text-primary ti ti-database me-2"></i>Technical &amp; administrative metadata
+          <i class="text-primary ti ti-database me-2"></i>Administrative metadata
         </h3>
         <div>
           <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i
@@ -77,8 +59,8 @@
         </div>
       </div>
 
-      <div class="mt-2 mb-3">
-        <div id="metadata-edit-form" class="mt-3">
+      <div class="mb-3">
+        <div id="metadata-edit-form">
           <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}}"
                 method="POST">
             <input type="hidden" name="_method" value="PATCH" />
@@ -132,6 +114,22 @@
 
           </form>
         </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- CONTENT METADATA (read-only) -->
+      <!-- ================================================================== -->
+      <h3 class="h5">
+        <i class="ti ti-database-export me-2 text-primary"></i>Content metadata
+      </h3>
+      <div>
+        <ul class="list-group border">
+          <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
+          <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
+          <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
+          <li class="list-group-item"><b>MD5:</b> <span th:text="${datastream.getMd5Checksum()}"></span></li>
+          <li class="list-group-item"><b>SHA-512:</b> <span th:text="${datastream.getSha512Checksum()}"></span></li>
+        </ul>
       </div>
 
 
