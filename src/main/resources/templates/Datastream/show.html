@@ -77,107 +77,60 @@
         </div>
       </div>
 
-      <div>
-        <ul class="list-group border" th:if="${datastream.baseMetadata}">
-          <li class="list-group-item">
-            <small>title</small>
-            <p th:text="${datastream.baseMetadata.title}"></p>
-          </li>
-          <li class="list-group-item">
-            <small>creator</small>
-            <p th:text="${datastream.baseMetadata.creator}"></p>
-          </li>
-          <li class="list-group-item">
-            <small>rights</small>
-            <p th:text="${datastream.baseMetadata.rights}"></p>
-          </li>
-          <li class="list-group-item">
-            <small>description</small>
-            <p th:text="${datastream.baseMetadata.description}"></p>
-          </li>
-          <li class="list-group-item">
-            <small>tags</small>
-            <p th:text="${datastream.getTags}"></p>
-          </li>
-          <li class="list-group-item">
-            <small>languages</small>
-            <p th:text="${datastream.getLang}"></p>
-          </li>
-        </ul>
-      </div>
+      <div class="mt-2 mb-3">
+        <div id="metadata-edit-form" class="mt-3">
+          <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}}"
+                method="POST">
+            <input type="hidden" name="_method" value="PATCH" />
 
+            <div class="mb-3">
+              <label class="form-label">Title *</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control" required
+                     maxlength="255"
+                     th:value="${datastream.baseMetadata.title}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Creator *</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="creator" class="form-control" required
+                     maxlength="255"
+                     th:value="${datastream.baseMetadata.creator}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea th:readonly="${!isAuthenticated}" name="description" class="form-control" rows="3"
+                        maxlength="2000"
+                        th:text="${datastream.baseMetadata.description}"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Rights *</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="rights" class="form-control" required
+                     maxlength="255"
+                     th:value="${datastream.baseMetadata.rights}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tags</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="tagsCommaSeparated"
+                     class="form-control"
+                     th:value="${sortedTagsCsv}"
+                     placeholder="tag1, tag2, tag3" />
+              <small class="text-muted">Comma-separated list of tags.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Languages</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="langCommaSeparated"
+                     class="form-control"
+                     th:value="${sortedLangCsv}"
+                     placeholder="en, de, fr" />
+              <small class="text-muted">Comma-separated list of language codes.</small>
+            </div>
 
-      <!-- ================================================================== -->
-      <!-- METADATA EDIT FORM (authenticated users only) -->
-      <!-- ================================================================== -->
-      <div sec:authorize="isAuthenticated()" class="mt-3 mb-3">
-        <button type="button" class="btn btn-outline-primary btn-sm"
-                data-bs-toggle="collapse" data-bs-target="#metadataEditForm">
-          <i class="ti ti-edit me-1"></i>Edit metadata
-        </button>
-
-        <div class="collapse mt-2" id="metadataEditForm">
-          <div class="card card-body">
-            <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}}"
-                  method="POST">
-              <input type="hidden" name="_method" value="PATCH" />
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Title *</label>
-                  <input type="text" name="title" class="form-control" required
-                         maxlength="255"
-                         th:value="${datastream.baseMetadata.title}">
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Creator *</label>
-                  <input type="text" name="creator" class="form-control" required
-                         maxlength="255"
-                         th:value="${datastream.baseMetadata.creator}">
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea name="description" class="form-control" rows="3"
-                          maxlength="2000"
-                          th:text="${datastream.baseMetadata.description}"></textarea>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Rights *</label>
-                  <input type="text" name="rights" class="form-control" required
-                         maxlength="255"
-                         th:value="${datastream.baseMetadata.rights}">
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Tags</label>
-                  <input type="text" name="tagsCommaSeparated" class="form-control"
-                         th:value="${sortedTagsCsv}"
-                         placeholder="tag1, tag2, tag3" />
-                  <small class="text-muted">Comma-separated list of tags.</small>
-                </div>
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Languages</label>
-                  <input type="text" name="langCommaSeparated" class="form-control"
-                         th:value="${sortedLangCsv}"
-                         placeholder="en, de, fr" />
-                  <small class="text-muted">Comma-separated list of language codes.</small>
-                </div>
-              </div>
-
-              <!-- Error display for server-side validation -->
-              <div th:if="${updateError}" class="alert alert-danger" th:text="${updateError}"></div>
-
+            <div sec:authorize="isAuthenticated()">
               <button type="submit" class="btn btn-primary">
                 <i class="ti ti-check me-1"></i>Save changes
               </button>
-            </form>
-          </div>
+            </div>
+
+          </form>
         </div>
       </div>
 
