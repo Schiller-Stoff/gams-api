@@ -999,4 +999,216 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
   }
 
+
+  @Nested
+  public class PatchDatastreamMetadata {
+
+    @Test
+    public void updatesMetadataViaJsonPatch() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      String patchJson = """
+          {
+            "title": "Updated via PATCH",
+            "description": "New description"
+          }
+          """;
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.patch(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .content(patchJson)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains("Updated via PATCH")
+          .contains("New description");
+    }
+
+    @Test
+    public void preservesUnchangedFieldsViaJsonPatch() throws Exception {
+      String originalRights = testDataSet.mainDatastream().getBaseMetadata().getRights();
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      String patchJson = """
+          {
+            "title": "Only title changes"
+          }
+          """;
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .content(patchJson)
+          )
+          .andExpect(status().isOk());
+
+      // verify via repository
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getBaseMetadata().getRights())
+          .isEqualTo(originalRights);
+    }
+
+    @Test
+    public void returns400ForEmptyTitle() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      String patchJson = """
+          {
+            "title": ""
+          }
+          """;
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .content(patchJson)
+          )
+          .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void returns404ForNonExistentDatastream() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          "DOES_NOT_EXIST.txt"
+      );
+
+      String patchJson = """
+          {
+            "title": "irrelevant"
+          }
+          """;
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .content(patchJson)
+          )
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void updatesTags() throws Exception {
+      // Re-fetch to safely check precondition on lazy collection
+      Datastream fresh = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+      org.assertj.core.api.Assertions.assertThat(fresh.getTags()).isNotEmpty();
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      String patchJson = """
+          {
+            "tags": ["patched-tag1", "patched-tag2"]
+          }
+          """;
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.patch(url)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .accept(MediaType.APPLICATION_JSON)
+                  .content(patchJson)
+          )
+          .andExpect(status().isOk());
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+      Assertions.assertThat(persisted.getTags())
+          .containsExactlyInAnyOrder("patched-tag1", "patched-tag2");
+    }
+  }
+
+
+  @Nested
+  public class UpdateDatastreamContent {
+
+    @Test
+    public void updatesContentViaFileUpload() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      MockMultipartFile newFile = new MockMultipartFile(
+          "file", "updated.txt", "text/plain",
+          "updated content via controller test".getBytes()
+      );
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(newFile)
+                  .with(request -> {
+                    request.setMethod("POST");
+                    return request;
+                  })
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      Assertions.assertThat(mvcResult.getResponse().getContentAsString())
+          .contains(testDataSet.mainDatastream().getDsid());
+    }
+
+    @Test
+    public void returns404ForNonExistentDatastream() throws Exception {
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          "DOES_NOT_EXIST.txt"
+      );
+
+      MockMultipartFile newFile = new MockMultipartFile(
+          "file", "test.txt", "text/plain", "content".getBytes()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.multipart(url)
+                  .file(newFile)
+                  .with(request -> {
+                    request.setMethod("POST");
+                    return request;
+                  })
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isNotFound());
+    }
+  }
+
 }

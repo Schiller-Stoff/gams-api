@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.Datastream;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamUpdateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAlreadyExistsException;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamValidationException;
@@ -22,7 +23,9 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class DatastreamServiceIT extends IntegrationTest {
@@ -599,6 +602,530 @@ public class DatastreamServiceIT extends IntegrationTest {
 
       DatastreamId dsId = new DatastreamId(DSID, testDataSet.digitalObject().getId());
       org.assertj.core.api.Assertions.assertThat(datastreamContentRepository.exists(dsId)).isTrue();
+    }
+  }
+
+  // ==================================================================================
+  // Add to DatastreamServiceIT.java — as a sibling of the existing @Nested classes
+  // ==================================================================================
+  // Additional import needed:
+  // import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamUpdateDto;
+
+  @Nested
+  public class UpdateDatastream {
+
+    @Test
+    public void updatesTitle() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("Updated Title");
+
+      var result = datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getTitle())
+          .isEqualTo("Updated Title");
+    }
+
+    @Test
+    public void updatesMultipleMetadataFields() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("New Title");
+      patch.setDescription("New Description");
+      patch.setRights("New Rights");
+      patch.setCreator("New Creator");
+
+      var result = datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getTitle())
+          .isEqualTo("New Title");
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getDescription())
+          .isEqualTo("New Description");
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getRights())
+          .isEqualTo("New Rights");
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getCreator())
+          .isEqualTo("New Creator");
+    }
+
+    @Test
+    public void preservesUnchangedFields() {
+      String originalRights = testDataSet.mainDatastream().getBaseMetadata().getRights();
+      String originalCreator = testDataSet.mainDatastream().getBaseMetadata().getCreator();
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("Only title changes");
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getBaseMetadata().getTitle())
+          .isEqualTo("Only title changes");
+      org.assertj.core.api.Assertions.assertThat(persisted.getBaseMetadata().getRights())
+          .isEqualTo(originalRights);
+      org.assertj.core.api.Assertions.assertThat(persisted.getBaseMetadata().getCreator())
+          .isEqualTo(originalCreator);
+    }
+
+    @Test
+    public void updatesTags() {
+      Set<String> newTags = Set.of("updated-tag1", "updated-tag2");
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTags(newTags);
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getTags())
+          .containsExactlyInAnyOrder("updated-tag1", "updated-tag2");
+    }
+
+    @Test
+    public void removesAllTags() {
+      // precondition: tags are not empty
+      org.assertj.core.api.Assertions.assertThat(testDataSet.mainDatastream().getTags())
+          .isNotEmpty();
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTags(new HashSet<>());
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getTags()).isEmpty();
+    }
+
+    @Test
+    public void tagsUnchangedWhenNotInPatch() {
+      // Re-fetch to safely access lazy tags collection
+      Datastream fresh = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+      Set<String> originalTags = Set.copyOf(fresh.getTags());
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("Tags should survive");
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getTags())
+          .containsExactlyInAnyOrderElementsOf(originalTags);
+    }
+
+    @Test
+    public void updatesLang() {
+      Set<String> newLang = Set.of("en", "de");
+
+      var patch = new DatastreamUpdateDto();
+      patch.setLang(newLang);
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getLang())
+          .containsExactlyInAnyOrder("en", "de");
+    }
+
+    @Test
+    public void allowsEmptyDescription() {
+      var patch = new DatastreamUpdateDto();
+      patch.setDescription("");
+
+      var result = datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getDescription())
+          .isEmpty();
+    }
+
+    @Test
+    public void allowsNullDescription() {
+      String originalDescription = testDataSet.mainDatastream().getBaseMetadata().getDescription();
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("Desc null test");
+      // description intentionally not set (stays null)
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getBaseMetadata().getDescription())
+          .isEqualTo(originalDescription);
+    }
+
+    @Test
+    public void rejectsEmptyTitle() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> datastreamService.updateDatastream(
+                  testDataSet.digitalObject().getId(),
+                  testDataSet.mainDatastream().getDsid(),
+                  patch
+              )
+          ).isInstanceOf(DatastreamValidationException.class)
+          .hasMessageContaining("Title");
+    }
+
+    @Test
+    public void rejectsEmptyRights() {
+      var patch = new DatastreamUpdateDto();
+      patch.setRights("");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> datastreamService.updateDatastream(
+                  testDataSet.digitalObject().getId(),
+                  testDataSet.mainDatastream().getDsid(),
+                  patch
+              )
+          ).isInstanceOf(DatastreamValidationException.class)
+          .hasMessageContaining("Rights");
+    }
+
+    @Test
+    public void rejectsEmptyCreator() {
+      var patch = new DatastreamUpdateDto();
+      patch.setCreator("");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> datastreamService.updateDatastream(
+                  testDataSet.digitalObject().getId(),
+                  testDataSet.mainDatastream().getDsid(),
+                  patch
+              )
+          ).isInstanceOf(DatastreamValidationException.class)
+          .hasMessageContaining("Creator");
+    }
+
+    @Test
+    public void reportsMultipleViolationsAtOnce() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("");
+      patch.setRights("");
+      patch.setCreator("");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> datastreamService.updateDatastream(
+                  testDataSet.digitalObject().getId(),
+                  testDataSet.mainDatastream().getDsid(),
+                  patch
+              )
+          ).isInstanceOf(DatastreamValidationException.class)
+          .hasMessageContaining("Title")
+          .hasMessageContaining("Rights")
+          .hasMessageContaining("Creator");
+    }
+
+    @Test
+    public void throwsNotFoundForNonExistentDatastream() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("irrelevant");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.updateDatastream(
+              testDataSet.digitalObject().getId(),
+              "DOES_NOT_EXIST.txt",
+              patch
+          )
+      ).isInstanceOf(DatastreamNotFoundException.class);
+    }
+
+    @Test
+    public void throwsNotFoundForNonExistentDigitalObject() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("irrelevant");
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.updateDatastream(
+              "nonexistent.object.id",
+              testDataSet.mainDatastream().getDsid(),
+              patch
+          )
+      ).isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
+    public void updatesParentObjectModifiedTimestamp() throws InterruptedException {
+      Date originalModified = testDataSet.digitalObject().getModified();
+      Thread.sleep(50);
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("Timestamp test");
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      DigitalObject refreshed = digitalObjectRepository
+          .findById(testDataSet.digitalObject().getId()).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshed.getModified())
+          .isAfter(originalModified);
+    }
+
+    @Test
+    public void returnsDetailsViewWithUpdatedValues() {
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("DTO check title");
+      patch.setDescription("DTO check description");
+
+      var result = datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      org.assertj.core.api.Assertions.assertThat(result).isNotNull();
+      org.assertj.core.api.Assertions.assertThat(result.getDsid())
+          .isEqualTo(testDataSet.mainDatastream().getDsid());
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getTitle())
+          .isEqualTo("DTO check title");
+      org.assertj.core.api.Assertions.assertThat(result.getBaseMetadata().getDescription())
+          .isEqualTo("DTO check description");
+    }
+
+    @Test
+    public void doesNotChangeDsid() {
+      String originalDsid = testDataSet.mainDatastream().getDsid();
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("dsid should not change");
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          originalDsid,
+          patch
+      );
+
+      // Verify the datastream is still accessible via original dsid
+      org.assertj.core.api.Assertions.assertThat(
+          datastreamRepository.findById(testDataSet.mainDatastream().deriveDatastreamId())
+      ).isPresent();
+    }
+
+    @Test
+    public void doesNotChangeChecksums() {
+      String originalMd5 = testDataSet.mainDatastream().getMd5Checksum();
+      String originalSha512 = testDataSet.mainDatastream().getSha512Checksum();
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("checksums should not change");
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getMd5Checksum())
+          .isEqualTo(originalMd5);
+      org.assertj.core.api.Assertions.assertThat(persisted.getSha512Checksum())
+          .isEqualTo(originalSha512);
+    }
+
+    @Test
+    public void doesNotChangeSize() {
+      Long originalSize = testDataSet.mainDatastream().getSize();
+
+      var patch = new DatastreamUpdateDto();
+      patch.setTitle("size should not change");
+
+      datastreamService.updateDatastream(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          patch
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getSize())
+          .isEqualTo(originalSize);
+    }
+  }
+
+
+  @Nested
+  public class UpdateDatastreamContent {
+
+    @Test
+    public void updatesContentAndRecomputesChecksums() {
+      String originalMd5 = testDataSet.mainDatastream().getMd5Checksum();
+
+      MockMultipartFile newFile = new MockMultipartFile(
+          "file", "test.txt", "text/plain",
+          "completely new content for checksum test".getBytes()
+      );
+
+      var result = datastreamService.updateDatastreamContent(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          newFile
+      );
+
+      org.assertj.core.api.Assertions.assertThat(result.getMd5Checksum())
+          .isNotEqualTo(originalMd5);
+      org.assertj.core.api.Assertions.assertThat(result.getMd5Checksum())
+          .isNotEmpty();
+      org.assertj.core.api.Assertions.assertThat(result.getSha512Checksum())
+          .isNotEmpty();
+    }
+
+    @Test
+    public void updatesFileSize() {
+      byte[] newContent = "much longer content than before for size test".getBytes();
+      MockMultipartFile newFile = new MockMultipartFile(
+          "file", "test.txt", "text/plain", newContent
+      );
+
+      var result = datastreamService.updateDatastreamContent(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          newFile
+      );
+
+      org.assertj.core.api.Assertions.assertThat(result.getSize())
+          .isEqualTo(newContent.length);
+    }
+
+    @Test
+    public void preservesMetadata() {
+      String originalTitle = testDataSet.mainDatastream().getBaseMetadata().getTitle();
+      String originalCreator = testDataSet.mainDatastream().getBaseMetadata().getCreator();
+
+      MockMultipartFile newFile = new MockMultipartFile(
+          "file", "test.txt", "text/plain", "new content".getBytes()
+      );
+
+      datastreamService.updateDatastreamContent(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          newFile
+      );
+
+      Datastream persisted = datastreamRepository.findById(
+          testDataSet.mainDatastream().deriveDatastreamId()
+      ).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(persisted.getBaseMetadata().getTitle())
+          .isEqualTo(originalTitle);
+      org.assertj.core.api.Assertions.assertThat(persisted.getBaseMetadata().getCreator())
+          .isEqualTo(originalCreator);
+    }
+
+    @Test
+    public void throwsIfFileIsEmpty() {
+      MockMultipartFile emptyFile = new MockMultipartFile(
+          "file", "empty.txt", "text/plain", new byte[0]
+      );
+
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.updateDatastreamContent(
+              testDataSet.digitalObject().getId(),
+              testDataSet.mainDatastream().getDsid(),
+              emptyFile
+          )
+      ).isInstanceOf(DatastreamValidationException.class);
+    }
+
+    @Test
+    public void throwsIfDatastreamNotFound() {
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.updateDatastreamContent(
+              testDataSet.digitalObject().getId(),
+              "DOES_NOT_EXIST.txt",
+              TEST_MULTIPART_FILE
+          )
+      ).isInstanceOf(DatastreamNotFoundException.class);
+    }
+
+    @Test
+    public void throwsIfDigitalObjectNotFound() {
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+          () -> datastreamService.updateDatastreamContent(
+              "nonexistent.object.id",
+              testDataSet.mainDatastream().getDsid(),
+              TEST_MULTIPART_FILE
+          )
+      ).isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
+    public void updatesParentObjectModifiedTimestamp() throws InterruptedException {
+      Date originalModified = testDataSet.digitalObject().getModified();
+      Thread.sleep(50);
+
+      datastreamService.updateDatastreamContent(
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid(),
+          TEST_MULTIPART_FILE
+      );
+
+      DigitalObject refreshed = digitalObjectRepository
+          .findById(testDataSet.digitalObject().getId()).orElseThrow();
+
+      org.assertj.core.api.Assertions.assertThat(refreshed.getModified())
+          .isAfter(originalModified);
     }
   }
 
