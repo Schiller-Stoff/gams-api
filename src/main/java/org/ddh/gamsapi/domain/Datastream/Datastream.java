@@ -133,7 +133,7 @@ public class Datastream {
   /**
    * Tags for the datastream.
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   @Column(name = Datastream.TAGS_TABLE_NAME)
   @Size(max = 100, message = "Maximum 100 tags allowed per datastream")
@@ -142,7 +142,7 @@ public class Datastream {
   /**
    * Language of the datastream.
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   @Column(name = Datastream.LANG_TABLE_NAME)
   @Size(max = 100, message = "Maximum 100 lang allowed per datastream")

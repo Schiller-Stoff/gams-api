@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamUpdateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectId;
@@ -27,10 +28,7 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -407,6 +405,204 @@ public class DatastreamService implements IDatastreamService {
 
     // Final fallback
     return "application/octet-stream";
+  }
+
+
+  /**
+   * Updates an existing datastream's metadata. Only non-null fields from the patch DTO
+   * are applied. The dsid and digitalObject (composite PK) cannot be changed.
+   *
+   * @param digitalObjectId the parent digital object ID
+   * @param dsid the datastream identifier
+   * @param patch DTO containing the fields to update
+   * @return the updated datastream details projection
+   * @throws DatastreamNotFoundException if the datastream does not exist
+   * @throws DigitalObjectNotFoundException if the digital object does not exist
+   * @throws DatastreamValidationException if the patch would violate invariants
+   */
+  @Override
+  @Transactional
+  public IDatastreamDetailsView updateDatastream(String digitalObjectId, String dsid,
+                                                 DatastreamUpdateDto patch) {
+
+    // 1. Validate digital object exists
+    if (!digitalObjectRepository.existsById(digitalObjectId)) {
+      throw new DigitalObjectNotFoundException(
+          "Cannot update datastream. Digital object not found: " + digitalObjectId
+      );
+    }
+
+    // 2. Find existing datastream
+    DatastreamId datastreamId = new DatastreamId(dsid, digitalObjectId);
+    Datastream existing = datastreamRepository.findById(datastreamId)
+        .orElseThrow(() -> new DatastreamNotFoundException(
+            "Cannot update datastream. Datastream not found: " + dsid
+                + " on digital object: " + digitalObjectId
+        ));
+
+    // 3. Merge: only apply non-null fields from patch
+    applyPatch(existing, patch);
+
+    // 4. Validate invariants after merge
+    validateInvariants(existing);
+
+    // 5. Persist
+    datastreamRepository.save(existing);
+
+    // 6. Publish modification event (updates parent object + project timestamps)
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor()
+        .orElseThrow(() -> new UserAuthenticationRequiredException(
+            "Failed to update datastream " + dsid + ". Current user is not logged in"
+        ));
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(digitalObjectId),
+            new Date(),
+            currentUser
+        )
+    );
+
+    log.info("Successfully updated datastream {} on object {}", dsid, digitalObjectId);
+    return findDatastreamDetailsById(datastreamId);
+  }
+
+  /**
+   * Updates the content of an existing datastream via file upload.
+   * Recomputes checksums and file size, updates MIME type.
+   * The dsid and digitalObject reference remain unchanged.
+   *
+   * @param digitalObjectId the parent digital object ID
+   * @param dsid the datastream identifier
+   * @param file the new file content
+   * @return the updated datastream details projection
+   * @throws DatastreamNotFoundException if the datastream does not exist
+   * @throws DigitalObjectNotFoundException if the digital object does not exist
+   * @throws DatastreamValidationException if the file is empty
+   * @throws DatastreamCannotWriteFileException if file write fails
+   */
+  @Override
+  @Transactional
+  public IDatastreamDetailsView updateDatastreamContent(String digitalObjectId, String dsid,
+                                                        MultipartFile file) {
+
+    // 1. Validate digital object exists
+    if (!digitalObjectRepository.existsById(digitalObjectId)) {
+      throw new DigitalObjectNotFoundException(
+          "Cannot update datastream content. Digital object not found: " + digitalObjectId
+      );
+    }
+
+    // 2. Validate file is present
+    if (file == null || file.isEmpty()) {
+      throw new DatastreamValidationException(
+          "Cannot update datastream content for " + dsid
+              + " on object " + digitalObjectId + ". File must not be empty"
+      );
+    }
+
+    // 3. Find existing datastream
+    DatastreamId datastreamId = new DatastreamId(dsid, digitalObjectId);
+    Datastream existing = datastreamRepository.findById(datastreamId)
+        .orElseThrow(() -> new DatastreamNotFoundException(
+            "Cannot update datastream content. Datastream not found: " + dsid
+                + " on digital object: " + digitalObjectId
+        ));
+
+    // 4. Stream new file content to disk with checksum computation
+    //    saveWithChecksums uses TRUNCATE_EXISTING, so the old file is overwritten
+    WriteResult writeResult;
+    try (InputStream inputStream = file.getInputStream()) {
+      writeResult = datastreamContentRepository.saveWithChecksums(inputStream, datastreamId);
+    } catch (IOException e) {
+      throw new DatastreamCannotWriteFileException(
+          "Failed to update file content for datastream " + datastreamId
+              + " at digital object: " + digitalObjectId
+              + " Original error: " + e.getMessage(), e);
+    }
+
+    // 5. Update content-derived fields
+    existing.setMd5Checksum(writeResult.md5Checksum());
+    existing.setSha512Checksum(writeResult.sha512Checksum());
+    existing.setSize(file.getSize());
+    existing.setMimeType(resolveMimeType(file));
+
+    // 6. Persist
+    datastreamRepository.save(existing);
+
+    // 7. Publish modification event
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor()
+        .orElseThrow(() -> new UserAuthenticationRequiredException(
+            "Failed to update datastream content " + dsid + ". Current user is not logged in"
+        ));
+
+    applicationEventPublisher.publishEvent(
+        new DigitalObjectModifiedEvent(
+            this,
+            new DigitalObjectId(digitalObjectId),
+            new Date(),
+            currentUser
+        )
+    );
+
+    log.info("Successfully updated content of datastream {} on object {}", dsid, digitalObjectId);
+    return findDatastreamDetailsById(datastreamId);
+  }
+
+
+  /**
+   * Applies non-null fields from the patch DTO to the existing datastream.
+   * Follows the same pattern as DigitalObjectService.applyPatch().
+   */
+  private void applyPatch(Datastream existing, DatastreamUpdateDto patch) {
+    MetadataBaseEntity metadata = existing.getBaseMetadata();
+
+    if (patch.getTitle() != null) {
+      metadata.setTitle(patch.getTitle());
+    }
+    if (patch.getDescription() != null) {
+      metadata.setDescription(patch.getDescription());
+    }
+    if (patch.getCreator() != null) {
+      metadata.setCreator(patch.getCreator());
+    }
+    if (patch.getRights() != null) {
+      metadata.setRights(patch.getRights());
+    }
+    if (patch.getTags() != null) {
+      existing.setTags(new HashSet<>(patch.getTags()));
+    }
+    if (patch.getLang() != null) {
+      existing.setLang(new HashSet<>(patch.getLang()));
+    }
+  }
+
+  /**
+   * Validates that required fields are not empty after applying a patch.
+   * Collects ALL violations before throwing, so the client sees everything at once.
+   */
+  private void validateInvariants(Datastream datastream) {
+    List<String> violations = new ArrayList<>();
+
+    MetadataBaseEntity metadata = datastream.getBaseMetadata();
+    if (metadata.getTitle() == null || metadata.getTitle().isEmpty()) {
+      violations.add("Title must not be empty");
+    }
+    if (metadata.getRights() == null || metadata.getRights().isEmpty()) {
+      violations.add("Rights must not be empty");
+    }
+    if (metadata.getCreator() == null || metadata.getCreator().isEmpty()) {
+      violations.add("Creator must not be empty");
+    }
+
+    if (!violations.isEmpty()) {
+      throw new DatastreamValidationException(
+          "PATCH would violate constraints on datastream " + datastream.getDsid()
+              + " of object " + datastream.getDigitalObject().getId() + ": "
+              + String.join(", ", violations)
+      );
+    }
   }
 
 }
