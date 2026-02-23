@@ -6,6 +6,8 @@ import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
+
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -25,11 +27,11 @@ public class DigitalObjectCompactDTO {
 
     private String objectType;
 
-    private Date published;
+    private Instant published;
 
-    private Date created;
+    private Instant created;
 
-    private Date modified;
+    private Instant modified;
 
     private String projectAbbr;
 

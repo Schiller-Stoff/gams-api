@@ -36,6 +36,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 
 
@@ -245,9 +246,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(foundObject.getProject()).isEqualTo(testDataSet.digitalObject().getProject());
       Assertions.assertThat(foundObject.getBaseMetadata()).isEqualTo(testDataSet.digitalObject().getBaseMetadata());
       Assertions.assertThat(foundObject.getMainResource()).isEqualTo(testDataSet.digitalObject().getMainResource());
-      // cannot be equal is being assigned by the database
-      Assertions.assertThat(foundObject.getModified()).isNotEqualTo(testDataSet.digitalObject().getModified());
-      Assertions.assertThat(foundObject.getCreated()).isNotEqualTo(testDataSet.digitalObject().getCreated());
+      Assertions.assertThat(foundObject.getModified()).isEqualTo(testDataSet.digitalObject().getModified());
+      Assertions.assertThat(foundObject.getCreated()).isEqualTo(testDataSet.digitalObject().getCreated());
 
       Assertions.assertThat(
           foundObject.getTags()
@@ -337,14 +337,14 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     @Test
     public void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
 
-      Date projectContentLastModifiedBeforeDelete = testDataSet.project().getModified();
+      Instant projectContentLastModifiedBeforeDelete = testDataSet.project().getModified();
 
       digitalObjectService.delete(testDataSet.digitalObject());
 
       var updatedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())
           .orElseThrow(() ->  new ProjectNotFoundException(testDataSet.project().getProjectAbbr()));
 
-      Date projectContentLastModifiedAfterDelete = updatedProject.getModified();
+      Instant projectContentLastModifiedAfterDelete = updatedProject.getModified();
 
       Assertions.assertThat(projectContentLastModifiedAfterDelete)
           .isNotNull()
@@ -1008,7 +1008,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void updatesModificationTimestamp() throws InterruptedException {
-      Date beforeUpdate = new Date();
+      Instant beforeUpdate = Instant.now();
       Thread.sleep(50);
 
       digitalObjectService.updateDigitalObject(

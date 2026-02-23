@@ -23,10 +23,11 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.time.temporal.ChronoUnit;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -304,20 +305,17 @@ public class ProjectControllerIT extends IntegrationTest {
 
       Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
 
-      // parse lastModified to Date
-      DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-      ZonedDateTime zonedDateTime = ZonedDateTime.parse(lastModifiedHeaderValue, formatter);
-      ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-      Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+      // parse Last-Modified header (RFC 1123) to Instant
+      Instant lastModifiedFromHeader = ZonedDateTime
+          .parse(lastModifiedHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME)
+          .toInstant();
 
-      // expected date
-      Date expectedDate = testDataSet.project().getModified();
-      // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-      expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
+      // expected: truncate to seconds since RFC 1123 has no sub-second precision
+      Instant expectedDate = testDataSet.project().getModified()
+          .truncatedTo(ChronoUnit.SECONDS);
 
-
-      Assertions.assertThat(lastModifiedHeaderValueAsDate).hasSameTimeAs(expectedDate);
-
+      Assertions.assertThat(lastModifiedFromHeader)
+          .isEqualTo(expectedDate);
     }
 
 
@@ -338,28 +336,21 @@ public class ProjectControllerIT extends IntegrationTest {
 
       Assertions.assertThat(projectLastModifiedHeaderValue).isNotNull();
 
-      // parse lastModified to Date
-      DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-      ZonedDateTime zonedDateTime = ZonedDateTime.parse(projectLastModifiedHeaderValue, formatter);
-      ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-      Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+      // parse Last-Modified header (RFC 1123) to Instant
+      Instant lastModifiedFromHeader = ZonedDateTime
+          .parse(projectLastModifiedHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME)
+          .toInstant();
 
-      // expected date
-      Date expectedDate = savedDigitalObject.getModified();
-      // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-      expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
+      // expected: truncate to seconds since RFC 1123 has no sub-second precision
+      Instant expectedDate = savedDigitalObject.getModified()
+          .truncatedTo(ChronoUnit.SECONDS);
 
-      Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
+      Assertions.assertThat(lastModifiedFromHeader)
           .isBefore(expectedDate);
-
     }
 
     @Test
-    @Disabled("Time comparison does not work")
-    public void HEADProjectObjectsRespondsWithExpectedLastModifiedValue() throws Exception {
-
-      // wait 1 second (the last modified date via controller is only seconds accurate)
-      Thread.sleep(1000);
+    public void HEADProjectRespondsWithExpectedLastModifiedValueRoundedToHours() throws Exception {
 
       // save a digital object to the project
       DigitalObject savedDigitalObject = digitalObjectRepository.save(TestDigitalObject.generate());
@@ -369,29 +360,25 @@ public class ProjectControllerIT extends IntegrationTest {
           .orElseThrow();
 
       // the contentLastModified date should be updated to the same date as the digital object modified date
-
       String projectLastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s/objects", foundProject.getProjectAbbr())
+              String.format("/api/v1/projects/%s", foundProject.getProjectAbbr())
           )
       ).andReturn().getResponse().getHeader("Last-Modified");
 
       Assertions.assertThat(projectLastModifiedHeaderValue).isNotNull();
 
-      // parse lastModified to Date
-      DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-      ZonedDateTime zonedDateTime = ZonedDateTime.parse(projectLastModifiedHeaderValue, formatter);
-      ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-      Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+      // parse Last-Modified header (RFC 1123) to Instant
+      Instant lastModifiedFromHeader = ZonedDateTime
+          .parse(projectLastModifiedHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME)
+          .toInstant();
 
-      // expected date
-      Date expectedDate = savedDigitalObject.getModified();
-      // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-      expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
+      // expected: truncate to seconds since RFC 1123 has no sub-second precision
+      Instant expectedDate = savedDigitalObject.getModified()
+          .truncatedTo(ChronoUnit.HOURS);
 
-      Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
-          .hasSameTimeAs(expectedDate);
-
+      Assertions.assertThat(lastModifiedFromHeader.truncatedTo(ChronoUnit.HOURS))
+          .isEqualTo(expectedDate);
     }
 
     @Test

@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -101,16 +102,14 @@ public class Datastream {
   /**
    * Creation date of the digital object / datastream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @CreationTimestamp
-  private Date created;
+  private Instant created;
 
   /**
    * Last modified date of the digital object / datatream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @UpdateTimestamp
-  private Date modified;
+  private Instant modified;
 
 
   @Embedded

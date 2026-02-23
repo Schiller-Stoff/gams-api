@@ -14,6 +14,8 @@ import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 
+import java.time.Instant;
+
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProjectRepositoryIT extends IntegrationTest {
@@ -85,7 +87,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
       // method returns same time as saved project's modification date
       org.assertj.core.api.Assertions.assertThat(
           foundProjectDate.get()
-      ).hasSameTimeAs(savedProject.getModified());
+      ).isEqualTo(savedProject.getModified());
 
     }
 
@@ -131,7 +133,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
       );
 
       // save the last modified date
-      java.util.Date lastModified = savedProject.getModified();
+      Instant lastModified = savedProject.getModified();
 
       // update the project
       savedProject.setDescription("new description");
@@ -140,7 +142,7 @@ public class ProjectRepositoryIT extends IntegrationTest {
       // check if the modification date has been updated
       org.assertj.core.api.Assertions.assertThat(
           savedProject.getModified()
-      ).isAfterOrEqualTo(lastModified);
+      ).isAfter(lastModified);
 
     }
 

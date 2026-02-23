@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -7,9 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +91,7 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return The last modified date of the digital object.
    */
   @Query("SELECT MAX(do.modified) FROM DigitalObject do WHERE do.project.projectAbbr = :projectAbbr")
-  Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+  Optional<Instant> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
   /**
    * Finds digital objects by project and tags using AND logic.

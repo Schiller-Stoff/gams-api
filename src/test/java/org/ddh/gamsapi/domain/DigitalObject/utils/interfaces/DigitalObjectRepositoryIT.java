@@ -20,6 +20,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -196,7 +197,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             public void returnsExpectedModifiedDate(){
                 Assertions.assertThat(
                     digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get()
-                ).hasSameTimeAs(testDataSet.digitalObject().getModified());
+                ).isEqualTo(testDataSet.digitalObject().getModified());
             }
 
             @Test
@@ -205,14 +206,14 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
                 final DigitalObject laterDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
                 // returns the singular last modified date over all digital objects in a project.
-                Date actualModfiedDate = digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
+                Instant actualModifiedDate = digitalObjectRepository.findMaxLastModifiedDateByProjectAbbr(testProject.getProjectAbbr()).get();
 
                 // the last modified date should be the same as the last saved digital object
-                Assertions.assertThat(actualModfiedDate)
-                    .hasSameTimeAs(laterDigitalObject.getModified());
+                Assertions.assertThat(actualModifiedDate)
+                    .isEqualTo(laterDigitalObject.getModified());
 
                 // the last modified date should not be the same as the first saved digital object
-                Assertions.assertThat(actualModfiedDate)
+                Assertions.assertThat(actualModifiedDate)
                     .isNotEqualTo(testDataSet.digitalObject().getModified());
 
             }
@@ -248,7 +249,7 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             public void modificationAuditingPropertiesAreUpdated(){
 
                 // save the last modified date
-                Date lastModified = testDataSet.digitalObject().getModified();
+                Instant lastModified = testDataSet.digitalObject().getModified();
 
                 // update the object
                 testDataSet.digitalObject().setPublisher("new publisher");

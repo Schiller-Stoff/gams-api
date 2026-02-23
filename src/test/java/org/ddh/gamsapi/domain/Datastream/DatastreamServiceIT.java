@@ -22,6 +22,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
@@ -146,7 +147,7 @@ public class DatastreamServiceIT extends IntegrationTest {
           .isFalse();
 
       // capture the original modified date of the parent digital object
-      Date originalModified = testDataSet.digitalObject().getModified();
+      Instant originalModified = testDataSet.digitalObject().getModified();
 
       // small delay to ensure timestamp difference
       try { Thread.sleep(50); } catch (InterruptedException ignored) {}
@@ -175,7 +176,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void saveDatastreamChangesModifiedOfParentProject(){
 
       // capture the original modified date of the parent digital object
-      Date originalModified = testDataSet.project().getModified();
+      Instant originalModified = testDataSet.project().getModified();
 
       // small delay to ensure timestamp difference
       try { Thread.sleep(50); } catch (InterruptedException ignored) {}
@@ -251,7 +252,7 @@ public class DatastreamServiceIT extends IntegrationTest {
           .isFalse();
 
       // capture the original modified date of the parent digital object
-      Date originalModified = testDataSet.digitalObject().getModified();
+      Instant originalModified = testDataSet.digitalObject().getModified();
 
       // small delay to ensure timestamp difference
       try { Thread.sleep(50); } catch (InterruptedException ignored) {}
@@ -277,7 +278,7 @@ public class DatastreamServiceIT extends IntegrationTest {
     public void deleteDatastreamShouldChangeParentProjectModified(){
 
       // capture the original modified date of the parent digital object
-      Date originalModified = testDataSet.project().getModified();
+      Instant originalModified = testDataSet.project().getModified();
 
       // small delay to ensure timestamp difference
       try { Thread.sleep(50); } catch (InterruptedException ignored) {}
@@ -540,7 +541,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void updatesParentObjectModifiedTimestamp() throws InterruptedException {
-      Date originalModified = testDataSet.digitalObject().getModified();
+      Instant originalModified = testDataSet.digitalObject().getModified();
       Thread.sleep(50);
 
       DatastreamCreateDto dto = new DatastreamCreateDto();
@@ -563,7 +564,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void updatesParentProjectModifiedTimestamp() throws InterruptedException {
-      Date originalModified = testDataSet.project().getModified();
+      Instant originalModified = testDataSet.project().getModified();
       Thread.sleep(50);
 
       DatastreamCreateDto dto = new DatastreamCreateDto();
@@ -899,7 +900,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void updatesParentObjectModifiedTimestamp() throws InterruptedException {
-      Date originalModified = testDataSet.digitalObject().getModified();
+      Instant originalModified = testDataSet.digitalObject().getModified();
       Thread.sleep(50);
 
       var patch = new DatastreamUpdateDto();
@@ -1112,7 +1113,7 @@ public class DatastreamServiceIT extends IntegrationTest {
 
     @Test
     public void updatesParentObjectModifiedTimestamp() throws InterruptedException {
-      Date originalModified = testDataSet.digitalObject().getModified();
+      Instant originalModified = testDataSet.digitalObject().getModified();
       Thread.sleep(50);
 
       datastreamService.updateDatastreamContent(

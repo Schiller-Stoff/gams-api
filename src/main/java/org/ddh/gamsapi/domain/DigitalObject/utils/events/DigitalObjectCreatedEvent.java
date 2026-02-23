@@ -6,6 +6,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectId;
 import org.ddh.gamsapi.domain.GamsApplicationEvents;
 
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -19,12 +20,12 @@ public class DigitalObjectCreatedEvent extends GamsApplicationEvents {
    */
   DigitalObject digitalObject;
 
-  public DigitalObjectCreatedEvent(Object source, DigitalObjectId objectId, Date occurredAt, String principal, DigitalObject digitalObject) {
+  public DigitalObjectCreatedEvent(Object source, DigitalObjectId objectId, Instant occurredAt, String principal, DigitalObject digitalObject) {
     this.digitalObject = digitalObject;
     super(source, objectId, occurredAt, principal);
   }
 
-  public DigitalObjectCreatedEvent(Object source, Clock clock, DigitalObjectId objectId, Date occurredAt, String principal) {
+  public DigitalObjectCreatedEvent(Object source, Clock clock, DigitalObjectId objectId, Instant occurredAt, String principal) {
     super(source, clock, objectId, occurredAt, principal);
   }
 }
