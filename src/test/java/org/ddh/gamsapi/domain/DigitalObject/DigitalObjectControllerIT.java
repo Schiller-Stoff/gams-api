@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
@@ -133,34 +134,29 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      @Disabled("UPDATE TEST - needed to switch to instant - comparison not working anymore?")
       public void headDigitalObjectReturnsExpectedLastModifiedDate() throws Exception {
 
-//        // expected date
-//        Instant expectedLastModified = testDataSet.digitalObject().getModified();
-//        // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-//        expectedLastModified.setTime(expectedLastModified.getTime() / 1000 * 1000);
-//
-//        // Act
-//        String digitalObjectLastModified = mockMvc.perform(
-//            MockMvcRequestBuilders.head(
-//                "/api/v1/projects/{projectAbbr}/objects/{id}",
-//                    testDataSet.project().getProjectAbbr(),
-//                    testDataSet.digitalObject().getId()))
-//            .andReturn().getResponse().getHeader("Last-Modified");
-//
-//        org.assertj.core.api.Assertions.assertThat(digitalObjectLastModified).isNotNull();
-//
-//        // parse lastModified to Date
-//        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-//        ZonedDateTime zonedDateTime = ZonedDateTime.parse(digitalObjectLastModified, formatter);
-//        ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-//        Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
-//
-//        org.assertj.core.api.Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
-//            .isNotNull()
-//            .isEqualTo(expectedLastModified);
+        // expected: truncate to seconds since RFC 1123 has no sub-second precision
+        Instant expectedLastModified = testDataSet.digitalObject().getModified()
+            .truncatedTo(ChronoUnit.SECONDS);
 
+        // Act
+        String digitalObjectLastModified = mockMvc.perform(
+                MockMvcRequestBuilders.head(
+                    "/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId()))
+            .andReturn().getResponse().getHeader("Last-Modified");
+
+        org.assertj.core.api.Assertions.assertThat(digitalObjectLastModified).isNotNull();
+
+        // parse Last-Modified header (RFC 1123) to Instant
+        Instant lastModifiedFromHeader = ZonedDateTime
+            .parse(digitalObjectLastModified, DateTimeFormatter.RFC_1123_DATE_TIME)
+            .toInstant();
+
+        org.assertj.core.api.Assertions.assertThat(lastModifiedFromHeader)
+            .isEqualTo(expectedLastModified);
       }
 
     }
@@ -212,34 +208,33 @@ public class DigitalObjectControllerIT extends IntegrationTest {
        * @throws Exception if the test fails (mockMvc.perform)
        */
       @Test
-      @Disabled("TEST NOT WORKING ANYMORE BECAUSE OF INSTANT")
       public void HEADDigitalObjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
 
-//        // Act
-//        String lastModifiedHeaderValue = mockMvc.perform(
-//            MockMvcRequestBuilders.head(
-//                "/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
-//            )
-//            .with(SecurityMockMvcRequestPostProcessors.csrf())
-//        ).andReturn().getResponse().getHeader("Last-Modified");
-//
-//        // Assert
-//        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
-//
-//        // parse lastModified to Date
-//        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-//        ZonedDateTime zonedDateTime = ZonedDateTime.parse(lastModifiedHeaderValue, formatter);
-//        ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-//        Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
-//
-//        // expected date
-//        Instant expectedDate = testDataSet.digitalObject().getModified();
-//        // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-//        expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
-//
-//        // assert same time
-//        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValueAsDate).isAfterOrEqualTo(expectedDate);
+        // Act
+        String lastModifiedHeaderValue = mockMvc.perform(
+            MockMvcRequestBuilders.head(
+                    "/api/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId()
+                )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+        ).andReturn().getResponse().getHeader("Last-Modified");
 
+        // Assert
+        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
+
+        // parse Last-Modified header (RFC 1123) to Instant
+        Instant lastModifiedFromHeader = ZonedDateTime
+            .parse(lastModifiedHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME)
+            .toInstant();
+
+        // expected: truncate to seconds since RFC 1123 has no sub-second precision
+        Instant expected = testDataSet.digitalObject().getModified()
+            .truncatedTo(ChronoUnit.SECONDS);
+
+        // assert
+        org.assertj.core.api.Assertions.assertThat(lastModifiedFromHeader)
+            .isEqualTo(expected);
       }
 
       /**
