@@ -569,6 +569,130 @@
             </ul>
           </div>
         </div>
+
+        <!-- ================================================================== -->
+        <!-- INTEGRATION SERVICES — only visible for authenticated users        -->
+        <!-- ================================================================== -->
+        <div sec:authorize="isAuthenticated()" class="mb-3 mt-5">
+          <div>
+            <h3 class="h5">
+              <i class="ti ti-refresh me-2 text-primary"></i>Integration Services
+            </h3>
+            <p class="text-muted small">
+              Index or remove this object from individual external services.
+            </p>
+          </div>
+
+          <!-- Integrate ALL services at once -->
+          <div class="mb-3">
+            <h4 class="h6">All services</h4>
+            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in ALL integration services?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-refresh me-1"></i>Index in all
+              </button>
+            </form>
+            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from ALL integration services?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Remove from all
+              </button>
+            </form>
+          </div>
+
+          <!-- GSearch (Base Search) -->
+          <div class="mb-3">
+            <h4 class="h6">GSearch (Base Search)</h4>
+            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in GSearch?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from GSearch?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <!-- C-Search (Custom Search) -->
+          <div class="mb-3">
+            <h4 class="h6">C-Search</h4>
+            <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in C-Search?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from C-Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <!-- Plexus Search -->
+          <div class="mb-3">
+            <h4 class="h6">Plexus Search</h4>
+            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in Plexus Search?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from Plexus Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <!-- RDF -->
+          <div class="mb-3">
+            <h4 class="h6">RDF (Linked Data)</h4>
+            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in the RDF store?');">
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="ti ti-database me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from the RDF store?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger btn-sm">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     <footer th:replace="~{fragments/general.html :: footer}"></footer>
   </div>

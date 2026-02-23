@@ -57,13 +57,21 @@ public class CustomSearchController {
       summary = "Add a single project object to external c-search service",
       description = "This endpoint indexes all objects of a project in the c-search service."
   )
-  @PostMapping(CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @PostMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public void indexProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id
   ){
     customSearchService.indexObject(projectAbbr, id);
+  }
+
+  @Hidden
+  @PostMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Indexing single object {} in c-search for project {}", id, projectAbbr);
+    customSearchService.indexObject(projectAbbr, id);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -89,7 +97,7 @@ public class CustomSearchController {
       summary = "Delete a single project object from external c-search service",
       description = "This endpoint deletes a single object of a project from the CustomSearch service."
   )
-  @DeleteMapping(CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @DeleteMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
   public void deleteProjectObject(
       @PathVariable String projectAbbr,
@@ -97,6 +105,14 @@ public class CustomSearchController {
   ){
     log.trace("*** Trying to delete single project object from custom-search service. Object-id: {}", id);
     customSearchService.deleteIndexedObject(projectAbbr, id);
+  }
+
+  @Hidden
+  @DeleteMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Deleting single object {} from c-search for project {}", id, projectAbbr);
+    customSearchService.deleteIndexedObject(projectAbbr, id);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 
