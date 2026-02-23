@@ -28,6 +28,7 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.*;
 
 @Slf4j
@@ -92,7 +93,7 @@ public class DatastreamService implements IDatastreamService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(datastream.getDigitalObject().getId()),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
@@ -155,7 +156,7 @@ public class DatastreamService implements IDatastreamService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(dsId.getDigitalObject()),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
@@ -366,7 +367,7 @@ public class DatastreamService implements IDatastreamService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(digitalObjectId),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
@@ -459,7 +460,7 @@ public class DatastreamService implements IDatastreamService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(digitalObjectId),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
@@ -541,7 +542,7 @@ public class DatastreamService implements IDatastreamService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(digitalObjectId),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
