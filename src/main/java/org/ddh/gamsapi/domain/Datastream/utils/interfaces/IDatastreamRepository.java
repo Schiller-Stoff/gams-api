@@ -1,15 +1,16 @@
 package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 
+import org.ddh.gamsapi.domain.Datastream.Datastream;
+import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.ddh.gamsapi.domain.Datastream.Datastream;
-import org.ddh.gamsapi.domain.Datastream.DatastreamId;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import java.util.Date;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -118,7 +119,7 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    * @return latest modified date of a datastream
    */
   @Query("SELECT MAX(ds.modified) FROM Datastream ds JOIN ds.digitalObject do WHERE do.project.projectAbbr = :projectAbbr")
-  Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+  Optional<Instant> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
   /**
    * Returns the latest modified date of a datastream for given digital object id.
@@ -126,7 +127,7 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    * @return latest modified date of a datastream
    */
   @Query("SELECT MAX(ds.modified) FROM Datastream ds JOIN ds.digitalObject do WHERE do.id = :digitalObjectId")
-  Optional<Date> findMaxLastModifiedDateByDigitalObjectId(String digitalObjectId);
+  Optional<Instant> findMaxLastModifiedDateByDigitalObjectId(String digitalObjectId);
 
 
   @Query("SELECT ds FROM Datastream ds " +

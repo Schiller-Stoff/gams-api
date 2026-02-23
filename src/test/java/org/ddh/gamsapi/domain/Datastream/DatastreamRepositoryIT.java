@@ -20,6 +20,7 @@ import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.TestUtilities.*;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 
@@ -453,7 +454,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             ).orElseThrow();
 
             // query last modified date
-            Date lastModified = datastreamRepository
+            Instant lastModified = datastreamRepository
                 .findMaxLastModifiedDateByProjectAbbr(testDataSet.project().getProjectAbbr())
                 .orElseThrow();
 
@@ -488,14 +489,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .isNotNull();
 
             // query last modified date
-            Date lastModified = datastreamRepository
+            Instant lastModified = datastreamRepository
                 .findMaxLastModifiedDateByProjectAbbr(testDataSet.project().getProjectAbbr()).
                 orElseThrow();
 
             // last modified should be equal to the saved later datastream
             Assertions.assertThat(lastModified)
                 .isNotNull()
-                .hasSameTimeAs(savedLaterDatastream.getModified());
+                .isEqualTo(savedLaterDatastream.getModified());
 
             // last modified should not be equal to the first datastream
             Assertions.assertThat(lastModified)
@@ -543,7 +544,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 testDataSet.mainDatastream().deriveDatastreamId()
             ).orElseThrow();
 
-            Date modified = foundDatastream.getModified();
+            Instant modified = foundDatastream.getModified();
 
 
             // update the datastream

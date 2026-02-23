@@ -52,6 +52,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -94,7 +95,7 @@ public class DigitalObjectService implements IDigitalObjectService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(digitalObject.getId()),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
@@ -193,7 +194,7 @@ public class DigitalObjectService implements IDigitalObjectService {
         new DigitalObjectDeletedEvent(
             this,
             new DigitalObjectId(digitalObject.getId()),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );
@@ -400,7 +401,7 @@ public class DigitalObjectService implements IDigitalObjectService {
         new DigitalObjectCreatedEvent(
             this,
             new DigitalObjectId(digitalObject.getId()),
-            new Date(),
+            Instant.now(),
             currentUser,
             digitalObject
         )
@@ -485,7 +486,7 @@ public class DigitalObjectService implements IDigitalObjectService {
         new DigitalObjectModifiedEvent(
             this,
             new DigitalObjectId(saved.getId()),
-            new Date(),
+            Instant.now(),
             currentUser
         )
     );

@@ -11,6 +11,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 
@@ -59,16 +61,14 @@ public class Project {
   /**
    * Creation date of the digital object / datastream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @CreationTimestamp
-  private Date created;
+  private Instant created;
 
   /**
    * Last modified date of the digital object / datastream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @UpdateTimestamp
-  private Date modified;
+  private Instant modified;
 
   @Column(name = "created_by")
   @CreatedBy

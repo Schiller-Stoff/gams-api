@@ -8,6 +8,8 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.UnitTest;
+
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 
@@ -59,9 +61,9 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
    */
   private static class DigitalObjectDetailsViewImpl implements DigitalObjectDetailsView {
 
-    private final Date created = new Date();
-    private final Date modified = new Date();
-    private final Date published = new Date();
+    private final Instant created = Instant.now();
+    private final Instant modified = Instant.now();
+    private final Instant published = Instant.now();
 
     @Override
     public String getId() {
@@ -89,17 +91,17 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     }
 
     @Override
-    public Date getCreated() {
+    public Instant getCreated() {
       return created;
     }
 
     @Override
-    public Date getPublished() {
+    public Instant getPublished() {
       return published;
     }
 
     @Override
-    public Date getModified() {
+    public Instant getModified() {
       return modified;
     }
 

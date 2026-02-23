@@ -92,13 +92,13 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
     }
 
     @Override
-    public Date getCreated() {
-      return Date.from(Instant.parse("2023-10-01T00:00:00Z"));
+    public Instant getCreated() {
+      return Instant.parse("2023-10-01T00:00:00Z");
     }
 
     @Override
-    public Date getModified() {
-      return Date.from(Instant.parse("2023-10-01T00:00:00Z"));
+    public Instant getModified() {
+      return Instant.parse("2023-10-01T00:00:00Z");
     }
 
     @Override

@@ -5,6 +5,7 @@ import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder published(java.util.Date published) {
+  public DigitalObjectBuilder published(Instant published) {
     digitalObject.setPublished(published);
     return this;
   }
