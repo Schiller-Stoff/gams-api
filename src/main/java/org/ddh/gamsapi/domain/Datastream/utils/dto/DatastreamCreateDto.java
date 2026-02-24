@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 
 /**
  * DTO for creating a new datastream via direct file upload.
@@ -30,4 +31,6 @@ public class DatastreamCreateDto {
   @NotEmpty(message = "Rights statement is required")
   @Size(max = 255)
   private String rights;
+
+  private ArchivalPolicy archivalPolicy;
 }

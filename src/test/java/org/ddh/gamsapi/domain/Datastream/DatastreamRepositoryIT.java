@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.Datastream;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -145,6 +146,16 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::getLang)
                 .isEqualTo(datastream.getLang());
 
+        }
+
+        @Test
+        public void persistsArchivalPolicy() {
+          Datastream ds = TestDatastream.generate(testDataSet.digitalObject(), "archival_test.txt");
+          ds.setArchivalPolicy(ArchivalPolicy.FORCE_ARCHIVE);
+          datastreamRepository.save(ds);
+
+          var found = datastreamRepository.findById(ds.deriveDatastreamId()).orElseThrow();
+          Assertions.assertThat(found.getArchivalPolicy()).isEqualTo(ArchivalPolicy.FORCE_ARCHIVE);
         }
 
     }

@@ -198,6 +198,20 @@
                      placeholder="en, de, fr" />
               <small class="text-muted">Comma-separated list of language codes.</small>
             </div>
+            <div class="mb-3">
+              <label class="form-label">Archival Policy</label>
+              <select name="archivalPolicy" class="form-select" th:disabled="${!isAuthenticated}">
+                <option value="DEFAULT" th:selected="${datastream.archivalPolicy.name() == 'DEFAULT'}">
+                  Default (mimetype-based)
+                </option>
+                <option value="FORCE_ARCHIVE" th:selected="${datastream.archivalPolicy.name() == 'FORCE_ARCHIVE'}">
+                  Force Archive
+                </option>
+                <option value="FORCE_EXCLUDE" th:selected="${datastream.archivalPolicy.name() == 'FORCE_EXCLUDE'}">
+                  Force Exclude
+                </option>
+              </select>
+            </div>
 
             <div sec:authorize="isAuthenticated()">
               <button type="submit" class="btn btn-primary">

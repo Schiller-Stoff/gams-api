@@ -2,6 +2,7 @@ package org.ddh.gamsapi.TestUtilities;
 
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.DatastreamBuilder;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 
@@ -26,6 +27,8 @@ public enum TestDatastream {
     public static final String SHA512_CHECKSUM = "3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79";
 
     public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestMetadataBaseEntity.generate();
+
+    public static final ArchivalPolicy ARCHIVAL_POLICY = ArchivalPolicy.DEFAULT;
 
     private final String value;
 
@@ -72,6 +75,7 @@ public enum TestDatastream {
           .mimeType(MIME_TYPE.getValue())
           .bagPath(FILE_NAME.getValue())
           .lang(DATASTREAM_LANG)
+          .archivalPolicy(ARCHIVAL_POLICY)
           .build();
     }
 
