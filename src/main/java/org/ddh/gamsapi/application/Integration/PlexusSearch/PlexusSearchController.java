@@ -58,7 +58,7 @@ public class PlexusSearchController {
       summary = "Add single project object to external plexus-search service",
       description = "This endpoint indexes a single object of a project in the plexus-search service."
   )
-  @PostMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @PostMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public void indexProjectObject(
       @PathVariable String projectAbbr,
@@ -66,6 +66,14 @@ public class PlexusSearchController {
   ){
     log.debug("*** Trying to index single project object");
     plexusSearchService.indexObject(projectAbbr, id);
+  }
+
+  @Hidden
+  @PostMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.TEXT_HTML_VALUE)
+  public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Indexing single object {} in plexus-search for project {}", id, projectAbbr);
+    plexusSearchService.indexObject(projectAbbr, id);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -91,7 +99,7 @@ public class PlexusSearchController {
       summary = "Delete single project object from external plexus-search service",
       description = "This endpoint deletes a single object of a project from the plexus-search service."
   )
-  @DeleteMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @DeleteMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public void deleteProjectObject(
       @PathVariable String projectAbbr,
@@ -99,6 +107,14 @@ public class PlexusSearchController {
   ){
     log.trace("*** Trying to delete single project object");
     plexusSearchService.deleteIndexedObject(projectAbbr, id);
+  }
+
+  @Hidden
+  @DeleteMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.TEXT_HTML_VALUE)
+  public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Deleting single object {} from plexus-search for project {}", id, projectAbbr);
+    plexusSearchService.deleteIndexedObject(projectAbbr, id);
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 

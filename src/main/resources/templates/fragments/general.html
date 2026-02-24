@@ -137,18 +137,45 @@
                 <span class="hide-menu">Facets</span>
               </a>
             </li>
-<!--            <li class="nav-small-cap">-->
-<!--              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>-->
-<!--              <span class="hide-menu">Files / Datastreams</span>-->
-<!--            </li>-->
-<!--            <li class="sidebar-item">-->
-<!--              <a class="sidebar-link" href="/api/v1/datastreams" aria-expanded="false">-->
-<!--                <span>-->
-<!--                  <i class="ti ti-search"></i>-->
-<!--                </span>-->
-<!--                <span class="hide-menu">Search</span>-->
-<!--              </a>-->
-<!--            </li>-->
+            <li class="nav-small-cap" sec:authorize="isAuthenticated()">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Integration services</span>
+            </li>
+            <li class="sidebar-item" sec:authorize="isAuthenticated()">
+              <div>
+                <a class="sidebar-link" target="_blank" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-api"></i>
+                  </span>
+                  <span class="hide-menu">API-Search</span>
+                </a>
+              </div>
+              <div>
+                <a class="sidebar-link" target="_blank" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-server-cog"></i>
+                  </span>
+                  <span class="hide-menu">Custom-Search</span>
+                </a>
+              </div>
+              <div>
+                <a class="sidebar-link" target="_blank" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-lock-open"></i>
+                  </span>
+                  <span class="hide-menu">Plexus-Search</span>
+                </a>
+              </div>
+              <div>
+                <a class="sidebar-link" target="_blank" href="https://zimlab.uni-graz.at/gams5/production/documentation/-/wikis/home" aria-expanded="false">
+                  <span>
+                    <i class="ti ti-affiliate"></i>
+                  </span>
+                  <span class="hide-menu">RDF-Search</span>
+                </a>
+              </div>
+            </li>
+
 <!--            <li class="nav-small-cap">-->
 <!--              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>-->
 <!--              <span class="hide-menu">Projects</span>-->
