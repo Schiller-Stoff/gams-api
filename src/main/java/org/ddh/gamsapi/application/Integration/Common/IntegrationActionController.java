@@ -1,11 +1,13 @@
 package org.ddh.gamsapi.application.Integration.Common;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
@@ -16,7 +18,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
-@RestController
 public class IntegrationActionController {
 
   /**
@@ -42,11 +43,20 @@ public class IntegrationActionController {
           )
       }
   )
-  @PostMapping("/{id}")
+  @ResponseBody
+  @PostMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public void indexProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default index object {} for project {}", id, projectAbbr);
     integrationServices.forEach(integrationService -> integrationService.indexObject(projectAbbr, id));
 
+  }
+
+  @Hidden
+  @PostMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.trace("*** HTML: Default index object {} for project {}", id, projectAbbr);
+    integrationServices.forEach(service -> service.indexObject(projectAbbr, id));
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -67,10 +77,19 @@ public class IntegrationActionController {
           )
       }
   )
-  @DeleteMapping("/{id}")
+  @DeleteMapping(value = "/{id}", produces =  MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
   public void deleteProjectObject(@PathVariable String projectAbbr, @PathVariable String id){
     log.trace("*** Trying now to default delete object {} for project {}", id, projectAbbr);
     integrationServices.forEach(integrationService -> integrationService.deleteIndexedObject(projectAbbr, id));
+  }
+
+  @Hidden
+  @DeleteMapping(value = "/{id}", produces = MediaType.TEXT_HTML_VALUE)
+  public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.trace("*** HTML: Default delete object {} for project {}", id, projectAbbr);
+    integrationServices.forEach(service -> service.deleteIndexedObject(projectAbbr, id));
+    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -92,6 +111,7 @@ public class IntegrationActionController {
       }
   )
   @PostMapping
+  @ResponseBody
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying now to default index all objects for project {}", projectAbbr);
     integrationServices.forEach(integrationService -> integrationService.indexObjects(projectAbbr));
@@ -116,6 +136,7 @@ public class IntegrationActionController {
       }
   )
   @DeleteMapping
+  @ResponseBody
   public void deleteProjectIndices(@PathVariable String projectAbbr){
     log.trace("*** Trying now to default delete all indices of objects for project {}", projectAbbr);
     integrationServices.forEach(integrationService -> integrationService.deleteIndexedObjects(projectAbbr));
