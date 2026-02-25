@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 
@@ -67,6 +68,11 @@ public class DatastreamBuilder {
     return this;
   }
 
+  public DatastreamBuilder archivalPolicy(ArchivalPolicy archivalPolicy) {
+    datastream.setArchivalPolicy(archivalPolicy);
+    return this;
+  }
+
   public DatastreamBuilder md5Checksum(String md5Checksum) {
     datastream.setMd5Checksum(md5Checksum);
     return this;
@@ -87,6 +93,11 @@ public class DatastreamBuilder {
     // ensure that a hashset is created for the datastreams
     if(datastream.getTags() == null){
       datastream.setTags(new HashSet<>());
+    }
+
+    // set default archival policy
+    if (datastream.getArchivalPolicy() == null) {
+      datastream.setArchivalPolicy(ArchivalPolicy.DEFAULT);
     }
 
     return datastream;

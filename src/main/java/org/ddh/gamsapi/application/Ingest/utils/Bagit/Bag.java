@@ -6,6 +6,7 @@ import org.ddh.gamsapi.application.Ingest.exceptions.ExportProcessingException;
 import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 
 import java.io.IOException;
@@ -195,6 +196,7 @@ public class Bag {
           .sha512Checksum(sha512)
           .tags(contentFile.getTags())
           .lang(contentFile.getLang())
+          .archivalPolicy(parseArchivalPolicy(contentFile.getArchivalPolicy()))
           .build();
 
       bagData.getContentFiles().add(bagFile);
@@ -448,6 +450,22 @@ public class Bag {
       result.append(String.format("%02x", b));
     }
     return result.toString();
+  }
+
+  /**
+   * Safely parses archival policy from sip.json string value.
+   * Returns DEFAULT for null, empty, or unrecognized values.
+   */
+  private ArchivalPolicy parseArchivalPolicy(String value) {
+    if (value == null || value.isBlank()) {
+      return ArchivalPolicy.DEFAULT;
+    }
+    try {
+      return ArchivalPolicy.valueOf(value.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      log.warn("Unknown archivalPolicy value '{}' in sip.json, defaulting to DEFAULT", value);
+      return ArchivalPolicy.DEFAULT;
+    }
   }
 
 }

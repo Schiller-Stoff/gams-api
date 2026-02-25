@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 
 import java.util.Set;
 
@@ -57,4 +58,6 @@ public class DatastreamUpdateDto {
    * The JSON API should use the 'lang' field directly.
    */
   private String langCommaSeparated;
+
+  private ArchivalPolicy archivalPolicy;
 }

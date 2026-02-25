@@ -21,6 +21,7 @@ public class BagFileToDatastreamConverterTest extends UnitTest {
             .lang(TestDatastream.DATASTREAM_LANG)
             .rights(TestDatastream.METADATA_BASE_ENTITY.getRights())
             .mimetype(TestDatastream.MIME_TYPE.getValue())
+            .archivalPolicy(TestDatastream.ARCHIVAL_POLICY)
             .build();
 
     @Test
@@ -59,6 +60,7 @@ public class BagFileToDatastreamConverterTest extends UnitTest {
 
         Assertions.assertThat(convertedDatastream.getFilePath()).isEqualTo(TEST_BAG_FILE.getBagpath());
         Assertions.assertThat(convertedDatastream.getMimeType()).isEqualTo(TEST_BAG_FILE.getMimetype());
+        Assertions.assertThat(convertedDatastream.getArchivalPolicy()).isEqualTo(TestDatastream.ARCHIVAL_POLICY);
 
     }
 

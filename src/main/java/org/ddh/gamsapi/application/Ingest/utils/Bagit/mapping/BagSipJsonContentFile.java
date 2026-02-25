@@ -78,5 +78,11 @@ public class BagSipJsonContentFile {
     @NotNull
     private Set<String> lang = new HashSet<>();
 
+    /**
+     * Archival policy override for this content file.
+     * When absent in sip.json, defaults to DEFAULT (mimetype-based decision).
+     */
+    private String archivalPolicy;
+
 
 }

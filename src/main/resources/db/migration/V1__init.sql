@@ -25,6 +25,7 @@ create table datastream
     size              bigint       not null,
     type              varchar(255),
     digital_object_id varchar(255) not null,
+    archival_policy varchar(255) not null default 'DEFAULT',
     constraint DatastreamNameUniquePerObject primary key (digital_object_id, dsid)
 );
 

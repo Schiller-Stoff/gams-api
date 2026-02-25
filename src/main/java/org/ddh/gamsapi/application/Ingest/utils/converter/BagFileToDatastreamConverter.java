@@ -21,6 +21,7 @@ public class BagFileToDatastreamConverter implements Converter<BagFile, Datastre
         .bagPath(source.getBagpath())
         .md5Checksum(source.getMd5Checksum())
         .sha512Checksum(source.getSha512Checksum())
+        .archivalPolicy(source.getArchivalPolicy())
         .baseMetadata(new MetadataBaseEntityBuilder()
             .title(source.getTitle())
             .creator(source.getCreator())

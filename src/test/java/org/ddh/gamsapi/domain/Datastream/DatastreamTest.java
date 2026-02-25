@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.Datastream;
 
 import jakarta.validation.*;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -217,7 +218,19 @@ public class DatastreamTest extends UnitTest {
       org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(0);
     }
 
+    @Test
+    public void defaultArchivalPolicyIsDefault() {
+      Datastream datastream = TestDatastream.generate();
+      Assertions.assertEquals(ArchivalPolicy.DEFAULT, datastream.getArchivalPolicy());
+    }
 
+    @Test
+    public void raisesViolationIfArchivalPolicyIsNull() {
+      Datastream datastream = TestDatastream.generate();
+      datastream.setArchivalPolicy(null);
+      Set<ConstraintViolation<Datastream>> violations = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violations).isNotEmpty();
+    }
 
 
   }

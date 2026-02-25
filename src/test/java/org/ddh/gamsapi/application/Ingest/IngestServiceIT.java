@@ -323,6 +323,9 @@ public class IngestServiceIT extends IntegrationTest {
       Assertions.assertThat(foundDatastream.getSha512Checksum())
           .isEqualTo(TestDatastream.SHA512_CHECKSUM);
 
+      Assertions.assertThat(foundDatastream.getArchivalPolicy())
+          .isEqualTo(TestDatastream.ARCHIVAL_POLICY);
+
 
     }
 

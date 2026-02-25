@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.Datastream;
 
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.ddh.gamsapi.UnitTest;
@@ -74,6 +75,21 @@ public class DatastreamBuilderTest extends UnitTest {
         .build();
     Assertions.assertNotNull(datastream);
     Assertions.assertEquals(stringSet, datastream.getLang());
+  }
+
+  @Test
+  public void buildsWithDefaultArchivalPolicy() {
+    Datastream ds = new DatastreamBuilder().dsid("test.txt").build();
+    Assertions.assertEquals(ArchivalPolicy.DEFAULT, ds.getArchivalPolicy());
+  }
+
+  @Test
+  public void buildsWithExplicitArchivalPolicy() {
+    Datastream ds = new DatastreamBuilder()
+        .dsid("test.txt")
+        .archivalPolicy(ArchivalPolicy.FORCE_ARCHIVE)
+        .build();
+    Assertions.assertEquals(ArchivalPolicy.FORCE_ARCHIVE, ds.getArchivalPolicy());
   }
 
 }
