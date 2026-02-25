@@ -404,6 +404,11 @@ public class IngestControllerIT extends IntegrationTest {
     }
 
     @Test
+    public void testDatastreamViewContainsExpectedArchivalPolicy(){
+      Assertions.assertThat(response).contains(TestDatastream.ARCHIVAL_POLICY.name());
+    }
+
+    @Test
     @Transactional
     public void testDatastreamViewContainsExpectedLang(){
       TestDatastream.DATASTREAM_LANG.forEach(lang -> Assertions.assertThat(response).contains(lang));
