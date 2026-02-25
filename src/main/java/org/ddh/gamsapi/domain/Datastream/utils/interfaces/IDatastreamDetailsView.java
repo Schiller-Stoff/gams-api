@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 
 import java.time.Instant;
@@ -44,6 +45,8 @@ public interface IDatastreamDetailsView {
     Set<String> getTags();
 
     Set<String> getLang();
+
+    ArchivalPolicy getArchivalPolicy();
 
     String getMd5Checksum();
 

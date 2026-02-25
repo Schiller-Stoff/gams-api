@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.Datastream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamUpdateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
@@ -352,6 +353,9 @@ public class DatastreamService implements IDatastreamService {
         .sha512Checksum(writeResult.sha512Checksum())
         .tags(new HashSet<>())
         .lang(new HashSet<>())
+        .archivalPolicy(dto.getArchivalPolicy() != null
+            ? dto.getArchivalPolicy()
+            : ArchivalPolicy.DEFAULT)
         .build();
 
     Datastream savedDatastream = datastreamRepository.save(datastream);
@@ -577,6 +581,10 @@ public class DatastreamService implements IDatastreamService {
     if (patch.getLang() != null) {
       existing.setLang(new HashSet<>(patch.getLang()));
     }
+    if (patch.getArchivalPolicy() != null) {
+      existing.setArchivalPolicy(patch.getArchivalPolicy());
+    }
+
   }
 
   /**

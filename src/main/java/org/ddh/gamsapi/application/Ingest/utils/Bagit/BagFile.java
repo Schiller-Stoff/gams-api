@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -84,6 +85,13 @@ public class BagFile {
   private Set<String> lang = new HashSet<>();
 
   /**
+   * Archival policy for this content file.
+   */
+  @NotNull
+  @Builder.Default
+  private ArchivalPolicy archivalPolicy = ArchivalPolicy.DEFAULT;
+
+  /**
    * Checksum of the file using md5 algorithm.
    */
   @NotEmpty
@@ -118,6 +126,7 @@ public class BagFile {
           .lang(datastream.getLang())
           .md5Checksum(datastream.getMd5Checksum())
           .sha512Checksum(datastream.getSha512Checksum())
+          .archivalPolicy(datastream.getArchivalPolicy())
           .build();
     }
 

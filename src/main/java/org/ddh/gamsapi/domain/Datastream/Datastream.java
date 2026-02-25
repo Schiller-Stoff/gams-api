@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.ValidDatastreamId;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -128,6 +129,17 @@ public class Datastream {
   @Column(name = "modified_by")
   @LastModifiedBy
   private String modifiedBy;
+
+  /**
+   * Controls whether this datastream should be transferred to the research repository.
+   * DEFAULT: mimetype-based procedure decides.
+   * FORCE_ARCHIVE: always archive this datastream.
+   * FORCE_EXCLUDE: never archive this datastream.
+   */
+  @Column(name = "archival_policy")
+  @Enumerated(EnumType.STRING)
+  @NotNull
+  private ArchivalPolicy archivalPolicy = ArchivalPolicy.DEFAULT;
 
   /**
    * Tags for the datastream.
