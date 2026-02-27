@@ -212,6 +212,19 @@
                 </option>
               </select>
             </div>
+            <div class="mb-3">
+              <label class="form-label">Content Restrictions</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="contentRestrictionsCommaSeparated"
+                     class="form-control"
+                     th:value="${sortedContentRestrictionsCsv}"
+                     placeholder="OVER_AGE_18, PROJECT_INTERNAL"
+                     pattern="^([A-Z0-9_]+(,\s*[A-Z0-9_]+)*)?$"
+                     title="Uppercase letters, digits, and underscores only. Comma-separated." />
+              <small class="text-muted">
+                Comma-separated restriction labels. When set, only users with matching
+                Keycloak roles can access this datastream's content. Leave empty for public access.
+              </small>
+            </div>
 
             <div sec:authorize="isAuthenticated()">
               <button type="submit" class="btn btn-primary">

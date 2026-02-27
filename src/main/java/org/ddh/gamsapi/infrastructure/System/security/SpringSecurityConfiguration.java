@@ -66,9 +66,13 @@ public class SpringSecurityConfiguration {
           // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
           .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
           .permitAll()
-          .requestMatchers(HttpMethod.GET, "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/content")
-          //.access(datastreamContentAuthorizationManager)
-          .permitAll()
+          .requestMatchers(
+              HttpMethod.GET,
+              "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/content",
+              "/api/v1/projects/{projectAbbr}/objects/{id}/datastream/content"
+          )
+          .access(datastreamContentAuthorizationManager)
+          //.permitAll()
           // All HEAD and GET after above rules are allowed
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();

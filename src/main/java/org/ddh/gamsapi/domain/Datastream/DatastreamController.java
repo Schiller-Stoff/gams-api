@@ -251,7 +251,7 @@ public class DatastreamController {
         && !(authentication instanceof AnonymousAuthenticationToken);
     model.addAttribute("isAuthenticated", canEdit);
 
-    // Pre-sorted CSV strings for tags and lang form fields
+    // Pre-sorted CSV strings for tags, lang and contentRestrictions form fields
     model.addAttribute("sortedTagsCsv",
         foundDatastream.getTags() != null
             ? foundDatastream.getTags().stream().sorted().collect(Collectors.joining(", "))
@@ -259,6 +259,10 @@ public class DatastreamController {
     model.addAttribute("sortedLangCsv",
         foundDatastream.getLang() != null
             ? foundDatastream.getLang().stream().sorted().collect(Collectors.joining(", "))
+            : "");
+    model.addAttribute("sortedContentRestrictionsCsv",
+        foundDatastream.getContentRestrictions() != null
+            ? foundDatastream.getContentRestrictions().stream().sorted().collect(Collectors.joining(", "))
             : "");
 
     // Determine if content is editable in the web code editor
@@ -594,6 +598,17 @@ public class DatastreamController {
           .filter(s -> !s.isEmpty())
           .collect(Collectors.toSet());
       patch.setLang(parsedLang);
+    }
+
+    // Parse comma-separated content restrictions from form
+    if (patch.getContentRestrictionsCommaSeparated() != null) {
+      Set<String> parsedRestrictions = Arrays.stream(
+              patch.getContentRestrictionsCommaSeparated().split(","))
+          .map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .map(String::toUpperCase) // normalize to uppercase
+          .collect(Collectors.toSet());
+      patch.setContentRestrictions(parsedRestrictions);
     }
 
     datastreamService.updateDatastream(id, dsid, patch);

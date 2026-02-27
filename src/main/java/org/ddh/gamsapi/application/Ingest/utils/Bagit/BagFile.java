@@ -92,6 +92,12 @@ public class BagFile {
   private ArchivalPolicy archivalPolicy = ArchivalPolicy.DEFAULT;
 
   /**
+   * Content restriction labels from the SIP manifest.
+   */
+  @Builder.Default
+  private Set<String> contentRestrictions = new HashSet<>();
+
+  /**
    * Checksum of the file using md5 algorithm.
    */
   @NotEmpty
@@ -127,6 +133,7 @@ public class BagFile {
           .md5Checksum(datastream.getMd5Checksum())
           .sha512Checksum(datastream.getSha512Checksum())
           .archivalPolicy(datastream.getArchivalPolicy())
+          .contentRestrictions(datastream.getContentRestrictions())
           .build();
     }
 

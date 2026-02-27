@@ -52,6 +52,8 @@ public interface IDatastreamDetailsView {
 
     String getSha512Checksum();
 
+    Set<String> getContentRestrictions();
+
     interface DigitalObjectView {
         String getId();
     }
