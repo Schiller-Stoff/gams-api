@@ -35,7 +35,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.SEARCH_TAG, description = OpenAPIConfig.SEARCH_TAG_DESCRIPTION)
 public class FulltextController {
 
-  public static final String FULLTEXT_SEARCH_PATH = "/api/v1/integration/gsearch/fulltext";
+  public static final String FULLTEXT_SEARCH_PATH = "/api/v1/integration/search/fulltext";
 
   private final FulltextService fulltextService;
 
