@@ -2,6 +2,7 @@ package org.ddh.gamsapi.infrastructure.System.security;
 
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.UnitTest;
+import org.ddh.gamsapi.domain.Datastream.DatastreamAuthorizationService;
 import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAuthorizedException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

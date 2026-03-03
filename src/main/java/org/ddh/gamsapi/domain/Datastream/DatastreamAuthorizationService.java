@@ -1,7 +1,8 @@
-package org.ddh.gamsapi.infrastructure.System.security;
+package org.ddh.gamsapi.domain.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.infrastructure.System.security.GAMSAPIAuthorities;
 import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAssignedToProjectException;
 import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAuthorizedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;

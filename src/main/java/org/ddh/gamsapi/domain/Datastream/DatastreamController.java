@@ -20,7 +20,6 @@ import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
-import org.ddh.gamsapi.infrastructure.System.security.DatastreamAuthorizationService;
 import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAuthorizedException;
 import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
 import org.springframework.core.io.InputStreamResource;
