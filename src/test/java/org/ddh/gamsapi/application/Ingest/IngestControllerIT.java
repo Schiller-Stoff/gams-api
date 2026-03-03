@@ -1,7 +1,9 @@
 package org.ddh.gamsapi.application.Ingest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -595,4 +598,91 @@ public class IngestControllerIT extends IntegrationTest {
 
 
   }
+
+  @Nested
+  public class EndToEndBagItTests {
+
+    @Test
+    public void ingestedBagShouldSemanticallyMatchExportedBag() throws Exception {
+      // --- 1. SETUP & INGEST ---
+      // Load the original test bag from resources
+      File originalBagFile = TestBag.loadFile();
+      byte[] zippedImportBag = ZipUtils.zipDir(originalBagFile);
+      String projectAbbr = TestProject.PROJECT_ABBR.getValue();
+      String objectId = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+
+      // Perform HTTP POST to Ingest
+      MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedImportBag);
+      mockMvc.perform(multipart("/api/v1/projects/{projectAbbr}/objects", projectAbbr)
+              .part(mockPart))
+          .andExpect(status().isOk());
+
+      // --- 2. EXPORT ---
+      // Perform HTTP GET to Export the ingested bag
+      MvcResult exportResult = mockMvc.perform(MockMvcRequestBuilders.get(
+                  "/api/v1/projects/{projectAbbr}/objects/{id}/export", projectAbbr, objectId)
+              .accept("application/zip"))
+          .andExpect(status().isOk())
+          .andReturn();
+
+      byte[] exportedZipBytes = exportResult.getResponse().getContentAsByteArray();
+
+      // --- 3. COMPARE (SEMANTIC ASSERTION) ---
+      ObjectMapper mapper = new ObjectMapper();
+
+      // Parse original sip.json directly from the test filesystem
+      File originalSipJsonFile = new File(originalBagFile, "data/meta/sip.json");
+      BagSipJson originalSip = mapper.readValue(originalSipJsonFile, BagSipJson.class);
+
+      // Extract the exported sip.json from the zipped response
+      AtomicReference<BagSipJson> exportedSipRef = new AtomicReference<>();
+      AtomicReference<String> exportedManifestMd5 = new AtomicReference<>();
+
+      ZipUtils.walkZippedDir(exportedZipBytes, (zipEntry, bos) -> {
+        String fullEntryName = zipEntry.getName();
+        try {
+          // Check if the full zip path ends with "data/meta/sip.json"
+          if (fullEntryName.endsWith(BagFilePaths.BAG_SIP_JSON.name)) {
+            exportedSipRef.set(mapper.readValue(bos.toByteArray(), BagSipJson.class));
+          }
+          // Check if it ends with "manifest-md5.txt"
+          else if (fullEntryName.endsWith("manifest-md5.txt")) {
+            exportedManifestMd5.set(bos.toString());
+          }
+        } catch (Exception e) {
+          throw new RuntimeException("Failed to parse zip entry: " + fullEntryName, e);
+        }
+      });
+
+      BagSipJson exportedSip = exportedSipRef.get();
+      Assertions.assertThat(exportedSip).as("Exported sip.json should be present in the zip").isNotNull();
+
+      // Compare Domain Fields (Should be identical)
+      Assertions.assertThat(exportedSip.getRecid()).isEqualTo(originalSip.getRecid());
+      Assertions.assertThat(exportedSip.getProject()).isEqualTo(originalSip.getProject());
+      Assertions.assertThat(exportedSip.getTitle()).isEqualTo(originalSip.getTitle());
+      Assertions.assertThat(exportedSip.getCreator()).isEqualTo(originalSip.getCreator());
+      Assertions.assertThat(exportedSip.getRights()).isEqualTo(originalSip.getRights());
+      Assertions.assertThat(exportedSip.getPublisher()).isEqualTo(originalSip.getPublisher());
+
+      // Complex Types Comparison (Collections)
+      Assertions.assertThat(exportedSip.getTags()).containsExactlyInAnyOrderElementsOf(originalSip.getTags());
+
+      // Compare datastream content files metadata (size, mimetype, etc.)
+      Assertions.assertThat(exportedSip.getContentFiles())
+          .hasSameSizeAs(originalSip.getContentFiles());
+
+      // Compare System-Managed Fields (Should intentionally diverge)
+      Assertions.assertThat(exportedSip.getCreated_by())
+          .as("Exporting system should override the original created_by property")
+          .isNotEqualTo(originalSip.getCreated_by())
+          .contains("gams-api"); // Assuming gams-api injects its name via BuildProperties
+
+      // Sanity Check on BagIt Specifications
+      Assertions.assertThat(exportedManifestMd5.get())
+          .as("Exported MD5 manifest must contain a hash for the generated sip.json")
+          .contains(BagFilePaths.BAG_SIP_JSON.name);
+    }
+  }
+
 }
