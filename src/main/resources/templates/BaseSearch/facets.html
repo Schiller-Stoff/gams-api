@@ -249,7 +249,7 @@
       <!-- Search Form -->
       <div class="card mb-4">
         <div class="card-body">
-          <form id="facetSearchForm" th:action="@{/api/v1/integration/gsearch/facets}" method="GET">
+          <form id="facetSearchForm" th:action="@{/api/v1/integration/search/facets}" method="GET">
             <div class="row g-3">
 
               <!-- Project Selection -->
@@ -304,7 +304,7 @@
                 <button type="submit" class="btn btn-primary">
                   <i class="ti ti-search"></i> Search
                 </button>
-                <a th:href="@{/api/v1/integration/gsearch/facets}" class="btn btn-outline-secondary ms-2">
+                <a th:href="@{/api/v1/integration/search/facets}" class="btn btn-outline-secondary ms-2">
                   <i class="ti ti-refresh"></i> Reset
                 </a>
               </div>
@@ -593,7 +593,7 @@
               <ul class="pagination">
                 <li class="page-item" th:classappend="${searchResults.pagination.isFirst()} ? 'disabled'">
                   <a class="page-link"
-                     th:href="${searchResults.pagination.isFirst()} ? '#' : @{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${searchResults.pagination.page - 1}}"
+                     th:href="${searchResults.pagination.isFirst()} ? '#' : @{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${searchResults.pagination.page - 1}}"
                      aria-label="Previous page">
                     <i class="ti ti-chevron-left"></i> Previous
                   </a>
@@ -605,7 +605,7 @@
                         class="page-item"
                         th:classappend="${page == currentPage} ? 'active'">
                       <a class="page-link"
-                         th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                         th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                          th:text="${page + 1}"
                          th:aria-label="${'Page ' + (page + 1)}"
                          th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
@@ -617,7 +617,7 @@
                       <th:block th:each="page : ${#numbers.sequence(0, 4)}">
                         <li class="page-item" th:classappend="${page == currentPage} ? 'active'">
                           <a class="page-link"
-                             th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                              th:text="${page + 1}">1</a>
                         </li>
                       </th:block>
@@ -625,7 +625,7 @@
                       <th:block th:each="page : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
                         <li class="page-item">
                           <a class="page-link"
-                             th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                              th:text="${page + 1}">1</a>
                         </li>
                       </th:block>
@@ -635,7 +635,7 @@
                       <th:block th:each="page : ${#numbers.sequence(0, 2)}">
                         <li class="page-item">
                           <a class="page-link"
-                             th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                              th:text="${page + 1}">1</a>
                         </li>
                       </th:block>
@@ -643,7 +643,7 @@
                       <th:block th:each="page : ${#numbers.sequence(totalPages - 5, totalPages - 1)}">
                         <li class="page-item" th:classappend="${page == currentPage} ? 'active'">
                           <a class="page-link"
-                             th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                              th:text="${page + 1}">1</a>
                         </li>
                       </th:block>
@@ -652,20 +652,20 @@
                     <th:block th:if="${currentPage > 3 && currentPage < totalPages - 4}">
                       <li class="page-item">
                         <a class="page-link"
-                           th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=0'}">1</a>
+                           th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=0'}">1</a>
                       </li>
                       <li class="page-item disabled"><span class="page-link">...</span></li>
                       <th:block th:each="page : ${#numbers.sequence(currentPage - 2, currentPage + 2)}">
                         <li class="page-item" th:classappend="${page == currentPage} ? 'active'">
                           <a class="page-link"
-                             th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                              th:text="${page + 1}">1</a>
                         </li>
                       </th:block>
                       <li class="page-item disabled"><span class="page-link">...</span></li>
                       <li class="page-item">
                         <a class="page-link"
-                           th:href="@{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${totalPages - 1}}"
+                           th:href="@{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${totalPages - 1}}"
                            th:text="${totalPages}">100</a>
                       </li>
                     </th:block>
@@ -674,7 +674,7 @@
 
                 <li class="page-item" th:classappend="${searchResults.pagination.isLast()} ? 'disabled'">
                   <a class="page-link"
-                     th:href="${searchResults.pagination.isLast()} ? '#' : @{'/api/v1/integration/gsearch/facets?' + ${currentQuery} + '&pageIndex=' + ${searchResults.pagination.page + 1}}"
+                     th:href="${searchResults.pagination.isLast()} ? '#' : @{'/api/v1/integration/search/facets?' + ${currentQuery} + '&pageIndex=' + ${searchResults.pagination.page + 1}}"
                      aria-label="Next page">
                     Next <i class="ti ti-chevron-right"></i>
                   </a>
