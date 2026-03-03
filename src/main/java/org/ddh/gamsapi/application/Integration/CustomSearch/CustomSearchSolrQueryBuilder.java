@@ -1,8 +1,8 @@
 package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
-import org.ddh.gamsapi.application.Integration.GSearch.Fulltext.FulltextSolrConfig;
+import org.ddh.gamsapi.application.Integration.ApiSearch.ApiSearchProperties;
+import org.ddh.gamsapi.application.Integration.ApiSearch.Fulltext.FulltextSolrConfig;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrUrlBuilder;
 import org.springframework.data.domain.Pageable;
 
@@ -166,7 +166,7 @@ public class CustomSearchSolrQueryBuilder {
     // ========== HIGHLIGHTING PARAMETERS ==========
     url.append("&hl=true");  // Enable highlighting
     // TODO remove using reference to GSearchProperties here
-    url.append("&hl.fl=").append(GSearchProperties.FULLTEXT.name); // Highlight fulltext field
+    url.append("&hl.fl=").append(ApiSearchProperties.FULLTEXT.name); // Highlight fulltext field
     url.append("&hl.requireFieldMatch=true");  // Only highlight if field matches query (only objectFulltext being here matched)
     url.append("&hl.snippets=3");  // Max 3 snippets per field
     url.append("&hl.fragsize=150");  // ~150 chars per snippet

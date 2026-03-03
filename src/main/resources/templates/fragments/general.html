@@ -24,7 +24,7 @@
 
         <!-- Fulltext Search Form - NEW -->
         <div class="navbar-collapse justify-content-end px-0" id="navbarSearch">
-          <form action="/api/v1/integration/gsearch/fulltext" method="GET" class="d-flex w-100" style="max-width: 600px;">
+          <form action="/api/v1/integration/search/fulltext" method="GET" class="d-flex w-100" style="max-width: 600px;">
             <!-- Search input -->
             <input type="text"
                    name="q"
@@ -122,19 +122,19 @@
               </a>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/api/v1/integration/gsearch/fulltext" aria-expanded="false">
+              <a class="sidebar-link" href="/api/v1/integration/search/fulltext" aria-expanded="false">
                 <span>
                   <i class="ti ti-file-search"></i>
                 </span>
-                <span class="hide-menu">Fulltext</span>
+                <span class="hide-menu">Fulltext Search</span>
               </a>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="/api/v1/integration/gsearch/facets" aria-expanded="false">
+              <a class="sidebar-link" href="/api/v1/integration/search/facets" aria-expanded="false">
                 <span>
                   <i class="ti ti-list-search"></i>
                 </span>
-                <span class="hide-menu">Facets</span>
+                <span class="hide-menu">Advanced Search</span>
               </a>
             </li>
             <li class="nav-small-cap" sec:authorize="isAuthenticated()">
