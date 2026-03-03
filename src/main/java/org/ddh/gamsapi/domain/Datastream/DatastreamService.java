@@ -584,6 +584,17 @@ public class DatastreamService implements IDatastreamService {
     if (patch.getArchivalPolicy() != null) {
       existing.setArchivalPolicy(patch.getArchivalPolicy());
     }
+    if (patch.getContentRestrictions() != null) {
+      // Validate each restriction label before applying
+      for (String restriction : patch.getContentRestrictions()) {
+        if (!restriction.matches("^[A-Z0-9_]{1,64}$")) {
+          throw new DatastreamValidationException(
+              "Invalid content restriction label '" + restriction
+                  + "'. Must match pattern [A-Z0-9_]{1,64}");
+        }
+      }
+      existing.setContentRestrictions(new HashSet<>(patch.getContentRestrictions()));
+    }
 
   }
 
@@ -612,6 +623,17 @@ public class DatastreamService implements IDatastreamService {
               + String.join(", ", violations)
       );
     }
-  }
 
+    // validate content restrictions
+    if(!datastream.getContentRestrictions().isEmpty()){
+      for (String restriction : datastream.getContentRestrictions()){
+        try {
+          Datastream.validateContentRestriction(restriction);
+        } catch (IllegalArgumentException e) {
+          violations.add(e.getMessage());
+        }
+      }
+    }
+
+  }
 }

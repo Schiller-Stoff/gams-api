@@ -156,4 +156,24 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
       Pageable pageable
   );
 
+  /**
+   * Lightweight projection for authorization checks.
+   * Loads ONLY content restrictions — no metadata, tags, or content.
+   */
+  @Query("""
+    SELECT cr
+    FROM Datastream d
+    JOIN d.contentRestrictions cr
+    WHERE d.digitalObject.id = :digitalObjectId AND d.dsid = :dsid
+    """)
+  Set<String> findContentRestrictionsByDigitalObjectIdAndDsid(
+      @Param("digitalObjectId") String digitalObjectId,
+      @Param("dsid") String dsid
+  );
+
+  /**
+   * Existence check: does the datastream exist at all?
+   */
+  boolean existsByDigitalObject_IdAndDsid(String digitalObjectId, String dsid);
+
 }

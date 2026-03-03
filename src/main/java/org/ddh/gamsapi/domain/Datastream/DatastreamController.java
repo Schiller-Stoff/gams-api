@@ -20,6 +20,7 @@ import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAuthorizedException;
 import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,6 +52,7 @@ public class DatastreamController {
   private final IDatastreamService datastreamService;
   private final IDatastreamContentService datastreamContentService;
   private final IProjectService projectService;
+  private final DatastreamAuthorizationService datastreamAuthorizationService;
 
 
   @GetMapping(path = {"/datastream/content"})
@@ -70,7 +73,8 @@ public class DatastreamController {
   public ResponseEntity<InputStreamResource> getDatastreamContent(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
+      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags,
+      Authentication authentication
   ){
 
     if(!projectService.exists(projectAbbr)){
@@ -87,6 +91,19 @@ public class DatastreamController {
       foundDatastream =  datastreamService.findMainDatastreamByDigitalObjectId(id);
     } else {
       foundDatastream = datastreamService.findSingularDatastreamDetailsViewByObjectIdAndTags(id, tags);
+    }
+
+    // In DatastreamController — after resolving the datastream
+    AuthorizationDecision decision = datastreamAuthorizationService.checkContentAccess(
+        projectAbbr,
+        foundDatastream.getContentRestrictions(),
+        authentication
+    );
+
+    if (!decision.isGranted()) {
+      throw new UserNotAuthorizedException(
+          "Access denied to content of datastream " + foundDatastream.getDsid()
+              + " on object " + id);
     }
 
     DatastreamId datastreamId = DatastreamId.builder()
@@ -251,7 +268,7 @@ public class DatastreamController {
         && !(authentication instanceof AnonymousAuthenticationToken);
     model.addAttribute("isAuthenticated", canEdit);
 
-    // Pre-sorted CSV strings for tags and lang form fields
+    // Pre-sorted CSV strings for tags, lang and contentRestrictions form fields
     model.addAttribute("sortedTagsCsv",
         foundDatastream.getTags() != null
             ? foundDatastream.getTags().stream().sorted().collect(Collectors.joining(", "))
@@ -259,6 +276,10 @@ public class DatastreamController {
     model.addAttribute("sortedLangCsv",
         foundDatastream.getLang() != null
             ? foundDatastream.getLang().stream().sorted().collect(Collectors.joining(", "))
+            : "");
+    model.addAttribute("sortedContentRestrictionsCsv",
+        foundDatastream.getContentRestrictions() != null
+            ? foundDatastream.getContentRestrictions().stream().sorted().collect(Collectors.joining(", "))
             : "");
 
     // Determine if content is editable in the web code editor
@@ -339,32 +360,41 @@ public class DatastreamController {
   public ResponseEntity<InputStreamResource> getDatastreamContent(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @PathVariable String dsid
-  ){
-
-    if(!projectService.exists(projectAbbr)){
+      @PathVariable String dsid,
+      Authentication authentication
+  ) {
+    if (!projectService.exists(projectAbbr)) {
       throw new ProjectNotFoundException(
-          "Cannot retrieve datastream content. Project does not exist: " + projectAbbr
-      );
+          "Cannot retrieve datastream content. Project does not exist: " + projectAbbr);
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
-    Datastream datastream = new DatastreamBuilder()
-        .dsid(dsid)
-        .digitalObject(id)
-        .build();
+    Datastream datastream = datastreamService.findById(
+        DatastreamId.builder()
+            .digitalObject(id)
+            .dsid(dsid)
+            .build()
+    );
 
-    datastream = datastreamService
-        .findById(datastream.deriveDatastreamId());
+    // Content authorization — uses already-loaded datastream
+    AuthorizationDecision decision = datastreamAuthorizationService.checkContentAccess(
+        projectAbbr,
+        datastream.getContentRestrictions(),
+        authentication
+    );
+    if (!decision.isGranted()) {
+      throw new UserNotAuthorizedException(
+          "Access denied to content of datastream " + dsid + " on object " + id);
+    }
 
-    InputStreamResource inputStreamResource = datastreamContentService.load(datastream.deriveDatastreamId());
+    InputStreamResource inputStreamResource = datastreamContentService.load(
+        datastream.deriveDatastreamId());
 
     return ResponseEntity.ok()
         .contentLength(datastream.getSize())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body( inputStreamResource);
-
+        .body(inputStreamResource);
   }
 
   @Operation(
@@ -594,6 +624,17 @@ public class DatastreamController {
           .filter(s -> !s.isEmpty())
           .collect(Collectors.toSet());
       patch.setLang(parsedLang);
+    }
+
+    // Parse comma-separated content restrictions from form
+    if (patch.getContentRestrictionsCommaSeparated() != null) {
+      Set<String> parsedRestrictions = Arrays.stream(
+              patch.getContentRestrictionsCommaSeparated().split(","))
+          .map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .map(String::toUpperCase) // normalize to uppercase
+          .collect(Collectors.toSet());
+      patch.setContentRestrictions(parsedRestrictions);
     }
 
     datastreamService.updateDatastream(id, dsid, patch);

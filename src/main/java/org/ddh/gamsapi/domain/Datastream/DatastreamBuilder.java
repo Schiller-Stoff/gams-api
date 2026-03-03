@@ -78,6 +78,11 @@ public class DatastreamBuilder {
     return this;
   }
 
+  public DatastreamBuilder contentRestrictions(Set<String> contentRestrictions) {
+    datastream.setContentRestrictions(contentRestrictions);
+    return this;
+  }
+
   public DatastreamBuilder sha512Checksum(String sha512Checksum) {
     datastream.setSha512Checksum(sha512Checksum);
     return this;
@@ -98,6 +103,10 @@ public class DatastreamBuilder {
     // set default archival policy
     if (datastream.getArchivalPolicy() == null) {
       datastream.setArchivalPolicy(ArchivalPolicy.DEFAULT);
+    }
+
+    if (datastream.getContentRestrictions() == null) {
+      datastream.setContentRestrictions(new HashSet<>());
     }
 
     return datastream;
