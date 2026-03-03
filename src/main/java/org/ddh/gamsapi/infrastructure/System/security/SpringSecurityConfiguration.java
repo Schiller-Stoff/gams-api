@@ -68,10 +68,15 @@ public class SpringSecurityConfiguration {
           .permitAll()
           .requestMatchers(
               HttpMethod.GET,
-              "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/content",
-              "/api/v1/projects/{projectAbbr}/objects/{id}/datastream/content"
+              "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/content"
           )
           .access(datastreamContentAuthorizationManager)
+          // Main resource and tag based resolution must be checked in service layer (dsid not known!)
+          .requestMatchers(
+              HttpMethod.GET,
+              "/api/v1/projects/{projectAbbr}/objects/{id}/datastream/content"
+          )
+          .permitAll()
           //.permitAll()
           // All HEAD and GET after above rules are allowed
           .requestMatchers(request -> {

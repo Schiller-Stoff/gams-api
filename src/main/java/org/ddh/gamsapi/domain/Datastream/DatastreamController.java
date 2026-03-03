@@ -20,6 +20,8 @@ import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.security.DatastreamAuthorizationService;
+import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAuthorizedException;
 import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,6 +53,7 @@ public class DatastreamController {
   private final IDatastreamService datastreamService;
   private final IDatastreamContentService datastreamContentService;
   private final IProjectService projectService;
+  private final DatastreamAuthorizationService datastreamAuthorizationService;
 
 
   @GetMapping(path = {"/datastream/content"})
@@ -70,7 +74,8 @@ public class DatastreamController {
   public ResponseEntity<InputStreamResource> getDatastreamContent(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags
+      @RequestParam(defaultValue = "", required = false, name = "tag") Set<String> tags,
+      Authentication authentication
   ){
 
     if(!projectService.exists(projectAbbr)){
@@ -87,6 +92,19 @@ public class DatastreamController {
       foundDatastream =  datastreamService.findMainDatastreamByDigitalObjectId(id);
     } else {
       foundDatastream = datastreamService.findSingularDatastreamDetailsViewByObjectIdAndTags(id, tags);
+    }
+
+    // In DatastreamController — after resolving the datastream
+    AuthorizationDecision decision = datastreamAuthorizationService.checkContentAccess(
+        projectAbbr,
+        foundDatastream.getContentRestrictions(),
+        authentication
+    );
+
+    if (!decision.isGranted()) {
+      throw new UserNotAuthorizedException(
+          "Access denied to content of datastream " + foundDatastream.getDsid()
+              + " on object " + id);
     }
 
     DatastreamId datastreamId = DatastreamId.builder()
