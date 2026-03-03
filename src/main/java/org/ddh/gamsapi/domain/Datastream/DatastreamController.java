@@ -361,32 +361,41 @@ public class DatastreamController {
   public ResponseEntity<InputStreamResource> getDatastreamContent(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @PathVariable String dsid
-  ){
-
-    if(!projectService.exists(projectAbbr)){
+      @PathVariable String dsid,
+      Authentication authentication
+  ) {
+    if (!projectService.exists(projectAbbr)) {
       throw new ProjectNotFoundException(
-          "Cannot retrieve datastream content. Project does not exist: " + projectAbbr
-      );
+          "Cannot retrieve datastream content. Project does not exist: " + projectAbbr);
     }
 
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
-    Datastream datastream = new DatastreamBuilder()
-        .dsid(dsid)
-        .digitalObject(id)
-        .build();
+    Datastream datastream = datastreamService.findById(
+        DatastreamId.builder()
+            .digitalObject(id)
+            .dsid(dsid)
+            .build()
+    );
 
-    datastream = datastreamService
-        .findById(datastream.deriveDatastreamId());
+    // Content authorization — uses already-loaded datastream
+    AuthorizationDecision decision = datastreamAuthorizationService.checkContentAccess(
+        projectAbbr,
+        datastream.getContentRestrictions(),
+        authentication
+    );
+    if (!decision.isGranted()) {
+      throw new UserNotAuthorizedException(
+          "Access denied to content of datastream " + dsid + " on object " + id);
+    }
 
-    InputStreamResource inputStreamResource = datastreamContentService.load(datastream.deriveDatastreamId());
+    InputStreamResource inputStreamResource = datastreamContentService.load(
+        datastream.deriveDatastreamId());
 
     return ResponseEntity.ok()
         .contentLength(datastream.getSize())
         .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body( inputStreamResource);
-
+        .body(inputStreamResource);
   }
 
   @Operation(
