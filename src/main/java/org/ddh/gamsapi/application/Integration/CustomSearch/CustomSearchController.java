@@ -26,7 +26,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class CustomSearchController {
 
-  public static final String CUSTOM_SEARCH_GET_PATH = "/api/v1/integration/c-search";
+  public static final String CUSTOM_SEARCH_GET_PATH = "/api/v1/integration/custom-search";
 
   public static final String CUSTOM_SEARCH_MANAGEMENT_PATH = CUSTOM_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
 
@@ -35,8 +35,8 @@ public class CustomSearchController {
   private final CustomSearchService customSearchService;
 
   @Operation(
-      summary = "Add all project objects to external c-search service",
-      description = "This endpoint indexes all objects of a project in the c-search service."
+      summary = "Add all project objects to external custom-search service",
+      description = "This endpoint indexes all objects of a project in the custom-search service."
   )
   @PostMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
   @ResponseBody
@@ -54,8 +54,8 @@ public class CustomSearchController {
   }
 
   @Operation(
-      summary = "Add a single project object to external c-search service",
-      description = "This endpoint indexes all objects of a project in the c-search service."
+      summary = "Add a single project object to external custom-search service",
+      description = "This endpoint indexes all objects of a project in the custom-search service."
   )
   @PostMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
   @ResponseBody
@@ -69,13 +69,13 @@ public class CustomSearchController {
   @Hidden
   @PostMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
-    log.debug("*** HTML: Indexing single object {} in c-search for project {}", id, projectAbbr);
+    log.debug("*** HTML: Indexing single object {} in custom-search for project {}", id, projectAbbr);
     customSearchService.indexObject(projectAbbr, id);
     return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
-      summary = "Delete all project objects from external c-search service",
+      summary = "Delete all project objects from external custom-search service",
       description = "This endpoint deletes all objects of a project from the CustomSearch service."
   )
   @DeleteMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
@@ -94,7 +94,7 @@ public class CustomSearchController {
   }
 
   @Operation(
-      summary = "Delete a single project object from external c-search service",
+      summary = "Delete a single project object from external custom-search service",
       description = "This endpoint deletes a single object of a project from the CustomSearch service."
   )
   @DeleteMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
@@ -110,7 +110,7 @@ public class CustomSearchController {
   @Hidden
   @DeleteMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
-    log.debug("*** HTML: Deleting single object {} from c-search for project {}", id, projectAbbr);
+    log.debug("*** HTML: Deleting single object {} from custom-search for project {}", id, projectAbbr);
     customSearchService.deleteIndexedObject(projectAbbr, id);
     return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
   }
