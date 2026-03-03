@@ -185,7 +185,7 @@ public class FulltextController {
     );
     model.addAttribute("currentQuery", currentQuery);
 
-    return "BaseSearch/fulltext";
+    return "ApiSearch/fulltext";
 
   }
 

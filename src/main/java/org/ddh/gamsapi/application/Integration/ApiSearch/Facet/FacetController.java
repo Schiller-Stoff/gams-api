@@ -142,7 +142,7 @@ public class FacetController {
       model.addAttribute("selectedFacets", new HashMap<>());
       model.addAttribute("totalUnfilteredCount", 0L);
       model.addAttribute("currentQuery", "");
-      return "BaseSearch/facets";
+      return "ApiSearch/facets";
     }
 
     // Limit page size
@@ -190,7 +190,7 @@ public class FacetController {
       model.addAttribute("searchResults", null);
     }
 
-    return "BaseSearch/facets";
+    return "ApiSearch/facets";
   }
 
 
