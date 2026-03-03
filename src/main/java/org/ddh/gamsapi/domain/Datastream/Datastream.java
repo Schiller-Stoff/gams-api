@@ -176,6 +176,30 @@ public class Datastream {
   private String sha512Checksum;
 
   /**
+   *
+   */
+  @ElementCollection(fetch = FetchType.EAGER)
+  @NotNull
+  @Column(name = Datastream.CONTENT_RESTRICTIONS_TABLE_NAME)
+  @Size(max = 50, message = "Maximum 50 content restrictions allowed per datastream")
+  private Set<String> contentRestrictions = new HashSet<>();
+
+  // Dedicated validator for contentRestrictions
+  private static final java.util.regex.Pattern VALID_RESTRICTION = java.util.regex.Pattern.compile("^[A-Z0-9_]{1,64}$");
+  /**
+   * Validates content restriction values.
+   * Restrictions become part of Keycloak role names,
+   * so they must be safe for role construction.
+   */
+  public static void validateContentRestriction(String restriction) {
+    if (!VALID_RESTRICTION.matcher(restriction).matches()) {
+      throw new IllegalArgumentException(
+          "Invalid content restriction '" + restriction
+              + "'. Must match pattern: " + VALID_RESTRICTION.pattern());
+    }
+  }
+
+  /**
    * Derives the DatastreamId from the current Datastream object.
    * Follows the pattern of the DatastreamId class which represents the logic stored in the database.
    * @return

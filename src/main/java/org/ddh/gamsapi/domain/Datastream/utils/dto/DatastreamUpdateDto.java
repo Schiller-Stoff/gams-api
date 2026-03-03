@@ -60,4 +60,19 @@ public class DatastreamUpdateDto {
   private String langCommaSeparated;
 
   private ArchivalPolicy archivalPolicy;
+
+  /**
+   * Content restriction labels for fine-grained access control.
+   * Each value must match pattern [A-Z0-9_]{1,64}.
+   * Example: ["OVER_AGE_18", "PROJECT_INTERNAL"]
+   */
+  @Size(max = 50, message = "Maximum 50 content restrictions allowed")
+  private Set<String> contentRestrictions;
+
+  /**
+   * Comma-separated content restrictions string from form submission.
+   * Parsed into the contentRestrictions Set in the controller layer.
+   * The JSON API should use the 'contentRestrictions' field directly.
+   */
+  private String contentRestrictionsCommaSeparated;
 }

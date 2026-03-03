@@ -15,7 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.*;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -30,8 +33,6 @@ import java.io.IOException;
 public class SpringSecurityConfiguration {
 
   private final UserProjectAuthorizationManager userProjectAuthorizationManager;
-
-  private final DatastreamContentAuthorizationManager datastreamContentAuthorizationManager;
 
   private final ClientRegistrationRepository clientRegistrationRepository;
 
@@ -66,9 +67,8 @@ public class SpringSecurityConfiguration {
           // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
           .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
           .permitAll()
-          .requestMatchers(HttpMethod.GET, "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams/{dsid}/content")
-          //.access(datastreamContentAuthorizationManager)
-          .permitAll()
+          // the datastream content auth is handled at controller level!
+          //.permitAll()
           // All HEAD and GET after above rules are allowed
           .requestMatchers(request -> {
               String requestMethod = request.getMethod();

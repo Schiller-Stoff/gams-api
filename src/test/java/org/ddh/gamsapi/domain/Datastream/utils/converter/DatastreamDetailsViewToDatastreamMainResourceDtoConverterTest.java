@@ -138,6 +138,11 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
     }
 
     @Override
+    public Set<String> getContentRestrictions() {
+      return TestDatastream.DATASTREAM_CONTENT_RESTRICTIONS;
+    }
+
+    @Override
     public ArchivalPolicy getArchivalPolicy() {
       return TestDatastream.ARCHIVAL_POLICY;
     }

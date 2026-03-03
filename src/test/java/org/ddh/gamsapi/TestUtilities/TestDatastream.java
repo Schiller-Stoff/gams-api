@@ -29,6 +29,7 @@ public enum TestDatastream {
     public static final MetadataBaseEntity METADATA_BASE_ENTITY = TestMetadataBaseEntity.generate();
 
     public static final ArchivalPolicy ARCHIVAL_POLICY = ArchivalPolicy.DEFAULT;
+    public static final Set<String> DATASTREAM_CONTENT_RESTRICTIONS = Set.of();
 
     private final String value;
 
@@ -76,6 +77,7 @@ public enum TestDatastream {
           .bagPath(FILE_NAME.getValue())
           .lang(DATASTREAM_LANG)
           .archivalPolicy(ARCHIVAL_POLICY)
+          .contentRestrictions(DATASTREAM_CONTENT_RESTRICTIONS)
           .build();
     }
 
