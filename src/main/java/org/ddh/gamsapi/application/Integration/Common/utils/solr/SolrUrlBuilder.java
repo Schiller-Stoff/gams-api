@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.application.Integration.Common.utils.solr;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.ApiSearchProperties;
+import org.ddh.gamsapi.application.Integration.ApiSearch.ApiSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 
 import java.io.UnsupportedEncodingException;
