@@ -7,7 +7,7 @@ import org.ddh.gamsapi.TestUtilities.TestDublinCoreEntry;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.application.Ingest.interfaces.IIngestService;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearchService;
+import org.ddh.gamsapi.application.Integration.GSearch.ApiSearchService;
 import org.ddh.gamsapi.application.Integration.SolrIntegrationTest;
 import org.ddh.gamsapi.domain.Project.ProjectBuilder;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
@@ -47,7 +47,7 @@ public class FacetControllerIT extends SolrIntegrationTest {
   private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Autowired
-  private GSearchService gSearchService;
+  private ApiSearchService apiSearchService;
 
   @Autowired
   private IIngestService ingestService;
@@ -73,7 +73,7 @@ public class FacetControllerIT extends SolrIntegrationTest {
     );
 
     // index object
-    gSearchService.indexObject(
+    apiSearchService.indexObject(
         TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
     );
   }

@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.application.Integration.GSearch.Fulltext;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.ApiSearchProperties;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrUrlBuilder;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationUserQueryException;
 import org.springframework.data.domain.Pageable;
@@ -134,16 +134,16 @@ public class FulltextQueryBuilder {
 
     // Field list
     List<String> fieldsToReturn = List.of(
-        GSearchProperties.OBJECT_ID.name,
-        GSearchProperties.PROJECT.name,
-        GSearchProperties.DATASTREAMS.name,
-        GSearchProperties.TYPE.name,
-        GSearchProperties.TITLE.name,
-        GSearchProperties.DESCRIPTION.name,
-        GSearchProperties.CREATOR.name,
-        GSearchProperties.PUBLISHER.name,
-        GSearchProperties.RIGHTS.name,
-        GSearchProperties.TAGS.name,
+        ApiSearchProperties.OBJECT_ID.name,
+        ApiSearchProperties.PROJECT.name,
+        ApiSearchProperties.DATASTREAMS.name,
+        ApiSearchProperties.TYPE.name,
+        ApiSearchProperties.TITLE.name,
+        ApiSearchProperties.DESCRIPTION.name,
+        ApiSearchProperties.CREATOR.name,
+        ApiSearchProperties.PUBLISHER.name,
+        ApiSearchProperties.RIGHTS.name,
+        ApiSearchProperties.TAGS.name,
         "dc.*"
     );
     url.append("&fl=").append(String.join(",", fieldsToReturn));
@@ -151,7 +151,7 @@ public class FulltextQueryBuilder {
 
     // ========== HIGHLIGHTING PARAMETERS (NEW) ==========
     url.append("&hl=true");  // Enable highlighting
-    url.append("&hl.fl=").append(GSearchProperties.FULLTEXT.name); // Highlight fulltext field
+    url.append("&hl.fl=").append(ApiSearchProperties.FULLTEXT.name); // Highlight fulltext field
     url.append("&hl.requireFieldMatch=true");  // Only highlight if field matches query (only objectFulltext being here matched)
     url.append("&hl.snippets=3");  // Max 3 snippets per field
     url.append("&hl.fragsize=150");  // ~150 chars per snippet

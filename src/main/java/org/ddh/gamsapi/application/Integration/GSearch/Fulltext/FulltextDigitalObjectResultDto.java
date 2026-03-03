@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearch;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.ApiSearch;
+import org.ddh.gamsapi.application.Integration.GSearch.ApiSearchProperties;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,7 +36,7 @@ public class FulltextDigitalObjectResultDto {
    */
   @JsonProperty("results")
   @Schema(description = "Paginated search results with complete metadata")
-  private PagedResponse<GSearch> results;
+  private PagedResponse<ApiSearch> results;
 
   /**
    * Currently selected dc filters.
@@ -64,11 +64,11 @@ public class FulltextDigitalObjectResultDto {
   ) {
 
     // Step 1: Map Solr documents to domain objects (and add highlighting data)
-    List<GSearch> searchResults = fulltextSolrResponse.getDocuments().stream()
+    List<ApiSearch> searchResults = fulltextSolrResponse.getDocuments().stream()
         .map( solrDocument -> {
-          var baseSearch = GSearch.from(solrDocument);
+          var baseSearch = ApiSearch.from(solrDocument);
           // additionally apply highlighting if available
-          String docId = (String) baseSearch.getProperty(GSearchProperties.OBJECT_ID.name);
+          String docId = (String) baseSearch.getProperty(ApiSearchProperties.OBJECT_ID.name);
           var highlightInfo = fulltextSolrResponse.getHighlighting().get(docId);
           // Add highlighting info if present
           if(!highlightInfo.isEmpty()){
@@ -80,14 +80,14 @@ public class FulltextDigitalObjectResultDto {
 
     // Step 2: Create Spring Page with complete pagination metadata
     // This automatically calculates: totalPages, hasNext, hasPrevious, isFirst, isLast
-    Page<GSearch> page = new PageImpl<>(
+    Page<ApiSearch> page = new PageImpl<>(
         searchResults,                      // Content for this page
         pageable,                           // Pageable (contains page number, size, sort)
         fulltextSolrResponse.getNumFound()   // Total elements (for totalPages calculation)
     );
 
     // Step 3: Convert to standard PagedResponse wrapper
-    PagedResponse<GSearch> pagedResults = PagedResponse.from(page);
+    PagedResponse<ApiSearch> pagedResults = PagedResponse.from(page);
 
     // Step 4: Convert selected facets from MultiValueMap to standard Map
     Map<String, List<String>> selectedFilterMap = new HashMap<>();

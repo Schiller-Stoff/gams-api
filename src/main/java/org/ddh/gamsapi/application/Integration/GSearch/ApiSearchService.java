@@ -28,7 +28,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GSearchService implements IIntegrationService {
+public class ApiSearchService implements IIntegrationService {
 
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
@@ -50,7 +50,7 @@ public class GSearchService implements IIntegrationService {
     log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
     // delete selected from GAMS core
-    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", GSearchProperties.PROJECT.name, projectAbbr));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", ApiSearchProperties.PROJECT.name, projectAbbr));
 
   }
 
@@ -67,18 +67,18 @@ public class GSearchService implements IIntegrationService {
     var foundDatastreams = datastreamRepository.findAllDatastreamMimeViewsByDigitalObject(digitalObject);
 
     // id needs to stay the same -- otherwise multiple entries with same ids will be created.
-    solrDocument.addProperty(GSearchProperties.OBJECT_ID.name, digitalObject.getId());
-    solrDocument.addProperty(GSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
-    solrDocument.addProperty(GSearchProperties.TYPE.name, GSearchTypes.DIGITAL_OBJECT.name);
+    solrDocument.addProperty(ApiSearchProperties.OBJECT_ID.name, digitalObject.getId());
+    solrDocument.addProperty(ApiSearchProperties.PROJECT.name, digitalObject.getProject().getProjectAbbr());
+    solrDocument.addProperty(ApiSearchProperties.TYPE.name, ApiSearchTypes.DIGITAL_OBJECT.name);
     // index datastream ids
     if(!foundDatastreams.isEmpty()){
-      solrDocument.addProperty(GSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
+      solrDocument.addProperty(ApiSearchProperties.DATASTREAMS.name, foundDatastreams.stream().map(IDatastreamMimeView::getDsid).toList());
     }
 
     // index tags if present
     if(!digitalObject.getTags().isEmpty()){
       solrDocument.addProperty(
-          GSearchProperties.TAGS.name,
+          ApiSearchProperties.TAGS.name,
           digitalObject.getTags()
               .stream()
               .toList()
@@ -86,11 +86,11 @@ public class GSearchService implements IIntegrationService {
     }
 
     // These fields might differ from the dublin core!
-     solrDocument.addProperty(GSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
-     solrDocument.addProperty(GSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
-     solrDocument.addProperty(GSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
-     solrDocument.addProperty(GSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
-     solrDocument.addProperty(GSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
+     solrDocument.addProperty(ApiSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
+     solrDocument.addProperty(ApiSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
+     solrDocument.addProperty(ApiSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
+     solrDocument.addProperty(ApiSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
+     solrDocument.addProperty(ApiSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
 
 
     // send datastream contained info to solr
@@ -144,9 +144,9 @@ public class GSearchService implements IIntegrationService {
     id = id.replaceAll(":", "\\\\\\\\:");
 
     // delete object from GAMS core
-    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", GSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", ApiSearchProperties.OBJECT_ID.name, id));
     // this requires solr documents to have the projectAbbr field
-    solrClient.delete(projectAbbr, String.format("%s:%s", GSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(projectAbbr, String.format("%s:%s", ApiSearchProperties.OBJECT_ID.name, id));
 
   }
 
@@ -211,11 +211,11 @@ public class GSearchService implements IIntegrationService {
 
     String docText = XMLUtils.extractText(dcXml);
 
-    if(solrDocument.getProperty(GSearchProperties.FULLTEXT.name) == null){
-      solrDocument.addProperty(GSearchProperties.FULLTEXT.name, docText);
+    if(solrDocument.getProperty(ApiSearchProperties.FULLTEXT.name) == null){
+      solrDocument.addProperty(ApiSearchProperties.FULLTEXT.name, docText);
     } else {
-      String existingText = (String) solrDocument.getProperty(GSearchProperties.FULLTEXT.name);
-      solrDocument.addProperty(GSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
+      String existingText = (String) solrDocument.getProperty(ApiSearchProperties.FULLTEXT.name);
+      solrDocument.addProperty(ApiSearchProperties.FULLTEXT.name, existingText + "; " + docText  );
     }
 
   }

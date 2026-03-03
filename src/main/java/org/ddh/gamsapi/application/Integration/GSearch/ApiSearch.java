@@ -20,7 +20,7 @@ import java.util.Map;
  */
 @Slf4j
 @ToString
-public class GSearch {
+public class ApiSearch {
 
   /**
    * JSON Any-Setter: All properties will be mapped to this map.
@@ -49,13 +49,13 @@ public class GSearch {
    * @param solrDocument SolrDocument
    * @return BaseSearch instance
    */
-  public static GSearch from(SolrDocument solrDocument) {
-    GSearch gSearch = new GSearch();
+  public static ApiSearch from(SolrDocument solrDocument) {
+    ApiSearch apiSearch = new ApiSearch();
     solrDocument.retrievePropertiesMap().forEach((key, value) -> {
-      gSearch.addProperty(key, value);
+      apiSearch.addProperty(key, value);
     });
 
-    return gSearch;
+    return apiSearch;
 
   }
 
@@ -66,7 +66,7 @@ public class GSearch {
    * @param solrDocumentAsResource
    * @return
    */
-  public static GSearch[] from(InputStreamResource solrDocumentAsResource) throws IOException {
+  public static ApiSearch[] from(InputStreamResource solrDocumentAsResource) throws IOException {
 
     JsonFactory jsonFactory = new JsonFactory();
 
@@ -77,8 +77,8 @@ public class GSearch {
       //01. parse as BaseSearch list
       var OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
       OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      GSearch[] gSearches = OBJECT_MAPPER.readValue(parser, GSearch[].class);
-      return gSearches;
+      ApiSearch[] apiSearches = OBJECT_MAPPER.readValue(parser, ApiSearch[].class);
+      return apiSearches;
     } catch (IOException e) {
       log.error("Error parsing SolrDocument JSON array stream", e);
       throw e;

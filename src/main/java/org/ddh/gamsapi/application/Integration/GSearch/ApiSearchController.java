@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
-public class GSearchController implements IIntegrationController {
+public class ApiSearchController implements IIntegrationController {
 
   public static final String GSEARCH_MANAGEMENT_PATH = "/api/v1/integration/projects/{projectAbbr}/objects/search";
   public static final String GSEARCH_SINGLE_OBJECT_MANAGEMENT_PATH = GSEARCH_MANAGEMENT_PATH + "/{pid}";
 
-  private final GSearchService gSearchService;
+  private final ApiSearchService apiSearchService;
 
   @Operation(
       summary = "Add all project objects to external BaseSearch service",
@@ -31,7 +31,7 @@ public class GSearchController implements IIntegrationController {
   @ResponseBody
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
-    gSearchService.indexObjects(projectAbbr);
+    apiSearchService.indexObjects(projectAbbr);
   }
 
   @Operation(
@@ -42,7 +42,7 @@ public class GSearchController implements IIntegrationController {
   @ResponseBody
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
-    gSearchService.deleteIndexedObjects(projectAbbr);
+    apiSearchService.deleteIndexedObjects(projectAbbr);
   }
 
   @Operation(
@@ -53,14 +53,14 @@ public class GSearchController implements IIntegrationController {
   @ResponseBody
   public void indexObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to index object with pid {}", pid);
-    gSearchService.indexObject(projectAbbr, pid);
+    apiSearchService.indexObject(projectAbbr, pid);
   }
 
   @Hidden
   @PostMapping(value = "/{pid}", produces = MediaType.TEXT_HTML_VALUE)
   public String indexObjectHtml(@PathVariable String projectAbbr, @PathVariable String pid) {
     log.debug("*** HTML: Indexing single object {} in gsearch for project {}", pid, projectAbbr);
-    gSearchService.indexObject(projectAbbr, pid);
+    apiSearchService.indexObject(projectAbbr, pid);
     return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + pid;
   }
 
@@ -72,14 +72,14 @@ public class GSearchController implements IIntegrationController {
   @ResponseBody
   public void deleteObject(@PathVariable String projectAbbr, @PathVariable String pid){
     log.trace("*** Trying to delete object with pid {}", pid);
-    gSearchService.deleteIndexedObject(projectAbbr, pid);
+    apiSearchService.deleteIndexedObject(projectAbbr, pid);
   }
 
   @Hidden
   @DeleteMapping(value = "/{pid}", produces = MediaType.TEXT_HTML_VALUE)
   public String deleteObjectHtml(@PathVariable String projectAbbr, @PathVariable String pid) {
     log.debug("*** HTML: Deleting single object {} from gsearch for project {}", pid, projectAbbr);
-    gSearchService.deleteIndexedObject(projectAbbr, pid);
+    apiSearchService.deleteIndexedObject(projectAbbr, pid);
     return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + pid;
   }
 

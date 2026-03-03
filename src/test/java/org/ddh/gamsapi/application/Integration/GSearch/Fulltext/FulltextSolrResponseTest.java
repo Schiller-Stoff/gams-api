@@ -3,7 +3,7 @@ package org.ddh.gamsapi.application.Integration.GSearch.Fulltext;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.UnitTest;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.ApiSearchProperties;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -109,7 +109,7 @@ public class FulltextSolrResponseTest extends UnitTest {
           .get("test.test").get(0))
           .contains("<mark>test-dc-title</mark>");
 
-      Assertions.assertThat(fulltextSolrResponse.getDocuments().get(0).getProperty(GSearchProperties.OBJECT_ID.name))
+      Assertions.assertThat(fulltextSolrResponse.getDocuments().get(0).getProperty(ApiSearchProperties.OBJECT_ID.name))
           .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
 
     }

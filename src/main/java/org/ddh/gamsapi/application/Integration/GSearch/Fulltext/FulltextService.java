@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
-import org.ddh.gamsapi.application.Integration.GSearch.GSearchProperties;
+import org.ddh.gamsapi.application.Integration.GSearch.ApiSearchProperties;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -130,7 +130,7 @@ public class FulltextService {
     // 05. Get baseline total count for these projects (unfiltered)
     int projectDocumentsCount = solrClient.countDocumentsByPropertyValues(
         SolrGamsCores.GAMS_CORE.value,
-        GSearchProperties.PROJECT.name,
+        ApiSearchProperties.PROJECT.name,
         projectAbbrs
     );
 

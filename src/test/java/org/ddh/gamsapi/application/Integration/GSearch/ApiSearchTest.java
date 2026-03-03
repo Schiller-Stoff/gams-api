@@ -7,7 +7,7 @@ import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class GSearchTest extends UnitTest {
+public class ApiSearchTest extends UnitTest {
 
   final SolrDocument solrDocument = new SolrDocument();
   final String DC_FIELD = "dc." + TestDublinCoreEntry.NAME.getValue();
@@ -21,7 +21,7 @@ public class GSearchTest extends UnitTest {
   @Test
   public void createNotNullOrEmptyPropertyObject(){
 
-    var mappedBasesearch = GSearch.from(solrDocument);
+    var mappedBasesearch = ApiSearch.from(solrDocument);
 
     Assertions.assertThat(mappedBasesearch)
         .isNotNull()
@@ -31,7 +31,7 @@ public class GSearchTest extends UnitTest {
   @Test
   public void createdBaseSearchContainsExpectedValue(){
 
-    var mappedBasesearch = GSearch.from(solrDocument);
+    var mappedBasesearch = ApiSearch.from(solrDocument);
 
     Assertions.assertThat(mappedBasesearch.getProperty(DC_FIELD))
         .isNotNull()
