@@ -114,7 +114,7 @@ public class GlobalExceptionHandler {
             extractLeafPropertyName(violation.getPropertyPath().toString()),
             violation.getMessage()
         ))
-        .collect(Collectors.toList());
+        .toList();
 
     log.debug("Constraint violation: {} violations", fieldErrors.size());
 
@@ -140,7 +140,7 @@ public class GlobalExceptionHandler {
           String fieldName = (error instanceof FieldError fe) ? fe.getField() : error.getObjectName();
           return new GamsAPIErrorResponse.FieldErrorDetail(fieldName, error.getDefaultMessage());
         })
-        .collect(Collectors.toList());
+        .toList();
 
     log.debug("Method argument validation failed: {} errors", fieldErrors.size());
 
@@ -239,11 +239,9 @@ public class GlobalExceptionHandler {
     } else if (cause instanceof InvalidFormatException ife) {
       errorMessage = String.format("Invalid value for property '%s'",
           extractJsonPath(ife));
-    } else if (cause instanceof MismatchedInputException mie) {
-      if (!mie.getPath().isEmpty()) {
-        errorMessage = String.format("Invalid type for property '%s'",
-            extractJsonPath(mie));
-      }
+    } else if ((cause instanceof MismatchedInputException mie) && (!mie.getPath().isEmpty())) {
+      errorMessage = String.format("Invalid type for property '%s'",
+          extractJsonPath(mie));
     }
 
     GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);

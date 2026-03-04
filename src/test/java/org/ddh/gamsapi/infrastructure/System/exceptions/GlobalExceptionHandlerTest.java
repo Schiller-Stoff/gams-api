@@ -1,28 +1,22 @@
 package org.ddh.gamsapi.infrastructure.System.exceptions;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
+import org.junit.jupiter.api.*;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -69,7 +63,7 @@ class GlobalExceptionHandlerTest {
     void handlesNotFound() {
       GamsApiException ex = new GamsApiException(HttpStatus.NOT_FOUND, "Digital object not found");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleGamsApiException(ex, webRequest);
+      var response = handler.handleGamsApiException(ex, webRequest);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
       assertThat(response.getBody()).isNotNull();
@@ -84,7 +78,7 @@ class GlobalExceptionHandlerTest {
     void notFoundHasCacheHeaders() {
       GamsApiException ex = new GamsApiException(HttpStatus.NOT_FOUND, "Not found");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleGamsApiException(ex, webRequest);
+      var response = handler.handleGamsApiException(ex, webRequest);
 
       assertThat(response.getHeaders().getCacheControl()).contains("max-age=300");
     }
@@ -94,7 +88,7 @@ class GlobalExceptionHandlerTest {
     void serverErrorNoCacheHeaders() {
       GamsApiException ex = new GamsApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Something broke");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleGamsApiException(ex, webRequest);
+      var response = handler.handleGamsApiException(ex, webRequest);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
       assertThat(response.getHeaders().getCacheControl()).isNullOrEmpty();
@@ -108,9 +102,10 @@ class GlobalExceptionHandlerTest {
           HttpStatus.UNPROCESSABLE_CONTENT, HttpStatus.INTERNAL_SERVER_ERROR}) {
 
         GamsApiException ex = new GamsApiException(status, "Test error");
-        ResponseEntity<GamsAPIErrorResponse> response = handler.handleGamsApiException(ex, webRequest);
+        var response = handler.handleGamsApiException(ex, webRequest);
 
         assertThat(response.getStatusCode()).isEqualTo(status);
+        Assertions.assertNotNull(response.getBody());
         assertThat(response.getBody().getStatus()).isEqualTo(status.value());
       }
     }
@@ -129,14 +124,15 @@ class GlobalExceptionHandlerTest {
       Set<ConstraintViolation<?>> violations = Set.of(violation);
       ConstraintViolationException ex = new ConstraintViolationException(violations);
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleConstraintViolation(ex);
+      var response = handler.handleConstraintViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("Validation failed");
       assertThat(response.getBody().getFieldErrors()).hasSize(1);
       // Must extract leaf property name only — no method/parameter path leaked
-      assertThat(response.getBody().getFieldErrors().get(0).getField()).isEqualTo("title");
-      assertThat(response.getBody().getFieldErrors().get(0).getMessage()).isEqualTo("must not be empty");
+      assertThat(response.getBody().getFieldErrors().getFirst().getField()).isEqualTo("title");
+      assertThat(response.getBody().getFieldErrors().getFirst().getMessage()).isEqualTo("must not be empty");
     }
 
     @Test
@@ -147,8 +143,9 @@ class GlobalExceptionHandlerTest {
       violations.add(mockViolation("creator", "must not be null"));
       ConstraintViolationException ex = new ConstraintViolationException(violations);
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleConstraintViolation(ex);
+      var response = handler.handleConstraintViolation(ex);
 
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getFieldErrors()).hasSize(2);
     }
 
@@ -158,11 +155,11 @@ class GlobalExceptionHandlerTest {
       ConstraintViolation<?> violation = mockViolation("password", "too short");
       ConstraintViolationException ex = new ConstraintViolationException(Set.of(violation));
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleConstraintViolation(ex);
+      var response = handler.handleConstraintViolation(ex);
 
-      String responseJson = response.getBody().toString();
       // The field error should only contain field name + message
-      GamsAPIErrorResponse.FieldErrorDetail detail = response.getBody().getFieldErrors().get(0);
+      Assertions.assertNotNull(response.getBody());
+      GamsAPIErrorResponse.FieldErrorDetail detail = response.getBody().getFieldErrors().getFirst();
       assertThat(detail.getField()).isEqualTo("password");
       assertThat(detail.getMessage()).isEqualTo("too short");
       // No rejected value, no class name in the response structure
@@ -185,9 +182,10 @@ class GlobalExceptionHandlerTest {
       MethodArgumentNotValidException ex = new MethodArgumentNotValidException(
           null, bindingResult);
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleMethodArgumentNotValid(ex);
+      var response = handler.handleMethodArgumentNotValid(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getFieldErrors()).hasSize(2);
     }
   }
@@ -205,9 +203,10 @@ class GlobalExceptionHandlerTest {
       ConstraintViolationException cve = new ConstraintViolationException(Set.of(violation));
       TransactionSystemException ex = new TransactionSystemException("Transaction failed", cve);
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleTransactionSystemException(ex);
+      var response = handler.handleTransactionSystemException(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("Validation failed");
       assertThat(response.getBody().getFieldErrors()).hasSize(1);
     }
@@ -218,9 +217,10 @@ class GlobalExceptionHandlerTest {
       TransactionSystemException ex = new TransactionSystemException(
           "Transaction failed", new RuntimeException("DB timeout"));
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleTransactionSystemException(ex);
+      var response = handler.handleTransactionSystemException(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage())
           .doesNotContain("DB timeout")
           .contains("transaction error");
@@ -240,9 +240,10 @@ class GlobalExceptionHandlerTest {
           "23505",
           "ERROR: duplicate key value violates unique constraint \"digital_object_pkey\"");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("A resource with the same identifier already exists");
       // Must NOT contain SQL, table names, or constraint names
       assertThat(response.getBody().getMessage()).doesNotContain("digital_object_pkey");
@@ -256,9 +257,10 @@ class GlobalExceptionHandlerTest {
           "23503",
           "ERROR: update or delete on table \"project\" violates foreign key constraint");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage())
           .isEqualTo("Cannot modify or delete this resource because other resources depend on it");
       assertThat(response.getBody().getMessage()).doesNotContain("project");
@@ -271,9 +273,10 @@ class GlobalExceptionHandlerTest {
           "23502",
           "ERROR: null value in column \"title\" violates not-null constraint");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("A required field is missing");
       assertThat(response.getBody().getMessage()).doesNotContain("title");
     }
@@ -285,9 +288,10 @@ class GlobalExceptionHandlerTest {
           "23514",
           "ERROR: new row violates check constraint");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("validation constraint");
     }
 
@@ -298,9 +302,10 @@ class GlobalExceptionHandlerTest {
           "22001",
           "ERROR: value too long for type character varying(255)");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("maximum allowed length");
       assertThat(response.getBody().getMessage()).doesNotContain("character varying(255)");
     }
@@ -312,9 +317,10 @@ class GlobalExceptionHandlerTest {
           "23999",
           "some future PostgreSQL integrity error");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("A data constraint was violated");
     }
 
@@ -325,9 +331,10 @@ class GlobalExceptionHandlerTest {
           "42P01", // undefined_table
           "ERROR: relation \"nonexistent\" does not exist");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("A data conflict occurred");
       assertThat(response.getBody().getMessage()).doesNotContain("nonexistent");
     }
@@ -338,9 +345,10 @@ class GlobalExceptionHandlerTest {
       DataIntegrityViolationException ex = new DataIntegrityViolationException(
           "some obscure error with internal details");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
+      var response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("A data conflict occurred");
     }
 
@@ -369,9 +377,10 @@ class GlobalExceptionHandlerTest {
           new com.fasterxml.jackson.core.JsonParseException(null, "Unexpected character"),
           new MockHttpInputMessage(new byte[0]));
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleHttpMessageNotReadable(ex);
+      var response = handler.handleHttpMessageNotReadable(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("Malformed JSON");
     }
 
@@ -383,9 +392,10 @@ class GlobalExceptionHandlerTest {
           (Throwable) null,
           new MockHttpInputMessage(new byte[0]));
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleHttpMessageNotReadable(ex);
+      var response = handler.handleHttpMessageNotReadable(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).isEqualTo("Invalid request body");
     }
   }
@@ -402,9 +412,10 @@ class GlobalExceptionHandlerTest {
       MethodArgumentTypeMismatchException ex = new MethodArgumentTypeMismatchException(
           "abc", Integer.class, "page", null, new NumberFormatException("For input string: \"abc\""));
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleTypeMismatch(ex);
+      var response = handler.handleTypeMismatch(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("page");
       assertThat(response.getBody().getMessage()).contains("Integer");
     }
@@ -422,9 +433,10 @@ class GlobalExceptionHandlerTest {
       MissingServletRequestParameterException ex =
           new MissingServletRequestParameterException("q", "String");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleMissingParameter(ex);
+      var response = handler.handleMissingParameter(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("q");
     }
   }
@@ -441,9 +453,10 @@ class GlobalExceptionHandlerTest {
       HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
           "Content-Type 'text/plain' is not supported");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleMediaTypeNotSupported(ex);
+      var response = handler.handleMediaTypeNotSupported(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getStatus()).isEqualTo(415);
     }
 
@@ -454,9 +467,10 @@ class GlobalExceptionHandlerTest {
       HttpMediaTypeNotSupportedException ex = new HttpMediaTypeNotSupportedException(
           "Content-Type is not set");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleMediaTypeNotSupported(ex);
+      var response = handler.handleMediaTypeNotSupported(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("request body");
     }
   }
@@ -473,9 +487,10 @@ class GlobalExceptionHandlerTest {
       HttpMediaTypeNotAcceptableException ex = new HttpMediaTypeNotAcceptableException(
           "No acceptable representation");
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleMediaTypeNotAcceptable(ex);
+      var response = handler.handleMediaTypeNotAcceptable(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_ACCEPTABLE);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getStatus()).isEqualTo(406);
     }
   }
@@ -492,9 +507,10 @@ class GlobalExceptionHandlerTest {
       HttpRequestMethodNotSupportedException ex = new HttpRequestMethodNotSupportedException(
           "DELETE", List.of(new String[]{"GET", "POST", "PATCH"}));
 
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleMethodNotSupported(ex);
+      var response = handler.handleMethodNotSupported(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.METHOD_NOT_ALLOWED);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage()).contains("DELETE");
     }
   }
@@ -511,10 +527,11 @@ class GlobalExceptionHandlerTest {
       NullPointerException ex = new NullPointerException(
           "Cannot invoke method on null reference at com.internal.Service.process(Service.java:42)");
 
-      ResponseEntity<GamsAPIErrorResponse> response =
+      var response =
           handler.handleAllUnexpectedExceptions(ex, webRequest);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getMessage())
           .doesNotContain("NullPointerException")
           .doesNotContain("Service.java")
@@ -525,9 +542,10 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("Response has consistent structure")
     void hasConsistentStructure() {
-      ResponseEntity<GamsAPIErrorResponse> response =
+      var response =
           handler.handleAllUnexpectedExceptions(new RuntimeException("boom"), webRequest);
 
+      Assertions.assertNotNull(response.getBody());
       assertThat(response.getBody().getStatus()).isEqualTo(500);
       assertThat(response.getBody().getError()).isEqualTo("Internal Server Error");
       assertThat(response.getBody().getTimestamp()).isNotNull();
