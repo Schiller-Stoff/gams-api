@@ -547,6 +547,35 @@
     <field name="dc.title" type="strings" multiValued="true"/>
     <field name="dc.type" type="strings" multiValued="true"/>
 
+    <!-- ====================================================================
+    DUBLIN CORE FIELDS - LANGUAGE-SPECIFIC DISPLAY FIELDS
+    ==================================================================== -->
+
+    <!--
+      Language-specific Dublin Core fields for multi-language display support.
+
+      These fields store clean DC values per language, enabling API clients
+      to display content in the appropriate language without parsing.
+
+      Pattern: dc_lang.{dcFieldName}.{languageCode}
+      Examples:
+        dc_lang.title.en    = "The Title"
+        dc_lang.title.de    = "Der Titel"
+        dc_lang.title.und   = "Untitled" (no language specified, ISO 639-2 "undetermined")
+        dc_lang.subject.la  = "Philosophia"
+
+      These fields are stored but NOT indexed because:
+        - Searching is done against the combined dc.* fields (which contain all language values)
+        - Fulltext/substring search uses the dc.*_txt fields (populated via copyField)
+        - These fields exist purely for structured API response display
+
+      The prefix "dc_lang." is chosen to avoid collisions with:
+        - Existing explicit dc.* fields (dc.title, dc.creator, etc.)
+        - The dc.*_txt copyField rules
+        - Other dynamic field patterns like *_ss, *_txt, etc.
+    -->
+    <dynamicField name="dc_lang.*" type="strings" indexed="false" stored="true" multiValued="true"/>
+
   <!--
    *****
    Person data
