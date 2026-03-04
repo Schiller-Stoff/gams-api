@@ -147,4 +147,16 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
       Pageable pageable
   );
 
+
+  /**
+   * Checks if any digital objects exist for the given project.
+   * Used by ProjectService to provide a clear error message before delete.
+   * PERFORMANCE: Spring Data JPA translates this to SELECT EXISTS(...) with
+   * an indexed lookup on project_project_abbr. O(1) regardless of object count.
+   *
+   * @param projectAbbr the project abbreviation
+   * @return true if at least one digital object belongs to this project
+   */
+  boolean existsByProject_ProjectAbbr(String projectAbbr);
+
 }
