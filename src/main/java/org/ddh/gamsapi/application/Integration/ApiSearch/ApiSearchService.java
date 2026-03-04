@@ -38,7 +38,7 @@ import java.util.*;
  *       for cross-language fulltext search and faceting. Duplicate values across languages are removed.</li>
  *   <li><b>Tokenized fulltext fields</b> ({@code dc.title_txt}): Automatically populated via Solr copyField rules
  *       for substring matching.</li>
- *   <li><b>Language-specific display fields</b> ({@code dc_lang.title.en}): Clean values per language,
+ *   <li><b>Language-specific display fields</b> ({@code dc.title.en}): Clean values per language,
  *       enabling clients to display appropriate language content without parsing.</li>
  * </ul>
  *
@@ -176,8 +176,8 @@ public class ApiSearchService implements IIntegrationService {
    *   <li><b>Combined search field</b> ({@code dc.title}): Clean value (no language prefix) containing
    *       all language variants. Used for fulltext search and faceting. Duplicate values across
    *       languages are automatically removed.</li>
-   *   <li><b>Language-specific display field</b> ({@code dc_lang.title.en}): Clean value for a specific
-   *       language. Entries without a language tag use {@code dc_lang.title.und}.
+   *   <li><b>Language-specific display field</b> ({@code dc.title.en}): Clean value for a specific
+   *       language. Entries without a language tag use {@code dc.title.und}.
    *       These fields are stored but not indexed in Solr (display-only).</li>
    *   <li><b>Tokenized search field</b> ({@code dc.title_txt}): Automatically populated via
    *       Solr copyField rule from {@code dc.title}. Enables substring matching.</li>
@@ -191,8 +191,8 @@ public class ApiSearchService implements IIntegrationService {
    * <p>The Solr document will contain:</p>
    * <pre>
    *   dc.title          = ["Der Titel", "The Title"]     // search + facet
-   *   dc_lang.title.de  = ["Der Titel"]                  // display
-   *   dc_lang.title.en  = ["The Title"]                  // display
+   *   dc.title.de  = ["Der Titel"]                  // display
+   *   dc.title.en  = ["The Title"]                  // display
    *   dc.title_txt      = (auto via copyField)           // fulltext/substring
    * </pre>
    *
@@ -213,7 +213,7 @@ public class ApiSearchService implements IIntegrationService {
     //
     // Structure:  fieldName -> { "all" -> Set<String>, "en" -> Set<String>, "de" -> Set<String>, ... }
     //             where "all" collects every value for the combined search field (dc.title)
-    //             and each language code collects values for the display field (dc_lang.title.en)
+    //             and each language code collects values for the display field (dc.title.en)
     Map<String, Map<String, LinkedHashSet<String>>> fieldLanguageValues = new LinkedHashMap<>();
 
     for (DublinCoreEntrySummaryView dcEntry : dcEntries) {
@@ -247,7 +247,7 @@ public class ApiSearchService implements IIntegrationService {
         solrDocument.addProperty(searchFieldName, new ArrayList<>(allValues));
       }
 
-      // Write language-specific display fields: dc_lang.{name}.{lang}
+      // Write language-specific display fields: dc.{name}.{lang}
       for (Map.Entry<String, LinkedHashSet<String>> langEntry : langMap.entrySet()) {
         String langCode = langEntry.getKey();
         if ("all".equals(langCode)) {
