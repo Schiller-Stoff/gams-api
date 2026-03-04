@@ -160,46 +160,46 @@ create sequence archival_record_seq start with 1 increment by 50;
 create sequence dublin_core_entry_seq start with 1 increment by 50;
 
 alter table if exists archival_record
-    add constraint FKbw4488rovwyth14g8cw5bt043
+    add constraint fk_archival_record_digital_object
     foreign key (digital_object_id)
     references digital_object;
 
 alter table if exists datastream
-    add constraint FKg3kmj5h5ksplr9o7fr8usynmg
+    add constraint fk_datastream_digital_object
     foreign key (digital_object_id)
     references digital_object;
 
 alter table if exists datastream_content_restrictions
-    add constraint FKklhxyijulpegn3vvhe40f4pxv
+    add constraint fk_ds_content_restrictions_datastream
     foreign key (datastream_digital_object_id, datastream_dsid)
     references datastream;
 
 alter table if exists datastream_lang
-    add constraint FKicsafqksm6xlq7q1yv3xgfom2
+    add constraint fk_ds_lang_datastream
     foreign key (datastream_digital_object_id, datastream_dsid)
     references datastream;
 
 alter table if exists datastream_tags
-    add constraint FKcd9cg0efijgen3qlkpqxl82g5
+    add constraint fk_ds_tags_datastream
     foreign key (datastream_digital_object_id, datastream_dsid)
     references datastream;
 
 alter table if exists digital_object
-    add constraint FKiscu1vj93tlk36fmmn42tifbx
+    add constraint fk_digital_object_project
     foreign key (project_project_abbr)
     references project;
 
 alter table if exists digital_object_tags
-    add constraint FKbckjsksr0o3ekojbl1t9eanl9
+    add constraint fk_do_tags_digital_object
     foreign key (digital_object_id)
     references digital_object;
 
 alter table if exists dublin_core_entry
-    add constraint FKsvcn1qeh9v6k9kyqxwjtqdyap
+    add constraint fk_dublin_core_entry_digital_object
     foreign key (digital_object_id)
     references digital_object;
 
 alter table if exists submission_record
-    add constraint FKc6deyb28usv7ceeidrmjjh4u5
+    add constraint fk_submission_record_digital_object
     foreign key (digital_object_id)
     references digital_object;
