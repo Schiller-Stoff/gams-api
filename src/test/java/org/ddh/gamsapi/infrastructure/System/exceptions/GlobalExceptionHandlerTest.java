@@ -389,7 +389,7 @@ class GlobalExceptionHandlerTest {
     void handlesNoCause() {
       HttpMessageNotReadableException ex = new HttpMessageNotReadableException(
           "Required request body is missing",
-          (Throwable) null,
+          null,
           new MockHttpInputMessage(new byte[0]));
 
       var response = handler.handleHttpMessageNotReadable(ex);
@@ -587,7 +587,6 @@ class GlobalExceptionHandlerTest {
 
   // ─── Helpers ───────────────────────────────────────────────────────────
 
-  @SuppressWarnings("unchecked")
   private ConstraintViolation<?> mockViolation(String propertyPath, String message) {
     ConstraintViolation<?> violation = mock(ConstraintViolation.class);
     Path path = mock(Path.class);
