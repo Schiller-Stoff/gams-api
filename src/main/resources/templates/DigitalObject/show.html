@@ -605,13 +605,12 @@
             </form>
           </div>
 
-          <!-- GSearch (Base Search) -->
           <div class="mb-3">
-            <h4 class="h6">GSearch (Base Search)</h4>
+            <h4 class="h6">Api-Search</h4>
             <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
-                  onsubmit="return confirm('Index this object in GSearch?');">
+                  onsubmit="return confirm('Index this object in Api-Search?');">
               <button type="submit" class="btn btn-outline-primary">
                 <i class="ti ti-search me-1"></i>Index
               </button>
@@ -619,7 +618,7 @@
             <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
-                  onsubmit="return confirm('Remove this object from GSearch?');">
+                  onsubmit="return confirm('Remove this object from Api-Search?');">
               <input type="hidden" name="_method" value="DELETE"/>
               <button type="submit" class="btn btn-outline-danger">
                 <i class="ti ti-trash me-1"></i>Remove
@@ -627,21 +626,20 @@
             </form>
           </div>
 
-          <!-- C-Search (Custom Search) -->
           <div class="mb-3">
-            <h4 class="h6">C-Search</h4>
-            <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <h4 class="h6">Custom-Search</h4>
+            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
-                  onsubmit="return confirm('Index this object in C-Search?');">
+                  onsubmit="return confirm('Index this object in Custom-Search?');">
               <button type="submit" class="btn btn-outline-primary">
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/c-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
-                  onsubmit="return confirm('Remove this object from C-Search?');">
+                  onsubmit="return confirm('Remove this object from Custom-Search?');">
               <input type="hidden" name="_method" value="DELETE"/>
               <button type="submit" class="btn btn-outline-danger">
                 <i class="ti ti-trash me-1"></i>Remove

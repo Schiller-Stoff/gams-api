@@ -2,6 +2,8 @@ package org.ddh.gamsapi.domain.Project;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotEmptyException;
 import org.ddh.gamsapi.domain.Project.interfaces.ProjectIdView;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.*;
 public class ProjectService implements IProjectService {
 
   private final IProjectRepository projectRepository;
+  private final IDigitalObjectRepository digitalObjectRepository;
 
   @Override
   @Transactional
@@ -45,6 +48,14 @@ public class ProjectService implements IProjectService {
     Project foundProject = projectRepository.findById(project.getProjectAbbr()).orElseThrow(() -> new ProjectNotFoundException(
         "Project " + project.getProjectAbbr() + " not found. Cannot delete project"
     ));
+
+    // Pre-check: fail fast with a domain-specific message before hitting the DB constraint
+    if (digitalObjectRepository.existsByProject_ProjectAbbr(foundProject.getProjectAbbr())) {
+      throw new ProjectNotEmptyException(
+          "Cannot delete project '" + foundProject.getProjectAbbr()
+              + "' because it still contains digital objects. Delete all objects first."
+      );
+    }
 
     log.trace("Found project {}", foundProject);
     projectRepository.delete(foundProject);
