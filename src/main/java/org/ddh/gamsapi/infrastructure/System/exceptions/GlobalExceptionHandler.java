@@ -15,52 +15,79 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
  * Global exception handler for the GAMS API.
+ *
+ * <p>Design principles:
+ * <ul>
+ *   <li><b>No cause-chain walking:</b> Each exception type has a dedicated handler.
+ *       Spring resolves the most specific @ExceptionHandler match, so wrapped exceptions
+ *       like TransactionSystemException are unwrapped once (O(1)) instead of walked (O(n)).</li>
+ *   <li><b>Security:</b> Internal details (SQL, class names, field values) are never exposed
+ *       in responses. They are logged server-side at appropriate levels.</li>
+ *   <li><b>Consistent response shape:</b> All errors return {@link GamsAPIErrorResponse}.</li>
+ *   <li><b>Log levels follow HTTP semantics:</b> 4xx → DEBUG/WARN, 5xx → ERROR with stack trace.</li>
+ * </ul>
+ *
+ * <p>Handler priority (Spring resolves most specific first):
+ * <ol>
+ *   <li>GamsApiException (and all subclasses) — application-level errors with known status</li>
+ *   <li>ConstraintViolationException — Bean Validation at controller or JPA level</li>
+ *   <li>MethodArgumentNotValidException — @Valid on @RequestBody</li>
+ *   <li>TransactionSystemException — unwraps to find ConstraintViolationException</li>
+ *   <li>DataIntegrityViolationException — DB constraint violations (unique, FK, etc.)</li>
+ *   <li>HttpMessageNotReadableException — malformed JSON</li>
+ *   <li>MethodArgumentTypeMismatchException — wrong type in path/query params</li>
+ *   <li>MissingServletRequestParameterException — missing required query params</li>
+ *   <li>HttpMediaTypeNotSupportedException — unsupported Content-Type (e.g., missing body on @RequestBody)</li>
+ *   <li>HttpMediaTypeNotAcceptableException — cannot produce requested Accept type</li>
+ *   <li>HttpRequestMethodNotSupportedException — wrong HTTP method for endpoint</li>
+ *   <li>NoResourceFoundException — no handler found for request (static resources)</li>
+ *   <li>Exception (catch-all) — unexpected errors, guaranteed consistent response</li>
+ * </ol>
  */
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(TransactionSystemException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleTransactionSystemExceotion(TransactionSystemException ex) {
-    log.error("TransactionSystemException occurred: {}", ex.getMessage());
-    // TODO too performance intense - refactor!
-    return drillRootErrorCause(ex);
-  }
+  // ─── Application Exceptions (GamsApiException hierarchy) ───────────────
 
+  /**
+   * Handles all custom application exceptions.
+   * GamsApiException carries its own HTTP status, so we trust it directly.
+   */
   @ExceptionHandler(GamsApiException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleResponseStatusException(
-      GamsApiException ex, WebRequest request
-  ) {
-    HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
-    // make sure we have a valid status
-    HttpStatus effectiveStatus = status != null ? status : HttpStatus.INTERNAL_SERVER_ERROR;
+  public ResponseEntity<GamsAPIErrorResponse> handleGamsApiException(
+      GamsApiException ex, WebRequest request) {
 
-    // Only ERROR log for 5xx, DEBUG for 4xx (no stack trace)
+    HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
+    HttpStatus effectiveStatus = (status != null) ? status : HttpStatus.INTERNAL_SERVER_ERROR;
+
     if (effectiveStatus.is5xxServerError()) {
       log.error("Server error: {} - {}", effectiveStatus, ex.getReason(), ex);
     } else {
       log.debug("Client error: {} - {}", effectiveStatus, ex.getReason());
     }
 
-    GamsAPIErrorResponse errorResponse = new GamsAPIErrorResponse(
-        effectiveStatus,
-        ex.getReason()
-    );
+    GamsAPIErrorResponse errorResponse = new GamsAPIErrorResponse(effectiveStatus, ex.getReason());
 
-    // Cache 404s for 5 minutes
     HttpHeaders headers = new HttpHeaders();
     if (effectiveStatus == HttpStatus.NOT_FOUND) {
       headers.setCacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES));
@@ -69,116 +96,473 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(effectiveStatus).headers(headers).body(errorResponse);
   }
 
-  @ExceptionHandler(DataIntegrityViolationException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
-    // TODO this is way to performance intense - refactor!
-    log.error("Data integrity violation: {}", ex.getMessage());
-    return drillRootErrorCause(ex);
+  // ─── Validation Exceptions ─────────────────────────────────────────────
+
+  /**
+   * Handles Bean Validation constraint violations thrown directly by @Validated
+   * controllers or from manual validator invocations.
+   *
+   * <p>Security: Only exposes property path + validation message.
+   * Never exposes the invalid value or the validated class name.</p>
+   */
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleConstraintViolation(
+      ConstraintViolationException ex) {
+
+    List<GamsAPIErrorResponse.FieldErrorDetail> fieldErrors = ex.getConstraintViolations().stream()
+        .map(violation -> new GamsAPIErrorResponse.FieldErrorDetail(
+            extractLeafPropertyName(violation.getPropertyPath().toString()),
+            violation.getMessage()
+        ))
+        .collect(Collectors.toList());
+
+    log.debug("Constraint violation: {} violations", fieldErrors.size());
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.BAD_REQUEST,
+        "Validation failed",
+        fieldErrors
+    );
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler(HttpMessageNotReadableException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+  /**
+   * Handles @Valid failures on @RequestBody parameters.
+   * Spring's MethodArgumentNotValidException provides BindingResult with field errors.
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex) {
 
-    log.error("HttpMessageNotReadableException: Message not readable exception in {}. Original cause: {}", this.getClass().getName(),ex.getMessage(), ex);
+    List<GamsAPIErrorResponse.FieldErrorDetail> fieldErrors = ex.getBindingResult()
+        .getAllErrors().stream()
+        .map(error -> {
+          String fieldName = (error instanceof FieldError fe) ? fe.getField() : error.getObjectName();
+          return new GamsAPIErrorResponse.FieldErrorDetail(fieldName, error.getDefaultMessage());
+        })
+        .collect(Collectors.toList());
+
+    log.debug("Method argument validation failed: {} errors", fieldErrors.size());
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.BAD_REQUEST,
+        "Validation failed",
+        fieldErrors
+    );
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handles TransactionSystemException — typically wraps a ConstraintViolationException
+   * that occurred during JPA flush (Hibernate validation at persist/merge time).
+   *
+   * <p>This replaces the old drillRootErrorCause approach. Instead of walking the full
+   * chain in a while-loop, we do a single targeted unwrap of the most specific cause.</p>
+   */
+  @ExceptionHandler(TransactionSystemException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleTransactionSystemException(
+      TransactionSystemException ex) {
+
+    Throwable rootCause = ex.getMostSpecificCause();
+
+    // Delegate to the ConstraintViolationException handler if that's the root cause
+    if (rootCause instanceof ConstraintViolationException cve) {
+      return handleConstraintViolation(cve);
+    }
+
+    // For any other root cause, treat as unexpected server error
+    log.error("Transaction system error with unexpected root cause: {}",
+        rootCause.getClass().getSimpleName(), ex);
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "A transaction error occurred. Please try again or contact support."
+    );
+    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  // ─── Data Layer Exceptions ─────────────────────────────────────────────
+
+  /**
+   * Handles database constraint violations (unique constraints, foreign key violations, etc.).
+   *
+   * <p>Classification uses PostgreSQL SQLState codes (ISO/IEC 9075) which are
+   * stable across PostgreSQL major versions, unlike error message text which is
+   * locale-dependent and can change between releases.</p>
+   *
+   * <p>As a secondary signal, the constraint name from Hibernate's
+   * {@link org.hibernate.exception.ConstraintViolationException} is used to provide
+   * entity-specific messages where possible. Constraint names are part of our own
+   * schema (controlled via {@code @UniqueConstraint(name=...)} and Flyway migrations),
+   * so they are also version-independent.</p>
+   *
+   * <p>Security: Raw SQL, constraint names, and table names are logged server-side
+   * but never exposed to the client.</p>
+   *
+   * @see <a href="https://www.postgresql.org/docs/current/errcodes-appendix.html">PostgreSQL Error Codes</a>
+   */
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleDataIntegrityViolation(
+      DataIntegrityViolationException ex) {
+
+    // Log the full detail server-side for debugging
+    log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+
+    // Classify using SQLState codes (stable across PG versions)
+    String sqlState = extractSqlState(ex);
+    String constraintName = extractConstraintName(ex);
+    String userMessage = classifyBySqlState(sqlState, constraintName);
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.CONFLICT, userMessage);
+    return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+  }
+
+  // ─── Request Parsing Exceptions ────────────────────────────────────────
+
+  /**
+   * Handles malformed JSON or type mismatches in request body.
+   *
+   * <p>Logged at DEBUG since this is a client error, not a server problem.
+   * Under load from a misbehaving client, this avoids flooding ERROR logs.</p>
+   */
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException ex) {
+
+    log.debug("Malformed request body: {}", ex.getMessage());
 
     String errorMessage = "Invalid request body";
     Throwable cause = ex.getCause();
 
-    // Handle different types of JSON errors
     if (cause instanceof JsonParseException) {
-      errorMessage = "Malformed JSON request";
+      errorMessage = "Malformed JSON in request body";
     } else if (cause instanceof UnrecognizedPropertyException upe) {
-      errorMessage = "Unknown property: " + upe.getPropertyName();
+      errorMessage = "Unknown property: '" + upe.getPropertyName() + "'";
     } else if (cause instanceof InvalidFormatException ife) {
-      errorMessage = String.format("Invalid value for property: '%s'",
-          ife.getPath().stream()
-              .map(JsonMappingException.Reference::getFieldName)
-              .filter(Objects::nonNull)
-              .collect(Collectors.joining(".")));
+      errorMessage = String.format("Invalid value for property '%s'",
+          extractJsonPath(ife));
     } else if (cause instanceof MismatchedInputException mie) {
       if (!mie.getPath().isEmpty()) {
-        errorMessage = String.format("Invalid value type for property: '%s'",
-            mie.getPath().stream()
-                .map(JsonMappingException.Reference::getFieldName)
-                .filter(Objects::nonNull)
-                .collect(Collectors.joining(".")));
+        errorMessage = String.format("Invalid type for property '%s'",
+            extractJsonPath(mie));
       }
     }
 
-    GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);
-    return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.BAD_REQUEST);
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.BAD_REQUEST, errorMessage);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
-
-  @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<GamsAPIErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-    Map<String, String> errors = new HashMap<>();
-    ex.getBindingResult().getAllErrors().forEach(error -> {
-      String fieldName = ((FieldError) error).getField();
-      String errorMessage = error.getDefaultMessage();
-      errors.put(fieldName, errorMessage);
-    });
-
-    GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(
-        HttpStatus.BAD_REQUEST,
-        "Validation error",
-        errors);
-    return new ResponseEntity<>(gamsAPIErrorResponse, HttpStatus.BAD_REQUEST);
-  }
-
-//  // Handle all other exceptions
-//  @ExceptionHandler(Exception.class)
-//  protected ResponseEntity<GamsAPIErrorResponse> handleAllExceptions(
-//      Exception ex, WebRequest request) {
-//    return drillRootErrorCause(ex);
-//  }
 
   /**
-   * Drill down the root cause of given error and return a response entity with the error message.
-   *
-   * @param cause the cause of the error
-   * @return a response entity with the error message
+   * Handles type mismatches in path variables or query parameters.
+   * E.g., sending "abc" for an integer parameter.
    */
-  public ResponseEntity<GamsAPIErrorResponse> drillRootErrorCause(Throwable cause) {
-    String msg;
-    ResponseEntity<GamsAPIErrorResponse> responseEntity = null;
-    // TODO refactor following code! (make cleaner!)
-    while (cause != null) {
-      if (cause instanceof ConstraintViolationException) {
-        var violations = ((ConstraintViolationException) cause).getConstraintViolations();
-        Map<String, String> errors = new HashMap<>();
-        for (var violation : violations) {
-          String propertyName = violation.getPropertyPath().toString();
-          String errMessage = String.format("Property %s | %s | But given was: %s | Validated domain class: %s", violation.getPropertyPath().toString(), violation.getMessage(), violation.getInvalidValue().toString(), violation.getRootBeanClass());
-          errors.put(propertyName, errMessage);
-        }
-        msg = "ConstraintViolationException in the database layer - aborting operations.";
-        log.error(msg, cause);
-        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY, msg, errors);
-        responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
-      } else if (cause instanceof DataIntegrityViolationException dataIntegrityViolationException) {
-        msg = "DataIntegrityViolationException in the database layer";
-        log.error(msg, cause);
-        var errors = new HashMap<String, String>();
-        errors.put("error", dataIntegrityViolationException.getMostSpecificCause().getMessage());
-        GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(
-            HttpStatus.CONFLICT,
-            msg,
-            errors
-        );
-        responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
-      }
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleTypeMismatch(
+      MethodArgumentTypeMismatchException ex) {
 
-      cause = cause.getCause();
-    }
+    log.debug("Type mismatch for parameter '{}': {}", ex.getName(), ex.getMessage());
 
-    if (responseEntity == null) {
-      String errMsg = "Response entity is unexpectedly null - for cause " + cause;
-      log.error(errMsg);
-      GamsAPIErrorResponse gamsAPIErrorResponse = new GamsAPIErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, errMsg);
-      responseEntity = new ResponseEntity<>(gamsAPIErrorResponse, gamsAPIErrorResponse.getStatus());
-    }
+    String requiredType = (ex.getRequiredType() != null)
+        ? ex.getRequiredType().getSimpleName()
+        : "unknown";
 
-    return responseEntity;
+    String message = String.format("Parameter '%s' must be of type %s",
+        ex.getName(), requiredType);
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.BAD_REQUEST, message);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
+  /**
+   * Handles missing required query parameters.
+   */
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleMissingParameter(
+      MissingServletRequestParameterException ex) {
+
+    log.debug("Missing required parameter: {}", ex.getParameterName());
+
+    String message = String.format("Required parameter '%s' of type %s is missing",
+        ex.getParameterName(), ex.getParameterType());
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.BAD_REQUEST, message);
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
+  /**
+   * Handles unsupported Content-Type header or missing request body.
+   *
+   * <p>This is commonly triggered when:
+   * <ul>
+   *   <li>A PATCH/POST/PUT is sent without a Content-Type header and no body</li>
+   *   <li>A Content-Type is sent that no HttpMessageConverter can handle</li>
+   * </ul>
+   */
+  @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleMediaTypeNotSupported(
+      HttpMediaTypeNotSupportedException ex) {
+
+    log.debug("Unsupported media type: {}", ex.getContentType());
+
+    String message = (ex.getContentType() != null)
+        ? String.format("Content type '%s' is not supported. Supported types: %s",
+        ex.getContentType(), ex.getSupportedMediaTypes())
+        : "A request body with a valid Content-Type header is required";
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.UNSUPPORTED_MEDIA_TYPE, message);
+    return new ResponseEntity<>(response, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+  }
+
+  /**
+   * Handles cases where the server cannot produce a response matching the client's Accept header.
+   */
+  @ExceptionHandler(HttpMediaTypeNotAcceptableException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleMediaTypeNotAcceptable(
+      HttpMediaTypeNotAcceptableException ex) {
+
+    log.debug("Not acceptable media type requested: {}", ex.getMessage());
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.NOT_ACCEPTABLE,
+        "The requested media type is not supported for this resource"
+    );
+    return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
+  }
+
+  /**
+   * Handles requests with unsupported HTTP methods (e.g., DELETE on a read-only endpoint).
+   */
+  @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleMethodNotSupported(
+      HttpRequestMethodNotSupportedException ex) {
+
+    log.debug("Method not allowed: {} (supported: {})", ex.getMethod(), ex.getSupportedMethods());
+
+    String message = String.format("HTTP method '%s' is not supported for this endpoint", ex.getMethod());
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, message);
+    return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
+  }
+
+  /**
+   * Handles requests for non-existent static resources.
+   * Spring Boot 3.x throws this instead of returning a default 404.
+   */
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
+    log.debug("No resource found: {}", ex.getMessage());
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.NOT_FOUND, "The requested resource was not found");
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setCacheControl(CacheControl.maxAge(5, TimeUnit.MINUTES));
+
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).headers(headers).body(response);
+  }
+
+  // ─── Catch-All ─────────────────────────────────────────────────────────
+
+  /**
+   * Catch-all handler for any unhandled exception.
+   *
+   * <p>This is critical for:
+   * <ul>
+   *   <li>Guaranteeing a consistent GamsAPIErrorResponse shape for ALL errors</li>
+   *   <li>Preventing Spring Boot's BasicErrorController from returning a different JSON structure</li>
+   *   <li>Ensuring no internal details leak through default error pages</li>
+   * </ul>
+   *
+   * <p>Always logged at ERROR with full stack trace since these are genuinely unexpected.</p>
+   */
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<GamsAPIErrorResponse> handleAllUnexpectedExceptions(
+      Exception ex, WebRequest request) {
+
+    log.error("Unexpected error processing request: {}", request.getDescription(false), ex);
+
+    GamsAPIErrorResponse response = new GamsAPIErrorResponse(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "An unexpected error occurred. Please try again or contact support."
+    );
+    return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
+  // ─── Private Helpers ───────────────────────────────────────────────────
+
+  /**
+   * Extracts the leaf property name from a Bean Validation property path.
+   * E.g., "createDigitalObject.arg0.title" → "title"
+   */
+  private String extractLeafPropertyName(String propertyPath) {
+    if (propertyPath == null || propertyPath.isEmpty()) {
+      return "unknown";
+    }
+    int lastDot = propertyPath.lastIndexOf('.');
+    return (lastDot >= 0) ? propertyPath.substring(lastDot + 1) : propertyPath;
+  }
+
+  /**
+   * Extracts a dot-separated JSON path from Jackson's path reference list.
+   * Filters null field names (array indices) to produce clean property paths.
+   */
+  private String extractJsonPath(JsonMappingException jme) {
+    return jme.getPath().stream()
+        .map(JsonMappingException.Reference::getFieldName)
+        .filter(Objects::nonNull)
+        .collect(Collectors.joining("."));
+  }
+
+  /**
+   * Extracts the SQL state code from the exception cause chain.
+   *
+   * <p>The chain is typically:
+   * {@code DataIntegrityViolationException → hibernate ConstraintViolationException → PSQLException}
+   * where PSQLException implements {@link SQLException#getSQLState()}.</p>
+   *
+   * @return the 5-character SQLState code, or {@code null} if not found
+   */
+  private String extractSqlState(DataIntegrityViolationException ex) {
+    Throwable cause = ex.getCause();
+    while (cause != null) {
+      if (cause instanceof SQLException sqlEx) {
+        return sqlEx.getSQLState();
+      }
+      cause = cause.getCause();
+    }
+    return null;
+  }
+
+  /**
+   * Extracts the constraint name from Hibernate's ConstraintViolationException.
+   *
+   * <p>These are the constraint names defined in our schema — either via JPA annotations
+   * like {@code @UniqueConstraint(name = "DatastreamNameUniquePerObject")} or via
+   * Flyway migration scripts. Since we control these names, they are stable across
+   * database version upgrades.</p>
+   *
+   * @return the constraint name, or {@code null} if not available
+   */
+  private String extractConstraintName(DataIntegrityViolationException ex) {
+    Throwable cause = ex.getCause();
+    if (cause instanceof org.hibernate.exception.ConstraintViolationException hibernateEx) {
+      return hibernateEx.getConstraintName();
+    }
+    return null;
+  }
+
+  /**
+   * Classifies a DataIntegrityViolationException into a safe, user-facing message
+   * using PostgreSQL SQLState codes (ISO/IEC 9075, Appendix A).
+   *
+   * <p>SQLState codes are part of the SQL standard and are explicitly stable across
+   * PostgreSQL major versions, unlike error message text which is locale-dependent
+   * and can change between releases.</p>
+   *
+   * <p>Relevant PostgreSQL SQLState codes (class 23 — Integrity Constraint Violation):
+   * <ul>
+   *   <li>{@code 23505} — unique_violation</li>
+   *   <li>{@code 23503} — foreign_key_violation</li>
+   *   <li>{@code 23502} — not_null_violation</li>
+   *   <li>{@code 23514} — check_violation</li>
+   *   <li>{@code 23001} — restrict_violation</li>
+   *   <li>{@code 23000} — integrity_constraint_violation (generic)</li>
+   *   <li>{@code 22001} — string_data_right_truncation (value too long)</li>
+   * </ul>
+   *
+   * <p>The optional {@code constraintName} parameter (from Hibernate) is used as a
+   * secondary signal to provide entity-specific messages. For example, if the constraint
+   * name is "digital_object_pkey", we can say "A digital object with this ID already exists"
+   * instead of the generic "A resource with the same identifier already exists".</p>
+   *
+   * @param sqlState       the 5-character SQLState code (may be null)
+   * @param constraintName the constraint name from Hibernate (may be null)
+   * @return a safe, user-facing error message
+   * @see <a href="https://www.postgresql.org/docs/current/errcodes-appendix.html">PostgreSQL Error Codes</a>
+   */
+  private String classifyBySqlState(String sqlState, String constraintName) {
+    if (sqlState == null) {
+      return "A data conflict occurred";
+    }
+
+    return switch (sqlState) {
+      case "23505" -> classifyUniqueViolation(constraintName);
+      case "23503" -> classifyForeignKeyViolation(constraintName);
+      case "23502" -> "A required field is missing";
+      case "23514" -> "A data validation constraint was violated";
+      case "23001" -> "Cannot modify or delete this resource due to existing references";
+      case "22001" -> "A field value exceeds the maximum allowed length";
+      default -> {
+        if (sqlState.startsWith("23")) {
+          // Class 23 = Integrity Constraint Violation — safe to report as conflict
+          yield "A data constraint was violated";
+        }
+        yield "A data conflict occurred";
+      }
+    };
+  }
+
+  /**
+   * Provides entity-specific messages for unique constraint violations based on the
+   * constraint name from our schema. These names are controlled by us (via JPA annotations
+   * and Flyway migrations), so they are stable.
+   */
+  private String classifyUniqueViolation(String constraintName) {
+    if (constraintName == null) {
+      return "A resource with the same identifier already exists";
+    }
+
+    // Match against known constraint names from our schema
+    // These are defined in entity classes and Flyway migrations
+    return switch (constraintName.toLowerCase()) {
+      case "digital_object_pkey" ->
+          "A digital object with this ID already exists";
+      case "datastreamnameuniqueperobject" ->
+          "A datastream with this identifier already exists in the given digital object";
+      case "project_pkey" ->
+          "A project with this abbreviation already exists";
+      default -> "A resource with the same identifier already exists";
+    };
+  }
+
+  /**
+   * Provides context-aware messages for foreign key violations based on the
+   * constraint name from our schema.
+   *
+   * <p>Convention: {@code fk_{source_table}_{target_table}}.
+   * These names are defined in {@code V1__init.sql} — if a constraint is renamed
+   * there, update this switch to match.</p>
+   */
+  private String classifyForeignKeyViolation(String constraintName) {
+    if (constraintName == null) {
+      return "Cannot modify or delete this resource because other resources depend on it";
+    }
+
+    return switch (constraintName.toLowerCase()) {
+      // digital_object → project
+      case "fk_digital_object_project" ->
+          "Cannot delete this project because it still contains digital objects";
+      // datastream → digital_object
+      case "fk_datastream_digital_object" ->
+          "Cannot delete this digital object because it still contains datastreams";
+      // dublin_core_entry → digital_object
+      case "fk_dublin_core_entry_digital_object" ->
+          "Cannot delete this digital object because it has Dublin Core entries";
+      // archival_record → digital_object
+      case "fk_archival_record_digital_object" ->
+          "Cannot delete this digital object because it has archival records";
+      // submission_record → digital_object
+      case "fk_submission_record_digital_object" ->
+          "Cannot delete this digital object because it has a submission record";
+      // digital_object_tags → digital_object
+      case "fk_do_tags_digital_object" ->
+          "Cannot delete this digital object because it has associated tags";
+      // datastream child tables → datastream
+      case "fk_ds_tags_datastream", "fk_ds_lang_datastream", "fk_ds_content_restrictions_datastream" ->
+          "Cannot delete this datastream because it has associated metadata";
+      default ->
+          "Cannot modify or delete this resource because other resources depend on it";
+    };
+  }
 }
