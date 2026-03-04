@@ -190,11 +190,11 @@ public class GlobalExceptionHandler {
    * stable across PostgreSQL major versions, unlike error message text which is
    * locale-dependent and can change between releases.</p>
    *
-   * <p>As a secondary signal, the constraint name from Hibernate's
-   * {@link org.hibernate.exception.ConstraintViolationException} is used to provide
-   * entity-specific messages where possible. Constraint names are part of our own
-   * schema (controlled via {@code @UniqueConstraint(name=...)} and Flyway migrations),
-   * so they are also version-independent.</p>
+   * <p>This handler is intentionally generic — it only classifies by constraint *type*
+   * (unique, FK, not-null, etc.), not by specific entity. Entity-specific error messages
+   * belong in the service layer where domain context is available. If a
+   * DataIntegrityViolationException reaches this handler, it means the service layer
+   * did not catch it — the generic message serves as a safe fallback.</p>
    *
    * <p>Security: Raw SQL, constraint names, and table names are logged server-side
    * but never exposed to the client.</p>
@@ -208,10 +208,8 @@ public class GlobalExceptionHandler {
     // Log the full detail server-side for debugging
     log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
 
-    // Classify using SQLState codes (stable across PG versions)
     String sqlState = extractSqlState(ex);
-    String constraintName = extractConstraintName(ex);
-    String userMessage = classifyBySqlState(sqlState, constraintName);
+    String userMessage = classifyBySqlState(sqlState);
 
     GamsAPIErrorResponse response = new GamsAPIErrorResponse(HttpStatus.CONFLICT, userMessage);
     return new ResponseEntity<>(response, HttpStatus.CONFLICT);
@@ -435,30 +433,13 @@ public class GlobalExceptionHandler {
   }
 
   /**
-   * Extracts the constraint name from Hibernate's ConstraintViolationException.
-   *
-   * <p>These are the constraint names defined in our schema — either via JPA annotations
-   * like {@code @UniqueConstraint(name = "DatastreamNameUniquePerObject")} or via
-   * Flyway migration scripts. Since we control these names, they are stable across
-   * database version upgrades.</p>
-   *
-   * @return the constraint name, or {@code null} if not available
-   */
-  private String extractConstraintName(DataIntegrityViolationException ex) {
-    Throwable cause = ex.getCause();
-    if (cause instanceof org.hibernate.exception.ConstraintViolationException hibernateEx) {
-      return hibernateEx.getConstraintName();
-    }
-    return null;
-  }
-
-  /**
    * Classifies a DataIntegrityViolationException into a safe, user-facing message
    * using PostgreSQL SQLState codes (ISO/IEC 9075, Appendix A).
    *
-   * <p>SQLState codes are part of the SQL standard and are explicitly stable across
-   * PostgreSQL major versions, unlike error message text which is locale-dependent
-   * and can change between releases.</p>
+   * <p>This classification is intentionally generic. Entity-specific messages
+   * (e.g., "Cannot delete this project because it still has digital objects")
+   * should be provided by the service layer, which has domain context.
+   * This handler serves as a safe fallback for anything that slips through.</p>
    *
    * <p>Relevant PostgreSQL SQLState codes (class 23 — Integrity Constraint Violation):
    * <ul>
@@ -471,98 +452,28 @@ public class GlobalExceptionHandler {
    *   <li>{@code 22001} — string_data_right_truncation (value too long)</li>
    * </ul>
    *
-   * <p>The optional {@code constraintName} parameter (from Hibernate) is used as a
-   * secondary signal to provide entity-specific messages. For example, if the constraint
-   * name is "digital_object_pkey", we can say "A digital object with this ID already exists"
-   * instead of the generic "A resource with the same identifier already exists".</p>
-   *
-   * @param sqlState       the 5-character SQLState code (may be null)
-   * @param constraintName the constraint name from Hibernate (may be null)
+   * @param sqlState the 5-character SQLState code (may be null)
    * @return a safe, user-facing error message
    * @see <a href="https://www.postgresql.org/docs/current/errcodes-appendix.html">PostgreSQL Error Codes</a>
    */
-  private String classifyBySqlState(String sqlState, String constraintName) {
+  private String classifyBySqlState(String sqlState) {
     if (sqlState == null) {
       return "A data conflict occurred";
     }
 
     return switch (sqlState) {
-      case "23505" -> classifyUniqueViolation(constraintName);
-      case "23503" -> classifyForeignKeyViolation(constraintName);
+      case "23505" -> "A resource with the same identifier already exists";
+      case "23503" -> "Cannot modify or delete this resource because other resources depend on it";
       case "23502" -> "A required field is missing";
       case "23514" -> "A data validation constraint was violated";
       case "23001" -> "Cannot modify or delete this resource due to existing references";
       case "22001" -> "A field value exceeds the maximum allowed length";
       default -> {
         if (sqlState.startsWith("23")) {
-          // Class 23 = Integrity Constraint Violation — safe to report as conflict
           yield "A data constraint was violated";
         }
         yield "A data conflict occurred";
       }
-    };
-  }
-
-  /**
-   * Provides entity-specific messages for unique constraint violations based on the
-   * constraint name from our schema. These names are controlled by us (via JPA annotations
-   * and Flyway migrations), so they are stable.
-   */
-  private String classifyUniqueViolation(String constraintName) {
-    if (constraintName == null) {
-      return "A resource with the same identifier already exists";
-    }
-
-    // Match against known constraint names from our schema
-    // These are defined in entity classes and Flyway migrations
-    return switch (constraintName.toLowerCase()) {
-      case "digital_object_pkey" ->
-          "A digital object with this ID already exists";
-      case "datastreamnameuniqueperobject" ->
-          "A datastream with this identifier already exists in the given digital object";
-      case "project_pkey" ->
-          "A project with this abbreviation already exists";
-      default -> "A resource with the same identifier already exists";
-    };
-  }
-
-  /**
-   * Provides context-aware messages for foreign key violations based on the
-   * constraint name from our schema.
-   *
-   * <p>Convention: {@code fk_{source_table}_{target_table}}.
-   * These names are defined in {@code V1__init.sql} — if a constraint is renamed
-   * there, update this switch to match.</p>
-   */
-  private String classifyForeignKeyViolation(String constraintName) {
-    if (constraintName == null) {
-      return "Cannot modify or delete this resource because other resources depend on it";
-    }
-
-    return switch (constraintName.toLowerCase()) {
-      // digital_object → project
-      case "fk_digital_object_project" ->
-          "Cannot delete this project because it still contains digital objects";
-      // datastream → digital_object
-      case "fk_datastream_digital_object" ->
-          "Cannot delete this digital object because it still contains datastreams";
-      // dublin_core_entry → digital_object
-      case "fk_dublin_core_entry_digital_object" ->
-          "Cannot delete this digital object because it has Dublin Core entries";
-      // archival_record → digital_object
-      case "fk_archival_record_digital_object" ->
-          "Cannot delete this digital object because it has archival records";
-      // submission_record → digital_object
-      case "fk_submission_record_digital_object" ->
-          "Cannot delete this digital object because it has a submission record";
-      // digital_object_tags → digital_object
-      case "fk_do_tags_digital_object" ->
-          "Cannot delete this digital object because it has associated tags";
-      // datastream child tables → datastream
-      case "fk_ds_tags_datastream", "fk_ds_lang_datastream", "fk_ds_content_restrictions_datastream" ->
-          "Cannot delete this datastream because it has associated metadata";
-      default ->
-          "Cannot modify or delete this resource because other resources depend on it";
     };
   }
 }

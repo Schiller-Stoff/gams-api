@@ -1,5 +1,7 @@
 package org.ddh.gamsapi.infrastructure.System.exceptions;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
@@ -16,11 +18,11 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -55,6 +57,8 @@ class GlobalExceptionHandlerTest {
     handler = new GlobalExceptionHandler();
     webRequest = new ServletWebRequest(new MockHttpServletRequest());
   }
+
+  // ─── GamsApiException ──────────────────────────────────────────────────
 
   @Nested
   @DisplayName("GamsApiException handling")
@@ -112,6 +116,8 @@ class GlobalExceptionHandlerTest {
     }
   }
 
+  // ─── ConstraintViolationException ──────────────────────────────────────
+
   @Nested
   @DisplayName("ConstraintViolationException handling")
   class ConstraintViolationTests {
@@ -154,6 +160,7 @@ class GlobalExceptionHandlerTest {
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleConstraintViolation(ex);
 
+      String responseJson = response.getBody().toString();
       // The field error should only contain field name + message
       GamsAPIErrorResponse.FieldErrorDetail detail = response.getBody().getFieldErrors().get(0);
       assertThat(detail.getField()).isEqualTo("password");
@@ -223,127 +230,45 @@ class GlobalExceptionHandlerTest {
   // ─── DataIntegrityViolationException (SQLState-based) ────────────────────
 
   @Nested
-  @DisplayName("DataIntegrityViolationException handling (SQLState-based)")
+  @DisplayName("DataIntegrityViolationException handling (SQLState-based, no schema coupling)")
   class DataIntegrityViolationTests {
 
     @Test
-    @DisplayName("Unique violation (23505) → 409 with entity-specific message for digital_object_pkey")
-    void handlesUniqueConstraintWithKnownConstraintName() {
+    @DisplayName("Unique violation (23505) → 409 with generic unique message")
+    void handlesUniqueViolation() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23505", "digital_object_pkey",
+          "23505",
           "ERROR: duplicate key value violates unique constraint \"digital_object_pkey\"");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).contains("digital object");
-      assertThat(response.getBody().getMessage()).contains("already exists");
+      assertThat(response.getBody().getMessage()).isEqualTo("A resource with the same identifier already exists");
       // Must NOT contain SQL, table names, or constraint names
       assertThat(response.getBody().getMessage()).doesNotContain("digital_object_pkey");
       assertThat(response.getBody().getMessage()).doesNotContain("duplicate key");
     }
 
     @Test
-    @DisplayName("Unique violation (23505) for DatastreamNameUniquePerObject → entity-specific message")
-    void handlesUniqueConstraintForDatastream() {
+    @DisplayName("Foreign key violation (23503) → 409 with generic FK message")
+    void handlesForeignKeyViolation() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23505", "DatastreamNameUniquePerObject",
-          "ERROR: duplicate key value violates unique constraint \"DatastreamNameUniquePerObject\"");
-
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
-
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).contains("datastream");
-      assertThat(response.getBody().getMessage()).doesNotContain("DatastreamNameUniquePerObject");
-    }
-
-    @Test
-    @DisplayName("Unique violation (23505) with unknown constraint → generic unique message")
-    void handlesUniqueConstraintWithUnknownName() {
-      DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23505", "some_future_constraint",
-          "ERROR: duplicate key value violates unique constraint");
-
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
-
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).isEqualTo("A resource with the same identifier already exists");
-    }
-
-    @Test
-    @DisplayName("Unique violation (23505) with null constraint name → generic unique message")
-    void handlesUniqueViolationWithNullConstraintName() {
-      DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23505", null,
-          "ERROR: duplicate key");
-
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
-
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).isEqualTo("A resource with the same identifier already exists");
-    }
-
-    @Test
-    @DisplayName("Foreign key violation (23503) with known FK → entity-specific message, no SQL leaked")
-    void handlesForeignKeyConstraintForProject() {
-      DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23503", "fk_digital_object_project",
+          "23503",
           "ERROR: update or delete on table \"project\" violates foreign key constraint");
-
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
-
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).contains("project");
-      assertThat(response.getBody().getMessage()).contains("digital objects");
-      assertThat(response.getBody().getMessage()).doesNotContain("fk_digital_object_project");
-    }
-
-    @Test
-    @DisplayName("Foreign key violation (23503) for datastream → digital_object")
-    void handlesForeignKeyConstraintForDatastream() {
-      DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23503", "fk_datastream_digital_object",
-          "ERROR: update or delete on table \"digital_object\" violates foreign key constraint");
-
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
-
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).contains("datastreams");
-      assertThat(response.getBody().getMessage()).doesNotContain("fk_datastream_digital_object");
-    }
-
-    @Test
-    @DisplayName("Foreign key violation (23503) for datastream child table")
-    void handlesForeignKeyConstraintForDatastreamChild() {
-      DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23503", "fk_ds_tags_datastream",
-          "ERROR: update or delete on table \"datastream\" violates foreign key constraint");
-
-      ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
-
-      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
-      assertThat(response.getBody().getMessage()).contains("associated metadata");
-    }
-
-    @Test
-    @DisplayName("Foreign key violation (23503) with unknown FK → generic FK message")
-    void handlesForeignKeyConstraintUnknown() {
-      DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23503", "fk_future_table_relation",
-          "ERROR: violates foreign key constraint");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
 
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
       assertThat(response.getBody().getMessage())
           .isEqualTo("Cannot modify or delete this resource because other resources depend on it");
+      assertThat(response.getBody().getMessage()).doesNotContain("project");
     }
 
     @Test
     @DisplayName("Not-null violation (23502) → 409")
-    void handlesNotNullConstraint() {
+    void handlesNotNullViolation() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23502", null,
+          "23502",
           "ERROR: null value in column \"title\" violates not-null constraint");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
@@ -355,9 +280,9 @@ class GlobalExceptionHandlerTest {
 
     @Test
     @DisplayName("Check violation (23514) → 409")
-    void handlesCheckConstraint() {
+    void handlesCheckViolation() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23514", null,
+          "23514",
           "ERROR: new row violates check constraint");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
@@ -370,7 +295,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("String truncation (22001) → 409")
     void handlesStringTruncation() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "22001", null,
+          "22001",
           "ERROR: value too long for type character varying(255)");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
@@ -384,7 +309,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("Unknown class-23 SQLState → generic constraint message")
     void handlesUnknownClass23SqlState() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "23999", null,
+          "23999",
           "some future PostgreSQL integrity error");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
@@ -397,7 +322,7 @@ class GlobalExceptionHandlerTest {
     @DisplayName("Non-class-23 SQLState → generic fallback")
     void handlesNonClass23SqlState() {
       DataIntegrityViolationException ex = buildDataIntegrityException(
-          "42P01", null, // 42P01 = undefined_table
+          "42P01", // undefined_table
           "ERROR: relation \"nonexistent\" does not exist");
 
       ResponseEntity<GamsAPIErrorResponse> response = handler.handleDataIntegrityViolation(ex);
@@ -410,7 +335,6 @@ class GlobalExceptionHandlerTest {
     @Test
     @DisplayName("No SQLException in chain → generic fallback")
     void handlesNoSqlState() {
-      // Plain exception without SQLException in the cause chain
       DataIntegrityViolationException ex = new DataIntegrityViolationException(
           "some obscure error with internal details");
 
@@ -422,23 +346,12 @@ class GlobalExceptionHandlerTest {
 
     /**
      * Builds a realistic DataIntegrityViolationException with the correct cause chain:
-     * {@code DataIntegrityViolationException → Hibernate ConstraintViolationException → SQLException}
-     *
-     * <p>This mirrors the actual chain that Spring + Hibernate + PostgreSQL produce.</p>
+     * {@code DataIntegrityViolationException → SQLException}
      */
     private DataIntegrityViolationException buildDataIntegrityException(
-        String sqlState, String constraintName, String pgMessage) {
-
-      // Bottom of chain: PostgreSQL's PSQLException (implements SQLException)
+        String sqlState, String pgMessage) {
       java.sql.SQLException sqlException = new java.sql.SQLException(pgMessage, sqlState);
-
-      // Middle: Hibernate wraps it with constraint name extraction
-      org.hibernate.exception.ConstraintViolationException hibernateEx =
-          new org.hibernate.exception.ConstraintViolationException(
-              "could not execute statement", sqlException, constraintName);
-
-      // Top: Spring wraps Hibernate's exception
-      return new DataIntegrityViolationException("could not execute statement", hibernateEx);
+      return new DataIntegrityViolationException("could not execute statement", sqlException);
     }
   }
 
