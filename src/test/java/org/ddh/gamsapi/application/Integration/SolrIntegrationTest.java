@@ -41,9 +41,9 @@ public class SolrIntegrationTest extends IntegrationTest {
 
     // base search configuration
     // TODO introduce more final variables like below
-    final String BASE_SEARCH_SERVICE_NAME = "g-search";
+    final String BASE_SEARCH_SERVICE_NAME = "api-search";
     final String BASE_SEARCH_CONTAINER_TEMP_PATH = String.format("/tmp/%s_configset", BASE_SEARCH_SERVICE_NAME);
-    final String BASE_SEARCH_LOCAL_CONFIG_PATH = "docker/apps/solr/solr/data/g-search/conf";
+    final String BASE_SEARCH_LOCAL_CONFIG_PATH = "docker/apps/solr/solr/data/api-search/conf";
 
     // custom-search configuration
     String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search/conf";
