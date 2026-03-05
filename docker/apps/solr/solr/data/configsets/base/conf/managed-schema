@@ -547,6 +547,38 @@
     <field name="dc.title" type="strings" multiValued="true"/>
     <field name="dc.type" type="strings" multiValued="true"/>
 
+    <!-- ====================================================================
+    DUBLIN CORE FIELDS - LANGUAGE-SPECIFIC DISPLAY FIELDS
+    ==================================================================== -->
+
+    <!--
+      Language-specific Dublin Core fields for multi-language display support.
+
+      These fields store clean DC values per language, enabling API clients
+      to display content in the appropriate language without parsing.
+
+      Pattern: dc.{dcFieldName}.{languageCode}
+      Examples:
+        dc.title.en    = "The Title"
+        dc.title.de    = "Der Titel"
+        dc.title.und   = "Untitled" (no language specified, ISO 639-2 "undetermined")
+        dc.subject.la  = "Philosophia"
+
+      These fields are stored but NOT indexed because:
+        - Searching is done against the combined dc.* fields (which contain all language values)
+        - Fulltext/substring search uses the dc.*_txt fields (populated via copyField)
+        - These fields exist purely for structured API response display
+
+      IMPORTANT — Solr field resolution order:
+        1. Explicit fields (dc.title, dc.creator, etc.) ALWAYS match first
+        2. This dynamic field only catches dc.* names that have NO explicit definition
+        3. Therefore dc.title.en, dc.creator.de → this dynamic field (display-only)
+           while dc.title, dc.creator → their explicit definitions (search + facet)
+        4. The existing copyField rules (dc.title → dc.title_txt) use exact source
+           matching, so dc.title.en does NOT trigger them — which is correct.
+    -->
+    <dynamicField name="dc.*" type="strings" indexed="false" stored="true" multiValued="true"/>
+
   <!--
    *****
    Person data
