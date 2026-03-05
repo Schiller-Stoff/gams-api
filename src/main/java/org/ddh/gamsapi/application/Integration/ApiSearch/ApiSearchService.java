@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Service responsible for indexing digital objects into Apache Solr for the API search (g-search core).
+ * Service responsible for indexing digital objects into Apache Solr for the API search (api-search core).
  *
  * <p>This service creates Solr documents from digital objects including their Dublin Core metadata,
  * fulltext content, and administrative metadata. It handles multi-language Dublin Core values
@@ -66,7 +66,7 @@ public class ApiSearchService implements IIntegrationService {
     log.trace("*** Trying to delete solr indexed project objects for: {}", projectAbbr);
 
     // delete selected from GAMS core
-    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", ApiSearchProperties.PROJECT.name, projectAbbr));
+    solrClient.delete(SolrGamsCores.API_SEARCH_CORE.value, String.format("%s:%s", ApiSearchProperties.PROJECT.name, projectAbbr));
 
   }
 
@@ -148,7 +148,7 @@ public class ApiSearchService implements IIntegrationService {
 
 
     // the end post base search entity to SOLR
-    solrClient.post(SolrGamsCores.GAMS_CORE.value, solrDocument, true);
+    solrClient.post(SolrGamsCores.API_SEARCH_CORE.value, solrDocument, true);
     log.info("Successfully created SOLR document representing digital object {}", digitalObject.getId());
 
   }
@@ -161,7 +161,7 @@ public class ApiSearchService implements IIntegrationService {
     id = id.replaceAll(":", "\\\\\\\\:");
 
     // delete object from GAMS core
-    solrClient.delete(SolrGamsCores.GAMS_CORE.value, String.format("%s:%s", ApiSearchProperties.OBJECT_ID.name, id));
+    solrClient.delete(SolrGamsCores.API_SEARCH_CORE.value, String.format("%s:%s", ApiSearchProperties.OBJECT_ID.name, id));
     // this requires solr documents to have the projectAbbr field
     solrClient.delete(projectAbbr, String.format("%s:%s", ApiSearchProperties.OBJECT_ID.name, id));
 
