@@ -67,7 +67,7 @@ public class FacetService {
 
     // STEP 1: Build SOLR url with drill-down support
     String solrFacetUrl = FacetQueryBuilder.buildSolrFacetDrilldownUrl(
-        SolrGamsCores.GAMS_CORE.value,
+        SolrGamsCores.API_SEARCH_CORE.value,
         projectAbbrs,
         fulltextQuery,
         selectedFacets,
@@ -85,7 +85,7 @@ public class FacetService {
 
     // STEP 4: Get baseline total count for these projects (unfiltered)
     int projectDocumentsCount = solrClient.countDocumentsByPropertyValues(
-        SolrGamsCores.GAMS_CORE.value,
+        SolrGamsCores.API_SEARCH_CORE.value,
         ApiSearchProperties.PROJECT.name,
         projectAbbrs);
 

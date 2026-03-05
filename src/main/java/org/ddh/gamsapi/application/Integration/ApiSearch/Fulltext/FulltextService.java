@@ -115,7 +115,7 @@ public class FulltextService {
 
     // 03. Build complete Solr URL
     var fulltextSolrUrl = FulltextQueryBuilder.buildSolrUrl(
-        SolrGamsCores.GAMS_CORE.value,
+        SolrGamsCores.API_SEARCH_CORE.value,
         fulltextQueryParam,
         filterQueries,
         pageable
@@ -129,7 +129,7 @@ public class FulltextService {
 
     // 05. Get baseline total count for these projects (unfiltered)
     int projectDocumentsCount = solrClient.countDocumentsByPropertyValues(
-        SolrGamsCores.GAMS_CORE.value,
+        SolrGamsCores.API_SEARCH_CORE.value,
         ApiSearchProperties.PROJECT.name,
         projectAbbrs
     );

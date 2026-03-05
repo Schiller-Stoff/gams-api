@@ -185,9 +185,9 @@ public class SolrIntegrationTest extends IntegrationTest {
 
       // 2. GAMS_CORE (uses base configset)
       // TODO rename / redo to base-search core!
-      log.info("Creating '{}' core with BASE configset...", SolrGamsCores.GAMS_CORE.value);
+      log.info("Creating '{}' core with BASE configset...", SolrGamsCores.API_SEARCH_CORE.value);
       var gamsCore = solr.execInContainer(
-          "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", API_SEARCH_CONTAINER_TEMP_PATH
+          "solr", "create_core", "-c", SolrGamsCores.API_SEARCH_CORE.value, "-d", API_SEARCH_CONTAINER_TEMP_PATH
       );
       log.info("GAMS core - exitCode: {}, stdout: '{}'",
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
@@ -228,7 +228,7 @@ public class SolrIntegrationTest extends IntegrationTest {
       Thread.sleep(1000);
       log.info("✓ Solr test container fully initialized with 4 cores");
       log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.TEST_CORE.value);
-      log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.GAMS_CORE.value);
+      log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.API_SEARCH_CORE.value);
       log.info("  - {} (custom-search schema): entityFulltext, entity* fields", SolrGamsCores.CUSTOM_SEARCH_CORE.value);
       log.info("  - {} (plexus-search schema): plexusFulltext, plexus* fields", PLEXUS_SEARCH_SERVICE_NAME);
 
@@ -249,7 +249,7 @@ public class SolrIntegrationTest extends IntegrationTest {
   public void tearDown() {
     try {
       log.debug("Cleaning up Solr cores after test");
-      solrClient.wipeCore(SolrGamsCores.GAMS_CORE.value);
+      solrClient.wipeCore(SolrGamsCores.API_SEARCH_CORE.value);
       solrClient.wipeCore(SolrGamsCores.TEST_CORE.value);
       solrClient.wipeCore(SolrGamsCores.CUSTOM_SEARCH_CORE.value);
       solrClient.wipeCore(SolrGamsCores.PLEXUS_SEARCH_CORE.value);

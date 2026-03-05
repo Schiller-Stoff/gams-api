@@ -141,7 +141,7 @@ public class ApiSearchServiceIT extends SolrIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          SolrGamsCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          SolrGamsCores.API_SEARCH_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
       // solr also returns the initial query info, so we just check that the id is contained in the response
@@ -159,7 +159,7 @@ public class ApiSearchServiceIT extends SolrIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          SolrGamsCores.GAMS_CORE.value, ApiSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
+          SolrGamsCores.API_SEARCH_CORE.value, ApiSearchProperties.PROJECT.name, TestProject.PROJECT_ABBR.getValue()
       );
 
       // solr also returns the initial query info, so we just check that the id is contained in the response
@@ -177,7 +177,7 @@ public class ApiSearchServiceIT extends SolrIntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
       String response = solrClient.retrieveSolrDocumentByProperty(
-          SolrGamsCores.GAMS_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          SolrGamsCores.API_SEARCH_CORE.value, "id", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
       );
 
       // solr also returns the initial query info, so we just check that the dc_title is contained in the response
