@@ -4,44 +4,60 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.exceptions.IntegrationDataProcessingException;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationService;
-import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrClient;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrDocument;
 import org.ddh.gamsapi.application.Integration.Common.utils.solr.SolrGamsCores;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMimeView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotLoadFileException;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
-import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.application.Integration.Common.utils.XMLUtils;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+/**
+ * Service responsible for indexing digital objects into Apache Solr for the API search (g-search core).
+ *
+ * <p>This service creates Solr documents from digital objects including their Dublin Core metadata,
+ * fulltext content, and administrative metadata. It handles multi-language Dublin Core values
+ * using a hybrid indexing strategy.</p>
+ *
+ * <h3>Multi-Language Indexing Strategy</h3>
+ * <p>Dublin Core entries are indexed into three types of Solr fields:</p>
+ * <ul>
+ *   <li><b>Combined search fields</b> ({@code dc.title}): All language values combined (clean, no language prefix)
+ *       for cross-language fulltext search and faceting. Duplicate values across languages are removed.</li>
+ *   <li><b>Tokenized fulltext fields</b> ({@code dc.title_txt}): Automatically populated via Solr copyField rules
+ *       for substring matching.</li>
+ *   <li><b>Language-specific display fields</b> ({@code dc.title.en}): Clean values per language,
+ *       enabling clients to display appropriate language content without parsing.</li>
+ * </ul>
+ *
+ * @see DublinCoreSolrFieldConfig
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class ApiSearchService implements IIntegrationService {
 
+  private final SolrClient solrClient;
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
-  private final IDatastreamContentRepository datastreamContentRepository;
   private final IDublinCoreEntryRepository dublinCoreEntryRepository;
-
-
-  private final SolrClient solrClient;
+  private final IDatastreamContentRepository datastreamContentRepository;
 
   @Override
   public void indexObjects(String projectAbbr) {
-    log.trace("*** BaseSearchService: Indexing now project objects for: {}", projectAbbr);
-    List<DigitalObjectIdView> digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
+    var digitalObjects = digitalObjectRepository.findAllByProject_ProjectAbbr(projectAbbr);
     digitalObjects.forEach(digitalObject -> indexObject(projectAbbr, digitalObject.getId()));
   }
 
@@ -60,7 +76,7 @@ public class ApiSearchService implements IIntegrationService {
     log.trace("*** BaseSearchService: Indexing now object with id {} for project {}", id, projectAbbr);
 
     DigitalObject digitalObject = digitalObjectRepository.findById(id)
-            .orElseThrow(() -> new IntegrationDataProcessingException(String.format("Digital object with id %s not found", id)));
+        .orElseThrow(() -> new IntegrationDataProcessingException(String.format("Digital object with id %s not found", id)));
 
     SolrDocument solrDocument = new SolrDocument();
 
@@ -86,15 +102,16 @@ public class ApiSearchService implements IIntegrationService {
     }
 
     // These fields might differ from the dublin core!
-     solrDocument.addProperty(ApiSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
-     solrDocument.addProperty(ApiSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
-     solrDocument.addProperty(ApiSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
-     solrDocument.addProperty(ApiSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
-     solrDocument.addProperty(ApiSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
+    solrDocument.addProperty(ApiSearchProperties.TITLE.name, digitalObject.getBaseMetadata().getTitle());
+    solrDocument.addProperty(ApiSearchProperties.DESCRIPTION.name, digitalObject.getBaseMetadata().getDescription());
+    solrDocument.addProperty(ApiSearchProperties.CREATOR.name, digitalObject.getBaseMetadata().getCreator());
+    solrDocument.addProperty(ApiSearchProperties.PUBLISHER.name, digitalObject.getPublisher());
+    solrDocument.addProperty(ApiSearchProperties.RIGHTS.name, digitalObject.getBaseMetadata().getRights());
 
 
     // send datastream contained info to solr
-    // based on conditions formulated by the datastream's metadata e.g. mimetype or dsid value, like DC.xml
+    // based on conditions formulated by the datastream's metadata e.g.
+    // mimetype or dsid value, like DC.xml
     foundDatastreams.forEach(datastream -> {
       DatastreamId datastreamId =  DatastreamId.builder().dsid(datastream.getDsid()).digitalObject(id).build();
       // send custom search datastream directly to solr
@@ -152,38 +169,100 @@ public class ApiSearchService implements IIntegrationService {
 
 
   /**
-   * Adds dublin core field to given base search entity.
-   * TODO test
-   * @param solrDocument base search entity
-   *                   (will be modified in place)
-   * @param datastreamId datastream id
+   * Adds Dublin Core fields to the given Solr document using the hybrid multi-language strategy.
+   *
+   * <p><b>Indexing produces three field types per DC entry:</b></p>
+   * <ol>
+   *   <li><b>Combined search field</b> ({@code dc.title}): Clean value (no language prefix) containing
+   *       all language variants. Used for fulltext search and faceting. Duplicate values across
+   *       languages are automatically removed.</li>
+   *   <li><b>Language-specific display field</b> ({@code dc.title.en}): Clean value for a specific
+   *       language. Entries without a language tag use {@code dc.title.und}.
+   *       These fields are stored but not indexed in Solr (display-only).</li>
+   *   <li><b>Tokenized search field</b> ({@code dc.title_txt}): Automatically populated via
+   *       Solr copyField rule from {@code dc.title}. Enables substring matching.</li>
+   * </ol>
+   *
+   * <p><b>Example:</b> Given two DC entries for "title":</p>
+   * <pre>
+   *   DublinCoreEntry(name="title", value="Der Titel", language="de")
+   *   DublinCoreEntry(name="title", value="The Title", language="en")
+   * </pre>
+   * <p>The Solr document will contain:</p>
+   * <pre>
+   *   dc.title          = ["Der Titel", "The Title"]     // search + facet
+   *   dc.title.de  = ["Der Titel"]                  // display
+   *   dc.title.en  = ["The Title"]                  // display
+   *   dc.title_txt      = (auto via copyField)           // fulltext/substring
+   * </pre>
+   *
+   * @param solrDocument Solr document to add Dublin Core fields to (modified in place)
+   * @param datastreamId Datastream ID pointing to the DC.xml datastream
+   * @throws IntegrationDataProcessingException if no Dublin Core entries found for the digital object
    */
-  public void addDublinCore(SolrDocument solrDocument, DatastreamId datastreamId){
+  public void addDublinCore(SolrDocument solrDocument, DatastreamId datastreamId) {
     var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(datastreamId.getDigitalObject());
-    if(dcEntries.isEmpty()){
+    if (dcEntries.isEmpty()) {
       String msg = String.format("No dublin core entries found for digital object %s", datastreamId.getDigitalObject());
       log.error(msg);
       throw new IntegrationDataProcessingException(msg);
     }
-    dcEntries.forEach(dcEntry -> {
-      String propertyName = "dc." + dcEntry.getName();
-      String nodeValue = dcEntry.getValue();
 
-      // if dc entry specifies a language -> prepend this e.g. 'en:'
-      if((dcEntry.getLanguage()) != null && (!dcEntry.getLanguage().isEmpty())){
-        nodeValue = dcEntry.getLanguage() + ": " +  nodeValue;
+    // Phase 1: Group entries by DC field name, collecting values per field and per language.
+    // This allows us to deduplicate values in the combined search field.
+    //
+    // Structure:  fieldName -> { "all" -> Set<String>, "en" -> Set<String>, "de" -> Set<String>, ... }
+    //             where "all" collects every value for the combined search field (dc.title)
+    //             and each language code collects values for the display field (dc.title.en)
+    Map<String, Map<String, LinkedHashSet<String>>> fieldLanguageValues = new LinkedHashMap<>();
+
+    for (DublinCoreEntrySummaryView dcEntry : dcEntries) {
+      String dcFieldName = dcEntry.getName();
+      String cleanValue = dcEntry.getValue();
+      String language = dcEntry.getLanguage();
+
+      // Initialize the field map if not present
+      fieldLanguageValues.computeIfAbsent(dcFieldName, k -> new LinkedHashMap<>());
+      Map<String, LinkedHashSet<String>> langMap = fieldLanguageValues.get(dcFieldName);
+
+      // Add to combined search set (deduplicates across languages)
+      langMap.computeIfAbsent("all", k -> new LinkedHashSet<>()).add(cleanValue);
+
+      // Add to language-specific set
+      String langCode = (language != null && !language.isBlank())
+          ? language.trim().toLowerCase()
+          : DublinCoreSolrFieldConfig.UNDEFINED_LANGUAGE_CODE;
+      langMap.computeIfAbsent(langCode, k -> new LinkedHashSet<>()).add(cleanValue);
+    }
+
+    // Phase 2: Write grouped values into the Solr document
+    for (Map.Entry<String, Map<String, LinkedHashSet<String>>> fieldEntry : fieldLanguageValues.entrySet()) {
+      String dcFieldName = fieldEntry.getKey();
+      Map<String, LinkedHashSet<String>> langMap = fieldEntry.getValue();
+
+      // Write combined search field: dc.{name} — all values, deduplicated
+      Set<String> allValues = langMap.get("all");
+      if (allValues != null && !allValues.isEmpty()) {
+        String searchFieldName = DublinCoreSolrFieldConfig.buildSearchFieldName(dcFieldName);
+        solrDocument.addProperty(searchFieldName, new ArrayList<>(allValues));
       }
 
-      if(solrDocument.getProperty(propertyName) == null){
-        solrDocument.addProperty(propertyName, List.of(nodeValue));
-      } else {
-        List<String> values = (List<String>) solrDocument.getProperty(propertyName);
-        List<String> newValues = new ArrayList<>(values);
-        newValues.add(nodeValue);
-        solrDocument.addProperty(propertyName, newValues);
+      // Write language-specific display fields: dc.{name}.{lang}
+      for (Map.Entry<String, LinkedHashSet<String>> langEntry : langMap.entrySet()) {
+        String langCode = langEntry.getKey();
+        if ("all".equals(langCode)) {
+          continue; // skip the "all" bucket — already written above
+        }
+        Set<String> langValues = langEntry.getValue();
+        if (langValues != null && !langValues.isEmpty()) {
+          String langFieldName = DublinCoreSolrFieldConfig.buildLanguageFieldName(dcFieldName, langCode);
+          solrDocument.addProperty(langFieldName, new ArrayList<>(langValues));
+        }
       }
-    });
+    }
 
+    log.debug("Added Dublin Core to Solr document for object {}: {} DC fields with language-specific display fields",
+        datastreamId.getDigitalObject(), fieldLanguageValues.size());
   }
 
 
