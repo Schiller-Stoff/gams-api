@@ -30,7 +30,7 @@ public class UserController {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if(!authentication.isAuthenticated()){
       log.trace("User is not authenticated to see user info - redirecting to login page");
-      return "redirect:/api/v1/auth";
+      return "redirect:/api/auth/login";
     }
 
     DefaultOidcUser oidcUser;
@@ -38,13 +38,13 @@ public class UserController {
       oidcUser = (DefaultOidcUser) authentication.getPrincipal();
     } catch (ClassCastException e){
       log.trace("Failed to cast the authentication principal to DefaultOidcUser. User is not authenticated to see user info - redirecting to login page");
-      return "redirect:/api/v1/auth";
+      return "redirect:/api/auth/login";
     }
 
     String userName = oidcUser.getSubject();
     if(userName == null){
       log.trace("Failed to get the user name from the authentication principal. User is not authenticated to see user info - redirecting to login page");
-      return "redirect:/api/v1/auth";
+      return "redirect:/api/auth/login";
     }
 
     User user = User.builder()
