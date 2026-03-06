@@ -81,6 +81,12 @@ public class SpringSecurityConfiguration {
           .failureUrl("/api/auth/login?error=true");
     });
 
+    // handling logout — processing endpoint at /api/auth/logout
+    http.logout(logout -> logout
+        .logoutUrl("/api/auth/logout")
+        .logoutSuccessHandler(oidcLogoutSuccessHandler())
+    );
+
     http.authorizeHttpRequests(auth ->
         auth
             // allow post requests against specific integration api endpoints (because: might get queries via POST)
@@ -127,11 +133,7 @@ public class SpringSecurityConfiguration {
     // Force CSRF token to be generated on every response
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
 
-    // handling logout — processing endpoint at /api/auth/logout
-    http.logout(logout -> logout
-        .logoutUrl("/api/auth/logout")
-        .logoutSuccessHandler(oidcLogoutSuccessHandler())
-    );
+
 
 
     // TODO check if this works
