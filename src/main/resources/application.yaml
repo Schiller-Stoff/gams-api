@@ -44,7 +44,14 @@ spring:
             redirect-uri: ${GAMSAPI_REDIRECT_URI:http://localhost:18085/api/auth/oauth2/callback/gams-client}
         provider:
           gams-realm:
-            issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
+            # issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
+            # spring oauth2-client issue: if using issuer-uri the spring boot app crashes on startup (when keycloak is not reachable)
+            # properties below avoid this issue (alongside string concatenation)
+            authorization-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}/protocol/openid-connect/auth
+            token-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}/protocol/openid-connect/token
+            user-info-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}/protocol/openid-connect/userinfo
+            jwk-set-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}/protocol/openid-connect/certs
+            user-name-attribute: preferred_username
 
 
   #####
