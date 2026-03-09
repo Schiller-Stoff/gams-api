@@ -582,7 +582,7 @@
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
     "secret" : "MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT",
-    "redirectUris" : [ "http://localhost:18085/login/oauth2/code/gams-client", "http://localhost:8080/login/oauth2/code/gams-client", "http://localhost:8182/*", "http://keycloak:8182/*", "http://localhost:18085/*", "http://localhost:8087/*" ],
+    "redirectUris" : ["http://localhost:18085/api/login/oauth2/code/gams-client", "http://localhost:18085/login/oauth2/code/gams-client", "http://localhost:8080/login/oauth2/code/gams-client", "http://localhost:8182/*", "http://keycloak:8182/*", "http://localhost:18085/*", "http://localhost:8087/*" ],
     "webOrigins" : [ ],
     "notBefore" : 0,
     "bearerOnly" : false,

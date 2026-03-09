@@ -25,7 +25,22 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
- * Spring security configuration
+ * Spring security configuration.
+ * <p>
+ * Domain API endpoints live under {@code /api/v1/} (versioned).
+ * Authentication infrastructure endpoints live under {@code /api/auth/} (unversioned),
+ * keeping auth concerns separate from the versioned API contract.
+ * <p>
+ * Both prefixes share the common {@code /api/} root, allowing reverse proxies
+ * to route all application traffic via a single {@code /api/**} rule.
+ * <p>
+ * Auth endpoint overview:
+ * <ul>
+ *   <li>{@code GET  /api/auth/login} — login entry point (redirects to OAuth2 provider)</li>
+ *   <li>{@code GET  /api/auth/oauth2/authorization/{registrationId}} — OAuth2 authorization redirect</li>
+ *   <li>{@code GET  /api/auth/oauth2/callback/{registrationId}} — OAuth2 callback from provider</li>
+ *   <li>{@code POST /api/auth/logout} — logout processing (CSRF-protected)</li>
+ * </ul>
  */
 @Configuration
 @Slf4j
@@ -52,41 +67,57 @@ public class SpringSecurityConfiguration {
     log.info("*** Initializing spring security config ***");
 
 
-    // configure oauth2 login
-    http.oauth2Login(httpSecurityOAuth2LoginConfigurer -> {
-      httpSecurityOAuth2LoginConfigurer
+    // configure oauth2 login — auth infrastructure under /api/auth/ (separate from versioned API)
+    // loginPage: where unauthenticated users are redirected (handled by AuthEndpointController)
+    // authorizationEndpoint.baseUri: remaps /oauth2/authorization/* to /api/auth/oauth2/authorization/*
+    // redirectionEndpoint.baseUri: remaps /login/oauth2/code/* to /api/auth/oauth2/callback/*
+    // failureUrl: where to redirect after a failed OAuth2 login (handled by AuthEndpointController)
+    http.oauth2Login(oauth2 -> {
+      oauth2
+          .loginPage("/api/auth/login")
+          .authorizationEndpoint(auth -> auth.baseUri("/api/auth/oauth2/authorization"))
+          .redirectionEndpoint(redirect -> redirect.baseUri("/api/auth/oauth2/callback/*"))
           .defaultSuccessUrl("/api/v1", true)
-          .failureUrl("/login?error=true");
+          .failureUrl("/api/auth/login?error=true");
     });
 
+    // handling logout — processing endpoint at /api/auth/logout
+    http.logout(logout -> logout
+        .logoutUrl("/api/auth/logout")
+        .logoutSuccessHandler(oidcLogoutSuccessHandler())
+        .invalidateHttpSession(true)
+        .clearAuthentication(true)
+        .deleteCookies("JSESSIONID")
+    );
+
     http.authorizeHttpRequests(auth ->
-      auth
-          // allow post requests against specific integration api endpoints (because: might get queries via POST)
-          // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
-          .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
-          .permitAll()
-          // the datastream content auth is handled at controller level!
-          //.permitAll()
-          // All HEAD and GET after above rules are allowed
-          .requestMatchers(request -> {
+        auth
+            // allow post requests against specific integration api endpoints (because: might get queries via POST)
+            // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
+            .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
+            .permitAll()
+            // the datastream content auth is handled at controller level!
+            //.permitAll()
+            // All HEAD and GET after above rules are allowed
+            .requestMatchers(request -> {
               String requestMethod = request.getMethod();
               return switch (requestMethod) {
                 case "GET", "HEAD", "OPTIONS" -> true;
                 default -> false;
               };
             })
-          .permitAll()
-          // authorization only applies for these endpoints
-          .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
-          .access(userProjectAuthorizationManager)
-          // projects may only be created / deleted by global admin role
-          .requestMatchers(HttpMethod.PUT,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
-          .hasAuthority(GAMSAPIAuthorities.getAdmin())
-          .requestMatchers(HttpMethod.DELETE,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
-          .hasAuthority(GAMSAPIAuthorities.getAdmin())
-          // any not matched requests require authentication
-          .anyRequest()
-          .authenticated()
+            .permitAll()
+            // authorization only applies for these endpoints
+            .requestMatchers("/api/v1/projects/{projectAbbr}/objects/**", "/api/v1/integration/projects/{projectAbbr}/objects/**")
+            .access(userProjectAuthorizationManager)
+            // projects may only be created / deleted by global admin role
+            .requestMatchers(HttpMethod.PUT,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
+            .hasAuthority(GAMSAPIAuthorities.getAdmin())
+            .requestMatchers(HttpMethod.DELETE,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
+            .hasAuthority(GAMSAPIAuthorities.getAdmin())
+            // any not matched requests require authentication
+            .anyRequest()
+            .authenticated()
 
     );
 
@@ -105,10 +136,7 @@ public class SpringSecurityConfiguration {
     // Force CSRF token to be generated on every response
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
 
-    // handling logout
-    http.logout(logout -> logout
-        .logoutSuccessHandler(oidcLogoutSuccessHandler())
-    );
+
 
 
     // TODO check if this works
@@ -156,7 +184,7 @@ public class SpringSecurityConfiguration {
    */
   private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
     var handler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1/");
+    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1");
     return handler;
   }
 

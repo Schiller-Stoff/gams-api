@@ -46,7 +46,7 @@
 
             <!-- Not authenticated: show login button -->
             <div sec:authorize="isAnonymous()">
-              <a href="/api/v1/auth" class="btn btn-outline-primary">
+              <a href="/api/auth/login" class="btn btn-outline-primary">
                 <i class="ti ti-login me-1"></i>Login
               </a>
             </div>
@@ -68,7 +68,7 @@
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
-                  <form th:action="@{/logout}" method="POST" class="d-inline">
+                  <form th:action="@{/api/auth/logout}" method="POST" class="d-inline">
                     <button type="submit" class="dropdown-item">
                       <i class="ti ti-logout me-1"></i>Logout
                     </button>
