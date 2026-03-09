@@ -41,7 +41,7 @@ spring:
             client-secret: ${GAMSAPI_CLIENT_SECRET:MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
             scope: ${OAUTH2_SCOPE:openid,profile,email}
             authorization-grant-type: authorization_code
-            redirect-uri: ${GAMSAPI_REDIRECT_URI:http://localhost:18085/login/oauth2/code/gams-client}
+            redirect-uri: ${GAMSAPI_REDIRECT_URI:http://localhost:18085/api/auth/oauth2/callback/gams-client}
         provider:
           gams-realm:
             issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
@@ -75,8 +75,6 @@ spring:
 # Logging
 # (handled in different profiles)
 logging:
-  file:
-    name: ${LOG_FILE:log/app.log}
   level:
     org.ddh.gamsapi: ${LOG_LEVEL:TRACE}
     org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
