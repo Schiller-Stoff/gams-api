@@ -85,6 +85,9 @@ public class SpringSecurityConfiguration {
     http.logout(logout -> logout
         .logoutUrl("/api/auth/logout")
         .logoutSuccessHandler(oidcLogoutSuccessHandler())
+        .invalidateHttpSession(true)
+        .clearAuthentication(true)
+        .deleteCookies("JSESSIONID")
     );
 
     http.authorizeHttpRequests(auth ->
@@ -181,7 +184,7 @@ public class SpringSecurityConfiguration {
    */
   private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
     var handler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1/");
+    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1");
     return handler;
   }
 
