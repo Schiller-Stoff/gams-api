@@ -22,6 +22,7 @@ testcontainers:
 gams:
   storage:
     rootPath: ${GAMS_FILES_ROOT_PATH:gams-test}
+    webRootPath: ${GAMS_WEB_ROOT_PATH:gams-web-test}
   solr:
     auto-commit: true # this is necessary to directly reflect changes in solr during tests
     batch-size: 100
