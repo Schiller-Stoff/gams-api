@@ -110,8 +110,6 @@ public class WebDeploymentService {
   }
 
 
-  // ─── Private helpers ─────────────────────────────────────────────────
-
   @Transactional
   protected WebDeploymentInfo persistDeploymentMetadata(
       String projectAbbr,
