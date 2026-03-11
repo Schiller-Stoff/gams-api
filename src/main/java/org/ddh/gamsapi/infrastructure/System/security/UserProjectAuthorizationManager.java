@@ -94,8 +94,14 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     }
 
     // global administrator is allowed to do everything
-    if(userAuthorities.contains(GAMSAPIAuthorities.getAdmin())) {
-      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPIAuthorities.ADMINISTRATOR.name, requestUri, requestMethod);
+    if(userAuthorities.contains(GAMSAPIAuthorities.getSuperAdmin())) {
+      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPIAuthorities.SUPER_ADMINISTRATOR.name, requestUri, requestMethod);
+      return new AuthorizationDecision(true);
+    }
+
+    // also the projects administrator is allowed to do everything (currently)
+    if(userAuthorities.contains(GAMSAPIAuthorities.getProjectsAdministrator())) {
+      log.debug("ACCESS GRANTED for User {} with role '{}' to {} with {}", username, GAMSAPIAuthorities.SUPER_ADMINISTRATOR.name, requestUri, requestMethod);
       return new AuthorizationDecision(true);
     }
 

@@ -112,9 +112,9 @@ public class SpringSecurityConfiguration {
             .access(userProjectAuthorizationManager)
             // projects may only be created / deleted by global admin role
             .requestMatchers(HttpMethod.PUT,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
-            .hasAuthority(GAMSAPIAuthorities.getAdmin())
+            .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
             .requestMatchers(HttpMethod.DELETE,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
-            .hasAuthority(GAMSAPIAuthorities.getAdmin())
+            .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
             // any not matched requests require authentication
             .anyRequest()
             .authenticated()

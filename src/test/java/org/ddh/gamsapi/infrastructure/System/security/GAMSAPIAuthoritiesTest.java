@@ -8,29 +8,29 @@ import org.ddh.gamsapi.UnitTest;
 public class GAMSAPIAuthoritiesTest extends UnitTest {
 
   @Test
-  public void testGetAdmin() {
-    String expectedRole = "ROLE_admin";
-    Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getAdmin());
+  public void testGetSuperAdmin() {
+    String expectedRole = "ROLE_super_admin";
+    Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getSuperAdmin());
   }
 
   @Test
   public void testGetProjectAdmin() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_project-admin";
+    String expectedRole = "ROLE_testProject_admin";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectAdmin(projectAbbr));
   }
 
   @Test
   public void testGetProjectEditor() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_project-editor";
+    String expectedRole = "ROLE_testProject_editor";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectEditor(projectAbbr));
   }
 
   @Test
   public void testGetProjectViewer() {
     String projectAbbr = "testProject";
-    String expectedRole = "ROLE_testProject_project-viewer";
+    String expectedRole = "ROLE_testProject_viewer";
     Assertions.assertEquals(expectedRole, GAMSAPIAuthorities.getProjectViewer(projectAbbr));
   }
 
@@ -91,7 +91,7 @@ public class GAMSAPIAuthoritiesTest extends UnitTest {
     @Test
     public void convertsExpectedAuthorityString(){
 
-      final String AUTHORITY_TO_CONVERT = GAMSAPIAuthorities.getAdmin();
+      final String AUTHORITY_TO_CONVERT = GAMSAPIAuthorities.getSuperAdmin();
       final String EXPECTED = AUTHORITY_TO_CONVERT.replace(GAMSAPIAuthorities.ROLE_PREFIX.name, "");
 
       GAMSAPIAuthorities.convertToRole(AUTHORITY_TO_CONVERT);

@@ -87,7 +87,7 @@ public class AuthorizationIT extends IntegrationTest {
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    String globalAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getAdmin());
+    String globalAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getSuperAdmin());
 
     mockMvc
         .perform(
@@ -156,7 +156,7 @@ public class AuthorizationIT extends IntegrationTest {
           .perform(
               MockMvcRequestBuilders.put(TEST_URL)
                   .with(
-                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(new SimpleGrantedAuthority(GAMSAPIAuthorities.getAdmin()))
+                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(new SimpleGrantedAuthority(GAMSAPIAuthorities.getSuperAdmin()))
                   )
                   .with(SecurityMockMvcRequestPostProcessors.csrf())
           ).andExpect(status().is2xxSuccessful());
