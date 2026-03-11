@@ -119,7 +119,7 @@ public class DatastreamAuthorizationServiceTest extends UnitTest {
 
     @Test
     public void grantsSuperadmin() {
-      Authentication auth = authenticatedUser(GAMSAPIAuthorities.getAdmin());
+      Authentication auth = authenticatedUser(GAMSAPIAuthorities.getSuperAdmin());
       AuthorizationDecision decision = service.checkContentAccess(
           PROJECT_ABBR, RESTRICTIONS, auth);
       assertThat(decision.isGranted()).isTrue();

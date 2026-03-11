@@ -47,7 +47,7 @@ public class DatastreamAuthorizationService {
         .toList();
 
     // Superadmin
-    if (authorities.contains(GAMSAPIAuthorities.getAdmin())) {
+    if (authorities.contains(GAMSAPIAuthorities.getSuperAdmin())) {
       return new AuthorizationDecision(true);
     }
 
