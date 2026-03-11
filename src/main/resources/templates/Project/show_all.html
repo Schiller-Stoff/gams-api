@@ -47,7 +47,7 @@
               </div>
 
               <!-- Edit form (hidden by default) — only for admins -->
-              <div sec:authorize="hasAuthority('ROLE_admin')"
+              <div sec:authorize="hasAuthority('ROLE_super_admin')"
                    th:id="'desc-edit-' + ${project.projectAbbr}"
                    style="display: none;">
                 <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr}}"
