@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.application.WebDeployment;
 
+import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +15,6 @@ import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.MimeTypeUtils;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -26,9 +26,6 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.PROJECTS_TAG, description = OpenAPIConfig.PROJECTS_TAG_DESCRIPTION)
 public class WebDeploymentController {
-
-  public static final String WEB_DEPLOYMENT_PATH =
-      "/api/v1/projects/{projectAbbr}/web";
 
   private final WebDeploymentService webDeploymentService;
 
