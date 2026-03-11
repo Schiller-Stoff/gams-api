@@ -62,11 +62,11 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
           .forEach(p -> {
             try (Stream<Path> walk = Files.walk(p)) {
               walk.sorted(Comparator.reverseOrder()).forEach(f -> {
-                try { Files.delete(f); } catch (IOException ignored) {}
+                try { Files.delete(f); } catch (IOException _) {}
               });
-            } catch (IOException ignored) {}
+            } catch (IOException _) {}
           });
-    } catch (IOException ignored) {}
+    } catch (IOException _) {}
   }
 
   @Nested
@@ -241,10 +241,6 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
       }
     }
   }
-
-  // ==================================================================================
-  // delete()
-  // ==================================================================================
 
   @Nested
   @DisplayName("delete()")
