@@ -56,6 +56,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
   }
 
   private void cleanupWebRoot() {
+    // TODO catching those exceptions here seems weird
     try (Stream<Path> children = Files.list(webRoot)) {
       children
           .filter(p -> !p.getFileName().toString().equals("README.md"))
