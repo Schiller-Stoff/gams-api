@@ -74,7 +74,7 @@ public class WebDeploymentContentRepository {
       log.info("Successfully deployed web content for project {} ({} files, {} bytes)",
           projectAbbr, stats.fileCount(), stats.totalSize());
 
-      // Phase 3: Cleanup old deployment (best effort)
+      // Phase 3: Cleanup old deployment
       if (Files.exists(oldDir)) {
         deleteDirectoryQuietly(oldDir);
       }
