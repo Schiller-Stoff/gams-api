@@ -103,6 +103,7 @@ public class WebDeploymentService {
     }
 
     // Phase 2: Database record deletion
+    // TODO do i need this method? (the problem: @transactional is not being reached!)
     deleteDeploymentMetadata(projectAbbr);
 
     log.info("Successfully undeployed web content for project {}", projectAbbr);

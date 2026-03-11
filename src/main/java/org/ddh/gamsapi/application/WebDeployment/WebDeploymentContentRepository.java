@@ -81,10 +81,14 @@ public class WebDeploymentContentRepository {
 
       return stats;
 
-    } catch (IOException e) {
-      // Cleanup temp dir on failure
+    } catch (Exception e) {
+      // Cleanup temp dir on ANY failure (IOException + RuntimeException like
+      // WebDeploymentStorageException from path traversal detection)
       if (Files.exists(tempDir)) {
         deleteDirectoryQuietly(tempDir);
+      }
+      if (e instanceof WebDeploymentStorageException wdse) {
+        throw wdse;
       }
       throw new WebDeploymentStorageException(
           "Failed to deploy web content for project " + projectAbbr
