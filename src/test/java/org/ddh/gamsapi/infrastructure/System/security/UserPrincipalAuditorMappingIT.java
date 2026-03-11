@@ -67,7 +67,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
     final String TEST_PROJECT_URL = String.format("/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue());
 
     // global admin creates the project
-    String testGlobalAdminAuthority = GAMSAPIAuthorities.getAdmin();
+    String testGlobalAdminAuthority = GAMSAPIAuthorities.getSuperAdmin();
 
     // first create a project
     mockMvc.perform(

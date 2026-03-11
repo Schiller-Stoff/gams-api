@@ -14,8 +14,8 @@ public class JWTAuthoritiesRolesMapperTest extends UnitTest {
 
   private JWTAuthoritiesRolesMapper mapper;
 
-  final String TEST_KEYCLOAK_ROLE_CANTUS = "cantus" + GAMSAPIAuthorities.ROLE_DELIMITER.name + GAMSAPIAuthorities.ADMINISTRATOR.name;
-  final String TEST_KEYCLOAK_ROLE_ADMIN = GAMSAPIAuthorities.ADMINISTRATOR.name;
+  final String TEST_KEYCLOAK_ROLE_CANTUS = "cantus" + GAMSAPIAuthorities.ROLE_DELIMITER.name + GAMSAPIAuthorities.SUPER_ADMINISTRATOR.name;
+  final String TEST_KEYCLOAK_ROLE_ADMIN = GAMSAPIAuthorities.SUPER_ADMINISTRATOR.name;
   final String EXPECTED_ROLE_ADMIN = GAMSAPIAuthorities.ROLE_PREFIX.name + TEST_KEYCLOAK_ROLE_ADMIN;
   final String EXPECTED_ROLE_CANTUS = GAMSAPIAuthorities.ROLE_PREFIX.name + TEST_KEYCLOAK_ROLE_CANTUS;
 

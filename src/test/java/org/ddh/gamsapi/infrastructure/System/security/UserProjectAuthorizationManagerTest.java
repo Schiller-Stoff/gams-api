@@ -145,7 +145,23 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
-          new SimpleGrantedAuthority(GAMSAPIAuthorities.getAdmin())
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getSuperAdmin())
+      );
+      when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
+
+      AuthorizationDecision decision = manager.authorize(() -> authentication, authorizationContext);
+
+      // make sure that this was actually called
+      Mockito.verify(authentication).getAuthorities();
+      assertTrue(decision.isGranted());
+    }
+
+    @Test
+    public void projectsAdminIsAuthorizedForPOST() {
+
+      // Arrange
+      List<GrantedAuthority> testAuthorities = List.of(
+          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectsAdministrator())
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
