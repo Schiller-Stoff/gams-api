@@ -23,4 +23,12 @@ public class GAMSStorageProperties {
   @NotBlank
   private String rootPath;
 
+  /**
+   * Root directory for static web deployments.
+   * Each project's site is stored under {webRootPath}/{projectAbbr}/.
+   * This directory is mounted read-only into nginx for serving.
+   */
+  @NotBlank
+  private String webRootPath;
+
 }

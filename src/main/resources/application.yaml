@@ -115,6 +115,8 @@ gams:
   storage:
     # root of GAMS files (datastreams) to be stored.
     rootPath: ${GAMS_FILES_ROOT_PATH:gams}
+    # root of web resources to be served.
+    webRootPath: ${GAMS_WEB_ROOT_PATH:gams-web}
   # optional solr client configuration
 #  solr:
 #    auto-commit: false # whether to auto-commit changes to solr (in production should be false)

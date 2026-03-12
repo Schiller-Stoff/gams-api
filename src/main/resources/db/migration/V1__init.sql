@@ -143,6 +143,16 @@ create table submission_record
     primary key (digital_object_id)
 );
 
+create table web_deployment
+(
+    project_abbr varchar(10)                 not null,
+    deployed_at  timestamp(6) with time zone not null,
+    deployed_by  varchar(255)                not null,
+    file_count   integer                     not null,
+    total_size   bigint                      not null,
+    primary key (project_abbr)
+);
+
 create index idx_dc_digital_object_id
     on dublin_core_entry (digital_object_id);
 
@@ -203,3 +213,8 @@ alter table if exists submission_record
     add constraint fk_submission_record_digital_object
     foreign key (digital_object_id)
     references digital_object;
+
+alter table if exists web_deployment
+    add constraint fk_web_deployment_project
+    foreign key (project_abbr)
+    references project (project_abbr);

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:replace="~{fragments/general.html :: headtemplate}"/>
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
+          <li class="breadcrumb-item">
+            <a th:text="${project.projectAbbr}"
+               th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a>
+          </li>
+          <li class="breadcrumb-item active">Web Deployment</li>
+        </ol>
+      </nav>
+
+      <h2 class="display-6 fw-bold text-primary mb-3">
+        Web Deployment
+        <small class="text-muted fs-5" th:text="' — ' + ${project.projectAbbr}"></small>
+      </h2>
+      <p class="text-muted">
+        Manage the static web site for this project. Files are deployed to nginx and served independently from the API.
+      </p>
+
+      <!-- ─── Current deployment info ─────────────────────────────────── -->
+
+      <div th:if="${deployment != null}" class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="ti ti-world me-2"></i>Current Deployment</span>
+          <span class="badge bg-success">Active</span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-3">
+              <small class="text-muted d-block">Deployed at</small>
+              <span th:text="${deployment.deployedAt()}"></span>
+            </div>
+            <div class="col-md-3">
+              <small class="text-muted d-block">Deployed by</small>
+              <span th:text="${deployment.deployedBy()}"></span>
+            </div>
+            <div class="col-md-3">
+              <small class="text-muted d-block">Files</small>
+              <span th:text="${deployment.fileCount()}"></span>
+            </div>
+            <div class="col-md-3">
+              <small class="text-muted d-block">Total size</small>
+              <span th:text="${#numbers.formatDecimal(deployment.totalSize() / 1024.0, 1, 1)} + ' KB'"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete button (authenticated only) -->
+        <div sec:authorize="isAuthenticated()" class="card-footer">
+          <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/web'}"
+                method="POST">
+            <input type="hidden" name="_method" value="DELETE" />
+            <button type="submit" class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Remove the current web deployment? This will delete all static files for this project.')">
+              <i class="ti ti-trash me-1"></i>Remove Deployment
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- No deployment state -->
+      <div th:if="${deployment == null}" class="card mb-4">
+        <div class="card-body text-center py-5">
+          <i class="ti ti-cloud-off fs-1 text-muted mb-3 d-block"></i>
+          <h5 class="text-muted">No Web Deployment</h5>
+          <p class="text-muted">
+            This project does not have a static site deployed yet.
+            Upload a zip archive below to deploy.
+          </p>
+        </div>
+      </div>
+
+      <!-- ─── Upload form (authenticated only) ────────────────────────── -->
+
+      <div sec:authorize="isAuthenticated()" class="card">
+        <div class="card-header">
+          <i class="ti ti-upload me-2"></i>
+          <span th:text="${deployment != null} ? 'Replace Deployment' : 'Deploy Static Site'"></span>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-3">
+            Upload a <code>.zip</code> archive containing the static site files
+            (e.g., pollin-tool output). The archive will be extracted and deployed for nginx to serve.
+            <span th:if="${deployment != null}" class="text-warning">
+              This will fully replace the current deployment.
+            </span>
+          </p>
+
+          <div id="upload-form-container">
+            <div class="mb-3">
+              <label for="siteZipFile" class="form-label">Static site archive (.zip)</label>
+              <input type="file" class="form-control" id="siteZipFile"
+                     accept=".zip,application/zip,application/x-zip-compressed" />
+              <small class="text-muted">Select the zip file containing your static site.</small>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="deployBtn" disabled>
+              <i class="ti ti-rocket me-1"></i>
+              <span th:text="${deployment != null} ? 'Replace & Deploy' : 'Deploy'"></span>
+            </button>
+
+            <!-- Progress feedback -->
+            <div id="deploy-progress" class="mt-3" style="display: none;">
+              <div class="d-flex align-items-center">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                  <span class="visually-hidden">Deploying...</span>
+                </div>
+                <span id="deploy-status-text">Uploading and deploying...</span>
+              </div>
+            </div>
+
+            <!-- Result feedback -->
+            <div id="deploy-result" class="mt-3" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
+  </div>
+</div>
+
+<script th:inline="javascript">
+    (function() {
+        const projectAbbr = /*[[${project.projectAbbr}]]*/ '';
+        const csrfToken   = /*[[${_csrf?.token}]]*/ '';
+        const csrfHeader  = /*[[${_csrf?.headerName}]]*/ '';
+
+        const fileInput   = document.getElementById('siteZipFile');
+        const deployBtn   = document.getElementById('deployBtn');
+        const progressDiv = document.getElementById('deploy-progress');
+        const statusText  = document.getElementById('deploy-status-text');
+        const resultDiv   = document.getElementById('deploy-result');
+
+        if (!fileInput || !deployBtn) return;
+
+        // Enable button only when a file is selected
+        fileInput.addEventListener('change', function() {
+            deployBtn.disabled = !fileInput.files || fileInput.files.length === 0;
+            // Clear previous result
+            resultDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+        });
+
+        deployBtn.addEventListener('click', async function() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            // Confirm replacement if there is an existing deployment
+            const hasExisting = /*[[${deployment != null}]]*/ false;
+            if (hasExisting) {
+                if (!confirm('This will fully replace the current deployment. Continue?')) {
+                    return;
+                }
+            }
+
+            // UI: show progress, disable controls
+            deployBtn.disabled = true;
+            fileInput.disabled = true;
+            progressDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            statusText.textContent = 'Uploading and deploying...';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const headers = {};
+                if (csrfHeader && csrfToken) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
+                const response = await fetch(
+                    '/api/v1/projects/' + encodeURIComponent(projectAbbr) + '/web',
+                    {
+                        method: 'PUT',
+                        body: formData,
+                        headers: headers,
+                        credentials: 'include'
+                    }
+                );
+
+                progressDiv.style.display = 'none';
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML =
+                        '<div class="alert alert-success">'
+                        + '<i class="ti ti-check me-1"></i>'
+                        + '<strong>Deployment successful.</strong> '
+                        + data.fileCount + ' files deployed (' + (data.totalSize / 1024).toFixed(1) + ' KB). '
+                        + 'Reloading...'
+                        + '</div>';
+                    resultDiv.style.display = 'block';
+                    // Reload to show updated deployment info
+                    setTimeout(function() { window.location.reload(); }, 1500);
+                } else {
+                    let errorMsg = 'HTTP ' + response.status;
+                    try {
+                        const errBody = await response.json();
+                        if (errBody.message) errorMsg = errBody.message;
+                    } catch (_) {}
+
+                    resultDiv.innerHTML =
+                        '<div class="alert alert-danger">'
+                        + '<i class="ti ti-alert-circle me-1"></i>'
+                        + '<strong>Deployment failed:</strong> ' + errorMsg
+                        + '</div>';
+                    resultDiv.style.display = 'block';
+                    deployBtn.disabled = false;
+                    fileInput.disabled = false;
+                }
+
+            } catch (err) {
+                progressDiv.style.display = 'none';
+                resultDiv.innerHTML =
+                    '<div class="alert alert-danger">'
+                    + '<i class="ti ti-alert-circle me-1"></i>'
+                    + '<strong>Network error:</strong> ' + err.message
+                    + '</div>';
+                resultDiv.style.display = 'block';
+                deployBtn.disabled = false;
+                fileInput.disabled = false;
+                console.error('[WEB-DEPLOY] Error:', err);
+            }
+        });
+    })();
+</script>
+
+</body>
+</html>
