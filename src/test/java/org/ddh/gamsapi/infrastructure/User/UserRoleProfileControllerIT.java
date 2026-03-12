@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class UserRoleProfileControllerIT extends IntegrationTest {
 
-  private static final String PROFILE_URL = "/api/auth/profile";
+  private static final String PROFILE_URL = "/api/auth/user";
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
