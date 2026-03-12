@@ -72,6 +72,9 @@
 
               <!-- Action buttons — only for admins -->
               <div sec:authorize="hasAuthority('ROLE_super_admin')" class="ms-2 d-flex gap-1">
+                <a class="btn btn-outline-primary btn-sm" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/web'">
+                  <i class="ti ti-upload"></i>
+                </a>
                 <button class="btn btn-outline-primary btn-sm"
                         th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
                   <i class="ti ti-pencil"></i>
