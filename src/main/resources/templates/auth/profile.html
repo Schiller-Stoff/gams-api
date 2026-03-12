@@ -63,7 +63,7 @@
             <tbody>
             <tr th:each="entry : ${roleProfile.projectRoles}">
               <td>
-                <a th:href="@{'/api/v1/projects/' + ${entry.key}}"
+                <a th:href="@{'/api/v1/projects/' + ${entry.key} + '/objects'}"
                    th:text="${entry.key}"
                    style="color: black; font-weight: 600;"
                    class="text-decoration-none">
