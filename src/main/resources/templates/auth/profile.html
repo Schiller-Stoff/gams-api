@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:replace="~{fragments/general.html :: headtemplate}"/>
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item active">Profile</li>
+        </ol>
+      </nav>
+
+      <!-- User Info Header -->
+      <div class="d-flex align-items-center mb-4">
+        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center"
+             style="width: 64px; height: 64px;">
+          <i class="ti ti-user" style="font-size: 32px;"></i>
+        </div>
+        <div class="ms-3">
+          <h2 class="display-6 fw-bold text-primary mb-0" th:text="${displayName}">User Name</h2>
+          <p class="text-muted mb-0" th:if="${email}" th:text="${email}">email@example.com</p>
+          <small class="text-muted" th:text="'Username: ' + ${username}">username</small>
+        </div>
+      </div>
+
+      <!-- Global Roles Section -->
+      <div th:if="${roleProfile.hasTopRoles()}" class="mb-4">
+        <h3 class="h5">
+          <i class="ti ti-shield me-2 text-primary"></i>Global Roles
+        </h3>
+        <div class="d-flex flex-wrap gap-2 mt-2">
+          <span th:each="role : ${roleProfile.topRoles}"
+                class="badge bg-danger fs-6 px-3 py-2"
+                th:text="${role}">
+            admin
+          </span>
+        </div>
+      </div>
+
+      <!-- My Projects Section -->
+      <div th:if="${roleProfile.hasProjectRoles()}" class="mb-4">
+        <h3 class="h5">
+          <i class="ti ti-folder me-2 text-primary"></i>My Projects
+        </h3>
+        <div class="webcirilo-box">
+          <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
+            <thead>
+            <tr>
+              <th scope="col">Project</th>
+              <th scope="col">Roles</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="entry : ${roleProfile.projectRoles}">
+              <td>
+                <a th:href="@{'/api/v1/projects/' + ${entry.key}}"
+                   th:text="${entry.key}"
+                   style="color: black; font-weight: 600;"
+                   class="text-decoration-none">
+                  project-abbr
+                </a>
+              </td>
+              <td>
+                  <span th:each="role : ${entry.value}"
+                        class="badge me-1"
+                        th:classappend="${role == 'admin' ? 'bg-warning text-dark' : (role == 'editor' ? 'bg-info' : 'bg-secondary')}"
+                        th:text="${role}">
+                    role
+                  </span>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- No roles at all -->
+      <div th:if="${!roleProfile.hasTopRoles() and !roleProfile.hasProjectRoles()}"
+           class="alert alert-info">
+        <i class="ti ti-info-circle me-2"></i>
+        You don't have any roles assigned yet. Contact your system administrator.
+      </div>
+
+    </div>
+
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
+  </div>
+</div>
+
+</body>
+</html>
