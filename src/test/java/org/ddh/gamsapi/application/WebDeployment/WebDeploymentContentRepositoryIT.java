@@ -50,7 +50,7 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
   }
 
   @AfterEach
-  public void cleanup() throws IOException {
+  void cleanup() throws IOException {
     FileUtils.emptyDirectory(webRoot.toFile(), Set.of("README.md"));
     super.tearDown();
   }
@@ -181,7 +181,7 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
                   || name.startsWith(".old-" + TEST_PROJECT);
             })
             .count();
-        Assertions.assertThat(orphanCount).isEqualTo(0);
+        Assertions.assertThat(orphanCount).isZero();
       }
     }
 
@@ -214,7 +214,7 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
       try {
         webDeploymentContentRepository.deploy(
             TEST_PROJECT, new ByteArrayInputStream(maliciousZip));
-      } catch (WebDeploymentStorageException expected) {
+      } catch (WebDeploymentStorageException _) {
         // expected
       }
 
@@ -223,7 +223,7 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
         long tmpCount = siblings
             .filter(p -> p.getFileName().toString().startsWith(".tmp-" + TEST_PROJECT))
             .count();
-        Assertions.assertThat(tmpCount).isEqualTo(0);
+        Assertions.assertThat(tmpCount).isZero();
       }
     }
   }
@@ -323,7 +323,7 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
     void returnedPathIsAbsolute() {
       Path result = webDeploymentContentRepository.getProjectWebPath(TEST_PROJECT);
 
-      Assertions.assertThat(result.isAbsolute()).isTrue();
+      Assertions.assertThat(result).isAbsolute();
     }
   }
 
@@ -382,11 +382,6 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
    */
   private static byte[] createEmptyZip() {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-      // Intentionally empty
-    } catch (IOException ex) {
-      throw new RuntimeException("Failed to create empty zip", ex);
-    }
     return baos.toByteArray();
   }
 
