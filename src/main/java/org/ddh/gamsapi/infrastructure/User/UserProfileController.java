@@ -21,11 +21,6 @@ public class UserProfileController {
   @GetMapping("/api/auth/profile")
   public String showUserProfile(Authentication authentication, Model model) {
 
-    if (authentication == null || !authentication.isAuthenticated()
-        || authentication instanceof AnonymousAuthenticationToken) {
-      return "redirect:/api/v1/auth";
-    }
-
     // User info from OIDC
     String username = authentication.getName();
     String displayName = username;

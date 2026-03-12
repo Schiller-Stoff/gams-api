@@ -98,6 +98,8 @@ public class SpringSecurityConfiguration {
             .permitAll()
             // the datastream content auth is handled at controller level!
             //.permitAll()
+            // protect user info endpoint
+            .requestMatchers("/api/auth/profile").authenticated()
             // All HEAD and GET after above rules are allowed
             .requestMatchers(request -> {
               String requestMethod = request.getMethod();
