@@ -78,8 +78,8 @@ public class FileUtils {
 
   /**
    * Empties given directory + allows to skip certain files.
-   * @param directoryToBeEmptied
-   * @param skipPaths
+   * @param directoryToBeEmptied directory to be emptied
+   * @param skipPaths paths to be skipped from deletion
    */
   public static void emptyDirectory(File directoryToBeEmptied, Set<String> skipPaths) throws IOException {
     emptyDirectory(directoryToBeEmptied, directoryToBeEmptied.toPath(), skipPaths);
@@ -94,10 +94,10 @@ public class FileUtils {
   }
 
   /**
-   * Empties gi
-   * @param current
-   * @param root
-   * @param skipPaths
+   * Empties given directory
+   * @param current current iterated file
+   * @param root root of the directory
+   * @param skipPaths paths to skip
    */
   private static void emptyDirectory(File current, Path root, Set<String> skipPaths) throws IOException {
     File[] allContents = current.listFiles();
