@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class WebDeploymentService {
   private final IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   /**
-   * Deploys a static web site for the given project.
+   * Deploys a static website for the given project.
    * Extracts the zip to the filesystem and records deployment metadata.
    * <p>
    * Follows the two-phase pattern from IngestService:
@@ -38,13 +39,11 @@ public class WebDeploymentService {
    */
   public WebDeploymentInfo deploy(String projectAbbr, InputStream zipStream) {
 
-    // Validate project exists
     if (!projectRepository.existsById(projectAbbr)) {
       throw new ProjectNotFoundException(
           "Cannot deploy web content. Project does not exist: " + projectAbbr);
     }
 
-    // Resolve current user
     String currentUser = userPrincipalAuditorMapping.getCurrentAuditor()
         .orElseThrow(() -> new UserAuthenticationRequiredException(
             "Cannot deploy web content for project " + projectAbbr
@@ -54,9 +53,21 @@ public class WebDeploymentService {
     WebDeploymentContentRepository.DeploymentStats stats =
         webDeploymentContentRepository.deploy(projectAbbr, zipStream);
 
-    // Phase 2: Persist metadata
-    // TODO do i need this method? (the problem: @transactional is not being reached!)
-    return persistDeploymentMetadata(projectAbbr, currentUser, stats);
+    // Phase 2: Persist metadata (single save — CrudRepository is already @Transactional)
+    WebDeployment deployment = webDeploymentRepository.findById(projectAbbr)
+        .orElse(new WebDeployment());
+
+    deployment.setProjectAbbr(projectAbbr);
+    deployment.setDeployedAt(Instant.now().truncatedTo(ChronoUnit.MICROS));
+    deployment.setDeployedBy(currentUser);
+    deployment.setFileCount(stats.fileCount());
+    deployment.setTotalSize(stats.totalSize());
+
+    WebDeployment saved = webDeploymentRepository.save(deployment);
+    log.info("Recorded web deployment for project {}: {} files, {} bytes, by {}",
+        projectAbbr, stats.fileCount(), stats.totalSize(), currentUser);
+
+    return toDto(saved);
   }
 
   /**
@@ -102,39 +113,10 @@ public class WebDeploymentService {
           "No web deployment found for project: " + projectAbbr);
     }
 
-    // Phase 2: Database record deletion
-    // TODO do i need this method? (the problem: @transactional is not being reached!)
-    deleteDeploymentMetadata(projectAbbr);
+    // Phase 2: Database record deletion (single call — already @Transactional)
+    webDeploymentRepository.deleteById(projectAbbr);
 
     log.info("Successfully undeployed web content for project {}", projectAbbr);
-  }
-
-
-  @Transactional
-  protected WebDeploymentInfo persistDeploymentMetadata(
-      String projectAbbr,
-      String deployedBy,
-      WebDeploymentContentRepository.DeploymentStats stats) {
-
-    WebDeployment deployment = webDeploymentRepository.findById(projectAbbr)
-        .orElse(new WebDeployment());
-
-    deployment.setProjectAbbr(projectAbbr);
-    deployment.setDeployedAt(Instant.now());
-    deployment.setDeployedBy(deployedBy);
-    deployment.setFileCount(stats.fileCount());
-    deployment.setTotalSize(stats.totalSize());
-
-    WebDeployment saved = webDeploymentRepository.save(deployment);
-    log.info("Recorded web deployment for project {}: {} files, {} bytes, by {}",
-        projectAbbr, stats.fileCount(), stats.totalSize(), deployedBy);
-
-    return toDto(saved);
-  }
-
-  @Transactional
-  protected void deleteDeploymentMetadata(String projectAbbr) {
-    webDeploymentRepository.deleteById(projectAbbr);
   }
 
   private WebDeploymentInfo toDto(WebDeployment entity) {
