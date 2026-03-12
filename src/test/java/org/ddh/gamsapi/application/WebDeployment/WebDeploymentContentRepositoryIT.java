@@ -200,9 +200,11 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
     void throwsOnPathTraversalAttack() {
       byte[] maliciousZip = createMaliciousZip("../../etc/passwd", "malicious");
 
+      var bos = new ByteArrayInputStream(maliciousZip);
+
       Assertions.assertThatThrownBy(
               () -> webDeploymentContentRepository.deploy(
-                  TEST_PROJECT, new ByteArrayInputStream(maliciousZip))
+                  TEST_PROJECT, bos)
           ).isInstanceOf(WebDeploymentStorageException.class)
           .hasMessageContaining("path traversal");
     }
