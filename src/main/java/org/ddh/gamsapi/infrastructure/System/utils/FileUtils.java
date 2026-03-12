@@ -5,6 +5,8 @@ import org.springframework.security.crypto.codec.Hex;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -103,7 +105,6 @@ public class FileUtils {
     File[] allContents = current.listFiles();
     if (allContents != null) {
       for (File file : allContents) {
-        // also manage windows paths
         String relativePath = root.relativize(file.toPath()).toString().replace('\\', '/');
 
         if (skipPaths.contains(relativePath)) {
@@ -113,7 +114,13 @@ public class FileUtils {
         if (file.isDirectory()) {
           emptyDirectory(file, root, skipPaths);
         }
-        file.delete();
+
+        try {
+          Files.delete(file.toPath());
+        } catch (DirectoryNotEmptyException _) {
+          // Directory still contains skipped files — intentionally kept
+          // (directory must be kept if it contains a skipped file)
+        }
       }
     }
   }
