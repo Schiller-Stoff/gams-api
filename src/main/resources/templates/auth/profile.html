@@ -35,7 +35,6 @@
         </div>
       </div>
 
-      <!-- Global Roles Section -->
       <div th:if="${roleProfile.hasTopRoles()}" class="mb-4">
         <h3 class="h5">
           <i class="ti ti-shield me-2 text-primary"></i>Global Roles
@@ -49,7 +48,6 @@
         </div>
       </div>
 
-      <!-- My Projects Section -->
       <div th:if="${roleProfile.hasProjectRoles()}" class="mb-4">
         <h3 class="h5">
           <i class="ti ti-folder me-2 text-primary"></i>My Projects
@@ -86,7 +84,6 @@
         </div>
       </div>
 
-      <!-- No roles at all -->
       <div th:if="${!roleProfile.hasTopRoles() and !roleProfile.hasProjectRoles()}"
            class="alert alert-info">
         <i class="ti ti-info-circle me-2"></i>
