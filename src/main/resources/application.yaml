@@ -45,6 +45,7 @@ spring:
         provider:
           gams-realm:
             issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
+            user-name-attribute: preferred_username
 
 
   #####
