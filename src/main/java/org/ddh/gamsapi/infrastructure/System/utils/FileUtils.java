@@ -1,17 +1,27 @@
 package org.ddh.gamsapi.infrastructure.System.utils;
 
 import org.springframework.security.crypto.codec.Hex;
+
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Utility class for file operations for GAMS5
  */
 public class FileUtils {
+
+  private FileUtils() {
+    /* This utility class should not be instantiated */
+    throw new IllegalStateException("Utility class should not be instantiated");
+  }
+
 
 
   /**
@@ -64,6 +74,48 @@ public class FileUtils {
         toHash.getBytes(StandardCharsets.UTF_8));
     char[] hex = Hex.encode(hashbytes);
     return String.valueOf(hex);
+  }
+
+  /**
+   * Empties given directory + allows to skip certain files.
+   * @param directoryToBeEmptied
+   * @param skipPaths
+   */
+  public static void emptyDirectory(File directoryToBeEmptied, Set<String> skipPaths) throws IOException {
+    emptyDirectory(directoryToBeEmptied, directoryToBeEmptied.toPath(), skipPaths);
+  }
+
+  /**
+   * Empties given directory.
+   * @param directoryToBeEmptied directory to be emptied
+   */
+  public static void emptyDirectory(File directoryToBeEmptied) throws IOException {
+    emptyDirectory(directoryToBeEmptied, Set.of());
+  }
+
+  /**
+   * Empties gi
+   * @param current
+   * @param root
+   * @param skipPaths
+   */
+  private static void emptyDirectory(File current, Path root, Set<String> skipPaths) throws IOException {
+    File[] allContents = current.listFiles();
+    if (allContents != null) {
+      for (File file : allContents) {
+        // also manage windows paths
+        String relativePath = root.relativize(file.toPath()).toString().replace('\\', '/');
+
+        if (skipPaths.contains(relativePath)) {
+          continue;
+        }
+
+        if (file.isDirectory()) {
+          emptyDirectory(file, root, skipPaths);
+        }
+        file.delete();
+      }
+    }
   }
 
 

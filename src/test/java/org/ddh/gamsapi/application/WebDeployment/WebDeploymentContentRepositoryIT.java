@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.application.WebDeployment.exceptions.WebDeploymentStorageException;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSStorageProperties;
+import org.ddh.gamsapi.infrastructure.System.utils.FileUtils;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,7 +15,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -49,25 +50,9 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
   }
 
   @AfterEach
-  @Override
-  public void tearDown() {
-    cleanupWebRoot();
+  public void cleanup() throws IOException {
+    FileUtils.emptyDirectory(webRoot.toFile(), Set.of("README.md"));
     super.tearDown();
-  }
-
-  private void cleanupWebRoot() {
-    // TODO catching those exceptions here seems weird
-    try (Stream<Path> children = Files.list(webRoot)) {
-      children
-          .filter(p -> !p.getFileName().toString().equals("README.md"))
-          .forEach(p -> {
-            try (Stream<Path> walk = Files.walk(p)) {
-              walk.sorted(Comparator.reverseOrder()).forEach(f -> {
-                try { Files.delete(f); } catch (IOException _) {}
-              });
-            } catch (IOException _) {}
-          });
-    } catch (IOException _) {}
   }
 
   @Nested
