@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream;
  * is a pure filesystem abstraction.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class WebDeploymentContentRepositoryIT extends IntegrationTest {
+class WebDeploymentContentRepositoryIT extends IntegrationTest {
 
   private static final String TEST_PROJECT = "webtest";
 
@@ -44,7 +44,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
   private Path webRoot;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     webRoot = Paths.get(gamsStorageProperties.getWebRootPath()).toAbsolutePath();
   }
 
@@ -72,10 +72,10 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
 
   @Nested
   @DisplayName("deploy()")
-  public class Deploy {
+  class Deploy {
 
     @Test
-    public void createsExpectedDirectoryForProject() {
+    void createsExpectedDirectoryForProject() {
       InputStream zip = createZip(
           entry("index.html", "<html/>")
       );
@@ -87,7 +87,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void extractsSingleFileWithExpectedContent() throws IOException {
+    void extractsSingleFileWithExpectedContent() throws IOException {
       final String EXPECTED_CONTENT = "<html><body>Hello World</body></html>";
       InputStream zip = createZip(
           entry("index.html", EXPECTED_CONTENT)
@@ -101,7 +101,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void extractsNestedDirectoryStructure() {
+    void extractsNestedDirectoryStructure() {
       InputStream zip = createZip(
           entry("index.html", "<html/>"),
           entry("css/styles.css", "body {}"),
@@ -119,7 +119,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsExpectedDeploymentStats() {
+    void returnsExpectedDeploymentStats() {
       final String FILE_1_CONTENT = "Hello";
       final String FILE_2_CONTENT = "World!";
       InputStream zip = createZip(
@@ -136,7 +136,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void directoryOnlyEntriesAreNotCountedAsFiles() {
+    void directoryOnlyEntriesAreNotCountedAsFiles() {
       InputStream zip = createZipWithDirectoryEntry(
           "emptydir/",
           entry("file.txt", "content")
@@ -155,7 +155,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void atomicSwapReplacesOldContentCompletely() throws IOException {
+    void atomicSwapReplacesOldContentCompletely() throws IOException {
       // First deployment
       webDeploymentContentRepository.deploy(TEST_PROJECT, createZip(
           entry("old.html", "old content"),
@@ -182,7 +182,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void noOrphanTempDirectoriesAfterSuccessfulDeploy() throws IOException {
+    void noOrphanTempDirectoriesAfterSuccessfulDeploy() throws IOException {
       webDeploymentContentRepository.deploy(TEST_PROJECT, createZip(
           entry("index.html", "<html/>")
       ));
@@ -201,7 +201,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsOnEmptyZip() {
+    void throwsOnEmptyZip() {
       byte[] emptyZip = createEmptyZip();
       InputStream zip = new ByteArrayInputStream(emptyZip);
 
@@ -212,7 +212,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsOnPathTraversalAttack() {
+    void throwsOnPathTraversalAttack() {
       byte[] maliciousZip = createMaliciousZip("../../etc/passwd", "malicious");
 
       Assertions.assertThatThrownBy(
@@ -223,7 +223,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void cleansUpTempDirectoryOnPathTraversalFailure() throws IOException {
+    void cleansUpTempDirectoryOnPathTraversalFailure() throws IOException {
       byte[] maliciousZip = createMaliciousZip("../../escape.txt", "data");
 
       try {
@@ -245,10 +245,10 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
 
   @Nested
   @DisplayName("delete()")
-  public class Delete {
+  class Delete {
 
     @Test
-    public void returnsTrueAndRemovesDirectoryWhenDeploymentExists() {
+    void returnsTrueAndRemovesDirectoryWhenDeploymentExists() {
       webDeploymentContentRepository.deploy(TEST_PROJECT, createZip(
           entry("index.html", "<html/>"),
           entry("css/styles.css", "body {}")
@@ -264,14 +264,14 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsFalseWhenNoDeploymentExists() {
+    void returnsFalseWhenNoDeploymentExists() {
       boolean result = webDeploymentContentRepository.delete("neverdeployed");
 
       Assertions.assertThat(result).isFalse();
     }
 
     @Test
-    public void removesAllNestedContentRecursively() {
+    void removesAllNestedContentRecursively() {
       webDeploymentContentRepository.deploy(TEST_PROJECT, createZip(
           entry("a/b/c/deep.txt", "deep content"),
           entry("a/b/shallow.txt", "shallow")
@@ -290,10 +290,10 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
 
   @Nested
   @DisplayName("exists()")
-  public class Exists {
+  class Exists {
 
     @Test
-    public void returnsTrueAfterDeploy() {
+    void returnsTrueAfterDeploy() {
       webDeploymentContentRepository.deploy(TEST_PROJECT, createZip(
           entry("index.html", "<html/>")
       ));
@@ -302,12 +302,12 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsFalseWhenNeverDeployed() {
+    void returnsFalseWhenNeverDeployed() {
       Assertions.assertThat(webDeploymentContentRepository.exists("neverdeployed")).isFalse();
     }
 
     @Test
-    public void returnsFalseAfterDelete() {
+    void returnsFalseAfterDelete() {
       webDeploymentContentRepository.deploy(TEST_PROJECT, createZip(
           entry("index.html", "<html/>")
       ));
@@ -324,10 +324,10 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
 
   @Nested
   @DisplayName("getProjectWebPath()")
-  public class GetProjectWebPath {
+  class GetProjectWebPath {
 
     @Test
-    public void returnsExpectedPath() {
+    void returnsExpectedPath() {
       Path result = webDeploymentContentRepository.getProjectWebPath(TEST_PROJECT);
 
       Path expected = webRoot.resolve(TEST_PROJECT);
@@ -335,7 +335,7 @@ public class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    public void returnedPathIsAbsolute() {
+    void returnedPathIsAbsolute() {
       Path result = webDeploymentContentRepository.getProjectWebPath(TEST_PROJECT);
 
       Assertions.assertThat(result.isAbsolute()).isTrue();
