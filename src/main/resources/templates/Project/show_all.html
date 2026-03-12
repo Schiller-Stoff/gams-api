@@ -71,7 +71,7 @@
               </div>
 
               <!-- Action buttons — only for admins -->
-              <div sec:authorize="hasAuthority('ROLE_admin')" class="ms-2 d-flex gap-1">
+              <div sec:authorize="hasAuthority('ROLE_super_admin')" class="ms-2 d-flex gap-1">
                 <button class="btn btn-outline-primary btn-sm"
                         th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
                   <i class="ti ti-pencil"></i>
@@ -211,7 +211,7 @@
 
 
       <!-- Create project form — only visible to global admins -->
-      <div sec:authorize="hasAuthority('ROLE_admin')" class="mb-3 mt-5">
+      <div sec:authorize="hasAuthority('ROLE_super_admin')" class="mb-3 mt-5">
         <div>
           <h5 class="h5">
             <i class="ti ti-plus me-1 text-primary"></i>Create new project
