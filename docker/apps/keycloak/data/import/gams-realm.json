@@ -408,7 +408,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-gams-realm", "admin" ],
+    "realmRoles" : [ "default-roles-gams-realm", "super_admin" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {
