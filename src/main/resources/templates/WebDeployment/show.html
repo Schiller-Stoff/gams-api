@@ -23,21 +23,18 @@
           <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
           <li class="breadcrumb-item">
             <a th:text="${project.projectAbbr}"
-               th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a>
+               th:href="'/api/v1/projects/' + ${project.projectAbbr}"></a>
           </li>
-          <li class="breadcrumb-item active">Web Deployment</li>
+          <li class="breadcrumb-item active">web deployment</li>
         </ol>
       </nav>
 
       <h2 class="display-6 fw-bold text-primary mb-3">
         Web Deployment
-        <small class="text-muted fs-5" th:text="' — ' + ${project.projectAbbr}"></small>
       </h2>
       <p class="text-muted">
         Manage the static web site for this project. Files are deployed to nginx and served independently from the API.
       </p>
-
-      <!-- ─── Current deployment info ─────────────────────────────────── -->
 
       <div th:if="${deployment != null}" class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">

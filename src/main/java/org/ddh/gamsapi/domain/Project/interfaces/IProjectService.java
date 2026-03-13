@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.Project.interfaces;
 
+import org.ddh.gamsapi.domain.Project.dto.ProjectDetailsDTO;
 import org.springframework.data.domain.Pageable;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
@@ -54,5 +55,12 @@ public interface IProjectService {
    * @return List of project abbreviations as strings
    */
   List<String> findAllProjectAbbrs();
+
+  /**
+   * Returns
+   * @param projectAbbr
+   * @return
+   */
+  ProjectDetailsDTO findProjectDetails(String projectAbbr);
 
 }
