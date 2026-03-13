@@ -60,8 +60,7 @@
           </h3>
           <div>
             <a class="mb-0 me-1" target="_blank"
-               th:href="'/api/v1/projects/' + ${project.projectAbbr}"
-               onclick="event.preventDefault(); fetch(this.href, {headers:{'Accept':'application/json'}}).then(r=>r.text()).then(t=>{const w=window.open();w.document.write('<pre>'+t+'</pre>')})">
+               th:href="'/api/v1/projects/' + ${project.projectAbbr} + '?format=json'">
               <i class="ti ti-file"></i>JSON
             </a>
           </div>
