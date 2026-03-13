@@ -3,12 +3,14 @@ package org.ddh.gamsapi.domain.Project;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Project.ProjectModification.IProjectModificationService;
 import org.ddh.gamsapi.domain.Project.ProjectModification.ProjectModification;
+import org.ddh.gamsapi.domain.Project.dto.ProjectDetailsDTO;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectInvalidDateFormatException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
@@ -180,23 +182,63 @@ public class ProjectController {
     );
   }
 
-  @GetMapping(path = "/{projectAbbr}")
+  /**
+   * Get project details as JSON.
+   * Returns project metadata and lightweight aggregate statistics
+   * (digital object count, datastream count, total storage).
+   *
+   * @param projectAbbr the project abbreviation
+   * @return project details DTO
+   */
+  @GetMapping(produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  }, value = "/{projectAbbr}")
   @ResponseBody
   @Operation(
-      summary = "A single project by proj́ect abbreviation and metadata",
-      description = "Returns a single project by its abbreviation with all metadata.",
+      summary = "Get project details",
+      description = "Retrieves project metadata and aggregate statistics including "
+          + "digital object count, datastream count, and total storage size.",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Project found",
-              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
-          @ApiResponse(responseCode = "404", description = "Project not found",
-              content = @Content)
+          @ApiResponse(
+              responseCode = "200",
+              description = "Successfully retrieved project details",
+              content = @Content(schema = @Schema(implementation = ProjectDetailsDTO.class))
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "Project not found",
+              content = @Content
+          )
       }
   )
-  public Project getProjectByAbbr(@PathVariable String projectAbbr) {
-    return projectService.findProject(projectAbbr);
+  public ProjectDetailsDTO getProjectDetails(@PathVariable String projectAbbr) {
+    return projectService.findProjectDetails(projectAbbr);
   }
 
-  @Operation(hidden = true)
+  /**
+   * Get project details as HTML (webclient project page).
+   * Renders the project dashboard view with navigation to project functionalities.
+   *
+   * @param projectAbbr the project abbreviation
+   * @param model the Thymeleaf model
+   * @return the Thymeleaf template name
+   */
+  @GetMapping(produces = MediaType.TEXT_HTML_VALUE, value = "/{projectAbbr}")
+  public String getProjectPage(
+      @PathVariable String projectAbbr,
+      Model model
+  ) {
+    ProjectDetailsDTO projectDetails = projectService.findProjectDetails(projectAbbr);
+
+    model.addAttribute("project", projectDetails);
+
+    return "Project/show";
+
+  }
+
+
+    @Operation(hidden = true)
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String showProjectsViaWebClient(
       Model model,

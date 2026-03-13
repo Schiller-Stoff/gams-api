@@ -176,4 +176,16 @@ public interface IDatastreamRepository extends CrudRepository<Datastream, Datast
    */
   boolean existsByDigitalObject_IdAndDsid(String digitalObjectId, String dsid);
 
+  /**
+   * Count all datastreams for a given project (via the digital object's project).
+   */
+  long countByDigitalObject_Project_ProjectAbbr(String projectAbbr);
+
+  /**
+   * Sum the total storage size of all datastreams for a given project.
+   * Returns 0 (via COALESCE) if the project has no datastreams.
+   */
+  @Query("SELECT COALESCE(SUM(d.size), 0) FROM Datastream d WHERE d.digitalObject.project.projectAbbr = :projectAbbr")
+  long sumSizeByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+
 }

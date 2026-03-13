@@ -2,7 +2,10 @@ package org.ddh.gamsapi.domain.Project;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.domain.Project.dto.ProjectDetailsDTO;
+import org.ddh.gamsapi.domain.Project.dto.ProjectStatisticsDTO;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotEmptyException;
 import org.ddh.gamsapi.domain.Project.interfaces.ProjectIdView;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ public class ProjectService implements IProjectService {
 
   private final IProjectRepository projectRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IDatastreamRepository datastreamRepository;
 
   @Override
   @Transactional
@@ -121,6 +125,38 @@ public class ProjectService implements IProjectService {
         .stream()
         .map(ProjectIdView::getProjectAbbr)
         .toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public ProjectDetailsDTO findProjectDetails(String projectAbbr) {
+
+    Project project = projectRepository.findById(projectAbbr).orElseThrow(
+        () -> new ProjectNotFoundException(
+            "Cannot find project with abbreviation: " + projectAbbr
+        )
+    );
+
+    long digitalObjectCount = digitalObjectRepository.countByProject_ProjectAbbr(projectAbbr);
+    long datastreamCount = datastreamRepository.countByDigitalObject_Project_ProjectAbbr(projectAbbr);
+    long totalStorageBytes = datastreamRepository.sumSizeByProjectAbbr(projectAbbr);
+
+    ProjectStatisticsDTO statistics = ProjectStatisticsDTO.builder()
+        .digitalObjectCount(digitalObjectCount)
+        .datastreamCount(datastreamCount)
+        .totalStorageBytes(totalStorageBytes)
+        .build();
+
+    return ProjectDetailsDTO.builder()
+        .projectAbbr(project.getProjectAbbr())
+        .description(project.getDescription())
+        .created(project.getCreated())
+        .modified(project.getModified())
+        .createdBy(project.getCreatedBy())
+        .modifiedBy(project.getModifiedBy())
+        .statistics(statistics)
+        .title(project.getTitle())
+        .build();
   }
 
 }

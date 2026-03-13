@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:replace="~{fragments/general.html :: headtemplate}" />
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
+          <li class="breadcrumb-item active" th:text="${project.projectAbbr}"></li>
+        </ol>
+      </nav>
+
+      <!-- Page Title -->
+      <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+        <span th:text="${project.projectAbbr}"></span>
+      </h2>
+      <p th:if="${project.description}" th:text="${project.description}">Project description</p>
+      <p th:unless="${project.description}" class="text-muted">No description provided</p>
+
+      <!-- Quick Actions -->
+      <a class="btn btn-outline-primary"
+         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'">
+        <i class="ti ti-files me-1"></i>Browse Objects
+      </a>
+      <a class="btn btn-outline-primary"
+         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/ids'">
+        <i class="ti ti-list me-1"></i>Object IDs
+      </a>
+
+      <br/>
+      <br/>
+
+      <!-- ================================================================== -->
+      <!-- STATISTICS                                                          -->
+      <!-- ================================================================== -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-chart-bar me-2 text-primary"></i>Project Statistics
+          </h3>
+          <div>
+            <a class="mb-0 me-1" target="_blank"
+               th:href="'/api/v1/projects/' + ${project.projectAbbr}"
+               onclick="event.preventDefault(); fetch(this.href, {headers:{'Accept':'application/json'}}).then(r=>r.text()).then(t=>{const w=window.open();w.document.write('<pre>'+t+'</pre>')})">
+              <i class="ti ti-file"></i>JSON
+            </a>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>Digital Objects</small>
+                <p class="fw-bold mb-0" th:text="${project.statistics.digitalObjectCount}">0</p>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>Datastreams</small>
+                <p class="fw-bold mb-0" th:text="${project.statistics.datastreamCount}">0</p>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>Total Storage</small>
+                <p class="fw-bold mb-0"
+                   th:text="${#numbers.formatDecimal(project.statistics.totalStorageBytes / 1048576.0, 1, 'COMMA', 2, 'POINT')} + ' MB'">0 MB</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <br/>
+
+      <!-- ================================================================== -->
+      <!-- PROJECT METADATA                                                    -->
+      <!-- ================================================================== -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-database me-2 text-primary"></i>Project Metadata
+          </h3>
+        </div>
+        <div>
+          <ul class="list-group border">
+            <li class="list-group-item">
+              <small>project abbreviation</small>
+              <p th:text="${project.projectAbbr}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>description</small>
+              <p th:text="${project.description} ?: 'N/A'"></p>
+            </li>
+          </ul>
+          <br/>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- AUDITING METADATA                                                   -->
+      <!-- ================================================================== -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-id me-2 text-primary"></i>Auditing Metadata
+          </h3>
+        </div>
+        <div>
+          <ul class="list-group border">
+            <li class="list-group-item">
+              <small>created</small>
+              <p th:text="${project.created}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>created by</small>
+              <p th:text="${project.createdBy} ?: 'N/A'"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified</small>
+              <p th:text="${project.modified}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified by</small>
+              <p th:text="${project.modifiedBy} ?: 'N/A'"></p>
+            </li>
+          </ul>
+          <br/>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- PROJECT MANAGEMENT — only visible for authenticated users           -->
+      <!-- ================================================================== -->
+      <div sec:authorize="isAuthenticated()" class="mb-3 mt-5">
+        <div>
+          <h3 class="h5">
+            <i class="ti ti-settings me-2 text-primary"></i>Project Management
+          </h3>
+          <p class="text-muted small">
+            Actions and tools for managing this project.
+          </p>
+        </div>
+
+        <div class="mb-3">
+          <h4 class="h6">Digital Objects</h4>
+          <a class="btn btn-outline-primary"
+             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'">
+            <i class="ti ti-files me-1"></i>Manage Objects
+          </a>
+        </div>
+
+        <!-- Placeholder for future functionality -->
+        <!--
+        <div class="mb-3">
+          <h4 class="h6">Content Ingest</h4>
+          <a class="btn btn-outline-primary"
+             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/ingest'">
+            <i class="ti ti-upload me-1"></i>Ingest Content
+          </a>
+        </div>
+
+        <div class="mb-3">
+          <h4 class="h6">Website Deployment</h4>
+          <a class="btn btn-outline-primary" href="#">
+            <i class="ti ti-world me-1"></i>Deploy Website
+          </a>
+        </div>
+
+        <div class="mb-3">
+          <h4 class="h6">Integration Services</h4>
+          <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr}}"
+                method="POST"
+                class="d-inline"
+                onsubmit="return confirm('Reindex ALL objects in this project across all integration services?');">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="ti ti-refresh me-1"></i>Reindex All
+            </button>
+          </form>
+        </div>
+        -->
+
+      </div>
+
+    </div>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
+  </div>
+</div>
+</body>
+
+</html>
