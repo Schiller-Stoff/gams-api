@@ -92,6 +92,7 @@ public class ProjectService implements IProjectService {
         "Project " + project.getProjectAbbr() + " not found. Cannot update project"
     ));
     foundProject.setDescription(project.getDescription());
+    foundProject.setTitle(project.getTitle());
     Project savedProject = projectRepository.save(foundProject);
     log.trace("Successfully updated project {}", foundProject);
     return savedProject;

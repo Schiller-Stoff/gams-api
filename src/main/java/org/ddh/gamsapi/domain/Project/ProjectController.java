@@ -20,6 +20,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
@@ -67,11 +69,13 @@ public class ProjectController {
   @PatchMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public String changeProjectFromForm(
       @PathVariable String projectAbbr,
-      @RequestParam String description
+      @RequestParam String description,
+      @RequestParam String title
   ) {
     Project project = ProjectBuilder.builder()
         .projectAbbr(projectAbbr)
         .description(description)
+        .title(title)
         .build();
     projectService.updateProject(project);
     return "redirect:/api/v1/projects";
@@ -227,11 +231,16 @@ public class ProjectController {
   @GetMapping(produces = MediaType.TEXT_HTML_VALUE, value = "/{projectAbbr}")
   public String getProjectPage(
       @PathVariable String projectAbbr,
-      Model model
+      Model model,
+      Authentication authentication
   ) {
     ProjectDetailsDTO projectDetails = projectService.findProjectDetails(projectAbbr);
 
     model.addAttribute("project", projectDetails);
+
+    boolean canEdit = authentication != null && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
+    model.addAttribute("isAuthenticated", canEdit);
 
     return "Project/show";
 
