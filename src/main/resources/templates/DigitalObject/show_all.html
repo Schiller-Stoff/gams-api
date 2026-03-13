@@ -21,7 +21,8 @@
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
           <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
-          <li class="breadcrumb-item" th:text="${project.projectAbbr}"></li>
+          <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr}"></a></li>
+          <li class="breadcrumb-item">objects</li>
         </ol>
       </nav>
       <h2 class="display-6 fw-bold text-primary mb-3" th:text="${project.projectAbbr}"></h2>

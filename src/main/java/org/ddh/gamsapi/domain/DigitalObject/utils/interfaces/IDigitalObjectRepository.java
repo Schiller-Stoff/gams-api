@@ -159,4 +159,10 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    */
   boolean existsByProject_ProjectAbbr(String projectAbbr);
 
+  /**
+   * Count all digital objects for a given project.
+   * Uses the indexed foreign key column — efficient even with millions of rows.
+   */
+  long countByProject_ProjectAbbr(String projectAbbr);
+
 }

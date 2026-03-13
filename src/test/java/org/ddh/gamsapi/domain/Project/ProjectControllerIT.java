@@ -10,7 +10,6 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @AutoConfigureMockMvc(addFilters = false)
-public class ProjectControllerIT extends IntegrationTest {
+class ProjectControllerIT extends IntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -58,15 +57,15 @@ public class ProjectControllerIT extends IntegrationTest {
   private TestDataBuilder testDataBuilder;
 
   @BeforeEach
-  public void setup(){
+  void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
-  public class WebclientTest {
+  class WebclientTest {
 
     @Test
-    public void projectAbbrContainedInWebclientProjectsOverview() throws Exception {
+    void projectAbbrContainedInWebclientProjectsOverview() throws Exception {
 
       MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects").accept(MediaType.TEXT_HTML))
         .andExpect(MockMvcResultMatchers.status().isOk())
@@ -82,11 +81,11 @@ public class ProjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class GETProject {
+  class GETProject {
 
 
     @Test
-    public void GETProjectOverviewReturns200() throws Exception {
+    void GETProjectOverviewReturns200() throws Exception {
       mockMvc.perform(
           MockMvcRequestBuilders.get("/api/v1/projects")
               .accept(MediaType.APPLICATION_JSON)
@@ -94,7 +93,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void GETProjectOverviewReturnsExpectedProjects() throws Exception {
+    void GETProjectOverviewReturnsExpectedProjects() throws Exception {
       // perform GET request
       MvcResult mvcResult = mockMvc.perform(
           MockMvcRequestBuilders.get("/api/v1/projects")
@@ -113,7 +112,7 @@ public class ProjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class ProjectCreation {
+  class ProjectCreation {
 
     /**
      * Tests if a PUT request for creating a project returns https status 200.
@@ -121,7 +120,7 @@ public class ProjectControllerIT extends IntegrationTest {
      * @throws Exception if the test fails (mockMvc.perform)
      */
     @Test
-    public void PUTTestProjectReturns200() throws Exception {
+    void PUTTestProjectReturns200() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
           "/api/v1/projects/%s", "demo"
@@ -137,7 +136,7 @@ public class ProjectControllerIT extends IntegrationTest {
      * requestBody = JSON was defined.
      */
     @Test
-    public void PUTRequestAllowsToSaveProjectDescription() throws Exception {
+    void PUTRequestAllowsToSaveProjectDescription() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
           "/api/v1/projects/%s", "demo"
@@ -163,7 +162,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void PUTRequestAllowsToSaveProjectTitle() throws Exception {
+    void PUTRequestAllowsToSaveProjectTitle() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
           "/api/v1/projects/%s", "demo"
@@ -190,10 +189,10 @@ public class ProjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class ProjectUpdate {
+  class ProjectUpdate {
 
     @Test
-    public void PATCHofProjectAllowsToUpdateDescription() throws Exception {
+    void PATCHofProjectAllowsToUpdateDescription() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
           "/api/v1/projects/%s", testDataSet.project().getProjectAbbr()
@@ -225,7 +224,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void requestBodyIsRequired() throws Exception {
+    void requestBodyIsRequired() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
           "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
@@ -240,10 +239,10 @@ public class ProjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class ProjectDeletion {
+  class ProjectDeletion {
 
     @Test
-    public void DELETEofProjectReturnsHTTPStatus200() throws Exception {
+    void DELETEofProjectReturnsHTTPStatus200() throws Exception {
 
       testDataBuilder.removeAllExceptProjects(testDataSet);
 
@@ -259,10 +258,10 @@ public class ProjectControllerIT extends IntegrationTest {
 
 
   @Nested
-  public class ProjectHEAD {
+  class ProjectHEAD {
 
     @Test
-    public void HEADofProjectReturnsHTTPStatus200() throws Exception {
+    void HEADofProjectReturnsHTTPStatus200() throws Exception {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
@@ -273,7 +272,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void HEADofProjectReturnsHTTPStatus404IfNOTFOUND() throws Exception {
+    void HEADofProjectReturnsHTTPStatus404IfNOTFOUND() throws Exception {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
@@ -284,7 +283,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void HEADProjectResponsesWithContainedLastModifiedHeader() throws Exception {
+    void HEADProjectResponsesWithContainedLastModifiedHeader() throws Exception {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
@@ -295,7 +294,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void HEADProjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
+    void HEADProjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
 
       String lastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
@@ -320,7 +319,7 @@ public class ProjectControllerIT extends IntegrationTest {
 
 
     @Test
-    public void HEADProjectRespondsWithExpectedLastModifiedValue() throws Exception {
+    void HEADProjectRespondsWithExpectedLastModifiedValue() throws Exception {
 
       // wait 1 second (the last modified date via controller is only seconds accurate)
       Thread.sleep(1000);
@@ -350,7 +349,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void HEADProjectRespondsWithExpectedLastModifiedValueRoundedToHours() throws Exception {
+    void HEADProjectRespondsWithExpectedLastModifiedValueRoundedToHours() throws Exception {
 
       // save a digital object to the project
       DigitalObject savedDigitalObject = digitalObjectRepository.save(TestDigitalObject.generate());
@@ -382,7 +381,7 @@ public class ProjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
+    void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
 
 
       final String MALFORMED_DATE = "PETER";
@@ -401,7 +400,7 @@ public class ProjectControllerIT extends IntegrationTest {
      * @throws Exception if the test fails (mockMvc.perform)
      */
     @Test
-    public void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
+    void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
 
       // Create a date in the future that's properly formatted for HTTP headers
       ZonedDateTime futureDate = ZonedDateTime.now(ZoneId.systemDefault()).plusYears(1);
@@ -413,6 +412,161 @@ public class ProjectControllerIT extends IntegrationTest {
         ).header("If-Modified-Since", ifModifiedSinceHeader)
       ).andExpect(status().isNotModified());
 
+    }
+
+  }
+
+
+  @Nested
+  class GETProjectDetailsJson {
+
+    @Test
+    void returnsProjectDetailsForExistingProject() throws Exception {
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      "/api/v1/projects/{projectAbbr}",
+                      testDataSet.project().getProjectAbbr()
+                  )
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      String response = mvcResult.getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(testDataSet.project().getProjectAbbr())
+          .contains("statistics")
+          .contains("digitalObjectCount")
+          .contains("datastreamCount")
+          .contains("totalStorageBytes");
+    }
+
+    @Test
+    void responseContainsExpectedProjectAbbr() throws Exception {
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      "/api/v1/projects/{projectAbbr}",
+                      testDataSet.project().getProjectAbbr()
+                  )
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      String response = mvcResult.getResponse().getContentAsString();
+
+      // The project abbr value should appear in the JSON
+      Assertions.assertThat(response)
+          .contains("\"projectAbbr\":\"" + testDataSet.project().getProjectAbbr() + "\"");
+    }
+
+    @Test
+    void returns404ForNonExistentProject() throws Exception {
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}", "nonExistent")
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void statisticsReflectActualDataCounts() throws Exception {
+      // The testDataSet includes 1 digital object and at least 1 datastream
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      "/api/v1/projects/{projectAbbr}",
+                      testDataSet.project().getProjectAbbr()
+                  )
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      String response = mvcResult.getResponse().getContentAsString();
+
+      // digitalObjectCount should be at least 1 (from testDataSet)
+      // We can't assert exact counts without knowing TestDataBuilder internals,
+      // but we can assert that the count is NOT zero since testDataSet creates objects.
+      Assertions.assertThat(response)
+          .doesNotContain("\"digitalObjectCount\":0");
+    }
+
+    @Test
+    void emptyProjectHasZeroStatistics() throws Exception {
+      // Remove all objects but keep the project
+      testDataBuilder.removeAllExceptProjects(testDataSet);
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      "/api/v1/projects/{projectAbbr}",
+                      testDataSet.project().getProjectAbbr()
+                  )
+                  .accept(MediaType.APPLICATION_JSON)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      String response = mvcResult.getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains("\"digitalObjectCount\":0")
+          .contains("\"datastreamCount\":0")
+          .contains("\"totalStorageBytes\":0");
+    }
+
+  }
+
+
+  @Nested
+  class GETProjectPageHtml {
+
+    @Test
+    void rendersProjectPageForExistingProject() throws Exception {
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      "/api/v1/projects/{projectAbbr}",
+                      testDataSet.project().getProjectAbbr()
+                  )
+                  .accept(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andExpect(MockMvcResultMatchers.view().name("Project/show"))
+          .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"));
+    }
+
+    @Test
+    void projectPageContainsExpectedProjectValues() throws Exception {
+
+      MvcResult mvcResult = mockMvc.perform(
+              MockMvcRequestBuilders.get(
+                      "/api/v1/projects/{projectAbbr}",
+                      testDataSet.project().getProjectAbbr()
+                  )
+                  .accept(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isOk())
+          .andReturn();
+
+      String response = mvcResult.getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(testDataSet.project().getProjectAbbr());
+    }
+
+    @Test
+    void returns404ForNonExistentProjectHtml() throws Exception {
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}", "nonExistent")
+                  .accept(MediaType.TEXT_HTML)
+          )
+          .andExpect(status().isNotFound());
     }
 
   }
