@@ -74,11 +74,48 @@ spring:
 
 ########
 # Logging
-# (handled in different profiles)
+# (handled in different profiles)<
 logging:
   level:
-    org.ddh.gamsapi: ${LOG_LEVEL:TRACE}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
+    # Application code
+    org.ddh.gamsapi: ${LOG_LEVEL:INFO}
+
+    # Top-level spring logging
+    org.springframework: ${SPRING_GLOBAL_LOG_LEVE:WARN}
+
+    # Top-level spring web logging (if needed)
+    org.springframework.web: ${SPRING_WEB_LOG_LEVEL:WARN}
+
+    # Top-level security: keep quiet unless debugging
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+
+    # CSRF filter — this is what you were missing
+    org.springframework.security.web.csrf: ${SECURITY_CSRF_LOG_LEVEL:INFO}
+
+    # Authorization decisions (access denied, role checks)
+    org.springframework.security.web.access: ${SECURITY_ACCESS_LOG_LEVEL:INFO}
+    org.springframework.security.authorization: ${SECURITY_ACCESS_LOG_LEVEL:INFO}
+
+    # OAuth2/OIDC client flows (token exchange, redirects, logout)
+    org.springframework.security.oauth2: ${SECURITY_OAUTH2_LOG_LEVEL:INFO}
+
+    # Session management (creation, invalidation, concurrent sessions)
+    org.springframework.security.web.session: ${SECURITY_SESSION_LOG_LEVEL:INFO}
+
+    # Authentication events (login success/failure)
+    org.springframework.security.web.authentication: ${SECURITY_AUTH_LOG_LEVEL:INFO}
+
+    # --- Infrastructure ---
+    # Hikari connection pool — critical for the connection-hold-time issues you've had
+    com.zaxxer.hikari: ${HIKARI_LOG_LEVEL:INFO}
+
+    # Flyway migrations
+    org.flywaydb: ${FLYWAY_LOG_LEVEL:INFO}
+
+    # Hibernate SQL (careful: DEBUG = all SQL statements)
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG_LEVEL:WARN}
+    # Hibernate bind parameters (TRACE shows actual values — NEVER in prod)
+    org.hibernate.orm.jdbc.bind: ${HIBERNATE_BIND_LOG_LEVEL:WARN}
 
 server:
   # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
