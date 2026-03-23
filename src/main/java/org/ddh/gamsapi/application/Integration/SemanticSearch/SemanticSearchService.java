@@ -8,9 +8,12 @@ import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QleverClient
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.TurtleParseResult;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.TurtleSparqlConverter;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamIndexingView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,6 +54,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SemanticSearchService implements ClientManagedIntegrationService {
 
+  private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
   private final QleverClient qleverClient;
@@ -200,11 +204,23 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   @Override
   public void indexObject(String projectAbbr, String id) {
 
+    if(!digitalObjectRepository.existsById(id)){
+      throw new DigitalObjectNotFoundException(
+          "Failed to index object " + id + " to the semantic search service. Digital object does not exist"
+      );
+    }
+
     String graphUri = GRAPH_BASE_URI + projectAbbr;
     DatastreamId datastreamId = DatastreamId.builder()
         .dsid(SemanticSearchProperties.DATASTREAM_DSID.name)
         .digitalObject(id)
         .build();
+
+    if(!datastreamContentRepository.exists(datastreamId)){
+      throw new DatastreamNotFoundException(
+          "Failed to index object " + id + " to the semantic search service. Datastream " + datastreamId + " does not exist"
+      );
+    }
 
     try {
       String turtleContent = readTurtleContent(datastreamId);
