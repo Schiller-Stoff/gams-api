@@ -91,6 +91,7 @@ services:
   # QLever SPARQL engine for semantic search.
   # On first startup, builds an index from the seed triple (seed.nt).
   # After that, data is populated via SPARQL UPDATE from gams-api.
+  # For bulk rebuilds, gams-api exports .nq.gz files to the qlever-export volume.
   # The index is persisted in a named volume so it survives restarts.
   # Web UI available at http://localhost:7001
   semanticSearch:
@@ -103,6 +104,7 @@ services:
     volumes:
       - ${PWD}/docker/apps/qlever:/data:ro
       - qlever-index:/index
+      - qlever-export:/export
     entrypoint: ["bash", "/data/entrypoint.sh"]
 
 
