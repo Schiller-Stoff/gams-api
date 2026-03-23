@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.SemanticSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
+import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QLeverBulkExporter;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QleverClient;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.TurtleParseResult;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.TurtleSparqlConverter;
@@ -31,16 +32,19 @@ import java.util.stream.Collectors;
 /**
  * Service for semantic search integration via QLever triplestore.
  * <p>
- * Indexes Turtle datastreams ({@code SEMANTIC_STATEMENTS.ttl}) from digital objects
- * into QLever using SPARQL 1.1 UPDATE (INSERT DATA) batched per project.
+ * Provides two indexing strategies:
+ * <ul>
+ *   <li><b>SPARQL UPDATE (HTTP)</b> — {@link #indexObjects(String)}, {@link #indexObject(String, String)}:
+ *       Sends triples directly via SPARQL 1.1 UPDATE. Good for small-to-medium datasets (&lt;2M triples)
+ *       and single-object operations. Data is immediately available for queries.</li>
+ *   <li><b>Bulk file export</b> — {@link #exportProject(String)}, {@link #exportAllProjects()}:
+ *       Exports Turtle datastreams to .nq.gz files on a shared volume for QLever's bulk indexer.
+ *       Required for large datasets (50M+ triples). Needs a subsequent QLever index rebuild
+ *       and server restart to become queryable.</li>
+ * </ul>
  * <p>
  * Each project's triples are stored in a dedicated named graph:
  * {@code <https://gams.uni-graz.at/project/{projectAbbr}>}
- * <p>
- * The batch strategy groups multiple objects' triples into a single INSERT DATA request
- * to minimize HTTP round-trips while staying within safe request-size limits.
- * Prefix declarations from individual Turtle files are converted to SPARQL syntax,
- * deduplicated across the batch, and prepended to the INSERT DATA block.
  */
 @Service
 @Slf4j
@@ -50,11 +54,12 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   private final IDatastreamRepository datastreamRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
   private final QleverClient qleverClient;
+  private final QLeverBulkExporter bulkExporter;
 
   /**
    * Base URI for named graphs. Each project gets its own graph.
    */
-  private static final String GRAPH_BASE_URI = "https://gams.uni-graz.at/project/";
+  static final String GRAPH_BASE_URI = "https://gams.uni-graz.at/project/";
 
   /**
    * Number of datastreams to fetch from the DB per page.
@@ -63,30 +68,22 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
 
   /**
    * Number of objects whose triples are aggregated before sending one INSERT DATA request.
-   * With ~10 triples per object at ~150 bytes each, 500 objects ≈ 750KB per request.
    */
   private static final int BATCH_SIZE = 500;
 
 
-  /**
-   * Indexes all semantic search datastreams for a project into QLever.
-   * <p>
-   * Strategy: DROP the project's named graph first (idempotent), then
-   * iterate all SEMANTIC_STATEMENTS.ttl datastreams in pages,
-   * aggregate their Turtle content in batches, and send each batch
-   * as a single INSERT DATA request with deduplicated PREFIX declarations.
-   *
-   * @param projectAbbr the project abbreviation
-   */
+  // ===========================================================================
+  // SPARQL UPDATE path — for small/medium datasets and single-object operations
+  // ===========================================================================
+
   @Override
   public void indexObjects(String projectAbbr) {
 
     Instant startTime = Instant.now();
     String graphUri = GRAPH_BASE_URI + projectAbbr;
-    log.info("*** SemanticSearchService: Starting indexing for project: {} into graph <{}>",
+    log.info("*** SemanticSearchService: Starting SPARQL UPDATE indexing for project: {} into graph <{}>",
         projectAbbr, graphUri);
 
-    // 01. Drop existing graph to ensure idempotent rebuild
     try {
       qleverClient.dropGraph(graphUri, projectAbbr);
       log.info("Dropped existing graph <{}> for project {}", graphUri, projectAbbr);
@@ -96,13 +93,11 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       return;
     }
 
-    // 02. Paginate through all SEMANTIC_STATEMENTS.ttl datastreams for this project
     int pageIndex = 0;
     int objectsProcessed = 0;
     int batchesSent = 0;
     List<String> warnings = new ArrayList<>();
 
-    // Batch accumulators
     Set<String> batchPrefixes = new HashSet<>();
     StringBuilder batchTriples = new StringBuilder();
     int objectsInCurrentBatch = 0;
@@ -126,7 +121,6 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
             page.getTotalElements(), projectAbbr);
       }
 
-      // 03. For each datastream in this page: read Turtle content, separate prefixes and triples
       for (IDatastreamIndexingView datastreamView : page.getContent()) {
 
         String digitalObjectId = datastreamView.getDigitalObject().getId();
@@ -140,24 +134,20 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
           TurtleParseResult parseResult = TurtleSparqlConverter.separatePrefixesAndTriples(turtleContent);
 
           if (!parseResult.hasNoTriples()) {
-            // Merge prefixes from this file into the batch's prefix set (auto-deduplicates)
             batchPrefixes.addAll(parseResult.sparqlPrefixes());
             batchTriples.append("# Object: ").append(digitalObjectId).append("\n");
             batchTriples.append(parseResult.triples()).append("\n");
             objectsInCurrentBatch++;
           }
         } catch (Exception e) {
-          String warning = String.format(
-              "Failed to read datastream %s for object %s: %s",
-              datastreamId, digitalObjectId, e.getMessage()
-          );
+          String warning = String.format("Failed to read datastream %s for object %s: %s",
+              datastreamId, digitalObjectId, e.getMessage());
           log.warn(warning);
           warnings.add(warning);
         }
 
         objectsProcessed++;
 
-        // 04. Flush batch when it reaches the configured size
         if (objectsInCurrentBatch >= BATCH_SIZE) {
           batchesSent += flushBatch(batchPrefixes, batchTriples, graphUri, projectAbbr, batchesSent + 1);
           objectsInCurrentBatch = 0;
@@ -167,13 +157,12 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       pageIndex++;
     } while (page.hasNext());
 
-    // 05. Flush remaining triples
     if (objectsInCurrentBatch > 0) {
       batchesSent += flushBatch(batchPrefixes, batchTriples, graphUri, projectAbbr, batchesSent + 1);
     }
 
     Duration duration = Duration.between(startTime, Instant.now());
-    log.info("*** SemanticSearchService: Completed indexing for project {}. " +
+    log.info("*** SemanticSearchService: Completed SPARQL UPDATE indexing for project {}. " +
             "Objects processed: {}, batches sent: {}, warnings: {}, duration: {}",
         projectAbbr, objectsProcessed, batchesSent, warnings.size(), duration);
 
@@ -183,11 +172,6 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   }
 
 
-  /**
-   * Deletes all indexed data for a project by dropping its named graph.
-   *
-   * @param projectAbbr the project abbreviation
-   */
   @Override
   public void deleteIndexedObjects(String projectAbbr) {
     String graphUri = GRAPH_BASE_URI + projectAbbr;
@@ -203,15 +187,6 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   }
 
 
-  /**
-   * Indexes a single digital object's semantic statements into QLever.
-   * <p>
-   * Note: This does NOT drop the project graph — it adds triples to it.
-   * For a full project rebuild, use {@link #indexObjects(String)}.
-   *
-   * @param projectAbbr project abbreviation
-   * @param id          digital object ID
-   */
   @Override
   public void indexObject(String projectAbbr, String id) {
 
@@ -241,22 +216,11 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   }
 
 
-  /**
-   * Deletes a single object's triples from the project graph.
-   * <p>
-   * Uses DELETE WHERE to remove all triples where the object's URI appears as subject.
-   * This assumes the object URI follows the GAMS convention: {@code <https://gams.uni-graz.at/{objectId}>}
-   *
-   * @param projectAbbr project abbreviation
-   * @param id          digital object ID
-   */
   @Override
   public void deleteIndexedObject(String projectAbbr, String id) {
     String graphUri = GRAPH_BASE_URI + projectAbbr;
     String objectUri = "https://gams.uni-graz.at/" + id;
 
-    // TODO: Verify that QLever supports DELETE WHERE. If not, a workaround would be
-    //  to re-index the entire project via indexObjects(projectAbbr) after object deletion.
     String sparql = String.format(
         "DELETE WHERE { GRAPH <%s> { <%s> ?p ?o } }",
         graphUri, objectUri
@@ -273,17 +237,102 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   }
 
 
+  // ===========================================================================
+  // Bulk file export path — for large datasets (50M+ triples)
+  // ===========================================================================
+
+  /**
+   * Exports a single project's semantic search datastreams to a .nq.gz file
+   * on the shared export volume for QLever bulk indexing.
+   * <p>
+   * This only writes the export file — it does NOT trigger a QLever index rebuild.
+   * After exporting all desired projects, a QLever index rebuild and server restart
+   * must be triggered separately (see {@link #rebuildQleverIndex()}).
+   * <p>
+   * Typical workflow:
+   * <pre>
+   * semanticSearchService.exportProject("projectA");
+   * semanticSearchService.exportProject("projectB");
+   * semanticSearchService.rebuildQleverIndex();
+   * </pre>
+   *
+   * @param projectAbbr the project abbreviation
+   * @return export report with statistics
+   */
+  public QLeverBulkExporter.ExportReport exportProject(String projectAbbr) {
+    return bulkExporter.exportProject(projectAbbr);
+  }
+
+
+  /**
+   * Exports ALL projects' semantic search datastreams to individual .nq.gz files
+   * on the shared export volume.
+   * <p>
+   * This only writes the export files — it does NOT trigger a QLever index rebuild.
+   *
+   * @return list of per-project export reports
+   */
+  public List<QLeverBulkExporter.ExportReport> exportAllProjects() {
+    return bulkExporter.exportAll();
+  }
+
+
+  /**
+   * Logs instructions for triggering a QLever index rebuild from the exported files.
+   * <p>
+   * TODO: Automate the rebuild trigger. Current options:
+   *  <ul>
+   *    <li>Docker Compose: {@code docker exec} into the QLever container</li>
+   *    <li>Sidecar container with a rebuild script watching for a trigger file</li>
+   *    <li>HTTP management endpoint on the QLever container</li>
+   *  </ul>
+   *  For now, logs the manual commands to execute.
+   */
+  public void rebuildQleverIndex() {
+    log.info("*** QLever index rebuild required. Export files are at: {}", bulkExporter.getExportPath());
+    log.info("*** To rebuild manually, run:");
+    log.info("***   1. docker compose stop semanticSearch");
+    log.info("***   2. docker compose run --rm semanticSearch bash -c " +
+        "'/qlever/qlever-index -i /index/gams -s /data/settings.json " +
+        "-F ttl -f <(zcat /export/*.nq.gz) -W'");
+    log.info("***   3. docker compose start semanticSearch");
+  }
+
+
+  /**
+   * Full bulk reindex for a single project: export + rebuild instructions.
+   * <p>
+   * Note: Since QLever's file-based index is global (all projects in one index),
+   * a single-project re-export still requires a full index rebuild.
+   * For incremental single-project updates without rebuild, use
+   * {@link #indexObjects(String)} (SPARQL UPDATE path) instead.
+   *
+   * @param projectAbbr the project abbreviation
+   * @return export report
+   */
+  public QLeverBulkExporter.ExportReport exportAndRebuildProject(String projectAbbr) {
+    QLeverBulkExporter.ExportReport report = exportProject(projectAbbr);
+    rebuildQleverIndex();
+    return report;
+  }
+
+
+  /**
+   * Full bulk reindex for all projects: export all + rebuild instructions.
+   *
+   * @return list of per-project export reports
+   */
+  public List<QLeverBulkExporter.ExportReport> exportAndRebuildAll() {
+    List<QLeverBulkExporter.ExportReport> reports = exportAllProjects();
+    rebuildQleverIndex();
+    return reports;
+  }
+
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Reads a Turtle datastream from the content repository and returns it as a String.
-   *
-   * @param datastreamId the datastream to read
-   * @return the Turtle content as String
-   * @throws IOException if reading fails
-   */
   private String readTurtleContent(DatastreamId datastreamId) throws IOException {
     InputStreamResource resource = datastreamContentRepository.findById(datastreamId);
     try (BufferedReader reader = new BufferedReader(
@@ -292,19 +341,6 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
     }
   }
 
-  /**
-   * Sends the accumulated batch of triples as a single INSERT DATA request
-   * with all collected PREFIX declarations.
-   * <p>
-   * Clears both the prefix set and the triple buffer after sending.
-   *
-   * @param prefixes    accumulated SPARQL PREFIX declarations for this batch
-   * @param triples     accumulated triple data for this batch
-   * @param graphUri    target named graph
-   * @param projectAbbr project abbreviation for logging
-   * @param batchNumber current batch number for logging
-   * @return 1 if batch was sent successfully, 0 otherwise
-   */
   private int flushBatch(Set<String> prefixes, StringBuilder triples,
                          String graphUri, String projectAbbr, int batchNumber) {
     if (triples.isEmpty()) {
@@ -313,21 +349,17 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
 
     try {
       qleverClient.insertDataIntoGraph(
-          graphUri,
-          prefixes,
-          triples.toString(),
+          graphUri, prefixes, triples.toString(),
           String.format("project %s batch %d", projectAbbr, batchNumber)
       );
       log.debug("Sent batch {} for project {} to QLever ({} prefixes)",
           batchNumber, projectAbbr, prefixes.size());
-      // Clear buffers after successful send
       triples.setLength(0);
       prefixes.clear();
       return 1;
     } catch (IOException e) {
       log.error("Failed to send batch {} for project {} to QLever. Error: {}",
           batchNumber, projectAbbr, e.getMessage());
-      // Clear even on failure to prevent re-sending stale data
       triples.setLength(0);
       prefixes.clear();
       return 0;

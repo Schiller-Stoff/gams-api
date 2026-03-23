@@ -152,6 +152,10 @@ gams:
     elasticsearchUrl: ${ELASTICSEARCH_URL:http://elasticsearch:9200}
     # Qlever
     qleverUrl: ${QLEVER_URL:http://semanticSearch:7001}
+  qlever:
+    access-token: ${QLEVER_ACCESS_TOKEN:gams-dev}
+    export-path: ${QLEVER_EXPORT_PATH:qlever-export}
+
   storage:
     # root of GAMS files (datastreams) to be stored.
     rootPath: ${GAMS_FILES_ROOT_PATH:gams}

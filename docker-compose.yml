@@ -108,3 +108,4 @@ services:
 
 volumes:
   qlever-index:
+  qlever-export:
