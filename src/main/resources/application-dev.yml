@@ -28,3 +28,5 @@ gams:
     triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}
     # elasticsearch
     elasticsearchUrl: ${ELASTICSEARCH_URL:http://localhost:9200}
+    # using local host in dev?
+    qleverUrl: ${QLEVER_URL:http://localhost:7001}
