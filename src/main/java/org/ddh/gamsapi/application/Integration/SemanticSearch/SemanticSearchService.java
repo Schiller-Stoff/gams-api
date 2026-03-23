@@ -161,6 +161,16 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       batchesSent += flushBatch(batchPrefixes, batchTriples, graphUri, projectAbbr, batchesSent + 1);
     }
 
+    try {
+      qleverClient.rebuildIndex();
+      // TODO better error handling
+    } catch (IOException e) {
+      log.error("Failed to trigger QLever index rebuild. Error: {}", e.getMessage());
+      // TODO own errors?
+      return;
+    }
+
+
     Duration duration = Duration.between(startTime, Instant.now());
     log.info("*** SemanticSearchService: Completed SPARQL UPDATE indexing for project {}. " +
             "Objects processed: {}, batches sent: {}, warnings: {}, duration: {}",
@@ -207,6 +217,9 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
 
       qleverClient.insertDataIntoGraph(graphUri, parseResult.sparqlPrefixes(), parseResult.triples(),
           String.format("object %s in project %s", id, projectAbbr));
+
+
+      qleverClient.rebuildIndex();
 
       log.info("Successfully indexed object {} into semantic search for project {}", id, projectAbbr);
     } catch (IOException e) {

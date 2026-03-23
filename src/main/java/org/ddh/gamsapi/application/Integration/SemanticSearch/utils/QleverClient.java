@@ -161,4 +161,49 @@ public class QleverClient {
     postSparqlUpdate(sparql, context);
   }
 
+  /**
+   * Triggers a QLever index rebuild via its native HTTP API.
+   * <p>
+   * This consolidates all pending SPARQL UPDATE changes (the delta partition)
+   * into the main on-disk index. Call this after large batch operations
+   * (e.g. full project reindex) to optimize query performance.
+   * <p>
+   * Without calling this, queries still work but may be slower because QLever
+   * has to merge results from the main index and the delta at query time.
+   * <p>
+   * Equivalent to: {@code curl "http://qlever:7001/?cmd=rebuild-index&access-token=..."}
+   *
+   * @throws IOException if the request fails
+   */
+  public void rebuildIndex() throws IOException {
+
+    String rebuildUrl = UriComponentsBuilder
+        .fromUriString(configProperties.getQleverUrl())
+        .queryParam("cmd", "rebuild-index")
+        .queryParam("access-token", accessToken)
+        .toUriString();
+
+    log.info("Triggering QLever index rebuild...");
+
+    ResponseEntity<String> response;
+    try {
+      response = restTemplate.getForEntity(rebuildUrl, String.class);
+    } catch (RestClientException e) {
+      String msg = String.format("Failed to trigger QLever index rebuild. Cause: %s", e.getMessage());
+      log.error(msg, e);
+      throw new IOException(msg, e);
+    }
+
+    if (response.getStatusCode().isError()) {
+      String msg = String.format(
+          "QLever returned error for index rebuild. Status: %s. Body: %s",
+          response.getStatusCode(), response.getBody()
+      );
+      log.error(msg);
+      throw new IOException(msg);
+    }
+
+    log.info("QLever index rebuild completed. Response: {}", response.getBody());
+  }
+
 }
