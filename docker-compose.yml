@@ -94,6 +94,7 @@ services:
   # For bulk rebuilds, gams-api exports .nq.gz files to the qlever-export volume.
   # The index is persisted in a named volume so it survives restarts.
   # Web UI available at http://localhost:7001
+  # TODO harmonize naming across application (named qlever elsewehere!)
   semanticSearch:
     container_name: semanticSearch
     hostname: semanticSearch
