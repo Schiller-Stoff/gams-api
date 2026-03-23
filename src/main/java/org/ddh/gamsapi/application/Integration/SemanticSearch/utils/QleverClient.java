@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.SemanticSearch.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Set;
@@ -30,6 +32,14 @@ public class QleverClient {
 
   private final RestTemplate restTemplate;
   private final GAMSDockerDNS configProperties;
+
+  /**
+   * Access token for QLever write operations (SPARQL UPDATE).
+   * QLever requires this as a query parameter {@code ?access-token=...} on all
+   * state-changing requests. Configured via {@code gams.qlever.access-token}.
+   */
+  @Value("${gams.qlever.access-token:gams-dev}")
+  private String accessToken;
 
   /**
    * Content type for SPARQL 1.1 Update requests.
@@ -58,9 +68,14 @@ public class QleverClient {
 
     HttpEntity<String> request = new HttpEntity<>(sparql, headers);
 
+    // QLever requires the access token as a URL query parameter
+    String updateUrl = UriComponentsBuilder
+        .fromUriString(configProperties.getQleverUrl())
+        .queryParam("access-token", accessToken)
+        .toUriString();
+
     ResponseEntity<String> response;
     try {
-      String updateUrl = configProperties.getQleverUrl();
       response = restTemplate.postForEntity(updateUrl, request, String.class);
     } catch (RestClientException e) {
       String msg = String.format(

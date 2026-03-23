@@ -41,4 +41,5 @@ exec ${QLEVER_SERVER} -i "${INDEX_DIR}/${INDEX_PREFIX}" \
   -e 512M \
   -t 30 \
   -j 4 \
-  --default-query-timeout 30s
+  --default-query-timeout 30s \
+  -a "${QLEVER_ACCESS_TOKEN:-gams-dev}"
