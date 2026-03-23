@@ -88,4 +88,23 @@ services:
     # imports mounted realm.json on startup (as required from keycloak 18.x)
     command: start-dev --import-realm --http-port=8182
 
+  # QLever SPARQL engine for semantic search.
+  # On first startup, builds an index from the seed triple (seed.nt).
+  # After that, data is populated via SPARQL UPDATE from gams-api.
+  # The index is persisted in a named volume so it survives restarts.
+  # Web UI available at http://localhost:7001
+  semanticSearch:
+    container_name: semanticSearch
+    hostname: semanticSearch
+    image: adfreiburg/qlever:latest
+    user: root
+    ports:
+      - "7001:7001"
+    volumes:
+      - ${PWD}/docker/apps/qlever:/data:ro
+      - qlever-index:/index
+    entrypoint: ["bash", "/data/entrypoint.sh"]
 
+
+volumes:
+  qlever-index:
