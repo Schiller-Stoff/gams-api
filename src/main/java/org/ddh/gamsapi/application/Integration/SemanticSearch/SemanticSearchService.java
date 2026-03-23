@@ -76,10 +76,6 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   private static final int BATCH_SIZE = 500;
 
 
-  // ===========================================================================
-  // SPARQL UPDATE path — for small/medium datasets and single-object operations
-  // ===========================================================================
-
   @Override
   public void indexObjects(String projectAbbr) {
 
@@ -94,6 +90,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
     } catch (IOException e) {
       log.error("Failed to drop graph <{}> for project {}. Aborting indexing. Error: {}",
           graphUri, projectAbbr, e.getMessage());
+      // TODO error handling
       return;
     }
 
@@ -143,6 +140,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
             batchTriples.append(parseResult.triples()).append("\n");
             objectsInCurrentBatch++;
           }
+          // TODO check exception handling
         } catch (Exception e) {
           String warning = String.format("Failed to read datastream %s for object %s: %s",
               datastreamId, digitalObjectId, e.getMessage());
@@ -197,6 +195,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
     } catch (IOException e) {
       log.error("Failed to drop graph <{}> for project {}. Error: {}",
           graphUri, projectAbbr, e.getMessage());
+      // TODO error handling
     }
   }
 
@@ -229,6 +228,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       if (parseResult.hasNoTriples()) {
         log.info("No triples found in {} for object {}", datastreamId, id);
         return;
+        // TODO error handling?
       }
 
       qleverClient.insertDataIntoGraph(graphUri, parseResult.sparqlPrefixes(), parseResult.triples(),
@@ -241,6 +241,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
     } catch (IOException e) {
       log.error("Failed to index object {} for project {} in semantic search. Error: {}",
           id, projectAbbr, e.getMessage());
+      // TODO error handling?
     }
   }
 
@@ -262,6 +263,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
     } catch (IOException e) {
       log.error("Failed to delete object {} from semantic search for project {}. Error: {}",
           id, projectAbbr, e.getMessage());
+      // TODO error handling?
     }
   }
 
