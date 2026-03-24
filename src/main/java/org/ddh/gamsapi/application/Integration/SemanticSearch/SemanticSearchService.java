@@ -3,6 +3,7 @@ package org.ddh.gamsapi.application.Integration.SemanticSearch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
+import org.ddh.gamsapi.application.Integration.SemanticSearch.exceptions.SemanticSearchIOException;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QLeverBulkExporter;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QleverClient;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.TurtleParseResult;
@@ -88,10 +89,10 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       qleverClient.dropGraph(graphUri, projectAbbr);
       log.info("Dropped existing graph <{}> for project {}", graphUri, projectAbbr);
     } catch (IOException e) {
-      log.error("Failed to drop graph <{}> for project {}. Aborting indexing. Error: {}",
-          graphUri, projectAbbr, e.getMessage());
-      // TODO error handling
-      return;
+      throw new SemanticSearchIOException(
+          "Failed to drop graph <" + graphUri + "> for project " + projectAbbr + ". Aborting indexing. Error: " + e.getMessage(),
+          e
+      );
     }
 
     int pageIndex = 0;
@@ -165,13 +166,12 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
 
     try {
       qleverClient.rebuildIndex();
-      // TODO better error handling
     } catch (IOException e) {
-      log.error("Failed to trigger QLever index rebuild. Error: {}", e.getMessage());
-      // TODO own errors?
-      return;
+      throw new SemanticSearchIOException(
+          "Failed to trigger QLever index rebuild. Error: " + e.getMessage(),
+          e
+      );
     }
-
 
     Duration duration = Duration.between(startTime, Instant.now());
     log.info("*** SemanticSearchService: Completed SPARQL UPDATE indexing for project {}. " +
@@ -193,9 +193,10 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       qleverClient.dropGraph(graphUri, projectAbbr);
       log.info("Successfully dropped graph <{}> for project {}", graphUri, projectAbbr);
     } catch (IOException e) {
-      log.error("Failed to drop graph <{}> for project {}. Error: {}",
-          graphUri, projectAbbr, e.getMessage());
-      // TODO error handling
+      throw new SemanticSearchIOException(
+          "Failed to drop graph <" + graphUri + "> for project " + projectAbbr + ". Error: " + e.getMessage(),
+          e
+      );
     }
   }
 
@@ -239,9 +240,10 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
 
       log.info("Successfully indexed object {} into semantic search for project {}", id, projectAbbr);
     } catch (IOException e) {
-      log.error("Failed to index object {} for project {} in semantic search. Error: {}",
-          id, projectAbbr, e.getMessage());
-      // TODO error handling?
+      throw new SemanticSearchIOException(
+          "Failed to index object " + id + " for project " + projectAbbr + " in semantic search. Error: " + e.getMessage(),
+          e
+      );
     }
   }
 
@@ -263,7 +265,10 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
     } catch (IOException e) {
       log.error("Failed to delete object {} from semantic search for project {}. Error: {}",
           id, projectAbbr, e.getMessage());
-      // TODO error handling?
+      throw new SemanticSearchIOException(
+          "Failed to delete object + " + id + " from semantic search for project " + projectAbbr + " . Error: " + e.getMessage(),
+          e
+      );
     }
   }
 
