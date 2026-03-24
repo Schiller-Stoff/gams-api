@@ -149,12 +149,14 @@ gams:
     # TODO remove hardcoded gams core
     triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
     # elasticsearch
-    elasticsearchUrl: ${ELASTICSEARCH_URL:http://elasticsearch:9200}
+    elasticsearchUrl: ${ELASTICSEARCH_URL:http://elasticsearch:9200} # TODO outdated remove?
     # Qlever
     qleverUrl: ${QLEVER_URL:http://semanticSearch:7001}
-  qlever:
-    access-token: ${QLEVER_ACCESS_TOKEN:gams-dev}
-    export-path: ${QLEVER_EXPORT_PATH:qlever-export}
+
+  services:
+    semantic-search:
+      accessToken: ${QLEVER_ACCESS_TOKEN:gams-dev}
+      exportPath: ${QLEVER_EXPORT_PATH:qlever-export}
 
   storage:
     # root of GAMS files (datastreams) to be stored.

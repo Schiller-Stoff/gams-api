@@ -2,6 +2,7 @@ package org.ddh.gamsapi.application.Integration.SemanticSearch.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
+import org.ddh.gamsapi.infrastructure.System.configproperties.SemanticSearchProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,8 +39,7 @@ public class QleverClient {
    * QLever requires this as a query parameter {@code ?access-token=...} on all
    * state-changing requests. Configured via {@code gams.qlever.access-token}.
    */
-  @Value("${gams.qlever.access-token:gams-dev}")
-  private String accessToken;
+  private final String accessToken;
 
   /**
    * Content type for SPARQL 1.1 Update requests.
@@ -48,8 +48,9 @@ public class QleverClient {
   private static final MediaType SPARQL_UPDATE_CONTENT_TYPE =
       MediaType.valueOf("application/sparql-update");
 
-  public QleverClient(GAMSDockerDNS configProperties) {
+  public QleverClient(GAMSDockerDNS configProperties, SemanticSearchProperties semanticSearchProperties) {
     this.configProperties = configProperties;
+    this.accessToken = semanticSearchProperties.getAccessToken();
     this.restTemplate = new RestTemplate();
   }
 

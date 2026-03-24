@@ -72,12 +72,12 @@ public class QLeverBulkExporter {
       IDatastreamRepository datastreamRepository,
       IDatastreamContentRepository datastreamContentRepository,
       IProjectService projectService,
-      @Value("${gams.qlever.export-path:qlever-export}") String exportPath
+      org.ddh.gamsapi.infrastructure.System.configproperties.SemanticSearchProperties semanticSearchProperties
   ) {
     this.datastreamRepository = datastreamRepository;
     this.datastreamContentRepository = datastreamContentRepository;
     this.projectService = projectService;
-    this.exportPath = Paths.get(exportPath).toAbsolutePath();
+    this.exportPath = Paths.get(semanticSearchProperties.getExportPath()).toAbsolutePath();
   }
 
 
