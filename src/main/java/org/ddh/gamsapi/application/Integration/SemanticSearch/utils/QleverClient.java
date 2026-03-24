@@ -87,6 +87,7 @@ public class QleverClient {
       throw new IOException(msg, e);
     }
 
+    // TODO i don't like this: client should be more aware of status codes e.g. 403 should be somekind of forbidden exception
     if (response.getStatusCode().isError()) {
       String msg = String.format(
           "QLever returned error for SPARQL Update. Context: %s. Status: %s. Body: %s",
