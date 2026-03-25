@@ -64,7 +64,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   /**
    * Base URI for named graphs. Each project gets its own graph.
    */
-  static final String GRAPH_BASE_URI = "https://gams.uni-graz.at/project/";
+  static final String GRAPH_BASE_URI = "https://gams.uni-graz.at/pub/";
 
   /**
    * Number of datastreams to fetch from the DB per page.
