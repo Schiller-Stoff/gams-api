@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.application.Integration.Common.interfaces.ClientManagedIntegrationService;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.exceptions.SemanticSearchIOException;
+import org.ddh.gamsapi.application.Integration.SemanticSearch.exceptions.SemanticSearchNoTriplesExtractableException;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QLeverBulkExporter;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QleverClient;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.TurtleParseResult;
@@ -227,9 +228,9 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
       TurtleParseResult parseResult = TurtleSparqlConverter.separatePrefixesAndTriples(turtleContent);
 
       if (parseResult.hasNoTriples()) {
-        log.info("No triples found in {} for object {}", datastreamId, id);
-        return;
-        // TODO error handling?
+        throw new SemanticSearchNoTriplesExtractableException(
+            "Failed to index object " + id + " to the semantic search service. No triples found in " + datastreamId
+        );
       }
 
       qleverClient.insertDataIntoGraph(graphUri, parseResult.sparqlPrefixes(), parseResult.triples(),
