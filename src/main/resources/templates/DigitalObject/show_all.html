@@ -486,6 +486,32 @@
               </button>
             </form>
           </div>
+
+          <br/>
+
+          <div>
+            <h4 class="h6">Semantic Search</h4>
+            <!-- Index all objects in semantic-search -->
+            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('This will index all objects for this project in the semantic search service. Continue?');">
+              <button type="submit" class="btn btn-outline-primary btn">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+
+            <!-- Delete all objects from semantic-search -->
+            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('This will DELETE all indexed objects for this project from the semantic search service. Continue?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger btn">
+                <i class="ti ti-trash me-1"></i>Clear index
+              </button>
+            </form>
+          </div>
         </div>
       </div>
 
