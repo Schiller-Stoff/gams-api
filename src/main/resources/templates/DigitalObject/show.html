@@ -691,6 +691,29 @@
               </button>
             </form>
           </div>
+
+          <!-- Semantic Search -->
+          <div class="mb-3">
+            <h4 class="h6">Semantic-Search</h4>
+            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in Semantic Search?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from Semantic Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
         </div>
       </div>
     <footer th:replace="~{fragments/general.html :: footer}"></footer>
