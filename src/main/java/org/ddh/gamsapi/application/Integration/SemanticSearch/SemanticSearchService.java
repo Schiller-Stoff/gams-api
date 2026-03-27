@@ -142,7 +142,6 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
             batchTriples.append(parseResult.triples()).append("\n");
             objectsInCurrentBatch++;
           }
-          // TODO check exception handling
         } catch (Exception e) {
           String warning = String.format("Failed to read datastream %s for object %s: %s",
               datastreamId, digitalObjectId, e.getMessage());
@@ -276,6 +275,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
 
   // ===========================================================================
   // Bulk file export path — for large datasets (50M+ triples)
+  // not used at the moment
   // ===========================================================================
 
   /**
@@ -317,7 +317,7 @@ public class SemanticSearchService implements ClientManagedIntegrationService {
   /**
    * Logs instructions for triggering a QLever index rebuild from the exported files.
    * <p>
-   * TODO: Automate the rebuild trigger. Current options:
+   * Automate the rebuild trigger. Current options:
    *  <ul>
    *    <li>Docker Compose: {@code docker exec} into the QLever container</li>
    *    <li>Sidecar container with a rebuild script watching for a trigger file</li>
