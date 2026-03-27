@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.application.Integration.SemanticSearch;
 
+import org.ddh.gamsapi.UnitTest;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.exceptions.SemanticSearchIOException;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.exceptions.SemanticSearchNoTriplesExtractableException;
 import org.ddh.gamsapi.application.Integration.SemanticSearch.utils.QLeverBulkExporter;
@@ -30,8 +31,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+// TODO should extend unittest!
 @SpringBootTest(classes = SemanticSearchService.class)
-class SemanticSearchServiceTest {
+class SemanticSearchServiceTest extends UnitTest {
 
   @Autowired
   private SemanticSearchService semanticSearchService;
