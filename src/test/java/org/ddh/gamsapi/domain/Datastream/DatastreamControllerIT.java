@@ -363,6 +363,28 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     }
 
+    @Test
+    void getDatastreamContentReturnsExpectedUtf8EncodingInContentType() throws Exception {
+
+      String url = String.format(
+          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.mainDatastream().getDsid()
+      );
+
+      // Act
+      String contentType = mockMvc.perform(
+          MockMvcRequestBuilders.get(url)
+      ).andReturn().getResponse().getContentType();
+
+      String expectedContentType = testDataSet.mainDatastream().getMimeType() + ";charset=utf-8";
+      Assertions.assertThat(contentType).isNotNull();
+      Assertions.assertThat(contentType.toLowerCase())
+          .isEqualTo(expectedContentType);
+
+    }
+
   }
 
 
