@@ -170,10 +170,10 @@ class DatastreamControllerIT extends IntegrationTest {
           .andExpect(status().is2xxSuccessful());
 
       // assertions
+      var datastreamId = testDataSet.mainDatastream().deriveDatastreamId();
       org.junit.jupiter.api.Assertions.assertThrows(
           DatastreamNotFoundException.class,
-          () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId()
-          )
+          () -> datastreamService.findById(datastreamId)
       );
 
       Assertions.assertThat(datastreamService.findAll(testDataSet.digitalObject()))
@@ -195,9 +195,10 @@ class DatastreamControllerIT extends IntegrationTest {
                   .contentType(MediaType.APPLICATION_FORM_URLENCODED))
           .andExpect(status().is3xxRedirection());
 
+      var datastreamId = testDataSet.mainDatastream().deriveDatastreamId();
       org.junit.jupiter.api.Assertions.assertThrows(
           DatastreamNotFoundException.class,
-          () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId())
+          () -> datastreamService.findById(datastreamId)
       );
     }
 
@@ -214,9 +215,10 @@ class DatastreamControllerIT extends IntegrationTest {
                   .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().isNoContent());
 
+      var datastreamId = testDataSet.mainDatastream().deriveDatastreamId();
       org.junit.jupiter.api.Assertions.assertThrows(
           DatastreamNotFoundException.class,
-          () -> datastreamService.findById(testDataSet.mainDatastream().deriveDatastreamId())
+          () -> datastreamService.findById(datastreamId)
       );
 
       Assertions.assertThat(datastreamService.findAll(testDataSet.digitalObject()))
@@ -663,7 +665,7 @@ class DatastreamControllerIT extends IntegrationTest {
       @Test
       void allowsToAccessSingularDatastreamContentViaTagFiltering() throws Exception {
 
-        var TEST_DATASTREAM_CONTENT = "___DEMO_CONTENT___";
+        final var TEST_DATASTREAM_CONTENT = "___DEMO_CONTENT___";
 
         final String SHARED_TAG = testDataSet.mainDatastream().getTags().iterator().next();
         final String UNIQUE_TAG = "test-tag-unique";
