@@ -7,14 +7,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,18 +47,12 @@ public class QleverClient {
   private static final MediaType SPARQL_UPDATE_CONTENT_TYPE =
       MediaType.valueOf("application/sparql-update; charset=utf-8");
 
-  public QleverClient(GAMSDockerDNS configProperties, SemanticSearchProperties semanticSearchProperties) {
+
+  public QleverClient(GAMSDockerDNS configProperties, SemanticSearchProperties semanticSearchProperties, RestTemplate restTemplate) {
     this.configProperties = configProperties;
     this.accessToken = semanticSearchProperties.getAccessToken();
-    this.restTemplate = new RestTemplate();
-    // RestTemplate's StringHttpMessageConverter defaults to ISO-8859-1,
-    // which corrupts non-ASCII characters in SPARQL Update payloads.
-    this.restTemplate.getMessageConverters().stream()
-        .filter(StringHttpMessageConverter.class::isInstance)
-        .map(StringHttpMessageConverter.class::cast)
-        .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
+    this.restTemplate = restTemplate;
   }
-
 
   /**
    * Sends a SPARQL UPDATE request to QLever.
