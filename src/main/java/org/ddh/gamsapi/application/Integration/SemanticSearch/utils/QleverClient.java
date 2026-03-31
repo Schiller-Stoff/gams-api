@@ -3,17 +3,18 @@ package org.ddh.gamsapi.application.Integration.SemanticSearch.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import org.ddh.gamsapi.infrastructure.System.configproperties.SemanticSearchProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,12 +47,18 @@ public class QleverClient {
    * QLever expects the raw SPARQL string in the body with this content type.
    */
   private static final MediaType SPARQL_UPDATE_CONTENT_TYPE =
-      MediaType.valueOf("application/sparql-update");
+      MediaType.valueOf("application/sparql-update; charset=utf-8");
 
   public QleverClient(GAMSDockerDNS configProperties, SemanticSearchProperties semanticSearchProperties) {
     this.configProperties = configProperties;
     this.accessToken = semanticSearchProperties.getAccessToken();
     this.restTemplate = new RestTemplate();
+    // RestTemplate's StringHttpMessageConverter defaults to ISO-8859-1,
+    // which corrupts non-ASCII characters in SPARQL Update payloads.
+    this.restTemplate.getMessageConverters().stream()
+        .filter(StringHttpMessageConverter.class::isInstance)
+        .map(StringHttpMessageConverter.class::cast)
+        .forEach(converter -> converter.setDefaultCharset(StandardCharsets.UTF_8));
   }
 
 
