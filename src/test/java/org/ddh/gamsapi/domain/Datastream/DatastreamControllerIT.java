@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates security filters
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DatastreamControllerIT extends IntegrationTest {
+class DatastreamControllerIT extends IntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -68,7 +68,7 @@ public class DatastreamControllerIT extends IntegrationTest {
   private TestDataSet testDataSet;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
     // needed when changing digital objects
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
@@ -76,11 +76,11 @@ public class DatastreamControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class WebClientTests {
+  class WebClientTests {
 
     @Test
     @Transactional
-    public void getDatastreamRendersExpectedDsidInView() throws Exception {
+    void getDatastreamRendersExpectedDsidInView() throws Exception {
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
@@ -110,7 +110,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     @Transactional
-    public void datastreamViewDisplaysExpectedMetadata() throws Exception {
+    void datastreamViewDisplaysExpectedMetadata() throws Exception {
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
@@ -153,10 +153,10 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  public class DELETEDatastream {
+  class DELETEDatastream {
 
     @Test
-    public void deleteDatastreamRemovesDatastreamFromDatabase() throws Exception {
+    void deleteDatastreamRemovesDatastreamFromDatabase() throws Exception {
 
       // DELETE request
       String url = String.format(
@@ -183,7 +183,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void deleteDatastreamViaFormRedirectsToObject() throws Exception {
+    void deleteDatastreamViaFormRedirectsToObject() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
@@ -202,7 +202,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void deleteDatastreamViaJsonReturns204() throws Exception {
+    void deleteDatastreamViaJsonReturns204() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
@@ -225,7 +225,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void deleteNonExistentDatastreamReturns404() throws Exception {
+    void deleteNonExistentDatastreamReturns404() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
@@ -240,10 +240,10 @@ public class DatastreamControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class GETAllDatastreams {
+  class GETAllDatastreams {
 
     @Test
-    public void findAllContainsExpectedDatastream() throws Exception {
+    void findAllContainsExpectedDatastream() throws Exception {
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams",
@@ -271,7 +271,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void findAllDsidsContainsExpectedDsid() throws Exception {
+    void findAllDsidsContainsExpectedDsid() throws Exception {
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/dsids",
@@ -298,10 +298,10 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  public class GETDatastreamJSON {
+  class GETDatastreamJSON {
 
     @Test
-    public void getDatastreamJsonContainsExpectedValues() throws Exception {
+    void getDatastreamJsonContainsExpectedValues() throws Exception {
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
@@ -337,11 +337,11 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  public class GETDatastreamContent {
+  class GETDatastreamContent {
 
 
     @Test
-    public void getDatastreamContentReturnsExpectedDatastreamContent() throws Exception {
+    void getDatastreamContentReturnsExpectedDatastreamContent() throws Exception {
 
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
@@ -393,12 +393,12 @@ public class DatastreamControllerIT extends IntegrationTest {
    * e.g. .../datastream?tag=...
    */
   @Nested
-  public class SingleDatastreamFiltering {
+  class SingleDatastreamFiltering {
 
     @Nested
-    public class MainResource {
+    class MainResource {
       @Test
-      public void returnsErrorIfNoMainResourceIsSetOnTheDigitalObject() throws Exception {
+      void returnsErrorIfNoMainResourceIsSetOnTheDigitalObject() throws Exception {
 
         DigitalObject testDigitalObject = testDataSet.mainDatastream().getDigitalObject();
 
@@ -423,7 +423,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void returnsClientErrorIfMainResourceIsNotFound() throws Exception {
+      void returnsClientErrorIfMainResourceIsNotFound() throws Exception {
 
         // set as main resource on digital object
         testDataSet.digitalObject().setMainResource("nonExistingDsid");
@@ -446,7 +446,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
       @Test
-      public void returnsExpectedMainDatastreamJSONByDefault() throws Exception {
+      void returnsExpectedMainDatastreamJSONByDefault() throws Exception {
 
         String url = String.format(
             "/api/v1/projects/%s/objects/%s/datastream",
@@ -475,10 +475,10 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Nested
-    public class TagFiltering {
+    class TagFiltering {
 
       @Test
-      public void returnsExpectedSingularDatastreamsByTag() throws Exception {
+      void returnsExpectedSingularDatastreamsByTag() throws Exception {
 
         Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
 
@@ -516,7 +516,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void throwsIfNoSingularDatastreamWasMatched() throws Exception {
+      void throwsIfNoSingularDatastreamWasMatched() throws Exception {
 
         // first datastream uses default test-tags
         Datastream datastream1 = testDataBuilder.addRandomDatastream(testDataSet);
@@ -544,7 +544,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void throwsIfNoDatastreamWasMatched() throws Exception {
+      void throwsIfNoDatastreamWasMatched() throws Exception {
 
         final String NOT_DEFINED_TEST_TAG = "test-tag-not-defined";
 
@@ -566,7 +566,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
       @Test
-      public void filtersAreCombinedWithAndLogic() throws Exception {
+      void filtersAreCombinedWithAndLogic() throws Exception {
 
         // create additional datastream a shared tag as the main datastream
         final String SHARED_TAG = testDataSet.mainDatastream().getTags().iterator().next();
@@ -614,10 +614,10 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Nested
-    public class DatastreamContent {
+    class DatastreamContent {
 
       @Test
-      public void returnsExpectedMainDatastreamContent() throws Exception {
+      void returnsExpectedMainDatastreamContent() throws Exception {
 
         final String URL = String.format(
             "/api/v1/projects/%s/objects/%s/datastream/content",
@@ -641,7 +641,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void returnsErrorIfNoMainResourceWasSet() throws Exception {
+      void returnsErrorIfNoMainResourceWasSet() throws Exception {
 
         // make sure that mein resource is not set
         testDataSet.digitalObject().setMainResource(null);
@@ -661,7 +661,7 @@ public class DatastreamControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void allowsToAccessSingularDatastreamContentViaTagFiltering() throws Exception {
+      void allowsToAccessSingularDatastreamContentViaTagFiltering() throws Exception {
 
         var TEST_DATASTREAM_CONTENT = "___DEMO_CONTENT___";
 
@@ -714,11 +714,11 @@ public class DatastreamControllerIT extends IntegrationTest {
    * Tests for .../datastreams/... endpoint
    */
   @Nested
-  public class MultipleDatastreamsFiltering {
+  class MultipleDatastreamsFiltering {
 
 
     @Test
-    public void returnsAJSONListOfExpectedDatastreams() throws Exception {
+    void returnsAJSONListOfExpectedDatastreams() throws Exception {
 
 
       Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
@@ -757,7 +757,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsAnEmptyListOfNoDatastreamsWereFound() throws Exception {
+    void returnsAnEmptyListOfNoDatastreamsWereFound() throws Exception {
 
       // remove main datastream from test data set
       datastreamRepository.delete(testDataSet.mainDatastream());
@@ -790,7 +790,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsExpectedDatastreamsIfMultipleTagsWereUsed() throws Exception {
+    void returnsExpectedDatastreamsIfMultipleTagsWereUsed() throws Exception {
 
       final String SHARED_TAG = testDataSet.mainDatastream().getTags().iterator().next();
       final String UNIQUE_TAG = "test-tag-unique";
@@ -841,11 +841,11 @@ public class DatastreamControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class PUTDatastreams {
+  class PUTDatastreams {
 
     @Test
     @WithMockUser
-    public void putReturns201WithCreatedDatastream() throws Exception {
+    void putReturns201WithCreatedDatastream() throws Exception {
       MockMultipartFile file = new MockMultipartFile(
           "file", "new_upload.txt", "text/plain", "test content".getBytes()
       );
@@ -875,7 +875,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     @WithMockUser
-    public void putReturns409OnDuplicateDsid() throws Exception {
+    void putReturns409OnDuplicateDsid() throws Exception {
       MockMultipartFile file = new MockMultipartFile(
           "file",
           testDataSet.mainDatastream().getDsid(),
@@ -904,7 +904,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void putRequiresAuthentication() throws Exception {
+    void putRequiresAuthentication() throws Exception {
       MockMultipartFile file = new MockMultipartFile(
           "file", "test.txt", "text/plain", "data".getBytes()
       );
@@ -933,7 +933,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     @WithMockUser
-    public void formPostRedirectsAfterSuccessfulCreation() throws Exception {
+    void formPostRedirectsAfterSuccessfulCreation() throws Exception {
       MockMultipartFile file = new MockMultipartFile(
           "file", "webclient_upload.txt", "text/plain", "data".getBytes()
       );
@@ -967,7 +967,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     @WithMockUser
-    public void formPostFailsOnDuplicate() throws Exception {
+    void formPostFailsOnDuplicate() throws Exception {
       MockMultipartFile file = new MockMultipartFile(
           "file",
           testDataSet.mainDatastream().getDsid(),
@@ -996,7 +996,7 @@ public class DatastreamControllerIT extends IntegrationTest {
 
     @Test
     @WithMockUser
-    public void formPostFailsOnValidationError() throws Exception {
+    void formPostFailsOnValidationError() throws Exception {
       MockMultipartFile file = new MockMultipartFile(
           "file", "test.txt", "text/plain", "data".getBytes()
       );
@@ -1023,10 +1023,10 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  public class PatchDatastreamMetadata {
+  class PatchDatastreamMetadata {
 
     @Test
-    public void updatesMetadataViaJsonPatch() throws Exception {
+    void updatesMetadataViaJsonPatch() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
@@ -1056,7 +1056,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void preservesUnchangedFieldsViaJsonPatch() throws Exception {
+    void preservesUnchangedFieldsViaJsonPatch() throws Exception {
       String originalRights = testDataSet.mainDatastream().getBaseMetadata().getRights();
 
       String url = String.format(
@@ -1089,7 +1089,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void returns400ForEmptyTitle() throws Exception {
+    void returns400ForEmptyTitle() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
@@ -1113,7 +1113,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void returns404ForNonExistentDatastream() throws Exception {
+    void returns404ForNonExistentDatastream() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
@@ -1137,7 +1137,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void updatesTags() throws Exception {
+    void updatesTags() throws Exception {
       // Re-fetch to safely check precondition on lazy collection
       Datastream fresh = datastreamRepository.findById(
           testDataSet.mainDatastream().deriveDatastreamId()
@@ -1175,10 +1175,10 @@ public class DatastreamControllerIT extends IntegrationTest {
 
 
   @Nested
-  public class UpdateDatastreamContent {
+  class UpdateDatastreamContent {
 
     @Test
-    public void updatesContentViaFileUpload() throws Exception {
+    void updatesContentViaFileUpload() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
           testDataSet.project().getProjectAbbr(),
@@ -1208,7 +1208,7 @@ public class DatastreamControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void returns404ForNonExistentDatastream() throws Exception {
+    void returns404ForNonExistentDatastream() throws Exception {
       String url = String.format(
           "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
           testDataSet.project().getProjectAbbr(),
