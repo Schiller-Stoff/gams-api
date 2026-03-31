@@ -37,6 +37,7 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -113,9 +114,18 @@ public class DatastreamController {
 
     InputStreamResource inputStreamResource = datastreamContentService.load(datastreamId);
 
+    // For text-based content types, ensure UTF-8 charset is declared
+    MediaType contentType = MediaType.parseMediaType(foundDatastream.getMimeType());
+    if (contentType.getType().equals("text") ||
+        contentType.getSubtype().contains("xml") ||
+        contentType.getSubtype().contains("json") ||
+        contentType.getSubtype().contains("javascript")) {
+      contentType = new MediaType(contentType, StandardCharsets.UTF_8);
+    }
+
     return ResponseEntity.ok()
         .contentLength(foundDatastream.getSize())
-        .contentType(MediaType.parseMediaType(foundDatastream.getMimeType()))
+        .contentType(contentType)
         .body( inputStreamResource);
 
   }
@@ -391,10 +401,19 @@ public class DatastreamController {
     InputStreamResource inputStreamResource = datastreamContentService.load(
         datastream.deriveDatastreamId());
 
+    // For text-based content types, ensure UTF-8 charset is declared
+    MediaType contentType = MediaType.parseMediaType(datastream.getMimeType());
+    if (contentType.getType().equals("text") ||
+        contentType.getSubtype().contains("xml") ||
+        contentType.getSubtype().contains("json") ||
+        contentType.getSubtype().contains("javascript")) {
+      contentType = new MediaType(contentType, StandardCharsets.UTF_8);
+    }
+
     return ResponseEntity.ok()
         .contentLength(datastream.getSize())
-        .contentType(MediaType.parseMediaType(datastream.getMimeType()))
-        .body(inputStreamResource);
+        .contentType(contentType)
+        .body( inputStreamResource);
   }
 
   @Operation(
