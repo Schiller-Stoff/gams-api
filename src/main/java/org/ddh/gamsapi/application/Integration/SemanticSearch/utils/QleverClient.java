@@ -3,7 +3,6 @@ package org.ddh.gamsapi.application.Integration.SemanticSearch.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 import org.ddh.gamsapi.infrastructure.System.configproperties.SemanticSearchProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -46,14 +45,14 @@ public class QleverClient {
    * QLever expects the raw SPARQL string in the body with this content type.
    */
   private static final MediaType SPARQL_UPDATE_CONTENT_TYPE =
-      MediaType.valueOf("application/sparql-update");
+      MediaType.valueOf("application/sparql-update; charset=utf-8");
 
-  public QleverClient(GAMSDockerDNS configProperties, SemanticSearchProperties semanticSearchProperties) {
+
+  public QleverClient(GAMSDockerDNS configProperties, SemanticSearchProperties semanticSearchProperties, RestTemplate restTemplate) {
     this.configProperties = configProperties;
     this.accessToken = semanticSearchProperties.getAccessToken();
-    this.restTemplate = new RestTemplate();
+    this.restTemplate = restTemplate;
   }
-
 
   /**
    * Sends a SPARQL UPDATE request to QLever.
