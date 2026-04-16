@@ -174,7 +174,7 @@ gams:
 # swagger ui base path
 springdoc:
   swagger-ui:
-    path: "/api/v1/openapi"
+    path: "/api/openapi"
     operationsSorter: "method"
     tagsSorter: "alpha"
     docExpansion: "none"

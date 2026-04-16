@@ -39,6 +39,7 @@ public class CORSConfig implements WebMvcConfigurer {
         .maxAge(gamsCors.getMaxAge());
 
     // Authenticated endpoints requiring credentials
+    // TODO api/v1 doesn't exist anymore!!!
     registry.addMapping("/api/v1/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
@@ -48,7 +49,7 @@ public class CORSConfig implements WebMvcConfigurer {
         .maxAge(gamsCors.getMaxAge());
 
     // OpenAPI/Swagger endpoints
-    registry.addMapping("/api/v1/openapi/**")
+    registry.addMapping("/api/openapi/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "OPTIONS")
