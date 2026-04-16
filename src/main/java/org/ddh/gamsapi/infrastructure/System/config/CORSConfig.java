@@ -30,19 +30,17 @@ public class CORSConfig implements WebMvcConfigurer {
     log.info("* Allowed origin patterns: {}", Arrays.stream(gamsCors.getAllowedOriginPatterns()).toList());
     log.info("*** Finished setup of GAMS variables");
 
-    // TODO allow only pattern OR origins! --> better would be just patterns!
-
-    // Public API endpoints (integration services)
+    // allow public for integration api
     registry.addMapping("/api/integration/v1/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
-        .allowedMethods("GET", "POST", "OPTIONS")
+        .allowedMethods("GET", "OPTIONS", "HEAD")
         .allowedHeaders("*")
         .allowCredentials(false) // Public endpoints don't need credentials
         .maxAge(gamsCors.getMaxAge());
 
-    // Public read-only endpoints
-    registry.addMapping("/api/curation/v1/projects/**")
+    // allow public for curation api
+    registry.addMapping("/api/curation/v1/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "HEAD", "OPTIONS")
@@ -59,11 +57,11 @@ public class CORSConfig implements WebMvcConfigurer {
         .allowCredentials(false)
         .maxAge(gamsCors.getMaxAge());
 
-    // Authenticated endpoints requiring credentials
+    // Authenticated endpoints requiring credentials (GET, OPTIONS, HEAD are handled before and public, inside here to secure 'forgotten' paths)
     registry.addMapping("/api/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
-        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
         .allowedHeaders("*")
         .allowCredentials(true) // Required for OAuth2/Keycloak authentication
         .maxAge(gamsCors.getMaxAge());

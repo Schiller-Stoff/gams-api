@@ -37,13 +37,13 @@ public class CORSConfigurationIT extends IntegrationTest {
   }
 
   @Test
-  public void corsActualRequest_integrationEndpoint_allowsPublicAccess() throws Exception {
+  public void corsActualRequest_integrationEndpoint_disAllowsPublicAccess() throws Exception {
     mockMvc.perform(
         MockMvcRequestBuilders.post("/api/integration/v1/rdf")
             .with(SecurityMockMvcRequestPostProcessors.csrf())
             .header("Origin", "http://localhost:3000")
             .content(""))
-        .andExpect(MockMvcResultMatchers.header().string("Access-Control-Allow-Origin", "http://localhost:3000"));
+        .andExpect(MockMvcResultMatchers.content().string("Invalid CORS request"));
   }
 
   @Test

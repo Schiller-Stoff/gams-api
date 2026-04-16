@@ -93,9 +93,9 @@ public class SpringSecurityConfiguration {
     http.authorizeHttpRequests(auth ->
         auth
             // allow post requests against specific integration api endpoints (because: might get queries via POST)
-            // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
-            .requestMatchers(HttpMethod.POST,"/api/integration/v1/rdf*","/api/integration/v1/search*")
-            .permitAll()
+            // must be separate from the GET requests
+            //.requestMatchers(HttpMethod.POST,"/api/integration/v1/rdf*","/api/integration/v1/search*")
+            //.permitAll()
             // the datastream content auth is handled at controller level!
             //.permitAll()
             // protect user info endpoint
