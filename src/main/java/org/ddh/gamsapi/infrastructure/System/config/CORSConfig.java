@@ -1,10 +1,13 @@
 package org.ddh.gamsapi.infrastructure.System.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSCorsProperties;
+
+import java.util.Arrays;
 
 /**
  * CORS configuration for GAMS API.
@@ -12,6 +15,7 @@ import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSCorsProperties
  */
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class CORSConfig implements WebMvcConfigurer {
 
 
@@ -20,6 +24,14 @@ public class CORSConfig implements WebMvcConfigurer {
 
   @Override
   public void addCorsMappings(CorsRegistry registry) {
+
+    log.info("*** Setting up CORS with variables");
+    log.info("* Allowed origins: {}", Arrays.stream(gamsCors.getAllowedOrigins()).toList());
+    log.info("* Allowed origin patterns: {}", Arrays.stream(gamsCors.getAllowedOriginPatterns()).toList());
+    log.info("*** Finished setup of GAMS variables");
+
+    // TODO allow only pattern OR origins! --> better would be just patterns!
+
     // Public API endpoints (integration services)
     registry.addMapping("/api/integration/v1/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
@@ -38,16 +50,6 @@ public class CORSConfig implements WebMvcConfigurer {
         .allowCredentials(false)
         .maxAge(gamsCors.getMaxAge());
 
-    // Authenticated endpoints requiring credentials
-    // TODO api/v1 doesn't exist anymore!!!
-    registry.addMapping("/api/v1/**")
-        .allowedOrigins(gamsCors.getAllowedOrigins())
-        .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
-        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-        .allowedHeaders("*")
-        .allowCredentials(true) // Required for OAuth2/Keycloak authentication
-        .maxAge(gamsCors.getMaxAge());
-
     // OpenAPI/Swagger endpoints
     registry.addMapping("/api/openapi/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
@@ -56,5 +58,16 @@ public class CORSConfig implements WebMvcConfigurer {
         .allowedHeaders("*")
         .allowCredentials(false)
         .maxAge(gamsCors.getMaxAge());
+
+    // Authenticated endpoints requiring credentials
+    registry.addMapping("/api/*/v1/**")
+        .allowedOrigins(gamsCors.getAllowedOrigins())
+        .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true) // Required for OAuth2/Keycloak authentication
+        .maxAge(gamsCors.getMaxAge());
+
+
   }
 }
