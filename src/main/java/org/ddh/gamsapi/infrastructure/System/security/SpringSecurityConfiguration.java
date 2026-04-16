@@ -78,7 +78,7 @@ public class SpringSecurityConfiguration {
           .authorizationEndpoint(auth -> auth.baseUri("/api/auth/oauth2/authorization"))
           .redirectionEndpoint(redirect -> redirect.baseUri("/api/auth/oauth2/callback/*"))
           .defaultSuccessUrl("/api/curation/v1", true)
-          .failureUrl("/api/auth/curation/login?error=true");
+          .failureUrl("/api/auth/login?error=true");
     });
 
     // handling logout — processing endpoint at /api/auth/logout
