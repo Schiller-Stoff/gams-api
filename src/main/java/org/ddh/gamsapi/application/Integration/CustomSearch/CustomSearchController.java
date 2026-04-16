@@ -26,7 +26,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class CustomSearchController {
 
-  public static final String CUSTOM_SEARCH_GET_PATH = "/api/v1/integration/custom-search";
+  public static final String CUSTOM_SEARCH_GET_PATH = "/api/integration/v1/custom-search";
 
   public static final String CUSTOM_SEARCH_MANAGEMENT_PATH = CUSTOM_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
 
@@ -50,7 +50,7 @@ public class CustomSearchController {
   public String indexProjectObjectsHtml(@PathVariable String projectAbbr) {
     log.debug("*** Trying to index project objects for project: {}", projectAbbr);
     customSearchService.indexObjects(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -71,7 +71,7 @@ public class CustomSearchController {
   public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Indexing single object {} in custom-search for project {}", id, projectAbbr);
     customSearchService.indexObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -90,7 +90,7 @@ public class CustomSearchController {
   public String deleteProjectObjectsHtml(@PathVariable String projectAbbr) {
     log.trace("*** Trying to delete project objects");
     customSearchService.deleteIndexedObjects(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -112,7 +112,7 @@ public class CustomSearchController {
   public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Deleting single object {} from custom-search for project {}", id, projectAbbr);
     customSearchService.deleteIndexedObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 

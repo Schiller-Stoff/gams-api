@@ -51,7 +51,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
+@RequestMapping(value = { "/api/curation/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
@@ -435,7 +435,7 @@ public class DigitalObjectController {
     }
 
     digitalObjectService.updateDigitalObject(id, patch);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 }
