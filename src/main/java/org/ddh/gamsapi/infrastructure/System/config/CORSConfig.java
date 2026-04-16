@@ -30,7 +30,7 @@ public class CORSConfig implements WebMvcConfigurer {
         .maxAge(gamsCors.getMaxAge());
 
     // Public read-only endpoints
-    registry.addMapping("/api/v1/projects/**")
+    registry.addMapping("/api/curation/v1/projects/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "HEAD", "OPTIONS")

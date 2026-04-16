@@ -24,15 +24,15 @@
       <!-- Breadcrumb -->
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/projects">projects</a></li>
           <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr}"></a></li>
-          <li class="breadcrumb-item"><a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'">objects</a></li>
+          <li class="breadcrumb-item"><a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'">objects</a></li>
           <li class="breadcrumb-item"><a th:text="${datastream.digitalObject.id}"
-                                         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a>
+                                         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a>
           </li>
           <li class="breadcrumb-item"><a th:text="${datastream.dsid}"
-                                         th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a>
+                                         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a>
           </li>
         </ol>
       </nav>
@@ -42,7 +42,7 @@
 
       <div class="mt-2">
         <a target="_blank" class="btn btn-outline-primary"
-           th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"><i class="ti ti-book ms-2"></i>View content</a>
+           th:href="('/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"><i class="ti ti-book ms-2"></i>View content</a>
         <a sec:authorize="isAuthenticated()" type="button" class="btn btn-outline-primary"
                 data-bs-toggle="collapse" data-bs-target="#contentUploadForm">
           <i class="ti ti-upload ms-2"></i>Replace file content
@@ -65,7 +65,7 @@
               <strong>Caution:</strong> This will permanently overwrite the current file content.
               Checksums and file size will be recomputed. Metadata (title, tags, etc.) remains unchanged.
             </div>
-            <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content'}"
+            <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content'}"
                   method="POST"
                   enctype="multipart/form-data"
                   onsubmit="return confirm('Replace file content? This cannot be undone.');">
@@ -154,7 +154,7 @@
 
       <div class="mb-3">
         <div id="metadata-edit-form">
-          <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}}"
+          <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}}"
                 method="POST">
             <input type="hidden" name="_method" value="PATCH" />
 
@@ -325,7 +325,7 @@
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', function() {
 
-        var contentUrl = /*[[ '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content' ]]*/ '';
+        var contentUrl = /*[[ '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content' ]]*/ '';
         var mimeType = /*[[ ${datastream.mimeType} ]]*/ 'text/plain';
         var dsid = /*[[ ${datastream.dsid} ]]*/ '';
 

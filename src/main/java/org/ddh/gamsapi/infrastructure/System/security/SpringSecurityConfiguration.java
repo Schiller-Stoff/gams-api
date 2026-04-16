@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * Spring security configuration.
  * <p>
- * Domain API endpoints live under {@code /api/v1/} (versioned).
+ * Domain API endpoints live under {@code /api/...} (versioned).
  * Authentication infrastructure endpoints live under {@code /api/auth/} (unversioned),
  * keeping auth concerns separate from the versioned API contract.
  * <p>
@@ -56,9 +56,9 @@ public class SpringSecurityConfiguration {
    * Matches all endpoints that require an admin authorization
    * (e.g. used along restrictions to DELETE / POST requests.)
    */
-  private final String[] ADMIN_ONLY_PATHS = {"/api/v1/user**", "/api/v1/projects/{projectAbbr}"};
+  private final String[] ADMIN_ONLY_PATHS = {"/api/user**", "/api/curation/v1/projects/{projectAbbr}"};
 
-  private final String[] PUBLIC_GET_PATHS = {"/api/v1**", "/api/v1/**"};
+  private final String[] PUBLIC_GET_PATHS = {"/api**", "/api/**"};
 
 
   @Bean
@@ -77,8 +77,8 @@ public class SpringSecurityConfiguration {
           .loginPage("/api/auth/login")
           .authorizationEndpoint(auth -> auth.baseUri("/api/auth/oauth2/authorization"))
           .redirectionEndpoint(redirect -> redirect.baseUri("/api/auth/oauth2/callback/*"))
-          .defaultSuccessUrl("/api/v1", true)
-          .failureUrl("/api/auth/login?error=true");
+          .defaultSuccessUrl("/api/curation/v1", true)
+          .failureUrl("/api/auth/curation/login?error=true");
     });
 
     // handling logout — processing endpoint at /api/auth/logout
@@ -94,7 +94,7 @@ public class SpringSecurityConfiguration {
         auth
             // allow post requests against specific integration api endpoints (because: might get queries via POST)
             // TODO think about stricter security check (must be query for solr / sparql / deny if to big content etc.)
-            .requestMatchers(HttpMethod.POST,"/api/v1/integration/rdf*","/api/v1/integration/search*")
+            .requestMatchers(HttpMethod.POST,"/api/integration/v1/rdf*","/api/integration/v1/search*")
             .permitAll()
             // the datastream content auth is handled at controller level!
             //.permitAll()
@@ -111,15 +111,15 @@ public class SpringSecurityConfiguration {
             .permitAll()
             // authorization only applies for these endpoints
             .requestMatchers(
-                "/api/v1/projects/{projectAbbr}/objects/**",
-                "/api/v1/projects/{projectAbbr}/web",
-                "/api/v1/integration/projects/{projectAbbr}/objects/**"
+                "/api/curation/v1/projects/{projectAbbr}/objects/**",
+                "/api/curation/v1/projects/{projectAbbr}/web",
+                "/api/integration/v1/projects/{projectAbbr}/objects/**"
             )
             .access(userProjectAuthorizationManager)
             // projects may only be created / deleted by global admin role
-            .requestMatchers(HttpMethod.PUT,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
+            .requestMatchers(HttpMethod.PUT,"/api/curation/v1/projects/{projectAbbr}/", "/api/curation/v1/projects/{projectAbbr}")
             .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
-            .requestMatchers(HttpMethod.DELETE,"/api/v1/projects/{projectAbbr}/", "/api/v1/projects/{projectAbbr}")
+            .requestMatchers(HttpMethod.DELETE,"/api/curation/v1/projects/{projectAbbr}/", "/api/curation/v1/projects/{projectAbbr}")
             .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
             // any not matched requests require authentication
             .anyRequest()
@@ -133,8 +133,8 @@ public class SpringSecurityConfiguration {
           .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
           .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
           .ignoringRequestMatchers(
-              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/integration/rdf"),
-              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/v1/integration/search/**")
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/curation/v1/integration/rdf"),
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/curation/v1/integration/search/**")
           )
       ;
     });
@@ -190,7 +190,7 @@ public class SpringSecurityConfiguration {
    */
   private OidcClientInitiatedLogoutSuccessHandler oidcLogoutSuccessHandler() {
     var handler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-    handler.setPostLogoutRedirectUri("{baseUrl}/api/v1");
+    handler.setPostLogoutRedirectUri("{baseUrl}/api/curation/v1");
     return handler;
   }
 
