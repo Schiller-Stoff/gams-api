@@ -133,8 +133,8 @@ public class SpringSecurityConfiguration {
           .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
           .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
           .ignoringRequestMatchers(
-              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/curation/v1/integration/rdf"),
-              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/curation/v1/integration/search/**")
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/rdf"),
+              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/search/**")
           )
       ;
     });
