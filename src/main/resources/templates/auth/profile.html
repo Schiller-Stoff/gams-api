@@ -17,7 +17,7 @@
     <div class="p-md-5 p-3" style="min-height: 100vh">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
           <li class="breadcrumb-item active">Profile</li>
         </ol>
       </nav>
@@ -63,7 +63,7 @@
             <tbody>
             <tr th:each="entry : ${roleProfile.projectRoles}">
               <td>
-                <a th:href="@{'/api/v1/projects/' + ${entry.key}}"
+                <a th:href="@{'/api/curation/v1/projects/' + ${entry.key}}"
                    th:text="${entry.key}"
                    style="color: black; font-weight: 600;"
                    class="text-decoration-none">

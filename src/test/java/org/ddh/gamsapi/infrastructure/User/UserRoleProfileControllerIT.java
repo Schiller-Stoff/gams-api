@@ -19,7 +19,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Integration tests for the user profile page at /api/v1/auth/profile.
+ * Integration tests for the user profile page at /api/curation/v1/auth/profile.
  * Security filters are enabled (no addFilters=false) to test authentication
  * behavior with real Spring Security processing.
  */
@@ -246,7 +246,7 @@ public class UserRoleProfileControllerIT extends IntegrationTest {
           .andReturn();
 
       String html = result.getResponse().getContentAsString();
-      assertThat(html).contains("/api/v1/projects/cantus");
+      assertThat(html).contains("/api/curation/v1/projects/cantus");
     }
 
     @Test

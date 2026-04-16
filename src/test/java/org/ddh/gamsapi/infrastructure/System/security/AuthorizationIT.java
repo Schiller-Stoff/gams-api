@@ -42,7 +42,7 @@ public class AuthorizationIT extends IntegrationTest {
     Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
                   .with(SecurityMockMvcRequestPostProcessors
                       .user("UNKNOWN_USER")
@@ -67,7 +67,7 @@ public class AuthorizationIT extends IntegrationTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+            multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                 .part(mockPart)
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")
@@ -91,7 +91,7 @@ public class AuthorizationIT extends IntegrationTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+            multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                 .part(mockPart)
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")
@@ -116,7 +116,7 @@ public class AuthorizationIT extends IntegrationTest {
     Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
                   .with(SecurityMockMvcRequestPostProcessors
                       .user("SOME_USER")
@@ -135,7 +135,7 @@ public class AuthorizationIT extends IntegrationTest {
     public void anonymousUserNotAuthorizedForProjectCreation_redirects() throws Exception {
 
       final String TEST_PROJECT_ABBR = "FOO";
-      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
 
       mockMvc
           .perform(
@@ -150,7 +150,7 @@ public class AuthorizationIT extends IntegrationTest {
     public void adminMayCreateAProject() throws Exception {
 
       final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
-      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
 
       mockMvc
           .perform(
@@ -173,7 +173,7 @@ public class AuthorizationIT extends IntegrationTest {
     public void anonymousUserNotAuthorizedForProjectDeletion_redirects() throws Exception {
 
       final String TEST_PROJECT_ABBR = "FOO";
-      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
 
       mockMvc
           .perform(

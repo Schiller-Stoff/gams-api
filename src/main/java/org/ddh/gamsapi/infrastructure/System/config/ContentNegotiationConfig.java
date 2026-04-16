@@ -18,7 +18,7 @@ public class ContentNegotiationConfig implements WebMvcConfigurer {
   @Override
   public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
     configurer
-        // Enable path extension negotiation (e.g., /api/v1/projects.xml)
+        // Enable path extension negotiation (e.g., /api/curation/v1/projects.xml)
         //.favorPathExtension(false) // Deprecated in Spring Boot 3.x, use Accept header
         .favorParameter(true)      // Enable format parameter (?format=xml)
         .parameterName(FORMAT_URL_PARAMETER)

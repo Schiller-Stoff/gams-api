@@ -56,7 +56,7 @@ public class CsrfProtectionIT extends IntegrationTest {
     );
 
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/projects/test/objects")
+            MockMvcRequestBuilders.post("/api/curation/v1/projects/test/objects")
                 .content(new byte[0])
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")
@@ -77,7 +77,7 @@ public class CsrfProtectionIT extends IntegrationTest {
     );
 
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/projects/test/objects")
+            MockMvcRequestBuilders.post("/api/curation/v1/projects/test/objects")
                 .content(new byte[0])
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")

@@ -17,7 +17,7 @@
         <div class="container-fluid" style="min-height: 100vh">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
                     <li class="breadcrumb-item"><a href="/api/v1/userinfo">User</a></li>
                 </ol>
             </nav>
@@ -29,7 +29,7 @@
                 <ul class="list-group list-group-flush" style="list-style: none;">
                     <li th:each="authority : ${user.authorities}" class="list-group-item">
                         <p th:text="${authority}"></p>
-<!--                        <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>-->
+<!--                        <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'" th:text="${project.projectAbbr + ' - project'}"></a>-->
                     </li>
                 </ul>
             </div>

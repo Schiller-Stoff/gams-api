@@ -18,7 +18,7 @@ public class CORSConfigurationIT extends IntegrationTest {
 
   @Test
   public void corsPreflightRequest_allowedOrigin_returnsProperHeaders() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.options("/api/v1/projects")
+    mockMvc.perform(MockMvcRequestBuilders.options("/api/curation/v1/projects")
             .header("Origin", "http://localhost:3000")
             .header("Access-Control-Request-Method", "GET")
             .header("Access-Control-Request-Headers", "Content-Type"))
@@ -30,7 +30,7 @@ public class CORSConfigurationIT extends IntegrationTest {
 
   @Test
   public void corsPreflightRequest_disallowedOrigin_noHeaders() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.options("/api/v1/projects")
+    mockMvc.perform(MockMvcRequestBuilders.options("/api/curation/v1/projects")
             .header("Origin", "http://malicious-site.com")
             .header("Access-Control-Request-Method", "GET"))
         .andExpect(MockMvcResultMatchers.status().isForbidden());

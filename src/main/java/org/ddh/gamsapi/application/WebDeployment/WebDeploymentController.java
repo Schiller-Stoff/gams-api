@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Controller
-@RequestMapping("/api/v1/projects/{projectAbbr}/web")
+@RequestMapping("/api/curation/v1/projects/{projectAbbr}/web")
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.PROJECTS_TAG, description = OpenAPIConfig.PROJECTS_TAG_DESCRIPTION)
@@ -155,6 +155,6 @@ public class WebDeploymentController {
   @DeleteMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String undeployHtml(@PathVariable String projectAbbr) {
     webDeploymentService.undeploy(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/web";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/web";
   }
 }
