@@ -37,7 +37,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/curation/1/projects" })
+@RequestMapping({"/api/curation/v1/projects" })
 @Tag(name = OpenAPIConfig.PROJECTS_TAG, description = OpenAPIConfig.PROJECTS_TAG_DESCRIPTION)
 public class ProjectController {
 
