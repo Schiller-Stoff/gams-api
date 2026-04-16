@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -65,7 +66,6 @@ public class SpringSecurityConfiguration {
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
     log.info("*** Initializing spring security config ***");
-
 
     // configure oauth2 login — auth infrastructure under /api/auth/ (separate from versioned API)
     // loginPage: where unauthenticated users are redirected (handled by AuthEndpointController)
@@ -143,6 +143,8 @@ public class SpringSecurityConfiguration {
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
 
 
+    // setup default cors protection
+    http.cors(Customizer.withDefaults());
 
 
     // TODO check if this works
