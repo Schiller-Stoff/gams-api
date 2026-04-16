@@ -48,7 +48,7 @@ public class CORSConfigurationIT extends IntegrationTest {
 
   @Test
   public void corsActualRequest_authenticatedEndpoint_requiresCredentials() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/userinfo")
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/userinfo")
             .header("Origin", "http://localhost:3000"))
         .andExpect(MockMvcResultMatchers.header().string("Access-Control-Allow-Credentials", "true"));
   }

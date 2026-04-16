@@ -60,7 +60,7 @@ public class CORSConfig implements WebMvcConfigurer {
         .maxAge(gamsCors.getMaxAge());
 
     // Authenticated endpoints requiring credentials
-    registry.addMapping("/api/*/v1/**")
+    registry.addMapping("/api/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
