@@ -26,13 +26,11 @@ public class CORSConfig implements WebMvcConfigurer {
   public void addCorsMappings(CorsRegistry registry) {
 
     log.info("*** Setting up CORS with variables");
-    log.info("* Allowed origins: {}", Arrays.stream(gamsCors.getAllowedOrigins()).toList());
     log.info("* Allowed origin patterns: {}", Arrays.stream(gamsCors.getAllowedOriginPatterns()).toList());
     log.info("*** Finished setup of GAMS variables");
 
     // allow public for integration api
     registry.addMapping("/api/integration/v1/**")
-        .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "OPTIONS", "HEAD")
         .allowedHeaders("*")
@@ -41,7 +39,6 @@ public class CORSConfig implements WebMvcConfigurer {
 
     // allow public for curation api
     registry.addMapping("/api/curation/v1/**")
-        .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "HEAD", "OPTIONS")
         .allowedHeaders("*")
@@ -50,7 +47,6 @@ public class CORSConfig implements WebMvcConfigurer {
 
     // OpenAPI/Swagger endpoints
     registry.addMapping("/api/openapi/**")
-        .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "OPTIONS")
         .allowedHeaders("*")
@@ -59,7 +55,6 @@ public class CORSConfig implements WebMvcConfigurer {
 
     // Authenticated endpoints requiring credentials (GET, OPTIONS, HEAD are handled before and public, inside here to secure 'forgotten' paths)
     registry.addMapping("/api/**")
-        .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
         .allowedHeaders("*")

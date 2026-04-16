@@ -134,8 +134,6 @@ server:
 #
 gams:
   cors:
-    # Development origins - adjust for your environment
-    allowed-origins: ${GAMSAPI_ALLOWED_ORIGINS:http://localhost:*}
     # Production patterns - use with caution
     allowed-origin-patterns: ${GAMSAPI_ALLOWED_ORIGIN_PATTERNS:http://localhost:*}
     # Preflight cache time (seconds)
