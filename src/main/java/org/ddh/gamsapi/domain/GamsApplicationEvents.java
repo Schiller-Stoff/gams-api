@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationEvent;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Date;
 
 /**
  * Superclass for CRUD operations using the domain layer.
