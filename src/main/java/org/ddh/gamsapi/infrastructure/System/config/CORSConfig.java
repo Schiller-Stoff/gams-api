@@ -29,36 +29,44 @@ public class CORSConfig implements WebMvcConfigurer {
     log.info("* Allowed origin patterns: {}", Arrays.stream(gamsCors.getAllowedOriginPatterns()).toList());
     log.info("*** Finished setup of GAMS variables");
 
-    // allow public for integration api
-    registry.addMapping("/api/integration/v1/**")
+    // Integration: public reads + public writes (for POST queries), uncredentialed
+    registry.addMapping("/api/integration/**")
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
-        .allowedMethods("GET", "OPTIONS", "HEAD")
+        .allowedMethods("GET", "POST", "HEAD", "OPTIONS")
         .allowedHeaders("*")
-        .allowCredentials(false) // Public endpoints don't need credentials
+        .allowCredentials(true)
         .maxAge(gamsCors.getMaxAge());
 
-    // allow public for curation api
-    registry.addMapping("/api/curation/v1/**")
+    // Curation: mixed trust, browser uses cookies → credentialed full CRUD
+    registry.addMapping("/api/curation/**")
+        .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS")
+        .allowedHeaders("*")
+        .allowCredentials(true)
+        .maxAge(gamsCors.getMaxAge());
+
+    // OpenAPI docs: public reads only
+    registry.addMapping("/api/openapi/**")
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "HEAD", "OPTIONS")
         .allowedHeaders("*")
         .allowCredentials(false)
         .maxAge(gamsCors.getMaxAge());
 
-    // OpenAPI/Swagger endpoints
-    registry.addMapping("/api/openapi/**")
+    // Auth infrastructure: credentialed (login/logout/callback)
+    registry.addMapping("/api/auth/**")
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
-        .allowedMethods("GET", "OPTIONS")
+        .allowedMethods("GET", "POST", "HEAD", "OPTIONS")
         .allowedHeaders("*")
-        .allowCredentials(false)
+        .allowCredentials(true)
         .maxAge(gamsCors.getMaxAge());
 
-    // Authenticated endpoints requiring credentials (GET, OPTIONS, HEAD are handled before and public, inside here to secure 'forgotten' paths)
+    // user info
     registry.addMapping("/api/**")
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
-        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD")
+        .allowedMethods("GET", "POST", "HEAD", "OPTIONS")
         .allowedHeaders("*")
-        .allowCredentials(true) // Required for OAuth2/Keycloak authentication
+        .allowCredentials(true)
         .maxAge(gamsCors.getMaxAge());
 
 
