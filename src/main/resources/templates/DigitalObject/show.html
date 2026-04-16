@@ -587,7 +587,7 @@
           <!-- Integrate ALL services at once -->
           <div class="mb-3">
             <h4 class="h6">All services</h4>
-            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Index this object in ALL integration services?');">
@@ -595,7 +595,7 @@
                 <i class="ti ti-refresh me-1"></i>Index in all
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Remove this object from ALL integration services?');">
@@ -608,7 +608,7 @@
 
           <div class="mb-3">
             <h4 class="h6">Api-Search</h4>
-            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Index this object in Api-Search?');">
@@ -616,7 +616,7 @@
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Remove this object from Api-Search?');">
@@ -629,7 +629,7 @@
 
           <div class="mb-3">
             <h4 class="h6">Custom-Search</h4>
-            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Index this object in Custom-Search?');">
@@ -637,7 +637,7 @@
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Remove this object from Custom-Search?');">
@@ -651,7 +651,7 @@
           <!-- Plexus Search -->
           <div class="mb-3">
             <h4 class="h6">Plexus Search</h4>
-            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Index this object in Plexus Search?');">
@@ -659,7 +659,7 @@
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Remove this object from Plexus Search?');">
@@ -673,7 +673,7 @@
           <!-- RDF -->
           <div class="mb-3">
             <h4 class="h6">RDF (Linked Data)</h4>
-            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Index this object in the RDF store?');">
@@ -681,7 +681,7 @@
                 <i class="ti ti-database me-1"></i>Index
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Remove this object from the RDF store?');">
@@ -695,7 +695,7 @@
           <!-- Semantic Search -->
           <div class="mb-3">
             <h4 class="h6">Semantic-Search</h4>
-            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Index this object in Semantic Search?');">
@@ -703,7 +703,7 @@
                 <i class="ti ti-search me-1"></i>Index
               </button>
             </form>
-            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('Remove this object from Semantic Search?');">

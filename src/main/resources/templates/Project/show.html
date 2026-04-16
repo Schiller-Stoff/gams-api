@@ -214,7 +214,7 @@
 
         <div class="mb-3">
           <h4 class="h6">Integration Services</h4>
-          <form th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr}}"
+          <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr}}"
                 method="POST"
                 class="d-inline"
                 onsubmit="return confirm('Reindex ALL objects in this project across all integration services?');">

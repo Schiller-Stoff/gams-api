@@ -99,7 +99,7 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   @Disabled("Succeeds in IDE but fails in CI/CD pipeline, needs investigation")
   public void integrationApiPostDontRequireAuthentication_returns500() throws Exception {
-    final String INTEGRATION_ENDPOINT =  "/api/v1/integration/rdf";
+    final String INTEGRATION_ENDPOINT =  "/api/integration/v1/rdf";
 
     mockMvc
         .perform(

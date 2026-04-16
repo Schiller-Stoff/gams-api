@@ -290,7 +290,7 @@
                 <!--            </div></td>-->
                 <!--            <td><div>-->
                 <!--              <form-->
-                <!--                      th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
+                <!--                      th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
                 <!--                      method="POST"-->
                 <!--              >-->
                 <!--                <button type="submit" class="btn btn-outline-dark d-block">Integrate</button>-->
@@ -440,7 +440,7 @@
           <div>
             <h4 class="h6">Custom-Search</h4>
             <!-- Index all objects in custom-search -->
-            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the custom search service. Continue?');">
@@ -450,7 +450,7 @@
             </form>
 
             <!-- Delete all objects from custom-search -->
-            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the custom search service. Continue?');">
@@ -466,7 +466,7 @@
           <div>
             <h4 class="h6">Plexus-Search</h4>
             <!-- Index all objects in plexus-search -->
-            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the plexus search service. Continue?');">
@@ -476,7 +476,7 @@
             </form>
 
             <!-- Delete all objects from plexus-search -->
-            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the plexus search service. Continue?');">
@@ -492,7 +492,7 @@
           <div>
             <h4 class="h6">Semantic Search</h4>
             <!-- Index all objects in semantic-search -->
-            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the semantic search service. Continue?');">
@@ -502,7 +502,7 @@
             </form>
 
             <!-- Delete all objects from semantic-search -->
-            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the semantic search service. Continue?');">

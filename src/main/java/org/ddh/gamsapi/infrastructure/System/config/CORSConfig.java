@@ -21,7 +21,7 @@ public class CORSConfig implements WebMvcConfigurer {
   @Override
   public void addCorsMappings(CorsRegistry registry) {
     // Public API endpoints (integration services)
-    registry.addMapping("/api/v1/integration/**")
+    registry.addMapping("/api/integration/v1/**")
         .allowedOrigins(gamsCors.getAllowedOrigins())
         .allowedOriginPatterns(gamsCors.getAllowedOriginPatterns())
         .allowedMethods("GET", "POST", "OPTIONS")

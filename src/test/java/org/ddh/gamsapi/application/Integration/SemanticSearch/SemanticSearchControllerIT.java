@@ -26,7 +26,7 @@ class SemanticSearchControllerIT extends IntegrationTest {
 
   private static final String PROJECT_ABBR = "TEST";
   private static final String OBJECT_ID = "o:test.1";
-  private static final String PROJECT_PATH = "/api/v1/integration/semantic-search/projects/" + PROJECT_ABBR + "/objects";
+  private static final String PROJECT_PATH = "/api/integration/v1/semantic-search/projects/" + PROJECT_ABBR + "/objects";
   private static final String SINGLE_OBJECT_PATH = PROJECT_PATH + "/" + OBJECT_ID;
 
   // ---------------------------------------------------------------------------

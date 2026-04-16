@@ -29,7 +29,7 @@ public class CsrfProtectionIT extends IntegrationTest {
     // It may return 5xx (no real service behind it in test) or other errors,
     // but crucially NOT 403 from the CSRF filter
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/integration/rdf")
+            MockMvcRequestBuilders.post("/api/integration/v1/rdf")
                 .content("SELECT * WHERE { ?s ?p ?o }")
         )
         .andExpect(MockMvcResultMatchers.status().is(Matchers.not(403)));
@@ -38,7 +38,7 @@ public class CsrfProtectionIT extends IntegrationTest {
   @Test
   public void csrfExemptedSearchEndpoint_postWithoutCsrfToken_isNotRejectedByCsrf() throws Exception {
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/integration/search/some-query")
+            MockMvcRequestBuilders.post("/api/integration/v1/search/some-query")
                 .content("")
         )
         .andExpect(MockMvcResultMatchers.status().is(Matchers.not(403)));
