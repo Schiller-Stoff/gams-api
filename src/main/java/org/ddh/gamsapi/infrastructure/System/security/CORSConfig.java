@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.infrastructure.System.config;
+package org.ddh.gamsapi.infrastructure.System.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
