@@ -147,7 +147,7 @@ public class BagDirectoryReaderTest extends UnitTest {
       public void createsExpectedSha512ManifestObject() {
           var sha512Manifest = BagDirectoryReader.readSha512ManifestFile(bag.getBAG_DIR_PATH());
           Assertions.assertThat(sha512Manifest.size()).isEqualTo(8);
-          Assertions.assertThat(sha512Manifest.get("data/content/DC.xml")).isEqualTo("16e0517a67c3b8c65b4d6fa159236a1cb005d278a9af6de829c8b69ff74c83c9d2848911db607b9a51d205b0dcd98495b4aee8dd107afa35aa1e8d8226c1b259");
+          Assertions.assertThat(sha512Manifest.get("data/content/DC.xml")).isEqualTo("f36bbb5ec833b58d1dc7ec4cac08417143883c092d229944c23d60547a9e4c2c8f515b2ea9e59957998d9ccbf5b591f9abb5e9bb03365bd4e484198f7ef5945d");
       }
 
 
@@ -172,7 +172,7 @@ public class BagDirectoryReaderTest extends UnitTest {
     public void createsExpectedMd5ManifestObject() {
         var md5Manifest = BagDirectoryReader.readMd5ManifestFile(bag.getBAG_DIR_PATH());
         Assertions.assertThat(md5Manifest.size()).isEqualTo(8);
-        Assertions.assertThat(md5Manifest.get("data/content/DC.xml")).isEqualTo("140193d9633d8449ee1bff28030fe045");
+        Assertions.assertThat(md5Manifest.get("data/content/DC.xml")).isEqualTo("310def22018d3a6608f133630748ddfc");
     }
 
   }

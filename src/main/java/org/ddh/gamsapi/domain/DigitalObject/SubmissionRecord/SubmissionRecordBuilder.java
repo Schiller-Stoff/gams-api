@@ -58,6 +58,11 @@ public class SubmissionRecordBuilder {
         return this;
     }
 
+    public SubmissionRecordBuilder gamsApiVersion(String gamsApiVersion) {
+      submissionRecord.setGamsApiVersion(gamsApiVersion);
+      return this;
+    }
+
     public SubmissionRecord build() {
         if(submissionRecord.getDigitalObject() == null){
             String msg = "Failed to build SubmissionRecord: DigitalObject is null and must be set. SubmissionRecord: " + submissionRecord;

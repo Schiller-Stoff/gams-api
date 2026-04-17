@@ -18,11 +18,6 @@ import java.time.Duration;
 
 /**
  * Handles integration of apache solr for testing.
- *
- * CRITICAL CHANGES:
- * 1. Mounts BOTH base and custom-fulltext configsets
- * 2. Creates FULLTEXT_CORE with custom-fulltext configuration
- * 3. Creates GAMS_CORE and TEST_CORE with base configuration
  */
 @Slf4j
 public class SolrIntegrationTest extends IntegrationTest {
@@ -39,11 +34,10 @@ public class SolrIntegrationTest extends IntegrationTest {
     // base configuration for every solr to be created
     String baseConfigsetPath = "docker/apps/solr/solr/data/configsets/base";
 
-    // base search configuration
-    // TODO introduce more final variables like below
-    final String BASE_SEARCH_SERVICE_NAME = "g-search";
-    final String BASE_SEARCH_CONTAINER_TEMP_PATH = String.format("/tmp/%s_configset", BASE_SEARCH_SERVICE_NAME);
-    final String BASE_SEARCH_LOCAL_CONFIG_PATH = "docker/apps/solr/solr/data/g-search/conf";
+    // api search configuration
+    final String API_SEARCH_SERVICE_NAME = "api-search";
+    final String API_SEARCH_CONTAINER_TEMP_PATH = String.format("/tmp/%s_configset", API_SEARCH_SERVICE_NAME);
+    final String API_SEARCH_LOCAL_CONFIG_PATH = "docker/apps/solr/solr/data/api-search/conf";
 
     // custom-search configuration
     String customSearchConfigPath = "docker/apps/solr/solr/data/custom-search/conf";
@@ -55,7 +49,7 @@ public class SolrIntegrationTest extends IntegrationTest {
 
 
     File baseConfigset = new File(baseConfigsetPath);
-    File baseSearchConfig = new File(BASE_SEARCH_LOCAL_CONFIG_PATH);
+    File baseSearchConfig = new File(API_SEARCH_LOCAL_CONFIG_PATH);
     File customSearchConfig = new File(customSearchConfigPath);
     File plexusSearchConfig = new File(PLEXUS_SEARCH_LOCAL_CONFIG_PATH);
 
@@ -76,7 +70,7 @@ public class SolrIntegrationTest extends IntegrationTest {
     }
 
     log.info("✓ Found 'base' configset at: {}", baseConfigset.getAbsolutePath());
-    log.info("✓ Found {} configset at: {}", BASE_SEARCH_SERVICE_NAME,  baseConfigset.getAbsolutePath());
+    log.info("✓ Found {} configset at: {}", API_SEARCH_SERVICE_NAME,  baseConfigset.getAbsolutePath());
     log.info("✓ Found 'custom-search' config at: {}", customSearchConfig.getAbsolutePath());
     log.info("✓ Found {} config at: {}", PLEXUS_SEARCH_SERVICE_NAME, plexusSearchConfig.getAbsolutePath());
 
@@ -91,8 +85,8 @@ public class SolrIntegrationTest extends IntegrationTest {
             "/tmp/base_configset"
         )
         .withCopyToContainer(
-            MountableFile.forHostPath(BASE_SEARCH_LOCAL_CONFIG_PATH),
-            BASE_SEARCH_CONTAINER_TEMP_PATH
+            MountableFile.forHostPath(API_SEARCH_LOCAL_CONFIG_PATH),
+            API_SEARCH_CONTAINER_TEMP_PATH
         )
         // Mount custom-search configset
         .withCopyToContainer(
@@ -135,14 +129,14 @@ public class SolrIntegrationTest extends IntegrationTest {
       var copyBaseSearchForApi = solr.execInContainer(
           "sh", "-c",
           String.format("cp -r %s /var/solr/data/configsets/%s && chmod -R 755 /var/solr/data/configsets/%s",
-              BASE_SEARCH_CONTAINER_TEMP_PATH, BASE_SEARCH_SERVICE_NAME, BASE_SEARCH_SERVICE_NAME)
+              API_SEARCH_CONTAINER_TEMP_PATH, API_SEARCH_SERVICE_NAME, API_SEARCH_SERVICE_NAME)
       );
 
       if (copyBaseSearchForApi.getExitCode() != 0) {
-        log.warn("Failed to copy {} configset: {}", BASE_SEARCH_SERVICE_NAME, copyBaseSearchForApi.getStderr());
+        log.warn("Failed to copy {} configset: {}", API_SEARCH_SERVICE_NAME, copyBaseSearchForApi.getStderr());
       } else {
         log.info("✓ {} configset copied to /var/solr/data/configsets/{}",
-            BASE_SEARCH_SERVICE_NAME, BASE_SEARCH_SERVICE_NAME);
+            API_SEARCH_SERVICE_NAME, API_SEARCH_SERVICE_NAME);
       }
 
       // Copy custom-search configset
@@ -191,9 +185,9 @@ public class SolrIntegrationTest extends IntegrationTest {
 
       // 2. GAMS_CORE (uses base configset)
       // TODO rename / redo to base-search core!
-      log.info("Creating '{}' core with BASE configset...", SolrGamsCores.GAMS_CORE.value);
+      log.info("Creating '{}' core with BASE configset...", SolrGamsCores.API_SEARCH_CORE.value);
       var gamsCore = solr.execInContainer(
-          "solr", "create_core", "-c", SolrGamsCores.GAMS_CORE.value, "-d", BASE_SEARCH_CONTAINER_TEMP_PATH
+          "solr", "create_core", "-c", SolrGamsCores.API_SEARCH_CORE.value, "-d", API_SEARCH_CONTAINER_TEMP_PATH
       );
       log.info("GAMS core - exitCode: {}, stdout: '{}'",
           gamsCore.getExitCode(), gamsCore.getStdout().trim());
@@ -234,7 +228,7 @@ public class SolrIntegrationTest extends IntegrationTest {
       Thread.sleep(1000);
       log.info("✓ Solr test container fully initialized with 4 cores");
       log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.TEST_CORE.value);
-      log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.GAMS_CORE.value);
+      log.info("  - {} (base schema): objectFulltext, dc.* fields", SolrGamsCores.API_SEARCH_CORE.value);
       log.info("  - {} (custom-search schema): entityFulltext, entity* fields", SolrGamsCores.CUSTOM_SEARCH_CORE.value);
       log.info("  - {} (plexus-search schema): plexusFulltext, plexus* fields", PLEXUS_SEARCH_SERVICE_NAME);
 
@@ -255,7 +249,7 @@ public class SolrIntegrationTest extends IntegrationTest {
   public void tearDown() {
     try {
       log.debug("Cleaning up Solr cores after test");
-      solrClient.wipeCore(SolrGamsCores.GAMS_CORE.value);
+      solrClient.wipeCore(SolrGamsCores.API_SEARCH_CORE.value);
       solrClient.wipeCore(SolrGamsCores.TEST_CORE.value);
       solrClient.wipeCore(SolrGamsCores.CUSTOM_SEARCH_CORE.value);
       solrClient.wipeCore(SolrGamsCores.PLEXUS_SEARCH_CORE.value);

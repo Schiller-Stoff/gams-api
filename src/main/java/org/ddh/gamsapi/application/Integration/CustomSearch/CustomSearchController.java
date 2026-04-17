@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Integration.CustomSearch;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -22,11 +23,10 @@ import java.util.Set;
 @RequestMapping
 @Slf4j
 @RequiredArgsConstructor
-@RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class CustomSearchController {
 
-  public static final String CUSTOM_SEARCH_GET_PATH = "/api/v1/integration/c-search";
+  public static final String CUSTOM_SEARCH_GET_PATH = "/api/integration/v1/custom-search";
 
   public static final String CUSTOM_SEARCH_MANAGEMENT_PATH = CUSTOM_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
 
@@ -35,20 +35,30 @@ public class CustomSearchController {
   private final CustomSearchService customSearchService;
 
   @Operation(
-      summary = "Add all project objects to external c-search service",
-      description = "This endpoint indexes all objects of a project in the c-search service."
+      summary = "Add all project objects to external custom-search service",
+      description = "This endpoint indexes all objects of a project in the custom-search service."
   )
   @PostMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
+  @ResponseBody
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
     customSearchService.indexObjects(projectAbbr);
   }
 
+  @Hidden
+  @PostMapping(value = CUSTOM_SEARCH_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String indexProjectObjectsHtml(@PathVariable String projectAbbr) {
+    log.debug("*** Trying to index project objects for project: {}", projectAbbr);
+    customSearchService.indexObjects(projectAbbr);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
+  }
+
   @Operation(
-      summary = "Add a single project object to external c-search service",
-      description = "This endpoint indexes all objects of a project in the c-search service."
+      summary = "Add a single project object to external custom-search service",
+      description = "This endpoint indexes all objects of a project in the custom-search service."
   )
-  @PostMapping(CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @PostMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
   public void indexProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id
@@ -56,27 +66,53 @@ public class CustomSearchController {
     customSearchService.indexObject(projectAbbr, id);
   }
 
+  @Hidden
+  @PostMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Indexing single object {} in custom-search for project {}", id, projectAbbr);
+    customSearchService.indexObject(projectAbbr, id);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
+  }
+
   @Operation(
-      summary = "Delete all project objects from external c-search service",
+      summary = "Delete all project objects from external custom-search service",
       description = "This endpoint deletes all objects of a project from the CustomSearch service."
   )
   @DeleteMapping(CUSTOM_SEARCH_MANAGEMENT_PATH)
+  @ResponseBody
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     customSearchService.deleteIndexedObjects(projectAbbr);
   }
 
+  @Hidden
+  @DeleteMapping(value = CUSTOM_SEARCH_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String deleteProjectObjectsHtml(@PathVariable String projectAbbr) {
+    log.trace("*** Trying to delete project objects");
+    customSearchService.deleteIndexedObjects(projectAbbr);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
+  }
+
   @Operation(
-      summary = "Delete a single project object from external c-search service",
+      summary = "Delete a single project object from external custom-search service",
       description = "This endpoint deletes a single object of a project from the CustomSearch service."
   )
-  @DeleteMapping(CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @DeleteMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.APPLICATION_JSON_VALUE)
+  @ResponseBody
   public void deleteProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id
   ){
     log.trace("*** Trying to delete single project object from custom-search service. Object-id: {}", id);
     customSearchService.deleteIndexedObject(projectAbbr, id);
+  }
+
+  @Hidden
+  @DeleteMapping(value = CUSTOM_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MimeTypeUtils.TEXT_HTML_VALUE)
+  public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Deleting single object {} from custom-search for project {}", id, projectAbbr);
+    customSearchService.deleteIndexedObject(projectAbbr, id);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 

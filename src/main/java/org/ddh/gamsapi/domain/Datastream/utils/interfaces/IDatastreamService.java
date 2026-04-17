@@ -1,11 +1,12 @@
 package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamUpdateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.exceptions.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAmbiguousMatchException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNoMainResourceDatastreamDefinedException;
@@ -80,4 +81,55 @@ public interface IDatastreamService {
    */
   PagedResponse<String> findAllIds(String digitalObjectId, Pageable pageable) throws DigitalObjectNotFoundException;
 
+  /**
+   * Creates a new datastream from a direct file upload (bypassing BagIt workflow).
+   * The dsid is provided explicitly by the caller.
+   * Checksums (MD5 + SHA-512) are computed server-side during file write.
+   *
+   * @param digitalObjectId the parent digital object ID
+   * @param dsid the datastream identifier (from path variable)
+   * @param dto metadata provided by the user
+   * @param file the uploaded file
+   * @return the created datastream
+   * @throws DigitalObjectNotFoundException if the digital object doesn't exist
+   * @throws DatastreamAlreadyExistsException if a datastream with this dsid already exists
+   * @throws DatastreamCannotWriteFileException if file write fails
+   */
+  Datastream createFromUpload(String digitalObjectId, String dsid, DatastreamCreateDto dto,
+                              MultipartFile file);
+
+  // --- Add these methods to IDatastreamService interface ---
+
+  /**
+   * Updates metadata fields of an existing datastream.
+   * Only non-null fields from the patch DTO are applied.
+   * The dsid and digitalObject (composite PK) cannot be changed.
+   *
+   * @param digitalObjectId the parent digital object ID
+   * @param dsid the datastream identifier
+   * @param patch DTO containing the fields to update
+   * @return the updated datastream details projection
+   * @throws DatastreamNotFoundException if the datastream does not exist
+   * @throws DigitalObjectNotFoundException if the digital object does not exist
+   * @throws DatastreamValidationException if the patch would violate invariants
+   */
+  IDatastreamDetailsView updateDatastream(String digitalObjectId, String dsid,
+                                          DatastreamUpdateDto patch);
+
+  /**
+   * Updates the content (file) of an existing datastream.
+   * Recomputes checksums and updates file size and MIME type.
+   * The dsid and digitalObject reference remain unchanged.
+   *
+   * @param digitalObjectId the parent digital object ID
+   * @param dsid the datastream identifier
+   * @param file the new file content
+   * @return the updated datastream details projection
+   * @throws DatastreamNotFoundException if the datastream does not exist
+   * @throws DigitalObjectNotFoundException if the digital object does not exist
+   * @throws DatastreamValidationException if the file is empty
+   * @throws DatastreamCannotWriteFileException if file write fails
+   */
+  IDatastreamDetailsView updateDatastreamContent(String digitalObjectId, String dsid,
+                                                 MultipartFile file);
 }

@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.Datastream;
 
 import jakarta.validation.*;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -49,6 +50,41 @@ public class DatastreamTest extends UnitTest {
 
     }
 
+
+  }
+
+  @Nested
+  public class DeriveProjectAbbr {
+
+    @Test
+    public void derivesExpectedProjectAbbr(){
+
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+      datastream.setDigitalObject(
+          TestDigitalObject.generate()
+      );
+     String projectAbbr = datastream.deriveProjectAbbr();
+     Assertions.assertEquals(TestDigitalObject.DIGITAL_OBJECT_PROJECT_ABBR.getValue(), projectAbbr);
+    }
+
+    @Test
+    public void derivesExpectedProjectAbbrWhenMultipleDots(){
+
+      Datastream datastream = new Datastream();
+      datastream.setDsid("dsid");
+
+      final String TEST_PROJECT_ABBR = "testmal";
+      final String TEST_OBJECT_ID =  TEST_PROJECT_ABBR + ".rudi1.5.4";
+
+      var testObject = TestDigitalObject.generate(TEST_PROJECT_ABBR, TEST_OBJECT_ID);
+
+      datastream.setDigitalObject(testObject);
+
+      String derivedProjectAbbr = datastream.deriveProjectAbbr();
+      Assertions.assertEquals(TEST_PROJECT_ABBR, derivedProjectAbbr);
+
+    }
 
   }
 
@@ -182,7 +218,19 @@ public class DatastreamTest extends UnitTest {
       org.assertj.core.api.Assertions.assertThat(violationSet.size()).isEqualTo(0);
     }
 
+    @Test
+    public void defaultArchivalPolicyIsDefault() {
+      Datastream datastream = TestDatastream.generate();
+      Assertions.assertEquals(ArchivalPolicy.DEFAULT, datastream.getArchivalPolicy());
+    }
 
+    @Test
+    public void raisesViolationIfArchivalPolicyIsNull() {
+      Datastream datastream = TestDatastream.generate();
+      datastream.setArchivalPolicy(null);
+      Set<ConstraintViolation<Datastream>> violations = validator.validate(datastream);
+      org.assertj.core.api.Assertions.assertThat(violations).isNotEmpty();
+    }
 
 
   }

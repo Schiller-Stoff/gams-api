@@ -2,7 +2,10 @@ package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -60,7 +63,6 @@ public interface IDigitalObjectService {
   DigitalObjectCompactDTO findDigitalObjectCompactDTOById(String id);
 
 
-
   /**
    * Find all digital objects for a given project and set of tags.
    * @param projectAbbr project the digital objects belong to
@@ -82,4 +84,23 @@ public interface IDigitalObjectService {
    */
   Set<String> findDistinctTagsByProject(String projectAbbr);
 
+  /**
+   * Allows to create a digital object
+   * @param projectAbbr project abbreviation
+   * @param dto command object to create a digital object
+   * @return created digital object
+   */
+  DigitalObject create(String projectAbbr, DigitalObjectCreateDto dto);
+
+  /**
+   * Selectively updates a digital object's metadata.
+   * Only non-null fields from the patch DTO are applied.
+   *
+   * @param id the digital object ID
+   * @param patch DTO containing only the fields to update
+   * @return the updated digital object as compact DTO
+   * @throws DigitalObjectNotFoundException if the object doesn't exist
+   * @throws DigitalObjectValidationException if the merge would violate invariants
+   */
+  DigitalObjectCompactDTO updateDigitalObject(String id, DigitalObjectUpdateDto patch);
 }

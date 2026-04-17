@@ -9,16 +9,19 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -68,22 +71,19 @@ public class DigitalObject {
   /**
    * Date of publication
    */
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date published;
+  private Instant published;
 
   /**
    * Creation date of the digital object / datastream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @CreationTimestamp
-  private Date created;
+  private Instant created;
 
   /**
    * Last modified date of the digital object / datastream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @UpdateTimestamp
-  private Date modified;
+  private Instant modified;
 
   /**
    * Project to which the digital object belongs to
@@ -137,6 +137,27 @@ public class DigitalObject {
   @Column(name = TAGS_TABLE_NAME)
   @Size(max = 100, message = "Maximum 100 tags allowed per digital object")
   private Set<String> tags = new HashSet<>();
+
+  /**
+   * Tracks if the object was created via ingest.
+   * Immutable history track.
+   */
+  @Column(name = "ingested", nullable = false, updatable = false)
+  private boolean ingested = false;
+
+  /**
+   * Tracks if an object was moved to an archive / repository.
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private ArchiveState archiveState = ArchiveState.NOT_ARCHIVED;
+
+  /**
+   * Describes if a digital object was changed after it's creation
+   * (Handled by by the application - not meant to be set by users).
+   */
+  @Column(name = "modified_after_creation")
+  private boolean modifiedAfterCreation = false;
 
   /**
    * equals and hashCode for JPA entities with DB-generated IDs

@@ -6,6 +6,7 @@ import org.ddh.gamsapi.application.Ingest.exceptions.ExportProcessingException;
 import org.ddh.gamsapi.application.Ingest.exceptions.IngestProcessingException;
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -57,6 +58,20 @@ public class Bag {
   final private Path BAG_DIR_PATH;
 
   /**
+   * MD5 checksum of the sip.json as declared in the bag manifest.
+   * Only populated during ingest (read from manifest-md5.txt).
+   * Null during export (computed on-the-fly in writeManifests).
+   */
+  private String sipJsonMd5Checksum;
+
+  /**
+   * SHA-512 checksum of the sip.json as declared in the bag manifest.
+   * Only populated during ingest (read from manifest-sha512.txt).
+   * Null during export (computed on-the-fly in writeManifests).
+   */
+  private String sipJsonSha512Checksum;
+
+  /**
    * Constructor that takes the path to a local bag directory.
    * Reads the bag from the filesystem and instantiates representing objects accordingly.
    * @param BAG_DIR_PATH path to the local bag directory
@@ -88,15 +103,27 @@ public class Bag {
    */
   private void readBag() {
 
-    this.bagInfo = BagDirectoryReader.readBagInfoFile(this.BAG_DIR_PATH);
-    this.bagMeta = BagDirectoryReader.readBagItTxtFile(this.BAG_DIR_PATH);
+    // first extract bag data from sip.json for essential data
+    BagSipJson bagSipJson = BagDirectoryReader.readSipJson(this.BAG_DIR_PATH);
+
+    try {
+      this.bagInfo = BagDirectoryReader.readBagInfoFile(this.BAG_DIR_PATH);
+      this.bagMeta = BagDirectoryReader.readBagItTxtFile(this.BAG_DIR_PATH);
+    } catch (IngestProcessingException e) {
+      throw new IngestProcessingException("Failed to extract bag-info / bag-meta file for object with id " + bagSipJson.getRecid() + ". " + e.getMessage(), e);
+    }
 
     // read in expected checksum files from bag (e.g. manifest-sha512.txt)
-    var bagPathSha512Map = BagDirectoryReader.readSha512ManifestFile(this.BAG_DIR_PATH);
-    var bagPathMd5Map = BagDirectoryReader.readMd5ManifestFile(this.BAG_DIR_PATH);
-
-    // handle sip json
-    BagSipJson bagSipJson = BagDirectoryReader.readSipJson(this.BAG_DIR_PATH);
+    Map<String,String> bagPathSha512Map;
+    Map<String,String> bagPathMd5Map;
+    try {
+      bagPathSha512Map = BagDirectoryReader.readSha512ManifestFile(this.BAG_DIR_PATH);
+      bagPathMd5Map = BagDirectoryReader.readMd5ManifestFile(this.BAG_DIR_PATH);
+    } catch (IngestProcessingException e){
+      // add string info to the exception message
+      log.error("Ingest error: Failed to extract manifest checksum files for object with id: {}.", bagSipJson.getRecid(), e);
+      throw e;
+    }
 
     String sipJsonMd5 = bagPathMd5Map.get(BagFilePaths.BAG_SIP_JSON.name);
     String sipJsonSHA512 = bagPathSha512Map.get(BagFilePaths.BAG_SIP_JSON.name);
@@ -113,6 +140,10 @@ public class Bag {
       );
     }
 
+    // store on Bag itself — these are manifest/transport metadata
+    this.sipJsonMd5Checksum = sipJsonMd5;
+    this.sipJsonSha512Checksum = sipJsonSHA512;
+
     BagData bagData = BagData.builder()
         .id(bagSipJson.getRecid())
         .project(bagSipJson.getProject())
@@ -126,8 +157,6 @@ public class Bag {
         .mainResource(bagSipJson.getMainResource())
         .tags(bagSipJson.getTags())
         .contentFiles(new HashSet<>())  // this is being populated below
-        .md5Checksum(sipJsonMd5)
-        .sha512Checksum(sipJsonSHA512)
         // bag related fields
         .schema(bagSipJson.getSchema())
         .createdBy(bagSipJson.getCreated_by())
@@ -144,13 +173,13 @@ public class Bag {
 
       if(md5.length() != 32){
         throw new IngestProcessingException(
-            "Md5 checksum for file " + contentFile.getBagpath() + " is unexpectedly not valid: " + md5
+            "Md5 checksum for file " + contentFile.getBagpath() + " is unexpectedly not valid: " + md5 + " for bag: " + bagSipJson.getRecid()
         );
       }
 
       if(sha512.length() != 128){
         throw new IngestProcessingException(
-            "SHA512 checksum for file " + contentFile.getBagpath() + " is unexpectedly not valid: " + sha512
+            "SHA512 checksum for file " + contentFile.getBagpath() + " is unexpectedly not valid: " + sha512 + " for bag: " + bagSipJson.getRecid() + "."
         );
       }
 
@@ -167,6 +196,7 @@ public class Bag {
           .sha512Checksum(sha512)
           .tags(contentFile.getTags())
           .lang(contentFile.getLang())
+          .archivalPolicy(parseArchivalPolicy(contentFile.getArchivalPolicy()))
           .build();
 
       bagData.getContentFiles().add(bagFile);
@@ -420,6 +450,22 @@ public class Bag {
       result.append(String.format("%02x", b));
     }
     return result.toString();
+  }
+
+  /**
+   * Safely parses archival policy from sip.json string value.
+   * Returns DEFAULT for null, empty, or unrecognized values.
+   */
+  private ArchivalPolicy parseArchivalPolicy(String value) {
+    if (value == null || value.isBlank()) {
+      return ArchivalPolicy.DEFAULT;
+    }
+    try {
+      return ArchivalPolicy.valueOf(value.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      log.warn("Unknown archivalPolicy value '{}' in sip.json, defaulting to DEFAULT", value);
+      return ArchivalPolicy.DEFAULT;
+    }
   }
 
 }

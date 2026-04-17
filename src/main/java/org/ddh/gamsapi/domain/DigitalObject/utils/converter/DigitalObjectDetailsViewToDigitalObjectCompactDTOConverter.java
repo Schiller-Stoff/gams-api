@@ -24,6 +24,9 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .publisher(source.getPublisher())
                 .funder(source.getFunder())
                 .tags(source.getTags() != null ? source.getTags() : new HashSet<>())
+                .isIngested(source.isIngested())
+                .archiveState(source.getArchiveState())
+                .modifiedAfterCreation(source.isModifiedAfterCreation())
                 .build();
     }
 }

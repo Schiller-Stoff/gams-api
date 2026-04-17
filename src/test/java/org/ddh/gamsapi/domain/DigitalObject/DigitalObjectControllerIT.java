@@ -3,22 +3,31 @@ package org.ddh.gamsapi.domain.DigitalObject;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestUser;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,8 +42,13 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   private TestDataSet testDataSet;
 
@@ -44,6 +58,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @BeforeEach
   public void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
+    // needed when changing digital objects
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -53,9 +70,11 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     public void deleteDigitalObjectWhenItExists() throws Exception {
 
       // Act
-      mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+              )
           .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is3xxRedirection());
+          .andExpect(status().isOk());
 
       // Assert
       org.assertj.core.api.Assertions.assertThat(
@@ -69,7 +88,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     @Test
     public void deleteObjectDoesShouldThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
       mockMvc.perform(MockMvcRequestBuilders.delete(
-                  "/api/v1/projects/{projectAbbr}/objects/{id}",
+                  "/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                   testDataSet.project().getProjectAbbr(), "nonExistentId")
               .contentType(MediaType.APPLICATION_JSON))
           .andExpect(status().is4xxClientError());
@@ -86,7 +105,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void headDigitalObjectReturns200ifObjectExists() throws Exception {
         // Act
-        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
                     testDataSet.digitalObject().getId())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -96,7 +115,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
         // Act
-        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
                     "nonExistentId")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -107,7 +126,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       public void headDigitalObjectReturnsLastModifiedDate() throws Exception {
 
         // Act
-        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
                     testDataSet.digitalObject().getId())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -117,31 +136,27 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void headDigitalObjectReturnsExpectedLastModifiedDate() throws Exception {
 
-        // expected date
-        Date expectedLastModified = testDataSet.digitalObject().getModified();
-        // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-        expectedLastModified.setTime(expectedLastModified.getTime() / 1000 * 1000);
+        // expected: truncate to seconds since RFC 1123 has no sub-second precision
+        Instant expectedLastModified = testDataSet.digitalObject().getModified()
+            .truncatedTo(ChronoUnit.SECONDS);
 
         // Act
         String digitalObjectLastModified = mockMvc.perform(
-            MockMvcRequestBuilders.head(
-                "/api/v1/projects/{projectAbbr}/objects/{id}",
+                MockMvcRequestBuilders.head(
+                    "/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
                     testDataSet.digitalObject().getId()))
             .andReturn().getResponse().getHeader("Last-Modified");
 
         org.assertj.core.api.Assertions.assertThat(digitalObjectLastModified).isNotNull();
 
-        // parse lastModified to Date
-        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(digitalObjectLastModified, formatter);
-        ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-        Date projectLastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+        // parse Last-Modified header (RFC 1123) to Instant
+        Instant lastModifiedFromHeader = ZonedDateTime
+            .parse(digitalObjectLastModified, DateTimeFormatter.RFC_1123_DATE_TIME)
+            .toInstant();
 
-        org.assertj.core.api.Assertions.assertThat(projectLastModifiedHeaderValueAsDate)
-            .isNotNull()
+        org.assertj.core.api.Assertions.assertThat(lastModifiedFromHeader)
             .isEqualTo(expectedLastModified);
-
       }
 
     }
@@ -154,7 +169,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       public void headDigitalObjectReturns200ifObjectExists() throws Exception {
 
         // Act
-        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
                     testDataSet.digitalObject().getId())
                 .contentType(MediaType.APPLICATION_JSON))
@@ -165,7 +180,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
         // Act
-        mockMvc.perform(MockMvcRequestBuilders.head("/api/v1/projects/{projectAbbr}/objects/{id}",
+        mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
                     "nonExistentId")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -179,7 +194,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         // assert
         mockMvc.perform(
             MockMvcRequestBuilders.head(
-                "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+                "/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
             )
         ).andExpect(
             MockMvcResultMatchers.header().exists("Last-Modified"));
@@ -198,27 +213,28 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         // Act
         String lastModifiedHeaderValue = mockMvc.perform(
             MockMvcRequestBuilders.head(
-                "/api/v1/projects/{projectAbbr}/objects/{id}/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
-            )
+                    "/api/curation/v1/projects/{projectAbbr}/objects/{id}",
+                    testDataSet.project().getProjectAbbr(),
+                    testDataSet.digitalObject().getId()
+                )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         ).andReturn().getResponse().getHeader("Last-Modified");
 
         // Assert
         org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValue).isNotNull();
 
-        // parse lastModified to Date
-        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(lastModifiedHeaderValue, formatter);
-        ZonedDateTime localZonedDateTime = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault());
-        Date lastModifiedHeaderValueAsDate = Date.from(localZonedDateTime.toInstant());
+        // parse Last-Modified header (RFC 1123) to Instant
+        Instant lastModifiedFromHeader = ZonedDateTime
+            .parse(lastModifiedHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME)
+            .toInstant();
 
-        // expected date
-        Date expectedDate = testDataSet.digitalObject().getModified();
-        // remove milliseconds (the database works with milliseconds but the header does not - because of ISO RFC 1123)
-        expectedDate.setTime(expectedDate.getTime() / 1000 * 1000);
+        // expected: truncate to seconds since RFC 1123 has no sub-second precision
+        Instant expected = testDataSet.digitalObject().getModified()
+            .truncatedTo(ChronoUnit.SECONDS);
 
-        // assert same time
-        org.assertj.core.api.Assertions.assertThat(lastModifiedHeaderValueAsDate).hasSameTimeAs(expectedDate);
-
+        // assert
+        org.assertj.core.api.Assertions.assertThat(lastModifiedFromHeader)
+            .isEqualTo(expected);
       }
 
       /**
@@ -232,7 +248,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
         final String MALFORMED_DATE = "PETER";
 
-        final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         mockMvc.perform(
             MockMvcRequestBuilders
@@ -257,7 +273,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         ZonedDateTime futureDate = ZonedDateTime.now(ZoneId.systemDefault()).plusYears(1);
         String ifModifiedSinceHeader = DateTimeFormatter.RFC_1123_DATE_TIME.format(futureDate);
 
-        final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams", testDataSet.digitalObject().getProject().getProjectAbbr(), testDataSet.digitalObject().getId());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.digitalObject().getProject().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         mockMvc.perform(
             MockMvcRequestBuilders
@@ -287,7 +303,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @BeforeEach
       public void setup() {
           REQUEST_URL = String.format(
-              "/api/v1/projects/%s/objects",
+              "/api/curation/v1/projects/%s/objects",
               testDataSet.project().getProjectAbbr()
           );
       }
@@ -374,7 +390,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @BeforeEach
       public void setup() throws Exception {
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s",
+            "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.digitalObject().getProject().getProjectAbbr(),
             testDataSet.digitalObject().getId()
         );
@@ -403,7 +419,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
         DigitalObject additionalDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
-        final String URL = String.format("/api/v1/projects/%s/objects/ids", testDataSet.project().getProjectAbbr());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/ids", testDataSet.project().getProjectAbbr());
 
         // Act
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(URL)
@@ -414,13 +430,6 @@ public class DigitalObjectControllerIT extends IntegrationTest {
         // Assert
         org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
             .contains(testDataSet.digitalObject().getId(), additionalDigitalObject.getId());
-      }
-
-      @Test
-      public void getDigitalObjectContainsExpectedChecksums(){
-        org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
-            .contains(testDataSet.digitalObject().getBaseMetadata().getMd5Checksum())
-            .contains(testDataSet.digitalObject().getBaseMetadata().getSha512Checksum());
       }
 
       @Test
@@ -439,7 +448,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void getProjectTagsReturnsExpectedTags() throws Exception {
 
-        String url = String.format("/api/v1/projects/%s/objects/tags", testDataSet.project().getProjectAbbr());
+        String url = String.format("/api/curation/v1/projects/%s/objects/tags", testDataSet.project().getProjectAbbr());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -465,6 +474,454 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
+  public class PATCHDigitalObject {
+
+    @Nested
+    public class PatchDigitalObject {
+
+      @Test
+      public void PATCHAllowsToUpdateTitle() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        final String NEW_TITLE = "Updated title";
+        final String body = "{\"title\": \"" + NEW_TITLE + "\"}";
+
+        String response = mockMvc.perform(
+                MockMvcRequestBuilders.patch(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(body)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        org.assertj.core.api.Assertions.assertThat(response).contains(NEW_TITLE);
+
+        // Verify via repository
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions. assertThat(
+                updated.getBaseMetadata().getTitle())
+            .isEqualTo(NEW_TITLE);
+      }
+
+      @Test
+      public void PATCHPreservesUnchangedFields() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
+        String originalPublisher = testDataSet.digitalObject().getPublisher();
+
+        // Only update description
+        final String body = "{\"description\": \"new desc\"}";
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getDescription()).isEqualTo("new desc");
+        org.assertj.core.api.Assertions. assertThat(updated.getBaseMetadata().getRights()).isEqualTo(originalRights);
+        org.assertj.core.api.Assertions.assertThat(updated.getPublisher()).isEqualTo(originalPublisher);
+      }
+
+      @Test
+      public void PATCHRejectsEmptyTitle() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        final String body = "{\"title\": \"\"}";
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void PATCHRequiresRequestBody() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+        ).andExpect(status().is4xxClientError());
+      }
+
+      @Test
+      public void PATCHReturns404ForNonExistentObject() throws Exception {
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch("/api/curation/v1/projects/test/objects/test.nonexistent")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\": \"test\"}")
+        ).andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void PATCHAllowsToUpdateMultipleFields() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        final String body = """
+            {
+                "title": "New Title",
+                "description": "New Description",
+                "funder": "New Funder"
+            }
+            """;
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo("New Title");
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getDescription()).isEqualTo("New Description");
+        org.assertj.core.api.Assertions.assertThat(updated.getFunder()).isEqualTo("New Funder");
+      }
+
+      @Test
+      public void PATCHUpdatesModificationTimestamp() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        Instant beforeUpdate = Instant.now();
+        Thread.sleep(50); // ensure timestamp difference
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\": \"Timestamp Test\"}")
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
+      }
+
+      @Test
+      public void setsMainResourceViaJson() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String body = String.format(
+            "{\"mainResource\": \"%s\"}",
+            testDataSet.mainDatastream().getDsid()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getMainResource())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
+      }
+
+      @Test
+      public void rejectsInvalidDsid() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"mainResource\": \"NONEXISTENT_DSID\"}")
+        ).andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void clearsMainResourceViaEmptyString() throws Exception {
+        // Pre-set mainResource
+        DigitalObject obj = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        obj.setMainResource(testDataSet.mainDatastream().getDsid());
+        digitalObjectRepository.save(obj);
+
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.patch(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"mainResource\": \"\"}")
+        ).andExpect(status().isOk());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getMainResource()).isNull();
+      }
+
+    }
+
+    @Nested
+    public class PatchDigitalObjectFromForm {
+
+      private String buildUrl() {
+        return String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+      }
+
+      private String buildRedirectUrl() {
+        return "/api/curation/v1/projects/" + testDataSet.project().getProjectAbbr()
+            + "/objects/" + testDataSet.digitalObject().getId();
+      }
+
+      @Test
+      public void updatesTitleAndRedirects() throws Exception {
+        final String NEW_TITLE = "Updated via form";
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", NEW_TITLE)
+            )
+            .andExpect(status().is3xxRedirection())
+            .andExpect(MockMvcResultMatchers.redirectedUrl(buildRedirectUrl()));
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo(NEW_TITLE);
+      }
+
+      @Test
+      public void updatesMultipleFieldsSimultaneously() throws Exception {
+        final String NEW_TITLE = "Form Title";
+        final String NEW_DESCRIPTION = "Form Description";
+        final String NEW_FUNDER = "Form Funder";
+        final String NEW_RIGHTS = "CC BY 4.0";
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", NEW_TITLE)
+                    .param("description", NEW_DESCRIPTION)
+                    .param("funder", NEW_FUNDER)
+                    .param("rights", NEW_RIGHTS)
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo(NEW_TITLE);
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getDescription()).isEqualTo(NEW_DESCRIPTION);
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getRights()).isEqualTo(NEW_RIGHTS);
+        org.assertj.core.api.Assertions.assertThat(updated.getFunder()).isEqualTo(NEW_FUNDER);
+      }
+
+      @Test
+      public void preservesUnchangedFields() throws Exception {
+        String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
+        String originalCreator = testDataSet.digitalObject().getBaseMetadata().getCreator();
+        String originalPublisher = testDataSet.digitalObject().getPublisher();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "Only title changes")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getTitle()).isEqualTo("Only title changes");
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getRights()).isEqualTo(originalRights);
+        org.assertj.core.api.Assertions.assertThat(updated.getBaseMetadata().getCreator()).isEqualTo(originalCreator);
+        org.assertj.core.api.Assertions.assertThat(updated.getPublisher()).isEqualTo(originalPublisher);
+      }
+
+      @Test
+      public void parsesCommaSeparatedTagsCorrectly() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("tagsCommaSeparated", "alpha, beta, gamma")
+                    .param("tagsPresent", "true")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags())
+            .containsExactlyInAnyOrder("alpha", "beta", "gamma");
+      }
+
+      @Test
+      public void handlesWhitespaceAndEmptyEntriesInTags() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("tagsCommaSeparated", " tag1 ,  tag2 ,, , tag3 ")
+                    .param("tagsPresent", "true")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags())
+            .containsExactlyInAnyOrder("tag1", "tag2", "tag3");
+      }
+
+      @Test
+      public void removesAllTagsWhenInputIsEmpty() throws Exception {
+        // Precondition: object has tags
+        org.assertj.core.api.Assertions.assertThat(testDataSet.digitalObject().getTags()).isNotEmpty();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("tagsCommaSeparated", "")
+                    .param("tagsPresent", "true")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags()).isEmpty();
+      }
+
+      @Test
+      public void tagsUnchangedWhenTagsNotSubmitted() throws Exception {
+        Set<String> originalTags = testDataSet.digitalObject().getTags();
+
+        // No tagsCommaSeparated and no tagsPresent param
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "Tag preservation test")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getTags())
+            .containsExactlyInAnyOrderElementsOf(originalTags);
+      }
+
+      @Test
+      public void rejectsEmptyRequiredFields() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "")
+            )
+            .andExpect(status().isBadRequest());
+      }
+
+      @Test
+      public void returns404ForNonExistentObject() throws Exception {
+        String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s.nonexistent",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.project().getProjectAbbr()
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(url)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "irrelevant")
+            )
+            .andExpect(status().isNotFound());
+      }
+
+      @Test
+      public void updatesModificationTimestamp() throws Exception {
+        Instant beforeUpdate = Instant.now();
+        Thread.sleep(50);
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(buildUrl())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("title", "Timestamp form test")
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getModified()).isAfter(beforeUpdate);
+      }
+
+      @Test
+      public void setsMainResourceViaForm() throws Exception {
+        final String url = String.format(
+            "/api/curation/v1/projects/%s/objects/%s",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        mockMvc.perform(
+                MockMvcRequestBuilders.patch(url)
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .param("mainResource", testDataSet.mainDatastream().getDsid())
+            )
+            .andExpect(status().is3xxRedirection());
+
+        DigitalObject updated = digitalObjectRepository.findById(
+            testDataSet.digitalObject().getId()
+        ).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(updated.getMainResource())
+            .isEqualTo(testDataSet.mainDatastream().getDsid());
+      }
+    }
+
+  }
+
+  @Nested
   public class WebclientTests {
 
     @Nested
@@ -475,7 +932,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       public void getDigitalObjectRendersExpectedViewValues() throws Exception {
 
 
-        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+        String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -511,7 +968,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
         var additionalDatastream = testDataBuilder.addRandomDatastream(testDataSet);
 
-        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+        String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -535,7 +992,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
 
 
-        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+        String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -567,7 +1024,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void getDigitalObjectContainsExpectedFunder() throws Exception {
 
-        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+        String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -588,30 +1045,47 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
       }
 
-      @Test
-      public void getDigitalDigitalObjectContainsExpectedChecksums() throws Exception {
-        String url = String.format("/api/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
+      @Nested
+      public class CreateObjectFromForm {
 
-        MvcResult mvcResult = mockMvc.perform(
-                MockMvcRequestBuilders.get(url)
-                    .accept(MediaType.TEXT_HTML)
-                    .contentType(MediaType.TEXT_HTML)
-            )
-            .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.view().name("DigitalObject/show"))
-            .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
-            .andReturn();
+        @Test
+        public void createsExpectedObject() throws Exception {
 
-        // both checksums should be present in returned view
-        org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getContentAsString())
-            .contains(
-                testDataSet.digitalObject().getBaseMetadata().getMd5Checksum(),
-                testDataSet.digitalObject().getBaseMetadata().getSha512Checksum()
-            );
+          final String ID_SUFFIX = "demo123";
+          final String TEST_OBJECT_ID = testDataSet.project().getProjectAbbr() + "." + ID_SUFFIX;
+          final String URL = "/api/curation/v1/projects/" + testDataSet.project().getProjectAbbr() + "/objects";
+
+          mockMvc.perform(
+              MockMvcRequestBuilders.post(URL)
+                  .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                  .param("idSuffix", ID_SUFFIX)
+                  .param("title", TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue())
+                  .param("creator", TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue())
+                  .param("rights", TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue())
+                  .param("publisher", TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue())
+                  .param("description", TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue())
+          )
+              .andExpect(status().is3xxRedirection());
+
+          // Verify object was persisted
+          var created = digitalObjectRepository.findById(TEST_OBJECT_ID);
+          org.assertj.core.api.Assertions.assertThat(created).isPresent();
+
+          var digitalObject = created.get();
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getId()).isEqualTo(TEST_OBJECT_ID);
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getTitle()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_TITLE.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getCreator()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_CREATOR.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getRights()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_RIGHTS.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getPublisher()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_PUBLISHER.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getBaseMetadata().getDescription()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_DESCRIPTION.getValue());
+          org.assertj.core.api.Assertions.assertThat(digitalObject.getProject().getProjectAbbr())
+              .isEqualTo(testDataSet.project().getProjectAbbr());
+
+        }
+
       }
 
     }
-
 
     @Nested
     public class DigitalObjectOverview {
@@ -619,7 +1093,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       @Test
       public void getDigitalObjectsContainsExpectedTags() throws Exception {
 
-        String url = String.format("/api/v1/projects/%s/objects", testDataSet.project().getProjectAbbr());
+        String url = String.format("/api/curation/v1/projects/%s/objects", testDataSet.project().getProjectAbbr());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(url)
@@ -646,7 +1120,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getObjectJsonReturnsDigitalObjectWhenItExists() throws Exception {
 
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -657,7 +1131,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Test
   public void getObjectJsonThrowsExceptionWhenDigitalObjectDoesNotExist() throws Exception {
-    mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), "nonExistentId")
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), "nonExistentId")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
@@ -665,7 +1139,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Test
   public void getProjectObjectsJsonReturnsEmptyListWhenNoDigitalObjectsExistForProject() throws Exception {
     testDataBuilder.removeAllExceptProjects(testDataSet);
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -678,7 +1152,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
   @Test
   public void getProjectObjectsJsonReturnsDigitalObjectsWhenTheyExistForProject() throws Exception {
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();
@@ -693,7 +1167,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
     final DigitalObject additionalDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
-    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects?style=idlist", testDataSet.project().getProjectAbbr())
+    MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects?style=idlist", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
         .andReturn();

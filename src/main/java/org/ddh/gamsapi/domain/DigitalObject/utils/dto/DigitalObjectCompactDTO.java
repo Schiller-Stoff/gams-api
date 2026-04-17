@@ -4,7 +4,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.*;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
+import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
+
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -24,11 +27,11 @@ public class DigitalObjectCompactDTO {
 
     private String objectType;
 
-    private Date published;
+    private Instant published;
 
-    private Date created;
+    private Instant created;
 
-    private Date modified;
+    private Instant modified;
 
     private String projectAbbr;
 
@@ -45,6 +48,12 @@ public class DigitalObjectCompactDTO {
     private Set<String> tags;
 
     private DatastreamMainResourceDto mainResource;
+
+    private boolean isIngested;
+
+    private ArchiveState archiveState;
+
+    private boolean modifiedAfterCreation;
 
     /**
      * Map of Dublin Core entries, where the key is the name of the entry and the value is a list of

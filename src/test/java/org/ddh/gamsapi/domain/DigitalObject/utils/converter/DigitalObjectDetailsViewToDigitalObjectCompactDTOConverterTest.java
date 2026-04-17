@@ -1,12 +1,15 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.converter;
 
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.UnitTest;
+
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 
@@ -45,6 +48,12 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
 
     Assertions.assertEquals(digitalObjectCompactDTO.getTags(), testObjectDetailsView.getTags());
 
+    Assertions.assertEquals(digitalObjectCompactDTO.isIngested(), testObjectDetailsView.isIngested());
+
+    Assertions.assertEquals(digitalObjectCompactDTO.getArchiveState(), testObjectDetailsView.getArchiveState());
+
+    Assertions.assertEquals(digitalObjectCompactDTO.isModifiedAfterCreation(), testObjectDetailsView.isModifiedAfterCreation());
+
   }
 
   /**
@@ -52,9 +61,9 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
    */
   private static class DigitalObjectDetailsViewImpl implements DigitalObjectDetailsView {
 
-    private final Date created = new Date();
-    private final Date modified = new Date();
-    private final Date published = new Date();
+    private final Instant created = Instant.now();
+    private final Instant modified = Instant.now();
+    private final Instant published = Instant.now();
 
     @Override
     public String getId() {
@@ -82,17 +91,17 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     }
 
     @Override
-    public Date getCreated() {
+    public Instant getCreated() {
       return created;
     }
 
     @Override
-    public Date getPublished() {
+    public Instant getPublished() {
       return published;
     }
 
     @Override
-    public Date getModified() {
+    public Instant getModified() {
       return modified;
     }
 
@@ -126,6 +135,20 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
       return "test-mainresource";
     }
 
+    @Override
+    public boolean isIngested(){
+      return true;
+    }
+
+    @Override
+    public ArchiveState getArchiveState(){
+      return ArchiveState.NOT_ARCHIVED;
+    }
+
+    @Override
+    public boolean isModifiedAfterCreation() {
+      return false;
+    }
   }
 
 

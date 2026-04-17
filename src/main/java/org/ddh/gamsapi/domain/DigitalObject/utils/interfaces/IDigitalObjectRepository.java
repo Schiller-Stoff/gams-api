@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -7,9 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -91,7 +91,7 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * @return The last modified date of the digital object.
    */
   @Query("SELECT MAX(do.modified) FROM DigitalObject do WHERE do.project.projectAbbr = :projectAbbr")
-  Optional<Date> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
+  Optional<Instant> findMaxLastModifiedDateByProjectAbbr(@Param("projectAbbr") String projectAbbr);
 
   /**
    * Finds digital objects by project and tags using AND logic.
@@ -146,5 +146,23 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
       String idPrefix,
       Pageable pageable
   );
+
+
+  /**
+   * Checks if any digital objects exist for the given project.
+   * Used by ProjectService to provide a clear error message before delete.
+   * PERFORMANCE: Spring Data JPA translates this to SELECT EXISTS(...) with
+   * an indexed lookup on project_project_abbr. O(1) regardless of object count.
+   *
+   * @param projectAbbr the project abbreviation
+   * @return true if at least one digital object belongs to this project
+   */
+  boolean existsByProject_ProjectAbbr(String projectAbbr);
+
+  /**
+   * Count all digital objects for a given project.
+   * Uses the indexed foreign key column — efficient even with millions of rows.
+   */
+  long countByProject_ProjectAbbr(String projectAbbr);
 
 }

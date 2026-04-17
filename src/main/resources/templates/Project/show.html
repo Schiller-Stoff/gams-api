@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:replace="~{fragments/general.html :: headtemplate}" />
+
+<body>
+<!--  Body Wrapper -->
+<div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+     data-sidebar-position="fixed" data-header-position="fixed">
+
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/projects">projects</a></li>
+          <li class="breadcrumb-item active" th:text="${project.projectAbbr}"></li>
+        </ol>
+      </nav>
+
+      <!-- Page Title -->
+      <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+        <span th:text="${project.projectAbbr}"></span>
+      </h2>
+      <p th:if="${project.title}" th:text="${project.title}">Project title</p>
+      <p th:unless="${project.title}" class="text-muted">No title provided</p>
+
+      <!-- Quick Actions -->
+      <a class="btn btn-outline-primary"
+         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'">
+        <i class="ti ti-files me-1"></i>Browse objects
+      </a>
+      <a class="btn btn-outline-primary"
+         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/web'">
+        <i class="ti ti-upload me-1"></i>Deploy web site
+      </a>
+      <a class="btn btn-outline-primary"
+         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/ids'">
+        <i class="ti ti-list me-1"></i>View object ids
+      </a>
+
+      <br/>
+      <br/>
+
+      <!-- ================================================================== -->
+      <!-- STATISTICS                                                          -->
+      <!-- ================================================================== -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-chart-bar me-2 text-primary"></i>Project Statistics
+          </h3>
+          <div>
+            <a class="mb-0 me-1" target="_blank"
+               th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '?format=json'">
+              <i class="ti ti-file"></i>JSON
+            </a>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>Digital Objects</small>
+                <p class="fw-bold mb-0" th:text="${project.statistics.digitalObjectCount}">0</p>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>Datastreams</small>
+                <p class="fw-bold mb-0" th:text="${project.statistics.datastreamCount}">0</p>
+              </li>
+            </ul>
+          </div>
+          <div class="col-md-4">
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>Total Storage</small>
+                <p class="fw-bold mb-0"
+                   th:text="${#numbers.formatDecimal(project.statistics.totalStorageBytes / 1048576.0, 1, 'COMMA', 2, 'POINT')} + ' MB'">0 MB</p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <br/>
+
+      <!-- ================================================================== -->
+      <!-- PROJECT METADATA (editable form)                                    -->
+      <!-- ================================================================== -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-database me-2 text-primary"></i>Project Metadata
+          </h3>
+        </div>
+        <div>
+          <div class="mt-2 mb-3">
+            <div id="metadata-edit-form" class="mt-3">
+              <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
+                    method="POST">
+                <div class="mb-3">
+                  <label class="form-label">Title</label>
+                  <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control"
+                         maxlength="255"
+                         th:value="${project.title}"
+                         placeholder="e.g. Medieval Memory Online">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea th:readonly="${!isAuthenticated}" name="description" class="form-control" rows="4"
+                            maxlength="5000"
+                            th:text="${project.description}"
+                            placeholder="Describe the project's purpose and scope"></textarea>
+                </div>
+
+                <div sec:authorize="isAuthenticated()">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="ti ti-check me-1"></i>Save changes
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+          <br/>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- AUDITING METADATA                                                   -->
+      <!-- ================================================================== -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-id me-2 text-primary"></i>Auditing Metadata
+          </h3>
+        </div>
+        <div>
+          <ul class="list-group border">
+            <li class="list-group-item">
+              <small>project abbreviation</small>
+              <p th:text="${project.projectAbbr}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>created</small>
+              <p th:text="${project.created}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>created by</small>
+              <p th:text="${project.createdBy} ?: 'N/A'"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified</small>
+              <p th:text="${project.modified}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified by</small>
+              <p th:text="${project.modifiedBy} ?: 'N/A'"></p>
+            </li>
+          </ul>
+          <br/>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- PROJECT MANAGEMENT — only visible for authenticated users           -->
+      <!-- ================================================================== -->
+      <div sec:authorize="isAuthenticated()" class="mb-3 mt-5">
+        <div>
+          <h3 class="h5">
+            <i class="ti ti-settings me-2 text-primary"></i>Project Management
+          </h3>
+          <p class="text-muted small">
+            Actions and tools for managing this project.
+          </p>
+        </div>
+
+        <div class="mb-3">
+          <h4 class="h6">Digital Objects</h4>
+          <a class="btn btn-outline-primary"
+             th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'">
+            <i class="ti ti-files me-1"></i>Manage Objects
+          </a>
+        </div>
+
+        <!-- Placeholder for future functionality -->
+        <!--
+        <div class="mb-3">
+          <h4 class="h6">Content Ingest</h4>
+          <a class="btn btn-outline-primary"
+             th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/ingest'">
+            <i class="ti ti-upload me-1"></i>Ingest Content
+          </a>
+        </div>
+
+        <div class="mb-3">
+          <h4 class="h6">Website Deployment</h4>
+          <a class="btn btn-outline-primary" href="#">
+            <i class="ti ti-world me-1"></i>Deploy Website
+          </a>
+        </div>
+
+        <div class="mb-3">
+          <h4 class="h6">Integration Services</h4>
+          <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr}}"
+                method="POST"
+                class="d-inline"
+                onsubmit="return confirm('Reindex ALL objects in this project across all integration services?');">
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="ti ti-refresh me-1"></i>Reindex All
+            </button>
+          </form>
+        </div>
+        -->
+
+        <!-- Danger Zone -->
+        <div class="mb-3 mt-4">
+          <h4 class="h6 text-danger">Danger Zone</h4>
+          <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
+                method="POST"
+                class="d-inline"
+                th:attr="onsubmit='return confirm(\'Delete project ' + ${project.projectAbbr} + '? This will delete ALL digital objects and datastreams. This cannot be undone.\')'">
+            <input type="hidden" name="_method" value="DELETE" />
+            <button type="submit" class="btn btn-outline-danger">
+              <i class="ti ti-trash me-1"></i>Delete Project
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
+  </div>
+</div>
+</body>
+
+</html>

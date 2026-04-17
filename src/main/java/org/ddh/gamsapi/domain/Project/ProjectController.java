@@ -1,13 +1,16 @@
 package org.ddh.gamsapi.domain.Project;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Project.ProjectModification.IProjectModificationService;
 import org.ddh.gamsapi.domain.Project.ProjectModification.ProjectModification;
+import org.ddh.gamsapi.domain.Project.dto.ProjectDetailsDTO;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectInvalidDateFormatException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
@@ -15,7 +18,10 @@ import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
@@ -31,14 +37,14 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/v1/projects" })
+@RequestMapping({"/api/curation/v1/projects" })
 @Tag(name = OpenAPIConfig.PROJECTS_TAG, description = OpenAPIConfig.PROJECTS_TAG_DESCRIPTION)
 public class ProjectController {
 
   private final IProjectService projectService;
   private final IProjectModificationService projectModificationService;
 
-  @PatchMapping(path = "/{projectAbbr}")
+  @PatchMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   @Operation(
       summary = "Change a project's metadata",
@@ -57,6 +63,22 @@ public class ProjectController {
     // project abbreviation is set via path variable and not via json
     project.setProjectAbbr(projectAbbr);
     return projectService.updateProject(project);
+  }
+
+  @Hidden
+  @PatchMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String changeProjectFromForm(
+      @PathVariable String projectAbbr,
+      @RequestParam String description,
+      @RequestParam String title
+  ) {
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description(description)
+        .title(title)
+        .build();
+    projectService.updateProject(project);
+    return "redirect:/api/curation/v1/projects";
   }
 
   @PutMapping(path = "/{projectAbbr}")
@@ -90,6 +112,36 @@ public class ProjectController {
           );
     });
 
+  }
+
+  /**
+   * Creates a project from a Thymeleaf form submission.
+   * Redirects back to the projects overview after creation.
+   */
+  @Hidden
+  @PutMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String createProjectFromForm(
+      @PathVariable String projectAbbr,
+      @RequestParam(required = false) String description
+  ) {
+    Project project = ProjectBuilder.builder()
+        .projectAbbr(projectAbbr)
+        .description(description)
+        .build();
+    projectService.save(project);
+    return "redirect:/api/curation/v1/projects";
+  }
+
+  /**
+   * Deletes a project and redirects back to the projects overview.
+   *
+   */
+  @Hidden
+  @DeleteMapping(path = "/{projectAbbr}", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String deleteProjectFromForm(@PathVariable String projectAbbr) {
+    Project project = projectService.findByAbbr(projectAbbr);
+    projectService.deleteProject(project);
+    return "redirect:/api/curation/v1/projects";
   }
 
   @DeleteMapping(path = "/{projectAbbr}")
@@ -134,23 +186,68 @@ public class ProjectController {
     );
   }
 
-  @GetMapping(path = "/{projectAbbr}")
+  /**
+   * Get project details as JSON.
+   * Returns project metadata and lightweight aggregate statistics
+   * (digital object count, datastream count, total storage).
+   *
+   * @param projectAbbr the project abbreviation
+   * @return project details DTO
+   */
+  @GetMapping(produces = {
+      MimeTypeUtils.APPLICATION_JSON_VALUE,
+      MimeTypeUtils.APPLICATION_XML_VALUE
+  }, value = "/{projectAbbr}")
   @ResponseBody
   @Operation(
-      summary = "A single project by proj́ect abbreviation and metadata",
-      description = "Returns a single project by its abbreviation with all metadata.",
+      summary = "Get project details",
+      description = "Retrieves project metadata and aggregate statistics including "
+          + "digital object count, datastream count, and total storage size.",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Project found",
-              content = @Content(mediaType = MimeTypeUtils.APPLICATION_JSON_VALUE)),
-          @ApiResponse(responseCode = "404", description = "Project not found",
-              content = @Content)
+          @ApiResponse(
+              responseCode = "200",
+              description = "Successfully retrieved project details",
+              content = @Content(schema = @Schema(implementation = ProjectDetailsDTO.class))
+          ),
+          @ApiResponse(
+              responseCode = "404",
+              description = "Project not found",
+              content = @Content
+          )
       }
   )
-  public Project getProjectByAbbr(@PathVariable String projectAbbr) {
-    return projectService.findProject(projectAbbr);
+  public ProjectDetailsDTO getProjectDetails(@PathVariable String projectAbbr) {
+    return projectService.findProjectDetails(projectAbbr);
   }
 
-  @Operation(hidden = true)
+  /**
+   * Get project details as HTML (webclient project page).
+   * Renders the project dashboard view with navigation to project functionalities.
+   *
+   * @param projectAbbr the project abbreviation
+   * @param model the Thymeleaf model
+   * @return the Thymeleaf template name
+   */
+  @GetMapping(produces = MediaType.TEXT_HTML_VALUE, value = "/{projectAbbr}")
+  public String getProjectPage(
+      @PathVariable String projectAbbr,
+      Model model,
+      Authentication authentication
+  ) {
+    ProjectDetailsDTO projectDetails = projectService.findProjectDetails(projectAbbr);
+
+    model.addAttribute("project", projectDetails);
+
+    boolean canEdit = authentication != null && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
+    model.addAttribute("isAuthenticated", canEdit);
+
+    return "Project/show";
+
+  }
+
+
+    @Operation(hidden = true)
   @GetMapping(produces = MimeTypeUtils.TEXT_HTML_VALUE)
   public String showProjectsViaWebClient(
       Model model,
@@ -219,54 +316,5 @@ public class ProjectController {
         .lastModified(zonedDateTime)
         .build();
   }
-
-  @Operation(
-      summary = "Check if the project's sub resources have been modified since a given date",
-      description = "Checks if the project's sub resources have been modified since a given date (E.g. digital objects and datastreams). Changes to the project metadata itself (project description or abbreviation) are not reflected in this modification date. If the project's content have not been modified, it returns a 304 Not Modified status.",
-      responses = {
-          @ApiResponse(responseCode = "200", description = "Project has been modified",
-              content = @Content),
-          @ApiResponse(responseCode = "304", description = "Project has not been modified",
-              content = @Content),
-          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
-              content = @Content)
-      }
-  )
-  @RequestMapping(value = "/{projectAbbr}/objects", method = RequestMethod.HEAD)
-  public ResponseEntity<Void> checkProjectContentModification(
-      @PathVariable String projectAbbr,
-      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
-  ) {
-
-    // Get latest content modification date
-    ProjectModification projectModification = projectModificationService.
-        findContentLatestModificationDate(projectAbbr);
-    LocalDateTime lastModified = projectModification.getLastModificationDateAsLocalDateTime();
-    // Format for HTTP header
-    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
-
-    // Handle conditional request
-    if (ifModifiedSince.isPresent()) {
-      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
-      try {
-        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
-            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
-
-        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
-          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-        }
-      } catch (DateTimeParseException e) {
-        throw new ProjectInvalidDateFormatException(
-            "Invalid date format for If-modified-since header: " + ifModifiedSince + ". Original error: " + e.getMessage(),
-            e
-        );
-      }
-    }
-
-    return ResponseEntity.ok()
-        .lastModified(zonedDateTime)
-        .build();
-  }
-
 
 }

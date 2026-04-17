@@ -1,3 +1,8 @@
+# file based logging
+logging:
+  file:
+      name: log/app.log
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/gams
@@ -23,3 +28,7 @@ gams:
     triplestoreUrl: ${TRIPLESTORE_URL:http://localhost:3030/gams}
     # elasticsearch
     elasticsearchUrl: ${ELASTICSEARCH_URL:http://localhost:9200}
+    # using local host in dev?
+    qleverUrl: ${QLEVER_URL:http://localhost:7001}
+  cors:
+    allowed-origin-patterns: ${GAMSAPI_ALLOWED_ORIGIN_PATTERNS:*}

@@ -16,7 +16,7 @@ import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects/{id}/record" })
+@RequestMapping(value = { "/api/curation/v1/projects/{projectAbbr}/objects/{id}/submission-record" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
@@ -43,7 +43,7 @@ public class SubmissionRecordController {
       @PathVariable String id
   ) {
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    return submissionRecordService.find(id);
+    return submissionRecordService.find(id).orElseThrow(() -> new SubmissionRecordNotFoundException("Submission record not found for digital object with ID: " + id));
   }
 
 }

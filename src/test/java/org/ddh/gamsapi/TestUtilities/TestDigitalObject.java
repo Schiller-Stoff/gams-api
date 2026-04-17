@@ -21,9 +21,7 @@ public enum TestDigitalObject {
     DIGITAL_OBJECT_DESCRIPTION(TestMetadataBaseEntity.DESCRIPTION),
     DIGITAL_OBJECT_CREATOR(TestMetadataBaseEntity.CREATOR),
     DIGITAL_OBJECT_RIGHTS(TestMetadataBaseEntity.RIGHTS),
-    DIGITAL_OBJECT_MAIN_RESOURCE(TestDatastream.DSID.getValue()),
-    DIGITAL_OBJECT_MD5_CHECKSUM(TestMetadataBaseEntity.MD5_CHECKSUM),
-    DIGITAL_OBJECT_SHA512_CHECKSUM(TestMetadataBaseEntity.SHA512_CHECKSUM);
+    DIGITAL_OBJECT_MAIN_RESOURCE(TestDatastream.DSID.getValue());
 
     private final String value;
     private static final Set<String> DIGITAL_OBJECT_TAGS = Set.of("object-test-tag1", "object-test-tag2", "object-test-tag3");

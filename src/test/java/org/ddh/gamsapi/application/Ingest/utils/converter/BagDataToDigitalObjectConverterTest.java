@@ -20,8 +20,6 @@ public class BagDataToDigitalObjectConverterTest extends UnitTest {
             .publisher(TestBag.TestBagSipJson.PUBLISHER)
             .funder(TestBag.TestBagSipJson.FUNDER)
             .mainResource(TestBag.TestBagSipJson.MAIN_RESOURCE)
-            .md5Checksum("540193d9633d8449ee1bff28030fe045")
-            .sha512Checksum("61eb68db4754a8349405f9355e86a72f32b00e17b747662c06c1c3027997d26d3cb1907e5f3ee3ec8299d67d97dc7c7ff4844dc70db8c5226666faf121540009")
             .source(TestBag.TestBagSipJson.SOURCE)
             .schema(TestBag.TestBagSipJson.SCHEMA)
             .createdBy(TestBag.TestBagSipJson.CREATED_BY)
@@ -44,9 +42,6 @@ public class BagDataToDigitalObjectConverterTest extends UnitTest {
         Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getRights()).isEqualTo(TEST_BAG_DATA.getRights());
         Assertions.assertThat(convertedDigitalObject.getPublisher()).isEqualTo(TEST_BAG_DATA.getPublisher());
         Assertions.assertThat(convertedDigitalObject.getMainResource()).isEqualTo(TEST_BAG_DATA.getMainResource());
-
-        Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getMd5Checksum()).isEqualTo(TEST_BAG_DATA.getMd5Checksum());
-        Assertions.assertThat(convertedDigitalObject.getBaseMetadata().getSha512Checksum()).isEqualTo(TEST_BAG_DATA.getSha512Checksum());
 
         Assertions.assertThat(convertedDigitalObject.getFunder()).isEqualTo(TEST_BAG_DATA.getFunder());
         Assertions.assertThat(convertedDigitalObject.getTags())

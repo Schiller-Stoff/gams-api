@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
@@ -42,12 +42,13 @@ public class AuthorizationIT extends IntegrationTest {
     Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
                   .with(SecurityMockMvcRequestPostProcessors
                       .user("UNKNOWN_USER")
                       .roles("UNKNOWN_ROLE")
                   )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is4xxClientError());
     });
@@ -66,12 +67,13 @@ public class AuthorizationIT extends IntegrationTest {
 
     mockMvc
         .perform(
-            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+            multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                 .part(mockPart)
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")
                     .roles(testProjectAdminRole)
                 )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         )
         .andExpect(
             status().isNotFound()
@@ -85,16 +87,17 @@ public class AuthorizationIT extends IntegrationTest {
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    String globalAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getAdmin());
+    String globalAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getSuperAdmin());
 
     mockMvc
         .perform(
-            multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+            multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                 .part(mockPart)
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")
                     .roles(globalAdminRole)
                 )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         )
         .andExpect(
             status().isNotFound()
@@ -113,12 +116,13 @@ public class AuthorizationIT extends IntegrationTest {
     Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
                   .with(SecurityMockMvcRequestPostProcessors
                       .user("SOME_USER")
                       .roles(differentProjectAdminRole)
                   )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           ).andExpect(status().is4xxClientError());
     });
 
@@ -131,12 +135,13 @@ public class AuthorizationIT extends IntegrationTest {
     public void anonymousUserNotAuthorizedForProjectCreation_redirects() throws Exception {
 
       final String TEST_PROJECT_ABBR = "FOO";
-      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
 
       mockMvc
           .perform(
               MockMvcRequestBuilders.post(TEST_URL)
                   .with(SecurityMockMvcRequestPostProcessors.anonymous())
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is3xxRedirection());
     }
@@ -145,14 +150,15 @@ public class AuthorizationIT extends IntegrationTest {
     public void adminMayCreateAProject() throws Exception {
 
       final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
-      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
 
       mockMvc
           .perform(
               MockMvcRequestBuilders.put(TEST_URL)
                   .with(
-                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(new SimpleGrantedAuthority(GAMSAPIAuthorities.getAdmin()))
+                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(new SimpleGrantedAuthority(GAMSAPIAuthorities.getSuperAdmin()))
                   )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           ).andExpect(status().is2xxSuccessful());
 
       org.assertj.core.api.Assertions.assertThat(projectRepository.findById(TEST_PROJECT_ABBR))
@@ -167,12 +173,13 @@ public class AuthorizationIT extends IntegrationTest {
     public void anonymousUserNotAuthorizedForProjectDeletion_redirects() throws Exception {
 
       final String TEST_PROJECT_ABBR = "FOO";
-      final String TEST_URL = "/api/v1/projects/" + TEST_PROJECT_ABBR;
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
 
       mockMvc
           .perform(
               MockMvcRequestBuilders.delete(TEST_URL)
                   .with(SecurityMockMvcRequestPostProcessors.anonymous())
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is3xxRedirection());
     }

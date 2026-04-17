@@ -4,24 +4,25 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.PlexusSearchProperties;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.ddh.gamsapi.EventCaptureListener;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.application.Ingest.exceptions.IngestObjectAlreadyExistsException;
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectCreatedEvent;
+import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class IngestServiceIT extends IntegrationTest {
@@ -66,23 +68,33 @@ public class IngestServiceIT extends IntegrationTest {
 
   File bagFile;
 
-  // disables auditing
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
+
+  @BeforeEach
+  public void setup(){
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
+  }
 
   @Nested
-  public class IngestUpdatesProjectContentLastModified {
+  public class IngestUpdatesProjectModified {
 
 
     @Test
-    public void ingestUpdatesProjectContentLastModified() throws IOException {
+    public void ingestUpdatesProjectModifiedProperties() throws IOException {
 
       projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
 
       // get the project before ingest
       var project = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
           .orElseThrow( () -> new RuntimeException("GAMS Project not found"));
-      var lastModifiedBeforeIngest = project.getContentLastModified();
+      var lastModifiedBeforeIngest = project.getModified();
 
       bagFile = TestBag.loadFile();
 
@@ -96,11 +108,17 @@ public class IngestServiceIT extends IntegrationTest {
       // get the project after ingest
       var updatedProject = projectRepository.findById(TestProject.PROJECT_ABBR.getValue())
           .orElseThrow();
-      var lastModifiedAfterIngest = updatedProject.getContentLastModified();
+      var lastModifiedAfterIngest = updatedProject.getModified();
 
       Assertions.assertThat(lastModifiedAfterIngest)
           .isNotNull()
           .isAfter(lastModifiedBeforeIngest);
+
+      // check if modifiedBy was updated
+      final var ORIGINAL_MODIFIED_BY = project.getModifiedBy();
+      Assertions.assertThat(ORIGINAL_MODIFIED_BY).isNotEqualTo(TestUser.USERNAME.getValue());
+      Assertions.assertThat(updatedProject.getModifiedBy())
+          .isEqualTo(TestUser.USERNAME.getValue());
     }
   }
 
@@ -146,17 +164,22 @@ public class IngestServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsDigitalObjectWithExpectedChecksums(){
+    @Transactional
+    public void createsDatastreamsWithServerComputedChecksums() {
+      var datastreams = datastreamRepository.findAll();
+      Assertions.assertThat(datastreams).isNotEmpty();
 
-        var digitalObject = digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-            .orElseThrow( () -> new RuntimeException("Digital object not found"));
+      datastreams.forEach(ds -> {
+        Assertions.assertThat(ds.getMd5Checksum())
+            .isNotNull()
+            .isNotEmpty()
+            .hasSize(32);
 
-        Assertions.assertThat(digitalObject.getBaseMetadata().getMd5Checksum())
-            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_MD5_CHECKSUM.getValue());
-
-        Assertions.assertThat(digitalObject.getBaseMetadata().getSha512Checksum())
-            .isEqualTo(TestDigitalObject.DIGITAL_OBJECT_SHA512_CHECKSUM.getValue());
-
+        Assertions.assertThat(ds.getSha512Checksum())
+            .isNotNull()
+            .isNotEmpty()
+            .hasSize(128);
+      });
     }
 
     @Test
@@ -166,6 +189,31 @@ public class IngestServiceIT extends IntegrationTest {
             .orElseThrow( () -> new RuntimeException("Digital object not found"));
         Assertions.assertThat(digitalObject.getTags().size())
             .isEqualTo(TestDigitalObject.getTags().size());
+    }
+
+    @Test
+    public void ingestCreatesDigitalObjectWithIngestedPropertyTrue(){
+      var ingestedObject =  digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+      Assertions.assertThat(ingestedObject)
+          .isNotNull()
+          .isPresent();
+
+      Assertions.assertThat(ingestedObject.get().isIngested())
+          .isTrue();
+
+    }
+
+    @Test
+    public void ingestCreatesDigitalObjectWithModifiedAfterCreationFalse(){
+      var ingestedObject =  digitalObjectRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+      Assertions.assertThat(ingestedObject)
+          .isNotNull()
+          .isPresent();
+
+      Assertions.assertThat(ingestedObject.get().isModifiedAfterCreation())
+          .isFalse();
     }
 
     @Test
@@ -263,17 +311,20 @@ public class IngestServiceIT extends IntegrationTest {
       Assertions.assertThat(foundDatastream.getBaseMetadata().getRights())
           .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getRights());
 
-      Assertions.assertThat(foundDatastream.getBagPath())
+      Assertions.assertThat(foundDatastream.getFilePath())
           .isEqualTo(TestDatastream.BAG_PATH.getValue());
 
       Assertions.assertThat(foundDatastream.getLang().size()).isEqualTo(TestDatastream.DATASTREAM_LANG.size());
       Assertions.assertThat(foundDatastream.getTags().size()).isEqualTo(TestDatastream.DATASTREAM_TAGS.size());
 
-      Assertions.assertThat(foundDatastream.getBaseMetadata().getMd5Checksum())
-          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getMd5Checksum());
+      Assertions.assertThat(foundDatastream.getMd5Checksum())
+          .isEqualTo(TestDatastream.MD5_CHECKSUM);
 
-      Assertions.assertThat(foundDatastream.getBaseMetadata().getSha512Checksum())
-          .isEqualTo(TestDatastream.METADATA_BASE_ENTITY.getSha512Checksum());
+      Assertions.assertThat(foundDatastream.getSha512Checksum())
+          .isEqualTo(TestDatastream.SHA512_CHECKSUM);
+
+      Assertions.assertThat(foundDatastream.getArchivalPolicy())
+          .isEqualTo(TestDatastream.ARCHIVAL_POLICY);
 
 
     }
@@ -489,12 +540,13 @@ public class IngestServiceIT extends IntegrationTest {
               String manifestMd5Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.BAG_SIP_JSON.name);
               Assertions.assertThat(manifestMd5Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
-              Assertions.assertThat(manifestMd5Content).contains("140193d9633d8449ee1bff28030fe045");
+              Assertions.assertThat(manifestMd5Content).contains(TestDatastream.MD5_CHECKSUM);
             }
             case "manifest-sha512.txt" -> {
               String manifestSha512Content = byteArrayOutputStream.toString();
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.DUBLIN_CORE_XML.name);
               Assertions.assertThat(manifestSha512Content).contains(BagFilePaths.BAG_SIP_JSON.name);
+              Assertions.assertThat(manifestSha512Content).contains(TestDatastream.SHA512_CHECKSUM);
             }
 
             default -> {

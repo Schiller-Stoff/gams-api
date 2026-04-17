@@ -25,10 +25,11 @@ spring:
     hibernate:
       # set to create if you want to drop existing data on app startup
       # value "none" would require to initialize a schema via SQL via extra file
-      ddl-auto: update
-      properties:
-        hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
-        hibernate.jdbc.lob.non_contextual_creation: true
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+
   # oauth2 integration with keycloak
   security:
     oauth2:
@@ -40,10 +41,11 @@ spring:
             client-secret: ${GAMSAPI_CLIENT_SECRET:MrrcrE7BHO1mkzi2Zl9aTrofrltmjtMT}
             scope: ${OAUTH2_SCOPE:openid,profile,email}
             authorization-grant-type: authorization_code
-            redirect-uri: ${GAMSAPI_REDIRECT_URI:http://localhost:18085/login/oauth2/code/gams-client}
+            redirect-uri: ${GAMSAPI_REDIRECT_URI:http://localhost:18085/api/auth/oauth2/callback/gams-client}
         provider:
           gams-realm:
             issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
+            user-name-attribute: preferred_username
 
 
   #####
@@ -65,22 +67,57 @@ spring:
     multipart:
       max-file-size: 10GB
       max-request-size: 10GB
+  web:
+    error:
+      include-stacktrace: on_param
 
 
 ########
 # Logging
-# (handled in different profiles)
+# (handled in different profiles)<
 logging:
-  file:
-    name: ${LOG_FILE:log/app.log}
   level:
-    org.ddh.gamsapi: ${LOG_LEVEL:WARN}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:ERROR}
+    # Application code
+    org.ddh.gamsapi: ${LOG_LEVEL:INFO}
+
+    # Top-level spring logging
+    org.springframework: ${SPRING_GLOBAL_LOG_LEVE:WARN}
+
+    # Top-level spring web logging (if needed)
+    org.springframework.web: ${SPRING_WEB_LOG_LEVEL:WARN}
+
+    # Top-level security: keep quiet unless debugging
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+
+    # CSRF filter — this is what you were missing
+    org.springframework.security.web.csrf: ${SECURITY_CSRF_LOG_LEVEL:INFO}
+
+    # Authorization decisions (access denied, role checks)
+    org.springframework.security.web.access: ${SECURITY_ACCESS_LOG_LEVEL:INFO}
+    org.springframework.security.authorization: ${SECURITY_ACCESS_LOG_LEVEL:INFO}
+
+    # OAuth2/OIDC client flows (token exchange, redirects, logout)
+    org.springframework.security.oauth2: ${SECURITY_OAUTH2_LOG_LEVEL:INFO}
+
+    # Session management (creation, invalidation, concurrent sessions)
+    org.springframework.security.web.session: ${SECURITY_SESSION_LOG_LEVEL:INFO}
+
+    # Authentication events (login success/failure)
+    org.springframework.security.web.authentication: ${SECURITY_AUTH_LOG_LEVEL:INFO}
+
+    # --- Infrastructure ---
+    # Hikari connection pool — critical for the connection-hold-time issues you've had
+    com.zaxxer.hikari: ${HIKARI_LOG_LEVEL:INFO}
+
+    # Flyway migrations
+    org.flywaydb: ${FLYWAY_LOG_LEVEL:INFO}
+
+    # Hibernate SQL (careful: DEBUG = all SQL statements)
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG_LEVEL:WARN}
+    # Hibernate bind parameters (TRACE shows actual values — NEVER in prod)
+    org.hibernate.orm.jdbc.bind: ${HIBERNATE_BIND_LOG_LEVEL:WARN}
 
 server:
-  error:
-    # includes stacktrace on error ( devtools will include it in dev)
-    include-stacktrace: always
   # Since Spring Boot 3.2, this is the new property to handle reverse proxy headers
   # Needed to consider reverse-proxy / api-gateway in front
   forward-headers-strategy: framework
@@ -97,8 +134,6 @@ server:
 #
 gams:
   cors:
-    # Development origins - adjust for your environment
-    allowed-origins: ${GAMSAPI_ALLOWED_ORIGINS:http://localhost:*}
     # Production patterns - use with caution
     allowed-origin-patterns: ${GAMSAPI_ALLOWED_ORIGIN_PATTERNS:http://localhost:*}
     # Preflight cache time (seconds)
@@ -112,20 +147,32 @@ gams:
     # TODO remove hardcoded gams core
     triplestoreUrl: ${TRIPLESTORE_URL:http://triplestore:3030/gams}
     # elasticsearch
-    elasticsearchUrl: ${ELASTICSEARCH_URL:http://elasticsearch:9200}
+    elasticsearchUrl: ${ELASTICSEARCH_URL:http://elasticsearch:9200} # TODO outdated remove?
+    # Qlever
+    qleverUrl: ${QLEVER_URL:http://semanticSearch:7001}
+
+  services:
+    semantic-search:
+      accessToken: ${QLEVER_ACCESS_TOKEN:gams-dev}
+      exportPath: ${QLEVER_EXPORT_PATH:qlever-export}
+
   storage:
     # root of GAMS files (datastreams) to be stored.
     rootPath: ${GAMS_FILES_ROOT_PATH:gams}
+    # root of web resources to be served.
+    webRootPath: ${GAMS_WEB_ROOT_PATH:gams-web}
   # optional solr client configuration
 #  solr:
 #    auto-commit: false # whether to auto-commit changes to solr (in production should be false)
 #    batch-size: 500 # number of documents to be indexed in a batch
 #    commit-interval: 10 # in seconds
+  environment:
+    allow-direct-modifications: ${GAMS_ALLOW_DIRECT_MODIFICATIONS:true}
 
 # swagger ui base path
 springdoc:
   swagger-ui:
-    path: "/api/v1/openapi"
+    path: "/api/openapi"
     operationsSorter: "method"
     tagsSorter: "alpha"
     docExpansion: "none"
@@ -141,7 +188,7 @@ springdoc:
     filter: true
     persistAuthorization: true
   api-docs:
-    path: "/api/v1/api-docs"
+    path: "/api/api-docs"
     enabled: true
   cache:
     disabled: false

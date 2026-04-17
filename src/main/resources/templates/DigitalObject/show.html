@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head th:replace="~{fragments/general.html :: headtemplate}" />
 
@@ -18,51 +18,165 @@
       <div class="p-md-5 p-3" style="min-height: 100vh">
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
-            <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
-            <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
+            <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/api/curation/v1/projects">projects</a></li>
+            <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr}"></a></li>
+            <li class="breadcrumb-item"><a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'">objects</a></li>
+            <li class="breadcrumb-item"><a th:text="${do.id}" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"></a></li>
           </ol>
         </nav>
-        <h2 class="display-6 fw-bold text-primary mb-3" th:text="${do.id}"></h2>
+        <h2 class="display-6 fw-bold text-primary mb-3 d-flex align-items-center gap-2">
+          <span th:text="${do.id}"></span>
+          <i th:if="${do.isIngested()}"
+             class="ti ti-file-check"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Ingested: Object was created via ingest">
+          </i>
+          <i th:unless="${do.isIngested()}"
+             class="ti ti-file-off text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Not Ingested: Object was not created via ingest">
+          </i>
+
+          <i th:if="${!do.isModifiedAfterCreation()}"
+             class="ti ti-shield-check"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Unmodified: This object's creation date is the same as modified.">
+          </i>
+          <i th:if="${do.isModifiedAfterCreation()}"
+             class="ti ti-shield text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Modified: This object has been modified after it's creation.">
+          </i>
+
+          <i th:if="${!archivalRecords.isEmpty()}"
+             class="ti ti-shield-check text-success"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Archived: This object has associated archival records.">
+          </i>
+
+          <i th:unless="${!archivalRecords.isEmpty()}"
+             class="ti ti-database-off text-warning"
+             style="font-size: 0.5em;"
+             data-bs-toggle="tooltip"
+             data-bs-placement="right"
+             title="Not Archived: This object has no archival records.">
+          </i>
+
+
+
+        </h2>
         <p>
           Overview over a singular digital object
         </p>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
-        <a class="btn btn-outline-primary mb-4" target="_blank" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/record'">Submission metadata</a>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
-              <i class="ti ti-id me-2"></i>Identifiers
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
+        <a th:if="${submissionRecord}" class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
+        <br/>
+        <br/>
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
+              <i class="ti ti-list-details me-2 text-primary"></i>Datastreams
             </h3>
           </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <li class="list-group-item"><b>Id:</b> <span th:text="${do.id}"></span></li>
-                    <li class="list-group-item"><b>Owned by project:</b> <span th:text="${project.projectAbbr}"></span></li>
-                </ul>
-                <br/>
+
+          <div sec:authorize="isAuthenticated()" class="mb-3">
+            <button type="button" class="btn btn-outline-primary"
+                    data-bs-toggle="collapse" data-bs-target="#createDatastreamForm">
+              <i class="ti ti-upload me-1"></i>Add datastream
+            </button>
+
+            <div class="collapse m-2" id="createDatastreamForm">
+              <div class="mt-2">
+                <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}
+                + '/objects/' + ${do.id} + '/datastreams'}"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">File *</label>
+                      <input type="file" name="file" id="datastreamFileInput"
+                             class="form-control" required>
+                      <small class="text-muted">
+                        Checksums (MD5, SHA-512) are computed automatically on the server.
+                      </small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">DSID (Datastream Identifier) *</label>
+                      <input type="text" name="dsid" id="datastreamDsidInput"
+                             class="form-control" required
+                             maxlength="256" pattern="[a-zA-Z0-9._]+"
+                             title="Only letters, digits, dots, and underscores"
+                             placeholder="e.g. my_image.jpg">
+                      <small class="text-muted">
+                        Must be unique per digital object. Auto-filled from filename.
+                      </small>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Title *</label>
+                      <input type="text" name="title" class="form-control" required
+                             maxlength="255" placeholder="e.g. Front page photograph">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Creator *</label>
+                      <input type="text" name="creator" class="form-control" required
+                             maxlength="255" placeholder="e.g. John Doe">
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Rights *</label>
+                      <input type="text" name="rights" class="form-control" required
+                             maxlength="255" placeholder="e.g. CC BY 4.0">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label">Description *</label>
+                      <textarea required name="description" class="form-control" rows="1"
+                                maxlength="2000" placeholder="Optional description"></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Error display for server-side validation -->
+                  <div th:if="${datastreamCreateError}" class="alert alert-danger"
+                       th:text="${datastreamCreateError}"></div>
+
+                  <button type="submit" class="btn btn-success">
+                    <i class="ti ti-check me-1"></i>Create
+                  </button>
+                </form>
+              </div>
             </div>
-        </div>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
-              <i class="ti ti-list-details me-2"></i>Datastreams
-            </h3>
           </div>
-          <div class="card-body">
-              <table class="table table-hover border border-2">
-                <thead class="">
+          <div class="mb-3">
+              <table class="table table-hover table-striped table-bordered" style="border-color: lightgrey">
+                <thead>
                 <tr>
                   <th scope="col">
-                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?searchDsid=' + ${searchDsid} + '&sortBy=dsid'">dsid</a>
+                    <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?searchDsid=' + ${searchDsid} + '&sortBy=dsid'">dsid</a>
                   </th>
                   <th scope="col">
-                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=baseMetadata.title'">title</a>
+                    <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=baseMetadata.title'">title</a>
                   </th>
                   <th scope="col">
-                    <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=mimeType'">mimetype</a>
+                    <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/'+ ${do.id} +'?searchDsid=' + ${searchDsid} + '&sortBy=mimeType'">mimetype</a>
                   </th>
+                  <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -71,10 +185,21 @@
                           style="color: black; font-weight: 600;"
                           class="text-decoration-none"
                           th:text="${datastream.getDsid()}"
-                          th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}"
+                          th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}"
                   ></a></td>
                   <td><span th:title="${datastream.getBaseMetadata().getTitle()}" th:if="${datastream.baseMetadata}" th:text="${#strings.abbreviate(datastream.baseMetadata.title, 50)}"></span></td>
                   <td><span th:text="${datastream.getMimeType()}"></span></td>
+                  <td sec:authorize="isAuthenticated()">
+                    <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${datastream.getDsid()}}"
+                          method="POST"
+                          class="d-inline"
+                          th:attr="onsubmit='return confirm(\'Delete datastream ' + ${datastream.getDsid()} + '? This cannot be undone.\')'">
+                      <input type="hidden" name="_method" value="DELETE" />
+                      <button type="submit" class="btn btn-outline-danger py-0 px-1">
+                        <i class="ti ti-trash"></i>
+                      </button>
+                    </form>
+                  </td>
                 </tr>
                 </tbody>
               </table>
@@ -92,7 +217,7 @@
                     <!-- First Page -->
                     <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
                       <a class="page-link"
-                         th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=0&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                         th:href="${pageIndex == 0} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=0&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
                         First
                       </a>
                     </li>
@@ -100,7 +225,7 @@
                     <!-- Previous Page -->
                     <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
                       <a class="page-link"
-                         th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                         th:href="${pageIndex == 0} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
                         Previous
                       </a>
                     </li>
@@ -111,7 +236,7 @@
                       <th:block th:each="i : ${#numbers.sequence(0, pagedDatastreams.getPagination().getTotalPages() - 1)}">
                         <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                           <a class="page-link"
-                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
                              th:text="${i + 1}"></a>
                         </li>
                       </th:block>
@@ -124,7 +249,7 @@
                       <th:block th:each="i : ${#numbers.sequence(0, 2)}">
                         <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                           <a class="page-link"
-                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
                              th:text="${i + 1}"></a>
                         </li>
                       </th:block>
@@ -139,7 +264,7 @@
                         <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
                           <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                             <a class="page-link"
-                               th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                               th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
                                th:text="${i + 1}"></a>
                           </li>
                         </th:block>
@@ -154,7 +279,7 @@
                       <th:block th:each="i : ${#numbers.sequence(pagedDatastreams.getPagination().getTotalPages() - 3, pagedDatastreams.getPagination().getTotalPages() - 1)}">
                         <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                           <a class="page-link"
-                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
+                             th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}"
                              th:text="${i + 1}"></a>
                         </li>
                       </th:block>
@@ -164,7 +289,7 @@
                     <!-- Next Page -->
                     <li class="page-item" th:classappend="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? 'disabled'">
                       <a class="page-link"
-                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
                         Next
                       </a>
                     </li>
@@ -172,7 +297,7 @@
                     <!-- Last Page -->
                     <li class="page-item" th:classappend="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? 'disabled'">
                       <a class="page-link"
-                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pagedDatastreams.getPagination().getTotalPages() - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
+                         th:href="${pageIndex >= pagedDatastreams.getPagination().getTotalPages() - 1} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '?pageIndex=' + ${pagedDatastreams.getPagination().getTotalPages() - 1} + '&pageSize=' + ${pageSize} + '&searchDsid=' + ${searchDsid} + '&sortBy=' + ${sortBy}">
                         Last
                       </a>
                     </li>
@@ -200,32 +325,63 @@
           </div>
 
           <br/>
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
-              <i class="ti ti-database me-2"></i>Technical &amp; administrative metadata
+          <br/>
+
+
+
+        <!-- Auto-fill DSID from filename -->
+        <script th:inline="javascript">
+            document.getElementById('datastreamFileInput')
+                .addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        let filename = this.files[0].name;
+                        let dsid = filename.replace(/[\s\-]/g, '_').replace(/[^a-zA-Z0-9._]/g, '');
+                        document.getElementById('datastreamDsidInput').value = dsid;
+                    }
+                });
+        </script>
+
+        <!-- Auto-fill DSID from filename -->
+        <script th:inline="javascript">
+            document.getElementById('datastreamFileInput')
+                .addEventListener('change', function() {
+                    if (this.files.length > 0) {
+                        let filename = this.files[0].name;
+                        // sanitize: replace spaces/hyphens with underscores, strip invalid chars
+                        let dsid = filename.replace(/[\s\-]/g, '_').replace(/[^a-zA-Z0-9._]/g, '');
+                        document.getElementById('datastreamDsidInput').value = dsid;
+                    }
+                });
+        </script>
+
+
+
+        <div class="mt-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
+              <i class="ti ti-database me-2 text-primary"></i>Administrative metadata
             </h3>
             <div>
               <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
               <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
             </div>
           </div>
-          <div class="card-body">
-              <div th:if="${do.mainResource}" class="accordion mb-2" id="accordionExample">
+          <div>
+              <div th:if="${do.mainResource}" class="accordion mb-2 border rounded" id="accordionExample">
                 <div class="accordion-item">
                   <h2 class="accordion-header">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                       Main resource
                     </button>
                   </h2>
-                  <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                  <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
                     <div class="accordion-body">
 
                       <ul>
                         <li>
                           <small>dsid</small>
                           <p>
-                            <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
+                            <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
                         </li>
                         <li>
                           <small>title</small>
@@ -252,150 +408,312 @@
                   </div>
                 </div>
               </div>
-              <ul class="list-group">
-                <li class="list-group-item">
-                  <small>identifier</small>
-                  <p th:text="${do.id}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>object tags</small>
-                  <div>
-                    <th:block th:each="tag, iterStat : ${do.tags}">
-                      <a class="text-decoration-none badge bg-secondary me-1 mb-1" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?tag=' + ${tag}" th:text="${tag}"></a>
-                    </th:block>
+
+            <!-- Add after the existing metadata display, inside the sec:authorize="isAuthenticated()" guard -->
+            <div class="mt-2 mb-3">
+              <div id="metadata-edit-form" class="mt-3">
+                <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                      method="POST">
+                  <input type="hidden" name="_method" value="PATCH" />
+
+                  <div class="mb-3">
+                    <label class="form-label">Title *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control" required
+                           th:value="${do.baseMetadata.title}">
                   </div>
-                </li>
-                <li class="list-group-item">
-                  <small>object type</small>
-                  <p th:text="${do.objectType}"></p>
-                </li>
-                  <li class="list-group-item">
-                      <small>main resource</small>
-                      <p>
-                        <a th:text="${do.mainResource?.getDsid()}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/datastreams/' + ${do.getMainResource()?.getDsid()}"></a>
-                      </p>
-                  </li>
-              </ul>
-              <ul class="list-group mt-2" th:if="${do.baseMetadata}">
-                <li class="list-group-item">
-                  <small>title</small>
-                  <p th:text="${do.baseMetadata.title}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>creator</small>
-                  <p th:text="${do.baseMetadata.creator}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>description</small>
-                  <p th:text="${do.baseMetadata.description}"></p>
-                </li>
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:subject</small>-->
-                <!--            <p th:text="${do.baseMetadata.subject}"></p>-->
-                <!--          </li>-->
-                <li class="list-group-item">
-                  <small>publisher</small>
-                  <p th:text="${do.publisher}"></p>
-                </li>
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:contributor</small>-->
-                <!--            <p th:text="${do.baseMetadata.contributor}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:date</small>-->
-                <!--            <p th:text="${do.baseMetadata.date}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:type</small>-->
-                <!--            <p th:text="${do.baseMetadata.type}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:format</small>-->
-                <!--            <p th:text="${do.baseMetadata.format}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:source</small>-->
-                <!--            <p th:text="${do.baseMetadata.source}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:language</small>-->
-                <!--            <p th:text="${do.baseMetadata.language}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:relation</small>-->
-                <!--            <p th:text="${do.baseMetadata.relation}"></p>-->
-                <!--          </li>-->
-                <!--          <li class="list-group-item bg-light">-->
-                <!--            <small>dc:coverage</small>-->
-                <!--            <p th:text="${do.baseMetadata.coverage}"></p>-->
-                <!--          </li>-->
-                <li class="list-group-item">
-                  <small>rights</small>
-                  <p th:text="${do.baseMetadata.rights}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>funder</small>
-                    <p th:text="${do.funder}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>md5 checksum</small>
-                  <p th:text="${do.getBaseMetadata().getMd5Checksum()}"></p>
-                </li>
-                <li class="list-group-item">
-                  <small>sha-512 checksum</small>
-                  <p th:text="${do.getBaseMetadata().getSha512Checksum()}"></p>
-                </li>
-              </ul>
-              <br/>
+                  <div class="mb-3">
+                    <label class="form-label">Creator *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="creator" class="form-control" required
+                           th:value="${do.baseMetadata.creator}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea th:readonly="${!isAuthenticated}" name="description" class="form-control" rows="3"
+                              th:text="${do.baseMetadata.description}"></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Rights *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="rights" class="form-control" required
+                           th:value="${do.baseMetadata.rights}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Publisher *</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="publisher" class="form-control" required
+                           th:value="${do.publisher}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Funder</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="funder" class="form-control"
+                           th:value="${do.funder}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Object Type</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="objectType" class="form-control"
+                           th:value="${do.objectType}">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Object Tags</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="tagsCommaSeparated"
+                           class="form-control"
+                           th:value="${sortedTagsCsv}"
+                           placeholder="tag1, tag2, tag3" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Main Resource (DSID)</label>
+                    <input th:readonly="${!isAuthenticated}" type="text" name="mainResource" class="form-control"
+                           th:value="${do.mainResource?.dsid}"
+                           pattern="[a-zA-Z0-9._]*"
+                           maxlength="256"
+                           placeholder="e.g. TEI_SOURCE">
+                    <small class="text-muted">
+                      Case-sensitive datastream identifier. Leave empty to clear.
+                    </small>
+                  </div>
+                  <div sec:authorize="isAuthenticated()">
+                    <button  type="submit" class="btn btn-primary">
+                      <i class="ti ti-check me-1"></i>Save changes
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+            <br/>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 h5">
-              <i class="ti ti-submarine me-2"></i>Submission data
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
+              <i class="ti ti-id me-2 text-primary"></i>Auditing metadata
             </h3>
           </div>
-          <div class="card-body">
-            <ul class="list-group">
+          <div>
+            <ul class="list-group border">
               <li class="list-group-item">
-                <small>schema</small>
-                <p th:text="${submissionRecord.getBagSchema()}"></p>
+                <small>object id</small>
+                <p th:text="${do.id}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>owned by project</small>
+                <p th:text="${project.projectAbbr}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>Created:</small>
+                <p th:text="${do.getCreated()}"></p>
               </li>
               <li class="list-group-item">
                 <small>created by</small>
-                <p th:text="${submissionRecord.getBagCreatedBy()}"></p>
+                <p th:text="${do.getCreatedBy()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>modified</small>
+                <p th:text="${do.getModified()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>modified by</small>
+                <p th:text="${do.getModifiedBy()}"></p>
+              </li>
+            </ul>
+            <br/>
+          </div>
+        </div>
+
+        <div class="mt-2" th:if="${submissionRecord}">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="h5">
+              <i class="ti ti-submarine me-2 text-primary"></i>Submission data
+            </h3>
+          </div>
+          <div>
+            <ul class="list-group border">
+              <li class="list-group-item">
+                <small>schema</small>
+                <p th:text="${submissionRecord?.getBagSchema()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>created by</small>
+                <p th:text="${submissionRecord?.getBagCreatedBy()}"></p>
               </li>
               <li class="list-group-item">
                 <small>source</small>
-                <p th:text="${submissionRecord.getBagSource()}"></p>
+                <p th:text="${submissionRecord?.getBagSource()}"></p>
               </li>
               <li class="list-group-item">
                 <small>bagging date</small>
-                <p th:text="${submissionRecord.getBaggingDate()}"></p>
+                <p th:text="${submissionRecord?.getBaggingDate()}"></p>
               </li>
               <li class="list-group-item">
                 <small>contact-mail</small>
-                <p th:text="${submissionRecord.getBagContactMail()}"></p>
+                <p th:text="${submissionRecord?.getBagContactMail()}"></p>
               </li>
               <li class="list-group-item">
                 <small>external description</small>
-                <p th:text="${submissionRecord.getBagExternalDescription()}"></p>
+                <p th:text="${submissionRecord?.getBagExternalDescription()}"></p>
               </li>
               <li class="list-group-item">
                 <small>source payload-oxum</small>
-                <p th:text="${submissionRecord.getBagPayloadOxum()}"></p>
+                <p th:text="${submissionRecord?.getBagPayloadOxum()}"></p>
               </li>
               <li class="list-group-item">
                 <small>bag version</small>
-                <p th:text="${submissionRecord.getBagVersion()}"></p>
+                <p th:text="${submissionRecord?.getBagVersion()}"></p>
               </li>
               <li class="list-group-item">
                 <small>character encoding</small>
-                <p th:text="${submissionRecord.getBagTagFileCharacterEncoding()}"></p>
+                <p th:text="${submissionRecord?.getBagTagFileCharacterEncoding()}"></p>
+              </li>
+              <li class="list-group-item">
+                <small>gams-api version</small>
+                <p th:text="${submissionRecord?.getGamsApiVersion()}"></p>
               </li>
             </ul>
           </div>
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- INTEGRATION SERVICES — only visible for authenticated users        -->
+        <!-- ================================================================== -->
+        <div sec:authorize="isAuthenticated()" class="mb-3 mt-5">
+          <div>
+            <h3 class="h5">
+              <i class="ti ti-refresh me-2 text-primary"></i>Integration Services
+            </h3>
+            <p class="text-muted small">
+              Index or remove this object from individual external services.
+            </p>
+          </div>
+
+          <!-- Integrate ALL services at once -->
+          <div class="mb-3">
+            <h4 class="h6">All services</h4>
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in ALL integration services?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-refresh me-1"></i>Index in all
+              </button>
+            </form>
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from ALL integration services?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove from all
+              </button>
+            </form>
+          </div>
+
+          <div class="mb-3">
+            <h4 class="h6">Api-Search</h4>
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in Api-Search?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/search/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from Api-Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <div class="mb-3">
+            <h4 class="h6">Custom-Search</h4>
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in Custom-Search?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from Custom-Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <!-- Plexus Search -->
+          <div class="mb-3">
+            <h4 class="h6">Plexus Search</h4>
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in Plexus Search?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from Plexus Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <!-- RDF -->
+          <div class="mb-3">
+            <h4 class="h6">RDF (Linked Data)</h4>
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in the RDF store?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-database me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/rdf/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from the RDF store?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
+          <!-- Semantic Search -->
+          <div class="mb-3">
+            <h4 class="h6">Semantic-Search</h4>
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Index this object in Semantic Search?');">
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="ti ti-search me-1"></i>Index
+              </button>
+            </form>
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  method="POST"
+                  class="d-inline"
+                  onsubmit="return confirm('Remove this object from Semantic Search?');">
+              <input type="hidden" name="_method" value="DELETE"/>
+              <button type="submit" class="btn btn-outline-danger">
+                <i class="ti ti-trash me-1"></i>Remove
+              </button>
+            </form>
+          </div>
+
         </div>
       </div>
     <footer th:replace="~{fragments/general.html :: footer}"></footer>
@@ -403,11 +721,6 @@
 </div>
 </div>
 </div>
-<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
-<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/sidebarmenu.js"></script>
-<script src="/assets/js/app.min.js"></script>
-<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
 </body>
 
 </html>

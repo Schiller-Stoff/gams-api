@@ -1,6 +1,8 @@
 package org.ddh.gamsapi.domain.Datastream.utils.converter;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.TestUtilities.TestDatastream;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.Test;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
@@ -91,18 +93,18 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
     }
 
     @Override
-    public Date getCreated() {
-      return Date.from(Instant.parse("2023-10-01T00:00:00Z"));
+    public Instant getCreated() {
+      return Instant.parse("2023-10-01T00:00:00Z");
     }
 
     @Override
-    public Date getModified() {
-      return Date.from(Instant.parse("2023-10-01T00:00:00Z"));
+    public Instant getModified() {
+      return Instant.parse("2023-10-01T00:00:00Z");
     }
 
     @Override
     public MetadataBaseEntity getBaseMetadata() {
-      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description", "md5", "sha512");
+      return new MetadataBaseEntity("Test Title", "Test Rights", "Test Creator", "Test Description");
     }
 
     @Override
@@ -123,6 +125,26 @@ public class DatastreamDetailsViewToDatastreamMainResourceDtoConverterTest exten
     @Override
     public Set<String> getLang() {
       return Set.of("en");
+    }
+
+    @Override
+    public String getMd5Checksum() {
+      return TestDatastream.MD5_CHECKSUM;
+    }
+
+    @Override
+    public String getSha512Checksum() {
+      return TestDatastream.SHA512_CHECKSUM;
+    }
+
+    @Override
+    public Set<String> getContentRestrictions() {
+      return TestDatastream.DATASTREAM_CONTENT_RESTRICTIONS;
+    }
+
+    @Override
+    public ArchivalPolicy getArchivalPolicy() {
+      return TestDatastream.ARCHIVAL_POLICY;
     }
   }
 

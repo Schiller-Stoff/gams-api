@@ -21,6 +21,8 @@ public class BagFileToDatastreamConverterTest extends UnitTest {
             .lang(TestDatastream.DATASTREAM_LANG)
             .rights(TestDatastream.METADATA_BASE_ENTITY.getRights())
             .mimetype(TestDatastream.MIME_TYPE.getValue())
+            .archivalPolicy(TestDatastream.ARCHIVAL_POLICY)
+            .contentRestrictions(TestDatastream.DATASTREAM_CONTENT_RESTRICTIONS)
             .build();
 
     @Test
@@ -36,7 +38,7 @@ public class BagFileToDatastreamConverterTest extends UnitTest {
         var convertedDatastream = converter.convert(TEST_BAG_FILE);
         Assertions.assertThat(convertedDatastream)
                 .hasNoNullFieldsOrPropertiesExcept(
-                        "fileName", "type", "created", "modified", "createdBy", "modifiedBy", "digitalObject"
+                        "fileName", "type", "created", "modified", "createdBy", "modifiedBy", "digitalObject", "md5Checksum", "sha512Checksum"
                 );
     }
 
@@ -51,14 +53,16 @@ public class BagFileToDatastreamConverterTest extends UnitTest {
         Assertions.assertThat(convertedDatastream.getBaseMetadata().getTitle()).isEqualTo(TEST_BAG_FILE.getTitle());
         Assertions.assertThat(convertedDatastream.getBaseMetadata().getDescription()).isEqualTo(TEST_BAG_FILE.getDescription());
         Assertions.assertThat(convertedDatastream.getBaseMetadata().getCreator()).isEqualTo(TEST_BAG_FILE.getCreator());
-        Assertions.assertThat(convertedDatastream.getBaseMetadata().getMd5Checksum()).isEqualTo(TEST_BAG_FILE.getMd5Checksum());
-        Assertions.assertThat(convertedDatastream.getBaseMetadata().getSha512Checksum()).isEqualTo(TEST_BAG_FILE.getSha512Checksum());
+        Assertions.assertThat(convertedDatastream.getMd5Checksum()).isEqualTo(TEST_BAG_FILE.getMd5Checksum());
+        Assertions.assertThat(convertedDatastream.getSha512Checksum()).isEqualTo(TEST_BAG_FILE.getSha512Checksum());
         Assertions.assertThat(convertedDatastream.getSize()).isEqualTo(TEST_BAG_FILE.getSize());
         Assertions.assertThat(convertedDatastream.getTags()).isEqualTo(TEST_BAG_FILE.getTags());
         Assertions.assertThat(convertedDatastream.getLang()).isEqualTo(TEST_BAG_FILE.getLang());
 
-        Assertions.assertThat(convertedDatastream.getBagPath()).isEqualTo(TEST_BAG_FILE.getBagpath());
+        Assertions.assertThat(convertedDatastream.getFilePath()).isEqualTo(TEST_BAG_FILE.getBagpath());
         Assertions.assertThat(convertedDatastream.getMimeType()).isEqualTo(TEST_BAG_FILE.getMimetype());
+        Assertions.assertThat(convertedDatastream.getArchivalPolicy()).isEqualTo(TestDatastream.ARCHIVAL_POLICY);
+        Assertions.assertThat(convertedDatastream.getContentRestrictions()).isEqualTo(TestDatastream.DATASTREAM_CONTENT_RESTRICTIONS);
 
     }
 

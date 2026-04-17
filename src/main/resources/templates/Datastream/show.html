@@ -1,166 +1,536 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.w3.org/1999/xhtml">
 
-<head th:replace="~{fragments/general.html :: headtemplate}" />
+<head th:replace="~{fragments/general.html :: headtemplate}"/>
+
+<!-- CodeMirror 5 for the content editor -->
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.css" />-->
+<link rel="stylesheet" href="/api-assets/lib/codemirror/codemirror.min.css" />
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/theme/mdn-like.min.css" />-->
 
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
 
-    <aside th:replace="~{fragments/general.html :: aside}"></aside>
-    <div class="body-wrapper">
-        <header th:replace="~{fragments/general.html :: header}"></header>
-        <br/>
-        <br/>
-        <br/>
-        <div class="p-md-5 p-3" style="min-height: 100vh">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-                    <li class="breadcrumb-item"><a href="/api/v1/projects">Projects</a></li>
-                    <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects'"></a></li>
-                    <li class="breadcrumb-item"><a th:text="${datastream.digitalObject.id}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a></li>
-                    <li class="breadcrumb-item"><a th:text="${datastream.dsid}" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a></li>
-                </ol>
-            </nav>
-            <h2 class="display-6 fw-bold text-primary mb-3" th:text="${datastream.dsid}"></h2>
-            <p>
-                Overview over a singular datastream
-            </p>
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
+  <div class="body-wrapper">
+    <header th:replace="~{fragments/general.html :: header}"></header>
+    <br/>
+    <br/>
+    <br/>
+    <div class="p-md-5 p-3" style="min-height: 100vh">
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-id me-2"></i>Identifier(s)
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item"><b>Dsid: </b><span th:text="${datastream.getDsid()}"></span></li>
-                        <li class="list-group-item"><b>Digital object id: </b><span th:text="${datastream.getDigitalObject().getId()}"></span></li>
-                        <li class="list-group-item"><b>Owning project: </b><span th:text="${project.getProjectAbbr()}"></span></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-database-export me-2"></i>Content
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
-                        <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
-                        <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
-                    </ul>
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/projects">projects</a></li>
+          <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr}"></a></li>
+          <li class="breadcrumb-item"><a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'">objects</a></li>
+          <li class="breadcrumb-item"><a th:text="${datastream.digitalObject.id}"
+                                         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id}"></a>
+          </li>
+          <li class="breadcrumb-item"><a th:text="${datastream.dsid}"
+                                         th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}"></a>
+          </li>
+        </ol>
+      </nav>
 
-            <div class="mt-2">
-                <a target="_blank" class="btn btn-light-primary mb-3" th:href="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')">Content</a>
-            </div>
-                </div>
-            </div>
+      <h2 class="display-6 fw-bold text-primary mb-3" th:text="${datastream.dsid}"></h2>
+      <p>Overview over a singular datastream</p>
 
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0 h5">
-                        <i class="ti ti-database me-2"></i>Metadata
-                    </h3>
-                    <div>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i class="ti ti-file"></i>XML</a>
-                        <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i class="ti ti-file"></i>JSON</a>
-                    </div>
-                </div>
-                <div class="card-body">
-            <h4 class="h5 mt-1">Metadata</h4>
-            <ul class="list-group" th:if="${datastream.baseMetadata}">
-                <li class="list-group-item">
-                    <small>title</small>
-                    <p th:text="${datastream.baseMetadata.title}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>creator</small>
-                    <p th:text="${datastream.baseMetadata.creator}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>description</small>
-                    <p th:text="${datastream.baseMetadata.description}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>tags</small>
-                    <p th:text="${datastream.getTags}"></p>
-                </li>
-                <li class="list-group-item">
-                    <small>languages</small>
-                    <p th:text="${datastream.getLang}"></p>
-                </li>
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:subject</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.subject}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>contributor</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.contributor}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>date</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.date}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:type</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.type}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:format</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.format}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:source</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.source}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:language</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.language}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:relation</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.relation}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:coverage</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.coverage}"></p>-->
-                <!--        </li>-->
-                <!--        <li class="list-group-item bg-light">-->
-                <!--            <small>dc:rights</small>-->
-                <!--            <p th:text="${datastream.baseMetadata.rights}"></p>-->
-                <!--        </li>-->
-            </ul>
+      <div class="mt-2">
+        <a target="_blank" class="btn btn-outline-primary"
+           th:href="('/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"><i class="ti ti-book ms-2"></i>View content</a>
+        <a sec:authorize="isAuthenticated()" type="button" class="btn btn-outline-primary"
+                data-bs-toggle="collapse" data-bs-target="#contentUploadForm">
+          <i class="ti ti-upload ms-2"></i>Replace file content
+        </a>
+        <a sec:authorize="isAuthenticated()" type="button" class="btn btn-outline-primary"
+                data-bs-toggle="collapse" data-bs-target="#contentEditorSection"
+                id="editorToggleBtn">
+          <i class="ti ti-code me-1"></i>Open code editor
+        </a>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- CONTENT UPDATE: FILE UPLOAD (authenticated users only) -->
+      <!-- ================================================================== -->
+      <div sec:authorize="isAuthenticated()" class="mt-3 mb-3">
+        <div class="collapse mt-2" id="contentUploadForm">
+          <div class="card card-body">
+            <div class="alert alert-warning" role="alert">
+              <i class="ti ti-alert-triangle me-1"></i>
+              <strong>Caution:</strong> This will permanently overwrite the current file content.
+              Checksums and file size will be recomputed. Metadata (title, tags, etc.) remains unchanged.
             </div>
-            </div>
-            <br/>
-<!--            <h4>Content preview</h4>-->
-<!--            <div class="border border-2">-->
-<!--                <embed-->
-<!--                        th:src="('/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content')"-->
-<!--                        width="100%"-->
-<!--                        height="600px"-->
-<!--                        th:type="${datastream.mimeType}"-->
-<!--                ></embed>-->
-<!--            </div>-->
-                </div>
-            </div>
+            <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content'}"
+                  method="POST"
+                  enctype="multipart/form-data"
+                  onsubmit="return confirm('Replace file content? This cannot be undone.');">
+              <div class="mb-3">
+                <label class="form-label">Select replacement file</label>
+                <input type="file" name="file" class="form-control" required />
+              </div>
+              <button type="submit" class="btn btn-warning">
+                <i class="ti ti-replace me-1"></i>Upload &amp; replace
+              </button>
+            </form>
+          </div>
         </div>
+      </div>
 
-        <footer th:replace="~{fragments/general.html :: footer}"></footer>
+      <!-- ================================================================== -->
+      <!-- CONTENT EDITOR: Web code editor for text-based files -->
+      <!-- (JSON, XML, CSV, HTML, TXT, etc.) -->
+      <!-- ================================================================== -->
+      <div sec:authorize="isAuthenticated()"
+           th:if="${isEditable}"
+           class="mt-3 mb-3">
+
+
+        <div class="collapse mt-2" id="contentEditorSection">
+          <div class="card card-body p-0">
+
+            <!-- Editor toolbar -->
+            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+              <div>
+                <span class="badge bg-secondary me-2" th:text="${datastream.mimeType}"></span>
+                <span class="text-muted" th:text="${datastream.dsid}"></span>
+              </div>
+              <div>
+                <button type="button" class="btn btn-sm btn-outline-secondary me-1" id="editorWordWrapBtn"
+                        title="Toggle word wrap">
+                  <i class="ti ti-text-wrap"></i> Wrap
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary me-1" id="editorFormatBtn"
+                        title="Auto-format (JSON only)">
+                  <i class="ti ti-indent-increase"></i> Format
+                </button>
+                <button type="button" class="btn btn-sm btn-success" id="editorSaveBtn">
+                  <i class="ti ti-device-floppy me-1"></i>Save
+                </button>
+              </div>
+            </div>
+
+            <!-- Loading indicator -->
+            <div id="editorLoading" class="text-center p-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading content...</span>
+              </div>
+              <p class="mt-2 text-muted">Loading datastream content...</p>
+            </div>
+
+            <!-- CodeMirror textarea (hidden until loaded) -->
+            <div id="editorContainer" style="display: none;">
+              <textarea id="codeEditorArea"></textarea>
+            </div>
+
+            <!-- Status bar -->
+            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-top small text-muted">
+              <span id="editorStatus">Ready</span>
+              <span id="editorCursorInfo"></span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- ADMINISTRATIVE METADATA (display + edit form) -->
+      <!-- ================================================================== -->
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <h3 class="h5">
+          <i class="text-primary ti ti-database me-2"></i>Administrative metadata
+        </h3>
+        <div>
+          <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('xml')"><i
+                  class="ti ti-file"></i>XML</a>
+          <a class="mb-0 me1" target="_blank" href="#" onclick="webCirilo.tabOpenCurLinkWithFormatUrlParam('json')"><i
+                  class="ti ti-file"></i>JSON</a>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <div id="metadata-edit-form">
+          <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid}}"
+                method="POST">
+            <input type="hidden" name="_method" value="PATCH" />
+
+            <div class="mb-3">
+              <label class="form-label">Title *</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control" required
+                     maxlength="255"
+                     th:value="${datastream.baseMetadata.title}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Creator *</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="creator" class="form-control" required
+                     maxlength="255"
+                     th:value="${datastream.baseMetadata.creator}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea th:readonly="${!isAuthenticated}" name="description" class="form-control" rows="3"
+                        maxlength="2000"
+                        th:text="${datastream.baseMetadata.description}"></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Rights *</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="rights" class="form-control" required
+                     maxlength="255"
+                     th:value="${datastream.baseMetadata.rights}">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Tags</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="tagsCommaSeparated"
+                     class="form-control"
+                     th:value="${sortedTagsCsv}"
+                     placeholder="tag1, tag2, tag3" />
+              <small class="text-muted">Comma-separated list of tags.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Languages</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="langCommaSeparated"
+                     class="form-control"
+                     th:value="${sortedLangCsv}"
+                     placeholder="en, de, fr" />
+              <small class="text-muted">Comma-separated list of language codes.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Archival Policy</label>
+              <select name="archivalPolicy" class="form-select" th:disabled="${!isAuthenticated}">
+                <option value="DEFAULT" th:selected="${datastream.archivalPolicy.name() == 'DEFAULT'}">
+                  Default (mimetype-based)
+                </option>
+                <option value="FORCE_ARCHIVE" th:selected="${datastream.archivalPolicy.name() == 'FORCE_ARCHIVE'}">
+                  Force Archive
+                </option>
+                <option value="FORCE_EXCLUDE" th:selected="${datastream.archivalPolicy.name() == 'FORCE_EXCLUDE'}">
+                  Force Exclude
+                </option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Content Restrictions</label>
+              <input th:readonly="${!isAuthenticated}" type="text" name="contentRestrictionsCommaSeparated"
+                     class="form-control"
+                     th:value="${sortedContentRestrictionsCsv}"
+                     placeholder="OVER_AGE_18, PROJECT_INTERNAL"
+                     pattern="^([A-Z0-9_]+(,\s*[A-Z0-9_]+)*)?$"
+                     title="Uppercase letters, digits, and underscores only. Comma-separated." />
+              <small class="text-muted">
+                Comma-separated restriction labels. When set, only users with matching
+                Keycloak roles can access this datastream's content. Leave empty for public access.
+              </small>
+            </div>
+
+            <div sec:authorize="isAuthenticated()">
+              <button type="submit" class="btn btn-primary">
+                <i class="ti ti-check me-1"></i>Save changes
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- ================================================================== -->
+      <!-- CONTENT METADATA (read-only) -->
+      <!-- ================================================================== -->
+      <h3 class="h5">
+        <i class="ti ti-database-export me-2 text-primary"></i>Content metadata
+      </h3>
+      <div>
+        <ul class="list-group border">
+          <li class="list-group-item"><b>Mimetype:</b> <span th:text="${datastream.mimeType}"></span></li>
+          <li class="list-group-item"><b>Filename:</b> <span th:text="${datastream.getFileName()}"></span></li>
+          <li class="list-group-item"><b>Filesize:</b> <span th:text="${datastream.size}"></span></li>
+          <li class="list-group-item"><b>MD5:</b> <span th:text="${datastream.getMd5Checksum()}"></span></li>
+          <li class="list-group-item"><b>SHA-512:</b> <span th:text="${datastream.getSha512Checksum()}"></span></li>
+        </ul>
+      </div>
+
+
+
+
+
+
+
+
+      <!-- ================================================================== -->
+      <!-- AUDITING METADATA (read-only) -->
+      <!-- ================================================================== -->
+      <br/>
+      <div>
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h5">
+            <i class="ti ti-id me-2 text-primary"></i>Auditing metadata
+          </h3>
+        </div>
+        <div>
+          <ul class="list-group border">
+            <li class="list-group-item">
+              <small>object id</small>
+              <p th:text="${datastream.getDsid()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>owned by project</small>
+              <p th:text="${project.projectAbbr}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>Created:</small>
+              <p th:text="${datastream.getCreated()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>created by</small>
+              <p th:text="${datastream.getCreatedBy()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified</small>
+              <p th:text="${datastream.getModified()}"></p>
+            </li>
+            <li class="list-group-item">
+              <small>modified by</small>
+              <p th:text="${datastream.getModifiedBy()}"></p>
+            </li>
+          </ul>
+          <br/>
+        </div>
+      </div>
+
     </div>
+  </div>
 </div>
 
-<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
-<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/sidebarmenu.js"></script>
-<script src="/assets/js/app.min.js"></script>
-<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
+<footer th:replace="~{fragments/general.html :: footer}"></footer>
+
+
+<!-- ================================================================== -->
+<!-- CODE EDITOR SCRIPTS -->
+<!-- ================================================================== -->
+<!--<script th:if="${isEditable}" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/codemirror.min.js"></script>-->
+<script th:if="${isEditable}" src="/api-assets/lib/codemirror/codemirror.min.js"></script>
+<!--<script th:if="${isEditable}" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/javascript/javascript.min.js"></script>-->
+<script th:if="${isEditable}" src="/api-assets/lib/codemirror/javascript.min.js"></script>
+<!--<script th:if="${isEditable}" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/xml/xml.min.js"></script>-->
+<script th:if="${isEditable}" src="/api-assets/lib/codemirror/xml.min.js"></script>
+<!--<script th:if="${isEditable}" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/css/css.min.js"></script>-->
+<script th:if="${isEditable}" src="/api-assets/lib/codemirror/css.min.js"></script>
+<!--<script th:if="${isEditable}" src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.18/mode/htmlmixed/htmlmixed.min.js"></script>-->
+<script th:if="${isEditable}" src="/api-assets/lib/codemirror/htmlmixed.min.js"></script>
+
+<script th:if="${isEditable}" th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function() {
+
+        var contentUrl = /*[[ '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${datastream.digitalObject.id} + '/datastreams/' + ${datastream.dsid} + '/content' ]]*/ '';
+        var mimeType = /*[[ ${datastream.mimeType} ]]*/ 'text/plain';
+        var dsid = /*[[ ${datastream.dsid} ]]*/ '';
+
+        // Map MIME types to CodeMirror modes
+        function resolveEditorMode(mime) {
+            if (mime.indexOf('json') !== -1) return 'application/json';
+            if (mime.indexOf('xml') !== -1 || dsid.endsWith('.xml')) return 'xml';
+            if (mime.indexOf('html') !== -1) return 'htmlmixed';
+            if (mime.indexOf('css') !== -1) return 'css';
+            if (mime.indexOf('javascript') !== -1) return 'javascript';
+            // CSV, TXT, and anything else: plain text
+            return 'text/plain';
+        }
+
+        // Read CSRF token from the cookie set by Spring Security's CookieCsrfTokenRepository
+        function getCsrfToken() {
+            var match = document.cookie.match(new RegExp('(^| )XSRF-TOKEN=([^;]+)'));
+            return match ? decodeURIComponent(match[2]) : null;
+        }
+
+        var editor = null;
+        var originalContent = '';
+        var editorInitialized = false;
+
+        // Initialize editor only when the collapse is actually shown
+        var editorSection = document.getElementById('contentEditorSection');
+        if (editorSection) {
+            editorSection.addEventListener('shown.bs.collapse', function() {
+                if (editorInitialized) {
+                    // Just refresh if already loaded
+                    if (editor) editor.refresh();
+                    return;
+                }
+                loadAndInitEditor();
+            });
+        }
+
+        function loadAndInitEditor() {
+            var loadingEl = document.getElementById('editorLoading');
+            var containerEl = document.getElementById('editorContainer');
+            var statusEl = document.getElementById('editorStatus');
+
+            // Fetch current content
+            fetch(contentUrl)
+                .then(function(response) {
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    return response.text();
+                })
+                .then(function(content) {
+                    originalContent = content;
+
+                    // Show editor, hide spinner
+                    loadingEl.style.display = 'none';
+                    containerEl.style.display = 'block';
+
+                    // Initialize CodeMirror
+                    editor = CodeMirror.fromTextArea(document.getElementById('codeEditorArea'), {
+                        value: content,
+                        mode: resolveEditorMode(mimeType),
+                        theme: 'default',
+                        lineNumbers: true,
+                        lineWrapping: false,
+                        matchBrackets: true,
+                        autoCloseBrackets: true,
+                        tabSize: 2,
+                        indentWithTabs: false,
+                        viewportMargin: Infinity
+                    });
+
+                    editor.setValue(content);
+
+                    // Set reasonable height
+                    editor.setSize(null, '500px');
+
+                    // Track cursor position
+                    editor.on('cursorActivity', function() {
+                        var cursor = editor.getCursor();
+                        var cursorInfo = document.getElementById('editorCursorInfo');
+                        if (cursorInfo) {
+                            cursorInfo.textContent = 'Ln ' + (cursor.line + 1) + ', Col ' + (cursor.ch + 1);
+                        }
+                    });
+
+                    // Track changes
+                    editor.on('change', function() {
+                        var hasChanges = editor.getValue() !== originalContent;
+                        statusEl.textContent = hasChanges ? 'Modified (unsaved)' : 'No changes';
+                        statusEl.style.color = hasChanges ? '#e2a03f' : '';
+                    });
+
+                    editorInitialized = true;
+                    statusEl.textContent = 'Ready';
+                })
+                .catch(function(err) {
+                    loadingEl.innerHTML =
+                        '<div class="alert alert-danger m-3">' +
+                        '<i class="ti ti-alert-circle me-1"></i>' +
+                        'Failed to load content: ' + err.message +
+                        '</div>';
+                });
+        }
+
+        // Word wrap toggle
+        document.getElementById('editorWordWrapBtn').addEventListener('click', function() {
+            if (!editor) return;
+            var current = editor.getOption('lineWrapping');
+            editor.setOption('lineWrapping', !current);
+            this.classList.toggle('active', !current);
+        });
+
+        // Format (JSON only)
+        document.getElementById('editorFormatBtn').addEventListener('click', function() {
+            if (!editor) return;
+            var mode = resolveEditorMode(mimeType);
+            if (mode !== 'application/json') {
+                alert('Auto-format is currently only supported for JSON content.');
+                return;
+            }
+            try {
+                var formatted = JSON.stringify(JSON.parse(editor.getValue()), null, 2);
+                editor.setValue(formatted);
+            } catch (e) {
+                alert('Invalid JSON: ' + e.message);
+            }
+        });
+
+        // Save button
+        document.getElementById('editorSaveBtn').addEventListener('click', function() {
+            if (!editor) return;
+
+            var newContent = editor.getValue();
+            if (newContent === originalContent) {
+                alert('No changes to save.');
+                return;
+            }
+
+            if (!confirm('Save changes to datastream content? This will overwrite the current file.')) {
+                return;
+            }
+
+            var statusEl = document.getElementById('editorStatus');
+            var saveBtn = document.getElementById('editorSaveBtn');
+            statusEl.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            // Build multipart form data with the content as a file blob
+            var blob = new Blob([newContent], { type: mimeType });
+            var formData = new FormData();
+            formData.append('file', blob, dsid);
+
+            fetch(contentUrl, {
+                method: 'POST',
+                headers: {
+                    'X-XSRF-TOKEN': getCsrfToken()
+                },
+                body: formData
+            })
+                .then(function(response) {
+                    if (!response.ok) {
+                        return response.text().then(function(body) {
+                            throw new Error('Server returned ' + response.status + ': ' + body);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    originalContent = newContent;
+                    statusEl.textContent = 'Saved successfully';
+                    statusEl.style.color = '#28a745';
+
+                    // Update the checksum display on the page if the response includes them
+                    if (data.md5Checksum) {
+                        document.querySelectorAll('.list-group-item').forEach(function(li) {
+                            if (li.querySelector('b') && li.querySelector('b').textContent === 'MD5:') {
+                                li.querySelector('span').textContent = data.md5Checksum;
+                            }
+                            if (li.querySelector('b') && li.querySelector('b').textContent === 'SHA-512:') {
+                                li.querySelector('span').textContent = data.sha512Checksum;
+                            }
+                            if (li.querySelector('b') && li.querySelector('b').textContent === 'Filesize:') {
+                                li.querySelector('span').textContent = data.size;
+                            }
+                        });
+                    }
+
+                    setTimeout(function() {
+                        statusEl.textContent = 'No changes';
+                        statusEl.style.color = '';
+                    }, 3000);
+                })
+                .catch(function(err) {
+                    statusEl.textContent = 'Save failed: ' + err.message;
+                    statusEl.style.color = '#dc3545';
+                })
+                .finally(function() {
+                    saveBtn.disabled = false;
+                });
+        });
+
+    });
+    /*]]>*/
+</script>
+
+</div>
+</div>
 </body>
 
 </html>

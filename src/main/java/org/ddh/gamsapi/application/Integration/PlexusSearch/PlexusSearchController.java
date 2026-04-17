@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.application.Integration.PlexusSearch;
 
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,17 +19,15 @@ import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping
 @Slf4j
 @RequiredArgsConstructor
-@RestController
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class PlexusSearchController {
 
-  public static final String PLEXUS_SEARCH_GET_PATH = "/api/v1/integration/plexus-search";
+  public static final String PLEXUS_SEARCH_GET_PATH = "/api/integration/v1/plexus-search";
 
   public static final String PLEXUS_SEARCH_MANAGEMENT_PATH = PLEXUS_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
 
@@ -41,16 +40,26 @@ public class PlexusSearchController {
       description = "This endpoint indexes all objects of a project in the plexus-search service."
   )
   @PostMapping(PLEXUS_SEARCH_MANAGEMENT_PATH)
+  @ResponseBody
   public void indexProjectObjects(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
     plexusSearchService.indexObjects(projectAbbr);
+  }
+
+  @Hidden
+  @PostMapping(value = PLEXUS_SEARCH_MANAGEMENT_PATH, produces = MediaType.TEXT_HTML_VALUE)
+  public String indexProjectObjectsHtml(@PathVariable String projectAbbr){
+    log.debug("*** Trying to index project objects");
+    plexusSearchService.indexObjects(projectAbbr);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
       summary = "Add single project object to external plexus-search service",
       description = "This endpoint indexes a single object of a project in the plexus-search service."
   )
-  @PostMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @PostMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
   public void indexProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id
@@ -59,27 +68,53 @@ public class PlexusSearchController {
     plexusSearchService.indexObject(projectAbbr, id);
   }
 
+  @Hidden
+  @PostMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.TEXT_HTML_VALUE)
+  public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Indexing single object {} in plexus-search for project {}", id, projectAbbr);
+    plexusSearchService.indexObject(projectAbbr, id);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
+  }
+
   @Operation(
       summary = "Delete all project objects from external plexus-search service",
       description = "This endpoint deletes all objects of a project from the plexus-search service."
   )
   @DeleteMapping(PLEXUS_SEARCH_MANAGEMENT_PATH)
+  @ResponseBody
   public void deleteProjectObjects(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     plexusSearchService.deleteIndexedObjects(projectAbbr);
+  }
+
+  @Hidden
+  @DeleteMapping(value = PLEXUS_SEARCH_MANAGEMENT_PATH, produces =  MediaType.TEXT_HTML_VALUE)
+  public String deleteProjectObjectsHtml(@PathVariable String projectAbbr){
+    log.trace("*** Trying to delete project objects");
+    plexusSearchService.deleteIndexedObjects(projectAbbr);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
       summary = "Delete single project object from external plexus-search service",
       description = "This endpoint deletes a single object of a project from the plexus-search service."
   )
-  @DeleteMapping(PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH)
+  @DeleteMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
   public void deleteProjectObject(
       @PathVariable String projectAbbr,
       @PathVariable String id
   ){
     log.trace("*** Trying to delete single project object");
     plexusSearchService.deleteIndexedObject(projectAbbr, id);
+  }
+
+  @Hidden
+  @DeleteMapping(value = PLEXUS_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH, produces = MediaType.TEXT_HTML_VALUE)
+  public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
+    log.debug("*** HTML: Deleting single object {} from plexus-search for project {}", id, projectAbbr);
+    plexusSearchService.deleteIndexedObject(projectAbbr, id);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 
@@ -114,7 +149,7 @@ public class PlexusSearchController {
       @Parameter(description = "Query parameters", required = true)
       @Valid @RequestBody PlexusSearchQueryRequestDto request
   ) {
-    log.info("Plexus search request for project: {}, query: {}", project, request.getQuery());
+    log.info("Plexus search request for project: {}, query: {}", project, request);
 
     PlexusSearchResponseDto response = plexusSearchService.search(project, request);
 

@@ -70,20 +70,6 @@ public class MetadataBaseEntityBuilderTest extends UnitTest {
   }
 
   @Test
-  public void throwsIfMd5ChecksumIsNot32CharactersLong(){
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("test-creator").md5Checksum("too-short").build();
-    });
-  }
-
-  @Test
-  public void throwsIfSha512ChecksumIsNot128CharactersLong(){
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      new MetadataBaseEntityBuilder().title("test-title").rights("test-rights").creator("test-creator").sha512Checksum("too-short").build();
-    });
-  }
-
-  @Test
   public void mayBuildAMetadataBaseEntityWithExpectedValues(){
 
     final String MD5_CHECKSUM = "d41d8cd98f00b204e9800998ecf8427e";
@@ -94,15 +80,11 @@ public class MetadataBaseEntityBuilderTest extends UnitTest {
         .rights("test-rights")
         .creator("test-creator")
         .description("test-description")
-        .md5Checksum(MD5_CHECKSUM)
-        .sha512Checksum(SHA512_CHECKSUM)
         .build();
 
     Assertions.assertEquals("test-title", metadataBaseEntity.getTitle());
     Assertions.assertEquals("test-rights", metadataBaseEntity.getRights());
     Assertions.assertEquals("test-creator", metadataBaseEntity.getCreator());
     Assertions.assertEquals("test-description", metadataBaseEntity.getDescription());
-    Assertions.assertEquals(MD5_CHECKSUM, metadataBaseEntity.getMd5Checksum());
-    Assertions.assertEquals(SHA512_CHECKSUM, metadataBaseEntity.getSha512Checksum());
   }
 }

@@ -9,10 +9,19 @@ import org.ddh.gamsapi.infrastructure.System.security.exceptions.AuthorizationCo
 @Slf4j
 public enum GAMSAPIAuthorities {
 
-  ADMINISTRATOR("admin"),
+  SUPER_ADMINISTRATOR("super_admin"),
 
   ANONYMOUS("anonymous"),
 
+  /**
+   * Administrator over all gams projects.
+   */
+  PROJECTS_ADMINISTRATOR("projects_admin"),
+
+  /**
+   * Administrator of a GAMS project
+   * Has all rights that are applicable for a project ()
+   */
   PROJECT_ADMINISTRATOR("admin"),
 
   PROJECT_EDITOR("editor"),
@@ -34,8 +43,16 @@ public enum GAMSAPIAuthorities {
    * Returns the full admin role
    * @return the full admin role
    */
-  public static String getAdmin() {
-    return GAMSAPIAuthorities.ROLE_PREFIX.name + GAMSAPIAuthorities.ADMINISTRATOR.name;
+  public static String getSuperAdmin() {
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + GAMSAPIAuthorities.SUPER_ADMINISTRATOR.name;
+  }
+
+  /**
+   * Returns the full projects administrator role.
+   * @return the full projects administrator role
+   */
+  public static String getProjectsAdministrator(){
+    return GAMSAPIAuthorities.ROLE_PREFIX.name + GAMSAPIAuthorities.PROJECTS_ADMINISTRATOR.name;
   }
 
   /**

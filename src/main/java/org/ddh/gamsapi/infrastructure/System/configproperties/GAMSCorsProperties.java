@@ -16,8 +16,6 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class GAMSCorsProperties {
 
-  private String[] allowedOrigins = {};
-
   private String[] allowedOriginPatterns = {};
 
   @NotEmpty

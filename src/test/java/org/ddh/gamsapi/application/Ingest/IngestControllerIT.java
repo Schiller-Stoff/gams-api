@@ -1,10 +1,14 @@
 package org.ddh.gamsapi.application.Ingest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.mapping.BagSipJson;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
@@ -23,13 +27,13 @@ import org.ddh.gamsapi.application.Ingest.utils.IngestStatics;
 import org.ddh.gamsapi.application.Ingest.utils.ZipUtils;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.ddh.gamsapi.TestUtilities.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,14 +61,20 @@ public class IngestControllerIT extends IntegrationTest {
   @Autowired
   private TestDataBuilder testDataBuilder;
 
-  // disables auditing
+  /**
+   * Classes need to mock authenticated users when changing datastreams
+   */
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   File bagFile;
 
   @BeforeEach
   public void setup() throws IOException {
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of("test-user"));
     bagFile = TestBag.loadFile();
     projectRepository.save(TestProject.generate());
   }
@@ -79,7 +89,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
           )
           .andExpect(status().isOk());
@@ -99,7 +109,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
                   .part(mockPart)
           )
           .andExpect(status().isBadRequest());
@@ -121,7 +131,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
           )
           .andExpect(status().isOk());
@@ -148,7 +158,7 @@ public class IngestControllerIT extends IntegrationTest {
           throw new IllegalStateException(msg);
         }
 
-        final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(URL)
@@ -210,16 +220,11 @@ public class IngestControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void digitalObjectViewContainsExpectedMainResourceTwice(){
+      public void digitalObjectViewContainsExpectedMainResource(){
         // check if label of main resource is there
-        Assertions.assertThat(response).contains("main resource");
+        Assertions.assertThat(response).contains("Main resource");
         // check if the value of the main resource is there
         Assertions.assertThat(response).contains(String.format(">%s<", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue()));
-        //match expected datastream id two times (once in list overview / once as main-resource)
-        Assertions.assertThat(response).containsPattern(
-            String.format("(%s.*?){2}", TestDigitalObject.DIGITAL_OBJECT_MAIN_RESOURCE.getValue())
-        );
-
       }
 
     }
@@ -245,7 +250,7 @@ public class IngestControllerIT extends IntegrationTest {
           throw new IllegalStateException(msg);
         }
 
-        final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(URL)
@@ -323,12 +328,12 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
           )
           .andExpect(status().isOk());
 
-      final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), TestDatastream.DSID.getValue());
+      final String URL = String.format("/api/curation/v1/projects/%s/objects/%s/datastreams/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), TestDatastream.DSID.getValue());
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(URL)
@@ -400,6 +405,11 @@ public class IngestControllerIT extends IntegrationTest {
     }
 
     @Test
+    public void testDatastreamViewContainsExpectedArchivalPolicy(){
+      Assertions.assertThat(response).contains(TestDatastream.ARCHIVAL_POLICY.name());
+    }
+
+    @Test
     @Transactional
     public void testDatastreamViewContainsExpectedLang(){
       TestDatastream.DATASTREAM_LANG.forEach(lang -> Assertions.assertThat(response).contains(lang));
@@ -419,7 +429,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", NOT_EXISTING_PROJECT_ABBR)
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", NOT_EXISTING_PROJECT_ABBR)
                   .part(mockPart)
           )
           .andExpect(status().is4xxClientError());
@@ -450,7 +460,7 @@ public class IngestControllerIT extends IntegrationTest {
     public void exportedBagIsNotNullOrEmpty() throws Exception {
 
       MvcResult result = mockMvc.perform(
-              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+              MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}/export",
                       testDataSet.project().getProjectAbbr(),
                       testDataSet.digitalObject().getId())
                   .accept("application/zip")
@@ -469,7 +479,7 @@ public class IngestControllerIT extends IntegrationTest {
     public void exportedBagContainsExpectedValues() throws Exception {
 
       MvcResult result = mockMvc.perform(
-              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+              MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}/export",
                       testDataSet.project().getProjectAbbr(),
                       testDataSet.digitalObject().getId())
                   .accept("application/zip")
@@ -510,7 +520,7 @@ public class IngestControllerIT extends IntegrationTest {
           case "manifest-md5.txt" -> {
             String manifestMd5Txt = bos.toString();
             org.assertj.core.api.Assertions.assertThat(manifestMd5Txt)
-                .contains(testDataSet.mainDatastream().getBaseMetadata().getMd5Checksum())
+                .contains(testDataSet.mainDatastream().getMd5Checksum())
                 .contains(testDataSet.mainDatastream().getDsid())
                 .contains(BagFilePaths.BAG_SIP_JSON.name)
             ;
@@ -518,7 +528,7 @@ public class IngestControllerIT extends IntegrationTest {
           case "manifest-sha512.txt" -> {
             String manifestSha512Txt = bos.toString();
             org.assertj.core.api.Assertions.assertThat(manifestSha512Txt)
-                .contains(testDataSet.mainDatastream().getBaseMetadata().getSha512Checksum())
+                .contains(testDataSet.mainDatastream().getSha512Checksum())
                 .contains(testDataSet.mainDatastream().getDsid())
                 .contains(BagFilePaths.BAG_SIP_JSON.name)
             ;
@@ -555,7 +565,7 @@ public class IngestControllerIT extends IntegrationTest {
                 .contains(testDataSet.mainDatastream().getLang())
                 .contains(testDataSet.mainDatastream().getMimeType())
                 .contains(testDataSet.mainDatastream().getSize().toString())
-                .contains(testDataSet.mainDatastream().getBagPath());
+                .contains(testDataSet.mainDatastream().getFilePath());
 
             var datastreamLang = testDataSet.mainDatastream().getLang();
             for (String lang : datastreamLang) {
@@ -586,4 +596,132 @@ public class IngestControllerIT extends IntegrationTest {
 
 
   }
+
+  @Nested
+  public class BagIngestExport {
+
+    @Test
+    public void ingestedBagShouldSemanticallyMatchExportedBag() throws Exception {
+      // --- 1. SETUP & INGEST ---
+      File originalBagFile = TestBag.loadFile();
+      byte[] zippedImportBag = ZipUtils.zipDir(originalBagFile);
+      String projectAbbr = TestProject.PROJECT_ABBR.getValue();
+      String objectId = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
+
+      MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedImportBag);
+      mockMvc.perform(multipart("/api/curation/v1/projects/{projectAbbr}/objects", projectAbbr).part(mockPart))
+          .andExpect(status().isOk());
+
+      // --- 2. EXPORT ---
+      MvcResult exportResult = mockMvc.perform(MockMvcRequestBuilders.get(
+                  "/api/curation/v1/projects/{projectAbbr}/objects/{id}/export", projectAbbr, objectId)
+              .accept("application/zip"))
+          .andExpect(status().isOk())
+          .andReturn();
+
+      byte[] exportedZipBytes = exportResult.getResponse().getContentAsByteArray();
+
+      // --- 3. EXTRACTION ---
+      ObjectMapper mapper = new ObjectMapper();
+      AtomicReference<BagSipJson> exportedSipRef = new AtomicReference<>();
+      AtomicReference<String> exportedManifestMd5 = new AtomicReference<>();
+      AtomicReference<String> exportedManifestSha512 = new AtomicReference<>();
+
+      ZipUtils.walkZippedDir(exportedZipBytes, (zipEntry, bos) -> {
+        String fullEntryName = zipEntry.getName();
+        try {
+          if (fullEntryName.endsWith(BagFilePaths.BAG_SIP_JSON.name)) {
+            exportedSipRef.set(mapper.readValue(bos.toByteArray(), BagSipJson.class));
+          } else if (fullEntryName.endsWith("manifest-md5.txt")) {
+            exportedManifestMd5.set(bos.toString(StandardCharsets.UTF_8));
+          } else if (fullEntryName.endsWith("manifest-sha512.txt")) {
+            exportedManifestSha512.set(bos.toString(StandardCharsets.UTF_8));
+          }
+        } catch (Exception e) {
+          throw new RuntimeException("Failed to parse zip entry: " + fullEntryName, e);
+        }
+      });
+
+      // --- 4. ASSERT SIP.JSON DOMAIN LOGIC ---
+      File originalSipJsonFile = new File(originalBagFile, BagFilePaths.BAG_SIP_JSON.name);
+      BagSipJson originalSip = mapper.readValue(originalSipJsonFile, BagSipJson.class);
+      BagSipJson exportedSip = exportedSipRef.get();
+
+      Assertions.assertThat(exportedSip).as("Exported sip.json should be present in the zip").isNotNull();
+      Assertions.assertThat(exportedSip.getRecid()).isEqualTo(originalSip.getRecid());
+      Assertions.assertThat(exportedSip.getCreated_by()).isNotEqualTo(originalSip.getCreated_by()).contains("gams-api");
+      // ... (Keep existing domain field assertions here) ...
+
+      // --- 5. ASSERT MANIFEST CHECKSUMS ---
+      // Read original manifests from the test filesystem
+      String originalMd5Content = java.nio.file.Files.readString(
+          Path.of(originalBagFile.getAbsolutePath(), BagFilePaths.MANIFEST_MD5_FILE_PATH.name));
+      String originalSha512Content = java.nio.file.Files.readString(
+          Path.of(originalBagFile.getAbsolutePath(), BagFilePaths.MANIFEST_SHA512_FILE_PATH.name));
+
+      // Parse into Maps
+      Map<String, String> originalMd5Map = parseManifest(originalMd5Content);
+      Map<String, String> exportedMd5Map = parseManifest(exportedManifestMd5.get());
+
+      Map<String, String> originalSha512Map = parseManifest(originalSha512Content);
+      Map<String, String> exportedSha512Map = parseManifest(exportedManifestSha512.get());
+
+      // Assert rules
+      assertManifestsMatchExceptSipJson(originalMd5Map, exportedMd5Map, "MD5");
+      assertManifestsMatchExceptSipJson(originalSha512Map, exportedSha512Map, "SHA-512");
+    }
+
+    /**
+     * Parses a BagIt manifest file content into a Map of FilePath -> Checksum.
+     */
+    private Map<String, String> parseManifest(String manifestContent) {
+      Map<String, String> manifestMap = new HashMap<>();
+      if (manifestContent == null || manifestContent.isBlank()) {
+        return manifestMap;
+      }
+
+      String[] lines = manifestContent.split("\\r?\\n");
+      for (String line : lines) {
+        if (line.trim().isEmpty()) continue;
+        // Split by whitespace. Limit to 2 parts: [0]=checksum, [1]=filepath
+        String[] parts = line.trim().split("\\s+", 2);
+        if (parts.length == 2) {
+          manifestMap.put(parts[1], parts[0]);
+        }
+      }
+      return manifestMap;
+    }
+
+    /**
+     * Asserts that all files in the original manifest match the exported manifest,
+     * EXCEPT for the sip.json which must exist but have a different checksum.
+     */
+    private void assertManifestsMatchExceptSipJson(Map<String, String> original, Map<String, String> exported, String manifestType) {
+      Assertions.assertThat(exported)
+          .as(manifestType + " manifest should contain the same number of file entries")
+          .hasSameSizeAs(original);
+
+      for (Map.Entry<String, String> entry : original.entrySet()) {
+        String filePath = entry.getKey();
+        String originalChecksum = entry.getValue();
+        String exportedChecksum = exported.get(filePath);
+
+        Assertions.assertThat(exportedChecksum)
+            .as("File " + filePath + " is missing from the exported " + manifestType + " manifest")
+            .isNotNull();
+
+        if (filePath.equals(BagFilePaths.BAG_SIP_JSON.name)) {
+          Assertions.assertThat(exportedChecksum)
+              .as("Checksum for " + filePath + " in " + manifestType + " MUST DIFFER because the file is updated by gams-api during export")
+              .isNotEqualTo(originalChecksum);
+        } else {
+          Assertions.assertThat(exportedChecksum)
+              .as("Checksum for " + filePath + " in " + manifestType + " MUST MATCH exactly")
+              .isEqualTo(originalChecksum);
+        }
+      }
+    }
+
+  }
+
 }

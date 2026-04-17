@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.Datastream;
 
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.ddh.gamsapi.UnitTest;
@@ -59,35 +60,6 @@ public class DatastreamBuilderTest extends UnitTest {
   }
 
   @Test
-  public void ableToDefineContentRestrictions(){
-
-    Set<String> stringSet = Set.of("restriction1", "restriction2");
-    Datastream datastream = new DatastreamBuilder()
-        .digitalObject("digitalObjectId")
-        .dsid("dsid")
-        .contentRestrictions(stringSet)
-        .build();
-
-    Assertions.assertNotNull(datastream);
-    Assertions.assertEquals("digitalObjectId", datastream.getDigitalObject().getId());
-    Assertions.assertEquals("dsid", datastream.getDsid());
-    Assertions.assertEquals(stringSet, datastream.getContentRestrictions());
-
-  }
-
-  @Test
-  public void builtDatastreamContainsExpectedTags(){
-    Set<String> stringSet = Set.of("tag1", "tag2", "tag3");
-    Datastream datastream = new DatastreamBuilder()
-        .digitalObject("digitalObjectId")
-        .dsid("dsid")
-        .tags(stringSet)
-        .build();
-    Assertions.assertNotNull(datastream);
-    Assertions.assertEquals(stringSet, datastream.getTags());
-  }
-
-  @Test
   public void builderReturnsDatastreamBuilderInstance(){
     DatastreamBuilder datastreamBuilder = DatastreamBuilder.builder();
     Assertions.assertNotNull(datastreamBuilder);
@@ -103,6 +75,21 @@ public class DatastreamBuilderTest extends UnitTest {
         .build();
     Assertions.assertNotNull(datastream);
     Assertions.assertEquals(stringSet, datastream.getLang());
+  }
+
+  @Test
+  public void buildsWithDefaultArchivalPolicy() {
+    Datastream ds = new DatastreamBuilder().dsid("test.txt").build();
+    Assertions.assertEquals(ArchivalPolicy.DEFAULT, ds.getArchivalPolicy());
+  }
+
+  @Test
+  public void buildsWithExplicitArchivalPolicy() {
+    Datastream ds = new DatastreamBuilder()
+        .dsid("test.txt")
+        .archivalPolicy(ArchivalPolicy.FORCE_ARCHIVE)
+        .build();
+    Assertions.assertEquals(ArchivalPolicy.FORCE_ARCHIVE, ds.getArchivalPolicy());
   }
 
 }

@@ -21,6 +21,7 @@ public class SubmissionRecordBuilderTest extends UnitTest {
                 .bagVersion(TestSubmissionRecord.BAG_VERSION)
                 .tagFileCharacterEncoding(TestSubmissionRecord.TAG_FILE_CHARACTER_ENCODING)
                 .digitalObject(TestDigitalObject.generate())
+                .gamsApiVersion(TestSubmissionRecord.GAMS_API_VERSION)
                 .build();
 
         Assertions.assertThat(TEST_BAG_ENTITY).isNotNull();
@@ -37,6 +38,8 @@ public class SubmissionRecordBuilderTest extends UnitTest {
         Assertions.assertThat(TEST_BAG_ENTITY.getBagTagFileCharacterEncoding()).isEqualTo(TestSubmissionRecord.TAG_FILE_CHARACTER_ENCODING);
         Assertions.assertThat(TEST_BAG_ENTITY.getDigitalObject().getId()).isEqualTo(TestDigitalObject.generate().getId());
         Assertions.assertThat(TEST_BAG_ENTITY.getDigitalObject().getId()).isEqualTo(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+
+        Assertions.assertThat(TEST_BAG_ENTITY.getGamsApiVersion()).isEqualTo(TestSubmissionRecord.GAMS_API_VERSION);
 
     }
 

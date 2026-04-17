@@ -1,25 +1,25 @@
 <!doctype html>
 <html lang="en">
 
-<head th:replace="fragments/general.html :: headtemplate" />
+<head th:replace="~{fragments/general.html :: headtemplate}" />
 
 <body>
 <!--  Body Wrapper -->
 <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed">
   <!-- Sidebar Start -->
-  <aside th:replace="fragments/general.html :: aside"></aside>
+  <aside th:replace="~{fragments/general.html :: aside}"></aside>
   <!--  Sidebar End -->
   <!--  Main wrapper -->
   <div class="body-wrapper">
-    <header th:replace="fragments/general.html :: header"></header>
+    <header th:replace="~{fragments/general.html :: header}"></header>
     <br/>
     <br/>
     <br/>
     <div class="p-md-5 p-3" style="min-height: 100vh">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
           <li class="breadcrumb-item"></li>
         </ol>
       </nav>
@@ -62,7 +62,7 @@
             <!-- Project Overview Card -->
             <div class="col-lg-4 col-md-6">
               <div class="feature-card h-100">
-                <a href="/api/v1/projects" class="text-decoration-none">
+                <a href="/api/curation/v1/projects" class="text-decoration-none">
                   <div class="card h-100 border-0 shadow-sm hover-card">
                     <div class="card-body d-flex flex-column">
                       <div class="icon-wrapper mb-3">
@@ -114,7 +114,7 @@
             <!-- REST API Documentation Card -->
             <div class="col-lg-4 col-md-6">
               <div class="feature-card h-100">
-                <a href="/api/v1/openapi" target="_blank" class="text-decoration-none">
+                <a href="/api/openapi" target="_blank" class="text-decoration-none">
                   <div class="card h-100 border-0 shadow-sm hover-card">
                     <div class="card-body d-flex flex-column">
                       <div class="icon-wrapper mb-3">
@@ -192,7 +192,7 @@
             <!-- Search & Navigation Card -->
             <div class="col-lg-4 col-md-6">
               <div class="feature-card h-100">
-                <a href="/api/v1/integration/gsearch/fulltext" class="text-decoration-none">
+                <a href="/api/integration/v1/search/fulltext" class="text-decoration-none">
                   <div class="card h-100 border-0 shadow-sm hover-card">
                     <div class="card-body d-flex flex-column">
                       <div class="icon-wrapper mb-3">
@@ -255,7 +255,7 @@
       </div>
 
     </div>
-    <footer th:replace="fragments/general.html :: footer"></footer>
+    <footer th:replace="~{fragments/general.html :: footer}"></footer>
   </div>
 </div>
 
@@ -346,13 +346,6 @@
   }
 </style>
 
-<script src="/assets/libs/jquery/dist/jquery.min.js"></script>
-<script src="/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/sidebarmenu.js"></script>
-<script src="/assets/js/app.min.js"></script>
-<script src="/assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-<script src="/assets/libs/simplebar/dist/simplebar.js"></script>
-<script src="/assets/js/dashboard.js"></script>
 </body>
 
 </html>

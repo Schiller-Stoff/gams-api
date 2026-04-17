@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -64,14 +64,15 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
 
 
 
-    final String TEST_PROJECT_URL = String.format("/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue());
+    final String TEST_PROJECT_URL = String.format("/api/curation/v1/projects/%s", TestProject.PROJECT_ABBR.getValue());
 
     // global admin creates the project
-    String testGlobalAdminAuthority = GAMSAPIAuthorities.getAdmin();
+    String testGlobalAdminAuthority = GAMSAPIAuthorities.getSuperAdmin();
 
     // first create a project
     mockMvc.perform(
         MockMvcRequestBuilders.put(TEST_PROJECT_URL)
+            .with(SecurityMockMvcRequestPostProcessors.csrf())
             .with(SecurityMockMvcRequestPostProcessors
               .oidcLogin()
               .authorities(new SimpleGrantedAuthority(testGlobalAdminAuthority))
@@ -100,6 +101,7 @@ public class UserPrincipalAuditorMappingIT extends IntegrationTest {
                     .oidcLogin()
                     .authorities(new SimpleGrantedAuthority(testProjectAdminAuthority))
                 )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
         )
         .andExpect(status().isOk());
 

@@ -1,8 +1,10 @@
 package org.ddh.gamsapi.domain.Datastream.utils.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
-import java.util.Date;
+
+import java.time.Instant;
 import java.util.Set;
 
 /**
@@ -28,9 +30,9 @@ public interface IDatastreamDetailsView {
 
     String getType();
 
-    Date getCreated();
+    Instant getCreated();
 
-    Date getModified();
+    Instant getModified();
 
 
     MetadataBaseEntity getBaseMetadata();
@@ -43,6 +45,14 @@ public interface IDatastreamDetailsView {
     Set<String> getTags();
 
     Set<String> getLang();
+
+    ArchivalPolicy getArchivalPolicy();
+
+    String getMd5Checksum();
+
+    String getSha512Checksum();
+
+    Set<String> getContentRestrictions();
 
     interface DigitalObjectView {
         String getId();

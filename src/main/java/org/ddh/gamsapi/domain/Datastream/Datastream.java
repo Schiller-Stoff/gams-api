@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.ValidDatastreamId;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
@@ -82,14 +84,14 @@ public class Datastream {
   @NotEmpty
   private String mimeType;
 
-    /**
-     * Relative path of a datastream from the source bag
-     * Contains the original filename of the datastream
-     * Example: data/content/TEI_SOURCE.xml
-     */
-  @Column(name = "bag_path")
+  /**
+   * Original path of a file from upload
+   * Also contains the original filename
+   * Example: data/content/TEI_SOURCE.xml for given file.
+   */
+  @Column(name = "file_path")
   @NotEmpty
-  private String bagPath;
+  private String filePath;
 
   @Column
   @NotNull
@@ -101,16 +103,14 @@ public class Datastream {
   /**
    * Creation date of the digital object / datastream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @CreationTimestamp
-  private Date created;
+  private Instant created;
 
   /**
    * Last modified date of the digital object / datatream
    */
-  @Temporal(TemporalType.TIMESTAMP)
   @UpdateTimestamp
-  private Date modified;
+  private Instant modified;
 
 
   @Embedded
@@ -131,17 +131,20 @@ public class Datastream {
   private String modifiedBy;
 
   /**
-   * Allows to restrict the content of the datastream to specific users.
+   * Controls whether this datastream should be transferred to the research repository.
+   * DEFAULT: mimetype-based procedure decides.
+   * FORCE_ARCHIVE: always archive this datastream.
+   * FORCE_EXCLUDE: never archive this datastream.
    */
-  @ElementCollection(fetch = FetchType.EAGER)
+  @Column(name = "archival_policy")
+  @Enumerated(EnumType.STRING)
   @NotNull
-  @Column(name = Datastream.CONTENT_RESTRICTIONS_TABLE_NAME)
-  private Set<String> contentRestrictions = new HashSet<>();
+  private ArchivalPolicy archivalPolicy = ArchivalPolicy.DEFAULT;
 
   /**
    * Tags for the datastream.
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   @Column(name = Datastream.TAGS_TABLE_NAME)
   @Size(max = 100, message = "Maximum 100 tags allowed per datastream")
@@ -150,11 +153,51 @@ public class Datastream {
   /**
    * Language of the datastream.
    */
-  @ElementCollection
+  @ElementCollection(fetch = FetchType.EAGER)
   @NotNull
   @Column(name = Datastream.LANG_TABLE_NAME)
   @Size(max = 100, message = "Maximum 100 lang allowed per datastream")
   private Set<String> lang;
+
+  /**
+   * MD5 checksum of the datastream content on the server.
+   * Computed during file write.
+   */
+  @Column(name = "md5_checksum")
+  @NotEmpty
+  private String md5Checksum;
+
+  /**
+   * SHA-512 checksum of the datastream content on the server.
+   * Computed during file write.
+   */
+  @Column(name = "sha512_checksum")
+  @NotEmpty
+  private String sha512Checksum;
+
+  /**
+   *
+   */
+  @ElementCollection(fetch = FetchType.EAGER)
+  @NotNull
+  @Column(name = Datastream.CONTENT_RESTRICTIONS_TABLE_NAME)
+  @Size(max = 50, message = "Maximum 50 content restrictions allowed per datastream")
+  private Set<String> contentRestrictions = new HashSet<>();
+
+  // Dedicated validator for contentRestrictions
+  private static final java.util.regex.Pattern VALID_RESTRICTION = java.util.regex.Pattern.compile("^[A-Z0-9_]{1,64}$");
+  /**
+   * Validates content restriction values.
+   * Restrictions become part of Keycloak role names,
+   * so they must be safe for role construction.
+   */
+  public static void validateContentRestriction(String restriction) {
+    if (!VALID_RESTRICTION.matcher(restriction).matches()) {
+      throw new IllegalArgumentException(
+          "Invalid content restriction '" + restriction
+              + "'. Must match pattern: " + VALID_RESTRICTION.pattern());
+    }
+  }
 
   /**
    * Derives the DatastreamId from the current Datastream object.
@@ -175,6 +218,21 @@ public class Datastream {
     }
 
     return new DatastreamId(dsid, digitalObject.getId());
+  }
+
+  /**
+   * Allows to return the project abbreviation of the current datastream (is known because digital object is being fetched)
+   * @return projectAbbr of the datastream
+   */
+  public String deriveProjectAbbr(){
+    if(dsid == null || digitalObject == null) {
+      String msg = "Encountered unexpected null value - Tried to derive DatastreamId from Datastream with dsid: "  + dsid  + " and digitalObject: " + digitalObject;
+      log.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    // return everything before first "."
+    return digitalObject.getId().substring(0, digitalObject.getId().indexOf("."));
   }
 
   /**
@@ -214,12 +272,12 @@ public class Datastream {
   }
 
   public String getFileName(){
-    if(bagPath == null) {
+    if(filePath == null) {
       String msg = "Encountered unexpected null value when getting filename from dsid: dsid is null. %s" + this;
       log.error(msg);
       throw new IllegalStateException(msg);
     }
-    return StringUtils.getFilename(bagPath);
+    return StringUtils.getFilename(filePath);
   }
 
   // implement to String method for better logging
@@ -229,7 +287,7 @@ public class Datastream {
             "digitalObject=" + (digitalObject != null ? digitalObject.getId() : "null") +
             ", dsid='" + dsid + '\'' +
             ", mimeType='" + mimeType + '\'' +
-            ", bagPath='" + bagPath + '\'' +
+            ", bagPath='" + filePath + '\'' +
             ", size=" + size +
             ", type='" + type + '\'' +
             ", created=" + created +

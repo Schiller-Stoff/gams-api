@@ -1,7 +1,9 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 
+import java.time.Instant;
 import java.util.Set;
 
 /**
@@ -23,11 +25,17 @@ public interface DigitalObjectListItemView {
 
     BaseMetadataView getBaseMetadata();
 
-    String getCreated();
+    Instant getCreated();
 
-    String getModified();
+    Instant getModified();
 
     Set<String> getTags();
+
+    Boolean isIngested();
+
+    ArchiveState getArchiveState();
+
+    boolean isModifiedAfterCreation();
 
     interface ProjectView {
         String getProjectAbbr();

@@ -7,14 +7,18 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamService;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectInvalidDateFormatException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.Project.Project;
@@ -28,6 +32,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MimeTypeUtils;
@@ -38,83 +44,35 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
+@RequestMapping(value = { "/api/curation/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
 public class DigitalObjectController {
 
+  // TODO inject interfaces instead of implementations
   private final DigitalObjectService digitalObjectService;
   private final DatastreamService datastreamService;
   private final IProjectService projectService;
   private final IDigitalObjectModificationService digitalObjectModificationService;
   private final ISubmissionRecordService submissionRecordService;
+  private final IArchivalRecordService archivalRecordService;
 
 
   @Operation(
-      summary = "Check if the digital object's sub resources have been modified since a given date",
-      description = "Checks if the digital object's sub resources have been modified since given date (datastreams). Changes to the object's itself (id etc.) are not reflected in this modification date. If the object's content have not been modified, it returns a 304 Not Modified status.",
+      summary = "Check if a digital object has been modified since a given date",
+      description = "Checks if the digital object has been modified since given date (datastreams). If the object has not been modified, it returns a 304 Not Modified status.",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Digital object sub resources have been modified",
+          @ApiResponse(responseCode = "200", description = "Digital object has been modified",
               content = @Content),
-          @ApiResponse(responseCode = "304", description = "Digital object sub resources have not been modified",
-              content = @Content),
-          @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
-              content = @Content)
-      }
-  )
-  @RequestMapping(value = "/{id}/datastreams", method = RequestMethod.HEAD)
-  public ResponseEntity<Void> checkDigitalObjectContentModification(
-      @PathVariable String projectAbbr,
-      @PathVariable String id,
-      @RequestHeader(value = "If-Modified-Since") Optional<String> ifModifiedSince
-  ) {
-
-    // Get latest modification date across entire entity hierarchy
-    DigitalObjectModification digitalObjectModification = digitalObjectModificationService.
-        findLatestModificationDate(projectAbbr, id);
-
-    LocalDateTime lastModified = digitalObjectModification.getLastModificationDateAsLocalDateTime();
-
-    // Format for HTTP header
-    ZonedDateTime zonedDateTime = lastModified.atZone(ZoneId.systemDefault());
-
-    // Handle conditional request
-    if (ifModifiedSince.isPresent()) {
-      String ifModifiedSinceHeaderValue = ifModifiedSince.get();
-      try {
-        ZonedDateTime ifModifiedSinceDate = ZonedDateTime.parse(
-            ifModifiedSinceHeaderValue, DateTimeFormatter.RFC_1123_DATE_TIME);
-
-        if (!zonedDateTime.isAfter(ifModifiedSinceDate)) {
-          return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
-        }
-      } catch (DateTimeParseException e) {
-        throw new DigitalObjectInvalidDateFormatException(
-            "Invalid date format for If-Modified-Since header: " + ifModifiedSinceHeaderValue + ". Original error: " + e.getMessage(),
-            e
-        );
-      }
-    }
-
-    return ResponseEntity.ok()
-        .lastModified(zonedDateTime)
-        .build();
-
-  }
-
-  @Operation(
-      summary = "Check if the digital object's metadata has been modified since a given date",
-      description = "Checks if the digital object's metadata has been modified since given date (datastreams). If the object's metadata has not been modified, it returns a 304 Not Modified status.",
-      responses = {
-          @ApiResponse(responseCode = "200", description = "Digital object's metadata has been modified",
-              content = @Content),
-          @ApiResponse(responseCode = "304", description = "Digital object's metadata has not been modified",
+          @ApiResponse(responseCode = "304", description = "Digital object has not been modified",
               content = @Content),
           @ApiResponse(responseCode = "400", description = "Invalid date format for If-modified-since header",
               content = @Content)
@@ -178,6 +136,7 @@ public class DigitalObjectController {
       DigitalObject digitalObject,
       Project project,
       Model model,
+      Authentication authentication,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "10") int pageSize,
       @RequestParam(defaultValue = "dsid") String sortBy,
@@ -192,13 +151,18 @@ public class DigitalObjectController {
     // first query digital object projection dto
     var foundObject = digitalObjectService.findDigitalObjectCompactDTOById(digitalObject.getId());
 
-    var submissionRecord = submissionRecordService.find(digitalObject.getId());
-    model.addAttribute("submissionRecord", submissionRecord);
+    submissionRecordService.find(digitalObject.getId()).ifPresent(submissionRecord -> {
+      model.addAttribute("submissionRecord", submissionRecord);
+    });
+
+    var archivalRecords = archivalRecordService.findForObject(digitalObject.getId());
+    model.addAttribute("archivalRecords", archivalRecords);
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?
     PagedResponse<IDatastreamDetailsView> pagedDatastreams = datastreamService.findAll(
         foundObject.getId(), PageRequest.of(pageIndex, pageSize, Sort.by(sortBy))
     );
+
     model.addAttribute("pageSize", pageSize);
     model.addAttribute("pageIndex", pageIndex);
     model.addAttribute("sortDir", sortDir);
@@ -207,6 +171,16 @@ public class DigitalObjectController {
     model.addAttribute("pagedDatastreams", pagedDatastreams);
     model.addAttribute("do", foundObject);
     model.addAttribute(project);
+
+    // TODO can this be done via global controller advice?
+    boolean canEdit = authentication != null && authentication.isAuthenticated()
+        && !(authentication instanceof AnonymousAuthenticationToken);
+    model.addAttribute("isAuthenticated", canEdit);
+
+    // tags of object sorted
+    model.addAttribute("sortedTagsCsv",
+        foundObject.getTags().stream().sorted().collect(Collectors.joining(", ")));
+
     return "DigitalObject/show";
   }
 
@@ -313,9 +287,8 @@ public class DigitalObjectController {
     return "DigitalObject/show_all";
   }
 
-  @DeleteMapping(value = { "/{id}" })
-  @Operation(summary = "Delete a digital object by its ID",
-      description = "Deletes a digital object from the specified project. This operation is irreversible.")
+  @DeleteMapping(value = { "/{id}" }, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  @Hidden
   public String deleteObject(
       @PathVariable String id,
       @PathVariable String projectAbbr,
@@ -330,7 +303,25 @@ public class DigitalObjectController {
 
     this.digitalObjectService.delete(digitalObject);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects";
+  }
+
+  @DeleteMapping(value = { "/{id}" })
+  @Operation(summary = "Delete a digital object by its ID",
+      description = "Deletes a digital object from the specified project. This operation is irreversible.")
+  @ResponseBody
+  public void deleteObjectJson(
+      @PathVariable String id,
+      @PathVariable String projectAbbr) {
+
+    DigitalObject digitalObject = DigitalObjectBuilder
+        .builder()
+        .id(id)
+        .project(projectAbbr)
+        .publisher("_")
+        .build();
+
+    this.digitalObjectService.delete(digitalObject);
   }
 
 
@@ -375,6 +366,76 @@ public class DigitalObjectController {
   )
   public Set<String> getProjectTags(@PathVariable String projectAbbr) {
     return digitalObjectService.findDistinctTagsByProject(projectAbbr);
+  }
+
+
+  // In DigitalObjectController.java
+
+  @Hidden // hide from OpenAPI — this is webclient-only
+  @PostMapping(consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String createObjectFromForm(
+      @PathVariable String projectAbbr,
+      @Valid DigitalObjectCreateDto dto,
+      @RequestHeader Map<String, String> requestHeader
+  ) {
+
+    digitalObjectService.create(projectAbbr, dto);
+    String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects";
+  }
+
+
+  @PatchMapping(
+      value = "/{id}",
+      consumes = MimeTypeUtils.APPLICATION_JSON_VALUE,
+      produces = MimeTypeUtils.APPLICATION_JSON_VALUE
+  )
+  @ResponseBody
+  @Operation(
+      summary = "Update a digital object's metadata",
+      description = "Partially updates a digital object's metadata. Only fields present in the "
+          + "request body are updated; omitted fields remain unchanged. Fields like title, rights, "
+          + "creator, and publisher cannot be set to empty as they are required.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Digital object updated successfully"),
+          @ApiResponse(responseCode = "400", description = "Invalid patch data or would violate constraints",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Digital object not found",
+              content = @Content)
+      }
+  )
+  public DigitalObjectCompactDTO patchDigitalObject(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestBody DigitalObjectUpdateDto patch
+  ) {
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+    return digitalObjectService.updateDigitalObject(id, patch);
+  }
+
+  @Hidden
+  @PatchMapping(
+      value = "/{id}",
+      consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
+  )
+  public String patchDigitalObjectFromForm(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @ModelAttribute DigitalObjectUpdateDto patch
+  ) {
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+
+    // Parse comma-separated tags from form into the tags Set
+    if (patch.getTagsCommaSeparated() != null) {
+      Set<String> parsedTags = Arrays.stream(patch.getTagsCommaSeparated().split(","))
+          .map(String::trim)
+          .filter(s -> !s.isEmpty())
+          .collect(Collectors.toSet());
+      patch.setTags(parsedTags);
+    }
+
+    digitalObjectService.updateDigitalObject(id, patch);
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 }

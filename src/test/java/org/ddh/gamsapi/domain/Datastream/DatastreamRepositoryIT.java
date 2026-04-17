@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.Datastream;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +21,7 @@ import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.TestUtilities.*;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 
@@ -144,6 +146,16 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .extracting(Datastream::getLang)
                 .isEqualTo(datastream.getLang());
 
+        }
+
+        @Test
+        public void persistsArchivalPolicy() {
+          Datastream ds = TestDatastream.generate(testDataSet.digitalObject(), "archival_test.txt");
+          ds.setArchivalPolicy(ArchivalPolicy.FORCE_ARCHIVE);
+          datastreamRepository.save(ds);
+
+          var found = datastreamRepository.findById(ds.deriveDatastreamId()).orElseThrow();
+          Assertions.assertThat(found.getArchivalPolicy()).isEqualTo(ArchivalPolicy.FORCE_ARCHIVE);
         }
 
     }
@@ -453,7 +465,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
             ).orElseThrow();
 
             // query last modified date
-            Date lastModified = datastreamRepository
+            Instant lastModified = datastreamRepository
                 .findMaxLastModifiedDateByProjectAbbr(testDataSet.project().getProjectAbbr())
                 .orElseThrow();
 
@@ -488,14 +500,14 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 .isNotNull();
 
             // query last modified date
-            Date lastModified = datastreamRepository
+            Instant lastModified = datastreamRepository
                 .findMaxLastModifiedDateByProjectAbbr(testDataSet.project().getProjectAbbr()).
                 orElseThrow();
 
             // last modified should be equal to the saved later datastream
             Assertions.assertThat(lastModified)
                 .isNotNull()
-                .hasSameTimeAs(savedLaterDatastream.getModified());
+                .isEqualTo(savedLaterDatastream.getModified());
 
             // last modified should not be equal to the first datastream
             Assertions.assertThat(lastModified)
@@ -543,7 +555,7 @@ public class DatastreamRepositoryIT extends IntegrationTest {
                 testDataSet.mainDatastream().deriveDatastreamId()
             ).orElseThrow();
 
-            Date modified = foundDatastream.getModified();
+            Instant modified = foundDatastream.getModified();
 
 
             // update the datastream

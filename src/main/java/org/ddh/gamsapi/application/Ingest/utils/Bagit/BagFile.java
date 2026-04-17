@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
+import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -84,6 +85,19 @@ public class BagFile {
   private Set<String> lang = new HashSet<>();
 
   /**
+   * Archival policy for this content file.
+   */
+  @NotNull
+  @Builder.Default
+  private ArchivalPolicy archivalPolicy = ArchivalPolicy.DEFAULT;
+
+  /**
+   * Content restriction labels from the SIP manifest.
+   */
+  @Builder.Default
+  private Set<String> contentRestrictions = new HashSet<>();
+
+  /**
    * Checksum of the file using md5 algorithm.
    */
   @NotEmpty
@@ -104,21 +118,23 @@ public class BagFile {
     * @param datastream the datastream to convert
     * @return the created BagFile
     */
-  public static BagFile from(Datastream datastream){
+    public static BagFile from(Datastream datastream) {
       return BagFile.builder()
-              .size(datastream.getSize())
-              .bagpath(datastream.getBagPath())
-              .dsid(datastream.getDsid())
-              .mimetype(datastream.getMimeType())
-              .title(datastream.getBaseMetadata().getTitle())
-              .description(datastream.getBaseMetadata().getDescription())
-              .creator(datastream.getBaseMetadata().getCreator())
-              .rights(datastream.getBaseMetadata().getRights())
-              .tags(datastream.getTags())
-              .lang(datastream.getLang())
-              .md5Checksum(datastream.getBaseMetadata().getMd5Checksum())
-              .sha512Checksum(datastream.getBaseMetadata().getSha512Checksum())
-              .build();
-  }
+          .size(datastream.getSize())
+          .bagpath(datastream.getFilePath())
+          .dsid(datastream.getDsid())
+          .mimetype(datastream.getMimeType())
+          .title(datastream.getBaseMetadata().getTitle())
+          .description(datastream.getBaseMetadata().getDescription())
+          .creator(datastream.getBaseMetadata().getCreator())
+          .rights(datastream.getBaseMetadata().getRights())
+          .tags(datastream.getTags())
+          .lang(datastream.getLang())
+          .md5Checksum(datastream.getMd5Checksum())
+          .sha512Checksum(datastream.getSha512Checksum())
+          .archivalPolicy(datastream.getArchivalPolicy())
+          .contentRestrictions(datastream.getContentRestrictions())
+          .build();
+    }
 
 }

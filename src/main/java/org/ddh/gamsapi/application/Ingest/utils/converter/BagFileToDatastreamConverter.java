@@ -10,30 +10,26 @@ import org.ddh.gamsapi.domain.MetadataBaseEntityBuilder;
 @Component
 public class BagFileToDatastreamConverter implements Converter<BagFile, Datastream> {
 
-    @Override
-    public Datastream convert(BagFile source) {
-        return new DatastreamBuilder()
-                .dsid(source.getDsid())
-                .mimeType(source.getMimetype())
-                .size(source.getSize())
-                .tags(source.getTags())
-                .lang(source.getLang())
-                .bagPath(source.getBagpath())
-                // omitted fields - because not available in a BagitContentFile
-                //.fileName()
-                //.data()
-                //.type()
-                //.digitalObject()
-                .baseMetadata(new MetadataBaseEntityBuilder()
-                        .title(source.getTitle())
-                        .creator(source.getCreator())
-                        .description(source.getDescription())
-                        .rights(source.getRights())
-                        .md5Checksum(source.getMd5Checksum())
-                        .sha512Checksum(source.getSha512Checksum())
-                        .build())
-                .build();
+  @Override
+  public Datastream convert(BagFile source) {
+    return new DatastreamBuilder()
+        .dsid(source.getDsid())
+        .mimeType(source.getMimetype())
+        .size(source.getSize())
+        .tags(source.getTags())
+        .lang(source.getLang())
+        .bagPath(source.getBagpath())
+        .md5Checksum(source.getMd5Checksum())
+        .sha512Checksum(source.getSha512Checksum())
+        .archivalPolicy(source.getArchivalPolicy())
+        .contentRestrictions(source.getContentRestrictions())
+        .baseMetadata(new MetadataBaseEntityBuilder()
+            .title(source.getTitle())
+            .creator(source.getCreator())
+            .description(source.getDescription())
+            .rights(source.getRights())
+            .build())
+        .build();
 
-    }
-
+  }
 }
