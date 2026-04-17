@@ -303,7 +303,7 @@ public class DigitalObjectController {
 
     this.digitalObjectService.delete(digitalObject);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @DeleteMapping(value = { "/{id}" })
@@ -381,7 +381,7 @@ public class DigitalObjectController {
 
     digitalObjectService.create(projectAbbr, dto);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
 

@@ -188,7 +188,7 @@ springdoc:
     filter: true
     persistAuthorization: true
   api-docs:
-    path: "/api/v1/api-docs"
+    path: "/api/api-docs"
     enabled: true
   cache:
     disabled: false

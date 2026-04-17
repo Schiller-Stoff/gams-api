@@ -508,7 +508,7 @@ public class DatastreamController {
   ) {
     datastreamService.createFromUpload(id, dsid, dto, file);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @DeleteMapping(value = "/datastreams/{dsid}")
@@ -577,7 +577,7 @@ public class DatastreamController {
     datastreamService.delete(datastream);
 
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 
