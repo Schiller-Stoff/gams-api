@@ -14,7 +14,7 @@ import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = { "/api/v1/integration/projects/{projectAbbr}/objects" })
+@RequestMapping(value = { "/api/integration/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
@@ -56,7 +56,7 @@ public class IntegrationActionController {
   public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.trace("*** HTML: Default index object {} for project {}", id, projectAbbr);
     integrationServices.forEach(service -> service.indexObject(projectAbbr, id));
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -89,7 +89,7 @@ public class IntegrationActionController {
   public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.trace("*** HTML: Default delete object {} for project {}", id, projectAbbr);
     integrationServices.forEach(service -> service.deleteIndexedObject(projectAbbr, id));
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(

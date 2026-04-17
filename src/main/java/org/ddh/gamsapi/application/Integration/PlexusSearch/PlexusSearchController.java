@@ -27,7 +27,7 @@ import java.util.List;
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class PlexusSearchController {
 
-  public static final String PLEXUS_SEARCH_GET_PATH = "/api/v1/integration/plexus-search";
+  public static final String PLEXUS_SEARCH_GET_PATH = "/api/integration/v1/plexus-search";
 
   public static final String PLEXUS_SEARCH_MANAGEMENT_PATH = PLEXUS_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
 
@@ -51,7 +51,7 @@ public class PlexusSearchController {
   public String indexProjectObjectsHtml(@PathVariable String projectAbbr){
     log.debug("*** Trying to index project objects");
     plexusSearchService.indexObjects(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -73,7 +73,7 @@ public class PlexusSearchController {
   public String indexProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Indexing single object {} in plexus-search for project {}", id, projectAbbr);
     plexusSearchService.indexObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -92,7 +92,7 @@ public class PlexusSearchController {
   public String deleteProjectObjectsHtml(@PathVariable String projectAbbr){
     log.trace("*** Trying to delete project objects");
     plexusSearchService.deleteIndexedObjects(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -114,7 +114,7 @@ public class PlexusSearchController {
   public String deleteProjectObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Deleting single object {} from plexus-search for project {}", id, projectAbbr);
     plexusSearchService.deleteIndexedObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 

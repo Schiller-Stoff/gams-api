@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects/{id}/archival-records" })
+@RequestMapping(value = { "/api/curation/v1/projects/{projectAbbr}/objects/{id}/archival-records" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)

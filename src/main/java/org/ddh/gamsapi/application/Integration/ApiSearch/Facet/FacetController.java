@@ -39,7 +39,7 @@ import java.util.Set;
 @Tag(name = OpenAPIConfig.SEARCH_TAG, description = OpenAPIConfig.SEARCH_TAG_DESCRIPTION)
 public class FacetController {
 
-  public static final String FACET_SEARCH_PATH = "/api/v1/integration/search/facets";
+  public static final String FACET_SEARCH_PATH = "/api/integration/v1/search/facets";
 
   private final FacetService facetService;
 

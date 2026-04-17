@@ -11,7 +11,7 @@ import java.time.Instant;
  * DTO for the project detail endpoint.
  * Combines project metadata with lightweight aggregate statistics.
  * <p>
- * This is the JSON response shape for {@code GET /api/v1/projects/{projectAbbr}}.
+ * This is the JSON response shape for {@code GET /api/curation/v1/projects/{projectAbbr}}.
  * It intentionally does NOT include lists of digital objects or datastreams —
  * those are served by their own paginated endpoints.
  */

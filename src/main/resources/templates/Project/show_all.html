@@ -17,7 +17,7 @@
     <div class="p-md-5 p-3" style="min-height: 100vh">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
           <li class="breadcrumb-item">projects</li>
         </ol>
       </nav>
@@ -41,7 +41,7 @@
           <ul class="list-group border" style="list-style: none;">
             <li th:each="project : ${projects}" class="list-group-item d-flex justify-content-between align-items-center">
               <div>
-                <a th:href="'/api/v1/projects/' + ${project.projectAbbr}"
+                <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr}"
                    th:text="${project.projectAbbr}"></a>
                 <p th:text="${project.getDescription()}" class="mb-0 text-muted small"></p>
               </div>
@@ -50,7 +50,7 @@
               <div sec:authorize="hasAuthority('ROLE_super_admin')"
                    th:id="'desc-edit-' + ${project.projectAbbr}"
                    style="display: none;">
-                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr}}"
+                <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
                       method="POST"
                       class="mt-1">
                   <input type="hidden" name="_method" value="PATCH" />
@@ -72,14 +72,14 @@
 
               <!-- Action buttons — only for admins -->
               <div sec:authorize="hasAuthority('ROLE_super_admin')" class="ms-2 d-flex gap-1">
-                <a class="btn btn-outline-primary btn-sm" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/web'">
+                <a class="btn btn-outline-primary btn-sm" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/web'">
                   <i class="ti ti-upload"></i>
                 </a>
                 <button class="btn btn-outline-primary btn-sm"
                         th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
                   <i class="ti ti-pencil"></i>
                 </button>
-                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr}}"
+                <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
                       method="POST"
                       class="d-inline"
                       th:attr="onsubmit='return confirm(\'Delete project ' + ${project.projectAbbr} + '? This cannot be undone.\')'">
@@ -105,7 +105,7 @@
                 <!-- First Page -->
                 <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
                   <a class="page-link"
-                     th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + '/objects?pageIndex=0&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                     th:href="${pageIndex == 0} ? '#' : '/api/curation/v1/projects/' + '/objects?pageIndex=0&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                     First
                   </a>
                 </li>
@@ -113,7 +113,7 @@
                 <!-- Previous Page -->
                 <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
                   <a class="page-link"
-                     th:href="${pageIndex == 0} ? '#' : '/api/v1/projects?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                     th:href="${pageIndex == 0} ? '#' : '/api/curation/v1/projects?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                     Previous
                   </a>
                 </li>
@@ -124,7 +124,7 @@
                   <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                     <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                       <a class="page-link"
-                         th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                         th:href="'/api/curation/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                          th:text="${i + 1}"></a>
                     </li>
                   </th:block>
@@ -137,7 +137,7 @@
                   <th:block th:each="i : ${#numbers.sequence(0, 2)}">
                     <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                       <a class="page-link"
-                         th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                         th:href="'/api/curation/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                          th:text="${i + 1}"></a>
                     </li>
                   </th:block>
@@ -152,7 +152,7 @@
                     <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
                       <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                         <a class="page-link"
-                           th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                           th:href="'/api/curation/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                            th:text="${i + 1}"></a>
                       </li>
                     </th:block>
@@ -167,7 +167,7 @@
                   <th:block th:each="i : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
                     <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                       <a class="page-link"
-                         th:href="'/api/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                         th:href="'/api/curation/v1/projects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                          th:text="${i + 1}"></a>
                     </li>
                   </th:block>
@@ -177,7 +177,7 @@
                 <!-- Next Page -->
                 <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
                   <a class="page-link"
-                     th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                     th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/curation/v1/projects?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                     Next
                   </a>
                 </li>
@@ -185,7 +185,7 @@
                 <!-- Last Page -->
                 <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
                   <a class="page-link"
-                     th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects?pageIndex=' + ${totalPages - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                     th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/curation/v1/projects?pageIndex=' + ${totalPages - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                     Last
                   </a>
                 </li>
@@ -252,7 +252,7 @@
                   const abbr = document.getElementById('newProjectAbbr').value.trim();
                   if (!abbr) return false;
                   if (!confirm('Create project "' + abbr + '"?')) return false;
-                  form.action = '/api/v1/projects/' + encodeURIComponent(abbr);
+                  form.action = '/api/curation/v1/projects/' + encodeURIComponent(abbr);
                   return true;
               }
 

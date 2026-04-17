@@ -51,7 +51,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping(value = { "/api/v1/projects/{projectAbbr}/objects" })
+@RequestMapping(value = { "/api/curation/v1/projects/{projectAbbr}/objects" })
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
@@ -303,7 +303,7 @@ public class DigitalObjectController {
 
     this.digitalObjectService.delete(digitalObject);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @DeleteMapping(value = { "/{id}" })
@@ -381,7 +381,7 @@ public class DigitalObjectController {
 
     digitalObjectService.create(projectAbbr, dto);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
 
@@ -435,7 +435,7 @@ public class DigitalObjectController {
     }
 
     digitalObjectService.updateDigitalObject(id, patch);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 }

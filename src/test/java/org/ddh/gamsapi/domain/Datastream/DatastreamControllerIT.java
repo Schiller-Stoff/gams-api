@@ -83,7 +83,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void getDatastreamRendersExpectedDsidInView() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid());
@@ -113,7 +113,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void datastreamViewDisplaysExpectedMetadata() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -160,7 +160,7 @@ class DatastreamControllerIT extends IntegrationTest {
 
       // DELETE request
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -185,7 +185,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void deleteDatastreamViaFormRedirectsToObject() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -205,7 +205,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void deleteDatastreamViaJsonReturns204() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -229,7 +229,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void deleteNonExistentDatastreamReturns404() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           "NON_EXISTENT_DSID"
@@ -248,7 +248,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void findAllContainsExpectedDatastream() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -276,7 +276,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void findAllDsidsContainsExpectedDsid() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/dsids",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/dsids",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -306,7 +306,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void getDatastreamJsonContainsExpectedValues() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -346,7 +346,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void getDatastreamContentReturnsExpectedDatastreamContent() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s/content",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -369,7 +369,7 @@ class DatastreamControllerIT extends IntegrationTest {
     void getDatastreamContentReturnsExpectedUtf8EncodingInContentType() throws Exception {
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s/content",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -409,7 +409,7 @@ class DatastreamControllerIT extends IntegrationTest {
         digitalObjectRepository.save(testDigitalObject);
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream",
+            "/api/curation/v1/projects/%s/objects/%s/datastream",
             testDataSet.project().getProjectAbbr(),
             testDigitalObject.getId()
         );
@@ -432,7 +432,7 @@ class DatastreamControllerIT extends IntegrationTest {
         digitalObjectRepository.save(testDataSet.digitalObject());
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream",
+            "/api/curation/v1/projects/%s/objects/%s/datastream",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId()
         );
@@ -451,7 +451,7 @@ class DatastreamControllerIT extends IntegrationTest {
       void returnsExpectedMainDatastreamJSONByDefault() throws Exception {
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream",
+            "/api/curation/v1/projects/%s/objects/%s/datastream",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId()
         );
@@ -489,7 +489,7 @@ class DatastreamControllerIT extends IntegrationTest {
         datastreamRepository.save(datastream2);
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
+            "/api/curation/v1/projects/%s/objects/%s/datastream?tag=%s",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId(),
             testDataSet.mainDatastream().getTags().iterator().next()
@@ -529,7 +529,7 @@ class DatastreamControllerIT extends IntegrationTest {
         final String TAG_MATCHES_BOTH_DATASTREAMS = datastream1.getTags().iterator().next();
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
+            "/api/curation/v1/projects/%s/objects/%s/datastream?tag=%s",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId(),
             TAG_MATCHES_BOTH_DATASTREAMS
@@ -551,7 +551,7 @@ class DatastreamControllerIT extends IntegrationTest {
         final String NOT_DEFINED_TEST_TAG = "test-tag-not-defined";
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream?tag=%s",
+            "/api/curation/v1/projects/%s/objects/%s/datastream?tag=%s",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId(),
             NOT_DEFINED_TEST_TAG
@@ -583,7 +583,7 @@ class DatastreamControllerIT extends IntegrationTest {
         datastreamRepository.save(datastream2);
 
         String url = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream?tag=%s&tag=%s",
+            "/api/curation/v1/projects/%s/objects/%s/datastream?tag=%s&tag=%s",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId(),
             SHARED_TAG,
@@ -622,7 +622,7 @@ class DatastreamControllerIT extends IntegrationTest {
       void returnsExpectedMainDatastreamContent() throws Exception {
 
         final String URL = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream/content",
+            "/api/curation/v1/projects/%s/objects/%s/datastream/content",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId()
         );
@@ -650,7 +650,7 @@ class DatastreamControllerIT extends IntegrationTest {
         digitalObjectRepository.save(testDataSet.digitalObject());
 
         final String URL = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream/content",
+            "/api/curation/v1/projects/%s/objects/%s/datastream/content",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId()
         );
@@ -682,7 +682,7 @@ class DatastreamControllerIT extends IntegrationTest {
 
         // url
         final String URL = String.format(
-            "/api/v1/projects/%s/objects/%s/datastream/content?tag=%s&tag=%s",
+            "/api/curation/v1/projects/%s/objects/%s/datastream/content?tag=%s&tag=%s",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId(),
             SHARED_TAG,
@@ -726,7 +726,7 @@ class DatastreamControllerIT extends IntegrationTest {
       Datastream datastream2 = testDataBuilder.addRandomDatastream(testDataSet);
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -765,7 +765,7 @@ class DatastreamControllerIT extends IntegrationTest {
       datastreamRepository.delete(testDataSet.mainDatastream());
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -808,7 +808,7 @@ class DatastreamControllerIT extends IntegrationTest {
 
       // using both unique and shared tag -> should only return datastream2
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams?tag=%s&tag=%s&pageSize=100",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams?tag=%s&tag=%s&pageSize=100",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           SHARED_TAG,
@@ -853,7 +853,7 @@ class DatastreamControllerIT extends IntegrationTest {
       );
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           "new_upload.txt"
@@ -886,7 +886,7 @@ class DatastreamControllerIT extends IntegrationTest {
       );
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -912,7 +912,7 @@ class DatastreamControllerIT extends IntegrationTest {
       );
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           "test.txt"
@@ -941,7 +941,7 @@ class DatastreamControllerIT extends IntegrationTest {
       );
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -978,7 +978,7 @@ class DatastreamControllerIT extends IntegrationTest {
       );
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -1004,7 +1004,7 @@ class DatastreamControllerIT extends IntegrationTest {
       );
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -1030,7 +1030,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void updatesMetadataViaJsonPatch() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -1062,7 +1062,7 @@ class DatastreamControllerIT extends IntegrationTest {
       String originalRights = testDataSet.mainDatastream().getBaseMetadata().getRights();
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -1093,7 +1093,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void returns400ForEmptyTitle() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -1117,7 +1117,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void returns404ForNonExistentDatastream() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           "DOES_NOT_EXIST.txt"
@@ -1147,7 +1147,7 @@ class DatastreamControllerIT extends IntegrationTest {
       org.assertj.core.api.Assertions.assertThat(fresh.getTags()).isNotEmpty();
 
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -1182,7 +1182,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void updatesContentViaFileUpload() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s/content",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           testDataSet.mainDatastream().getDsid()
@@ -1212,7 +1212,7 @@ class DatastreamControllerIT extends IntegrationTest {
     @Test
     void returns404ForNonExistentDatastream() throws Exception {
       String url = String.format(
-          "/api/v1/projects/%s/objects/%s/datastreams/%s/content",
+          "/api/curation/v1/projects/%s/objects/%s/datastreams/%s/content",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId(),
           "DOES_NOT_EXIST.txt"

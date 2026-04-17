@@ -20,7 +20,7 @@ import org.ddh.gamsapi.TestUtilities.TestProject;
  * With the login/logout URL rework, unauthenticated users are redirected
  * to {@code /api/auth/login} instead of the Spring default {@code /login}.
  * Auth infrastructure lives under {@code /api/auth/}, separate from the
- * versioned domain API at {@code /api/v1/}.
+ * versioned domain API at {@code /api/curation/v1/}.
  */
 @AutoConfigureMockMvc
 public class AuthenticationIT extends IntegrationTest {
@@ -31,7 +31,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void getRequestDoesntRequireAuthentication() throws Exception {
-    final String PROJECTS_URL =  "/api/v1/projects";
+    final String PROJECTS_URL =  "/api/curation/v1/projects";
     mockMvc.perform(
         MockMvcRequestBuilders.get(PROJECTS_URL)
     ).andExpect(
@@ -41,7 +41,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void headRequestDoesntRequireAuthentication() throws Exception {
-    final String PROJECTS_URL =  "/api/v1/projects";
+    final String PROJECTS_URL =  "/api/curation/v1/projects";
     mockMvc.perform(
         MockMvcRequestBuilders.head(PROJECTS_URL)
     ).andExpect(
@@ -51,7 +51,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void projectCreationRequiresAuthentication_redirectsToLogin() throws Exception {
-    final String PROJECT_CREATION_URL = "/api/v1/projects/" + TestProject.PROJECT_ABBR.getValue();
+    final String PROJECT_CREATION_URL = "/api/curation/v1/projects/" + TestProject.PROJECT_ABBR.getValue();
     mockMvc.perform(MockMvcRequestBuilders.put(PROJECT_CREATION_URL)
             .with(SecurityMockMvcRequestPostProcessors.csrf())
             .with(SecurityMockMvcRequestPostProcessors.anonymous()))
@@ -62,7 +62,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void userCreationRequiresAuthentication_redirectsToLogin() throws Exception {
-    final String USER_CREATION_URL = "/api/v1/user/";
+    final String USER_CREATION_URL = "/api/curation/v1/user/";
     mockMvc.perform(MockMvcRequestBuilders.post(USER_CREATION_URL)
             .with(SecurityMockMvcRequestPostProcessors.anonymous())
             .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -74,7 +74,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void objectCreationRequiresAuthentication_redirectsToLogin() throws Exception {
-    final String USER_CREATION_URL = "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/demo";
+    final String USER_CREATION_URL = "/api/curation/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/demo";
     mockMvc.perform(
         MockMvcRequestBuilders.put(USER_CREATION_URL)
             .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -87,7 +87,7 @@ public class AuthenticationIT extends IntegrationTest {
 
   @Test
   public void ingestRequiresAuthentication_redirectsToLogin() throws Exception {
-    final String INGEST_ENDPOINT =  "/api/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/";
+    final String INGEST_ENDPOINT =  "/api/curation/v1/projects/" + GAMSAPIProperties.DEMO_PROJECT_ABBR.name + "/objects/";
     mockMvc.perform(MockMvcRequestBuilders.post(INGEST_ENDPOINT).content(new byte[0])
             .with(SecurityMockMvcRequestPostProcessors.anonymous())
             .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -99,7 +99,7 @@ public class AuthenticationIT extends IntegrationTest {
   @Test
   @Disabled("Succeeds in IDE but fails in CI/CD pipeline, needs investigation")
   public void integrationApiPostDontRequireAuthentication_returns500() throws Exception {
-    final String INTEGRATION_ENDPOINT =  "/api/v1/integration/rdf";
+    final String INTEGRATION_ENDPOINT =  "/api/integration/v1/rdf";
 
     mockMvc
         .perform(

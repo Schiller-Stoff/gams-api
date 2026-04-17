@@ -20,5 +20,5 @@
       "width": 1200
     }
   ],
-  "id": "http://localhost:18085/api/v1/projects/demo/objects/o:derla.vor3/datastreams/IMAGE.2/content"
+  "id": "http://localhost:18085/api/curation/v1/projects/demo/objects/o:derla.vor3/datastreams/IMAGE.2/content"
 }

@@ -89,7 +89,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
           )
           .andExpect(status().isOk());
@@ -109,7 +109,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", MISMATCHING_PROJECT_ABBR)
                   .part(mockPart)
           )
           .andExpect(status().isBadRequest());
@@ -131,7 +131,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
           )
           .andExpect(status().isOk());
@@ -158,7 +158,7 @@ public class IngestControllerIT extends IntegrationTest {
           throw new IllegalStateException(msg);
         }
 
-        final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(URL)
@@ -250,7 +250,7 @@ public class IngestControllerIT extends IntegrationTest {
           throw new IllegalStateException(msg);
         }
 
-        final String URL = String.format("/api/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        final String URL = String.format("/api/curation/v1/projects/%s/objects/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
 
         MvcResult mvcResult = mockMvc.perform(
                 MockMvcRequestBuilders.get(URL)
@@ -328,12 +328,12 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
                   .part(mockPart)
           )
           .andExpect(status().isOk());
 
-      final String URL = String.format("/api/v1/projects/%s/objects/%s/datastreams/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), TestDatastream.DSID.getValue());
+      final String URL = String.format("/api/curation/v1/projects/%s/objects/%s/datastreams/%s", TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), TestDatastream.DSID.getValue());
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(URL)
@@ -429,7 +429,7 @@ public class IngestControllerIT extends IntegrationTest {
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
       mockMvc
           .perform(
-              multipart("/api/v1/projects/{projectAbbr}/objects", NOT_EXISTING_PROJECT_ABBR)
+              multipart("/api/curation/v1/projects/{projectAbbr}/objects", NOT_EXISTING_PROJECT_ABBR)
                   .part(mockPart)
           )
           .andExpect(status().is4xxClientError());
@@ -460,7 +460,7 @@ public class IngestControllerIT extends IntegrationTest {
     public void exportedBagIsNotNullOrEmpty() throws Exception {
 
       MvcResult result = mockMvc.perform(
-              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+              MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}/export",
                       testDataSet.project().getProjectAbbr(),
                       testDataSet.digitalObject().getId())
                   .accept("application/zip")
@@ -479,7 +479,7 @@ public class IngestControllerIT extends IntegrationTest {
     public void exportedBagContainsExpectedValues() throws Exception {
 
       MvcResult result = mockMvc.perform(
-              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}/objects/{id}/export",
+              MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}/export",
                       testDataSet.project().getProjectAbbr(),
                       testDataSet.digitalObject().getId())
                   .accept("application/zip")
@@ -609,12 +609,12 @@ public class IngestControllerIT extends IntegrationTest {
       String objectId = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
 
       MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedImportBag);
-      mockMvc.perform(multipart("/api/v1/projects/{projectAbbr}/objects", projectAbbr).part(mockPart))
+      mockMvc.perform(multipart("/api/curation/v1/projects/{projectAbbr}/objects", projectAbbr).part(mockPart))
           .andExpect(status().isOk());
 
       // --- 2. EXPORT ---
       MvcResult exportResult = mockMvc.perform(MockMvcRequestBuilders.get(
-                  "/api/v1/projects/{projectAbbr}/objects/{id}/export", projectAbbr, objectId)
+                  "/api/curation/v1/projects/{projectAbbr}/objects/{id}/export", projectAbbr, objectId)
               .accept("application/zip"))
           .andExpect(status().isOk())
           .andReturn();

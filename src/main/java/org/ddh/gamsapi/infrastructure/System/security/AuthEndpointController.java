@@ -48,7 +48,7 @@ public class AuthEndpointController {
     // to the OAuth2 provider, creating an infinite loop.
     if (error != null) {
       log.warn("OAuth2 login failed. Redirecting to home page. Check Keycloak availability and client configuration.");
-      return "redirect:/api/v1/?loginError=true";
+      return "redirect:/api/curation/v1/?loginError=true";
     }
 
     String registrationId = null;

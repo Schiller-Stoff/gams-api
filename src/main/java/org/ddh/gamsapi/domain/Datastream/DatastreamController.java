@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping({"/api/v1/projects/{projectAbbr}/objects/{id}"})
+@RequestMapping({"/api/curation/v1/projects/{projectAbbr}/objects/{id}"})
 @Controller
 @Tag(name = OpenAPIConfig.DATASTREAMS_TAG, description = OpenAPIConfig.DATASTREAMS_TAG_DESCRIPTION)
 public class DatastreamController {
@@ -508,7 +508,7 @@ public class DatastreamController {
   ) {
     datastreamService.createFromUpload(id, dsid, dto, file);
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @DeleteMapping(value = "/datastreams/{dsid}")
@@ -577,7 +577,7 @@ public class DatastreamController {
     datastreamService.delete(datastream);
 
     String origin = ControllerUtils.resolveProxiedOrigin(requestHeader);
-    return "redirect:" + origin + "api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:" + origin + "api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 
@@ -657,7 +657,7 @@ public class DatastreamController {
     }
 
     datastreamService.updateDatastream(id, dsid, patch);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id + "/datastreams/" + dsid;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id + "/datastreams/" + dsid;
   }
 
 

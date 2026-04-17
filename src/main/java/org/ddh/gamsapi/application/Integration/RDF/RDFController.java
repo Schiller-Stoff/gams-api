@@ -12,7 +12,7 @@ import org.ddh.gamsapi.application.Integration.Common.interfaces.IIntegrationCon
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/rdf", "/api/v1/integration/projects/{projectAbbr}/objects/rdf/"})
+@RequestMapping(value = {"/api/integration/v1/projects/{projectAbbr}/objects/rdf", "/api/integration/v1/projects/{projectAbbr}/objects/rdf/"})
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
@@ -58,7 +58,7 @@ public class RDFController implements IIntegrationController {
   public String indexObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Indexing single object {} in RDF for project {}", id, projectAbbr);
     rdfService.indexObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -77,6 +77,6 @@ public class RDFController implements IIntegrationController {
   public String deleteObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Deleting single object {} from RDF for project {}", id, projectAbbr);
     rdfService.deleteIndexedObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 }

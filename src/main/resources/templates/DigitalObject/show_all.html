@@ -19,9 +19,9 @@
     <div class="p-md-5 p-3" style="min-height: 100vh">
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
-          <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/v1/projects/' + ${project.projectAbbr}"></a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/projects">projects</a></li>
+          <li class="breadcrumb-item"><a th:text="${project.projectAbbr}" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr}"></a></li>
           <li class="breadcrumb-item">objects</li>
         </ol>
       </nav>
@@ -38,7 +38,7 @@
 
             <div class="collapse m-2" id="createObjectForm">
               <div class="mt-2">
-                <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects'}"
+                <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects'}"
                       method="POST">
 
                   <!-- ID with project prefix shown -->
@@ -165,23 +165,23 @@
               <thead>
               <tr>
                 <th scope="col">
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=id'">ID</a>
+                  <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=id'">ID</a>
                 </th>
                 <th scope="col">
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.title'">title</a>
+                  <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.title'">title</a>
                 </th>
                 <th scope="col">
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
+                  <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modified'">modified</a>
                 </th>
                 <th scope="col">tags</th>
                 <th sec:authorize="isAuthenticated()">
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">ingest</a>/<br/>
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=archiveState'">archived</a>/<br/>
-                  <a th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modifiedAfterCreation'">changed</a><br/>
+                  <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=ingested'">ingest</a>/<br/>
+                  <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=archiveState'">archived</a>/<br/>
+                  <a th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=modifiedAfterCreation'">changed</a><br/>
                 </th>
                 <th sec:authorize="isAuthenticated()" scope="col" style="width: 50px;"></th>
                 <!--          <th scope="col">-->
-                <!--            <a class="link-dark text-decoration-none" th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
+                <!--            <a class="link-dark text-decoration-none" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?id=' + ${searchId} + '&sortBy=baseMetadata.type'">dc:type</a>-->
                 <!--          </th>-->
                 <!--            <th scope="col">Delete</th>-->
                 <!--            <th scope="col">Integrate</th>-->
@@ -193,7 +193,7 @@
                         style="color: black; font-weight: 600;"
                         class="text-decoration-none"
                         th:text="${do.id}"
-                        th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"
+                        th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}"
                 ></a></td>
                 <td><span th:title="${do.getBaseMetadata().getTitle()}" th:if="${do.baseMetadata}"
                           th:text="${#strings.abbreviate(do.baseMetadata.title, 50)}"></span></td>
@@ -201,7 +201,7 @@
                 <td>
                   <th:block th:each="tag, iterStat : ${do.tags}">
                     <a th:if="${iterStat.index < 5}"
-                       th:href="@{/api/v1/projects/{projectAbbr}/objects(
+                       th:href="@{/api/curation/v1/projects/{projectAbbr}/objects(
                        projectAbbr=${project.projectAbbr},
                        q=${param.q},
                        pageIndex=${param.pageIndex},
@@ -264,7 +264,7 @@
 
                 </td>
                 <td sec:authorize="isAuthenticated()">
-                  <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
+                  <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"
                         method="POST"
                         class="d-inline"
                         th:attr="onsubmit='return confirm(\'Delete object ' + ${do.id} + '? This cannot be undone.\')'">
@@ -280,7 +280,7 @@
                 <!--              <form-->
                 <!--                      onsubmit="return confirm('Are you sure you want to delete this digital object?');"-->
                 <!--                      action="#"-->
-                <!--                      th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
+                <!--                      th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
                 <!--                      method="delete"-->
                 <!--                      th:method="DELETE"-->
                 <!--                      class="d-inline"-->
@@ -290,7 +290,7 @@
                 <!--            </div></td>-->
                 <!--            <td><div>-->
                 <!--              <form-->
-                <!--                      th:action="@{'/api/v1/integration/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
+                <!--                      th:action="@{'/api/integration/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id}}"-->
                 <!--                      method="POST"-->
                 <!--              >-->
                 <!--                <button type="submit" class="btn btn-outline-dark d-block">Integrate</button>-->
@@ -317,7 +317,7 @@
                   <!-- First Page -->
                   <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
                     <a class="page-link"
-                       th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=0&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                       th:href="${pageIndex == 0} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=0&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                       First
                     </a>
                   </li>
@@ -325,7 +325,7 @@
                   <!-- Previous Page -->
                   <li class="page-item" th:classappend="${pageIndex == 0} ? 'disabled'">
                     <a class="page-link"
-                       th:href="${pageIndex == 0} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                       th:href="${pageIndex == 0} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${pageIndex - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                       Previous
                     </a>
                   </li>
@@ -336,7 +336,7 @@
                     <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                       <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                         <a class="page-link"
-                           th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                           th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                            th:text="${i + 1}"></a>
                       </li>
                     </th:block>
@@ -349,7 +349,7 @@
                     <th:block th:each="i : ${#numbers.sequence(0, 2)}">
                       <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                         <a class="page-link"
-                           th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                           th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                            th:text="${i + 1}"></a>
                       </li>
                     </th:block>
@@ -364,7 +364,7 @@
                       <th:block th:each="i : ${#numbers.sequence(pageIndex - 1, pageIndex + 1)}">
                         <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                           <a class="page-link"
-                             th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                             th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                              th:text="${i + 1}"></a>
                         </li>
                       </th:block>
@@ -379,7 +379,7 @@
                     <th:block th:each="i : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
                       <li class="page-item" th:classappend="${i == pageIndex} ? 'active'">
                         <a class="page-link"
-                           th:href="'/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
+                           th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${i} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}"
                            th:text="${i + 1}"></a>
                       </li>
                     </th:block>
@@ -389,7 +389,7 @@
                   <!-- Next Page -->
                   <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
                     <a class="page-link"
-                       th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                       th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${pageIndex + 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                       Next
                     </a>
                   </li>
@@ -397,7 +397,7 @@
                   <!-- Last Page -->
                   <li class="page-item" th:classappend="${pageIndex >= totalPages - 1} ? 'disabled'">
                     <a class="page-link"
-                       th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${totalPages - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
+                       th:href="${pageIndex >= totalPages - 1} ? '#' : '/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects?pageIndex=' + ${totalPages - 1} + '&pageSize=' + ${pageSize} + '&id=' + ${searchId} + '&sortBy=' + ${sortBy}">
                       Last
                     </a>
                   </li>
@@ -440,7 +440,7 @@
           <div>
             <h4 class="h6">Custom-Search</h4>
             <!-- Index all objects in custom-search -->
-            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the custom search service. Continue?');">
@@ -450,7 +450,7 @@
             </form>
 
             <!-- Delete all objects from custom-search -->
-            <form th:action="@{'/api/v1/integration/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/custom-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the custom search service. Continue?');">
@@ -466,7 +466,7 @@
           <div>
             <h4 class="h6">Plexus-Search</h4>
             <!-- Index all objects in plexus-search -->
-            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the plexus search service. Continue?');">
@@ -476,7 +476,7 @@
             </form>
 
             <!-- Delete all objects from plexus-search -->
-            <form th:action="@{'/api/v1/integration/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/plexus-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the plexus search service. Continue?');">
@@ -492,7 +492,7 @@
           <div>
             <h4 class="h6">Semantic Search</h4>
             <!-- Index all objects in semantic-search -->
-            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will index all objects for this project in the semantic search service. Continue?');">
@@ -502,7 +502,7 @@
             </form>
 
             <!-- Delete all objects from semantic-search -->
-            <form th:action="@{'/api/v1/integration/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
+            <form th:action="@{'/api/integration/v1/semantic-search/projects/' + ${project.projectAbbr} + '/objects'}"
                   method="POST"
                   class="d-inline"
                   onsubmit="return confirm('This will DELETE all indexed objects for this project from the semantic search service. Continue?');">
@@ -565,7 +565,7 @@
                 const objectId = allIds[i];
                 try {
                     const response = await fetch(
-                        `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
+                        `/api/curation/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
                         {
                             method: 'DELETE',
                             headers: { [csrfHeader]: csrfToken },
@@ -608,7 +608,7 @@
         let hasMore = true;
 
         while (hasMore) {
-            const url = `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/ids`
+            const url = `/api/curation/v1/projects/${encodeURIComponent(projectAbbr)}/objects/ids`
                 + `?pageIndex=${pageIndex}&pageSize=${PAGE_SIZE}`;
 
             console.log(`[DELETE-ALL] Fetching IDs page ${pageIndex}...`);
@@ -691,7 +691,7 @@
                 const ifModifiedSince = localDate.toUTCString();
 
                 const headResponse = await fetch(
-                    `/api/v1/projects/${projectAbbr}/objects/${objectId}`,
+                    `/api/curation/v1/projects/${projectAbbr}/objects/${objectId}`,
                     {
                         method: 'HEAD',
                         headers: { 'If-Modified-Since': ifModifiedSince },
@@ -720,7 +720,7 @@
                 let deleteResponse;
                 try {
                     deleteResponse = await fetch(
-                        `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
+                        `/api/curation/v1/projects/${encodeURIComponent(projectAbbr)}/objects/${encodeURIComponent(objectId)}`,
                         {
                             method: 'DELETE',
                             headers: { [csrfHeader]: csrfToken },
@@ -757,7 +757,7 @@
 
                 console.log(`[INGEST] ${progress} Uploading: ${objectId}`);
                 const ingestResponse = await fetch(
-                    `/api/v1/projects/${encodeURIComponent(projectAbbr)}/objects`,
+                    `/api/curation/v1/projects/${encodeURIComponent(projectAbbr)}/objects`,
                     {
                         method: 'POST',
                         body: formData,

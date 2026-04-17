@@ -26,7 +26,7 @@ class SemanticSearchControllerIT extends IntegrationTest {
 
   private static final String PROJECT_ABBR = "TEST";
   private static final String OBJECT_ID = "o:test.1";
-  private static final String PROJECT_PATH = "/api/v1/integration/semantic-search/projects/" + PROJECT_ABBR + "/objects";
+  private static final String PROJECT_PATH = "/api/integration/v1/semantic-search/projects/" + PROJECT_ABBR + "/objects";
   private static final String SINGLE_OBJECT_PATH = PROJECT_PATH + "/" + OBJECT_ID;
 
   // ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ class SemanticSearchControllerIT extends IntegrationTest {
     mockMvc.perform(post(PROJECT_PATH)
             .accept(MediaType.TEXT_HTML))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/api/v1/projects/" + PROJECT_ABBR + "/objects"));
+        .andExpect(redirectedUrl("/api/curation/v1/projects/" + PROJECT_ABBR + "/objects"));
 
     verify(semanticSearchService).indexObjects(PROJECT_ABBR);
   }
@@ -70,7 +70,7 @@ class SemanticSearchControllerIT extends IntegrationTest {
     mockMvc.perform(delete(PROJECT_PATH)
             .accept(MediaType.TEXT_HTML))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/api/v1/projects/" + PROJECT_ABBR + "/objects"));
+        .andExpect(redirectedUrl("/api/curation/v1/projects/" + PROJECT_ABBR + "/objects"));
 
     verify(semanticSearchService).deleteIndexedObjects(PROJECT_ABBR);
   }
@@ -95,7 +95,7 @@ class SemanticSearchControllerIT extends IntegrationTest {
     mockMvc.perform(post(SINGLE_OBJECT_PATH)
             .accept(MediaType.TEXT_HTML))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/api/v1/projects/" + PROJECT_ABBR + "/objects/" + OBJECT_ID));
+        .andExpect(redirectedUrl("/api/curation/v1/projects/" + PROJECT_ABBR + "/objects/" + OBJECT_ID));
 
     verify(semanticSearchService).indexObject(PROJECT_ABBR, OBJECT_ID);
   }
@@ -116,7 +116,7 @@ class SemanticSearchControllerIT extends IntegrationTest {
     mockMvc.perform(delete(SINGLE_OBJECT_PATH)
             .accept(MediaType.TEXT_HTML))
         .andExpect(status().is3xxRedirection())
-        .andExpect(redirectedUrl("/api/v1/projects/" + PROJECT_ABBR + "/objects/" + OBJECT_ID));
+        .andExpect(redirectedUrl("/api/curation/v1/projects/" + PROJECT_ABBR + "/objects/" + OBJECT_ID));
 
     verify(semanticSearchService).deleteIndexedObject(PROJECT_ABBR, OBJECT_ID);
   }
