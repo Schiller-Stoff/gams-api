@@ -37,7 +37,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping({"/api/v1/projects" })
+@RequestMapping({"/api/curation/v1/projects" })
 @Tag(name = OpenAPIConfig.PROJECTS_TAG, description = OpenAPIConfig.PROJECTS_TAG_DESCRIPTION)
 public class ProjectController {
 
@@ -78,7 +78,7 @@ public class ProjectController {
         .title(title)
         .build();
     projectService.updateProject(project);
-    return "redirect:/api/v1/projects";
+    return "redirect:/api/curation/v1/projects";
   }
 
   @PutMapping(path = "/{projectAbbr}")
@@ -129,7 +129,7 @@ public class ProjectController {
         .description(description)
         .build();
     projectService.save(project);
-    return "redirect:/api/v1/projects";
+    return "redirect:/api/curation/v1/projects";
   }
 
   /**
@@ -141,7 +141,7 @@ public class ProjectController {
   public String deleteProjectFromForm(@PathVariable String projectAbbr) {
     Project project = projectService.findByAbbr(projectAbbr);
     projectService.deleteProject(project);
-    return "redirect:/api/v1/projects";
+    return "redirect:/api/curation/v1/projects";
   }
 
   @DeleteMapping(path = "/{projectAbbr}")

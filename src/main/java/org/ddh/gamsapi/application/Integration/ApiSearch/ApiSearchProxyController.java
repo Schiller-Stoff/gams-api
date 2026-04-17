@@ -19,7 +19,7 @@ import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 @Controller
 // TODO should expose "baseSearch" in url
 // TODO this is completely outdated, needs refactor
-@RequestMapping(value = {"/api/v1/integration/search" })
+@RequestMapping(value = {"/api/integration/v1/search" })
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -42,7 +42,7 @@ public class ApiSearchProxyController implements IIntegrationProxyController {
     // proxy against read only endpoint.
     // TODO should expose "baseSearch" in url
     // TOD refactor
-    String targetUrl = gamsConfigProperties.getBaseSearchUrl() + "/" +  request.getRequestURI().replace("/api/v1/integration/search/", "");
+    String targetUrl = gamsConfigProperties.getBaseSearchUrl() + "/" +  request.getRequestURI().replace("/api/integration/v1/search/", "");
     return proxyService.proxy(request, body, targetUrl);
   }
 }

@@ -12,13 +12,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/projects/{projectAbbr}/objects/search"})
+@RequestMapping(value = {"/api/integration/v1/projects/{projectAbbr}/objects/search"})
 @Slf4j
 @RequiredArgsConstructor
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class ApiSearchController implements IIntegrationController {
 
-  public static final String API_SEARCH_MANAGEMENT_PATH = "/api/v1/integration/projects/{projectAbbr}/objects/search";
+  public static final String API_SEARCH_MANAGEMENT_PATH = "/api/integration/v1/projects/{projectAbbr}/objects/search";
   public static final String API_SEARCH_SINGLE_OBJECT_MANAGEMENT_PATH = API_SEARCH_MANAGEMENT_PATH + "/{pid}";
 
   private final ApiSearchService apiSearchService;
@@ -61,7 +61,7 @@ public class ApiSearchController implements IIntegrationController {
   public String indexObjectHtml(@PathVariable String projectAbbr, @PathVariable String pid) {
     log.debug("*** HTML: Indexing single object {} in api-search for project {}", pid, projectAbbr);
     apiSearchService.indexObject(projectAbbr, pid);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + pid;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + pid;
   }
 
   @Operation(
@@ -80,7 +80,7 @@ public class ApiSearchController implements IIntegrationController {
   public String deleteObjectHtml(@PathVariable String projectAbbr, @PathVariable String pid) {
     log.debug("*** HTML: Deleting single object {} from api-search for project {}", pid, projectAbbr);
     apiSearchService.deleteIndexedObject(projectAbbr, pid);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + pid;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + pid;
   }
 
 }

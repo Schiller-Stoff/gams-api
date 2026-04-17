@@ -151,7 +151,7 @@
       <!-- Breadcrumb Navigation -->
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
           <li class="breadcrumb-item active">Fulltext Search</li>
         </ol>
       </nav>
@@ -179,7 +179,7 @@
               </div>
             </div>
             <div class="card-body">
-              <form id="searchForm" method="GET" action="/api/v1/integration/search/fulltext">
+              <form id="searchForm" method="GET" action="/api/integration/v1/search/fulltext">
 
                 <!-- PRIMARY SEARCH FIELDS (Always Visible) -->
                 <div class="row g-3 mb-3">
@@ -424,7 +424,7 @@
                   <tr th:each="result : ${searchResults.content}">
                     <td>
                       <a th:text="${result.getProperty('id')}" target="_blank"
-                         th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}">o:gams.123</a>
+                         th:href="'/api/curation/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects/' + ${result.getProperty('id')}">o:gams.123</a>
                     </td>
                     <td>
                       <strong th:text="${result.getProperty('objectTitle') ?: '...'}">Object title</strong>
@@ -440,7 +440,7 @@
                       </div>
                     </td>
                     <td>
-                      <a target="_blank" th:href="'/api/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects'" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</a>
+                      <a target="_blank" th:href="'/api/curation/v1/projects/' + ${result.getProperty('objectProjectAbbr')} + '/objects'" th:text="${result.getProperty('objectProjectAbbr')}">PROJECT</a>
                     </td>
                     <td>
                       <!-- Dublin Core Metadata Display -->
@@ -489,7 +489,7 @@
                     <li class="page-item"
                         th:classappend="${searchResults.getPagination().isFirst()} ? 'disabled'">
                       <a class="page-link"
-                         th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}"
+                         th:href="${searchResults.getPagination().isFirst()} ? '#' : @{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() - 1}}"
                          aria-label="Previous page">
                         <i class="ti ti-chevron-left"></i> Previous
                       </a>
@@ -504,7 +504,7 @@
                             class="page-item"
                             th:classappend="${page == currentPage} ? 'active'">
                           <a class="page-link"
-                             th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                             th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                              th:text="${page + 1}"
                              th:aria-label="${'Page ' + (page + 1)}"
                              th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
@@ -521,7 +521,7 @@
                             <li class="page-item"
                                 th:classappend="${page == currentPage} ? 'active'">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}"
                                  th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
@@ -535,7 +535,7 @@
                           <th:block th:each="page : ${#numbers.sequence(totalPages - 3, totalPages - 1)}">
                             <li class="page-item">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}">1</a>
                             </li>
@@ -548,7 +548,7 @@
                           <th:block th:each="page : ${#numbers.sequence(0, 2)}">
                             <li class="page-item">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}">1</a>
                             </li>
@@ -562,7 +562,7 @@
                             <li class="page-item"
                                 th:classappend="${page == currentPage} ? 'active'">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}"
                                  th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
@@ -576,7 +576,7 @@
                           <th:block th:each="page : ${#numbers.sequence(0, 1)}">
                             <li class="page-item">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}">1</a>
                             </li>
@@ -590,7 +590,7 @@
                             <li class="page-item"
                                 th:classappend="${page == currentPage} ? 'active'">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}"
                                  th:attr="aria-current=${page == currentPage} ? 'page' : null">1</a>
@@ -604,7 +604,7 @@
                           <th:block th:each="page : ${#numbers.sequence(totalPages - 2, totalPages - 1)}">
                             <li class="page-item">
                               <a class="page-link"
-                                 th:href="@{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
+                                 th:href="@{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${page}}"
                                  th:text="${page + 1}"
                                  th:aria-label="${'Page ' + (page + 1)}">1</a>
                             </li>
@@ -618,7 +618,7 @@
                     <li class="page-item"
                         th:classappend="${searchResults.getPagination().isLast()} ? 'disabled'">
                       <a class="page-link"
-                         th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/v1/integration/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}"
+                         th:href="${searchResults.getPagination().isLast()} ? '#' : @{'/api/integration/v1/search/fulltext?' + ${currentQuery} + '&pageIndex=' + ${searchResults.getPagination().getPage() + 1}}"
                          aria-label="Next page">
                         Next <i class="ti ti-chevron-right"></i>
                       </a>
@@ -734,12 +734,12 @@
                 }
             }
 
-            window.location.href = '/api/v1/integration/search/fulltext?' + params.toString();
+            window.location.href = '/api/integration/v1/search/fulltext?' + params.toString();
         });
 
         // Clear form
         $('#clearForm').click(function() {
-            window.location.href = '/api/v1/integration/search/fulltext';
+            window.location.href = '/api/integration/v1/search/fulltext';
         });
 
         // Initialize remove button states

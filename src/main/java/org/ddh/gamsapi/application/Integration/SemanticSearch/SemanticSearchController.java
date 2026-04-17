@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = OpenAPIConfig.INTEGRATION_TAG, description = OpenAPIConfig.INTEGRATION_TAG_DESCRIPTION)
 public class SemanticSearchController implements IIntegrationController {
 
-  public static final String SEMANTIC_SEARCH_GET_PATH = "/api/v1/integration/semantic-search";
+  public static final String SEMANTIC_SEARCH_GET_PATH = "/api/integration/v1/semantic-search";
 
   public static final String SEMANTIC_SEARCH_MANAGEMENT_PATH = SEMANTIC_SEARCH_GET_PATH + "/projects/{projectAbbr}/objects";
 
@@ -47,7 +47,7 @@ public class SemanticSearchController implements IIntegrationController {
   public String indexProjectObjectsHtml(@PathVariable String projectAbbr) {
     log.debug("*** HTML: Indexing all objects for project {} in semantic search", projectAbbr);
     semanticSearchService.indexObjects(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
   @Operation(
@@ -68,7 +68,7 @@ public class SemanticSearchController implements IIntegrationController {
   public String deleteProjectObjectsHtml(@PathVariable String projectAbbr) {
     log.debug("*** HTML: Deleting all objects for project {} from semantic search", projectAbbr);
     semanticSearchService.deleteIndexedObjects(projectAbbr);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects";
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects";
   }
 
 
@@ -94,7 +94,7 @@ public class SemanticSearchController implements IIntegrationController {
   public String indexObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Indexing object {} for project {} in semantic search", id, projectAbbr);
     semanticSearchService.indexObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
   @Operation(
@@ -115,7 +115,7 @@ public class SemanticSearchController implements IIntegrationController {
   public String deleteObjectHtml(@PathVariable String projectAbbr, @PathVariable String id) {
     log.debug("*** HTML: Deleting object {} for project {} from semantic search", id, projectAbbr);
     semanticSearchService.deleteIndexedObject(projectAbbr, id);
-    return "redirect:/api/v1/projects/" + projectAbbr + "/objects/" + id;
+    return "redirect:/api/curation/v1/projects/" + projectAbbr + "/objects/" + id;
   }
 
 }

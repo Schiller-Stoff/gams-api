@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@RequestMapping({"/api/v1/", "/api/v1"})
+@RequestMapping({"/api/curation/v1/", "/api/curation/v1"})
 @RequiredArgsConstructor
 @Controller
 public class ManagementController {

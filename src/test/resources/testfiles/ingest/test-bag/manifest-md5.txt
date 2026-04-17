@@ -1,6 +1,6 @@
 310def22018d3a6608f133630748ddfc data/content/DC.xml
 827ccb0eea8a706c4c34a16891f84e7b data/content/test.txt
-ecf45e9ff90d35083f8f50163f765352 data/content/manifest.json
+eb39774dd8a28f8eab2b1e7b12dbb6db data/content/manifest.json
 71b6d6d5b10ddbf1b9d3165a864680a1 data/content/search.json
 8f2defdc0c3ace42f69fa45b24219532 data/meta/sip.json
 b3ec558e074f24d11362e053539a9634 data/content/test.xml

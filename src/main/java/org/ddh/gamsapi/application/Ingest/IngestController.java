@@ -33,7 +33,7 @@ public class IngestController {
   @PostMapping(
       consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
       produces = "application/json",
-      path = { "/api/v1/projects/{projectAbbr}/objects"}
+      path = { "/api/curation/v1/projects/{projectAbbr}/objects"}
   )
   @ResponseBody
   @Operation(
@@ -99,7 +99,7 @@ public class IngestController {
   }
 
 
-  @GetMapping(produces = "application/zip", path = { "/api/v1/projects/{projectAbbr}/objects/{id}/export"})
+  @GetMapping(produces = "application/zip", path = { "/api/curation/v1/projects/{projectAbbr}/objects/{id}/export"})
   @ResponseBody
   @Parameter(name = "projectAbbr", description = "Project abbreviation", required = true)
   @Parameter(name = "id", description = "Digital object ID", required = true)

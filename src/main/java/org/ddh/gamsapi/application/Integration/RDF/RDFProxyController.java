@@ -13,7 +13,7 @@ import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.configproperties.GAMSDockerDNS;
 
 @Controller
-@RequestMapping(value = {"/api/v1/integration/rdf", "/api/v1/integration/rdf/"})
+@RequestMapping(value = {"/api/integration/v1/rdf", "/api/integration/v1/rdf/"})
 @Slf4j
 @RequiredArgsConstructor
 @RestController

@@ -48,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WebDeploymentControllerIT extends IntegrationTest {
 
-  private static final String BASE_URL = "/api/v1/projects/%s/web";
+  private static final String BASE_URL = "/api/curation/v1/projects/%s/web";
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -115,7 +115,7 @@ public class WebDeploymentControllerIT extends IntegrationTest {
   // ==================================================================================
 
   @Nested
-  @DisplayName("PUT /api/v1/projects/{projectAbbr}/web")
+  @DisplayName("PUT /api/curation/v1/projects/{projectAbbr}/web")
   public class PUTDeploy {
 
     @Test
@@ -263,7 +263,7 @@ public class WebDeploymentControllerIT extends IntegrationTest {
   // ==================================================================================
 
   @Nested
-  @DisplayName("GET /api/v1/projects/{projectAbbr}/web")
+  @DisplayName("GET /api/curation/v1/projects/{projectAbbr}/web")
   public class GETDeploymentInfo {
 
     @Test
@@ -320,7 +320,7 @@ public class WebDeploymentControllerIT extends IntegrationTest {
   // ==================================================================================
 
   @Nested
-  @DisplayName("DELETE /api/v1/projects/{projectAbbr}/web")
+  @DisplayName("DELETE /api/curation/v1/projects/{projectAbbr}/web")
   public class DELETEUndeploy {
 
     @Test

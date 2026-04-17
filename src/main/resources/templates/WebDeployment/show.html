@@ -19,11 +19,11 @@
       <!-- Breadcrumb -->
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="/api/v1/">Home</a></li>
-          <li class="breadcrumb-item"><a href="/api/v1/projects">projects</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/api/curation/v1/projects">projects</a></li>
           <li class="breadcrumb-item">
             <a th:text="${project.projectAbbr}"
-               th:href="'/api/v1/projects/' + ${project.projectAbbr}"></a>
+               th:href="'/api/curation/v1/projects/' + ${project.projectAbbr}"></a>
           </li>
           <li class="breadcrumb-item active">web deployment</li>
         </ol>
@@ -64,7 +64,7 @@
 
         <!-- Delete button (authenticated only) -->
         <div sec:authorize="isAuthenticated()" class="card-footer">
-          <form th:action="@{'/api/v1/projects/' + ${project.projectAbbr} + '/web'}"
+          <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr} + '/web'}"
                 method="POST">
             <input type="hidden" name="_method" value="DELETE" />
             <button type="submit" class="btn btn-outline-danger btn-sm"
@@ -188,7 +188,7 @@
                 }
 
                 const response = await fetch(
-                    '/api/v1/projects/' + encodeURIComponent(projectAbbr) + '/web',
+                    '/api/curation/v1/projects/' + encodeURIComponent(projectAbbr) + '/web',
                     {
                         method: 'PUT',
                         body: formData,

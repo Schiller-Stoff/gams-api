@@ -30,3 +30,5 @@ gams:
     elasticsearchUrl: ${ELASTICSEARCH_URL:http://localhost:9200}
     # using local host in dev?
     qleverUrl: ${QLEVER_URL:http://localhost:7001}
+  cors:
+    allowed-origin-patterns: ${GAMSAPI_ALLOWED_ORIGIN_PATTERNS:*}

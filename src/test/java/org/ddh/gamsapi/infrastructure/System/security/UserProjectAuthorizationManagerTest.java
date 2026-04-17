@@ -45,7 +45,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     // makes sure that mock request is returned
     when(authorizationContext.getRequest()).thenReturn(request);
     // mockig a valid request uri
-    when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+    when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects/test");
   }
 
   /**
@@ -103,7 +103,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     @Test
     public void doesNotThrowWhenProjectAbbrInRequest() {
       when(request.getMethod()).thenReturn(HttpMethod.GET.name());
-      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+      when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects/test");
 
       Assertions.assertDoesNotThrow(() -> {
         manager.authorize(() -> authentication, authorizationContext);
@@ -292,7 +292,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     @Test
     public void denyProjectEditorPATCHObject(){
       // mocking a valid request uri
-      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+      when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects/test");
       when(request.getMethod()).thenReturn(HttpMethod.PATCH.name());
 
       final String PROJECT_ABBR = "test";
@@ -313,7 +313,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     @Test
     public void stillAllowProjectEditorDELETEObject(){
       // mocking a valid request uri
-      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test");
+      when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects/test");
       when(request.getMethod()).thenReturn(HttpMethod.DELETE.name());
 
       final String PROJECT_ABBR = "test";
@@ -333,7 +333,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     @Test
     public void stillAllowProjectEditorINGESTObject(){
       // mocking a valid request uri
-      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects");
+      when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects");
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
 
       final String PROJECT_ABBR = "test";
@@ -353,7 +353,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     @Test
     public void denyProjectEditorDeleteDatastream(){
       // mocking a valid request uri
-      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test/datastreams/text.xml");
+      when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects/test/datastreams/text.xml");
       when(request.getMethod()).thenReturn(HttpMethod.DELETE.name());
 
       final String PROJECT_ABBR = "test";
@@ -378,7 +378,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     @Test
     public void denyProjectEditorPUTDatastream(){
       // mocking a valid request uri
-      when(request.getRequestURI()).thenReturn("/api/v1/projects/test/objects/test/datastreams/text.xml");
+      when(request.getRequestURI()).thenReturn("/api/curation/v1/projects/test/objects/test/datastreams/text.xml");
       when(request.getMethod()).thenReturn(HttpMethod.PUT.name());
 
       final String PROJECT_ABBR = "test";

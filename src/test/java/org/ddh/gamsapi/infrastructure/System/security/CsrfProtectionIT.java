@@ -17,31 +17,22 @@ public class CsrfProtectionIT extends IntegrationTest {
   @Autowired
   private MockMvc mockMvc;
 
-  /**
-   * Verifies that CSRF-exempted integration proxy endpoints accept POST
-   * requests without a CSRF token. These endpoints are read-only proxies
-   * that receive queries via POST (SPARQL, Solr) and must remain publicly
-   * accessible without CSRF.
-   */
   @Test
-  public void csrfExemptedEndpoint_postWithoutCsrfToken_isNotRejectedByCsrf() throws Exception {
-    // POST without .with(csrf()) — should NOT get 403 Forbidden
-    // It may return 5xx (no real service behind it in test) or other errors,
-    // but crucially NOT 403 from the CSRF filter
+  public void csrfExemptedEndpoint_postWithoutCsrfToken_isRejectedByCsrf() throws Exception {
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/integration/rdf")
+            MockMvcRequestBuilders.post("/api/integration/v1/rdf")
                 .content("SELECT * WHERE { ?s ?p ?o }")
         )
-        .andExpect(MockMvcResultMatchers.status().is(Matchers.not(403)));
+        .andExpect(MockMvcResultMatchers.status().is(Matchers.is(403)));
   }
 
   @Test
-  public void csrfExemptedSearchEndpoint_postWithoutCsrfToken_isNotRejectedByCsrf() throws Exception {
+  public void csrfExemptedSearchEndpoint_postWithoutCsrfToken_isRejectedByCsrf() throws Exception {
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/integration/search/some-query")
+            MockMvcRequestBuilders.post("/api/integration/v1/search/some-query")
                 .content("")
         )
-        .andExpect(MockMvcResultMatchers.status().is(Matchers.not(403)));
+        .andExpect(MockMvcResultMatchers.status().is(Matchers.is(403)));
   }
 
   /**
@@ -56,7 +47,7 @@ public class CsrfProtectionIT extends IntegrationTest {
     );
 
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/projects/test/objects")
+            MockMvcRequestBuilders.post("/api/curation/v1/projects/test/objects")
                 .content(new byte[0])
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")
@@ -77,7 +68,7 @@ public class CsrfProtectionIT extends IntegrationTest {
     );
 
     mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/projects/test/objects")
+            MockMvcRequestBuilders.post("/api/curation/v1/projects/test/objects")
                 .content(new byte[0])
                 .with(SecurityMockMvcRequestPostProcessors
                     .user("SOME_USER")

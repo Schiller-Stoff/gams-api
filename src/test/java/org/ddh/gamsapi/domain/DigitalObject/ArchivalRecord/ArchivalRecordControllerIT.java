@@ -53,7 +53,7 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
       public void jsonContainsExpectedPid() throws Exception {
 
         final String TEST_REQUEST_URL = String.format(
-            "/api/v1/projects/%s/objects/%s/archival-records",
+            "/api/curation/v1/projects/%s/objects/%s/archival-records",
             testDataSet.project().getProjectAbbr(),
             testDataSet.digitalObject().getId()
         );
@@ -82,7 +82,7 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
     public void createsAnAdditionalArchivalRecord() throws Exception {
 
       final String TEST_REQUEST_URL = String.format(
-          "/api/v1/projects/%s/objects/%s/archival-records",
+          "/api/curation/v1/projects/%s/objects/%s/archival-records",
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );

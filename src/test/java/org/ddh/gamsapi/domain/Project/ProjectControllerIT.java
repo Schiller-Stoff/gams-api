@@ -67,7 +67,7 @@ class ProjectControllerIT extends IntegrationTest {
     @Test
     void projectAbbrContainedInWebclientProjectsOverview() throws Exception {
 
-      MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/projects").accept(MediaType.TEXT_HTML))
+      MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects").accept(MediaType.TEXT_HTML))
         .andExpect(MockMvcResultMatchers.status().isOk())
           // verifies that webclient html is being returned
           .andExpect(MockMvcResultMatchers.content().contentType("text/html;charset=UTF-8"))
@@ -87,7 +87,7 @@ class ProjectControllerIT extends IntegrationTest {
     @Test
     void GETProjectOverviewReturns200() throws Exception {
       mockMvc.perform(
-          MockMvcRequestBuilders.get("/api/v1/projects")
+          MockMvcRequestBuilders.get("/api/curation/v1/projects")
               .accept(MediaType.APPLICATION_JSON)
       ).andExpect(status().isOk());
     }
@@ -96,7 +96,7 @@ class ProjectControllerIT extends IntegrationTest {
     void GETProjectOverviewReturnsExpectedProjects() throws Exception {
       // perform GET request
       MvcResult mvcResult = mockMvc.perform(
-          MockMvcRequestBuilders.get("/api/v1/projects")
+          MockMvcRequestBuilders.get("/api/curation/v1/projects")
               .accept(MediaType.APPLICATION_JSON)
       ).andExpect(status().isOk())
           .andReturn();
@@ -123,7 +123,7 @@ class ProjectControllerIT extends IntegrationTest {
     void PUTTestProjectReturns200() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
-          "/api/v1/projects/%s", "demo"
+          "/api/curation/v1/projects/%s", "demo"
       );
 
       mockMvc.perform(
@@ -139,7 +139,7 @@ class ProjectControllerIT extends IntegrationTest {
     void PUTRequestAllowsToSaveProjectDescription() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
-          "/api/v1/projects/%s", "demo"
+          "/api/curation/v1/projects/%s", "demo"
       );
 
       final String TEST_PROJECT_DESCRIPTION = TestProject.PROJECT_DESCRIPTION.getValue();
@@ -165,7 +165,7 @@ class ProjectControllerIT extends IntegrationTest {
     void PUTRequestAllowsToSaveProjectTitle() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
-          "/api/v1/projects/%s", "demo"
+          "/api/curation/v1/projects/%s", "demo"
       );
 
       final String TEST_PROJECT_TITLE = TestProject.PROJECT_TITLE.getValue();
@@ -195,7 +195,7 @@ class ProjectControllerIT extends IntegrationTest {
     void PATCHofProjectAllowsToUpdateDescription() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
-          "/api/v1/projects/%s", testDataSet.project().getProjectAbbr()
+          "/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr()
       );
 
       // update the project description
@@ -227,7 +227,7 @@ class ProjectControllerIT extends IntegrationTest {
     void requestBodyIsRequired() throws Exception {
 
       final String TEST_PROJECT_URL = String.format(
-          "/api/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
+          "/api/curation/v1/projects/%s", TestProject.PROJECT_ABBR.getValue()
       );
 
       mockMvc.perform(
@@ -248,7 +248,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
           MockMvcRequestBuilders.delete(
-              String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
           )
       ).andExpect(status().isOk());
 
@@ -265,7 +265,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
           )
       ).andExpect(status().isOk());
 
@@ -276,7 +276,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", "not-existing-project")
+              String.format("/api/curation/v1/projects/%s", "not-existing-project")
           )
       ).andExpect(status().isNotFound());
 
@@ -287,7 +287,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
           )
       ).andExpect(
           MockMvcResultMatchers.header().exists("Last-Modified"));
@@ -298,7 +298,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       String lastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
           )
       ).andReturn().getResponse().getHeader("Last-Modified");
 
@@ -329,7 +329,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       String projectLastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
           )
       ).andReturn().getResponse().getHeader("Last-Modified");
 
@@ -361,7 +361,7 @@ class ProjectControllerIT extends IntegrationTest {
       // the contentLastModified date should be updated to the same date as the digital object modified date
       String projectLastModifiedHeaderValue = mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", foundProject.getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", foundProject.getProjectAbbr())
           )
       ).andReturn().getResponse().getHeader("Last-Modified");
 
@@ -388,7 +388,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
           MockMvcRequestBuilders.head(
-              String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+              String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
           ).header("If-Modified-Since", MALFORMED_DATE)
       ).andExpect(status().isBadRequest());
 
@@ -408,7 +408,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
         MockMvcRequestBuilders.head(
-          String.format("/api/v1/projects/%s", testDataSet.project().getProjectAbbr())
+          String.format("/api/curation/v1/projects/%s", testDataSet.project().getProjectAbbr())
         ).header("If-Modified-Since", ifModifiedSinceHeader)
       ).andExpect(status().isNotModified());
 
@@ -425,7 +425,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      "/api/v1/projects/{projectAbbr}",
+                      "/api/curation/v1/projects/{projectAbbr}",
                       testDataSet.project().getProjectAbbr()
                   )
                   .accept(MediaType.APPLICATION_JSON)
@@ -448,7 +448,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      "/api/v1/projects/{projectAbbr}",
+                      "/api/curation/v1/projects/{projectAbbr}",
                       testDataSet.project().getProjectAbbr()
                   )
                   .accept(MediaType.APPLICATION_JSON)
@@ -467,7 +467,7 @@ class ProjectControllerIT extends IntegrationTest {
     void returns404ForNonExistentProject() throws Exception {
 
       mockMvc.perform(
-              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}", "nonExistent")
+              MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}", "nonExistent")
                   .accept(MediaType.APPLICATION_JSON)
           )
           .andExpect(status().isNotFound());
@@ -479,7 +479,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      "/api/v1/projects/{projectAbbr}",
+                      "/api/curation/v1/projects/{projectAbbr}",
                       testDataSet.project().getProjectAbbr()
                   )
                   .accept(MediaType.APPLICATION_JSON)
@@ -503,7 +503,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      "/api/v1/projects/{projectAbbr}",
+                      "/api/curation/v1/projects/{projectAbbr}",
                       testDataSet.project().getProjectAbbr()
                   )
                   .accept(MediaType.APPLICATION_JSON)
@@ -530,7 +530,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      "/api/v1/projects/{projectAbbr}",
+                      "/api/curation/v1/projects/{projectAbbr}",
                       testDataSet.project().getProjectAbbr()
                   )
                   .accept(MediaType.TEXT_HTML)
@@ -545,7 +545,7 @@ class ProjectControllerIT extends IntegrationTest {
 
       MvcResult mvcResult = mockMvc.perform(
               MockMvcRequestBuilders.get(
-                      "/api/v1/projects/{projectAbbr}",
+                      "/api/curation/v1/projects/{projectAbbr}",
                       testDataSet.project().getProjectAbbr()
                   )
                   .accept(MediaType.TEXT_HTML)
@@ -563,7 +563,7 @@ class ProjectControllerIT extends IntegrationTest {
     void returns404ForNonExistentProjectHtml() throws Exception {
 
       mockMvc.perform(
-              MockMvcRequestBuilders.get("/api/v1/projects/{projectAbbr}", "nonExistent")
+              MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}", "nonExistent")
                   .accept(MediaType.TEXT_HTML)
           )
           .andExpect(status().isNotFound());
