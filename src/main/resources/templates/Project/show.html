@@ -111,6 +111,7 @@
               <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
                     method="POST">
                 <div class="mb-3">
+                  <input type="hidden" name="_method" value="PATCH" />
                   <label class="form-label">Title</label>
                   <input th:readonly="${!isAuthenticated}" type="text" name="title" class="form-control"
                          maxlength="255"
