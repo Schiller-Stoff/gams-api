@@ -46,39 +46,12 @@
                 <p th:text="${project.getDescription()}" class="mb-0 text-muted small"></p>
               </div>
 
-              <!-- Edit form (hidden by default) — only for admins -->
-              <div sec:authorize="hasAuthority('ROLE_super_admin')"
-                   th:id="'desc-edit-' + ${project.projectAbbr}"
-                   style="display: none;">
-                <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
-                      method="POST"
-                      class="mt-1">
-                  <input type="hidden" name="_method" value="PATCH" />
-                  <div class="input-group input-group-sm">
-                    <input type="text" class="form-control" name="description"
-                           th:value="${project.getDescription()}"
-                           placeholder="Project description"
-                           maxlength="500" />
-                    <button type="submit" class="btn btn-outline-success btn-sm">
-                      <i class="ti ti-check"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm"
-                            th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
-                      <i class="ti ti-x"></i>
-                    </button>
-                  </div>
-                </form>
-              </div>
 
               <!-- Action buttons — only for admins -->
               <div sec:authorize="hasAuthority('ROLE_super_admin')" class="ms-2 d-flex gap-1">
                 <a class="btn btn-outline-primary btn-sm" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/web'">
                   <i class="ti ti-upload"></i>
                 </a>
-                <button class="btn btn-outline-primary btn-sm"
-                        th:attr="onclick='toggleDescriptionEdit(\'' + ${project.projectAbbr} + '\')'">
-                  <i class="ti ti-pencil"></i>
-                </button>
                 <form th:action="@{'/api/curation/v1/projects/' + ${project.projectAbbr}}"
                       method="POST"
                       class="d-inline"
@@ -254,19 +227,6 @@
                   if (!confirm('Create project "' + abbr + '"?')) return false;
                   form.action = '/api/curation/v1/projects/' + encodeURIComponent(abbr);
                   return true;
-              }
-
-              function toggleDescriptionEdit(projectAbbr) {
-                  const display = document.getElementById('desc-display-' + projectAbbr);
-                  const edit = document.getElementById('desc-edit-' + projectAbbr);
-                  if (edit.style.display === 'none') {
-                      edit.style.display = 'block';
-                      display.style.display = 'none';
-                      edit.querySelector('input[name="description"]').focus();
-                  } else {
-                      edit.style.display = 'none';
-                      display.style.display = 'block';
-                  }
               }
           </script>
         </div>
