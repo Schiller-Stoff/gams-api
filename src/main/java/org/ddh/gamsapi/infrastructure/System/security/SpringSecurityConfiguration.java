@@ -119,12 +119,6 @@ public class SpringSecurityConfiguration {
                 "/api/integration/v1/projects/{projectAbbr}/**"
             )
             .access(userProjectAuthorizationManager)
-            // projects may only be created / deleted by global admin role
-            // TODO are the PUT / DELETE statements below necessary?
-            .requestMatchers(HttpMethod.PUT,"/api/curation/v1/projects/{projectAbbr}/", "/api/curation/v1/projects/{projectAbbr}")
-            .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
-            .requestMatchers(HttpMethod.DELETE,"/api/curation/v1/projects/{projectAbbr}/", "/api/curation/v1/projects/{projectAbbr}")
-            .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
             // any not matched requests require authentication
             .anyRequest()
             .authenticated()
