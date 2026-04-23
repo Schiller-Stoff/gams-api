@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockPart;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.ddh.gamsapi.application.Ingest.utils.IngestStatics;
@@ -32,26 +35,32 @@ public class AuthorizationIT extends IntegrationTest {
   @Autowired
   private IProjectRepository projectRepository;
 
+  // disables auditing
+  // (necessary -> otherwise the createdBy fields etc. from Project need to be filled)
+  // this auditing / security test is done in a separate test
+  @MockitoBean
+  private AuditingHandler auditingHandler;
+
 
   @Test
-  public void authenticatedDemoUserNotAuthorizedForProjectIngest_throwsUserNotAssignedToProjectException() {
+  void authenticatedDemoUserNotAuthorizedForProjectIngest_returnsStatus403() throws Exception {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
 
-    Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
-      mockMvc
-          .perform(
-              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
-                  .part(mockPart)
-                  .with(SecurityMockMvcRequestPostProcessors
-                      .user("UNKNOWN_USER")
-                      .roles("UNKNOWN_ROLE")
-                  )
-                  .with(SecurityMockMvcRequestPostProcessors.csrf())
-          )
-          .andExpect(status().is4xxClientError());
-    });
+
+    mockMvc
+        .perform(
+            multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                .part(mockPart)
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("UNKNOWN_USER")
+                    .roles("UNKNOWN_ROLE")
+                )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+        )
+        .andExpect(status().is(403));
+
 
   }
 
@@ -105,7 +114,7 @@ public class AuthorizationIT extends IntegrationTest {
   }
 
   @Test
-  public void projectAdminAuthorizedForDifferentProjectIngest_throwsUserNotAssignedToProjectException() {
+  void projectAdminAuthorizedForDifferentProjectIngest_returnsStatus403() throws Exception {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
@@ -113,18 +122,18 @@ public class AuthorizationIT extends IntegrationTest {
     // mock method needs role prefix excluded.
     String differentProjectAdminRole = GAMSAPIAuthorities.convertToRole(GAMSAPIAuthorities.getProjectAdmin("differentproject"));
 
-    Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
-      mockMvc
-          .perform(
-              multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
-                  .part(mockPart)
-                  .with(SecurityMockMvcRequestPostProcessors
-                      .user("SOME_USER")
-                      .roles(differentProjectAdminRole)
-                  )
-                  .with(SecurityMockMvcRequestPostProcessors.csrf())
-          ).andExpect(status().is4xxClientError());
-    });
+
+    mockMvc
+        .perform(
+            multipart("/api/curation/v1/projects/{projectAbbr}/objects", TestProject.PROJECT_ABBR.getValue())
+                .part(mockPart)
+                .with(SecurityMockMvcRequestPostProcessors
+                    .user("SOME_USER")
+                    .roles(differentProjectAdminRole)
+                )
+                .with(SecurityMockMvcRequestPostProcessors.csrf())
+        ).andExpect(status().is(403));
+
 
   }
 
@@ -182,6 +191,97 @@ public class AuthorizationIT extends IntegrationTest {
                   .with(SecurityMockMvcRequestPostProcessors.csrf())
           )
           .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void userNotAssignedToProjectRoles_putProjectWillReturnStatusCode403() throws Exception {
+
+      final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.put(TEST_URL)
+                  .with(
+                      // user is authenticated but has no roles
+                      SecurityMockMvcRequestPostProcessors.oidcLogin()
+                  )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          ).andExpect(status().is(403));
+
+    }
+
+    @Test
+    void userAssignedToDifferentProject_putProjectWillReturnStatusCode403() throws Exception {
+
+      final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.put(TEST_URL)
+                  .with(
+                      // user is assigned to a different project
+                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin("different"))
+                      )
+                  )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          ).andExpect(status().is(403));
+
+    }
+
+
+    @Test
+    void userAssignedToDifferentProject_patchAnotherProjectWillReturnStatusCode403() throws Exception {
+
+      // create test project (so that it can be patched)
+      projectRepository.save(TestProject.generate());
+
+      final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
+
+      // update the project description
+      final String UPDATED_TEST_PROJECT_DESCRIPTION = "Updated description";
+      final String TEST_PROJECT_PATCH_REQUEST_BODY =  "{\"description\": \"" + UPDATED_TEST_PROJECT_DESCRIPTION + "\"}";
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.patch(TEST_URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .content(TEST_PROJECT_PATCH_REQUEST_BODY)
+                  .with(
+                      // user is assigned to a different project
+                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin("different"))
+                      )
+                  )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          ).andExpect(status().is(403));
+
+    }
+
+    @Test
+    void userAssignedToDifferentProject_deleteAnotherProjectWillReturnStatusCode403() throws Exception {
+
+      // create test project (so that it can be patched)
+      projectRepository.save(TestProject.generate());
+
+      final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
+      final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
+
+      mockMvc
+          .perform(
+              MockMvcRequestBuilders.delete(TEST_URL)
+                  .with(
+                      // user is assigned to a different project
+                      SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                          new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin("different"))
+                      )
+                  )
+                  .with(SecurityMockMvcRequestPostProcessors.csrf())
+          ).andExpect(status().is(403));
+
     }
 
 

@@ -52,14 +52,7 @@ public class SpringSecurityConfiguration {
 
   private final ClientRegistrationRepository clientRegistrationRepository;
 
-  /**
-   * Combined spring security matchers.
-   * Matches all endpoints that require an admin authorization
-   * (e.g. used along restrictions to DELETE / POST requests.)
-   */
-  private final String[] ADMIN_ONLY_PATHS = {"/api/user**", "/api/curation/v1/projects/{projectAbbr}"};
-
-  private final String[] PUBLIC_GET_PATHS = {"/api**", "/api/**"};
+  private final GamsAccessDeniedHandler gamsAccessDeniedHandler;
 
 
   @Bean
@@ -109,37 +102,20 @@ public class SpringSecurityConfiguration {
               };
             })
             .permitAll()
-            // authorization only applies for these endpoints
+            // authorization logic only applies for these endpoints
             .requestMatchers(
-                "/api/curation/v1/projects/{projectAbbr}/objects/**",
-                "/api/curation/v1/projects/{projectAbbr}/web",
-                "/api/integration/v1/projects/{projectAbbr}/objects/**"
+                "/api/curation/v1/projects/{projectAbbr}**",
+                "/api/curation/v1/projects/{projectAbbr}/**",
+                "/api/integration/v1/projects/{projectAbbr}**",
+                "/api/integration/v1/projects/{projectAbbr}/**"
             )
             .access(userProjectAuthorizationManager)
-            // projects may only be created / deleted by global admin role
-            .requestMatchers(HttpMethod.PUT,"/api/curation/v1/projects/{projectAbbr}/", "/api/curation/v1/projects/{projectAbbr}")
-            .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
-            .requestMatchers(HttpMethod.DELETE,"/api/curation/v1/projects/{projectAbbr}/", "/api/curation/v1/projects/{projectAbbr}")
-            .hasAuthority(GAMSAPIAuthorities.getSuperAdmin())
             // any not matched requests require authentication
             .anyRequest()
             .authenticated()
 
     );
 
-    // this would allow POST requests in the integration api if users want to send SPARQL queries via POST instead of url param
-    // this might be necessary if the sparql gets to complex
-//
-//    http.csrf(httpSecurityCsrfConfigurer -> {
-//      httpSecurityCsrfConfigurer
-//          .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-//          .ignoringRequestMatchers(
-//              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/rdf"),
-//              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/search/**")
-//          )
-//      ;
-//    });
 
     // Force CSRF token to be generated on every response
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
@@ -155,6 +131,11 @@ public class SpringSecurityConfiguration {
         frameOptionsConfig.sameOrigin();
       });
     });
+
+    // configures how responses are being sent when auth is denied
+    http.exceptionHandling(e -> e
+        .accessDeniedHandler(gamsAccessDeniedHandler)
+    );
 
     return http.build();
 
