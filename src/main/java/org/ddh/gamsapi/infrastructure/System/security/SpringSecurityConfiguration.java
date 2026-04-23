@@ -54,15 +54,6 @@ public class SpringSecurityConfiguration {
 
   private final GamsAccessDeniedHandler gamsAccessDeniedHandler;
 
-  /**
-   * Combined spring security matchers.
-   * Matches all endpoints that require an admin authorization
-   * (e.g. used along restrictions to DELETE / POST requests.)
-   */
-  private final String[] ADMIN_ONLY_PATHS = {"/api/user**", "/api/curation/v1/projects/{projectAbbr}"};
-
-  private final String[] PUBLIC_GET_PATHS = {"/api**", "/api/**"};
-
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -125,19 +116,6 @@ public class SpringSecurityConfiguration {
 
     );
 
-    // this would allow POST requests in the integration api if users want to send SPARQL queries via POST instead of url param
-    // this might be necessary if the sparql gets to complex
-//
-//    http.csrf(httpSecurityCsrfConfigurer -> {
-//      httpSecurityCsrfConfigurer
-//          .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-//          .ignoringRequestMatchers(
-//              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/rdf"),
-//              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/search/**")
-//          )
-//      ;
-//    });
 
     // Force CSRF token to be generated on every response
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
