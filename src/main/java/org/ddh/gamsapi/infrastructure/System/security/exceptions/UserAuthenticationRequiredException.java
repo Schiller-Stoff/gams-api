@@ -1,7 +1,6 @@
 package org.ddh.gamsapi.infrastructure.System.security.exceptions;
 
 import org.jspecify.annotations.Nullable;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 
 /**
