@@ -129,7 +129,7 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
 
     // there is no role that contains the project-abbreviation ()
     if(filteredRoles.isEmpty()) {
-      String msg = "User" + username + " is not assigned to project " + projectAbbr + ". Url: " + requestUri + " Method: " + requestMethod + ". Has authorities: " + userAuthorities;
+      String msg = "User " + username + " is not assigned to project " + projectAbbr + ". Url: " + requestUri + " Method: " + requestMethod + ". Has authorities: " + userAuthorities;
       log.debug(msg);
       throw new UserNotAssignedToProjectException(msg);
     }
