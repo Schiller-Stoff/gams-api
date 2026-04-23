@@ -67,20 +67,17 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       );
     }
 
-    // TODO I think this remote user is quite unreliable? - check
-    String username = authorizationContext.getRequest().getRemoteUser();
-    // failsafe if username is unexpectedly null
-    // TODO test
-    if(username == null){
-      // TODO improve error message
-      String msg = "Remote user is unexpectedly null. This should not happen. Url: " + requestUri + " Method: " + requestMethod;
-      log.error(msg);
-      throw new AccessDeniedException(msg);
+
+    Authentication auth = authentication.get();
+
+    String username;
+    try {
+      username = auth.getName();
+    } catch (NullPointerException e) {
+      username = "unknown";
     }
-
-
     // access authorities from authentication workflow
-    List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+    List<String> userAuthorities = auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
     if(userAuthorities.contains(GAMSAPIAuthorities.getAnonymous())){
       log.debug("User with name {} is not authorized for state changing operations on the GAMS-API because having anonymous role. Actual roles: {} Url: {} Method: {}", username, userAuthorities, requestUri, requestMethod);
