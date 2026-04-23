@@ -67,13 +67,6 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       );
     }
 
-    //TODO test
-    if(authorizationContext.getRequest().getSession() == null){
-      String msg = "User session is required for state changing operations on GAMS. Against url " + requestUri + " for method: " + requestMethod;
-      log.debug(msg);
-      throw new AuthorizationConfigurationException(msg);
-    }
-
     // TODO I think this remote user is quite unreliable? - check
     String username = authorizationContext.getRequest().getRemoteUser();
     // failsafe if username is unexpectedly null

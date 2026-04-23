@@ -120,7 +120,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       when(authentication.isAuthenticated()).thenReturn(true);
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
       when(request.getRemoteUser()).thenReturn("test");
-      when(request.getSession()).thenReturn(new MockHttpSession());
     }
 
     @Test
@@ -280,7 +279,6 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     public void setUp(){
       when(authentication.isAuthenticated()).thenReturn(true);
       when(request.getRemoteUser()).thenReturn("test");
-      when(request.getSession()).thenReturn(new MockHttpSession());
 
       // setting allowDirectModifications to false
       var gamsEnvironmentProperties = new GamsEnvironmentProperties();
