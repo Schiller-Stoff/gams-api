@@ -1,4 +1,10 @@
 spring:
+  datasource:
+    # limits connections during testing to save performance
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 0
+      idle-timeout: 10000
   profiles:
     # loads tests in dev profile.
     active: dev
