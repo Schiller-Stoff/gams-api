@@ -1,18 +1,19 @@
 package org.ddh.gamsapi.infrastructure.System.security.exceptions;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.AuthenticationException;
 
 /**
  * If user authentication failed.
  */
-public class UserAuthenticationRequiredException extends SecurityException {
+public class UserAuthenticationRequiredException extends AuthenticationException {
 
-  public UserAuthenticationRequiredException(String reason) {
-    super(HttpStatus.UNAUTHORIZED, reason);
+  public UserAuthenticationRequiredException(@Nullable String msg, Throwable cause) {
+    super(msg, cause);
   }
 
-  public UserAuthenticationRequiredException(String reason, Throwable cause) {
-    super(HttpStatus.UNAUTHORIZED, reason, cause);
+  public UserAuthenticationRequiredException(@Nullable String msg) {
+    super(msg);
   }
-
 }
