@@ -79,14 +79,14 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     }
 
     @Test
-    public void throwsAccessDeniedExceptionIfNotAuthenticatedForPOST() {
+    public void adeniesAuthIfNotAuthenticatedForPOST() {
       // Arrange
       when(authentication.isAuthenticated()).thenReturn(false);
       when(request.getMethod()).thenReturn(HttpMethod.POST.name());
 
-      Assertions.assertThrows(AccessDeniedException.class, () -> {
-        manager.authorize(() -> authentication, authorizationContext);
-      });
+      org.assertj.core.api.Assertions.assertThat(
+          manager.authorize(() -> authentication, authorizationContext).isGranted()
+      ).isFalse();
 
     }
 
@@ -124,7 +124,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     }
 
     @Test
-    public void userWithAnonymousRoleIsNotAuthorizedForPOST() {
+    public void deniesUserWithAnonymousRoleNotAuthorizedForPOST() {
 
       // Arrange
       List<GrantedAuthority> testAuthorities = List.of(
@@ -132,10 +132,9 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      // Assert
-      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
-        manager.authorize(() -> authentication, authorizationContext);
-      });
+      org.assertj.core.api.Assertions.assertThat(
+          manager.authorize(() -> authentication, authorizationContext).isGranted()
+      ).isFalse();
 
       Mockito.verify(authentication).getAuthorities();
     }
@@ -188,7 +187,7 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
     }
 
     @Test
-    public void throwsIfStandardUserMissesRequiredProjectRole(){
+    void deniesIfStandardUserMissesRequiredProjectRole(){
 
       final String PROJECT_ABBR = "test";
       when(authorizationContext.getVariables()).thenReturn(Map.of("projectAbbr", PROJECT_ABBR));
@@ -199,10 +198,10 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      // Act
-      Assertions.assertThrows(UserNotAssignedToProjectException.class, () -> {
-        manager.authorize(() -> authentication, authorizationContext);
-      });
+      // act
+      org.assertj.core.api.Assertions.assertThat(
+          manager.authorize(() -> authentication, authorizationContext).isGranted()
+      ).isFalse();
 
       Mockito.verify(authorizationContext).getVariables();
 
@@ -304,10 +303,10 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       );
       when(authentication.getAuthorities()).thenReturn((List) testAuthorities);
 
-      // Act
-      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
-        manager.authorize(() -> authentication, authorizationContext);
-      });
+      org.assertj.core.api.Assertions.assertThat(
+          manager.authorize(() -> authentication, authorizationContext).isGranted()
+      ).isFalse();
+
     }
 
     @Test
@@ -369,10 +368,10 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       gamsEnvironmentProperties.setAllowDirectModifications(false);
       manager =  new UserProjectAuthorizationManager(gamsEnvironmentProperties);
 
-      // Act
-      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
-        manager.authorize(() -> authentication, authorizationContext);
-      });
+      org.assertj.core.api.Assertions.assertThat(
+          manager.authorize(() -> authentication, authorizationContext).isGranted()
+      ).isFalse();
+
     }
 
     @Test
@@ -394,10 +393,10 @@ public class UserProjectAuthorizationManagerTest extends UnitTest {
       gamsEnvironmentProperties.setAllowDirectModifications(false);
       manager =  new UserProjectAuthorizationManager(gamsEnvironmentProperties);
 
-      // Act
-      Assertions.assertThrows(UserNotAuthorizedException.class, () -> {
-        manager.authorize(() -> authentication, authorizationContext);
-      });
+      org.assertj.core.api.Assertions.assertThat(
+          manager.authorize(() -> authentication, authorizationContext).isGranted()
+      ).isFalse();
+
     }
   }
 }

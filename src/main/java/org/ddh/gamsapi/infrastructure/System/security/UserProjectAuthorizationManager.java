@@ -60,16 +60,18 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     }
 
     if(!authentication.get().isAuthenticated()){
-      String msg = "User is not authenticated for state changing operations on GAMS. Against url " + requestUri + " for method: " + requestMethod;
-      log.debug(msg);
-      throw new AccessDeniedException(msg);
+      log.debug("User is not authenticated for state changing operations on GAMS. Against url {} for method {}", requestUri, requestMethod);
+      return new GamsApiAuthorizationDecision(
+          false,
+          "You are not authorized for state changing operations on GAMS."
+      );
     }
 
     //TODO test
     if(authorizationContext.getRequest().getSession() == null){
       String msg = "User session is required for state changing operations on GAMS. Against url " + requestUri + " for method: " + requestMethod;
       log.debug(msg);
-      throw new UserAuthenticationRequiredException(msg);
+      throw new AuthorizationConfigurationException(msg);
     }
 
     // TODO I think this remote user is quite unreliable? - check
@@ -88,9 +90,11 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
     List<String> userAuthorities = authentication.get().getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
 
     if(userAuthorities.contains(GAMSAPIAuthorities.getAnonymous())){
-      String msg = "User with name " + username + " is not authorized for state changing operations on the GAMS-API because having anonymous role: " + GAMSAPIAuthorities.getAnonymous() + ". Url: " + requestUri + " Method: " + requestMethod;
-      log.debug(msg);
-      throw new UserNotAuthorizedException(msg);
+      log.debug("User with name {} is not authorized for state changing operations on the GAMS-API because having anonymous role. Actual roles: {} Url: {} Method: {}", username, userAuthorities, requestUri, requestMethod);
+      return new GamsApiAuthorizationDecision(
+          false,
+          "You are not authorized for state changing operations on the GAMS-API. Make sure that your account has the required rights."
+      );
     }
 
     // global administrator is allowed to do everything
@@ -129,9 +133,11 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
 
     // there is no role that contains the project-abbreviation ()
     if(filteredRoles.isEmpty()) {
-      String msg = "User " + username + " is not assigned to project " + projectAbbr + ". Url: " + requestUri + " Method: " + requestMethod + ". Has authorities: " + userAuthorities;
-      log.debug(msg);
-      throw new UserNotAssignedToProjectException(msg);
+      log.trace("User {} is not assigned to project  {}. Url: {} Method: {} Has authorities: {}", username, projectAbbr, requestUri, requestMethod, userAuthorities);
+      return new GamsApiAuthorizationDecision(
+          false,
+          "You are not authorized for the project " + projectAbbr
+      );
     }
 
     // if project admin - allow everything
@@ -150,15 +156,19 @@ public class UserProjectAuthorizationManager implements AuthorizationManager<Req
       if(gamsEnvironmentProperties.isAllowDirectModifications()) return new AuthorizationDecision(true);
 
       if(requestMethod.equals(HttpMethod.PATCH.name()) || requestMethod.equals(HttpMethod.PUT.name())){
-        String msg = "Project editor must not change project data when property 'allow-direct-modifications' is false. Url: ' " + requestUri + "' Method: '" + requestMethod + "'";
-        log.trace(msg);
-        throw new UserNotAuthorizedException(msg);
+        log.trace("Project editor must not change project data when property 'allow-direct-modifications' is false. Url: {} - Method: {}", requestUri, requestMethod);
+        return new GamsApiAuthorizationDecision(
+            false,
+            "Project editor must not change project data when property 'allow-direct-modifications' is false (usually set in production setups)"
+        );
       }
 
       if( requestUri.contains("/datastreams/") && requestMethod.equals(HttpMethod.DELETE.name())) {
-        String msg = "Project editor must not delete a singular datastream when property 'allow-direct-modifications' is false. Url: ' " + requestUri + "' Method: '" + requestMethod + "'";
-        log.trace(msg);
-        throw new UserNotAuthorizedException(msg);
+        log.trace("Project editor must not delete a singular datastream when property 'allow-direct-modifications' is false. Url: {} Request-Method: {}", requestUri, requestMethod);
+        return new GamsApiAuthorizationDecision(
+            false,
+            "Project editors must not delete a singular datastream when property 'allow-direct-modifications' is set to false. (usually set in production setups)"
+        );
       }
 
       return new AuthorizationDecision(true);

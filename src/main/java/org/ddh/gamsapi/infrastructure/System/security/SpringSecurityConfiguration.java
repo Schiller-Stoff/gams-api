@@ -52,6 +52,8 @@ public class SpringSecurityConfiguration {
 
   private final ClientRegistrationRepository clientRegistrationRepository;
 
+  private final GamsAccessDeniedHandler gamsAccessDeniedHandler;
+
   /**
    * Combined spring security matchers.
    * Matches all endpoints that require an admin authorization
@@ -157,6 +159,11 @@ public class SpringSecurityConfiguration {
         frameOptionsConfig.sameOrigin();
       });
     });
+
+    // configures how responses are being sent when auth is denied
+    http.exceptionHandling(e -> e
+        .accessDeniedHandler(gamsAccessDeniedHandler)
+    );
 
     return http.build();
 
