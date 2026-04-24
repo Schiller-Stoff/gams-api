@@ -116,7 +116,8 @@ public class SpringSecurityConfiguration {
 
     );
 
-    // csrf protection
+    // csrf protection with customization - spring security has csrf activated by default
+    // (needed for configuration here)
     http.csrf(httpSecurityCsrfConfigurer -> {
       httpSecurityCsrfConfigurer
           .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
