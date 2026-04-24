@@ -116,6 +116,19 @@ public class SpringSecurityConfiguration {
 
     );
 
+    // csrf protection
+    http.csrf(httpSecurityCsrfConfigurer -> {
+      httpSecurityCsrfConfigurer
+          .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+          .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+          // define exceptions to the csrf protection
+//          .ignoringRequestMatchers(
+//              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/rdf"),
+//              PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/integration/v1/search/**")
+//          )
+      ;
+    });
+
 
     // Force CSRF token to be generated on every response
     http.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
