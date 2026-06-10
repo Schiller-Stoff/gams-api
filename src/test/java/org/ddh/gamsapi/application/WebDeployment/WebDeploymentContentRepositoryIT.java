@@ -329,6 +329,106 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
   }
 
+  // ==================================================================================
+  // deleteAll()
+  // ==================================================================================
+
+  @Nested
+  @DisplayName("deleteAll()")
+  class DeleteAll {
+
+    @Test
+    void deletesMultipleDeploymentsAndLeavesRootIntact() {
+      // Arrange: Deploy two different projects
+      webDeploymentContentRepository.deploy("project-a", createZip(
+          entry("index.html", "<html/>")
+      ));
+      webDeploymentContentRepository.deploy("project-b", createZip(
+          entry("index.html", "<html/>")
+      ));
+
+      Assertions.assertThat(Files.isDirectory(webRoot.resolve("project-a"))).isTrue();
+      Assertions.assertThat(Files.isDirectory(webRoot.resolve("project-b"))).isTrue();
+
+      // Act
+      webDeploymentContentRepository.deleteAll();
+
+      // Assert: Projects are gone, but root survives
+      Assertions.assertThat(Files.exists(webRoot.resolve("project-a"))).isFalse();
+      Assertions.assertThat(Files.exists(webRoot.resolve("project-b"))).isFalse();
+      Assertions.assertThat(Files.isDirectory(webRoot))
+          .as("The webRoot directory itself must not be deleted").isTrue();
+    }
+
+    @Test
+    void deletesStrayFilesInRootDirectory() throws IOException {
+      // Arrange: Create a random stray file directly in the webRoot
+      Path strayFile = webRoot.resolve("stray-file.txt");
+      Files.writeString(strayFile, "I should not be here");
+      Assertions.assertThat(Files.exists(strayFile)).isTrue();
+
+      // Act
+      webDeploymentContentRepository.deleteAll();
+
+      // Assert: Stray file is cleaned up, but root survives
+      Assertions.assertThat(Files.exists(strayFile)).isFalse();
+      Assertions.assertThat(Files.isDirectory(webRoot)).isTrue();
+    }
+
+    @Test
+    void completesSuccessfullyWhenDirectoryIsAlreadyEmpty() throws IOException {
+      // Arrange: Ensure directory is completely empty
+      try (Stream<Path> paths = Files.list(webRoot)) {
+        paths
+            // but not the readme file
+            .filter(path -> !path.getFileName().toString().equalsIgnoreCase("readme.md"))
+            .forEach(p -> {
+          try {
+            Files.deleteIfExists(p);
+          } catch (IOException _) {
+            // empty because ignored
+          }
+        });
+      }
+
+      // Act & Assert: Should not throw any exceptions
+      org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> webDeploymentContentRepository.deleteAll());
+      Assertions.assertThat(Files.isDirectory(webRoot)).isTrue();
+    }
+
+    @Test
+    void preservesReadmeFileAtRootLevelButDeletesNestedReadmes() throws IOException {
+      // Arrange 1: Create README files at the root level (testing case-insensitivity)
+      Path uppercaseReadme = webRoot.resolve("README.md");
+      Path lowercaseReadme = webRoot.resolve("readme.md");
+
+      Files.writeString(uppercaseReadme, "Folder contains test web files - location to where during testing project web files are written to.");
+      Files.writeString(lowercaseReadme, "Folder contains test web files - location to where during testing project web files are written to.");
+
+      // Arrange 2: Deploy a project that contains its own nested README.md
+      webDeploymentContentRepository.deploy("project-with-readme", createZip(
+          entry("README.md", "I am a nested project README and should be deleted"),
+          entry("index.html", "<html/>")
+      ));
+
+      Assertions.assertThat(Files.exists(uppercaseReadme)).isTrue();
+      Assertions.assertThat(Files.exists(lowercaseReadme)).isTrue();
+      Assertions.assertThat(Files.exists(webRoot.resolve("project-with-readme/README.md"))).isTrue();
+
+      // Act
+      webDeploymentContentRepository.deleteAll();
+
+      // Assert 1: Root READMEs must survive
+      Assertions.assertThat(Files.exists(uppercaseReadme))
+          .as("Uppercase README.md at the root should survive").isTrue();
+      Assertions.assertThat(Files.exists(lowercaseReadme))
+          .as("Lowercase readme.md at the root should survive").isTrue();
+
+      // Assert 2: Project directory (and its nested README) must be deleted
+      Assertions.assertThat(Files.exists(webRoot.resolve("project-with-readme")))
+          .as("The project directory and all its contents should be deleted").isFalse();
+    }
+  }
 
   // ==================================================================================
   // Zip creation helpers

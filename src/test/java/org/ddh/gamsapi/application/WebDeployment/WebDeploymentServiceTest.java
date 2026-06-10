@@ -261,6 +261,10 @@ public class WebDeploymentServiceTest extends UnitTest {
   // undeploy()
   // ==================================================================================
 
+  // ==================================================================================
+  // undeploy()
+  // ==================================================================================
+
   @Nested
   @DisplayName("undeploy()")
   public class Undeploy {
@@ -279,23 +283,26 @@ public class WebDeploymentServiceTest extends UnitTest {
     }
 
     @Test
-    public void throwsWebDeploymentNotFoundExceptionWhenNoDeploymentExists() {
+    public void throwsWebDeploymentNotFoundExceptionWhenNoDeploymentExistsInFilesystemOrDatabase() {
       when(projectRepository.existsById(PROJECT_ABBR)).thenReturn(true);
+      // Simulate BOTH missing
       when(webDeploymentContentRepository.delete(PROJECT_ABBR)).thenReturn(false);
+      when(webDeploymentRepository.existsById(PROJECT_ABBR)).thenReturn(false);
 
       assertThatThrownBy(() -> webDeploymentService.undeploy(PROJECT_ABBR))
           .isInstanceOf(WebDeploymentNotFoundException.class)
           .hasMessageContaining(PROJECT_ABBR);
 
       verify(webDeploymentContentRepository).delete(PROJECT_ABBR);
-      // DB record should NOT be deleted if filesystem had nothing to remove
-      verifyNoInteractions(webDeploymentRepository);
+      verify(webDeploymentRepository).existsById(PROJECT_ABBR);
+      verify(webDeploymentRepository, never()).deleteById(any());
     }
 
     @Test
-    public void deletesFilesystemContentAndDatabaseRecord() {
+    public void deletesFilesystemContentAndDatabaseRecordWhenBothExist() {
       when(projectRepository.existsById(PROJECT_ABBR)).thenReturn(true);
       when(webDeploymentContentRepository.delete(PROJECT_ABBR)).thenReturn(true);
+      when(webDeploymentRepository.existsById(PROJECT_ABBR)).thenReturn(true);
 
       webDeploymentService.undeploy(PROJECT_ABBR);
 
@@ -304,20 +311,51 @@ public class WebDeploymentServiceTest extends UnitTest {
     }
 
     @Test
+    public void recoversFromSplitBrainByDeletingDatabaseRecordWhenFilesystemContentIsMissing() {
+      when(projectRepository.existsById(PROJECT_ABBR)).thenReturn(true);
+      // Simulate split brain: Folder is gone, but DB record still exists
+      when(webDeploymentContentRepository.delete(PROJECT_ABBR)).thenReturn(false);
+      when(webDeploymentRepository.existsById(PROJECT_ABBR)).thenReturn(true);
+
+      webDeploymentService.undeploy(PROJECT_ABBR);
+
+      // It should successfully recover and delete the orphaned DB record
+      verify(webDeploymentContentRepository).delete(PROJECT_ABBR);
+      verify(webDeploymentRepository).deleteById(PROJECT_ABBR);
+    }
+
+    @Test
+    public void recoversFromSplitBrainByIgnoringMissingDatabaseRecordWhenFilesystemContentDeleted() {
+      when(projectRepository.existsById(PROJECT_ABBR)).thenReturn(true);
+      // Simulate split brain: Folder exists, but DB record is missing
+      when(webDeploymentContentRepository.delete(PROJECT_ABBR)).thenReturn(true);
+      when(webDeploymentRepository.existsById(PROJECT_ABBR)).thenReturn(false);
+
+      webDeploymentService.undeploy(PROJECT_ABBR);
+
+      // It should delete the folder and skip the DB deletion
+      verify(webDeploymentContentRepository).delete(PROJECT_ABBR);
+      verify(webDeploymentRepository, never()).deleteById(any());
+    }
+
+    @Test
     public void performsFilesystemDeletionBeforeDatabaseDeletion() {
       when(projectRepository.existsById(PROJECT_ABBR)).thenReturn(true);
       when(webDeploymentContentRepository.delete(PROJECT_ABBR)).thenReturn(true);
+      when(webDeploymentRepository.existsById(PROJECT_ABBR)).thenReturn(true);
 
       webDeploymentService.undeploy(PROJECT_ABBR);
 
       var inOrder = inOrder(webDeploymentContentRepository, webDeploymentRepository);
       inOrder.verify(webDeploymentContentRepository).delete(PROJECT_ABBR);
+      inOrder.verify(webDeploymentRepository).existsById(PROJECT_ABBR);
       inOrder.verify(webDeploymentRepository).deleteById(PROJECT_ABBR);
     }
 
     @Test
-    public void doesNotDeleteDatabaseRecordWhenFilesystemDeletionFails() {
+    public void doesNotDeleteDatabaseRecordWhenFilesystemDeletionFailsWithException() {
       when(projectRepository.existsById(PROJECT_ABBR)).thenReturn(true);
+      // Simulating an actual I/O failure, not just a "not found"
       when(webDeploymentContentRepository.delete(PROJECT_ABBR))
           .thenThrow(new RuntimeException("Permission denied"));
 
@@ -325,7 +363,9 @@ public class WebDeploymentServiceTest extends UnitTest {
           .isInstanceOf(RuntimeException.class)
           .hasMessageContaining("Permission denied");
 
-      verifyNoInteractions(webDeploymentRepository);
+      // Verify that if a real exception occurs in phase 1, phase 2 is aborted safely
+      verify(webDeploymentRepository, never()).existsById(any());
+      verify(webDeploymentRepository, never()).deleteById(any());
     }
   }
 }
