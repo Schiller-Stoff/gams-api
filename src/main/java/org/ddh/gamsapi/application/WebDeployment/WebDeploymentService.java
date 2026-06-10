@@ -106,15 +106,26 @@ public class WebDeploymentService {
     }
 
     // Phase 1: Filesystem deletion
-    boolean existed = webDeploymentContentRepository.delete(projectAbbr);
+    boolean fsExisted = webDeploymentContentRepository.delete(projectAbbr);
 
-    if (!existed) {
+    // Phase 2: Database existence check
+    boolean dbExisted = webDeploymentRepository.existsById(projectAbbr);
+
+    if (!fsExisted && !dbExisted) {
       throw new WebDeploymentNotFoundException(
           "No web deployment found for project: " + projectAbbr);
     }
 
-    // Phase 2: Database record deletion (single call — already @Transactional)
-    webDeploymentRepository.deleteById(projectAbbr);
+    // Phase 3: Database record deletion
+    if (dbExisted) {
+      webDeploymentRepository.deleteById(projectAbbr);
+    } else {
+      log.warn("Web deployment deleted from filesystem, but no DB record existed for project {}", projectAbbr);
+    }
+
+    if (!fsExisted && dbExisted) {
+      log.warn("Web deployment DB record deleted for project {}, but filesystem content was already missing", projectAbbr);
+    }
 
     log.info("Successfully undeployed web content for project {}", projectAbbr);
   }
