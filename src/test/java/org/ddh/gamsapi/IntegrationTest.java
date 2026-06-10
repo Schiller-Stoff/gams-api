@@ -38,7 +38,7 @@ public abstract class IntegrationTest {
 
   // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
   static {
-    postgres = new PostgreSQLContainer<>("postgres:15.3-alpine");
+    postgres = new PostgreSQLContainer<>("postgres:18.4-alpine");
     postgres.start();
   }
 

@@ -9,7 +9,7 @@ networks:
 
 services:
   relationalDB:
-    image: postgres:15.3
+    image: postgres:18.4-alpine
     container_name: relationalDB
     hostname: relationalDB
     ports:
