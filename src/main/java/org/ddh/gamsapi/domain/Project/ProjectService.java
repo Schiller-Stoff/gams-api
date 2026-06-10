@@ -6,19 +6,26 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.Project.dto.ProjectDetailsDTO;
 import org.ddh.gamsapi.domain.Project.dto.ProjectStatisticsDTO;
-import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotEmptyException;
-import org.ddh.gamsapi.domain.Project.interfaces.ProjectIdView;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.ddh.gamsapi.domain.Project.events.ProjectPreDeletedEvent;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectAlreadyExistsException;
+import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotEmptyException;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectObjectMismatchException;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
+import org.ddh.gamsapi.domain.Project.interfaces.ProjectIdView;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
+import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserAuthenticationRequiredException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +35,8 @@ public class ProjectService implements IProjectService {
   private final IProjectRepository projectRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IDatastreamRepository datastreamRepository;
+  private final ApplicationEventPublisher applicationEventPublisher;
+  private final IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   @Override
   @Transactional
@@ -62,6 +71,21 @@ public class ProjectService implements IProjectService {
     }
 
     log.trace("Found project {}", foundProject);
+
+    // publish event
+    String currentUser = userPrincipalAuditorMapping.getCurrentAuditor().orElseThrow(
+        () -> new UserAuthenticationRequiredException("Failed to save project " + project.getProjectAbbr() + " Current user is not logged in (cannot extract user name for modification tracking)")
+    );
+
+    applicationEventPublisher.publishEvent(
+        new ProjectPreDeletedEvent(
+            this,
+            project.getProjectAbbr(),
+            Instant.now(),
+            currentUser
+        )
+    );
+
     projectRepository.delete(foundProject);
     log.info("Successfully deleted project {}", foundProject);
   }

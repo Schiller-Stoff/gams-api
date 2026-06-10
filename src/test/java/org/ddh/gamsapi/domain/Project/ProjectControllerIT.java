@@ -2,16 +2,17 @@ package org.ddh.gamsapi.domain.Project;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
-import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.WebDeployment.WebDeployment;
+import org.ddh.gamsapi.application.WebDeployment.WebDeploymentRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
@@ -27,6 +28,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,12 +46,17 @@ class ProjectControllerIT extends IntegrationTest {
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
+  @Autowired
+  private WebDeploymentRepository webDeploymentRepository;
+
 
   // disables auditing
   // (necessary -> otherwise the createdBy fields etc. from Project need to be filled)
   // this auditing / security test is done in a separate test
   @MockitoBean
   private AuditingHandler auditingHandler;
+  @MockitoBean
+  private IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
   private TestDataSet testDataSet;
 
@@ -59,6 +66,8 @@ class ProjectControllerIT extends IntegrationTest {
   @BeforeEach
   void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
+    Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
+        .thenReturn(Optional.of(TestUser.USERNAME.getValue()));
   }
 
   @Nested
@@ -252,6 +261,42 @@ class ProjectControllerIT extends IntegrationTest {
           )
       ).andExpect(status().isOk());
 
+    }
+
+    @Test
+    void removesLinkedWebDeploymentIfExists() throws Exception {
+
+      // 1. Arrange: Clean up digital objects so the project is eligible for deletion
+      testDataBuilder.removeAllExceptProjects(testDataSet);
+      String projectAbbr = testDataSet.project().getProjectAbbr();
+
+      // Create and save an active web deployment for this project
+      var webDeployment = WebDeployment.builder()
+          .projectAbbr(projectAbbr)
+          .deployedAt(java.time.Instant.now())
+          .deployedBy("test-admin")
+          .fileCount(10)
+          .totalSize(2048L)
+          .build();
+
+      webDeploymentRepository.save(webDeployment);
+
+      // Verify initial state
+      Assertions.assertThat(webDeploymentRepository.existsById(projectAbbr))
+          .as("Web deployment should exist before calling the delete endpoint")
+          .isTrue();
+
+      // 2. Act: Perform the DELETE request via the REST API
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(
+              String.format("/api/curation/v1/projects/%s", projectAbbr)
+          )
+      ).andExpect(MockMvcResultMatchers.status().isOk());
+
+      // 3. Assert: Verify the event listener successfully cascaded the deletion
+      Assertions.assertThat(webDeploymentRepository.existsById(projectAbbr))
+          .as("The linked WebDeployment should be automatically deleted by the event listener")
+          .isFalse();
     }
 
   }

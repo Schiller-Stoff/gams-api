@@ -133,6 +133,40 @@ public class WebDeploymentContentRepository {
     return webRoot.resolve(projectAbbr);
   }
 
+  /**
+   * Deletes all deployed static sites by emptying the web root directory.
+   * Skips the root README.md file.
+   */
+  public void deleteAll() {
+    if (!Files.exists(webRoot)) {
+      return;
+    }
+
+    try (Stream<Path> paths = Files.list(webRoot)) {
+      paths
+          // Filter out the readme file (case-insensitive) before processing
+          .filter(path -> !path.getFileName().toString().equalsIgnoreCase("readme.md"))
+          .forEach(path -> {
+            try {
+              if (Files.isDirectory(path)) {
+                deleteDirectory(path);
+              } else {
+                // Delete stray files in the root if any exist
+                Files.delete(path);
+              }
+            } catch (IOException | WebDeploymentStorageException e) {
+              log.error("Failed to delete web deployment content at {}: {}", path, e.getMessage());
+              throw new WebDeploymentStorageException(
+                  "Failed to delete content at " + path + ". Original error: " + e.getMessage(), e);
+            }
+          });
+      log.info("Successfully deleted all web deployment content under {}", webRoot);
+    } catch (IOException e) {
+      throw new WebDeploymentStorageException(
+          "Failed to list contents of web root for deletion. Original error: " + e.getMessage(), e);
+    }
+  }
+
 
   /**
    * Extracts a zip stream to the given target directory.
