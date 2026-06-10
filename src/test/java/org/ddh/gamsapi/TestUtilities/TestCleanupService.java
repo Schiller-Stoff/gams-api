@@ -2,6 +2,8 @@ package org.ddh.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.EventCaptureListener;
+import org.ddh.gamsapi.application.WebDeployment.WebDeploymentContentRepository;
+import org.ddh.gamsapi.application.WebDeployment.WebDeploymentRepository;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.DatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
@@ -40,6 +42,12 @@ public class TestCleanupService {
   @Autowired
   private IArchivalRecordRepository archivalRecordRepository;
 
+  @Autowired
+  private WebDeploymentRepository webDeploymentRepository;
+
+  @Autowired
+  private WebDeploymentContentRepository webDeploymentContentRepository;
+
   public TestCleanupService(DatastreamContentRepository datastreamContentRepository) {
     this.datastreamContentRepository = datastreamContentRepository;
   }
@@ -57,6 +65,8 @@ public class TestCleanupService {
     submissionRecordRepository.deleteAll();
     archivalRecordRepository.deleteAll();
     digitalObjectRepository.deleteAll();
+    webDeploymentContentRepository.deleteAll();
+    webDeploymentRepository.deleteAll();
     projectRepository.deleteAll();
   }
 
