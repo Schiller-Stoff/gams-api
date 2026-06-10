@@ -397,10 +397,13 @@ class WebDeploymentContentRepositoryIT extends IntegrationTest {
     }
 
     @Test
-    void preservesReadmeFileAtRootLevelButDeletesNestedReadmes() {
+    void preservesReadmeFileAtRootLevelButDeletesNestedReadmes() throws IOException {
       // Arrange 1: Create README files at the root level (testing case-insensitivity)
       Path uppercaseReadme = webRoot.resolve("README.md");
       Path lowercaseReadme = webRoot.resolve("readme.md");
+
+      Files.writeString(uppercaseReadme, "Folder contains test web files - location to where during testing project web files are written to.");
+      Files.writeString(lowercaseReadme, "Folder contains test web files - location to where during testing project web files are written to.");
 
       // Arrange 2: Deploy a project that contains its own nested README.md
       webDeploymentContentRepository.deploy("project-with-readme", createZip(
