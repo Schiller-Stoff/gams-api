@@ -2,7 +2,7 @@ package org.ddh.gamsapi.application.Integration.Common.interfaces;
 
 /**
  * Describes the indexing of DigitalObjects and specific datastreams
- * to integrated services, like apache solr or jena-fuseki.
+ * to integrated services, like apache solr or qlever.
  */
 public interface IIntegrationService {
 

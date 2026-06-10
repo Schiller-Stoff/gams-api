@@ -10,14 +10,14 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.ddh.gamsapi.IntegrationTest;
 
 @AutoConfigureMockMvc
-public class CORSConfigurationIT extends IntegrationTest {
+class CORSConfigurationIT extends IntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
   private MockMvc mockMvc;
 
   @Test
-  public void corsPreflightRequest_allowedOrigin_returnsProperHeaders() throws Exception {
+  void corsPreflightRequest_allowedOrigin_returnsProperHeaders() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.options("/api/curation/v1/projects")
             .header("Origin", "http://localhost:3000")
             .header("Access-Control-Request-Method", "GET")
@@ -29,7 +29,7 @@ public class CORSConfigurationIT extends IntegrationTest {
   }
 
   @Test
-  public void corsPreflightRequest_disallowedOrigin_noHeaders() throws Exception {
+  void corsPreflightRequest_disallowedOrigin_noHeaders() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.options("/api/curation/v1/projects")
             .header("Origin", "http://malicious-site.com")
             .header("Access-Control-Request-Method", "GET"))
@@ -37,7 +37,7 @@ public class CORSConfigurationIT extends IntegrationTest {
   }
 
   @Test
-  public void corsActualRequest_integrationEndpoint_allowsPublicAccess() throws Exception {
+  void corsActualRequest_integrationEndpoint_allowsPublicAccess() throws Exception {
     mockMvc.perform(
         MockMvcRequestBuilders.post("/api/integration/v1/rdf")
             .with(SecurityMockMvcRequestPostProcessors.csrf())
@@ -47,7 +47,7 @@ public class CORSConfigurationIT extends IntegrationTest {
   }
 
   @Test
-  public void corsActualRequest_authenticatedEndpoint_requiresCredentials() throws Exception {
+  void corsActualRequest_authenticatedEndpoint_requiresCredentials() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/userinfo")
             .header("Origin", "http://localhost:3000"))
         .andExpect(MockMvcResultMatchers.header().string("Access-Control-Allow-Credentials", "true"));
