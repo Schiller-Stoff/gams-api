@@ -39,7 +39,7 @@ class CORSConfigurationIT extends IntegrationTest {
   @Test
   void corsActualRequest_integrationEndpoint_allowsPublicAccess() throws Exception {
     mockMvc.perform(
-        MockMvcRequestBuilders.post("/api/integration/v1/rdf")
+        MockMvcRequestBuilders.post("/api/integration/v1/semantic-search")
             .with(SecurityMockMvcRequestPostProcessors.csrf())
             .header("Origin", "http://localhost:3000")
             .content(""))
