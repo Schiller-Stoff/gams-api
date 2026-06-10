@@ -3,6 +3,22 @@
 
 ## Global roles
 
+| Role           | Identifier       | Description |
+|----------------|------------------|-------------|
+| Super admin    | `super_admin`    | Allowed to do everything; may create / delete / change projects |
+| Projects admin | `projects_admin` | Metadata managers responsible for all projects; may create / delete / change projects, but may not perform certain administration tasks |
+
+## Project-specific roles
+
+| Role           | Identifier                | Description |
+|----------------|---------------------------|-------------|
+| Project admin  | e.g. `foo_project_admin`  | Admin of a single project |
+| Project editor | e.g. `foo_project_editor` | Editor of a single project |
+| Project viewer | e.g. `foo_project_viewer` | Viewer of a single project |
+
+
+## Global roles
+
 ### Super admin role
 
 - super_admin
