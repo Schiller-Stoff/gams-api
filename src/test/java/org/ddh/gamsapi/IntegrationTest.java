@@ -9,7 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.ddh.gamsapi.TestUtilities.TestCleanupService;
 
 /**
@@ -34,11 +34,11 @@ public abstract class IntegrationTest {
   private TestCleanupService testCleanupService;
 
   // First launch postgres for all integration tests
-  static final PostgreSQLContainer<?> postgres;
+  static final PostgreSQLContainer postgres;
 
   // setup of test-containers: https://java.testcontainers.org/test_framework_integration/manual_lifecycle_control/
   static {
-    postgres = new PostgreSQLContainer<>("postgres:15.3-alpine");
+    postgres = new PostgreSQLContainer("postgres:18.4-alpine");
     postgres.start();
   }
 
