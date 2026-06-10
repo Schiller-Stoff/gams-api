@@ -129,20 +129,6 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-core -->
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-core</artifactId>
-			<version>4.9.0</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-rdfconnection -->
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-rdfconnection</artifactId>
-			<version>4.9.0</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>
