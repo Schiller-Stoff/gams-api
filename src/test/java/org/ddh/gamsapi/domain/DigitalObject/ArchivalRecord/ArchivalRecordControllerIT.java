@@ -71,6 +71,31 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
       }
 
+      @Test
+      void getPublicArchivalRecordsDoesNotReturnPidOfTestArchivalRecord() throws Exception {
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/projects/%s/objects/%s/archival-records/public",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        // test-data archival record is drafted but endpoint should only return public ones
+        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
+
+        Assertions.assertThat(responseBody)
+            .isNotNull()
+            .doesNotContain(
+                testDataSet.archivalRecord().getPid()
+            );
+
+      }
+
     }
 
   }

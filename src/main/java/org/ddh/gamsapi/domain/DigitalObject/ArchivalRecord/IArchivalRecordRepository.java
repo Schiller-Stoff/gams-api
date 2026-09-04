@@ -18,4 +18,7 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   void deleteAllByDigitalObjectId(String digitalObjectId);
 
+
+  List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
+
 }

@@ -46,4 +46,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecord.setDigitalObject(digitalObject);
     return archivalRecordRepository.save(archivalRecord);
   }
+
+  @Override
+  public List<ArchivalRecordCompactView> findForObjectByArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus) {
+    return archivalRecordRepository.findArchivalRecordsByDigitalObjectIdAndArchivingStatus(digitalObjectId, archivingStatus);
+  }
 }

@@ -33,12 +33,31 @@ public class ArchivalRecordController {
   )
   @RequestMapping(method = RequestMethod.GET)
   @ResponseBody
+  // TODO rename this method to findArchivalRecords
   public List<ArchivalRecordCompactView> findSubmissionRecord(
       @PathVariable String projectAbbr,
       @PathVariable String id
   ) {
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
     return archivalRecordService.findForObject(id);
+  }
+
+  @Operation(
+      summary = "Get only public archival records",
+      description = "Retrieve the public archival records associated with a specific digital object within a project.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Successful retrieval of the archival records",
+              content = @Content)
+      }
+  )
+  @RequestMapping(method = RequestMethod.GET, path = "/public")
+  @ResponseBody
+  public List<ArchivalRecordCompactView> findSubmissionRecordsByArchivingStatus(
+      @PathVariable String projectAbbr,
+      @PathVariable String id
+  ) {
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+    return archivalRecordService.findForObjectByArchivingStatus(id, ArchivingStatus.PUBLISHED);
   }
 
   @PostMapping
