@@ -81,5 +81,17 @@ public class ArchivalRecordController {
     archivalRecordService.save(archivalRecord);
   }
 
+  @DeleteMapping(path = "/{recordId}")
+  @ResponseBody
+  public void delete(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @PathVariable Long recordId
+  ){
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+    archivalRecordService.deleteById(recordId);
+
+  }
+
 
 }

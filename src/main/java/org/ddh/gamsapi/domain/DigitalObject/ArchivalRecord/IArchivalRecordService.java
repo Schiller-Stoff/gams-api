@@ -30,4 +30,11 @@ public interface IArchivalRecordService {
    */
   ArchivalRecord save(ArchivalRecordCreateDto archivalRecordCreateDto);
 
+
+  /**
+   * Deletes an archival record by it's id.
+   * @param archivalRecordId id of the archival record.
+   */
+  void deleteById(Long archivalRecordId);
+
 }

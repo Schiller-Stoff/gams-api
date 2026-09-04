@@ -198,4 +198,29 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
   }
 
+  @Nested
+  class DELETE {
+
+    @Test
+    void successfullyDeletesTestArchivalRecord() throws Exception {
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/projects/%s/objects/%s/archival-records/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.archivalRecord().getId()
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
+      ).andExpect(status().isOk());
+
+      var expectedDeleted = archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
+
+      Assertions.assertThat(expectedDeleted).isEmpty();
+
+    }
+
+  }
+
 }

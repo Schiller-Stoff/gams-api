@@ -2,7 +2,6 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +20,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   @Autowired
   IArchivalRecordService archivalRecordService;
+
+  @Autowired
+  IArchivalRecordRepository archivalRecordRepository;
 
   // Deactivates the auditing process.
   @MockitoBean
@@ -108,6 +110,18 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       Assertions.assertThat(foundRecords).hasSize(2);
 
+    }
+
+  }
+
+  @Nested
+  class Delete {
+
+    @Test
+    void successfullyDeletesExpectedArchivalRecord(){
+      archivalRecordService.deleteById(testDataSet.archivalRecord().getId());
+      var expectedDeleted = archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
+      Assertions.assertThat(expectedDeleted).isEmpty();
     }
 
   }

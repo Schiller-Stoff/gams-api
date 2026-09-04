@@ -51,4 +51,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
   public List<ArchivalRecordCompactView> findForObjectByArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus) {
     return archivalRecordRepository.findArchivalRecordsByDigitalObjectIdAndArchivingStatus(digitalObjectId, archivingStatus);
   }
+
+  @Override
+  public void deleteById(Long archivalRecordId) {
+    archivalRecordRepository.deleteById(archivalRecordId);
+  }
 }
