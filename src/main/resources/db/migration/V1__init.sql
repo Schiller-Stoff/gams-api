@@ -4,6 +4,8 @@ create table archival_record
     pid               varchar(255)                not null,
     timestamp         timestamp(6) with time zone not null,
     digital_object_id varchar(255)                not null,
+    archival_status   varchar(255) not null default 'DRAFTED',
+    external_id       varchar(255) not null,
     primary key (id)
 );
 

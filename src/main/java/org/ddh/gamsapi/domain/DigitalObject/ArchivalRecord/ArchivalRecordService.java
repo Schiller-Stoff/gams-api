@@ -37,6 +37,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecord.setPid(archivalRecordCreateDto.getPid());
     archivalRecord.setTimeStamp(archivalRecordCreateDto.getTimeStamp());
 
+    archivalRecord.setArchivingStatus(archivalRecordCreateDto.getArchivingStatus());
+    archivalRecord.setExternalId(archivalRecordCreateDto.getExternalId());
+
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(DIGITAL_OBJECT_ID);
 
