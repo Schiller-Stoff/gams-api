@@ -26,7 +26,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DigitalObjectControllerIT extends IntegrationTest {
+class DigitalObjectControllerIT extends IntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -60,7 +59,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   private TestDataBuilder testDataBuilder;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
     // needed when changing digital objects
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
@@ -104,7 +103,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Test
-    public void deleteObjectDoesShouldThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
+    void deleteObjectDoesShouldThrowExceptionWhenDigitalObjectDoesNotExist() throws Exception {
       mockMvc.perform(MockMvcRequestBuilders.delete(
                   "/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                   testDataSet.project().getProjectAbbr(), "nonExistentId")
@@ -114,14 +113,14 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class HEADRequests {
+  class HEADRequests {
 
     @Nested
-    public class DigitalObjectModification {
+    class DigitalObjectModification {
 
 
       @Test
-      public void headDigitalObjectReturns200ifObjectExists() throws Exception {
+      void headDigitalObjectReturns200ifObjectExists() throws Exception {
         // Act
         mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
@@ -131,7 +130,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
+      void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
         // Act
         mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
@@ -141,7 +140,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void headDigitalObjectReturnsLastModifiedDate() throws Exception {
+      void headDigitalObjectReturnsLastModifiedDate() throws Exception {
 
         // Act
         mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
@@ -152,7 +151,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void headDigitalObjectReturnsExpectedLastModifiedDate() throws Exception {
+      void headDigitalObjectReturnsExpectedLastModifiedDate() throws Exception {
 
         // expected: truncate to seconds since RFC 1123 has no sub-second precision
         Instant expectedLastModified = testDataSet.digitalObject().getModified()
@@ -181,10 +180,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
 
     @Nested
-    public class SubResourcesModified {
+    class SubResourcesModified {
 
       @Test
-      public void headDigitalObjectReturns200ifObjectExists() throws Exception {
+      void headDigitalObjectReturns200ifObjectExists() throws Exception {
 
         // Act
         mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
@@ -196,7 +195,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
+      void headDigitalObjectReturns404WhenObjectDoesNotExist() throws Exception {
         // Act
         mockMvc.perform(MockMvcRequestBuilders.head("/api/curation/v1/projects/{projectAbbr}/objects/{id}",
                     testDataSet.project().getProjectAbbr(),
@@ -207,7 +206,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void HEADDigitalObjectResponsesWithIncludedLastModifiedHeader() throws Exception {
+      void HEADDigitalObjectResponsesWithIncludedLastModifiedHeader() throws Exception {
 
         // assert
         mockMvc.perform(
@@ -226,7 +225,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
        * @throws Exception if the test fails (mockMvc.perform)
        */
       @Test
-      public void HEADDigitalObjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
+      void HEADDigitalObjectResponsesWithExpectedLastModifiedHeaderDate() throws Exception {
 
         // Act
         String lastModifiedHeaderValue = mockMvc.perform(
@@ -261,7 +260,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
        * @throws Exception if the test fails (mockMvc.perform)
        */
       @Test
-      public void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
+      void HEADProjectIfModifiedSinceIsMalformedRespondWith400() throws Exception {
 
 
         final String MALFORMED_DATE = "PETER";
@@ -284,7 +283,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
        * @throws Exception if the test fails (mockMvc.perform)
        */
       @Test
-      public void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
+      void HEADProjectIfModifiedSinceRespondsWithIsNotModifiedHttpSTATUS() throws Exception {
 
 
         // Create a date in the future that's properly formatted for HTTP headers
@@ -311,15 +310,15 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class GETRequests {
+  class GETRequests {
 
     @Nested
-    public class GETAllDigitalObjects {
+    class GETAllDigitalObjects {
 
       String REQUEST_URL = "";
 
       @BeforeEach
-      public void setup() {
+      void setup() {
           REQUEST_URL = String.format(
               "/api/curation/v1/projects/%s/objects",
               testDataSet.project().getProjectAbbr()
@@ -327,7 +326,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void formatXmlReturnsExpectedDigitalObjectId() throws Exception {
+      void formatXmlReturnsExpectedDigitalObjectId() throws Exception {
 
         final String FORMAT_XML_REQUEST_URL = String.format(
             "%s?format=xml",
@@ -356,7 +355,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void trailingSlashWillReturnError() throws Exception {
+      void trailingSlashWillReturnError() throws Exception {
         final String TRAILING_SLASH_REQUEST_URL = String.format(
             "%s/",
             REQUEST_URL
@@ -369,7 +368,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void tagFilterReturnsExpectedDigitalObject() throws Exception {
+      void tagFilterReturnsExpectedDigitalObject() throws Exception {
         final String TAG_FILTER_REQUEST_URL = String.format(
             "%s?tag=%s",
             REQUEST_URL,
@@ -401,12 +400,12 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Nested
-    public class GETSingularDigitalObject {
+    class GETSingularDigitalObject {
 
       String digitalObjectJsonResponse;
 
       @BeforeEach
-      public void setup() throws Exception {
+      void setup() throws Exception {
         String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.digitalObject().getProject().getProjectAbbr(),
@@ -424,7 +423,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void getDigitalObjectContainsExpectedDublinCoreTestValue() {
+      void getDigitalObjectContainsExpectedDublinCoreTestValue() {
         org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
             .contains(testDataSet.dublinCoreEntry().getLanguage())
             .contains(testDataSet.dublinCoreEntry().getValue())
@@ -433,7 +432,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void getAllObjectIdsReturnsExpectedIds() throws Exception {
+      void getAllObjectIdsReturnsExpectedIds() throws Exception {
 
         DigitalObject additionalDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
@@ -451,7 +450,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void getDigitalObjectContainsExpectedTags(){
+      void getDigitalObjectContainsExpectedTags(){
         for (String tag : testDataSet.digitalObject().getTags()) {
           org.assertj.core.api.Assertions.assertThat(digitalObjectJsonResponse)
               .contains(tag);
@@ -461,10 +460,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Nested
-    public class GETProjectTags {
+    class GETProjectTags {
 
       @Test
-      public void getProjectTagsReturnsExpectedTags() throws Exception {
+      void getProjectTagsReturnsExpectedTags() throws Exception {
 
         String url = String.format("/api/curation/v1/projects/%s/objects/tags", testDataSet.project().getProjectAbbr());
 
@@ -492,13 +491,13 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class PATCHDigitalObject {
+  class PATCHDigitalObject {
 
     @Nested
-    public class PatchDigitalObject {
+    class PatchDigitalObject {
 
       @Test
-      public void PATCHAllowsToUpdateTitle() throws Exception {
+      void PATCHAllowsToUpdateTitle() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -527,7 +526,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void PATCHPreservesUnchangedFields() throws Exception {
+      void PATCHPreservesUnchangedFields() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -555,7 +554,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void PATCHRejectsEmptyTitle() throws Exception {
+      void PATCHRejectsEmptyTitle() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -572,7 +571,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void PATCHRequiresRequestBody() throws Exception {
+      void PATCHRequiresRequestBody() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -585,7 +584,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void PATCHReturns404ForNonExistentObject() throws Exception {
+      void PATCHReturns404ForNonExistentObject() throws Exception {
         mockMvc.perform(
             MockMvcRequestBuilders.patch("/api/curation/v1/projects/test/objects/test.nonexistent")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -594,7 +593,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void PATCHAllowsToUpdateMultipleFields() throws Exception {
+      void PATCHAllowsToUpdateMultipleFields() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -624,7 +623,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void PATCHUpdatesModificationTimestamp() throws Exception {
+      void PATCHUpdatesModificationTimestamp() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -647,7 +646,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void setsMainResourceViaJson() throws Exception {
+      void setsMainResourceViaJson() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -673,7 +672,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void rejectsInvalidDsid() throws Exception {
+      void rejectsInvalidDsid() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -688,7 +687,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void clearsMainResourceViaEmptyString() throws Exception {
+      void clearsMainResourceViaEmptyString() throws Exception {
         // Pre-set mainResource
         DigitalObject obj = digitalObjectRepository.findById(
             testDataSet.digitalObject().getId()
@@ -717,7 +716,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Nested
-    public class PatchDigitalObjectFromForm {
+    class PatchDigitalObjectFromForm {
 
       private String buildUrl() {
         return String.format(
@@ -733,7 +732,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void updatesTitleAndRedirects() throws Exception {
+      void updatesTitleAndRedirects() throws Exception {
         final String NEW_TITLE = "Updated via form";
 
         mockMvc.perform(
@@ -751,7 +750,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void updatesMultipleFieldsSimultaneously() throws Exception {
+      void updatesMultipleFieldsSimultaneously() throws Exception {
         final String NEW_TITLE = "Form Title";
         final String NEW_DESCRIPTION = "Form Description";
         final String NEW_FUNDER = "Form Funder";
@@ -777,7 +776,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void preservesUnchangedFields() throws Exception {
+      void preservesUnchangedFields() throws Exception {
         String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
         String originalCreator = testDataSet.digitalObject().getBaseMetadata().getCreator();
         String originalPublisher = testDataSet.digitalObject().getPublisher();
@@ -799,7 +798,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void parsesCommaSeparatedTagsCorrectly() throws Exception {
+      void parsesCommaSeparatedTagsCorrectly() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.patch(buildUrl())
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -816,7 +815,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void handlesWhitespaceAndEmptyEntriesInTags() throws Exception {
+      void handlesWhitespaceAndEmptyEntriesInTags() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.patch(buildUrl())
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -833,7 +832,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void removesAllTagsWhenInputIsEmpty() throws Exception {
+      void removesAllTagsWhenInputIsEmpty() throws Exception {
         // Precondition: object has tags
         org.assertj.core.api.Assertions.assertThat(testDataSet.digitalObject().getTags()).isNotEmpty();
 
@@ -852,7 +851,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void tagsUnchangedWhenTagsNotSubmitted() throws Exception {
+      void tagsUnchangedWhenTagsNotSubmitted() throws Exception {
         Set<String> originalTags = testDataSet.digitalObject().getTags();
 
         // No tagsCommaSeparated and no tagsPresent param
@@ -871,7 +870,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void rejectsEmptyRequiredFields() throws Exception {
+      void rejectsEmptyRequiredFields() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.patch(buildUrl())
                     .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -881,7 +880,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void returns404ForNonExistentObject() throws Exception {
+      void returns404ForNonExistentObject() throws Exception {
         String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s.nonexistent",
             testDataSet.project().getProjectAbbr(),
@@ -897,7 +896,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void updatesModificationTimestamp() throws Exception {
+      void updatesModificationTimestamp() throws Exception {
         Instant beforeUpdate = Instant.now();
         Thread.sleep(50);
 
@@ -915,7 +914,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void setsMainResourceViaForm() throws Exception {
+      void setsMainResourceViaForm() throws Exception {
         final String url = String.format(
             "/api/curation/v1/projects/%s/objects/%s",
             testDataSet.project().getProjectAbbr(),
@@ -940,14 +939,14 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class WebclientTests {
+  class WebclientTests {
 
     @Nested
-    public class SingularObject {
+    class SingularObject {
 
 
       @Test
-      public void getDigitalObjectRendersExpectedViewValues() throws Exception {
+      void getDigitalObjectRendersExpectedViewValues() throws Exception {
 
 
         String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
@@ -982,7 +981,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
 
       @Test
-      public void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
+      void digitalObjectShowsExpectedDatastreamDsids() throws Exception {
 
         var additionalDatastream = testDataBuilder.addRandomDatastream(testDataSet);
 
@@ -1007,7 +1006,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
+      void getDigitalObjectRendersExpectedBaseMetadata() throws Exception {
 
 
         String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
@@ -1040,7 +1039,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Test
-      public void getDigitalObjectContainsExpectedFunder() throws Exception {
+      void getDigitalObjectContainsExpectedFunder() throws Exception {
 
         String url = String.format("/api/curation/v1/projects/%s/objects/%s", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId());
 
@@ -1064,10 +1063,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
       }
 
       @Nested
-      public class CreateObjectFromForm {
+      class CreateObjectFromForm {
 
         @Test
-        public void createsExpectedObject() throws Exception {
+        void createsExpectedObject() throws Exception {
 
           final String ID_SUFFIX = "demo123";
           final String TEST_OBJECT_ID = testDataSet.project().getProjectAbbr() + "." + ID_SUFFIX;
@@ -1106,10 +1105,10 @@ public class DigitalObjectControllerIT extends IntegrationTest {
     }
 
     @Nested
-    public class DigitalObjectOverview {
+    class DigitalObjectOverview {
 
       @Test
-      public void getDigitalObjectsContainsExpectedTags() throws Exception {
+      void getDigitalObjectsContainsExpectedTags() throws Exception {
 
         String url = String.format("/api/curation/v1/projects/%s/objects", testDataSet.project().getProjectAbbr());
 
@@ -1136,7 +1135,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Test
-  public void getObjectJsonReturnsDigitalObjectWhenItExists() throws Exception {
+  void getObjectJsonReturnsDigitalObjectWhenItExists() throws Exception {
 
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId())
             .contentType(MediaType.APPLICATION_JSON))
@@ -1148,14 +1147,14 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Test
-  public void getObjectJsonThrowsExceptionWhenDigitalObjectDoesNotExist() throws Exception {
+  void getObjectJsonThrowsExceptionWhenDigitalObjectDoesNotExist() throws Exception {
     mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), "nonExistentId")
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isNotFound());
   }
 
   @Test
-  public void getProjectObjectsJsonReturnsEmptyListWhenNoDigitalObjectsExistForProject() throws Exception {
+  void getProjectObjectsJsonReturnsEmptyListWhenNoDigitalObjectsExistForProject() throws Exception {
     testDataBuilder.removeAllExceptProjects(testDataSet);
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
@@ -1169,7 +1168,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Test
-  public void getProjectObjectsJsonReturnsDigitalObjectsWhenTheyExistForProject() throws Exception {
+  void getProjectObjectsJsonReturnsDigitalObjectsWhenTheyExistForProject() throws Exception {
     MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/api/curation/v1/projects/{projectAbbr}/objects", testDataSet.project().getProjectAbbr())
             .contentType(MediaType.APPLICATION_JSON))
         .andExpect(status().isOk())
@@ -1181,7 +1180,7 @@ public class DigitalObjectControllerIT extends IntegrationTest {
 
 
   @Test
-  public void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
+  void getFindAllIdsReturnsExpectedObjectIds() throws Exception {
 
     final DigitalObject additionalDigitalObject = testDataBuilder.addRandomObject(testDataSet);
 
