@@ -21,4 +21,6 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
 
+  boolean existsByDigitalObjectId(String digitalObjectId);
+
 }

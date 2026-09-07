@@ -5,6 +5,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestUser;
+import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;
@@ -42,6 +43,9 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   @Autowired
   private IDigitalObjectRepository digitalObjectRepository;
 
+  @Autowired
+  private IArchivalRecordRepository archivalRecordRepository;
+
   /**
    * Classes need to mock authenticated users when changing datastreams
    */
@@ -64,10 +68,24 @@ public class DigitalObjectControllerIT extends IntegrationTest {
   }
 
   @Nested
-  public class DELETERequests {
+  class DELETERequests {
 
     @Test
-    public void deleteDigitalObjectWhenItExists() throws Exception {
+    void mayNotDeleteObjectWhenArchivalRecordsExists() throws Exception {
+
+      // Act
+      mockMvc.perform(
+              MockMvcRequestBuilders.delete("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
+                  )
+                  .contentType(MediaType.APPLICATION_JSON))
+          .andExpect(status().is(409)); // status code for archival records exists
+
+    }
+
+    @Test
+    void deleteDigitalObjectWhenItExists() throws Exception {
+
+      archivalRecordRepository.delete(testDataSet.archivalRecord());
 
       // Act
       mockMvc.perform(
