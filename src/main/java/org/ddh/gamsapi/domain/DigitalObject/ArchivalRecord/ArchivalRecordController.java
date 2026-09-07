@@ -33,8 +33,7 @@ public class ArchivalRecordController {
   )
   @RequestMapping(method = RequestMethod.GET)
   @ResponseBody
-  // TODO rename this method to findArchivalRecords
-  public List<ArchivalRecordCompactView> findSubmissionRecord(
+  public List<ArchivalRecordCompactView> findArchivalRecords(
       @PathVariable String projectAbbr,
       @PathVariable String id
   ) {
@@ -52,7 +51,7 @@ public class ArchivalRecordController {
   )
   @RequestMapping(method = RequestMethod.GET, path = "/public")
   @ResponseBody
-  public List<ArchivalRecordCompactView> findSubmissionRecordsByArchivingStatus(
+  public List<ArchivalRecordCompactView> findArchivalRecordsByArchivingStatus(
       @PathVariable String projectAbbr,
       @PathVariable String id
   ) {
