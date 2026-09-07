@@ -18,4 +18,8 @@ public class ArchivalRecordCreateDto {
   private String pid;
   @NotEmpty
   private Instant timeStamp;
+  @NotEmpty
+  private String externalId;
+  @NotEmpty
+  private ArchivingStatus archivingStatus;
 }

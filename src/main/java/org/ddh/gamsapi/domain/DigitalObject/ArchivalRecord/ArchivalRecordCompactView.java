@@ -9,4 +9,6 @@ public interface ArchivalRecordCompactView {
   Long getId();
   String getPid();
   Instant getTimeStamp();
+  ArchivingStatus getArchivingStatus();
+  String getExternalId();
 }

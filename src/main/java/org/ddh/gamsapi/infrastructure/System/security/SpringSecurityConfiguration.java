@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,7 +19,6 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -103,6 +101,16 @@ public class SpringSecurityConfiguration {
             })
             .permitAll()
             // authorization logic only applies for these endpoints
+            // any mutating verb (POST/PUT/PATCH/DELETE) under archival-records:
+            // restricted to global roles only — project-scoped admins/editors excluded
+            .requestMatchers(
+                "/api/curation/v1/projects/{projectAbbr}/objects/{id}/archival-records",
+                "/api/curation/v1/projects/{projectAbbr}/objects/{id}/archival-records/**"
+            )
+            .hasAnyAuthority(
+                GAMSAPIAuthorities.getSuperAdmin(),
+                GAMSAPIAuthorities.getProjectsAdministrator()
+            )
             .requestMatchers(
                 "/api/curation/v1/projects/{projectAbbr}**",
                 "/api/curation/v1/projects/{projectAbbr}/**",

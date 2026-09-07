@@ -1,6 +1,11 @@
 package org.ddh.gamsapi.infrastructure.System.security;
 
-import org.junit.jupiter.api.Assertions;
+import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
+import org.ddh.gamsapi.TestUtilities.TestProject;
+import org.ddh.gamsapi.application.Ingest.utils.IngestStatics;
+import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +18,7 @@ import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequ
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.ddh.gamsapi.application.Ingest.utils.IngestStatics;
-import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.domain.Project.interfaces.IProjectRepository;
-import org.ddh.gamsapi.infrastructure.System.security.exceptions.UserNotAssignedToProjectException;
-import org.ddh.gamsapi.TestUtilities.TestProject;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Tests Authorization settings in the application
  */
 @AutoConfigureMockMvc
-public class AuthorizationIT extends IntegrationTest {
+class AuthorizationIT extends IntegrationTest {
 
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
@@ -65,7 +66,7 @@ public class AuthorizationIT extends IntegrationTest {
   }
 
   @Test
-  public void projectAdminAuthorizedForProjectIngest_throwsExpected404ErrorBecauseProjectDoesNotExist() throws Exception {
+  void projectAdminAuthorizedForProjectIngest_throwsExpected404ErrorBecauseProjectDoesNotExist() throws Exception {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
@@ -91,7 +92,7 @@ public class AuthorizationIT extends IntegrationTest {
   }
 
   @Test
-  public void globalAdminMayIngest_throwsExpected404ErrorBecauseProjectDoesNotExist() throws Exception {
+  void globalAdminMayIngest_throwsExpected404ErrorBecauseProjectDoesNotExist() throws Exception {
 
     byte[] zippedBag = new byte[0];
     MockPart mockPart = new MockPart(IngestStatics.FORM_PART_NAME.name, "test.zip", zippedBag);
@@ -138,10 +139,10 @@ public class AuthorizationIT extends IntegrationTest {
   }
 
   @Nested
-  public class ProjectAuthorization {
+  class ProjectAuthorization {
 
     @Test
-    public void anonymousUserNotAuthorizedForProjectCreation_redirects() throws Exception {
+    void anonymousUserNotAuthorizedForProjectCreation_redirects() throws Exception {
 
       final String TEST_PROJECT_ABBR = "FOO";
       final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
@@ -156,7 +157,7 @@ public class AuthorizationIT extends IntegrationTest {
     }
 
     @Test
-    public void adminMayCreateAProject() throws Exception {
+    void adminMayCreateAProject() throws Exception {
 
       final String TEST_PROJECT_ABBR = TestProject.PROJECT_ABBR.getValue();
       final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
@@ -179,7 +180,7 @@ public class AuthorizationIT extends IntegrationTest {
     }
 
     @Test
-    public void anonymousUserNotAuthorizedForProjectDeletion_redirects() throws Exception {
+    void anonymousUserNotAuthorizedForProjectDeletion_redirects() throws Exception {
 
       final String TEST_PROJECT_ABBR = "FOO";
       final String TEST_URL = "/api/curation/v1/projects/" + TEST_PROJECT_ABBR;
@@ -285,6 +286,106 @@ public class AuthorizationIT extends IntegrationTest {
     }
 
 
+  }
+
+  @Nested
+  class ArchivalRecordAuthorization {
+
+    private final String TEST_REQUEST_BODY = "{}";
+
+    private final String ARCHIVAL_RECORDS_URL = String.format(
+        "/api/curation/v1/projects/%s/objects/%s/archival-records",
+        TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+    );
+
+    @Test
+    void projectAdminIsForbiddenToPost() throws Exception {
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(ARCHIVAL_RECORDS_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+              .with(SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                  new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue()))
+              ))
+              .with(SecurityMockMvcRequestPostProcessors.csrf())
+      ).andExpect(status().is(403));
+    }
+
+    @Test
+    void projectEditorIsForbiddenToPost() throws Exception {
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(ARCHIVAL_RECORDS_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+              .with(SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                  new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectEditor(TestProject.PROJECT_ABBR.getValue()))
+              ))
+              .with(SecurityMockMvcRequestPostProcessors.csrf())
+      ).andExpect(status().is(403));
+    }
+
+    @Test
+    void projectAdminIsForbiddenToDeleteNestedRecord() throws Exception {
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(ARCHIVAL_RECORDS_URL + "/1")
+              .with(SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                  new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue()))
+              ))
+              .with(SecurityMockMvcRequestPostProcessors.csrf())
+      ).andExpect(status().is(403));
+    }
+
+    @Test
+    void superAdminIsNotForbiddenToPost() throws Exception {
+      // no digital object persisted in this test -> not asserting 2xx, only that
+      // the authorization layer itself doesn't block it. Functional CRUD behavior
+      // (given a real digital object) is covered in ArchivalRecordControllerIT.
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(ARCHIVAL_RECORDS_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+              .with(SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                  new SimpleGrantedAuthority(GAMSAPIAuthorities.getSuperAdmin())
+              ))
+              .with(SecurityMockMvcRequestPostProcessors.csrf())
+      ).andExpect(status().is(Matchers.not(403)));
+    }
+
+    @Test
+    void projectsAdminIsNotForbiddenToPost() throws Exception {
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(ARCHIVAL_RECORDS_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+              .with(SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                  new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectsAdministrator())
+              ))
+              .with(SecurityMockMvcRequestPostProcessors.csrf())
+      ).andExpect(status().is(Matchers.not(403)));
+    }
+
+    @Test
+    void anonymousUserIsRedirectedOnPost() throws Exception {
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(ARCHIVAL_RECORDS_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+              .with(SecurityMockMvcRequestPostProcessors.anonymous())
+              .with(SecurityMockMvcRequestPostProcessors.csrf())
+      ).andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    void projectAdminIsStillAllowedToRead() throws Exception {
+      // sanity check: GET/HEAD/OPTIONS permitAll rule is registered earlier in the
+      // chain, so it should never even reach the archival-records matcher
+      mockMvc.perform(
+          MockMvcRequestBuilders.get(ARCHIVAL_RECORDS_URL)
+              .with(SecurityMockMvcRequestPostProcessors.oidcLogin().authorities(
+                  new SimpleGrantedAuthority(GAMSAPIAuthorities.getProjectAdmin(TestProject.PROJECT_ABBR.getValue()))
+              ))
+      ).andExpect(status().is(Matchers.not(403)));
+    }
   }
 
 }

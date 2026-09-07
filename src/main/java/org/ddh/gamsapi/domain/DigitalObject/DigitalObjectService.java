@@ -24,10 +24,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectConversionException;
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.*;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -169,9 +166,14 @@ public class DigitalObjectService implements IDigitalObjectService {
       );
     }
 
-    submissionRecordRepository.deleteById(digitalObject.getId());
+    if (archivalRecordRepository.existsByDigitalObjectId(digitalObject.getId())) {
+      throw new DigitalObjectHasArchivalRecordsException(
+          "Cannot delete digital object " + digitalObject.getId()
+              + ". It still has archival records associated with it."
+      );
+    }
 
-    archivalRecordRepository.deleteAllByDigitalObjectId(digitalObject.getId());
+    submissionRecordRepository.deleteById(digitalObject.getId());
 
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
     datastreamRepository.deleteAllByDigitalObject(digitalObject);
