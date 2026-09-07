@@ -14,6 +14,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepo
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectHasArchivalRecordsException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
@@ -297,10 +298,25 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class Delete {
+  class Delete {
 
     @Test
-    public void deletesDigitalObject() {
+    void cannotDeleteDigitalObjectIfArchivalRecordExists(){
+      // verify test archival record exists
+      Assertions.assertThat(
+          archivalRecordRepository.existsByDigitalObjectId(testDataSet.digitalObject().getId())
+          ).isTrue();
+
+      Assertions.assertThatThrownBy(() -> digitalObjectService.delete(testDataSet.digitalObject()))
+              .isInstanceOf(DigitalObjectHasArchivalRecordsException.class);
+
+
+    }
+
+    @Test
+    void deletesDigitalObject() {
+      // test archival record must be deleted - otherwise error
+      archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(testDataSet.digitalObject());
       Assertions.assertThatThrownBy(() -> digitalObjectService.findById(
               testDataSet.digitalObject().getId())
@@ -310,6 +326,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void deletesChildDatastreamsWithFileContent() {
+      // remove test archival record
+      archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(testDataSet.digitalObject());
       Assertions.assertThat(datastreamRepository.existsById(testDataSet.mainDatastream().deriveDatastreamId())).isFalse();
       Assertions.assertThat(datastreamContentRepository.exists(testDataSet.mainDatastream().deriveDatastreamId())).isFalse();
@@ -317,6 +335,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
     @Test
     public void deletesReferencedDublinCoreEntries(){
+      // remove test archival record
+      archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(
           testDataSet.digitalObject()
       );
@@ -327,18 +347,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void deletesRelatedArchivalRecord(){
-      digitalObjectService.delete(testDataSet.digitalObject());
-      Assertions.assertThat(
-          archivalRecordRepository.existsById(testDataSet.archivalRecord().getId())
-      ).isFalse();
-    }
-
-    @Test
     public void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
 
       Instant projectContentLastModifiedBeforeDelete = testDataSet.project().getModified();
 
+      // remove test archival record
+      archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(testDataSet.digitalObject());
 
       var updatedProject = projectRepository.findById(testDataSet.project().getProjectAbbr())

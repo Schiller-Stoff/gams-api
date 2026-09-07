@@ -27,10 +27,9 @@ public class ArchivalRecord {
 
   public static final String ENTITY_TABLE_NAME = "archival_record";
 
-  public static final String[] ORDERED_MANAGED_TABLES = new String[]{
+  protected static final String[] ORDERED_MANAGED_TABLES = new String[]{
       ENTITY_TABLE_NAME
   };
-
 
   /**
    * Generated unique identifier for the dublin core element
@@ -58,6 +57,14 @@ public class ArchivalRecord {
   @NotNull
   private Instant timeStamp;
 
+  @Column(name = "archival_status")
+  @Enumerated(EnumType.STRING)
+  @NotNull
+  private ArchivingStatus archivingStatus = ArchivingStatus.DRAFTED;
+
+  @Column(name = "external_id", nullable = false)
+  @NotNull
+  private String externalId;
 
   /**
    * Proper equals/hashCode for entities with assigned IDs.

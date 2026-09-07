@@ -37,10 +37,23 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecord.setPid(archivalRecordCreateDto.getPid());
     archivalRecord.setTimeStamp(archivalRecordCreateDto.getTimeStamp());
 
+    archivalRecord.setArchivingStatus(archivalRecordCreateDto.getArchivingStatus());
+    archivalRecord.setExternalId(archivalRecordCreateDto.getExternalId());
+
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(DIGITAL_OBJECT_ID);
 
     archivalRecord.setDigitalObject(digitalObject);
     return archivalRecordRepository.save(archivalRecord);
+  }
+
+  @Override
+  public List<ArchivalRecordCompactView> findForObjectByArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus) {
+    return archivalRecordRepository.findArchivalRecordsByDigitalObjectIdAndArchivingStatus(digitalObjectId, archivingStatus);
+  }
+
+  @Override
+  public void deleteById(Long archivalRecordId) {
+    archivalRecordRepository.deleteById(archivalRecordId);
   }
 }

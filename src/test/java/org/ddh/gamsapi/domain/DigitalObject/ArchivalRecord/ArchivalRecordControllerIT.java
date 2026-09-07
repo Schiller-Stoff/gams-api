@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ArchivalRecordControllerIT extends IntegrationTest {
+class ArchivalRecordControllerIT extends IntegrationTest {
 
   @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
   @Autowired
@@ -39,18 +39,18 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
   private IArchivalRecordRepository archivalRecordRepository;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
   }
 
   @Nested
-  public class GET {
+  class GET {
 
     @Nested
-    public class JSONResponse {
+    class JSONResponse {
 
       @Test
-      public void jsonContainsExpectedPid() throws Exception {
+      void jsonContainsExpectedPid() throws Exception {
 
         final String TEST_REQUEST_URL = String.format(
             "/api/curation/v1/projects/%s/objects/%s/archival-records",
@@ -71,15 +71,40 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
 
       }
 
+      @Test
+      void getPublicArchivalRecordsDoesNotReturnPidOfTestArchivalRecord() throws Exception {
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/projects/%s/objects/%s/archival-records/public",
+            testDataSet.project().getProjectAbbr(),
+            testDataSet.digitalObject().getId()
+        );
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        // test-data archival record is drafted but endpoint should only return public ones
+        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
+
+        Assertions.assertThat(responseBody)
+            .isNotNull()
+            .doesNotContain(
+                testDataSet.archivalRecord().getPid()
+            );
+
+      }
+
     }
 
   }
 
   @Nested
-  public class POST {
+  class POST {
 
     @Test
-    public void createsAnAdditionalArchivalRecord() throws Exception {
+    void failsToCreateAnArchivalRecordWithoutExternalId() throws Exception {
 
       final String TEST_REQUEST_URL = String.format(
           "/api/curation/v1/projects/%s/objects/%s/archival-records",
@@ -88,16 +113,79 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\"}",
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"archivingStatus\":\"%s\"}",
           testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getTimeStamp()
+          testDataSet.archivalRecord().getTimeStamp(),
+          testDataSet.archivalRecord().getArchivingStatus()
       );
 
       mockMvc.perform(
               MockMvcRequestBuilders.post(TEST_REQUEST_URL)
                   .contentType(MediaType.APPLICATION_JSON)
                   .content(TEST_REQUEST_BODY)
-          ).andExpect(status().isOk());
+          ).andExpect(status().is4xxClientError());
+
+      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
+          testDataSet.digitalObject().getId()
+      );
+
+      // now an additional archival record should NOT exist (next to the one in the test data set)
+      Assertions.assertThat(foundRecords).hasSize(1);
+
+    }
+
+    @Test
+    void failsToCreateAnArchivalRecordWithoutArchivingStatus() throws Exception {
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      final String TEST_REQUEST_BODY = String.format(
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\"}",
+          testDataSet.archivalRecord().getPid(),
+          testDataSet.archivalRecord().getTimeStamp(),
+          testDataSet.archivalRecord().getExternalId()
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+      ).andExpect(status().is4xxClientError());
+
+      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
+          testDataSet.digitalObject().getId()
+      );
+
+      // now an additional archival record should NOT exist (next to the one in the test data set)
+      Assertions.assertThat(foundRecords).hasSize(1);
+
+    }
+
+    @Test
+    void successfullyCreatesAnArchivalRecord() throws Exception {
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      final String TEST_REQUEST_BODY = String.format(
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\",\"archivingStatus\":\"DRAFTED\"}",
+          testDataSet.archivalRecord().getPid(),
+          testDataSet.archivalRecord().getTimeStamp(),
+          testDataSet.archivalRecord().getExternalId()
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+      ).andExpect(status().isOk());
 
       var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
           testDataSet.digitalObject().getId()
@@ -106,8 +194,30 @@ public class ArchivalRecordControllerIT extends IntegrationTest {
       // now an additional archival record should exist (next to the one in the test data set)
       Assertions.assertThat(foundRecords).hasSize(2);
 
+    }
 
+  }
 
+  @Nested
+  class DELETE {
+
+    @Test
+    void successfullyDeletesTestArchivalRecord() throws Exception {
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/projects/%s/objects/%s/archival-records/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId(),
+          testDataSet.archivalRecord().getId()
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
+      ).andExpect(status().isOk());
+
+      var expectedDeleted = archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
+
+      Assertions.assertThat(expectedDeleted).isEmpty();
 
     }
 

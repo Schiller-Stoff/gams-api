@@ -81,7 +81,7 @@
         </p>
         <a class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/export'">Export as bag</a>
         <a th:if="${submissionRecord}" class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/submission-record'">Submission metadata</a>
-        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records'">Archival metadata</a>
+        <a class="btn btn-outline-primary" target="_blank" th:href="'/api/curation/v1/projects/' + ${project.projectAbbr} + '/objects/' + ${do.id} + '/archival-records/public'">Archival metadata</a>
         <br/>
         <br/>
         <div>
