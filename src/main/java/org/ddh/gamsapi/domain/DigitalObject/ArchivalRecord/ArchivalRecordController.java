@@ -72,12 +72,12 @@ public class ArchivalRecordController {
   public void createArchivalRecord(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @RequestBody ArchivalRecordCreateDto archivalRecord
+      @RequestBody ArchivalRecordReserveDto archivalRecord
   ){
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
     archivalRecord.setDigitalObjectId(id);
-    archivalRecordService.save(archivalRecord);
+    archivalRecordService.reserve(archivalRecord);
   }
 
   @DeleteMapping(path = "/{recordId}")

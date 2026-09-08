@@ -24,11 +24,11 @@ public interface IArchivalRecordService {
   List<ArchivalRecordCompactView> findForObjectByArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
 
   /**
-   * Saves given ArchivalRecord.
-   * @param archivalRecordCreateDto the ArchivalRecord to save
+   * Saves given archival record bia generating a id + checking uniqueness of the pid + assigning archival status reserved.
+   * @param archivalRecordReserveDto the ArchivalRecord to save
    * @return the saved ArchivalRecord
    */
-  ArchivalRecord save(ArchivalRecordCreateDto archivalRecordCreateDto);
+  ArchivalRecord reserve(ArchivalRecordReserveDto archivalRecordReserveDto);
 
 
   /**

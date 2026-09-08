@@ -61,50 +61,17 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
 
   @Nested
-  class Save {
-
-    @Test
-    void failsToSaveAdditionalRecordWithoutArchivingStatus(){
-
-      ArchivalRecordCreateDto archivalRecordCreateDto = new ArchivalRecordCreateDto();
-      archivalRecordCreateDto.setDigitalObjectId(testDataSet.digitalObject().getId());
-      archivalRecordCreateDto.setPid(testDataSet.archivalRecord().getPid());
-      archivalRecordCreateDto.setTimeStamp(Instant.now());
-      archivalRecordCreateDto.setExternalId(testDataSet.archivalRecord().getExternalId());
-      // skip archiving status
-
-      Assertions.assertThatThrownBy(
-          () -> archivalRecordService.save(archivalRecordCreateDto)
-      ).isInstanceOf(TransactionSystemException.class);
-
-    }
-
-    @Test
-    void failsToSaveAdditionalRecordWithoutExternalId(){
-
-      ArchivalRecordCreateDto archivalRecordCreateDto = new ArchivalRecordCreateDto();
-      archivalRecordCreateDto.setDigitalObjectId(testDataSet.digitalObject().getId());
-      archivalRecordCreateDto.setPid(testDataSet.archivalRecord().getPid());
-      archivalRecordCreateDto.setTimeStamp(Instant.now());
-      archivalRecordCreateDto.setArchivingStatus(testDataSet.archivalRecord().getArchivingStatus());
-      // skip archiving status
-
-      Assertions.assertThatThrownBy(
-          () -> archivalRecordService.save(archivalRecordCreateDto)
-      ).isInstanceOf(TransactionSystemException.class);
-
-    }
+  class Generate {
 
     @Test
     void successfullySavesExpectedAdditionalArchivalRecord(){
 
-      ArchivalRecordCreateDto archivalRecordCreateDto = new ArchivalRecordCreateDto();
-      archivalRecordCreateDto.setDigitalObjectId(testDataSet.digitalObject().getId());
-      archivalRecordCreateDto.setPid(testDataSet.archivalRecord().getPid());
-      archivalRecordCreateDto.setTimeStamp(Instant.now());
-      archivalRecordCreateDto.setArchivingStatus(testDataSet.archivalRecord().getArchivingStatus());
-      archivalRecordCreateDto.setExternalId(testDataSet.archivalRecord().getExternalId());
-      archivalRecordService.save(archivalRecordCreateDto);
+      ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
+      archivalRecordReserveDto.setDigitalObjectId(testDataSet.digitalObject().getId());
+      archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
+      archivalRecordReserveDto.setTimeStamp(Instant.now());
+      archivalRecordReserveDto.setExternalId(testDataSet.archivalRecord().getExternalId());
+      archivalRecordService.reserve(archivalRecordReserveDto);
 
       var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
 

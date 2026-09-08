@@ -9,7 +9,7 @@ import java.time.Instant;
  * DTO for creating an ArchivalRecord (represents user requests)
  */
 @Data
-public class ArchivalRecordCreateDto {
+public class ArchivalRecordReserveDto {
   /**
    * This might be empty because digitalObjectId must be defined by the endpoint
    */
@@ -20,6 +20,4 @@ public class ArchivalRecordCreateDto {
   private Instant timeStamp;
   @NotEmpty
   private String externalId;
-  @NotEmpty
-  private ArchivingStatus archivingStatus;
 }

@@ -24,27 +24,31 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
-  public ArchivalRecord save(ArchivalRecordCreateDto archivalRecordCreateDto) {
+  public ArchivalRecord reserve(ArchivalRecordReserveDto archivalRecordReserveDto) {
 
-    final String DIGITAL_OBJECT_ID = archivalRecordCreateDto.getDigitalObjectId();
+    final String DIGITAL_OBJECT_ID = archivalRecordReserveDto.getDigitalObjectId();
 
     if (!digitalObjectRepository.existsById(DIGITAL_OBJECT_ID)) {
       throw new DigitalObjectNotFoundException(
-          "Cannot save archival record " + archivalRecordCreateDto + ". The digital object with id does not exist: " + DIGITAL_OBJECT_ID
+          "Cannot save archival record " + archivalRecordReserveDto + ". The digital object with id does not exist: " + DIGITAL_OBJECT_ID
       );
     }
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
-    archivalRecord.setPid(archivalRecordCreateDto.getPid());
-    archivalRecord.setTimeStamp(archivalRecordCreateDto.getTimeStamp());
+    archivalRecord.setPid(archivalRecordReserveDto.getPid());
+    archivalRecord.setTimeStamp(archivalRecordReserveDto.getTimeStamp());
+    archivalRecord.setExternalId(archivalRecordReserveDto.getExternalId());
 
-    archivalRecord.setArchivingStatus(archivalRecordCreateDto.getArchivingStatus());
-    archivalRecord.setExternalId(archivalRecordCreateDto.getExternalId());
+    //
+    archivalRecord.setArchivingStatus(ArchivingStatus.RESERVED);
 
+    // link to digital object
     DigitalObject digitalObject = new DigitalObject();
     digitalObject.setId(DIGITAL_OBJECT_ID);
-
     archivalRecord.setDigitalObject(digitalObject);
+
+
+
     return archivalRecordRepository.save(archivalRecord);
   }
 

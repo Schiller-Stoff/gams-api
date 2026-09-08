@@ -135,37 +135,6 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     }
 
     @Test
-    void failsToCreateAnArchivalRecordWithoutArchivingStatus() throws Exception {
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getTimeStamp(),
-          testDataSet.archivalRecord().getExternalId()
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is4xxClientError());
-
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
-          testDataSet.digitalObject().getId()
-      );
-
-      // now an additional archival record should NOT exist (next to the one in the test data set)
-      Assertions.assertThat(foundRecords).hasSize(1);
-
-    }
-
-    @Test
     void successfullyCreatesAnArchivalRecord() throws Exception {
 
       final String TEST_REQUEST_URL = String.format(
