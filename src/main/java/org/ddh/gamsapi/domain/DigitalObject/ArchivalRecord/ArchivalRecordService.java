@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.NotImplementedException;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -55,5 +56,16 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   public void deleteById(Long archivalRecordId) {
     archivalRecordRepository.deleteById(archivalRecordId);
+  }
+
+  @Override
+  public void updateArchivalRecord(ArchivalRecordUpdateDto archivalRecordUpdateDto) {
+
+
+    // TODO implement!
+    throw new NotImplementedException("NOT IMPLEMENTED CURRENTLY");
+
+
+
   }
 }

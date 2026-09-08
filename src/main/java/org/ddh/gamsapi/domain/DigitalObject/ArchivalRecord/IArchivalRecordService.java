@@ -37,4 +37,11 @@ public interface IArchivalRecordService {
    */
   void deleteById(Long archivalRecordId);
 
+
+  /**
+   * Updates an existing archival record
+   * @param archivalRecordUpdateDto contains data about archival record to be updated
+   */
+  void updateArchivalRecord(ArchivalRecordUpdateDto archivalRecordUpdateDto);
+
 }
