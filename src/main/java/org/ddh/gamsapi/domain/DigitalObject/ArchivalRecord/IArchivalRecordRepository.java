@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for managing ArchivalRecord entities.
@@ -22,5 +23,9 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
   List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
 
   boolean existsByDigitalObjectId(String digitalObjectId);
+
+  Optional<ArchivalRecordCompactView> findByArchivingStatus(ArchivingStatus archivingStatus);
+
+  boolean existsByArchivingStatus(ArchivingStatus archivingStatus);
 
 }
