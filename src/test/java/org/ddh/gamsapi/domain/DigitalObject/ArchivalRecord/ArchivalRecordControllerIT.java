@@ -86,7 +86,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
         ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
         // test-data archival record is drafted but endpoint should only return public ones
-        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
+        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.RESERVED);
 
         Assertions.assertThat(responseBody)
             .isNotNull()

@@ -60,7 +60,7 @@ public class ArchivalRecord {
   @Column(name = "archival_status")
   @Enumerated(EnumType.STRING)
   @NotNull
-  private ArchivingStatus archivingStatus = ArchivingStatus.DRAFTED;
+  private ArchivingStatus archivingStatus = ArchivingStatus.RESERVED;
 
   @Column(name = "external_id", nullable = false)
   @NotNull
