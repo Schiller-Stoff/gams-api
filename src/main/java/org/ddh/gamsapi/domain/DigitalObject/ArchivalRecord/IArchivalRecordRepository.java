@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
 import org.springframework.data.repository.CrudRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,5 +28,7 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
   Optional<ArchivalRecordCompactView> findByArchivingStatus(ArchivingStatus archivingStatus);
 
   boolean existsByArchivingStatus(ArchivingStatus archivingStatus);
+
+  boolean existsByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
 
 }

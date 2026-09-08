@@ -34,6 +34,13 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    if (archivalRecordRepository.existsByDigitalObjectIdAndArchivingStatusIn(DIGITAL_OBJECT_ID, ArchivingStatus.gtBlockingStatuses())) {
+      throw new ArchivalRecordAlreadyActiveException(
+          "Cannot create archival record for digital object " + DIGITAL_OBJECT_ID
+              + ". An archival record with status DRAFTED or RESERVED already exists."
+      );
+    }
+
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(archivalRecordReserveDto.getPid());
     archivalRecord.setTimeStamp(archivalRecordReserveDto.getTimeStamp());
@@ -65,6 +72,11 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   public void updateArchivalRecord(ArchivalRecordUpdateDto archivalRecordUpdateDto) {
 
+    // TODO check if object exists?
+
+    // TODO check if archival record exists?
+
+    // TODO check if published archival record should be changed?
 
     // TODO implement!
     throw new NotImplementedException("NOT IMPLEMENTED CURRENTLY");

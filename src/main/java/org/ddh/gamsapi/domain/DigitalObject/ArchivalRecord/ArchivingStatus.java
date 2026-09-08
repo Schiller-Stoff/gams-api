@@ -1,5 +1,8 @@
 package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
+import java.util.Collection;
+import java.util.EnumSet;
+
 /**
  * Represents the status of the archiving process of digital objects.
  */
@@ -20,5 +23,14 @@ public enum ArchivingStatus {
   /**
    * Archival record is completely public.
    */
-  PUBLISHED
+  PUBLISHED;
+
+  /**
+   * Returns the blocking enum statuses of a digital object.
+   * Blocking means: there can only be one ArchivalRecord that is in reserved state.
+   * @return collection of blocking statuses
+   */
+  static Collection<ArchivingStatus> gtBlockingStatuses(){
+    return EnumSet.of(ArchivingStatus.RESERVED, ArchivingStatus.DRAFTED);
+  }
 }

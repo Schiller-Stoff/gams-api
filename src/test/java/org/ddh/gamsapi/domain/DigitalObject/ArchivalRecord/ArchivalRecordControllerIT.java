@@ -2,8 +2,10 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -113,10 +115,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"archivingStatus\":\"%s\"}",
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\"}",
           testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getTimeStamp(),
-          testDataSet.archivalRecord().getArchivingStatus()
+          testDataSet.archivalRecord().getTimeStamp()
       );
 
       mockMvc.perform(
@@ -137,6 +138,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     @Test
     void successfullyCreatesAnArchivalRecord() throws Exception {
 
+      // make sure that nothing exists first
+      archivalRecordRepository.deleteAll();
+
       final String TEST_REQUEST_URL = String.format(
           "/api/curation/v1/projects/%s/objects/%s/archival-records",
           testDataSet.project().getProjectAbbr(),
@@ -144,7 +148,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\",\"archivingStatus\":\"DRAFTED\"}",
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\"}",
           testDataSet.archivalRecord().getPid(),
           testDataSet.archivalRecord().getTimeStamp(),
           testDataSet.archivalRecord().getExternalId()
@@ -160,10 +164,49 @@ class ArchivalRecordControllerIT extends IntegrationTest {
           testDataSet.digitalObject().getId()
       );
 
-      // now an additional archival record should exist (next to the one in the test data set)
-      Assertions.assertThat(foundRecords).hasSize(2);
+      // now an additional archival record should not exist - but still be one
+      Assertions.assertThat(foundRecords).hasSize(1);
 
     }
+
+    @Test
+    void cannotCreatIfABlockingArchivalRecordAlreadyExists() throws Exception {
+
+      // first delete available test record
+      archivalRecordRepository.deleteAll();
+
+      // create new
+      var archivalRecord = TestArchivalRecord.generate(
+          testDataSet.digitalObject(),
+          "foo",
+          "bar",
+          ArchivingStatus.RESERVED
+      );
+      archivalRecordRepository.save(archivalRecord);
+
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      final String TEST_REQUEST_BODY = String.format(
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\"}",
+          testDataSet.archivalRecord().getPid(),
+          testDataSet.archivalRecord().getTimeStamp(),
+          testDataSet.archivalRecord().getExternalId()
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+      ).andExpect(status().is(409));
+
+
+    }
+
 
   }
 

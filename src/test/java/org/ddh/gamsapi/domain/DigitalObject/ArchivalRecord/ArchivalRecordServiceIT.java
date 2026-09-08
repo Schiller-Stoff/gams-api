@@ -66,6 +66,8 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     @Test
     void successfullySavesExpectedAdditionalArchivalRecord(){
 
+      archivalRecordRepository.deleteAll();
+
       ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
       archivalRecordReserveDto.setDigitalObjectId(testDataSet.digitalObject().getId());
       archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
@@ -75,7 +77,24 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
 
-      Assertions.assertThat(foundRecords).hasSize(2);
+      // archival records count should still be one
+      Assertions.assertThat(foundRecords).hasSize(1);
+
+    }
+
+    @Test
+    void cannotSaveIfBlockingArchivalRecordExists(){
+
+      ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
+      archivalRecordReserveDto.setDigitalObjectId(testDataSet.digitalObject().getId());
+      archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
+      archivalRecordReserveDto.setTimeStamp(Instant.now());
+      archivalRecordReserveDto.setExternalId(testDataSet.archivalRecord().getExternalId());
+
+      // this will throw because testdata creates drafted archival record
+      Assertions.assertThatThrownBy(() -> archivalRecordService.reserve(archivalRecordReserveDto))
+          .isInstanceOf(ArchivalRecordAlreadyActiveException.class);
+
 
     }
 

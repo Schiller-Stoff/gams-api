@@ -23,4 +23,21 @@ public class TestArchivalRecord {
     return archivalRecord;
   }
 
+  public static ArchivalRecord generate(
+      DigitalObject digitalObject,
+      String pid,
+      String externalId,
+      ArchivingStatus archivingStatus
+      ){
+
+    var archivalRecord = new ArchivalRecord();
+    archivalRecord.setDigitalObject(digitalObject);
+    archivalRecord.setPid(pid);
+    archivalRecord.setTimeStamp(TIME_STAMP);
+    archivalRecord.setArchivingStatus(archivingStatus);
+    archivalRecord.setExternalId(externalId);
+    return archivalRecord;
+
+  }
+
 }
