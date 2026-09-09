@@ -8,6 +8,7 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -42,8 +43,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(archivalRecordReserveDto.getPid());
-    archivalRecord.setTimeStamp(archivalRecordReserveDto.getTimeStamp());
-    archivalRecord.setExternalId(archivalRecordReserveDto.getExternalId());
+    archivalRecord.setTimeStamp(Instant.now());
 
     //
     archivalRecord.setArchivingStatus(ArchivingStatus.RESERVED);

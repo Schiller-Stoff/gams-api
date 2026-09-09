@@ -74,8 +74,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
       archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
-      archivalRecordReserveDto.setTimeStamp(Instant.now());
-      archivalRecordReserveDto.setExternalId(testDataSet.archivalRecord().getExternalId());
       archivalRecordService.reserve(testDataSet.digitalObject().getId(), archivalRecordReserveDto);
 
       var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
@@ -90,8 +88,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
       archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
-      archivalRecordReserveDto.setTimeStamp(Instant.now());
-      archivalRecordReserveDto.setExternalId(testDataSet.archivalRecord().getExternalId());
 
       // this will throw because testdata creates drafted archival record
       Assertions.assertThatThrownBy(() -> archivalRecordService.reserve(testDataSet.digitalObject().getId(), archivalRecordReserveDto))

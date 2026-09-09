@@ -3,7 +3,6 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +49,6 @@ public class ArchivalRecord {
   private DigitalObject digitalObject;
 
   @Column(name = "pid", nullable = false)
-  @NotEmpty
   private String pid;
 
   @Column(name = "timestamp", nullable = false)
@@ -63,7 +61,6 @@ public class ArchivalRecord {
   private ArchivingStatus archivingStatus = ArchivingStatus.RESERVED;
 
   @Column(name = "external_id", nullable = false)
-  @NotNull
   private String externalId;
 
   /**
