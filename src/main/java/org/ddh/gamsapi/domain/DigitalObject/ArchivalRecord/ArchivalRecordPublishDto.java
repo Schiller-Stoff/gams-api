@@ -1,6 +1,6 @@
 package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.Instant;
@@ -11,7 +11,7 @@ import java.time.Instant;
 @Data
 public class ArchivalRecordPublishDto {
 
-  @NotEmpty
+  @NotNull
   private Instant timeStamp;
 
 }

@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.Instant;
@@ -14,6 +15,6 @@ public class ArchivalRecordDraftDto {
   private String pid;
   @NotEmpty
   private String externalId;
-  @NotEmpty
+  @NotNull
   private Instant timeStamp;
 }
