@@ -13,11 +13,11 @@ public class ArchivalRecordReserveDto {
   /**
    * This might be empty because digitalObjectId must be defined by the endpoint
    */
-  private String digitalObjectId;
+  private String digitalObjectId; // TODO this should stay outside
   @NotEmpty
   private String pid;
   @NotEmpty
-  private Instant timeStamp;
+  private Instant timeStamp; // TODO remove handled by the system!
   @NotEmpty
-  private String externalId;
+  private String externalId; // TODO remove this cannot be known!
 }

@@ -30,18 +30,17 @@ public interface IArchivalRecordService {
    */
   ArchivalRecord reserve(ArchivalRecordReserveDto archivalRecordReserveDto);
 
-
   /**
    * Deletes an archival record by it's id.
    * @param archivalRecordId id of the archival record.
    */
   void deleteById(Long archivalRecordId);
 
-
   /**
    * Updates an existing archival record
-   * @param archivalRecordUpdateDto contains data about archival record to be updated
+   * @param objectId object's archival record that should be drafted.
+   * @param archivalRecordDraftDto contains data about archival record to be updated.
    */
-  void updateArchivalRecord(ArchivalRecordUpdateDto archivalRecordUpdateDto);
+  void draftArchivalRecord(String objectId, ArchivalRecordDraftDto archivalRecordDraftDto);
 
 }

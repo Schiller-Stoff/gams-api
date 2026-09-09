@@ -31,4 +31,6 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   boolean existsByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
 
+  Optional<ArchivalRecord> findByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
+
 }

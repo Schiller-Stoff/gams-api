@@ -2,11 +2,11 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.NotImplementedException;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +24,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
+  @Transactional
   public ArchivalRecord reserve(ArchivalRecordReserveDto archivalRecordReserveDto) {
 
     final String DIGITAL_OBJECT_ID = archivalRecordReserveDto.getDigitalObjectId();
@@ -34,7 +35,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    if (archivalRecordRepository.existsByDigitalObjectIdAndArchivingStatusIn(DIGITAL_OBJECT_ID, ArchivingStatus.gtBlockingStatuses())) {
+    if (archivalRecordRepository.existsByDigitalObjectIdAndArchivingStatusIn(DIGITAL_OBJECT_ID, ArchivingStatus.getBlockingStatuses())) {
       throw new ArchivalRecordAlreadyActiveException(
           "Cannot create archival record for digital object " + DIGITAL_OBJECT_ID
               + ". An archival record with status DRAFTED or RESERVED already exists."
@@ -70,18 +71,33 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
-  public void updateArchivalRecord(ArchivalRecordUpdateDto archivalRecordUpdateDto) {
+  @Transactional
+  public void draftArchivalRecord(String objectId, ArchivalRecordDraftDto archivalRecordDraftDto) {
 
-    // TODO check if object exists?
+    // this might not be necessary
+    if (!digitalObjectRepository.existsById(objectId)) {
+      throw new DigitalObjectNotFoundException(
+          "Cannot update archival record " + archivalRecordDraftDto + ". The digital object with id does not exist: " + objectId
+      );
+    }
 
-    // TODO check if archival record exists?
+    var foundArchivalRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatusIn(
+        objectId,
+        ArchivingStatus.getBlockingStatuses()
+    );
 
-    // TODO check if published archival record should be changed?
+    var foundArchivalRecord = foundArchivalRecordOptional.orElseThrow(() ->
+      new ArchivalRecordNoActiveRecordException(
+          "Cannot draft archival record. No active archival record available: " + archivalRecordDraftDto + ". For object with id: " +  objectId
+      )
+    );
 
-    // TODO implement!
-    throw new NotImplementedException("NOT IMPLEMENTED CURRENTLY");
+    foundArchivalRecord.setPid(archivalRecordDraftDto.getPid());
+    foundArchivalRecord.setTimeStamp(archivalRecordDraftDto.getTimeStamp());
+    foundArchivalRecord.setExternalId(archivalRecordDraftDto.getExternalId());
+    foundArchivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED);
 
-
+    log.info("Successfully drafted archival record {} for digital object {}", archivalRecordDraftDto,  objectId);
 
   }
 }

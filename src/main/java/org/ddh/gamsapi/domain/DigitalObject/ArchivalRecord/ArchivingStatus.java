@@ -30,7 +30,7 @@ public enum ArchivingStatus {
    * Blocking means: there can only be one ArchivalRecord that is in reserved state.
    * @return collection of blocking statuses
    */
-  static Collection<ArchivingStatus> gtBlockingStatuses(){
+  static Collection<ArchivingStatus> getBlockingStatuses(){
     return EnumSet.of(ArchivingStatus.RESERVED, ArchivingStatus.DRAFTED);
   }
 }

@@ -69,7 +69,7 @@ public class ArchivalRecordController {
               content = @Content)
       }
   )
-  public void createArchivalRecord(
+  public void reserveArchivalRecord(
       @PathVariable String projectAbbr,
       @PathVariable String id,
       @RequestBody ArchivalRecordReserveDto archivalRecord
@@ -90,6 +90,17 @@ public class ArchivalRecordController {
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
     archivalRecordService.deleteById(recordId);
 
+  }
+
+  @PatchMapping(path = "/draft")
+  @ResponseBody
+  public void draftArchivalRecord(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestBody ArchivalRecordDraftDto archivalRecord
+  ){
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+    archivalRecordService.draftArchivalRecord(id, archivalRecord);
   }
 
 
