@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
@@ -72,7 +73,7 @@ public class ArchivalRecordController {
   public void reserveArchivalRecord(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @RequestBody ArchivalRecordReserveDto archivalRecord
+      @RequestBody @Valid ArchivalRecordReserveDto archivalRecord
   ){
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
@@ -112,7 +113,7 @@ public class ArchivalRecordController {
   public void draftArchivalRecord(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @RequestBody ArchivalRecordDraftDto archivalRecord
+      @RequestBody @Valid ArchivalRecordDraftDto archivalRecord
   ){
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
     archivalRecordService.draftArchivalRecord(id, archivalRecord);
@@ -131,7 +132,7 @@ public class ArchivalRecordController {
   public void publishArchivalRecord(
       @PathVariable String projectAbbr,
       @PathVariable String id,
-      @RequestBody ArchivalRecordPublishDto archivalRecord
+      @RequestBody @Valid ArchivalRecordPublishDto archivalRecord
   ){
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
     archivalRecordService.publishArchivalRecord(id, archivalRecord);
