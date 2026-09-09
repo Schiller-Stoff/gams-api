@@ -73,11 +73,10 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       archivalRecordRepository.deleteAll();
 
       ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
-      archivalRecordReserveDto.setDigitalObjectId(testDataSet.digitalObject().getId());
       archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
       archivalRecordReserveDto.setTimeStamp(Instant.now());
       archivalRecordReserveDto.setExternalId(testDataSet.archivalRecord().getExternalId());
-      archivalRecordService.reserve(archivalRecordReserveDto);
+      archivalRecordService.reserve(testDataSet.digitalObject().getId(), archivalRecordReserveDto);
 
       var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
 
@@ -90,13 +89,12 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     void cannotSaveIfBlockingArchivalRecordExists(){
 
       ArchivalRecordReserveDto archivalRecordReserveDto = new ArchivalRecordReserveDto();
-      archivalRecordReserveDto.setDigitalObjectId(testDataSet.digitalObject().getId());
       archivalRecordReserveDto.setPid(testDataSet.archivalRecord().getPid());
       archivalRecordReserveDto.setTimeStamp(Instant.now());
       archivalRecordReserveDto.setExternalId(testDataSet.archivalRecord().getExternalId());
 
       // this will throw because testdata creates drafted archival record
-      Assertions.assertThatThrownBy(() -> archivalRecordService.reserve(archivalRecordReserveDto))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.reserve(testDataSet.digitalObject().getId(), archivalRecordReserveDto))
           .isInstanceOf(ArchivalRecordAlreadyActiveException.class);
 
 

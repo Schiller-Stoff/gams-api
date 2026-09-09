@@ -25,19 +25,17 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord reserve(ArchivalRecordReserveDto archivalRecordReserveDto) {
+  public ArchivalRecord reserve(String objectId, ArchivalRecordReserveDto archivalRecordReserveDto) {
 
-    final String DIGITAL_OBJECT_ID = archivalRecordReserveDto.getDigitalObjectId();
-
-    if (!digitalObjectRepository.existsById(DIGITAL_OBJECT_ID)) {
+    if (!digitalObjectRepository.existsById(objectId)) {
       throw new DigitalObjectNotFoundException(
-          "Cannot save archival record " + archivalRecordReserveDto + ". The digital object with id does not exist: " + DIGITAL_OBJECT_ID
+          "Cannot save archival record " + archivalRecordReserveDto + ". The digital object with id does not exist: " + objectId
       );
     }
 
-    if (archivalRecordRepository.existsByDigitalObjectIdAndArchivingStatusIn(DIGITAL_OBJECT_ID, ArchivingStatus.getBlockingStatuses())) {
+    if (archivalRecordRepository.existsByDigitalObjectIdAndArchivingStatusIn(objectId, ArchivingStatus.getBlockingStatuses())) {
       throw new ArchivalRecordAlreadyActiveException(
-          "Cannot create archival record for digital object " + DIGITAL_OBJECT_ID
+          "Cannot create archival record for digital object " + objectId
               + ". An archival record with status DRAFTED or RESERVED already exists."
       );
     }
@@ -52,7 +50,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     // link to digital object
     DigitalObject digitalObject = new DigitalObject();
-    digitalObject.setId(DIGITAL_OBJECT_ID);
+    digitalObject.setId(objectId);
     archivalRecord.setDigitalObject(digitalObject);
 
 

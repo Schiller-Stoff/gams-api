@@ -76,8 +76,7 @@ public class ArchivalRecordController {
   ){
     projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
-    archivalRecord.setDigitalObjectId(id);
-    archivalRecordService.reserve(archivalRecord);
+    archivalRecordService.reserve(id, archivalRecord);
   }
 
   @DeleteMapping(path = "/{recordId}")
