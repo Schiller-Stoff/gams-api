@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 
 @Service
@@ -81,12 +82,12 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     var foundArchivalRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatusIn(
         objectId,
-        ArchivingStatus.getBlockingStatuses()
+        EnumSet.of(ArchivingStatus.RESERVED)
     );
 
     var foundArchivalRecord = foundArchivalRecordOptional.orElseThrow(() ->
       new ArchivalRecordNoActiveRecordException(
-          "Cannot draft archival record. No active archival record available: " + archivalRecordDraftDto + ". For object with id: " +  objectId
+          "Cannot draft archival record. No reserved archival record available: " + archivalRecordDraftDto + ". For object with id: " +  objectId
       )
     );
 
@@ -97,5 +98,31 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     log.info("Successfully drafted archival record {} for digital object {}", archivalRecordDraftDto,  objectId);
 
+  }
+
+  @Override
+  @Transactional
+  public void publishArchivalRecord(String objectId, ArchivalRecordPublishDto archivalRecordPublishDto) {
+
+    // this might not be necessary
+    if (!digitalObjectRepository.existsById(objectId)) {
+      throw new DigitalObjectNotFoundException(
+          "Cannot publish archival record " + archivalRecordPublishDto + ". The digital object with id does not exist: " + objectId
+      );
+    }
+
+    var foundArchivalRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatusIn(
+        objectId,
+        EnumSet.of(ArchivingStatus.DRAFTED)
+    );
+
+    var foundArchivalRecord = foundArchivalRecordOptional.orElseThrow(() ->
+        new ArchivalRecordNoActiveRecordException(
+            "Cannot publish archival record. No drafted archival record available: " + archivalRecordPublishDto + ". For object with id: " +  objectId
+        )
+    );
+
+    foundArchivalRecord.setTimeStamp(archivalRecordPublishDto.getTimeStamp());
+    foundArchivalRecord.setArchivingStatus(ArchivingStatus.PUBLISHED);
   }
 }

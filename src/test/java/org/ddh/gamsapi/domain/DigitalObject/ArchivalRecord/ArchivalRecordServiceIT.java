@@ -7,7 +7,6 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.TestUtilities.TestProject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
-import org.hibernate.query.common.TemporalUnit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -203,6 +202,89 @@ class ArchivalRecordServiceIT extends IntegrationTest {
               archivalRecordDraftDto)
           )
           .isInstanceOf(ArchivalRecordNoActiveRecordException.class);
+
+    }
+
+  }
+
+  @Nested
+  class Publish {
+
+    @Test
+    void updatesArchivalRecordToExpectedValues(){
+
+      // first delete test entry
+      archivalRecordRepository.deleteAll();
+
+      // create test record is DRAFT
+      final String TEST_EXTERNAL_ID = "fooBar";
+      final String TEST_PID = "10.5281/zenodo.22658867";
+
+      ArchivalRecord archivalRecord = new ArchivalRecord();
+      archivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecord.setTimeStamp(Instant.now()); // truncated to different value
+      archivalRecord.setPid(TEST_PID);
+      archivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED); // at first in drafted state
+      archivalRecord.setDigitalObject(testDataSet.digitalObject());
+      var savedTestArchivalRecord = archivalRecordRepository.save(archivalRecord);
+
+
+      // publish archival record
+      final Instant TEST_TIME = Instant.now();
+      ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
+      archivalRecordPublishDto.setTimeStamp(TEST_TIME);
+      archivalRecordService.publishArchivalRecord(testDataSet.digitalObject().getId(), archivalRecordPublishDto);
+
+
+      // check if values are as expected
+      var updatedTestArchivalRecordOptional =  archivalRecordRepository.findById(savedTestArchivalRecord.getId());
+
+      Assertions.assertThat(updatedTestArchivalRecordOptional).isNotEmpty();
+
+      var updatedTestArchivalRecord = updatedTestArchivalRecordOptional.get();
+
+      Assertions.assertThat(updatedTestArchivalRecord.getId())
+          .isEqualTo(savedTestArchivalRecord.getId());
+
+      Assertions.assertThat(updatedTestArchivalRecord.getArchivingStatus())
+          .isEqualTo(ArchivingStatus.PUBLISHED);
+
+      Assertions.assertThat(updatedTestArchivalRecord.getPid())
+          .isEqualTo(savedTestArchivalRecord.getPid());
+
+      Assertions.assertThat(updatedTestArchivalRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
+          .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
+
+      Assertions.assertThat(updatedTestArchivalRecord.getExternalId())
+          .isEqualTo(savedTestArchivalRecord.getExternalId());
+
+    }
+
+    @Test
+    void throwsIfNoArchivalRecordsExist(){
+
+      archivalRecordRepository.deleteAll();
+
+      ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
+      archivalRecordPublishDto.setTimeStamp(Instant.now());
+
+      Assertions.assertThatThrownBy(() -> {
+        archivalRecordService.publishArchivalRecord(testDataSet.digitalObject().getId(), archivalRecordPublishDto);
+      }).isInstanceOf(ArchivalRecordNoActiveRecordException.class);
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectDoesNotExist(){
+
+      final String NOT_EXISTENT_OBJECT_ID = TestProject.PROJECT_ABBR + ".foobar";
+
+      ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
+      archivalRecordPublishDto.setTimeStamp(Instant.now());
+
+      Assertions.assertThatThrownBy(() -> {
+        archivalRecordService.publishArchivalRecord(NOT_EXISTENT_OBJECT_ID, archivalRecordPublishDto);
+      }).isInstanceOf(DigitalObjectNotFoundException.class);
 
     }
 

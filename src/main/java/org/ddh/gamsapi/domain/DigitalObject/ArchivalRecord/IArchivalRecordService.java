@@ -44,4 +44,11 @@ public interface IArchivalRecordService {
    */
   void draftArchivalRecord(String objectId, ArchivalRecordDraftDto archivalRecordDraftDto);
 
+  /**
+   * Publishes an existing, active archival record
+   * @param objectId object's archival record that should be published.
+   * @param archivalRecordPublishDto contains data necessary for publishing process.
+   */
+  void publishArchivalRecord(String objectId, ArchivalRecordPublishDto archivalRecordPublishDto);
+
 }

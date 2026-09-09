@@ -65,7 +65,7 @@ public class ArchivalRecordController {
       summary = "Create a an archival record for a digital object",
       description = "Allows to create an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
       responses = {
-          @ApiResponse(responseCode = "200", description = "Project successfully created",
+          @ApiResponse(responseCode = "200", description = "Archival record successfully created",
               content = @Content)
       }
   )
@@ -81,6 +81,14 @@ public class ArchivalRecordController {
 
   @DeleteMapping(path = "/{recordId}")
   @ResponseBody
+  @Operation(
+      summary = "Deletes a archival record for a digital object",
+      description = "Allows to delete an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record id.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully deleted",
+              content = @Content)
+      }
+  )
   public void delete(
       @PathVariable String projectAbbr,
       @PathVariable String id,
@@ -91,6 +99,14 @@ public class ArchivalRecordController {
 
   }
 
+  @Operation(
+      summary = "Brings a reserved archival record in the draft state.",
+      description = "Allows to draft an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully patched",
+              content = @Content)
+      }
+  )
   @PatchMapping(path = "/draft")
   @ResponseBody
   public void draftArchivalRecord(
@@ -102,5 +118,24 @@ public class ArchivalRecordController {
     archivalRecordService.draftArchivalRecord(id, archivalRecord);
   }
 
+  @Operation(
+      summary = "Brings a drafted archival record in the published state.",
+      description = "Allows to publish an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully published",
+              content = @Content)
+      }
+  )
+  @PatchMapping(path = "/publish")
+  @ResponseBody
+  public void publishArchivalRecord(
+      @PathVariable String projectAbbr,
+      @PathVariable String id,
+      @RequestBody ArchivalRecordPublishDto archivalRecord
+  ){
+    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
+    archivalRecordService.publishArchivalRecord(id, archivalRecord);
+
+  }
 
 }
