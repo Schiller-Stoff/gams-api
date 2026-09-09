@@ -48,10 +48,10 @@ public class ArchivalRecord {
   @JsonIgnore
   private DigitalObject digitalObject;
 
-  @Column(name = "pid", nullable = false)
+  @Column(name = "pid")
   private String pid;
 
-  @Column(name = "timestamp", nullable = false)
+  @Column(name = "timestamp")
   @NotNull
   private Instant timeStamp;
 
@@ -60,7 +60,7 @@ public class ArchivalRecord {
   @NotNull
   private ArchivingStatus archivingStatus = ArchivingStatus.RESERVED;
 
-  @Column(name = "external_id", nullable = false)
+  @Column(name = "external_id")
   private String externalId;
 
   /**
