@@ -1,10 +1,8 @@
-package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Repository interface for managing ArchivalRecord entities.

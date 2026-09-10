@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import java.util.List;
 

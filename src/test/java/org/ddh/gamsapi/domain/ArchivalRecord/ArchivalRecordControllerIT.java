@@ -1,26 +1,16 @@
-package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
-import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

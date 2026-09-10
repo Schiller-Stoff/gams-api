@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Datastream.DatastreamService;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamDetailsView;
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordService;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.DigitalObjectModification;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectModification.IDigitalObjectModificationService;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordService;

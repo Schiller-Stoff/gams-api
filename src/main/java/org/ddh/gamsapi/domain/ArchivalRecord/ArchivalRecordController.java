@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -112,7 +112,7 @@ public class ArchivalRecordController {
   public void publishArchivalRecord(
       @RequestBody @Valid ArchivalRecordPublishDto archivalRecord
   ){
-    
+
 
   }
 

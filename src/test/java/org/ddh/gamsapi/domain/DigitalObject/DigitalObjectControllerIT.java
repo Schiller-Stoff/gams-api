@@ -5,7 +5,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.TestUtilities.TestUser;
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
 import org.junit.jupiter.api.*;

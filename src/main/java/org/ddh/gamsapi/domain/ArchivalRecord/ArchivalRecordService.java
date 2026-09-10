@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,6 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.EnumSet;
 import java.util.List;
 
 @Service

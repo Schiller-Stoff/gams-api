@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.TestUtilities;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;

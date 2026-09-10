@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.TestUtilities;
 
 import org.ddh.gamsapi.domain.Datastream.Datastream;
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.ArchivalRecord;
+import org.ddh.gamsapi.domain.ArchivalRecord.ArchivalRecord;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;

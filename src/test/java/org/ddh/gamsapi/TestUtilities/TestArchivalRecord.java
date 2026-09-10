@@ -1,6 +1,6 @@
 package org.ddh.gamsapi.TestUtilities;
 
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.ArchivalRecord;
+import org.ddh.gamsapi.domain.ArchivalRecord.ArchivalRecord;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 
 public class TestArchivalRecord {

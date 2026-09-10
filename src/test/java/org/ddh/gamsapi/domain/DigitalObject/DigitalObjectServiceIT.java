@@ -8,7 +8,7 @@ import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;

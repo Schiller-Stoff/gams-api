@@ -1,9 +1,11 @@
-package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
