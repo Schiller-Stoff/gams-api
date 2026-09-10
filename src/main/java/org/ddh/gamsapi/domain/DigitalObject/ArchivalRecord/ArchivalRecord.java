@@ -51,9 +51,8 @@ public class ArchivalRecord {
   @Column(name = "pid")
   private String pid;
 
-  @Column(name = "timestamp")
-  @NotNull
-  private Instant timeStamp;
+  @Column(name = "publication_timestamp")
+  private Instant publicationTimeStamp;
 
   @Column(name = "archival_status")
   @Enumerated(EnumType.STRING)

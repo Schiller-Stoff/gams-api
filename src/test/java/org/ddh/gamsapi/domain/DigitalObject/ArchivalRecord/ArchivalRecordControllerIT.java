@@ -105,7 +105,50 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   }
 
   @Nested
-  class POST {
+  class POST_reserveArchivalRecord {
+
+    @Test
+    void postCannotChangePublicationTimestamp() throws Exception {
+
+      final Instant TEST_TIME =  Instant.now();
+
+      // make sure that nothing exists first
+      archivalRecordRepository.deleteAll();
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      final String TEST_REQUEST_BODY = String.format(
+          "{\"pid\":\"%s\",\"timeStamp\":\"%s\"}",
+          testDataSet.archivalRecord().getPid(),
+          TEST_TIME
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(TEST_REQUEST_BODY)
+      ).andExpect(status().isOk());
+
+      var foundRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatus(
+          testDataSet.digitalObject().getId(), ArchivingStatus.RESERVED
+      );
+
+      Assertions.assertThat(foundRecordOptional).isNotEmpty();
+
+      var foundArchivalRecord = foundRecordOptional.get();
+
+      Assertions.assertThat(foundArchivalRecord.getArchivingStatus())
+          .isEqualTo(ArchivingStatus.RESERVED);
+
+      // this should be still null
+      Assertions.assertThat(foundArchivalRecord.getPublicationTimeStamp())
+          .isNull();
+
+    }
 
     @Test
     void failsToCreateAnArchivalRecordWithoutExternalId() throws Exception {
@@ -117,9 +160,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getTimeStamp()
+          "{\"pid\":\"%s\"}",
+          testDataSet.archivalRecord().getPid()
       );
 
       mockMvc.perform(
@@ -128,7 +170,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
                   .content(TEST_REQUEST_BODY)
           ).andExpect(status().is4xxClientError());
 
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
+      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
           testDataSet.digitalObject().getId()
       );
 
@@ -150,10 +192,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getTimeStamp(),
-          testDataSet.archivalRecord().getExternalId()
+          "{\"pid\":\"%s\"}",
+          testDataSet.archivalRecord().getPid()
       );
 
       mockMvc.perform(
@@ -162,7 +202,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
               .content(TEST_REQUEST_BODY)
       ).andExpect(status().isOk());
 
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(
+      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
           testDataSet.digitalObject().getId()
       );
 
@@ -194,10 +234,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\",\"externalId\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getTimeStamp(),
-          testDataSet.archivalRecord().getExternalId()
+          "{\"pid\":\"%s\"}",
+          testDataSet.archivalRecord().getPid()
       );
 
       mockMvc.perform(
@@ -219,8 +257,6 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     void updatesArchivalRecordToExpectedValues() throws Exception {
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final String TEST_PID = "10.5281/zenodo.22658867"; // pid should not change
-      final Instant TEST_TIME = Instant.now();
 
       final String TEST_REQUEST_URL = String.format(
           "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
@@ -229,10 +265,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"externalId\":\"%s\",\"timeStamp\":\"%s\"}",
-          TEST_PID,
-          TEST_EXTERNAL_ID,
-          TEST_TIME
+          "{\"externalId\":\"%s\"}",
+          TEST_EXTERNAL_ID
       );
 
       mockMvc.perform(
@@ -246,7 +280,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       // archival record should now be in drafted state
       Assertions.assertThat(draftedRecord.getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
       Assertions.assertThat(draftedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_ID);
-      Assertions.assertThat(draftedRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)).isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
+      Assertions.assertThat(draftedRecord.getPublicationTimeStamp()).isNull();
       Assertions.assertThat(draftedRecord.getPid()).isEqualTo(testDataSet.archivalRecord().getPid()); // this pid should stay the same!
 
     }
@@ -263,10 +297,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"externalId\":\"%s\",\"timeStamp\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getExternalId(),
-          testDataSet.archivalRecord().getTimeStamp()
+          "{\"externalId\":\"%s\"}",
+          testDataSet.archivalRecord().getExternalId()
       );
 
       mockMvc.perform(
@@ -285,8 +317,6 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       archivalRecordRepository.deleteAll();
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final String TEST_PID = "10.5281/zenodo.22658867";
-      final Instant TEST_TIME = Instant.now();
 
       final String TEST_REQUEST_URL = String.format(
           "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
@@ -295,10 +325,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"externalId\":\"%s\",\"timeStamp\":\"%s\"}",
-          TEST_PID,
-          TEST_EXTERNAL_ID,
-          TEST_TIME
+          "{\"externalId\":\"%s\"}",
+          TEST_EXTERNAL_ID
       );
 
       mockMvc.perform(
@@ -324,10 +352,8 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"externalId\":\"%s\",\"timeStamp\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          testDataSet.archivalRecord().getExternalId(),
-          testDataSet.archivalRecord().getTimeStamp()
+          "{\"externalId\":\"%s\"}",
+          testDataSet.archivalRecord().getExternalId()
       );
 
       mockMvc.perform(
@@ -357,7 +383,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
       final Instant TEST_TIME = Instant.now();
       final String TEST_REQUEST_BODY = String.format(
-          "{\"timeStamp\":\"%s\"}",
+          "{\"publicationTimeStamp\":\"%s\"}",
           TEST_TIME
       );
 
@@ -383,7 +409,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
       ArchivalRecord archivalRecord = new ArchivalRecord();
       archivalRecord.setExternalId(TEST_EXTERNAL_ID);
-      archivalRecord.setTimeStamp(Instant.now()); // truncated to different value
+      archivalRecord.setPublicationTimeStamp(Instant.now()); // truncated to different value
       archivalRecord.setPid(TEST_PID);
       archivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED); // at first in drafted state
       archivalRecord.setDigitalObject(testDataSet.digitalObject());
@@ -401,7 +427,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
       final Instant TEST_TIME = Instant.now();
       final String TEST_REQUEST_BODY = String.format(
-          "{\"timeStamp\":\"%s\"}",
+          "{\"publicationTimeStamp\":\"%s\"}",
           TEST_TIME
       );
 
@@ -428,7 +454,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       Assertions.assertThat(updatedTestArchivalRecord.getPid())
           .isEqualTo(savedTestArchivalRecord.getPid());
 
-      Assertions.assertThat(updatedTestArchivalRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
+      Assertions.assertThat(updatedTestArchivalRecord.getPublicationTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
           .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
 
       Assertions.assertThat(updatedTestArchivalRecord.getExternalId())

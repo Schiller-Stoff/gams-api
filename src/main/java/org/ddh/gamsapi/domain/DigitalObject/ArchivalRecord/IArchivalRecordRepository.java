@@ -16,7 +16,7 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
    * @param digitalObjectId the ID of the associated DigitalObject
    * @return the ArchivalRecord
    */
-  List<ArchivalRecordCompactView> findAllByDigitalObjectIdOrderByTimeStampDesc(String digitalObjectId);
+  List<ArchivalRecordCompactView> findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(String digitalObjectId);
 
   void deleteAllByDigitalObjectId(String digitalObjectId);
 
@@ -32,5 +32,7 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
   boolean existsByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
 
   Optional<ArchivalRecord> findByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
+
+  Optional<ArchivalRecord> findByDigitalObjectIdAndArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
 
 }

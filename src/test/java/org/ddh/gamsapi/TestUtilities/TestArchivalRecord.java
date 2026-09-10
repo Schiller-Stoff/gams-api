@@ -17,7 +17,6 @@ public class TestArchivalRecord {
     var archivalRecord = new ArchivalRecord();
     archivalRecord.setDigitalObject(digitalObject);
     archivalRecord.setPid(PID);
-    archivalRecord.setTimeStamp(TIME_STAMP);
     archivalRecord.setArchivingStatus(ARCHIVING_STATUS);
     archivalRecord.setExternalId(EXTERNAL_ID);
     return archivalRecord;
@@ -33,7 +32,6 @@ public class TestArchivalRecord {
     var archivalRecord = new ArchivalRecord();
     archivalRecord.setDigitalObject(digitalObject);
     archivalRecord.setPid(pid);
-    archivalRecord.setTimeStamp(TIME_STAMP);
     archivalRecord.setArchivingStatus(archivingStatus);
     archivalRecord.setExternalId(externalId);
     return archivalRecord;

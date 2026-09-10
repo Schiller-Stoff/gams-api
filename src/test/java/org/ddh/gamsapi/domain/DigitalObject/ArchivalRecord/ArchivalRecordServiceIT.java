@@ -104,11 +104,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     void updatesArchivalRecordToExpectedValues(){
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final Instant TEST_TIME = Instant.now();
 
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
       archivalRecordDraftDto.setExternalId(TEST_EXTERNAL_ID);
-      archivalRecordDraftDto.setTimeStamp(TEST_TIME);
 
       archivalRecordService.draftArchivalRecord(
           testDataSet.digitalObject().getId(),
@@ -131,8 +129,8 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       Assertions.assertThat(foundRecord.getPid())
           .isEqualTo(TestArchivalRecord.PID);
 
-      Assertions.assertThat(foundRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
-          .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
+      Assertions.assertThat(foundRecord.getPublicationTimeStamp())
+          .isNull();
 
       Assertions.assertThat(foundRecord.getExternalId())
           .isEqualTo(TEST_EXTERNAL_ID);
@@ -146,11 +144,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String NON_EXISTENT_OBJECT_ID = TestProject.PROJECT_ABBR + ".foo";
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final Instant TEST_TIME = Instant.MIN;
 
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
       archivalRecordDraftDto.setExternalId(TEST_EXTERNAL_ID);
-      archivalRecordDraftDto.setTimeStamp(TEST_TIME);
 
       Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
               NON_EXISTENT_OBJECT_ID,
@@ -171,7 +167,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // try to draft new record
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
       archivalRecordDraftDto.setExternalId(testRecord.getExternalId());
-      archivalRecordDraftDto.setTimeStamp(testRecord.getTimeStamp());
 
       Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
           testDataSet.digitalObject().getId(),
@@ -189,7 +184,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // try to draft new record
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
       archivalRecordDraftDto.setExternalId(TestArchivalRecord.EXTERNAL_ID);
-      archivalRecordDraftDto.setTimeStamp(TestArchivalRecord.TIME_STAMP);
 
       Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
               testDataSet.digitalObject().getId(),
@@ -216,7 +210,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       ArchivalRecord archivalRecord = new ArchivalRecord();
       archivalRecord.setExternalId(TEST_EXTERNAL_ID);
-      archivalRecord.setTimeStamp(Instant.now()); // truncated to different value
+      archivalRecord.setPublicationTimeStamp(null); // this should be null
       archivalRecord.setPid(TEST_PID);
       archivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED); // at first in drafted state
       archivalRecord.setDigitalObject(testDataSet.digitalObject());
@@ -226,7 +220,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // publish archival record
       final Instant TEST_TIME = Instant.now();
       ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
-      archivalRecordPublishDto.setTimeStamp(TEST_TIME);
+      archivalRecordPublishDto.setPublicationTimeStamp(TEST_TIME);
       archivalRecordService.publishArchivalRecord(testDataSet.digitalObject().getId(), archivalRecordPublishDto);
 
 
@@ -246,7 +240,8 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       Assertions.assertThat(updatedTestArchivalRecord.getPid())
           .isEqualTo(savedTestArchivalRecord.getPid());
 
-      Assertions.assertThat(updatedTestArchivalRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
+      // time should be set and not null anymore
+      Assertions.assertThat(updatedTestArchivalRecord.getPublicationTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
           .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
 
       Assertions.assertThat(updatedTestArchivalRecord.getExternalId())
@@ -260,7 +255,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       archivalRecordRepository.deleteAll();
 
       ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
-      archivalRecordPublishDto.setTimeStamp(Instant.now());
+      archivalRecordPublishDto.setPublicationTimeStamp(Instant.now());
 
       String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(() -> {
@@ -275,7 +270,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String NOT_EXISTENT_OBJECT_ID = TestProject.PROJECT_ABBR + ".foobar";
 
       ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
-      archivalRecordPublishDto.setTimeStamp(Instant.now());
+      archivalRecordPublishDto.setPublicationTimeStamp(Instant.now());
 
       Assertions.assertThatThrownBy(() -> {
         archivalRecordService.publishArchivalRecord(NOT_EXISTENT_OBJECT_ID, archivalRecordPublishDto);

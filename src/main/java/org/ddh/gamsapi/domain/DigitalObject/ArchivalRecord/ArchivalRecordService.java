@@ -8,7 +8,6 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepos
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -22,7 +21,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   public List<ArchivalRecordCompactView> findForObject(String digitalObjectId) {
-    return archivalRecordRepository.findAllByDigitalObjectIdOrderByTimeStampDesc(digitalObjectId);
+    return archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(digitalObjectId);
   }
 
   @Override
@@ -44,7 +43,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(archivalRecordReserveDto.getPid());
-    archivalRecord.setTimeStamp(Instant.now());
 
     //
     archivalRecord.setArchivingStatus(ArchivingStatus.RESERVED);
@@ -91,7 +89,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       )
     );
 
-    foundArchivalRecord.setTimeStamp(archivalRecordDraftDto.getTimeStamp());
     foundArchivalRecord.setExternalId(archivalRecordDraftDto.getExternalId());
     foundArchivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED);
 
@@ -121,7 +118,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
         )
     );
 
-    foundArchivalRecord.setTimeStamp(archivalRecordPublishDto.getTimeStamp());
+    foundArchivalRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     foundArchivalRecord.setArchivingStatus(ArchivingStatus.PUBLISHED);
   }
 }

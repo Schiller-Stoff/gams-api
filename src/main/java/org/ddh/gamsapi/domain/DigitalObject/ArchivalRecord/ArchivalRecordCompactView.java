@@ -8,7 +8,7 @@ import java.time.Instant;
 public interface ArchivalRecordCompactView {
   Long getId();
   String getPid();
-  Instant getTimeStamp();
+  Instant getPublicationTimeStamp();
   ArchivingStatus getArchivingStatus();
   String getExternalId();
 }

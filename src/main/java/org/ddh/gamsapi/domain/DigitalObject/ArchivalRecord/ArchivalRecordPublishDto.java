@@ -12,6 +12,6 @@ import java.time.Instant;
 public class ArchivalRecordPublishDto {
 
   @NotNull
-  private Instant timeStamp;
+  private Instant publicationTimeStamp;
 
 }
