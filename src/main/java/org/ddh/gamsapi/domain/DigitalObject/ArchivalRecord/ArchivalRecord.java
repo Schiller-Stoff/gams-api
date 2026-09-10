@@ -3,7 +3,6 @@ package org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
@@ -30,34 +29,22 @@ public class ArchivalRecord {
       ENTITY_TABLE_NAME
   };
 
-  /**
-   * Generated unique identifier for the dublin core element
-   * (unique for the full gams-api).
-   */
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  private Long id;
 
   /**
-   * Digital object the dublin core archival record belongs to.
+   * Digital object the archival record belongs to.
    */
   @ManyToOne(fetch = FetchType.LAZY) // fetchType lazy = means that the digital object is loaded only when accessed
   @JoinColumn(name = "digital_object_id", nullable = false)
-  @NotNull
   @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
   @JsonIgnore
   private DigitalObject digitalObject;
 
-  @Column(name = "pid")
+  @Id
+  @Column(name = "pid") // TODO needs validation
   private String pid;
 
   @Column(name = "publication_timestamp")
   private Instant publicationTimeStamp;
-
-  @Column(name = "archival_status")
-  @Enumerated(EnumType.STRING)
-  @NotNull
-  private ArchivingStatus archivingStatus = ArchivingStatus.RESERVED;
 
   @Column(name = "external_id")
   private String externalId;
@@ -78,7 +65,7 @@ public class ArchivalRecord {
         : this.getClass();
     if (thisEffectiveClass != oEffectiveClass) return false;
     ArchivalRecord that = (ArchivalRecord) o;
-    return getId() != null && Objects.equals(getId(), that.getId());
+    return getPid() != null && Objects.equals(getPid(), that.getPid());
   }
 
   @Override

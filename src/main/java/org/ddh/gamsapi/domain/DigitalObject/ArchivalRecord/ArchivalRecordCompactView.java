@@ -6,9 +6,7 @@ import java.time.Instant;
  * View for an ArchivalRecord summary.
  */
 public interface ArchivalRecordCompactView {
-  Long getId();
   String getPid();
   Instant getPublicationTimeStamp();
-  ArchivingStatus getArchivingStatus();
   String getExternalId();
 }

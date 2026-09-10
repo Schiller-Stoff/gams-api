@@ -16,14 +16,6 @@ public interface IArchivalRecordService {
 
 
   /**
-   * Find ArchivalRecord by digital object id and archiving status.
-   * @param digitalObjectId id of the associated object
-   * @param archivingStatus records to be found by status
-   * @return list of found archival records
-   */
-  List<ArchivalRecordCompactView> findForObjectByArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
-
-  /**
    * Saves given archival record bia generating a id + checking uniqueness of the pid + assigning archival status reserved.
    * @param objectId object's archival record that should be drafted.
    * @param archivalRecordReserveDto the ArchivalRecord to save

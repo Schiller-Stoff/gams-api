@@ -9,16 +9,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Controller
-@RequestMapping(value = { "/api/curation/v1/projects/{projectAbbr}/objects/{id}/archival-records" })
+@RestController
+@RequestMapping(value = { "/api/curation/v1/archival-records" }) //TODO check auth!!! spring security config
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION)
+@Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION) // TODO redo openapi
 public class ArchivalRecordController {
 
   private final IArchivalRecordService archivalRecordService;
@@ -32,14 +32,12 @@ public class ArchivalRecordController {
               content = @Content)
       }
   )
-  @RequestMapping(method = RequestMethod.GET)
-  @ResponseBody
+  @GetMapping
   public List<ArchivalRecordCompactView> findArchivalRecords(
-      @PathVariable String projectAbbr,
-      @PathVariable String id
+
   ) {
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    return archivalRecordService.findForObject(id);
+    // TODO implement
+    return null;
   }
 
   @Operation(
@@ -50,18 +48,14 @@ public class ArchivalRecordController {
               content = @Content)
       }
   )
-  @RequestMapping(method = RequestMethod.GET, path = "/public")
-  @ResponseBody
+  @GetMapping(path = "/public")
   public List<ArchivalRecordCompactView> findArchivalRecordsByArchivingStatus(
-      @PathVariable String projectAbbr,
-      @PathVariable String id
   ) {
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    return archivalRecordService.findForObjectByArchivingStatus(id, ArchivingStatus.PUBLISHED);
+   // TODO implement
+    return new ArrayList<>();
   }
 
   @PostMapping
-  @ResponseBody
   @Operation(
       summary = "Create a an archival record for a digital object",
       description = "Allows to create an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
@@ -71,17 +65,12 @@ public class ArchivalRecordController {
       }
   )
   public void reserveArchivalRecord(
-      @PathVariable String projectAbbr,
-      @PathVariable String id,
       @RequestBody @Valid ArchivalRecordReserveDto archivalRecord
   ){
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
 
-    archivalRecordService.reserve(id, archivalRecord);
   }
 
   @DeleteMapping(path = "/{recordId}")
-  @ResponseBody
   @Operation(
       summary = "Deletes a archival record for a digital object",
       description = "Allows to delete an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record id.",
@@ -91,12 +80,8 @@ public class ArchivalRecordController {
       }
   )
   public void delete(
-      @PathVariable String projectAbbr,
-      @PathVariable String id,
       @PathVariable Long recordId
   ){
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    archivalRecordService.deleteById(recordId);
 
   }
 
@@ -109,14 +94,10 @@ public class ArchivalRecordController {
       }
   )
   @PatchMapping(path = "/draft")
-  @ResponseBody
   public void draftArchivalRecord(
-      @PathVariable String projectAbbr,
-      @PathVariable String id,
       @RequestBody @Valid ArchivalRecordDraftDto archivalRecord
   ){
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    archivalRecordService.draftArchivalRecord(id, archivalRecord);
+
   }
 
   @Operation(
@@ -128,14 +109,10 @@ public class ArchivalRecordController {
       }
   )
   @PatchMapping(path = "/publish")
-  @ResponseBody
   public void publishArchivalRecord(
-      @PathVariable String projectAbbr,
-      @PathVariable String id,
       @RequestBody @Valid ArchivalRecordPublishDto archivalRecord
   ){
-    projectService.verifyProjectAbbrMatchesObjectId(projectAbbr, id);
-    archivalRecordService.publishArchivalRecord(id, archivalRecord);
+    
 
   }
 

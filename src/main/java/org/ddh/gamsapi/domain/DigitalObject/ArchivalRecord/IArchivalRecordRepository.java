@@ -21,18 +21,6 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
   void deleteAllByDigitalObjectId(String digitalObjectId);
 
 
-  List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
-
   boolean existsByDigitalObjectId(String digitalObjectId);
-
-  Optional<ArchivalRecordCompactView> findByArchivingStatus(ArchivingStatus archivingStatus);
-
-  boolean existsByArchivingStatus(ArchivingStatus archivingStatus);
-
-  boolean existsByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
-
-  Optional<ArchivalRecord> findByDigitalObjectIdAndArchivingStatusIn(String digitalObjectId, Collection<ArchivingStatus> statuses);
-
-  Optional<ArchivalRecord> findByDigitalObjectIdAndArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus);
 
 }

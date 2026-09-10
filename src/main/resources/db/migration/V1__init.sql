@@ -1,12 +1,10 @@
 create table archival_record
 (
-    id                bigint                      not null,
     pid               varchar(255),
     publication_timestamp         timestamp(6) with time zone,
-    digital_object_id varchar(255)                not null,
-    archival_status   varchar(255)                not null,
+    digital_object_id varchar(255),
     external_id       varchar(255),
-    primary key (id)
+    primary key (pid)
 );
 
 create table datastream

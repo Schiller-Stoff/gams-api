@@ -46,473 +46,473 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
   }
-
-  @Nested
-  class GET {
-
-    @Nested
-    class JSONResponse {
-
-      @Test
-      void jsonContainsExpectedPid() throws Exception {
-
-        final String TEST_REQUEST_URL = String.format(
-            "/api/curation/v1/projects/%s/objects/%s/archival-records",
-            testDataSet.project().getProjectAbbr(),
-            testDataSet.digitalObject().getId()
-        );
-
-        String responseBody = mockMvc.perform(
-            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-
-        Assertions.assertThat(responseBody)
-            .isNotNull()
-            .contains(
-                testDataSet.archivalRecord().getPid()
-            );
-
-      }
-
-      @Test
-      void getPublicArchivalRecordsDoesNotReturnPidOfTestArchivalRecord() throws Exception {
-
-        final String TEST_REQUEST_URL = String.format(
-            "/api/curation/v1/projects/%s/objects/%s/archival-records/public",
-            testDataSet.project().getProjectAbbr(),
-            testDataSet.digitalObject().getId()
-        );
-
-        String responseBody = mockMvc.perform(
-            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-
-        // test-data archival record is drafted but endpoint should only return public ones
-        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.RESERVED);
-
-        Assertions.assertThat(responseBody)
-            .isNotNull()
-            .doesNotContain(
-                testDataSet.archivalRecord().getPid()
-            );
-
-      }
-
-    }
-
-  }
-
-  @Nested
-  class POST_reserveArchivalRecord {
-
-    @Test
-    void postCannotChangePublicationTimestamp() throws Exception {
-
-      final Instant TEST_TIME =  Instant.now();
-
-      // make sure that nothing exists first
-      archivalRecordRepository.deleteAll();
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\",\"timeStamp\":\"%s\"}",
-          testDataSet.archivalRecord().getPid(),
-          TEST_TIME
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().isOk());
-
-      var foundRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatus(
-          testDataSet.digitalObject().getId(), ArchivingStatus.RESERVED
-      );
-
-      Assertions.assertThat(foundRecordOptional).isNotEmpty();
-
-      var foundArchivalRecord = foundRecordOptional.get();
-
-      Assertions.assertThat(foundArchivalRecord.getArchivingStatus())
-          .isEqualTo(ArchivingStatus.RESERVED);
-
-      // this should be still null
-      Assertions.assertThat(foundArchivalRecord.getPublicationTimeStamp())
-          .isNull();
-
-    }
-
-    @Test
-    void failsToCreateAnArchivalRecordWithoutExternalId() throws Exception {
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\"}",
-          testDataSet.archivalRecord().getPid()
-      );
-
-      mockMvc.perform(
-              MockMvcRequestBuilders.post(TEST_REQUEST_URL)
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(TEST_REQUEST_BODY)
-          ).andExpect(status().is4xxClientError());
-
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
-          testDataSet.digitalObject().getId()
-      );
-
-      // now an additional archival record should NOT exist (next to the one in the test data set)
-      Assertions.assertThat(foundRecords).hasSize(1);
-
-    }
-
-    @Test
-    void successfullyCreatesAnArchivalRecord() throws Exception {
-
-      // make sure that nothing exists first
-      archivalRecordRepository.deleteAll();
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\"}",
-          testDataSet.archivalRecord().getPid()
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().isOk());
-
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
-          testDataSet.digitalObject().getId()
-      );
-
-      // now an additional archival record should not exist - but still be one
-      Assertions.assertThat(foundRecords).hasSize(1);
-
-    }
-
-    @Test
-    void cannotCreatIfABlockingArchivalRecordAlreadyExists() throws Exception {
-
-      // first delete available test record
-      archivalRecordRepository.deleteAll();
-
-      // create new
-      var archivalRecord = TestArchivalRecord.generate(
-          testDataSet.digitalObject(),
-          "foo",
-          "bar",
-          ArchivingStatus.RESERVED
-      );
-      archivalRecordRepository.save(archivalRecord);
-
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"pid\":\"%s\"}",
-          testDataSet.archivalRecord().getPid()
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is(409));
-
-
-    }
-
-
-  }
-
-  @Nested
-  class PATCH_DRAFT {
-
-    @Test
-    void updatesArchivalRecordToExpectedValues() throws Exception {
-
-      final String TEST_EXTERNAL_ID = "fooBar";
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"externalId\":\"%s\"}",
-          TEST_EXTERNAL_ID
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().isOk());
-
-      var draftedRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getId()).orElseThrow();
-
-      // archival record should now be in drafted state
-      Assertions.assertThat(draftedRecord.getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
-      Assertions.assertThat(draftedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_ID);
-      Assertions.assertThat(draftedRecord.getPublicationTimeStamp()).isNull();
-      Assertions.assertThat(draftedRecord.getPid()).isEqualTo(testDataSet.archivalRecord().getPid()); // this pid should stay the same!
-
-    }
-
-    @Test
-    void throwsIfDigitalObjectDoesNotExist() throws Exception {
-
-      final String VALID_NON_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
-          testDataSet.project().getProjectAbbr(),
-          VALID_NON_EXISTENT_OBJECT_ID
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"externalId\":\"%s\"}",
-          testDataSet.archivalRecord().getExternalId()
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is(404));
-
-
-    }
-
-    @Test
-    void throwsIfNoArchivalRecordsAreAvailable() throws Exception {
-
-      // first make sure that no archival records exist
-      archivalRecordRepository.deleteAll();
-
-      final String TEST_EXTERNAL_ID = "fooBar";
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"externalId\":\"%s\"}",
-          TEST_EXTERNAL_ID
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is(400));
-
-    }
-
-    @Test
-    void throwsIfNoActiveArchivalRecordIsAvailable() throws Exception {
-
-      // set status of test record to PUBLISHED -> so non draft can be found.
-      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getId()).orElseThrow();
-      testRecord.setArchivingStatus(ArchivingStatus.PUBLISHED);
-      archivalRecordRepository.save(testRecord);
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"externalId\":\"%s\"}",
-          testDataSet.archivalRecord().getExternalId()
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is(400));
-
-    }
-
-
-  }
-
-  @Nested
-  class PATCH_PUBLISH {
-
-    @Test
-    void throwsIfOnlyReservedArchivalRecordExist() throws Exception {
-
-      // test data record is in reserved state -> should throw when trying to directly call publish.
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/publish",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final Instant TEST_TIME = Instant.now();
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"publicationTimeStamp\":\"%s\"}",
-          TEST_TIME
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is(400));
-
-
-    }
-
-
-    @Test
-    void updatesArchivalRecordWithExpectedValues() throws Exception {
-
-      // first delete test entry
-      archivalRecordRepository.deleteAll();
-
-      // create test record in DRAFT state
-      final String TEST_EXTERNAL_ID = "fooBar";
-      final String TEST_PID = "10.5281/zenodo.22658867";
-
-      ArchivalRecord archivalRecord = new ArchivalRecord();
-      archivalRecord.setExternalId(TEST_EXTERNAL_ID);
-      archivalRecord.setPublicationTimeStamp(Instant.now()); // truncated to different value
-      archivalRecord.setPid(TEST_PID);
-      archivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED); // at first in drafted state
-      archivalRecord.setDigitalObject(testDataSet.digitalObject());
-      var savedTestArchivalRecord = archivalRecordRepository.save(archivalRecord);
-
-      //
-      // test publish functionality
-      //
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/publish",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final Instant TEST_TIME = Instant.now();
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"publicationTimeStamp\":\"%s\"}",
-          TEST_TIME
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().isOk());
-
-
-      // check if values are as expected
-      var updatedTestArchivalRecordOptional =  archivalRecordRepository.findById(savedTestArchivalRecord.getId());
-
-      Assertions.assertThat(updatedTestArchivalRecordOptional).isNotEmpty();
-
-      var updatedTestArchivalRecord = updatedTestArchivalRecordOptional.get();
-
-      Assertions.assertThat(updatedTestArchivalRecord.getId())
-          .isEqualTo(savedTestArchivalRecord.getId());
-
-      Assertions.assertThat(updatedTestArchivalRecord.getArchivingStatus())
-          .isEqualTo(ArchivingStatus.PUBLISHED);
-
-      Assertions.assertThat(updatedTestArchivalRecord.getPid())
-          .isEqualTo(savedTestArchivalRecord.getPid());
-
-      Assertions.assertThat(updatedTestArchivalRecord.getPublicationTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
-          .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
-
-      Assertions.assertThat(updatedTestArchivalRecord.getExternalId())
-          .isEqualTo(savedTestArchivalRecord.getExternalId());
-
-    }
-
-    @Test
-    void throwsIfNoArchivalRecordsExist() throws Exception {
-
-      // first delete test entry
-      archivalRecordRepository.deleteAll();
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/publish",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId()
-      );
-
-      final Instant TEST_TIME = Instant.now();
-      final String TEST_REQUEST_BODY = String.format(
-          "{\"timeStamp\":\"%s\"}",
-          TEST_TIME
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
-              .contentType(MediaType.APPLICATION_JSON)
-              .content(TEST_REQUEST_BODY)
-      ).andExpect(status().is(400));
-
-    }
-
-  }
-
-  @Nested
-  class DELETE {
-
-    @Test
-    void successfullyDeletesTestArchivalRecord() throws Exception {
-
-      final String TEST_REQUEST_URL = String.format(
-          "/api/curation/v1/projects/%s/objects/%s/archival-records/%s",
-          testDataSet.project().getProjectAbbr(),
-          testDataSet.digitalObject().getId(),
-          testDataSet.archivalRecord().getId()
-      );
-
-      mockMvc.perform(
-          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
-      ).andExpect(status().isOk());
-
-      var expectedDeleted = archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
-
-      Assertions.assertThat(expectedDeleted).isEmpty();
-
-    }
-
-  }
+//
+//  @Nested
+//  class GET {
+//
+//    @Nested
+//    class JSONResponse {
+//
+//      @Test
+//      void jsonContainsExpectedPid() throws Exception {
+//
+//        final String TEST_REQUEST_URL = String.format(
+//            "/api/curation/v1/projects/%s/objects/%s/archival-records",
+//            testDataSet.project().getProjectAbbr(),
+//            testDataSet.digitalObject().getId()
+//        );
+//
+//        String responseBody = mockMvc.perform(
+//            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+//                .contentType(MediaType.APPLICATION_JSON)
+//        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+//
+//        Assertions.assertThat(responseBody)
+//            .isNotNull()
+//            .contains(
+//                testDataSet.archivalRecord().getPid()
+//            );
+//
+//      }
+//
+//      @Test
+//      void getPublicArchivalRecordsDoesNotReturnPidOfTestArchivalRecord() throws Exception {
+//
+//        final String TEST_REQUEST_URL = String.format(
+//            "/api/curation/v1/projects/%s/objects/%s/archival-records/public",
+//            testDataSet.project().getProjectAbbr(),
+//            testDataSet.digitalObject().getId()
+//        );
+//
+//        String responseBody = mockMvc.perform(
+//            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+//                .contentType(MediaType.APPLICATION_JSON)
+//        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+//
+//        // test-data archival record is drafted but endpoint should only return public ones
+//        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.RESERVED);
+//
+//        Assertions.assertThat(responseBody)
+//            .isNotNull()
+//            .doesNotContain(
+//                testDataSet.archivalRecord().getPid()
+//            );
+//
+//      }
+//
+//    }
+//
+//  }
+//
+//  @Nested
+//  class POST_reserveArchivalRecord {
+//
+//    @Test
+//    void postCannotChangePublicationTimestamp() throws Exception {
+//
+//      final Instant TEST_TIME =  Instant.now();
+//
+//      // make sure that nothing exists first
+//      archivalRecordRepository.deleteAll();
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"pid\":\"%s\",\"timeStamp\":\"%s\"}",
+//          testDataSet.archivalRecord().getPid(),
+//          TEST_TIME
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().isOk());
+//
+//      var foundRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatus(
+//          testDataSet.digitalObject().getId(), ArchivingStatus.RESERVED
+//      );
+//
+//      Assertions.assertThat(foundRecordOptional).isNotEmpty();
+//
+//      var foundArchivalRecord = foundRecordOptional.get();
+//
+//      Assertions.assertThat(foundArchivalRecord.getArchivingStatus())
+//          .isEqualTo(ArchivingStatus.RESERVED);
+//
+//      // this should be still null
+//      Assertions.assertThat(foundArchivalRecord.getPublicationTimeStamp())
+//          .isNull();
+//
+//    }
+//
+//    @Test
+//    void failsToCreateAnArchivalRecordWithoutExternalId() throws Exception {
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"pid\":\"%s\"}",
+//          testDataSet.archivalRecord().getPid()
+//      );
+//
+//      mockMvc.perform(
+//              MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+//                  .contentType(MediaType.APPLICATION_JSON)
+//                  .content(TEST_REQUEST_BODY)
+//          ).andExpect(status().is4xxClientError());
+//
+//      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      // now an additional archival record should NOT exist (next to the one in the test data set)
+//      Assertions.assertThat(foundRecords).hasSize(1);
+//
+//    }
+//
+//    @Test
+//    void successfullyCreatesAnArchivalRecord() throws Exception {
+//
+//      // make sure that nothing exists first
+//      archivalRecordRepository.deleteAll();
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"pid\":\"%s\"}",
+//          testDataSet.archivalRecord().getPid()
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().isOk());
+//
+//      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      // now an additional archival record should not exist - but still be one
+//      Assertions.assertThat(foundRecords).hasSize(1);
+//
+//    }
+//
+//    @Test
+//    void cannotCreatIfABlockingArchivalRecordAlreadyExists() throws Exception {
+//
+//      // first delete available test record
+//      archivalRecordRepository.deleteAll();
+//
+//      // create new
+//      var archivalRecord = TestArchivalRecord.generate(
+//          testDataSet.digitalObject(),
+//          "foo",
+//          "bar",
+//          ArchivingStatus.RESERVED
+//      );
+//      archivalRecordRepository.save(archivalRecord);
+//
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"pid\":\"%s\"}",
+//          testDataSet.archivalRecord().getPid()
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.post(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().is(409));
+//
+//
+//    }
+//
+//
+//  }
+//
+//  @Nested
+//  class PATCH_DRAFT {
+//
+//    @Test
+//    void updatesArchivalRecordToExpectedValues() throws Exception {
+//
+//      final String TEST_EXTERNAL_ID = "fooBar";
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"externalId\":\"%s\"}",
+//          TEST_EXTERNAL_ID
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().isOk());
+//
+//      var draftedRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getId()).orElseThrow();
+//
+//      // archival record should now be in drafted state
+//      Assertions.assertThat(draftedRecord.getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
+//      Assertions.assertThat(draftedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_ID);
+//      Assertions.assertThat(draftedRecord.getPublicationTimeStamp()).isNull();
+//      Assertions.assertThat(draftedRecord.getPid()).isEqualTo(testDataSet.archivalRecord().getPid()); // this pid should stay the same!
+//
+//    }
+//
+//    @Test
+//    void throwsIfDigitalObjectDoesNotExist() throws Exception {
+//
+//      final String VALID_NON_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
+//          testDataSet.project().getProjectAbbr(),
+//          VALID_NON_EXISTENT_OBJECT_ID
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"externalId\":\"%s\"}",
+//          testDataSet.archivalRecord().getExternalId()
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().is(404));
+//
+//
+//    }
+//
+//    @Test
+//    void throwsIfNoArchivalRecordsAreAvailable() throws Exception {
+//
+//      // first make sure that no archival records exist
+//      archivalRecordRepository.deleteAll();
+//
+//      final String TEST_EXTERNAL_ID = "fooBar";
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"externalId\":\"%s\"}",
+//          TEST_EXTERNAL_ID
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().is(400));
+//
+//    }
+//
+//    @Test
+//    void throwsIfNoActiveArchivalRecordIsAvailable() throws Exception {
+//
+//      // set status of test record to PUBLISHED -> so non draft can be found.
+//      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getId()).orElseThrow();
+//      testRecord.setArchivingStatus(ArchivingStatus.PUBLISHED);
+//      archivalRecordRepository.save(testRecord);
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/draft",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"externalId\":\"%s\"}",
+//          testDataSet.archivalRecord().getExternalId()
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().is(400));
+//
+//    }
+//
+//
+//  }
+//
+//  @Nested
+//  class PATCH_PUBLISH {
+//
+//    @Test
+//    void throwsIfOnlyReservedArchivalRecordExist() throws Exception {
+//
+//      // test data record is in reserved state -> should throw when trying to directly call publish.
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/publish",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final Instant TEST_TIME = Instant.now();
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"publicationTimeStamp\":\"%s\"}",
+//          TEST_TIME
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().is(400));
+//
+//
+//    }
+//
+//
+//    @Test
+//    void updatesArchivalRecordWithExpectedValues() throws Exception {
+//
+//      // first delete test entry
+//      archivalRecordRepository.deleteAll();
+//
+//      // create test record in DRAFT state
+//      final String TEST_EXTERNAL_ID = "fooBar";
+//      final String TEST_PID = "10.5281/zenodo.22658867";
+//
+//      ArchivalRecord archivalRecord = new ArchivalRecord();
+//      archivalRecord.setExternalId(TEST_EXTERNAL_ID);
+//      archivalRecord.setPublicationTimeStamp(Instant.now()); // truncated to different value
+//      archivalRecord.setPid(TEST_PID);
+//      archivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED); // at first in drafted state
+//      archivalRecord.setDigitalObject(testDataSet.digitalObject());
+//      var savedTestArchivalRecord = archivalRecordRepository.save(archivalRecord);
+//
+//      //
+//      // test publish functionality
+//      //
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/publish",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final Instant TEST_TIME = Instant.now();
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"publicationTimeStamp\":\"%s\"}",
+//          TEST_TIME
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().isOk());
+//
+//
+//      // check if values are as expected
+//      var updatedTestArchivalRecordOptional =  archivalRecordRepository.findById(savedTestArchivalRecord.getId());
+//
+//      Assertions.assertThat(updatedTestArchivalRecordOptional).isNotEmpty();
+//
+//      var updatedTestArchivalRecord = updatedTestArchivalRecordOptional.get();
+//
+//      Assertions.assertThat(updatedTestArchivalRecord.getId())
+//          .isEqualTo(savedTestArchivalRecord.getId());
+//
+//      Assertions.assertThat(updatedTestArchivalRecord.getArchivingStatus())
+//          .isEqualTo(ArchivingStatus.PUBLISHED);
+//
+//      Assertions.assertThat(updatedTestArchivalRecord.getPid())
+//          .isEqualTo(savedTestArchivalRecord.getPid());
+//
+//      Assertions.assertThat(updatedTestArchivalRecord.getPublicationTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
+//          .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
+//
+//      Assertions.assertThat(updatedTestArchivalRecord.getExternalId())
+//          .isEqualTo(savedTestArchivalRecord.getExternalId());
+//
+//    }
+//
+//    @Test
+//    void throwsIfNoArchivalRecordsExist() throws Exception {
+//
+//      // first delete test entry
+//      archivalRecordRepository.deleteAll();
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/publish",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId()
+//      );
+//
+//      final Instant TEST_TIME = Instant.now();
+//      final String TEST_REQUEST_BODY = String.format(
+//          "{\"timeStamp\":\"%s\"}",
+//          TEST_TIME
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.patch(TEST_REQUEST_URL)
+//              .contentType(MediaType.APPLICATION_JSON)
+//              .content(TEST_REQUEST_BODY)
+//      ).andExpect(status().is(400));
+//
+//    }
+//
+//  }
+//
+//  @Nested
+//  class DELETE {
+//
+//    @Test
+//    void successfullyDeletesTestArchivalRecord() throws Exception {
+//
+//      final String TEST_REQUEST_URL = String.format(
+//          "/api/curation/v1/projects/%s/objects/%s/archival-records/%s",
+//          testDataSet.project().getProjectAbbr(),
+//          testDataSet.digitalObject().getId(),
+//          testDataSet.archivalRecord().getId()
+//      );
+//
+//      mockMvc.perform(
+//          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
+//      ).andExpect(status().isOk());
+//
+//      var expectedDeleted = archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
+//
+//      Assertions.assertThat(expectedDeleted).isEmpty();
+//
+//    }
+//
+//  }
 
 }

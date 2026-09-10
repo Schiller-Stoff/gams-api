@@ -34,18 +34,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    if (archivalRecordRepository.existsByDigitalObjectIdAndArchivingStatusIn(objectId, ArchivingStatus.getBlockingStatuses())) {
-      throw new ArchivalRecordAlreadyActiveException(
-          "Cannot create archival record for digital object " + objectId
-              + ". An archival record with status DRAFTED or RESERVED already exists."
-      );
-    }
-
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(archivalRecordReserveDto.getPid());
-
-    //
-    archivalRecord.setArchivingStatus(ArchivingStatus.RESERVED);
 
     // link to digital object
     DigitalObject digitalObject = new DigitalObject();
@@ -55,11 +45,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
 
     return archivalRecordRepository.save(archivalRecord);
-  }
-
-  @Override
-  public List<ArchivalRecordCompactView> findForObjectByArchivingStatus(String digitalObjectId, ArchivingStatus archivingStatus) {
-    return archivalRecordRepository.findArchivalRecordsByDigitalObjectIdAndArchivingStatus(digitalObjectId, archivingStatus);
   }
 
   @Override
@@ -78,20 +63,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    var foundArchivalRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatusIn(
-        objectId,
-        EnumSet.of(ArchivingStatus.RESERVED)
-    );
-
-    var foundArchivalRecord = foundArchivalRecordOptional.orElseThrow(() ->
-      new ArchivalRecordNoActiveRecordException(
-          "Cannot draft archival record. No reserved archival record available: " + archivalRecordDraftDto + ". For object with id: " +  objectId
-      )
-    );
-
-    foundArchivalRecord.setExternalId(archivalRecordDraftDto.getExternalId());
-    foundArchivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED);
-
     log.info("Successfully drafted archival record {} for digital object {}", archivalRecordDraftDto,  objectId);
 
   }
@@ -107,18 +78,5 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    var foundArchivalRecordOptional = archivalRecordRepository.findByDigitalObjectIdAndArchivingStatusIn(
-        objectId,
-        EnumSet.of(ArchivingStatus.DRAFTED)
-    );
-
-    var foundArchivalRecord = foundArchivalRecordOptional.orElseThrow(() ->
-        new ArchivalRecordNoActiveRecordException(
-            "Cannot publish archival record. No drafted archival record available: " + archivalRecordPublishDto + ". For object with id: " +  objectId
-        )
-    );
-
-    foundArchivalRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
-    foundArchivalRecord.setArchivingStatus(ArchivingStatus.PUBLISHED);
   }
 }
