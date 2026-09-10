@@ -12,8 +12,6 @@ import java.time.Instant;
 @Data
 public class ArchivalRecordDraftDto {
   @NotEmpty
-  private String pid;
-  @NotEmpty
   private String externalId;
   @NotNull
   private Instant timeStamp;

@@ -104,11 +104,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     void updatesArchivalRecordToExpectedValues(){
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final String TEST_PID = "10.5281/zenodo.22658867";
       final Instant TEST_TIME = Instant.now();
 
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
-      archivalRecordDraftDto.setPid(TEST_PID);
       archivalRecordDraftDto.setExternalId(TEST_EXTERNAL_ID);
       archivalRecordDraftDto.setTimeStamp(TEST_TIME);
 
@@ -119,7 +117,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       var recordOptional =  archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
 
-      Assertions.assertThat(recordOptional).isNotNull();
       Assertions.assertThat(recordOptional).isNotEmpty();
 
       var foundRecord = recordOptional.get();
@@ -130,8 +127,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       Assertions.assertThat(foundRecord.getArchivingStatus())
               .isEqualTo(ArchivingStatus.DRAFTED);
 
+      // stays the same
       Assertions.assertThat(foundRecord.getPid())
-          .isEqualTo(TEST_PID);
+          .isEqualTo(TestArchivalRecord.PID);
 
       Assertions.assertThat(foundRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)) // truncate because database doesn't save as exactly
           .isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
@@ -148,11 +146,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String NON_EXISTENT_OBJECT_ID = TestProject.PROJECT_ABBR + ".foo";
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final String TEST_PID = "10.5281/zenodo.22658867";
       final Instant TEST_TIME = Instant.MIN;
 
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
-      archivalRecordDraftDto.setPid(TEST_PID);
       archivalRecordDraftDto.setExternalId(TEST_EXTERNAL_ID);
       archivalRecordDraftDto.setTimeStamp(TEST_TIME);
 
@@ -160,21 +156,20 @@ class ArchivalRecordServiceIT extends IntegrationTest {
               NON_EXISTENT_OBJECT_ID,
               archivalRecordDraftDto
           )).isInstanceOf(DigitalObjectNotFoundException.class);
-      ;
+
 
     }
 
     @Test
     void throwsIfNoActiveArchivalRecordIsAvailable(){
 
-      // set status of test record to PUBLISHED -> so non draft can be found.
+      // set status of test record to PUBLISHED -> so no draft can be found.
       var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getId()).orElseThrow();
       testRecord.setArchivingStatus(ArchivingStatus.PUBLISHED);
       archivalRecordRepository.save(testRecord);
 
       // try to draft new record
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
-      archivalRecordDraftDto.setPid(testRecord.getPid());
       archivalRecordDraftDto.setExternalId(testRecord.getExternalId());
       archivalRecordDraftDto.setTimeStamp(testRecord.getTimeStamp());
 
@@ -193,7 +188,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       // try to draft new record
       ArchivalRecordDraftDto archivalRecordDraftDto = new ArchivalRecordDraftDto();
-      archivalRecordDraftDto.setPid(TestArchivalRecord.PID);
       archivalRecordDraftDto.setExternalId(TestArchivalRecord.EXTERNAL_ID);
       archivalRecordDraftDto.setTimeStamp(TestArchivalRecord.TIME_STAMP);
 
@@ -268,8 +262,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       ArchivalRecordPublishDto  archivalRecordPublishDto = new ArchivalRecordPublishDto();
       archivalRecordPublishDto.setTimeStamp(Instant.now());
 
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(() -> {
-        archivalRecordService.publishArchivalRecord(testDataSet.digitalObject().getId(), archivalRecordPublishDto);
+        archivalRecordService.publishArchivalRecord(objectId, archivalRecordPublishDto);
       }).isInstanceOf(ArchivalRecordNoActiveRecordException.class);
 
     }

@@ -219,7 +219,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     void updatesArchivalRecordToExpectedValues() throws Exception {
 
       final String TEST_EXTERNAL_ID = "fooBar";
-      final String TEST_PID = "10.5281/zenodo.22658867";
+      final String TEST_PID = "10.5281/zenodo.22658867"; // pid should not change
       final Instant TEST_TIME = Instant.now();
 
       final String TEST_REQUEST_URL = String.format(
@@ -247,7 +247,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       Assertions.assertThat(draftedRecord.getArchivingStatus()).isEqualTo(ArchivingStatus.DRAFTED);
       Assertions.assertThat(draftedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_ID);
       Assertions.assertThat(draftedRecord.getTimeStamp().truncatedTo(ChronoUnit.SECONDS)).isEqualTo(TEST_TIME.truncatedTo(ChronoUnit.SECONDS));
-      Assertions.assertThat(draftedRecord.getPid()).isEqualTo(TEST_PID);
+      Assertions.assertThat(draftedRecord.getPid()).isEqualTo(testDataSet.archivalRecord().getPid()); // this pid should stay the same!
 
     }
 

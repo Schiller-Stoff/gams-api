@@ -91,7 +91,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       )
     );
 
-    foundArchivalRecord.setPid(archivalRecordDraftDto.getPid());
     foundArchivalRecord.setTimeStamp(archivalRecordDraftDto.getTimeStamp());
     foundArchivalRecord.setExternalId(archivalRecordDraftDto.getExternalId());
     foundArchivalRecord.setArchivingStatus(ArchivingStatus.DRAFTED);
