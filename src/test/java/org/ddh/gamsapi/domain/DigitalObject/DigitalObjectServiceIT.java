@@ -127,7 +127,9 @@ class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(oldModifiedBy).isNotEqualTo(TestUser.USERNAME.getValue());
 
       // small delay to ensure timestamp difference
-      try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+      try { Thread.sleep(50); } catch (InterruptedException _) {
+        // ignored
+      }
 
       // change something
       savedObject.setObjectType("DEMO VALUE");
@@ -169,7 +171,7 @@ class DigitalObjectServiceIT extends IntegrationTest {
       );
 
       Assertions.assertThat(result.getContent()).isNotEmpty();
-      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(
+      Assertions.assertThat(result.getContent().getFirst().getId()).isEqualTo(
           testDataSet.digitalObject().getId()
       );
 
@@ -281,7 +283,7 @@ class DigitalObjectServiceIT extends IntegrationTest {
       );
 
       Assertions.assertThat(result.getContent()).isNotEmpty();
-      Assertions.assertThat(result.getContent().get(0).getId()).isEqualTo(
+      Assertions.assertThat(result.getContent().getFirst().getId()).isEqualTo(
           testDataSet.digitalObject().getId()
       );
 
@@ -496,7 +498,7 @@ class DigitalObjectServiceIT extends IntegrationTest {
       Assertions.assertThat(foundObjects.getPagination().getTotalElements())
           .isGreaterThan(0);
 
-      var firstFoundObject = foundObjects.getContent().get(0);
+      var firstFoundObject = foundObjects.getContent().getFirst();
 
       Assertions.assertThat(firstFoundObject.getTags())
           .isNotNull()
