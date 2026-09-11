@@ -54,19 +54,24 @@ public class ArchivalRecordController {
     // TODO implement
   }
 
-  @DeleteMapping(path = "/{recordId}")
+  // TODO update open-api annotation
+  @DeleteMapping(path = "/{*pid}") // pattern takes everything after (but includes the leading slash!)
   @Operation(
-      summary = "Deletes a archival record for a digital object",
-      description = "Allows to delete an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record id.",
+      summary = "Deletes a archival record by it's pid.",
+      description = "Allows to delete an archival record by the archival record pid.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Archival record successfully deleted",
               content = @Content)
       }
   )
   public void delete(
-      @PathVariable Long recordId
+      @PathVariable String pid
   ){
-    // TODO implement
+    // need to check for the included leading slash from the PathVariable
+    String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
+
+    // TODO validate pids!
+    archivalRecordService.deleteById(normalizedPid);
   }
 
 }

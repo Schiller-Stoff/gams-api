@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,6 +45,46 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   @BeforeEach
   void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
+  }
+
+
+  @Nested
+  class DELETE {
+
+    @Test
+    void successfullyDeletesTestArchivalRecord() throws Exception {
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/%s",
+          testDataSet.archivalRecord().getPid()
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
+      ).andExpect(status().isOk());
+
+      // test archival record should be deleted
+      Assertions.assertThat(archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid()))
+          .isFalse();
+
+    }
+
+    @Test
+    void throwsIfArchivalRecordWasNotFound() throws Exception {
+
+      final String NON_EXISTENT_PID = TestArchivalRecord.PID.replace("1", "9");
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/%s",
+          NON_EXISTENT_PID
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
+      ).andExpect(status().isNotFound());
+
+    }
+
   }
 
   @Nested
@@ -71,6 +115,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       }
 
     }
+
 
 
 //  @Nested
@@ -459,30 +504,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 //
 //  }
 //
-//  @Nested
-//  class DELETE {
-//
-//    @Test
-//    void successfullyDeletesTestArchivalRecord() throws Exception {
-//
-//      final String TEST_REQUEST_URL = String.format(
-//          "/api/curation/v1/projects/%s/objects/%s/archival-records/%s",
-//          testDataSet.project().getProjectAbbr(),
-//          testDataSet.digitalObject().getId(),
-//          testDataSet.archivalRecord().getId()
-//      );
-//
-//      mockMvc.perform(
-//          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
-//      ).andExpect(status().isOk());
-//
-//      var expectedDeleted = archivalRecordRepository.findById(testDataSet.archivalRecord().getId());
-//
-//      Assertions.assertThat(expectedDeleted).isEmpty();
-//
-//    }
-//
-//  }
+
+
+
 
 
   }

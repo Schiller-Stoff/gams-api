@@ -55,6 +55,11 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   public void deleteById(String archivalRecordPid) {
+    if(!archivalRecordRepository.existsById(archivalRecordPid)){
+      throw new ArchivalRecordNotFoundException(
+          "Cannot delete archival record with pid: " + archivalRecordPid + " The archival record does not exist."
+      );
+    }
     archivalRecordRepository.deleteById(archivalRecordPid);
   }
 

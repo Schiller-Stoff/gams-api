@@ -4,9 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestProject;
-import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
-import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordService;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -57,6 +54,19 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           .isInstanceOf(
               DigitalObjectNotFoundException.class
           );
+    }
+
+  }
+
+  @Nested
+  class DeleteById {
+
+    @Test
+    void successfullyDeletesExpectedArchivalRecord(){
+      archivalRecordRepository.deleteById(testDataSet.archivalRecord().getPid());
+      Assertions.assertThat(
+          archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid())
+      ).isFalse();
     }
 
   }
