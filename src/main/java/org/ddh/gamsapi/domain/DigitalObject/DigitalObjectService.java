@@ -165,12 +165,8 @@ public class DigitalObjectService implements IDigitalObjectService {
       );
     }
 
-    if (archivalRecordRepository.existsByDigitalObjectId(digitalObject.getId())) {
-      throw new DigitalObjectHasArchivalRecordsException(
-          "Cannot delete digital object " + digitalObject.getId()
-              + ". It still has archival records associated with it."
-      );
-    }
+    // orphan associated archival records instead of blocking delete or cascading
+    archivalRecordRepository.detachAllFromDigitalObject(digitalObject.getId());
 
     submissionRecordRepository.deleteById(digitalObject.getId());
 

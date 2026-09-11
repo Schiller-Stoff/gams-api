@@ -25,9 +25,9 @@ public interface IArchivalRecordService {
 
   /**
    * Deletes an archival record by it's id.
-   * @param archivalRecordId id of the archival record.
+   * @param archivalRecordPid pid of the archival record.
    */
-  void deleteById(Long archivalRecordId);
+  void deleteById(String archivalRecordPid);
 
   /**
    * Updates an existing archival record

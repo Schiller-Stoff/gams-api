@@ -47,8 +47,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
-  public void deleteById(Long archivalRecordId) {
-    archivalRecordRepository.deleteById(archivalRecordId);
+  public void deleteById(String archivalRecordPid) {
+    archivalRecordRepository.deleteById(archivalRecordPid);
   }
 
   @Override

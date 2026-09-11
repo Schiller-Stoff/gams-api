@@ -301,14 +301,30 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   class Delete {
 
     @Test
-    void cannotDeleteDigitalObjectIfArchivalRecordExists(){
+    void successfullyDeletesDigitalObjectAlthoughArchivalRecordExists(){
       // verify test archival record exists
       Assertions.assertThat(
           archivalRecordRepository.existsByDigitalObjectId(testDataSet.digitalObject().getId())
           ).isTrue();
 
-      Assertions.assertThatThrownBy(() -> digitalObjectService.delete(testDataSet.digitalObject()))
-              .isInstanceOf(DigitalObjectHasArchivalRecordsException.class);
+      digitalObjectService.delete(testDataSet.digitalObject());
+
+      // object is deleted
+      Assertions.assertThat(
+          digitalObjectRepository.existsById(testDataSet.digitalObject().getId())
+      ).isFalse();
+
+      // but archival record still exists
+      Assertions.assertThat(
+          archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid())
+      ).isTrue();
+
+      // check if reference is set to null as expected
+      var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid())
+          .orElseThrow();
+      Assertions.assertThat(foundArchivalRecord.getDigitalObject())
+          .isNull();
+
 
 
     }

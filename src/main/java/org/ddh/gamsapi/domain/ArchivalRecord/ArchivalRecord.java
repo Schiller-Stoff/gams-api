@@ -34,7 +34,7 @@ public class ArchivalRecord {
    * Digital object the archival record belongs to.
    */
   @ManyToOne(fetch = FetchType.LAZY) // fetchType lazy = means that the digital object is loaded only when accessed
-  @JoinColumn(name = "digital_object_id", nullable = false)
+  @JoinColumn(name = "digital_object_id")
   @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
   @JsonIgnore
   private DigitalObject digitalObject;

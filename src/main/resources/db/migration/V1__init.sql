@@ -1,6 +1,6 @@
 create table archival_record
 (
-    pid               varchar(255),
+    pid               varchar(255) not null,
     publication_timestamp         timestamp(6) with time zone,
     digital_object_id varchar(255),
     external_id       varchar(255),
@@ -165,14 +165,12 @@ create index idx_dc_value
 create index idx_dc_language
     on dublin_core_entry (language);
 
-create sequence archival_record_seq start with 1 increment by 50;
-
 create sequence dublin_core_entry_seq start with 1 increment by 50;
 
 alter table if exists archival_record
     add constraint fk_archival_record_digital_object
     foreign key (digital_object_id)
-    references digital_object;
+    references digital_object; -- add "on delete set null" here only if going DB-level route
 
 alter table if exists datastream
     add constraint fk_datastream_digital_object

@@ -70,14 +70,25 @@ class DigitalObjectControllerIT extends IntegrationTest {
   class DELETERequests {
 
     @Test
-    void mayNotDeleteObjectWhenArchivalRecordsExists() throws Exception {
+    void mayDeleteObjectEvenThoughArchivalRecordsExists() throws Exception {
 
       // Act
       mockMvc.perform(
               MockMvcRequestBuilders.delete("/api/curation/v1/projects/{projectAbbr}/objects/{id}", testDataSet.project().getProjectAbbr(), testDataSet.digitalObject().getId()
                   )
                   .contentType(MediaType.APPLICATION_JSON))
-          .andExpect(status().is(409)); // status code for archival records exists
+          .andExpect(status().isOk()); // status code for archival records exists
+
+      // digital object is deleted
+      org.assertj.core.api.Assertions.assertThat(
+          digitalObjectRepository.existsById(testDataSet.digitalObject().getId())
+      ).isFalse();
+
+      // archival record still exists
+      org.assertj.core.api.Assertions.assertThat(
+          archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid())
+      ).isTrue();
+
 
     }
 
