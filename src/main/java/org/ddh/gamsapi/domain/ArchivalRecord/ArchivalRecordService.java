@@ -20,6 +20,13 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   public List<ArchivalRecordCompactView> findForObject(String digitalObjectId) {
+
+    if(!digitalObjectRepository.existsById(digitalObjectId)){
+      throw new DigitalObjectNotFoundException(
+          "Cannot find archival records for digital object: " +  digitalObjectId + " The digital object does not exist."
+      );
+    }
+
     return archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(digitalObjectId);
   }
 

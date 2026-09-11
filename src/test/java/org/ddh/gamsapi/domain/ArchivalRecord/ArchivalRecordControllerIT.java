@@ -1,16 +1,22 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc(addFilters = false) // deactivates spring security for the test class
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -36,64 +42,37 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
   }
-//
-//  @Nested
-//  class GET {
-//
-//    @Nested
-//    class JSONResponse {
-//
-//      @Test
-//      void jsonContainsExpectedPid() throws Exception {
-//
-//        final String TEST_REQUEST_URL = String.format(
-//            "/api/curation/v1/projects/%s/objects/%s/archival-records",
-//            testDataSet.project().getProjectAbbr(),
-//            testDataSet.digitalObject().getId()
-//        );
-//
-//        String responseBody = mockMvc.perform(
-//            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
-//                .contentType(MediaType.APPLICATION_JSON)
-//        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-//
-//        Assertions.assertThat(responseBody)
-//            .isNotNull()
-//            .contains(
-//                testDataSet.archivalRecord().getPid()
-//            );
-//
-//      }
-//
-//      @Test
-//      void getPublicArchivalRecordsDoesNotReturnPidOfTestArchivalRecord() throws Exception {
-//
-//        final String TEST_REQUEST_URL = String.format(
-//            "/api/curation/v1/projects/%s/objects/%s/archival-records/public",
-//            testDataSet.project().getProjectAbbr(),
-//            testDataSet.digitalObject().getId()
-//        );
-//
-//        String responseBody = mockMvc.perform(
-//            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
-//                .contentType(MediaType.APPLICATION_JSON)
-//        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-//
-//        // test-data archival record is drafted but endpoint should only return public ones
-//        Assertions.assertThat(testDataSet.archivalRecord().getArchivingStatus()).isEqualTo(ArchivingStatus.RESERVED);
-//
-//        Assertions.assertThat(responseBody)
-//            .isNotNull()
-//            .doesNotContain(
-//                testDataSet.archivalRecord().getPid()
-//            );
-//
-//      }
-//
-//    }
-//
-//  }
-//
+
+  @Nested
+  class GET {
+
+    @Nested
+    class JSONResponse {
+
+      @Test
+      void jsonContainsExpectedPid() throws Exception {
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records?objectId=%s",
+            testDataSet.digitalObject().getId()
+        );
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(responseBody)
+            .isNotNull()
+            .contains(
+                testDataSet.archivalRecord().getPid()
+            );
+
+      }
+
+    }
+
+
 //  @Nested
 //  class POST_reserveArchivalRecord {
 //
@@ -505,4 +484,6 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 //
 //  }
 
+
+  }
 }

@@ -24,9 +24,10 @@ public class ArchivalRecordController {
   private final IArchivalRecordService archivalRecordService;
   private final IProjectService projectService;
 
+  // TODO add to openapi the request param
   @Operation(
       summary = "Get archival records",
-      description = "Retrieve the archival records associated with a specific digital object within a project.",
+      description = "Retrieve the archival records optionally for specific digital objects.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Successful retrieval of the archival records",
               content = @Content)
@@ -34,25 +35,9 @@ public class ArchivalRecordController {
   )
   @GetMapping
   public List<ArchivalRecordCompactView> findArchivalRecords(
-
+      @RequestParam String objectId
   ) {
-    // TODO implement
-    return null;
-  }
-
-  @Operation(
-      summary = "Get only public archival records",
-      description = "Retrieve the public archival records associated with a specific digital object within a project.",
-      responses = {
-          @ApiResponse(responseCode = "200", description = "Successful retrieval of the archival records",
-              content = @Content)
-      }
-  )
-  @GetMapping(path = "/public")
-  public List<ArchivalRecordCompactView> findArchivalRecordsByArchivingStatus(
-  ) {
-   // TODO implement
-    return new ArrayList<>();
+    return archivalRecordService.findForObject(objectId);
   }
 
   @PostMapping
