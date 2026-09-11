@@ -626,8 +626,9 @@ class DigitalObjectServiceIT extends IntegrationTest {
 
       var dcEntries = dublinCoreEntryRepository.findByDigitalObjectId(expectedId);
       // Should have at least title, creator, rights, publisher (+ optional description)
-      Assertions.assertThat(dcEntries).isNotEmpty();
-      Assertions.assertThat(dcEntries.size()).isGreaterThanOrEqualTo(4);
+      Assertions.assertThat(dcEntries)
+          .isNotEmpty()
+          .hasSizeGreaterThanOrEqualTo(4);
     }
 
     @Test
