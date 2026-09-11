@@ -335,8 +335,9 @@ class DigitalObjectServiceIT extends IntegrationTest {
       // test archival record must be deleted - otherwise error
       archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(testDataSet.digitalObject());
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(() -> digitalObjectService.findById(
-              testDataSet.digitalObject().getId())
+              objectId)
           )
           .isInstanceOf(DigitalObjectNotFoundException.class);
     }
@@ -757,9 +758,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
           .replace(testDataSet.project().getProjectAbbr() + ".", "");
       dto.setIdSuffix(existingIdSuffix);
 
+      String projectAbbr = testDataSet.project().getProjectAbbr();
       Assertions.assertThatThrownBy(
           () -> digitalObjectService.create(
-              testDataSet.project().getProjectAbbr(), dto
+              projectAbbr, dto
           )
       ).isInstanceOf(DigitalObjectAlreadyExistsException.class);
     }
@@ -771,9 +773,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
           .replace(testDataSet.project().getProjectAbbr() + ".", "");
       dto.setIdSuffix(existingIdSuffix);
 
+      String projectAbbr = testDataSet.project().getProjectAbbr();
       Assertions.assertThatThrownBy(
           () -> digitalObjectService.create(
-              testDataSet.project().getProjectAbbr(), dto
+              projectAbbr, dto
           )
       ).isInstanceOf(DigitalObjectAlreadyExistsException.class);
 
@@ -973,9 +976,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("");
 
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(
               () -> digitalObjectService.updateDigitalObject(
-                  testDataSet.digitalObject().getId(), patch
+                  objectId, patch
               )
           ).isInstanceOf(DigitalObjectValidationException.class)
           .hasMessageContaining("Title");
@@ -986,9 +990,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
       var patch = new DigitalObjectUpdateDto();
       patch.setRights("");
 
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(
               () -> digitalObjectService.updateDigitalObject(
-                  testDataSet.digitalObject().getId(), patch
+                  objectId, patch
               )
           ).isInstanceOf(DigitalObjectValidationException.class)
           .hasMessageContaining("Rights");
@@ -999,9 +1004,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
       var patch = new DigitalObjectUpdateDto();
       patch.setCreator("");
 
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(
               () -> digitalObjectService.updateDigitalObject(
-                  testDataSet.digitalObject().getId(), patch
+                  objectId, patch
               )
           ).isInstanceOf(DigitalObjectValidationException.class)
           .hasMessageContaining("Creator");
@@ -1012,9 +1018,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
       var patch = new DigitalObjectUpdateDto();
       patch.setPublisher("");
 
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(
               () -> digitalObjectService.updateDigitalObject(
-                  testDataSet.digitalObject().getId(), patch
+                  objectId, patch
               )
           ).isInstanceOf(DigitalObjectValidationException.class)
           .hasMessageContaining("Publisher");
@@ -1027,9 +1034,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
       patch.setRights("");
       patch.setCreator("");
 
+      String objectId = testDataSet.digitalObject().getId();
       Assertions.assertThatThrownBy(
               () -> digitalObjectService.updateDigitalObject(
-                  testDataSet.digitalObject().getId(), patch
+                  objectId, patch
               )
           ).isInstanceOf(DigitalObjectValidationException.class)
           .hasMessageContaining("Title")
@@ -1134,9 +1142,10 @@ class DigitalObjectServiceIT extends IntegrationTest {
         var patch = new DigitalObjectUpdateDto();
         patch.setMainResource("DOES_NOT_EXIST");
 
+        String objectId = testDataSet.digitalObject().getId();
         Assertions.assertThatThrownBy(
                 () -> digitalObjectService.updateDigitalObject(
-                    testDataSet.digitalObject().getId(), patch
+                    objectId, patch
                 )
             ).isInstanceOf(DigitalObjectValidationException.class)
             .hasMessageContaining("DOES_NOT_EXIST")
