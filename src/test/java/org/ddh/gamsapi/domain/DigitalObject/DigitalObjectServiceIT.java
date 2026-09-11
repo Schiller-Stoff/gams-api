@@ -3,18 +3,17 @@ package org.ddh.gamsapi.domain.DigitalObject;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectHasArchivalRecordsException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
@@ -42,7 +41,7 @@ import java.util.*;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DigitalObjectServiceIT extends IntegrationTest {
+class DigitalObjectServiceIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectRepository digitalObjectRepository;
@@ -80,7 +79,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   private TestDataSet testDataSet;
 
   @BeforeEach
-  public void setup(){
+  void setup(){
     testDataSet = testDataBuilder.buildTestDataSet();
     // needed when changing datastreams
     Mockito.when(userPrincipalAuditorMapping.getCurrentAuditor())
@@ -88,11 +87,11 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class Save {
+  class Save {
 
 
     @Test
-    public void successFullySavesSimpleDigitalObject() {
+    void successFullySavesSimpleDigitalObject() {
       // given
       DigitalObject digitalObject = TestDigitalObject.generate(
           testDataSet.project().getProjectAbbr(),
@@ -115,7 +114,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void savingExistingObjectChangesCreationAfterModified(){
+    void savingExistingObjectChangesCreationAfterModified(){
 
       var savedObject = digitalObjectRepository.findById(testDataSet.digitalObject().getId())
           .orElseThrow();
@@ -147,10 +146,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class FindAllByProjectAbbr {
+  class FindAllByProjectAbbr {
 
     @Test
-    public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
+    void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
       testDataBuilder.removeAllExceptProjects(testDataSet);
       PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(
           testDataSet.project().getProjectAbbr(),
@@ -161,7 +160,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
+    void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
 
       var result = digitalObjectService.findAllByProjectAbbr(
           testDataSet.project().getProjectAbbr(),
@@ -177,14 +176,14 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsExceptionWhenProjectDoesNotExist() {
+    void throwsExceptionWhenProjectDoesNotExist() {
       String projectAbbr = "nonExistentProject";
       Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
           .isInstanceOf(ProjectNotFoundException.class);
     }
 
     @Test
-    public void findsDigitalObjectExactId(){
+    void findsDigitalObjectExactId(){
 
       digitalObjectService.findAllByProjectAbbr(
               testDataSet.project().getProjectAbbr(),
@@ -199,7 +198,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void findsDigitalObjectStartsWithId(){
+    void findsDigitalObjectStartsWithId(){
 
       String idStartsWith = testDataSet.digitalObject().getId().substring(0,5);
 
@@ -219,10 +218,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class FindById {
+  class FindById {
 
     @Test
-    public void returnsDigitalObjectWhenItExists() {
+    void returnsDigitalObjectWhenItExists() {
       DigitalObject result = digitalObjectService.findById(
           testDataSet.digitalObject().getId()
       );
@@ -230,7 +229,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsExceptionWhenDigitalObjectDoesNotExist() {
+    void throwsExceptionWhenDigitalObjectDoesNotExist() {
       String id = "nonExistentId";
       org.junit.jupiter.api.Assertions.assertThrows(
           DigitalObjectNotFoundException.class, () -> digitalObjectService.findById(id)
@@ -238,7 +237,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsDigitalObjectWithExpectedProperties(){
+    void returnsDigitalObjectWithExpectedProperties(){
       DigitalObject foundObject = digitalObjectService.findById(testDataSet.digitalObject().getId());
       Assertions.assertThat(foundObject.getFunder()).isEqualTo(testDataSet.digitalObject().getFunder());
       Assertions.assertThat(foundObject.getId()).isEqualTo(testDataSet.digitalObject().getId());
@@ -261,10 +260,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class FindAllByProjectAbbrWithOptionalParameters {
+  class FindAllByProjectAbbrWithOptionalParameters {
 
     @Test
-    public void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
+    void returnsEmptyPageWhenNoDigitalObjectsExistForProject() {
       testDataBuilder.removeAllExceptProjects(testDataSet);
       PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(
           testDataSet.project().getProjectAbbr(), Optional.empty(), Pageable.unpaged()
@@ -273,7 +272,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
+    void returnsPageOfDigitalObjectsWhenTheyExistForProject() {
 
       PagedResponse<DigitalObjectListItemView> result = digitalObjectService.findAllByProjectAbbr(
           testDataSet.project().getProjectAbbr(),
@@ -289,7 +288,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsExceptionWhenProjectDoesNotExist() {
+    void throwsExceptionWhenProjectDoesNotExist() {
       String projectAbbr = "nonExistentProject";
 
       Assertions.assertThatThrownBy(() -> digitalObjectService.findAllByProjectAbbr(projectAbbr, Optional.empty(), Pageable.unpaged()))
@@ -341,7 +340,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void deletesChildDatastreamsWithFileContent() {
+    void deletesChildDatastreamsWithFileContent() {
       // remove test archival record
       archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(testDataSet.digitalObject());
@@ -350,7 +349,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void deletesReferencedDublinCoreEntries(){
+    void deletesReferencedDublinCoreEntries(){
       // remove test archival record
       archivalRecordRepository.delete(testDataSet.archivalRecord());
       digitalObjectService.delete(
@@ -363,7 +362,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
+    void projectContentIsUpdatedWhenDigitalObjectIsDeleted() {
 
       Instant projectContentLastModifiedBeforeDelete = testDataSet.project().getModified();
 
@@ -386,11 +385,11 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   @Nested
-  public class FindDigitalObjectCompactDTOById {
+  class FindDigitalObjectCompactDTOById {
 
     @Test
     @Transactional
-    public void containsExpectedDublinCoreEntry(){
+    void containsExpectedDublinCoreEntry(){
 
       var foundDigitalObject = digitalObjectService.findDigitalObjectCompactDTOById(
           testDataSet.digitalObject().getId()
@@ -418,12 +417,12 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
   @Nested
-  public class DublinCoreFulltextSearch {
+  class DublinCoreFulltextSearch {
 
     Project additionalProject;
 
     @BeforeEach
-    public void setup(){
+    void setup(){
 
       // 1 object belongs to a different project
       additionalProject =  testDataBuilder.addRandomProject(testDataSet);
@@ -453,10 +452,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class FindAllIdsByProjectAbbr {
+  class FindAllIdsByProjectAbbr {
 
     @Test
-    public void returnsExpectedDigitalObjectIds(){
+    void returnsExpectedDigitalObjectIds(){
 
       // adding two additional digital objects to the test data set
       DigitalObject digitalObject1 = testDataBuilder.addRandomObject(testDataSet);
@@ -480,10 +479,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class FindAllByProjectAndTags {
+  class FindAllByProjectAndTags {
 
     @Test
-    public void returnsDigitalObjectsWithExpectedTags(){
+    void returnsDigitalObjectsWithExpectedTags(){
 
       var TAG_TO_FIND = TestDigitalObject.getTags();
 
@@ -509,10 +508,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class FindDistinctTagsByProject {
+  class FindDistinctTagsByProject {
 
     @Test
-    public void returnsDistinctTagsForProject(){
+    void returnsDistinctTagsForProject(){
 
       // adding two additional digital objects to the test data set
       testDataBuilder.addRandomObject(testDataSet);
@@ -532,7 +531,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class CreateDigitalObject {
+  class CreateDigitalObject {
 
     private DigitalObjectCreateDto buildValidDto() {
       var dto = new DigitalObjectCreateDto();
@@ -548,7 +547,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsDigitalObjectWithExpectedId() {
+    void createsDigitalObjectWithExpectedId() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -561,7 +560,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void persistsDigitalObjectInDatabase() {
+    void persistsDigitalObjectInDatabase() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -572,7 +571,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createdObjectHasExpectedMetadata() {
+    void createdObjectHasExpectedMetadata() {
       var dto = buildValidDto();
 
       DigitalObject result = digitalObjectService.create(
@@ -589,7 +588,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createdObjectBelongsToExpectedProject() {
+    void createdObjectBelongsToExpectedProject() {
       var dto = buildValidDto();
 
       DigitalObject result = digitalObjectService.create(
@@ -601,9 +600,8 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsTimestamps() {
+    void createsTimestamps() {
       var dto = buildValidDto();
-      Date beforeCreate = new Date();
 
       DigitalObject result = digitalObjectService.create(
           testDataSet.project().getProjectAbbr(), dto
@@ -618,7 +616,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     // --- Dublin Core entries ---
 
     @Test
-    public void createsDublinCoreEntries() {
+    void createsDublinCoreEntries() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -631,7 +629,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsDublinCoreEntryForTitle() {
+    void createsDublinCoreEntryForTitle() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -646,7 +644,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsDublinCoreEntryForDescription() {
+    void createsDublinCoreEntryForDescription() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -661,7 +659,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void skipsDublinCoreDescriptionWhenEmpty() {
+    void skipsDublinCoreDescriptionWhenEmpty() {
       var dto = buildValidDto();
       dto.setDescription(null);
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
@@ -678,7 +676,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     // --- DC.xml datastream ---
 
     @Test
-    public void createsDcXmlDatastream() {
+    void createsDcXmlDatastream() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -689,7 +687,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void dcXmlDatastreamHasExpectedMimeType() {
+    void dcXmlDatastreamHasExpectedMimeType() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -701,7 +699,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void dcXmlDatastreamHasChecksums() {
+    void dcXmlDatastreamHasChecksums() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -714,7 +712,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void dcXmlDatastreamFileExistsOnDisk() {
+    void dcXmlDatastreamFileExistsOnDisk() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -725,7 +723,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void dcXmlDatastreamHasPositiveSize() {
+    void dcXmlDatastreamHasPositiveSize() {
       var dto = buildValidDto();
       String expectedId = testDataSet.project().getProjectAbbr() + "." + dto.getIdSuffix();
 
@@ -739,7 +737,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     // --- Validation / error cases ---
 
     @Test
-    public void throwsWhenProjectDoesNotExist() {
+    void throwsWhenProjectDoesNotExist() {
       var dto = buildValidDto();
 
       Assertions.assertThatThrownBy(
@@ -748,7 +746,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsWhenObjectAlreadyExists() {
+    void throwsWhenObjectAlreadyExists() {
       // The testDataSet already has a digital object with id "test.test"
       var dto = buildValidDto();
       // Use the existing object's id suffix
@@ -764,7 +762,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void doesNotPersistObjectWhenDuplicateIdDetected() {
+    void doesNotPersistObjectWhenDuplicateIdDetected() {
       var dto = buildValidDto();
       String existingIdSuffix = testDataSet.digitalObject().getId()
           .replace(testDataSet.project().getProjectAbbr() + ".", "");
@@ -787,7 +785,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     // --- Optional fields ---
 
     @Test
-    public void createsObjectWithNullDescription() {
+    void createsObjectWithNullDescription() {
       var dto = buildValidDto();
       dto.setDescription(null);
 
@@ -799,7 +797,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsObjectWithNullFunder() {
+    void createsObjectWithNullFunder() {
       var dto = buildValidDto();
       dto.setFunder(null);
 
@@ -811,7 +809,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void createsObjectWithNullObjectType() {
+    void createsObjectWithNullObjectType() {
       var dto = buildValidDto();
       dto.setObjectType(null);
 
@@ -825,7 +823,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     // --- ID composition ---
 
     @Test
-    public void composesIdFromProjectAbbrAndIdSuffix() {
+    void composesIdFromProjectAbbrAndIdSuffix() {
       var dto = buildValidDto();
       dto.setIdSuffix("my.complex-suffix-123");
 
@@ -839,10 +837,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class UpdateDigitalObject {
+  class UpdateDigitalObject {
 
     @Test
-    public void updatesTitle() {
+    void updatesTitle() {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("New Title");
 
@@ -860,7 +858,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void updatesMultipleFieldsSimultaneously() {
+    void updatesMultipleFieldsSimultaneously() {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("Updated Title");
       patch.setDescription("Updated Description");
@@ -880,7 +878,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void preservesUnchangedFields() {
+    void preservesUnchangedFields() {
       String originalRights = testDataSet.digitalObject().getBaseMetadata().getRights();
       String originalCreator = testDataSet.digitalObject().getBaseMetadata().getCreator();
       String originalPublisher = testDataSet.digitalObject().getPublisher();
@@ -904,7 +902,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void updatesTags() {
+    void updatesTags() {
       Set<String> newTags = Set.of("new-tag1", "new-tag2");
 
       var patch = new DigitalObjectUpdateDto();
@@ -922,7 +920,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void removesAllTags() {
+    void removesAllTags() {
       // precondition
       Assertions.assertThat(testDataSet.digitalObject().getTags()).isNotEmpty();
 
@@ -940,7 +938,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void tagsUnchangedWhenNotInPatch() {
+    void tagsUnchangedWhenNotInPatch() {
       Set<String> originalTags = Set.copyOf(testDataSet.digitalObject().getTags());
 
       var patch = new DigitalObjectUpdateDto();
@@ -958,7 +956,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void throwsNotFoundForNonExistentObject() {
+    void throwsNotFoundForNonExistentObject() {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("irrelevant");
 
@@ -968,7 +966,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void rejectsEmptyTitle() {
+    void rejectsEmptyTitle() {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("");
 
@@ -981,7 +979,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void rejectsEmptyRights() {
+    void rejectsEmptyRights() {
       var patch = new DigitalObjectUpdateDto();
       patch.setRights("");
 
@@ -994,7 +992,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void rejectsEmptyCreator() {
+    void rejectsEmptyCreator() {
       var patch = new DigitalObjectUpdateDto();
       patch.setCreator("");
 
@@ -1007,7 +1005,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void rejectsEmptyPublisher() {
+    void rejectsEmptyPublisher() {
       var patch = new DigitalObjectUpdateDto();
       patch.setPublisher("");
 
@@ -1020,7 +1018,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void reportsMultipleViolationsAtOnce() {
+    void reportsMultipleViolationsAtOnce() {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("");
       patch.setRights("");
@@ -1037,7 +1035,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void updatesModificationTimestamp() throws InterruptedException {
+    void updatesModificationTimestamp() throws InterruptedException {
       Instant beforeUpdate = Instant.now();
       Thread.sleep(50);
 
@@ -1055,7 +1053,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void returnsCompactDTOWithUpdatedValues() {
+    void returnsCompactDTOWithUpdatedValues() {
       var patch = new DigitalObjectUpdateDto();
       patch.setTitle("DTO check title");
       patch.setFunder("DTO check funder");
@@ -1071,7 +1069,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void allowsEmptyDescription() {
+    void allowsEmptyDescription() {
       // description is optional — setting it to empty should not throw
       var patch = new DigitalObjectUpdateDto();
       patch.setDescription("");
@@ -1084,7 +1082,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
     }
 
     @Test
-    public void allowsNullDescription() {
+    void allowsNullDescription() {
       // null description in patch means "don't change" — original should be preserved
       String originalDescription = testDataSet.digitalObject().getBaseMetadata().getDescription();
 
@@ -1105,10 +1103,10 @@ public class DigitalObjectServiceIT extends IntegrationTest {
 
 
     @Nested
-    public class UpdateMainResource {
+    class UpdateMainResource {
 
       @Test
-      public void setsMainResourceToExistingDatastream() {
+      void setsMainResourceToExistingDatastream() {
         var patch = new DigitalObjectUpdateDto();
         patch.setMainResource(testDataSet.mainDatastream().getDsid());
 
@@ -1129,7 +1127,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       }
 
       @Test
-      public void rejectsNonExistentDatastreamAsDsid() {
+      void rejectsNonExistentDatastreamAsDsid() {
         var patch = new DigitalObjectUpdateDto();
         patch.setMainResource("DOES_NOT_EXIST");
 
@@ -1143,7 +1141,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       }
 
       @Test
-      public void clearsMainResourceWithEmptyString() {
+      void clearsMainResourceWithEmptyString() {
         // First set a main resource
         DigitalObject obj = digitalObjectRepository.findById(
             testDataSet.digitalObject().getId()
@@ -1166,7 +1164,7 @@ public class DigitalObjectServiceIT extends IntegrationTest {
       }
 
       @Test
-      public void preservesMainResourceWhenNotInPatch() {
+      void preservesMainResourceWhenNotInPatch() {
         // Set a main resource first
         DigitalObject obj = digitalObjectRepository.findById(
             testDataSet.digitalObject().getId()
