@@ -85,6 +85,21 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
     }
 
+    @Test
+    void invalidPidWillCauseStatus400() throws Exception {
+
+      final String INVALID_PID = "123456";
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/%s",
+          INVALID_PID
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.delete(TEST_REQUEST_URL)
+      ).andExpect(status().isBadRequest());
+
+    }
+
   }
 
   @Nested

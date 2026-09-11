@@ -41,6 +41,7 @@ public class ArchivalRecord {
 
   @Id
   @Column(name = "pid") // TODO needs validation
+  @ValidPid
   private String pid;
 
   @Column(name = "publication_timestamp")

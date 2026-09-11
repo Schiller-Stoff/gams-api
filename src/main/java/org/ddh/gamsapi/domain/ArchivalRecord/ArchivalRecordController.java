@@ -4,7 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
@@ -12,6 +14,7 @@ import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = { "/api/curation/v1/archival-records" }) //TODO check auth!!! spring security config
@@ -22,6 +25,7 @@ public class ArchivalRecordController {
 
   private final IArchivalRecordService archivalRecordService;
   private final IProjectService projectService;
+  private final Validator validator;
 
   // TODO add to openapi the request param
   @Operation(
@@ -70,7 +74,15 @@ public class ArchivalRecordController {
     // need to check for the included leading slash from the PathVariable
     String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
 
-    // TODO validate pids!
+    Set<ConstraintViolation<ArchivalRecord>> violations =
+        validator.validateValue(ArchivalRecord.class, "pid", normalizedPid);
+
+    if (!violations.isEmpty()) {
+      throw new ArchivalRecordInvalidPidException(
+          "Cannot delete archival record. PID does not conform to required format: " + normalizedPid + ". " +  violations
+      );
+    }
+
     archivalRecordService.deleteById(normalizedPid);
   }
 

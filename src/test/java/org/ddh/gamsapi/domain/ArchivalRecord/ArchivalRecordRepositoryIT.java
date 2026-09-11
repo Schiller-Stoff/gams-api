@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
@@ -78,8 +79,10 @@ class ArchivalRecordRepositoryIT extends IntegrationTest {
     void doesNotAffectArchivalRecordsOfOtherDigitalObjects() {
       DigitalObject otherObject = testDataBuilder.addRandomObject(testDataSet);
 
+      String differentPid = TestArchivalRecord.PID.replace("1", "9");
+
       ArchivalRecord otherRecord = new ArchivalRecord();
-      otherRecord.setPid("other-object-record-" + System.currentTimeMillis());
+      otherRecord.setPid(differentPid);
       otherRecord.setDigitalObject(otherObject);
       otherRecord.setExternalId("some-external-id");
       archivalRecordRepository.save(otherRecord);
