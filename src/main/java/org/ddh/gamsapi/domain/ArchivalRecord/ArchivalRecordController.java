@@ -11,7 +11,6 @@ import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -49,10 +48,10 @@ public class ArchivalRecordController {
               content = @Content)
       }
   )
-  public void reserveArchivalRecord(
+  public void createArchivalRecord(
       @RequestBody @Valid ArchivalRecordReserveDto archivalRecord
   ){
-
+    // TODO implement
   }
 
   @DeleteMapping(path = "/{recordId}")
@@ -67,38 +66,7 @@ public class ArchivalRecordController {
   public void delete(
       @PathVariable Long recordId
   ){
-
-  }
-
-  @Operation(
-      summary = "Brings a reserved archival record in the draft state.",
-      description = "Allows to draft an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
-      responses = {
-          @ApiResponse(responseCode = "200", description = "Archival record successfully patched",
-              content = @Content)
-      }
-  )
-  @PatchMapping(path = "/draft")
-  public void draftArchivalRecord(
-      @RequestBody @Valid ArchivalRecordDraftDto archivalRecord
-  ){
-
-  }
-
-  @Operation(
-      summary = "Brings a drafted archival record in the published state.",
-      description = "Allows to publish an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
-      responses = {
-          @ApiResponse(responseCode = "200", description = "Archival record successfully published",
-              content = @Content)
-      }
-  )
-  @PatchMapping(path = "/publish")
-  public void publishArchivalRecord(
-      @RequestBody @Valid ArchivalRecordPublishDto archivalRecord
-  ){
-
-
+    // TODO implement
   }
 
 }
