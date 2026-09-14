@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
@@ -16,9 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -522,6 +520,53 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
 
 
+
+
+  }
+
+  @Nested
+  class POST {
+
+    @Test
+    void createsExpectedArchivalRecord() throws Exception {
+
+      String REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records?objectId=%s",
+          testDataSet.digitalObject().getId()
+      );
+
+      String response = mockMvc.perform(
+              MockMvcRequestBuilders.post(REQUEST_URL)
+          ).andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      var parsedResponse = new ObjectMapper().readValue(response, ArchivalRecord.class);
+      String createdPid = parsedResponse.getPid();
+
+      Assertions.assertThat(
+          archivalRecordRepository.existsById(createdPid)
+      ).isTrue();
+
+    }
+
+    @Test
+    void addsAnAdditionalArchivalRecords() throws Exception {
+
+      String REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records?objectId=%s",
+          testDataSet.digitalObject().getId()
+      );
+
+      mockMvc.perform(
+              MockMvcRequestBuilders.post(REQUEST_URL)
+          ).andExpect(status().isOk())
+          .andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(
+          archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(testDataSet.digitalObject().getId())
+      ).hasSize(2);
+
+    }
 
 
   }
