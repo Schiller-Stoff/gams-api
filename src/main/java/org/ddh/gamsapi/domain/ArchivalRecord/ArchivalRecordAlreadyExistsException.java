@@ -1,6 +1,5 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
-import org.ddh.gamsapi.infrastructure.System.exceptions.GamsApiException;
 import org.springframework.http.HttpStatus;
 
 /**
