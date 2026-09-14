@@ -5,6 +5,7 @@ import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   @Autowired
   IArchivalRecordRepository archivalRecordRepository;
+
+  @Autowired
+  IDigitalObjectRepository  digitalObjectRepository;
 
   // Deactivates the auditing process.
   @MockitoBean
@@ -68,6 +72,56 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid())
       ).isFalse();
     }
+
+  }
+
+  @Nested
+  class CreateArchivalRecord {
+
+    @Test
+    void createsExpectedArchivalRecord(){
+      var savedArchivalRecord = archivalRecordService.createArchivalRecord(testDataSet.digitalObject().getId());
+      var foundArchivalRecord = archivalRecordRepository.findById(savedArchivalRecord.getPid()).orElseThrow();
+
+      Assertions.assertThat(savedArchivalRecord)
+          .isNotNull();
+
+      Assertions.assertThat(savedArchivalRecord.getPid())
+          .isEqualTo(foundArchivalRecord.getPid());
+
+
+    }
+
+    @Test
+    void doesNotChangeLinkedDigitalObject(){
+
+      archivalRecordService.createArchivalRecord(testDataSet.digitalObject().getId());
+
+      var linkedObject = digitalObjectRepository.findDigitalObjectById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      Assertions.assertThat(linkedObject.getPublisher())
+          .isNotNull()
+          .isEqualTo(testDataSet.digitalObject().getPublisher());
+
+      Assertions.assertThat(linkedObject.getObjectType())
+          .isEqualTo(testDataSet.digitalObject().getObjectType());
+
+    }
+
+    @Test
+    void increasesAmountOfArchivalRecordsSaved(){
+
+      archivalRecordService.createArchivalRecord(testDataSet.digitalObject().getId());
+
+      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(testDataSet.digitalObject().getId());
+
+      Assertions.assertThat(foundRecords).hasSize(2); // should now contain 2 (aside from test data)
+
+    }
+
+
+
 
   }
 

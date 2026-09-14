@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.stereotype.Service;
@@ -42,4 +43,39 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecordRepository.deleteById(archivalRecordPid);
   }
 
+  @Override
+  @Transactional
+  public ArchivalRecord createArchivalRecord(String objectId) {
+    if(!digitalObjectRepository.existsById(objectId)){
+      throw new DigitalObjectNotFoundException(
+          "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
+      );
+    }
+
+    ArchivalRecord archivalRecord = new ArchivalRecord();
+
+    // TODO communication with handle server - needs to allow to set handle
+    String pid = HandleGenerator.generate();
+    // versions are not expressed in the pid
+    archivalRecord.setPid(pid);
+
+    // TODO test if nothing changes on object after save (object should not be saved along)
+    DigitalObject linkedDigitalObject = new DigitalObject();
+    linkedDigitalObject.setId(objectId);
+    archivalRecord.setDigitalObject(linkedDigitalObject);
+
+    // these fields should be null
+    archivalRecord.setExternalId(null);
+    archivalRecord.setPublicationTimeStamp(null);
+
+    var savedRecord = archivalRecordRepository.save(archivalRecord);
+    log.info("Successfully created archival record {} for digital object: {}", archivalRecord, objectId);
+
+    return savedRecord;
+  }
+
+  @Override
+  public void saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+
+  }
 }

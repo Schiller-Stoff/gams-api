@@ -53,7 +53,7 @@ public class ArchivalRecordController {
       }
   )
   public void createArchivalRecord(
-      @RequestBody @Valid ArchivalRecordReserveDto archivalRecord
+      @RequestBody @Valid ArchivalRecordDto archivalRecord
   ){
     // TODO implement
   }

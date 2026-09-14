@@ -22,5 +22,9 @@ public interface IArchivalRecordService {
   void deleteById(String archivalRecordPid);
 
 
+  ArchivalRecord createArchivalRecord(String objectId);
+
+  void saveArchivalRecord(ArchivalRecordDto archivalRecord);
+
 
 }
