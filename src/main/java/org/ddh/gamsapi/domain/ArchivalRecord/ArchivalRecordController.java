@@ -13,6 +13,7 @@ import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -52,9 +53,41 @@ public class ArchivalRecordController {
       }
   )
   public ArchivalRecord createArchivalRecord(
-      @RequestParam String objectId
+      @RequestParam Optional<String> objectId
   ){
-    return archivalRecordService.createArchivalRecord(objectId);
+
+    if(objectId.isPresent()) {
+      return archivalRecordService.createArchivalRecordByObjectId(objectId.get());
+    } else {
+      return archivalRecordService.createArchivalRecord();
+    }
+  }
+
+  //TODO open api annotations
+  @PutMapping(path = "/{*pid}")
+  public ArchivalRecord createArchivalRecordViaPid(
+      @PathVariable String pid,
+      @RequestParam Optional<String> objectId
+  ){
+
+    // need to check for the included leading slash from the PathVariable
+    String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
+
+    Set<ConstraintViolation<ArchivalRecord>> violations =
+        validator.validateValue(ArchivalRecord.class, "pid", normalizedPid);
+
+    if (!violations.isEmpty()) {
+      throw new ArchivalRecordInvalidPidException(
+          "Cannot create archival record. PID does not conform to required format: " + normalizedPid + ". " +  violations
+      );
+    }
+
+    if(objectId.isPresent()) {
+      return archivalRecordService.createArchivalRecordByObjectIdAndPid(objectId.get(), normalizedPid);
+    } else {
+      return archivalRecordService.createArchivalRecordByPid(normalizedPid);
+    }
+
   }
 
   // TODO update open-api annotation

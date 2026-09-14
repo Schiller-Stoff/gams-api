@@ -2,7 +2,6 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.IHandleClient;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
@@ -47,7 +46,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord createArchivalRecord(String objectId) {
+  public ArchivalRecord createArchivalRecordByObjectId(String objectId) {
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
           "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
@@ -55,20 +54,38 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
-
-    // TODO communication with handle server - needs to allow to set handle
     String pid = handleClient.generate();
-    // versions are not expressed in the pid
     archivalRecord.setPid(pid);
-
-    // TODO test if nothing changes on object after save (object should not be saved along)
     DigitalObject linkedDigitalObject = new DigitalObject();
     linkedDigitalObject.setId(objectId);
     archivalRecord.setDigitalObject(linkedDigitalObject);
 
-    // these fields should be null
-    archivalRecord.setExternalId(null);
-    archivalRecord.setPublicationTimeStamp(null);
+    var savedRecord = archivalRecordRepository.save(archivalRecord);
+    log.info("Successfully created archival record with generated pid: {} for digital object: {}", archivalRecord, objectId);
+
+    return savedRecord;
+  }
+
+  @Override
+  public ArchivalRecord createArchivalRecordByObjectIdAndPid(String objectId, String pid) {
+    if(!digitalObjectRepository.existsById(objectId)){
+      throw new DigitalObjectNotFoundException(
+          "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
+      );
+    }
+
+    if(archivalRecordRepository.existsById(pid)){
+      throw new ArchivalRecordAlreadyExistsException(
+          "Cannot create archival record for digital object: " + objectId + ". The archival record already exists with handle: " + pid
+      );
+    }
+
+    ArchivalRecord archivalRecord = new ArchivalRecord();
+    archivalRecord.setPid(pid);
+
+    DigitalObject linkedDigitalObject = new DigitalObject();
+    linkedDigitalObject.setId(objectId);
+    archivalRecord.setDigitalObject(linkedDigitalObject);
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record {} for digital object: {}", archivalRecord, objectId);
@@ -77,7 +94,38 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
-  public void saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+  public ArchivalRecord createArchivalRecord() {
+    ArchivalRecord archivalRecord = new ArchivalRecord();
+    String pid = handleClient.generate();
+    archivalRecord.setPid(pid);
+
+    var savedRecord = archivalRecordRepository.save(archivalRecord);
+    log.info("Successfully created archival record {} (without assigned object or pid)", archivalRecord);
+    return savedRecord;
+  }
+
+  @Override
+  public ArchivalRecord createArchivalRecordByPid(String pid) {
+    if(archivalRecordRepository.existsById(pid)){
+      throw new ArchivalRecordAlreadyExistsException(
+          "Cannot create archival record. Archival record with pid already exists: " + pid
+      );
+    }
+
+    ArchivalRecord archivalRecord = new ArchivalRecord();
+    archivalRecord.setPid(pid);
+
+    var savedRecord = archivalRecordRepository.save(archivalRecord);
+    log.info("Successfully created archival record {}", archivalRecord);
+    return savedRecord;
 
   }
+
+  @Override
+  public void saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+
+    // TODO think about
+
+  }
+
 }

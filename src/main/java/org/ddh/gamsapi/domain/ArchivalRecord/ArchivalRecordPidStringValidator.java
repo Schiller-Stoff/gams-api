@@ -20,6 +20,11 @@ public class ArchivalRecordPidStringValidator implements ConstraintValidator<Val
 
     context.disableDefaultConstraintViolation();
 
+    if (pid.startsWith("/")){
+      addViolation(context, "Pid must not start with '/' - Invalid PID: " + pid);
+      return false;
+    }
+
     if (pid.length() < MIN_LENGTH) {
       addViolation(context, "PID is too short (shorter than " + MIN_LENGTH + "). Got: " + pid);
       return false;

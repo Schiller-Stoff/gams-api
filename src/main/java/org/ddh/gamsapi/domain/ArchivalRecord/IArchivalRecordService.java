@@ -21,8 +21,33 @@ public interface IArchivalRecordService {
    */
   void deleteById(String archivalRecordPid);
 
+  /**
+   * Creates an archival record by also specifying a linked digital object.
+   * @param objectId id of linked object
+   * @return archival record
+   */
+  ArchivalRecord createArchivalRecordByObjectId(String objectId);
 
-  ArchivalRecord createArchivalRecord(String objectId);
+  /**
+   * Creates an archival record with given pid linked to specified digital object
+   * @param objectId id of the linked object
+   * @param pid pid of the archival record
+   * @return archival record entity
+   */
+  ArchivalRecord createArchivalRecordByObjectIdAndPid(String objectId, String pid);
+
+  /**
+   * Create an archival record
+   * @return archival record entity
+   */
+  ArchivalRecord createArchivalRecord();
+
+  /**
+   * Create an archival record via specifying the pid
+   * @param pid pid of the archival record
+   * @return archival record entity
+   */
+  ArchivalRecord createArchivalRecordByPid(String pid);
 
   void saveArchivalRecord(ArchivalRecordDto archivalRecord);
 
