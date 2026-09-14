@@ -16,31 +16,11 @@ public interface IArchivalRecordService {
 
 
   /**
-   * Saves given archival record bia generating a id + checking uniqueness of the pid + assigning archival status reserved.
-   * @param objectId object's archival record that should be drafted.
-   * @param archivalRecordReserveDto the ArchivalRecord to save
-   * @return the saved ArchivalRecord
-   */
-  ArchivalRecord reserve(String objectId, ArchivalRecordReserveDto archivalRecordReserveDto);
-
-  /**
    * Deletes an archival record by it's id.
    * @param archivalRecordPid pid of the archival record.
    */
   void deleteById(String archivalRecordPid);
 
-  /**
-   * Updates an existing archival record
-   * @param objectId object's archival record that should be drafted.
-   * @param archivalRecordDraftDto contains data about archival record to be updated.
-   */
-  void draftArchivalRecord(String objectId, ArchivalRecordDraftDto archivalRecordDraftDto);
 
-  /**
-   * Publishes an existing, active archival record
-   * @param objectId object's archival record that should be published.
-   * @param archivalRecordPublishDto contains data necessary for publishing process.
-   */
-  void publishArchivalRecord(String objectId, ArchivalRecordPublishDto archivalRecordPublishDto);
 
 }
