@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils;
 
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import java.nio.charset.StandardCharsets;

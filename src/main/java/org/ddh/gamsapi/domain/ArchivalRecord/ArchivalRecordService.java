@@ -2,8 +2,9 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.IHandleClient;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObjectBuilder;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   private final IArchivalRecordRepository archivalRecordRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
+  private final IHandleClient handleClient;
 
   @Override
   public List<ArchivalRecordCompactView> findForObject(String digitalObjectId) {
@@ -55,7 +57,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
 
     // TODO communication with handle server - needs to allow to set handle
-    String pid = HandleGenerator.generate();
+    String pid = handleClient.generate();
     // versions are not expressed in the pid
     archivalRecord.setPid(pid);
 
