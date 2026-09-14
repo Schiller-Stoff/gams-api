@@ -529,24 +529,6 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   class POST {
 
     @Test
-    void createsExpectedArchivalRecord() throws Exception {
-      final String REQUEST_URL = "/api/curation/v1/archival-records";
-
-      String response = mockMvc.perform(
-              MockMvcRequestBuilders.post(REQUEST_URL)
-          ).andExpect(status().isOk())
-          .andReturn().getResponse().getContentAsString();
-
-      var parsedResponse = new ObjectMapper().readValue(response, ArchivalRecord.class);
-      String createdPid = parsedResponse.getPid();
-
-      Assertions.assertThat(
-          archivalRecordRepository.existsById(createdPid)
-      ).isTrue();
-
-    }
-
-    @Test
     void createsExpectedArchivalRecordWithObjectId() throws Exception {
 
       final String REQUEST_URL = String.format(
@@ -568,28 +550,6 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
     }
 
-    @Test
-    void addsNoAdditionalArchivalRecordToObject_becauseObjectWasNotDefined() throws Exception {
-
-      String REQUEST_URL = "/api/curation/v1/archival-records";
-
-      mockMvc.perform(
-              MockMvcRequestBuilders.post(REQUEST_URL)
-          ).andExpect(status().isOk())
-          .andReturn().getResponse().getContentAsString();
-
-      Assertions.assertThat(
-          archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
-              testDataSet.digitalObject().getId()
-          )
-      ).hasSize(1); // object was not defined
-
-      // but should be two globally
-      Assertions.assertThat(
-          archivalRecordRepository.findAll()
-      ).hasSize(2);
-
-    }
 
   }
 

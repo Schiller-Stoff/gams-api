@@ -53,21 +53,16 @@ public class ArchivalRecordController {
       }
   )
   public ArchivalRecord createArchivalRecord(
-      @RequestParam Optional<String> objectId
+      @RequestParam String objectId
   ){
-
-    if(objectId.isPresent()) {
-      return archivalRecordService.createArchivalRecordByObjectId(objectId.get());
-    } else {
-      return archivalRecordService.createArchivalRecord();
-    }
+    return archivalRecordService.createArchivalRecordByObjectId(objectId);
   }
 
   //TODO open api annotations
   @PutMapping(path = "/{*pid}")
   public ArchivalRecord createArchivalRecordViaPid(
       @PathVariable String pid,
-      @RequestParam Optional<String> objectId
+      @RequestParam String objectId
   ){
 
     // need to check for the included leading slash from the PathVariable
@@ -82,11 +77,7 @@ public class ArchivalRecordController {
       );
     }
 
-    if(objectId.isPresent()) {
-      return archivalRecordService.createArchivalRecordByObjectIdAndPid(objectId.get(), normalizedPid);
-    } else {
-      return archivalRecordService.createArchivalRecordByPid(normalizedPid);
-    }
+    return archivalRecordService.createArchivalRecordByObjectIdAndPid(objectId, normalizedPid);
 
   }
 
