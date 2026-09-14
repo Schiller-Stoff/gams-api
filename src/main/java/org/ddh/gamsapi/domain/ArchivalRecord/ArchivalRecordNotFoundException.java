@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 /**
  * Represents error states where the archival record was not found.
  */
-public class ArchivalRecordNotFoundException extends GamsApiException {
+public class ArchivalRecordNotFoundException extends ArchivalRecordException {
 
   public ArchivalRecordNotFoundException(String reason) {
     super(HttpStatus.NOT_FOUND, reason);
