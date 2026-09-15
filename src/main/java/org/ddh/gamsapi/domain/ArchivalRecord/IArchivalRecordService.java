@@ -49,7 +49,12 @@ public interface IArchivalRecordService {
    */
   ArchivalRecord createArchivalRecordByPid(String pid);
 
-  void saveArchivalRecord(ArchivalRecordDto archivalRecord);
+  /**
+   * Updates given archival record
+   * @param archivalRecord dto containing data to change the archival record with
+   * @return saved archival record entity
+   */
+  ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord);
 
 
 }

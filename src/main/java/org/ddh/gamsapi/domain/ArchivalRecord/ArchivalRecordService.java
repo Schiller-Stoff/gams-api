@@ -67,6 +67,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
+  @Transactional
   public ArchivalRecord createArchivalRecordByObjectIdAndPid(String objectId, String pid) {
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
@@ -94,6 +95,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
+  @Transactional
   public ArchivalRecord createArchivalRecord() {
     ArchivalRecord archivalRecord = new ArchivalRecord();
     String pid = handleClient.generate();
@@ -105,6 +107,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
+  @Transactional
   public ArchivalRecord createArchivalRecordByPid(String pid) {
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
@@ -122,10 +125,39 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
-  public void saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+  @Transactional
+  public ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+    if((archivalRecord.getPublicationTimeStamp() == null) &&  (archivalRecord.getExternalId() == null)){
+      throw new ArchivalRecordInvalidStateException(
+          "Cannot patch archival record. You either have to provide a publication timestamp or an external id - but both are null. Got values: " + archivalRecord
+      );
+    }
 
-    // TODO think about
+    var curArchivalRecord = archivalRecordRepository.findById(archivalRecord.getPid())
+        .orElseThrow(() ->
+          new ArchivalRecordNotFoundException(
+              "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
+          ));
+
+    curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
+    curArchivalRecord.setExternalId(archivalRecord.getExternalId());
+    // digital object cannot be changed (after creation)
+    // curArchivalRecord.setDigitalObject();
+    // pid cannot be changed after creation!
+    // curArchivalRecord.setPid(archivalRecord.getPid());
+
+    if(archivalRecord.getPublicationTimeStamp() != null){
+      if(archivalRecord.getExternalId() == null){
+        throw new ArchivalRecordInvalidStateException(
+            "Cannot patch archival record. Archival record has a valid publicationTimeStamp but no external id assigned to it - which is illegal." + curArchivalRecord
+        );
+      }
+
+    }
+
+    log.info("Successfully patched archival record {}", curArchivalRecord);
+
+    return curArchivalRecord;
 
   }
-
 }

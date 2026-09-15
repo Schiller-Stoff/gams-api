@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import java.time.Instant;
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ArchivalRecordServiceIT extends IntegrationTest {
 
@@ -180,7 +182,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
-  public class CreateArchivalRecordByObjectIdAndPid {
+  class CreateArchivalRecordByObjectIdAndPid {
 
     @Test
     void createsExpectedArchivalRecordViaProvidingExternalPid(){
@@ -220,5 +222,71 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  class SaveArchivalRecord {
+
+    @Test
+    void changesExpectedArchivalRecord(){
+
+      final String TEST_EXTERNAL_REFERENCE = "foobarxyz";
+      final Instant TEST_TIMESTAMP = Instant.now();
+
+      var changeDto = new ArchivalRecordDto();
+      changeDto.setPid(testDataSet.archivalRecord().getPid());
+      changeDto.setExternalId(TEST_EXTERNAL_REFERENCE);
+      changeDto.setPublicationTimeStamp(TEST_TIMESTAMP);
+
+      var savedRecord = archivalRecordService.saveArchivalRecord(changeDto);
+
+      Assertions.assertThat(savedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_REFERENCE);
+      Assertions.assertThat(savedRecord.getPublicationTimeStamp()).isEqualTo(TEST_TIMESTAMP);
+
+    }
+
+    @Test
+    void throwsIfArchivalRecordDoesNotExist(){
+
+      final String TEST_PID = HandleGenerator.generate();
+
+      var changeDto = new ArchivalRecordDto();
+      changeDto.setPid(TEST_PID);
+      changeDto.setExternalId("foobarxyz");
+      changeDto.setPublicationTimeStamp(Instant.now());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
+          .isInstanceOf(ArchivalRecordNotFoundException.class);
+
+    }
+
+    @Test
+    void throwsIfNeitherPublicationTimeNorExternalIdWasGiven(){
+
+      var changeDto = new ArchivalRecordDto();
+      changeDto.setPid(testDataSet.archivalRecord().getPid());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
+      .isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+    }
+
+    @Test
+    void cannotNullifyArchivalRecordExternalIdIfPublicationTimestampIsAlreadySet(){
+
+      // need to make sure that a publication timestamp was defined first
+      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+      testRecord.setPublicationTimeStamp(Instant.now());
+      archivalRecordRepository.save(testRecord);
+
+      var changeDto = new ArchivalRecordDto();
+      changeDto.setPid(testDataSet.archivalRecord().getPid());
+      changeDto.setExternalId(null);
+      // publication timestamp must be null here
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
+          .isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+    }
+
+  }
 
 }
