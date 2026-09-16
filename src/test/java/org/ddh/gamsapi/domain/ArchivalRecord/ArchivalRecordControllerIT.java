@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
@@ -18,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.time.Instant;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -600,6 +603,97 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       Assertions.assertThat(
           archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(testDataSet.digitalObject().getId())
       ).hasSize(2); // has size 2 now!
+
+    }
+
+  }
+
+  @Nested
+  class PATCH {
+
+    @Test
+    void successfullyPatchesGivenArchivalRecord() throws Exception {
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now();
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      final String REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/%s",
+          testDataSet.archivalRecord().getPid()
+      );
+
+      final String body = String.format(
+          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\"}",
+          TEST_PUBLICATION_TIMESTAMP,
+          TEST_EXTERNAL_ID
+      );
+
+      String response = mockMvc.perform(
+          MockMvcRequestBuilders.patch(REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(body)
+        ).andExpect(status().isOk()
+      ).andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(response)
+          .contains(testDataSet.archivalRecord().getPid());
+
+      Assertions.assertThat(response)
+          .contains(TEST_PUBLICATION_TIMESTAMP.toString());
+
+      Assertions.assertThat(response)
+          .contains(TEST_EXTERNAL_ID);
+
+    }
+
+    @Test
+    void throwsIfGivenPidWasInvalid() throws Exception {
+
+      final String INVALID_PID = "foobar_bar";
+
+      final String REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/%s",
+          INVALID_PID
+      );
+
+      final String body = String.format(
+          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\"}",
+          Instant.now(),
+          "foobarxyz"
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.patch(REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(body)
+      ).andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    void throwsIfArchivalRecordDoesntExist() throws Exception {
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now();
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      final String DIFFERENT_PID = testDataSet.archivalRecord().getPid().replace("8","2");
+
+      final String REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/%s",
+          DIFFERENT_PID
+      );
+
+      final String body = String.format(
+          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\"}",
+          TEST_PUBLICATION_TIMESTAMP,
+          TEST_EXTERNAL_ID
+      );
+
+      mockMvc.perform(
+          MockMvcRequestBuilders.patch(REQUEST_URL)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(body)
+      ).andExpect(status().isNotFound());
 
     }
 

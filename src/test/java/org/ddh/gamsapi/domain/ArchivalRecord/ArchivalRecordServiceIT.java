@@ -16,6 +16,7 @@ import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ArchivalRecordServiceIT extends IntegrationTest {
@@ -284,6 +285,30 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
           .isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+    }
+
+    @Test
+    void cannotSetPublicationTimeStampToNull(){
+
+      Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      // need to make sure that a publication timestamp was defined first
+      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+      testRecord.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+      testRecord.setExternalId("foobarxyz");
+      archivalRecordRepository.save(testRecord);
+
+      var changeDto = new ArchivalRecordDto();
+      changeDto.setPid(testDataSet.archivalRecord().getPid());
+      changeDto.setExternalId(testRecord.getExternalId());
+      // publication timestamp must be null
+      changeDto.setPublicationTimeStamp(null);
+
+      var savedRecord = archivalRecordService.saveArchivalRecord(changeDto);
+
+      // publicationTimestamp not null
+      Assertions.assertThat(savedRecord.getPublicationTimeStamp()).isEqualTo(TEST_PUBLICATION_TIMESTAMP.truncatedTo(ChronoUnit.SECONDS));
 
     }
 

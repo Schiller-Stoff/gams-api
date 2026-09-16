@@ -139,12 +139,18 @@ public class ArchivalRecordService implements IArchivalRecordService {
               "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
           ));
 
-    curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
-    curArchivalRecord.setExternalId(archivalRecord.getExternalId());
+    // cannot set publication timestamp to null if once set
+    if(archivalRecord.getPublicationTimeStamp() != null){
+      curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
+    }
+
+    // cannot set archival record to null if once set
+    if(archivalRecord.getExternalId() != null){
+      curArchivalRecord.setExternalId(archivalRecord.getExternalId());
+    }
+
     // digital object cannot be changed (after creation)
-    // curArchivalRecord.setDigitalObject();
     // pid cannot be changed after creation!
-    // curArchivalRecord.setPid(archivalRecord.getPid());
 
     if(archivalRecord.getPublicationTimeStamp() != null){
       if(archivalRecord.getExternalId() == null){

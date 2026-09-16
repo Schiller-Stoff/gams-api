@@ -12,6 +12,8 @@ import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 
@@ -106,6 +108,49 @@ public class ArchivalRecordController {
     }
 
     archivalRecordService.deleteById(normalizedPid);
+  }
+
+  @PatchMapping(path = "/{*pid}") // pattern takes everything after (but includes the leading slash!)
+  // TODO open api annotations
+  public ArchivalRecord patchArchivalRecord(
+      @PathVariable String pid,
+      @RequestBody ArchivalRecordUpdateDto archivalRecordUpdateDto
+  ){
+
+    // need to check for the included leading slash from the PathVariable
+    String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
+
+    Set<ConstraintViolation<ArchivalRecord>> violations =
+        validator.validateValue(ArchivalRecord.class, "pid", normalizedPid);
+
+    if (!violations.isEmpty()) {
+      throw new ArchivalRecordInvalidPidException(
+          "Cannot patch archival record. Given pid does not conform to required format: " + normalizedPid + ". " +  violations
+      );
+    }
+
+    var archivalRecordDto = new ArchivalRecordDto();
+    archivalRecordDto.setPid(normalizedPid);
+    archivalRecordDto.setObjectId(archivalRecordUpdateDto.getObjectId());
+    archivalRecordDto.setExternalId(archivalRecordUpdateDto.getExternalId());
+
+    // if no publication date was set -> no parsing needs to be done.
+    if(archivalRecordUpdateDto.getPublicationTimeStamp() == null)
+      archivalRecordService.saveArchivalRecord(archivalRecordDto);
+
+    Instant publicationDate;
+    try {
+      publicationDate = Instant.parse(archivalRecordUpdateDto.getPublicationTimeStamp());
+      archivalRecordDto.setPublicationTimeStamp(publicationDate);
+    } catch (DateTimeParseException e) {
+      throw new ArchivalRecordInvalidPublicationTimeStampException(
+        "Cannot parse publication timestamp of given archival record to patch: " + archivalRecordUpdateDto.getPublicationTimeStamp() + " " + archivalRecordUpdateDto,
+        e
+      );
+    }
+
+    return archivalRecordService.saveArchivalRecord(archivalRecordDto);
+
   }
 
 }
