@@ -179,12 +179,11 @@ public class ArchivalRecordController {
 
   }
 
-  @PutMapping("/publish/{*pid}")
+  @PutMapping("/published/{*pid}")
   public ArchivalRecord publishArchivalRecord(
       @PathVariable String pid,
-      ArchivalRecordPublishDto archivalRecordPublishDto
+      @Valid @RequestBody ArchivalRecordPublishDto archivalRecordPublishDto
   ){
-    // TODO test!
 
     // need to check for the included leading slash from the PathVariable
     String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
