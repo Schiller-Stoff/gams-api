@@ -7,6 +7,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -401,4 +402,110 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
 
   }
+
+  @Nested
+  class PublishArchivalRecord {
+
+    @Test
+    void publishesExpectedArchivalRecord(){
+
+      // first need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+
+      var publishedArchivalRecord = archivalRecordService.publishArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      );
+
+      Assertions.assertThat(
+          publishedArchivalRecord.getPublicationTimeStamp()
+      ).isEqualTo(TEST_PUBLICATION_TIMESTAMP);
+
+      Assertions.assertThat(publishedArchivalRecord.getArchivalState())
+          .isEqualTo(ArchivalState.PUBLISHED);
+
+      Assertions.assertThat(publishedArchivalRecord.getExternalId())
+          .isEqualTo(TEST_EXTERNAL_ID);
+    }
+
+    @Test
+    void throwsIfPublicationDateIsNull(){
+
+      var changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(null);
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(testDataSet.archivalRecord().getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordInvalidPublicationTimeStampException.class);
+
+    }
+
+    @Test
+    void throwsIfArchivalRecordWasNotFound(){
+
+      var changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+
+      final String NOT_EXISTING_PID = testDataSet.archivalRecord().getPid().replace("1", "9");
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(NOT_EXISTING_PID, changeDto)
+      ).isInstanceOf(ArchivalRecordNotFoundException.class);
+
+    }
+
+    @Test
+    void cannotPublishRecordInRESERVEDState(){
+
+      // first change test data
+      var testArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+      testArchivalRecord.setArchivalState(ArchivalState.RESERVED);
+      testArchivalRecord.setExternalId("foobarxyz");
+      archivalRecordRepository.save(testArchivalRecord);
+
+      var changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(testArchivalRecord.getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+
+
+    }
+
+    @Test
+    void cannotPublishRecordInPUBLISHEDState(){
+
+      // first change test data
+      var testArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+      testArchivalRecord.setArchivalState(ArchivalState.PUBLISHED);
+      testArchivalRecord.setExternalId("foobarxyz");
+      testArchivalRecord.setPublicationTimeStamp(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+      archivalRecordRepository.save(testArchivalRecord);
+
+      var changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(testArchivalRecord.getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+
+
+    }
+
+  }
+
 }

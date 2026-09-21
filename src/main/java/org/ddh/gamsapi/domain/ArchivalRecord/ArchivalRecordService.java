@@ -218,10 +218,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord publishArchivalRecord(String pid, ArchivalRecordPublishDto archivalRecordPublishDto) {
-    // TODO test
-
     if(archivalRecordPublishDto.getPublicationTimeStamp() == null){
-      throw new ArchivalRecordInvalidStateException(
+      throw new ArchivalRecordInvalidPublicationTimeStampException(
           "Cannot publish archival record - the provided publication timestamp is null. Got dto: " + archivalRecordPublishDto
       );
     }
@@ -231,9 +229,14 @@ public class ArchivalRecordService implements IArchivalRecordService {
             "Cannot publish archival record with pid: " + pid + " The record does not exist."
         ));
 
-    // TODO validate? (external id must be set at this moment)
+    if(activeRecord.getArchivalState() != ArchivalState.DRAFT){
+      throw new ArchivalRecordInvalidStateException(
+          "Cannot publish archival record - Requested archival record has not the required DRAFT state. For pid: " + pid + " And archival record: " + archivalRecordPublishDto
+      );
+    }
 
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
+    activeRecord.setArchivalState(ArchivalState.PUBLISHED);
     return activeRecord;
   }
 }
