@@ -3,8 +3,10 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -49,6 +51,11 @@ public class ArchivalRecord {
 
   @Column(name = "external_id")
   private String externalId;
+
+  @Column(name = "archival_state")
+  @Enumerated(EnumType.STRING)
+  @NotNull
+  private ArchivalState archivalState;
 
   /**
    * Proper equals/hashCode for entities with assigned IDs.
