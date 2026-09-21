@@ -7,6 +7,7 @@ import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -561,6 +562,125 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
   @Nested
   class PUT {
+
+    @Nested
+    class DraftArchivalRecord {
+
+      @Test
+      void draftsExpectedArchivalRecord() throws Exception {
+
+        final String TEST_EXTERNAL_ID = "foobarxyz";
+
+        final String REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/draft/%s",
+            testDataSet.archivalRecord().getPid()
+        );
+
+        final String BODY = String.format(
+            "{\"externalId\":\"%s\"}",
+            TEST_EXTERNAL_ID
+        );
+
+        String response = mockMvc.perform(
+            MockMvcRequestBuilders.put(REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY)
+        ).andExpect(status().isOk()
+        ).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(response)
+            .contains(TEST_EXTERNAL_ID)
+            .contains(ArchivalState.DRAFT.name())
+            .contains("null") // publicationDate should be null
+            .contains(testDataSet.archivalRecord().getPid());
+
+      }
+
+      @Test
+      void throwsIfExternalIdIsTooShort() throws Exception {
+
+        final String TEST_EXTERNAL_ID = "fo";
+
+        final String REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/draft/%s",
+            testDataSet.archivalRecord().getPid()
+        );
+
+        final String BODY = String.format(
+            "{\"externalId\":\"%s\"}",
+            TEST_EXTERNAL_ID
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.put(REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY)
+        ).andExpect(status().isBadRequest());
+
+      }
+
+      @Test
+      void throwsIfNoReservedRecordIsAvailable() throws Exception {
+
+        final String TEST_EXTERNAL_ID = "foobarxyz";
+
+        // first set test record to DRAFT state.
+        var archivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid())
+            .orElseThrow();
+        archivalRecord.setArchivalState(ArchivalState.PUBLISHED);
+        archivalRecord.setExternalId(TEST_EXTERNAL_ID);
+        archivalRecordRepository.save(archivalRecord);
+
+        final String REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/draft/%s",
+            testDataSet.archivalRecord().getPid()
+        );
+
+        final String BODY = String.format(
+            "{\"externalId\":\"%s\"}",
+            TEST_EXTERNAL_ID
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.put(REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY)
+        ).andExpect(status().isBadRequest());
+
+      }
+
+
+      @Test
+      void throwsIfOnlyPublishedRecordIsAvailable() throws Exception {
+
+        final String TEST_EXTERNAL_ID = "foobarxyz";
+
+        // first set test record to DRAFT state.
+        var archivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid())
+            .orElseThrow();
+        archivalRecord.setArchivalState(ArchivalState.PUBLISHED);
+        archivalRecord.setExternalId(TEST_EXTERNAL_ID);
+        archivalRecordRepository.save(archivalRecord);
+
+        final String REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/draft/%s",
+            testDataSet.archivalRecord().getPid()
+        );
+
+        final String BODY = String.format(
+            "{\"externalId\":\"%s\"}",
+            TEST_EXTERNAL_ID
+        );
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.put(REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY)
+        ).andExpect(status().isBadRequest());
+
+      }
+
+    }
 
     @Test
     void createsExpectedArchivalRecord() throws Exception {

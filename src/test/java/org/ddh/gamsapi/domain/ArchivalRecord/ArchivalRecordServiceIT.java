@@ -343,6 +343,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       Assertions.assertThat(changedRecord.getExternalId())
           .isEqualTo(TEST_EXTERNAL_REFERENCE);
 
+      Assertions.assertThat(changedRecord.getArchivalState())
+          .isEqualTo(ArchivalState.DRAFT);
+
     }
 
     @Test

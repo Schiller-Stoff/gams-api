@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -159,7 +160,7 @@ public class ArchivalRecordController {
   @PutMapping("/draft/{*pid}")
   public ArchivalRecord draftArchivalRecord(
       @PathVariable String pid,
-      ArchivalRecordDraftDto archivalRecordDraftDto
+      @Valid @RequestBody ArchivalRecordDraftDto archivalRecordDraftDto
   ){
 
     // need to check for the included leading slash from the PathVariable
@@ -174,8 +175,7 @@ public class ArchivalRecordController {
       );
     }
 
-    // TODO test!
-    return archivalRecordService.draftArchivalRecord(pid, archivalRecordDraftDto);
+    return archivalRecordService.draftArchivalRecord(normalizedPid, archivalRecordDraftDto);
 
   }
 
@@ -198,7 +198,7 @@ public class ArchivalRecordController {
       );
     }
 
-    return archivalRecordService.publishArchivalRecord(pid, archivalRecordPublishDto);
+    return archivalRecordService.publishArchivalRecord(normalizedPid, archivalRecordPublishDto);
 
   }
 

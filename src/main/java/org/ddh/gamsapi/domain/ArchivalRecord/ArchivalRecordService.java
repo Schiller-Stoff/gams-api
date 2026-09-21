@@ -211,6 +211,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
+    activeRecord.setArchivalState(ArchivalState.DRAFT);
     return activeRecord;
   }
 
