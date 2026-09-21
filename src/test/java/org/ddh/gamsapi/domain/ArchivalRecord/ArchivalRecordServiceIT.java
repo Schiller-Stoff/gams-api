@@ -4,7 +4,9 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -322,4 +324,78 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  class DraftArchivalRecord {
+
+    @Test
+    void changesExpectedArchivalRecordExternalReference(){
+
+      final String TEST_EXTERNAL_REFERENCE = "foobarxyz";
+
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(TEST_EXTERNAL_REFERENCE);
+
+      var changedRecord = archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      );
+
+      Assertions.assertThat(changedRecord.getExternalId())
+          .isEqualTo(TEST_EXTERNAL_REFERENCE);
+
+    }
+
+    @Test
+    void throwsIfProvidedArchivalRecordExternalIdIsNull(){
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(null);
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      )).isInstanceOf(
+          ArchivalRecordInvalidStateException.class
+      );
+
+    }
+
+    @Test
+    void throwsIfArchivalRecordDoesNotExist(){
+      final String NOT_EXISTENT_TEST_PID = testDataSet.archivalRecord().getPid().replace("1", "9");
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(testDataSet.archivalRecord().getExternalId());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
+          NOT_EXISTENT_TEST_PID,
+          changeDto
+      )).isInstanceOf(
+          ArchivalRecordNotFoundException.class
+      );
+
+    }
+
+    @Test
+    void throwsIfArchivalRecordStateIsNotValid(){
+
+      // first change state of test archival record
+      var archivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      archivalRecord.setArchivalState(ArchivalState.PUBLISHED);
+      archivalRecord.setExternalId(testDataSet.archivalRecord().getExternalId());
+
+      archivalRecordRepository.save(archivalRecord);
+
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(testDataSet.archivalRecord().getExternalId());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      )).isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+    }
+
+
+
+  }
 }

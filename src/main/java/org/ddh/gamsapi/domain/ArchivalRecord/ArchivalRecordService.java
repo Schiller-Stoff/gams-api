@@ -192,7 +192,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord draftArchivalRecord(String pid, ArchivalRecordDraftDto archivalRecordDraftDto) {
-    //TODO TEST
 
     if(archivalRecordDraftDto.getExternalId() == null){
       throw new ArchivalRecordInvalidStateException(
@@ -205,10 +204,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
             "Cannot draft archival record with pid: " + pid + " The record does not exist."
         ));
 
-    // validation? (what about the state?)
-    if(activeRecord.getPublicationTimeStamp() != null){
+    if(activeRecord.getArchivalState() != ArchivalState.RESERVED){
       throw new ArchivalRecordInvalidStateException(
-          "Cannot draft an already published archival record. The publication date is already set. " + activeRecord
+          "Cannot draft archival record with pid " + pid + ". The requested record has not the required state " + ArchivalState.RESERVED + " Got actual state: " + activeRecord.getArchivalState()
       );
     }
 
