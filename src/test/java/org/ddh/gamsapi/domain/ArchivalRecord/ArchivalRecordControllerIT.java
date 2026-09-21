@@ -431,13 +431,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       ).andReturn().getResponse().getContentAsString();
 
       Assertions.assertThat(response)
+          .contains(TEST_EXTERNAL_ID)
+          .contains(TEST_PUBLICATION_TIMESTAMP.toString())
           .contains(testDataSet.archivalRecord().getPid());
-
-      Assertions.assertThat(response)
-          .contains(TEST_PUBLICATION_TIMESTAMP.toString());
-
-      Assertions.assertThat(response)
-          .contains(TEST_EXTERNAL_ID);
 
     }
 
