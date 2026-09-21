@@ -1,12 +1,15 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for managing ArchivalRecord entities.
@@ -22,7 +25,6 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   void deleteAllByDigitalObjectId(String digitalObjectId);
 
-
   boolean existsByDigitalObjectId(String digitalObjectId);
 
   /**
@@ -33,5 +35,13 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
   @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query("UPDATE ArchivalRecord a SET a.digitalObject = NULL WHERE a.digitalObject.id = :digitalObjectId")
   void detachAllFromDigitalObject(@Param("digitalObjectId") String digitalObjectId);
+
+  boolean existsByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
+
+  boolean existsByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
+
+  Optional<ArchivalRecord> findByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
+
+  List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
 
 }

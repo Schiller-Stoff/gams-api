@@ -1,5 +1,8 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+
 import java.util.List;
 
 /**
@@ -56,5 +59,19 @@ public interface IArchivalRecordService {
    */
   ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord);
 
+
+  /**
+   * Updates an existing (reserved) archival record
+   * @param pid id of the archival record
+   * @param archivalRecordDraftDto contains data about archival record to be updated.
+   */
+  ArchivalRecord draftArchivalRecord(String pid, ArchivalRecordDraftDto archivalRecordDraftDto);
+
+  /**
+   * Publishes an existing, active archival record
+   * @param pid if of the archival record
+   * @param archivalRecordPublishDto contains data necessary for publishing process.
+   */
+  ArchivalRecord publishArchivalRecord(String pid, ArchivalRecordPublishDto archivalRecordPublishDto);
 
 }
