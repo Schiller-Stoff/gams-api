@@ -5,6 +5,7 @@ import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,6 +86,7 @@ class ArchivalRecordRepositoryIT extends IntegrationTest {
       otherRecord.setPid(differentPid);
       otherRecord.setDigitalObject(otherObject);
       otherRecord.setExternalId("some-external-id");
+      otherRecord.setArchivalState(ArchivalState.RESERVED);
       archivalRecordRepository.save(otherRecord);
 
       archivalRecordRepository.detachAllFromDigitalObject(testDataSet.digitalObject().getId());

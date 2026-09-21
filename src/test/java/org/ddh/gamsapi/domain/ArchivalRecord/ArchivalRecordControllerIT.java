@@ -534,6 +534,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     @Test
     void createsExpectedArchivalRecordWithObjectId() throws Exception {
 
+      // delete existing archival records from test data
+      archivalRecordRepository.deleteAll();
+
       final String REQUEST_URL = String.format(
           "/api/curation/v1/archival-records?objectId=%s",
           testDataSet.digitalObject().getId()

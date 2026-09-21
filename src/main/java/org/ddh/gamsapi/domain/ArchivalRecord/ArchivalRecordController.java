@@ -8,6 +8,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.Project.interfaces.IProjectService;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.springframework.web.bind.annotation.*;
@@ -150,6 +152,53 @@ public class ArchivalRecordController {
     }
 
     return archivalRecordService.saveArchivalRecord(archivalRecordDto);
+
+  }
+
+  //TODO openapi
+  @PutMapping("/draft/{*pid}")
+  public ArchivalRecord draftArchivalRecord(
+      @PathVariable String pid,
+      ArchivalRecordDraftDto archivalRecordDraftDto
+  ){
+
+    // need to check for the included leading slash from the PathVariable
+    String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
+
+    Set<ConstraintViolation<ArchivalRecord>> violations =
+        validator.validateValue(ArchivalRecord.class, "pid", normalizedPid);
+
+    if (!violations.isEmpty()) {
+      throw new ArchivalRecordInvalidPidException(
+          "Cannot draft archival record. Given pid does not conform to required format: " + normalizedPid + ". " +  violations
+      );
+    }
+
+    // TODO test!
+    return archivalRecordService.draftArchivalRecord(pid, archivalRecordDraftDto);
+
+  }
+
+  @PutMapping("/publish/{*pid}")
+  public ArchivalRecord publishArchivalRecord(
+      @PathVariable String pid,
+      ArchivalRecordPublishDto archivalRecordPublishDto
+  ){
+    // TODO test!
+
+    // need to check for the included leading slash from the PathVariable
+    String normalizedPid = pid.startsWith("/") ? pid.substring(1) : pid;
+
+    Set<ConstraintViolation<ArchivalRecord>> violations =
+        validator.validateValue(ArchivalRecord.class, "pid", normalizedPid);
+
+    if (!violations.isEmpty()) {
+      throw new ArchivalRecordInvalidPidException(
+          "Cannot draft archival record. Given pid does not conform to required format: " + normalizedPid + ". " +  violations
+      );
+    }
+
+    return archivalRecordService.publishArchivalRecord(pid, archivalRecordPublishDto);
 
   }
 

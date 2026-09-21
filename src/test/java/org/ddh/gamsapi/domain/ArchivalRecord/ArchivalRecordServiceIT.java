@@ -129,6 +129,10 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     @Test
     void createsExpectedArchivalRecord(){
+
+      // make sure that test archival record is deleted (otherwise clash)
+      archivalRecordRepository.deleteAll();
+
       var savedArchivalRecord = archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
       var foundArchivalRecord = archivalRecordRepository.findById(savedArchivalRecord.getPid()).orElseThrow();
 
@@ -143,6 +147,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     @Test
     void doesNotChangeLinkedDigitalObject(){
+
+      // make sure that test archival record is deleted (otherwise clash)
+      archivalRecordRepository.deleteAll();
 
       archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
 
@@ -159,13 +166,14 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     }
 
     @Test
-    void increasesAmountOfArchivalRecordsSaved(){
+    void throwsIfActiveArchivalRecordAlreadyExists(){
 
-      archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
-
-      var foundRecords = archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(testDataSet.digitalObject().getId());
-
-      Assertions.assertThat(foundRecords).hasSize(2); // should now contain 2 (aside from test data)
+      // test saved archival record already exists
+      Assertions.assertThatThrownBy(() -> {
+        archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
+      }).isInstanceOf(
+          ArchivalRecordAlreadyActiveException.class
+      );
 
     }
 

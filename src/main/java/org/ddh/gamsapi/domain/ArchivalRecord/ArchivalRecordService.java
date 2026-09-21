@@ -2,7 +2,10 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.IHandleClient;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -53,7 +56,16 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    if(archivalRecordRepository.existsByDigitalObjectIdAndArchivalStateIn(objectId, ArchivalState.getBlockingStatuses())) {
+      throw new ArchivalRecordAlreadyActiveException(
+          "Cannot create archival record for digital object " + objectId
+              + ". An archival record with blocking status already exists."
+      );
+    }
+
     ArchivalRecord archivalRecord = new ArchivalRecord();
+    archivalRecord.setArchivalState(ArchivalState.RESERVED);
+
     String pid = handleClient.generate();
     archivalRecord.setPid(pid);
     DigitalObject linkedDigitalObject = new DigitalObject();
@@ -82,6 +94,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
+    archivalRecord.setArchivalState(ArchivalState.RESERVED);
     archivalRecord.setPid(pid);
 
     DigitalObject linkedDigitalObject = new DigitalObject();
@@ -97,9 +110,12 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord createArchivalRecord() {
+    // TODO hide method atm?
     ArchivalRecord archivalRecord = new ArchivalRecord();
+    // TODO add handle server communication
     String pid = handleClient.generate();
     archivalRecord.setPid(pid);
+    archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record {} (without assigned object or pid)", archivalRecord);
@@ -109,6 +125,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord createArchivalRecordByPid(String pid) {
+    // TODO hide method atm?
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
           "Cannot create archival record. Archival record with pid already exists: " + pid
@@ -117,6 +134,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(pid);
+    archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record {}", archivalRecord);
@@ -127,6 +145,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+
+    // TODO might need to remove this method completely
+
     if((archivalRecord.getPublicationTimeStamp() == null) &&  (archivalRecord.getExternalId() == null)){
       throw new ArchivalRecordInvalidStateException(
           "Cannot patch archival record. You either have to provide a publication timestamp or an external id - but both are null. Got values: " + archivalRecord
@@ -165,5 +186,55 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     return curArchivalRecord;
 
+  }
+
+
+  @Override
+  @Transactional
+  public ArchivalRecord draftArchivalRecord(String pid, ArchivalRecordDraftDto archivalRecordDraftDto) {
+    //TODO TEST
+
+    if(archivalRecordDraftDto.getExternalId() == null){
+      throw new ArchivalRecordInvalidStateException(
+          "Cannot draft archival record - the provided external id is null. Got dto: " + archivalRecordDraftDto
+      );
+    }
+
+    var activeRecord = archivalRecordRepository.findById(pid)
+        .orElseThrow( () -> new ArchivalRecordNotFoundException(
+            "Cannot draft archival record with pid: " + pid + " The record does not exist."
+        ));
+
+    // validation? (what about the state?)
+    if(activeRecord.getPublicationTimeStamp() != null){
+      throw new ArchivalRecordInvalidStateException(
+          "Cannot draft an already published archival record. The publication date is already set. " + activeRecord
+      );
+    }
+
+    activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
+    return activeRecord;
+  }
+
+  @Override
+  @Transactional
+  public ArchivalRecord publishArchivalRecord(String pid, ArchivalRecordPublishDto archivalRecordPublishDto) {
+    // TODO test
+
+    if(archivalRecordPublishDto.getPublicationTimeStamp() == null){
+      throw new ArchivalRecordInvalidStateException(
+          "Cannot publish archival record - the provided publication timestamp is null. Got dto: " + archivalRecordPublishDto
+      );
+    }
+
+    var activeRecord = archivalRecordRepository.findById(pid)
+        .orElseThrow( () -> new ArchivalRecordNotFoundException(
+            "Cannot publish archival record with pid: " + pid + " The record does not exist."
+        ));
+
+    // TODO validate? (external id must be set at this moment)
+
+    activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
+    return activeRecord;
   }
 }
