@@ -1,5 +1,6 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -113,11 +114,12 @@ public class ArchivalRecordController {
     archivalRecordService.deleteById(normalizedPid);
   }
 
+  @Hidden
   @PatchMapping(path = "/{*pid}") // pattern takes everything after (but includes the leading slash!)
   // TODO open api annotations
   public ArchivalRecord patchArchivalRecord(
       @PathVariable String pid,
-      @RequestBody ArchivalRecordUpdateDto archivalRecordUpdateDto
+      @RequestBody @Valid ArchivalRecordUpdateDto archivalRecordUpdateDto
   ){
 
     // need to check for the included leading slash from the PathVariable

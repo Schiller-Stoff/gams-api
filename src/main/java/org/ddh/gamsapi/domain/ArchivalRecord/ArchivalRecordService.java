@@ -146,44 +146,31 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Transactional
   public ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord) {
 
-    // TODO might need to remove this method completely
-
-    if((archivalRecord.getPublicationTimeStamp() == null) &&  (archivalRecord.getExternalId() == null)){
-      throw new ArchivalRecordInvalidStateException(
-          "Cannot patch archival record. You either have to provide a publication timestamp or an external id - but both are null. Got values: " + archivalRecord
-      );
-    }
-
     var curArchivalRecord = archivalRecordRepository.findById(archivalRecord.getPid())
         .orElseThrow(() ->
           new ArchivalRecordNotFoundException(
               "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
           ));
 
-    // cannot set publication timestamp to null if once set
-    if(archivalRecord.getPublicationTimeStamp() != null){
-      curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
-    }
+    // don't change the pid
+    curArchivalRecord.setArchivalState(archivalRecord.getArchivalState());
+    curArchivalRecord.setExternalId(archivalRecord.getExternalId());
+    curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
 
-    // cannot set archival record to null if once set
-    if(archivalRecord.getExternalId() != null){
-      curArchivalRecord.setExternalId(archivalRecord.getExternalId());
-    }
-
-    // digital object cannot be changed (after creation)
-    // pid cannot be changed after creation!
-
-    if(archivalRecord.getPublicationTimeStamp() != null){
-      if(archivalRecord.getExternalId() == null){
-        throw new ArchivalRecordInvalidStateException(
-            "Cannot patch archival record. Archival record has a valid publicationTimeStamp but no external id assigned to it - which is illegal." + curArchivalRecord
+    if(archivalRecord.getObjectId() != null){
+      // check if defined digital object exists.
+      if(!digitalObjectRepository.existsById(archivalRecord.getPid())){
+        throw new DigitalObjectNotFoundException(
+            "Cannot change archival record: The digital object with id " + archivalRecord.getObjectId() + " does not exist. For archival record change dto: " + archivalRecord
         );
       }
-
+      // link digital object if given in dto
+      DigitalObject linkedDigitalObject = new DigitalObject();
+      linkedDigitalObject.setId(archivalRecord.getObjectId());
+      curArchivalRecord.setDigitalObject(linkedDigitalObject);
     }
 
     log.info("Successfully patched archival record {}", curArchivalRecord);
-
     return curArchivalRecord;
 
   }

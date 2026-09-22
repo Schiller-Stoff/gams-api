@@ -247,11 +247,13 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       changeDto.setPid(testDataSet.archivalRecord().getPid());
       changeDto.setExternalId(TEST_EXTERNAL_REFERENCE);
       changeDto.setPublicationTimeStamp(TEST_TIMESTAMP);
+      changeDto.setArchivalState(ArchivalState.PUBLISHED);
 
       var savedRecord = archivalRecordService.saveArchivalRecord(changeDto);
 
       Assertions.assertThat(savedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_REFERENCE);
       Assertions.assertThat(savedRecord.getPublicationTimeStamp()).isEqualTo(TEST_TIMESTAMP);
+      Assertions.assertThat(savedRecord.getArchivalState()).isEqualTo(ArchivalState.PUBLISHED);
 
     }
 
@@ -267,59 +269,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
           .isInstanceOf(ArchivalRecordNotFoundException.class);
-
-    }
-
-    @Test
-    void throwsIfNeitherPublicationTimeNorExternalIdWasGiven(){
-
-      var changeDto = new ArchivalRecordDto();
-      changeDto.setPid(testDataSet.archivalRecord().getPid());
-
-      Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
-      .isInstanceOf(ArchivalRecordInvalidStateException.class);
-
-    }
-
-    @Test
-    void cannotNullifyArchivalRecordExternalIdIfPublicationTimestampIsAlreadySet(){
-
-      // need to make sure that a publication timestamp was defined first
-      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
-      testRecord.setPublicationTimeStamp(Instant.now());
-      archivalRecordRepository.save(testRecord);
-
-      var changeDto = new ArchivalRecordDto();
-      changeDto.setPid(testDataSet.archivalRecord().getPid());
-      changeDto.setExternalId(null);
-      // publication timestamp must be null here
-
-      Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
-          .isInstanceOf(ArchivalRecordInvalidStateException.class);
-
-    }
-
-    @Test
-    void cannotSetPublicationTimeStampToNull(){
-
-      Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
-
-      // need to make sure that a publication timestamp was defined first
-      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
-      testRecord.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
-      testRecord.setExternalId("foobarxyz");
-      archivalRecordRepository.save(testRecord);
-
-      var changeDto = new ArchivalRecordDto();
-      changeDto.setPid(testDataSet.archivalRecord().getPid());
-      changeDto.setExternalId(testRecord.getExternalId());
-      // publication timestamp must be null
-      changeDto.setPublicationTimeStamp(null);
-
-      var savedRecord = archivalRecordService.saveArchivalRecord(changeDto);
-
-      // publicationTimestamp not null
-      Assertions.assertThat(savedRecord.getPublicationTimeStamp()).isEqualTo(TEST_PUBLICATION_TIMESTAMP.truncatedTo(ChronoUnit.SECONDS));
 
     }
 
