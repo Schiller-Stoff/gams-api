@@ -329,7 +329,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       }
 
       @Test
-      void returnsErrorIfGivenPidIsInvalid() throws Exception {
+      void returnsErrorIfGivenPublicationTimestampIsInvalid() throws Exception {
 
         final String INVALID_DATE_FORMAT = "this is no date";
 
@@ -348,6 +348,34 @@ class ArchivalRecordControllerIT extends IntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(BODY)
         ).andExpect(status().isBadRequest());
+
+      }
+
+      @Test
+      void errorIfPublicationsTimestampIsInTheFuture() throws Exception {
+
+        final String INVALID_DATE_FORMAT = Instant.now().plus(1, ChronoUnit.MINUTES).toString();
+
+        final String REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/published/%s",
+            testDataSet.archivalRecord().getPid()
+        );
+
+        final String BODY = String.format(
+            "{\"publicationTimeStamp\":\"%s\"}",
+            INVALID_DATE_FORMAT
+        );
+
+        String response = mockMvc.perform(
+            MockMvcRequestBuilders.put(REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(BODY)
+        ).andExpect(status().isBadRequest())
+            .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(response.toLowerCase())
+            .contains("validation failed")
+            .contains("publicationtimestamp");
 
       }
 
