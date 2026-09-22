@@ -446,7 +446,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String body = String.format(
-          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\"}",
+          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\", \"archivalState\":\"PUBLISHED\"}",
           TEST_PUBLICATION_TIMESTAMP,
           TEST_EXTERNAL_ID
       );
@@ -461,7 +461,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       Assertions.assertThat(response)
           .contains(TEST_EXTERNAL_ID)
           .contains(TEST_PUBLICATION_TIMESTAMP.toString())
-          .contains(testDataSet.archivalRecord().getPid());
+          .contains(testDataSet.archivalRecord().getPid())
+          .contains(ArchivalState.PUBLISHED.name())
+      ;
 
     }
 
@@ -476,7 +478,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String body = String.format(
-          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\"}",
+          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\", \"archivalState\":\"PUBLISHED\"}",
           Instant.now(),
           "foobarxyz"
       );
@@ -503,7 +505,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       );
 
       final String body = String.format(
-          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\"}",
+          "{\"publicationTimeStamp\": \"%s\",\"externalId\":\"%s\", \"archivalState\":\"PUBLISHED\"}",
           TEST_PUBLICATION_TIMESTAMP,
           TEST_EXTERNAL_ID
       );

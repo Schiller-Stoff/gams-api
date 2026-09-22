@@ -117,7 +117,7 @@ public class ArchivalRecordController {
   @Hidden
   @PatchMapping(path = "/{*pid}") // pattern takes everything after (but includes the leading slash!)
   // TODO open api annotations
-  public ArchivalRecord patchArchivalRecord(
+  public ArchivalRecord updateArchivalRecord(
       @PathVariable String pid,
       @RequestBody @Valid ArchivalRecordUpdateDto archivalRecordUpdateDto
   ){
@@ -138,10 +138,11 @@ public class ArchivalRecordController {
     archivalRecordDto.setPid(normalizedPid);
     archivalRecordDto.setObjectId(archivalRecordUpdateDto.getObjectId());
     archivalRecordDto.setExternalId(archivalRecordUpdateDto.getExternalId());
+    archivalRecordDto.setArchivalState(archivalRecordUpdateDto.getArchivalState());
 
     // if no publication date was set -> no parsing needs to be done.
     if(archivalRecordUpdateDto.getPublicationTimeStamp() == null)
-      archivalRecordService.saveArchivalRecord(archivalRecordDto);
+      archivalRecordService.updateArchivalRecord(archivalRecordDto);
 
     Instant publicationDate;
     try {
@@ -154,7 +155,7 @@ public class ArchivalRecordController {
       );
     }
 
-    return archivalRecordService.saveArchivalRecord(archivalRecordDto);
+    return archivalRecordService.updateArchivalRecord(archivalRecordDto);
 
   }
 

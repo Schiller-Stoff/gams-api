@@ -52,10 +52,11 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     @Test
     void foundArchivalRecordIsNotNullAndIsNotEmpty(){
-      var foundRecord = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
-      Assertions.assertThat(foundRecord).isNotNull();
-      Assertions.assertThat(foundRecord).isNotEmpty();
-      Assertions.assertThat(foundRecord).hasSize(1);
+      var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
+      Assertions.assertThat(foundRecords)
+          .isNotNull()
+          .isNotEmpty()
+          .hasSize(1);
     }
 
     @Test
@@ -235,7 +236,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
-  class SaveArchivalRecord {
+  class UpdateArchivalRecord {
 
     @Test
     void changesExpectedArchivalRecord(){
@@ -249,7 +250,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       changeDto.setPublicationTimeStamp(TEST_TIMESTAMP);
       changeDto.setArchivalState(ArchivalState.PUBLISHED);
 
-      var savedRecord = archivalRecordService.saveArchivalRecord(changeDto);
+      var savedRecord = archivalRecordService.updateArchivalRecord(changeDto);
 
       Assertions.assertThat(savedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_REFERENCE);
       Assertions.assertThat(savedRecord.getPublicationTimeStamp()).isEqualTo(TEST_TIMESTAMP);
@@ -267,7 +268,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       changeDto.setExternalId("foobarxyz");
       changeDto.setPublicationTimeStamp(Instant.now());
 
-      Assertions.assertThatThrownBy(() -> archivalRecordService.saveArchivalRecord(changeDto))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.updateArchivalRecord(changeDto))
           .isInstanceOf(ArchivalRecordNotFoundException.class);
 
     }

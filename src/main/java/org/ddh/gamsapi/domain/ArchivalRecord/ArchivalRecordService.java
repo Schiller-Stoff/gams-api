@@ -144,7 +144,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord) {
+  public ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord) {
 
     var curArchivalRecord = archivalRecordRepository.findById(archivalRecord.getPid())
         .orElseThrow(() ->

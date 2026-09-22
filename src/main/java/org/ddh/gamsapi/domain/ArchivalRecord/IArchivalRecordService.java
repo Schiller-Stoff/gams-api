@@ -57,7 +57,7 @@ public interface IArchivalRecordService {
    * @param archivalRecord dto containing data to change the archival record with
    * @return saved archival record entity
    */
-  ArchivalRecord saveArchivalRecord(ArchivalRecordDto archivalRecord);
+  ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord);
 
 
   /**
