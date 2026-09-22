@@ -59,7 +59,7 @@ public class ArchivalRecordController {
   public ArchivalRecord createArchivalRecord(
       @RequestParam String objectId
   ){
-    return archivalRecordService.createArchivalRecordByObjectId(objectId);
+    return archivalRecordService.reserveArchivalRecordByObjectId(objectId);
   }
 
   //TODO open api annotations

@@ -29,7 +29,7 @@ public interface IArchivalRecordService {
    * @param objectId id of linked object
    * @return archival record
    */
-  ArchivalRecord createArchivalRecordByObjectId(String objectId);
+  ArchivalRecord reserveArchivalRecordByObjectId(String objectId);
 
   /**
    * Creates an archival record with given pid linked to specified digital object

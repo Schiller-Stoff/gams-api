@@ -128,7 +128,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
-  class CreateArchivalRecordByObjectId {
+  class ReserveArchivalRecordByObjectId {
 
     @Test
     void createsExpectedArchivalRecord(){
@@ -136,7 +136,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // make sure that test archival record is deleted (otherwise clash)
       archivalRecordRepository.deleteAll();
 
-      var savedArchivalRecord = archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
+      var savedArchivalRecord = archivalRecordService.reserveArchivalRecordByObjectId(testDataSet.digitalObject().getId());
       var foundArchivalRecord = archivalRecordRepository.findById(savedArchivalRecord.getPid()).orElseThrow();
 
       Assertions.assertThat(savedArchivalRecord)
@@ -154,7 +154,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // make sure that test archival record is deleted (otherwise clash)
       archivalRecordRepository.deleteAll();
 
-      archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
+      archivalRecordService.reserveArchivalRecordByObjectId(testDataSet.digitalObject().getId());
 
       var linkedObject = digitalObjectRepository.findDigitalObjectById(testDataSet.digitalObject().getId())
           .orElseThrow();
@@ -173,7 +173,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       // test saved archival record already exists
       Assertions.assertThatThrownBy(() -> {
-        archivalRecordService.createArchivalRecordByObjectId(testDataSet.digitalObject().getId());
+        archivalRecordService.reserveArchivalRecordByObjectId(testDataSet.digitalObject().getId());
       }).isInstanceOf(
           ArchivalRecordAlreadyActiveException.class
       );
@@ -185,7 +185,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       final String NON_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
 
-      Assertions.assertThatThrownBy(() -> archivalRecordService.createArchivalRecordByObjectId(NON_EXISTENT_OBJECT_ID))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.reserveArchivalRecordByObjectId(NON_EXISTENT_OBJECT_ID))
           .isInstanceOf(DigitalObjectNotFoundException.class);
 
     }

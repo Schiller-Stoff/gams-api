@@ -49,7 +49,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord createArchivalRecordByObjectId(String objectId) {
+  public ArchivalRecord reserveArchivalRecordByObjectId(String objectId) {
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
           "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
