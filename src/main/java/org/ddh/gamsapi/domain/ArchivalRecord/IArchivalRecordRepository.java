@@ -40,7 +40,9 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   boolean existsByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
 
-  Optional<ArchivalRecord> findByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
+  List<ArchivalRecord> findByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
+
+  Optional<ArchivalRecord> findActiveByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
 
   List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
 
