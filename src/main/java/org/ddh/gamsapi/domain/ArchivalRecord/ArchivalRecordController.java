@@ -49,14 +49,14 @@ public class ArchivalRecordController {
 
   @PostMapping
   @Operation(
-      summary = "Create a an archival record for a digital object",
+      summary = "Reserve an archival record for a digital object",
       description = "Allows to create an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Archival record successfully created",
               content = @Content)
       }
   )
-  public ArchivalRecord createArchivalRecord(
+  public ArchivalRecord reserveArchivalRecordByObjectId(
       @RequestParam String objectId
   ){
     return archivalRecordService.reserveArchivalRecordByObjectId(objectId);
@@ -64,7 +64,7 @@ public class ArchivalRecordController {
 
   //TODO open api annotations
   @PutMapping(path = "/{*pid}")
-  public ArchivalRecord createArchivalRecordViaPid(
+  public ArchivalRecord reserveArchivalRecordViaPid(
       @PathVariable String pid,
       @RequestParam String objectId
   ){
@@ -77,7 +77,7 @@ public class ArchivalRecordController {
 
     if (!violations.isEmpty()) {
       throw new ArchivalRecordInvalidPidException(
-          "Cannot create archival record. PID does not conform to required format: " + normalizedPid + ". " +  violations
+          "Cannot reserve archival record. PID does not conform to required format: " + normalizedPid + ". " +  violations
       );
     }
 
