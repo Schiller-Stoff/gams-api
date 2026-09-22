@@ -35,6 +35,27 @@ public class ArchivalRecordService implements IArchivalRecordService {
     return archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(digitalObjectId);
   }
 
+  @Override
+  public ArchivalRecord findActiveArchivalRecordForObject(String objectId) {
+    if(!digitalObjectRepository.existsById(objectId)){
+      throw new DigitalObjectNotFoundException(
+          "Cannot find archival records for digital object: " +  objectId + " The digital object does not exist."
+      );
+    }
+
+    var foundArchivalRecord = archivalRecordRepository.findActiveByDigitalObjectIdAndArchivalStateIn(
+        objectId,
+        ArchivalState.getBlockingStatuses()
+    ).orElseThrow(() ->
+      new ArchivalRecordInvalidStateException(
+          "Cannot find any active archival record for digital object: " +  objectId
+      )
+    );
+
+    log.info("Successfully found active archival record {}", foundArchivalRecord);
+    return foundArchivalRecord;
+
+  }
 
   @Override
   @Transactional

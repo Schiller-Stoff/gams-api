@@ -71,6 +71,42 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
+  class FindActiveArchivalRecordForObject {
+
+    @Test
+    void successfullyFindsExpectedActiveArchivalRecord(){
+
+      var foundRecord = archivalRecordService.findActiveArchivalRecordForObject(testDataSet.digitalObject().getId());
+
+      Assertions.assertThat(foundRecord.getPid())
+          .isEqualTo(testDataSet.archivalRecord().getPid());
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectDoesNotExist(){
+
+      final String NOT_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
+      Assertions.assertThatThrownBy(() -> archivalRecordService.findActiveArchivalRecordForObject(NOT_EXISTENT_OBJECT_ID))
+          .isInstanceOf(DigitalObjectNotFoundException.class);
+
+    }
+
+    @Test
+    void throwsIfNotActiveArchivalRecordExists(){
+
+      // make sure that no archival records exist at all
+      archivalRecordRepository.deleteAll();
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.findActiveArchivalRecordForObject(testDataSet.digitalObject().getId()))
+          .isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+    }
+
+  }
+
+  @Nested
   class DeleteById {
 
     @Test
