@@ -8,6 +8,8 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInconsistentActiveRecordsException;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,7 +102,26 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       Assertions.assertThatThrownBy(
           () -> archivalRecordService.findActiveArchivalRecordForObject(testDataSet.digitalObject().getId()))
-          .isInstanceOf(ArchivalRecordInvalidStateException.class);
+          .isInstanceOf(ArchivalRecordNoActiveRecordException.class);
+
+    }
+
+    @Test
+    void throwsIfUnexpectedlyMultipleActiveRecordsExist(){
+
+      ArchivalRecord another = new ArchivalRecord();
+      another.setPid(HandleGenerator.generate());
+      another.setArchivalState(ArchivalState.RESERVED);
+
+      var linkedObject = new DigitalObject();
+      linkedObject.setId(testDataSet.digitalObject().getId());
+      another.setDigitalObject(linkedObject);
+
+      archivalRecordRepository.save(another);
+
+      Assertions.assertThatThrownBy(
+              () -> archivalRecordService.findActiveArchivalRecordForObject(testDataSet.digitalObject().getId()))
+          .isInstanceOf(ArchivalRecordInconsistentActiveRecordsException.class);
 
     }
 

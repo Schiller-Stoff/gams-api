@@ -132,6 +132,55 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
       }
     }
+
+    @Nested
+    class findActiveArchivalRecord {
+
+      @Test
+      void returnsExpectedActiveArchivalRecord() throws Exception {
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/active?objectId=%s",
+            testDataSet.digitalObject().getId()
+        );
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(responseBody)
+            .contains(testDataSet.archivalRecord().getPid())
+            .contains(testDataSet.archivalRecord().getArchivalState().name())
+            .contains(testDataSet.archivalRecord().getExternalId());
+
+      }
+
+    }
+
+    @Test
+    void returnsErrorIfNoActiveRecordWasFound() throws Exception {
+
+      // first delete all archival records
+      archivalRecordRepository.deleteAll();
+
+      final String TEST_REQUEST_URL = String.format(
+          "/api/curation/v1/archival-records/active?objectId=%s",
+          testDataSet.digitalObject().getId()
+      );
+
+      String responseBody = mockMvc.perform(
+              MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                  .contentType(MediaType.APPLICATION_JSON)
+          ).andExpect(status().isBadRequest())
+          .andReturn().getResponse().getContentAsString();
+
+      Assertions.assertThat(responseBody)
+          .contains("No active records found.");
+
+    }
+
   }
 
   @Nested

@@ -6,6 +6,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.IHandleClient;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInconsistentActiveRecordsException;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -52,13 +53,15 @@ public class ArchivalRecordService implements IArchivalRecordService {
     );
 
     if(activeRecords.isEmpty()){
-      throw new ArchivalRecordInvalidStateException(
-          "Cannot find any active archival record for digital object: " +  objectId
+      throw new ArchivalRecordNoActiveRecordException(
+          "Cannot find any active archival record for digital object: " +  objectId + " No active records found."
       );
     }
 
     if(activeRecords.getTotalElements() > 1){
-      // TODO inconsistency check? should be a server error - throw error
+      throw new ArchivalRecordInconsistentActiveRecordsException(
+          "Cannot retrieve active archival record for object " + objectId + " -  Active archival record count is unexpectedly " + activeRecords.getTotalElements() + " Only one should be active."
+      );
     }
 
     log.info("Successfully found active archival record {}", activeRecords.getContent().getFirst());

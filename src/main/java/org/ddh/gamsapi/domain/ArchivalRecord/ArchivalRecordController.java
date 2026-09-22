@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
+import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -32,18 +33,28 @@ public class ArchivalRecordController {
 
   // TODO add to openapi the request param
   @Operation(
-      summary = "Get archival records",
+      summary = "Get archival records for a digital object.",
       description = "Retrieve the archival records optionally for specific digital objects.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Successful retrieval of the archival records",
               content = @Content)
       }
   )
+  // TODO return paged but unpaged?
   @GetMapping
   public List<ArchivalRecordCompactView> findArchivalRecords(
-      @RequestParam String objectId
+      @RequestParam String objectId,
+      @RequestParam(required = false, defaultValue = "false") boolean active
   ) {
     return archivalRecordService.findForObject(objectId);
+  }
+
+  // TODO openapi
+  @GetMapping("/active")
+  public PagedResponse<ArchivalRecordCompactView> findActiveArchivalRecord(
+      @RequestParam String objectId
+  ) {
+    return archivalRecordService.findActiveArchivalRecordForObject(objectId);
   }
 
   @PostMapping
