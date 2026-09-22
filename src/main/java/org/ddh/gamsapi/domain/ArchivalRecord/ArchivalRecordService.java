@@ -110,9 +110,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord reserveArchivalRecord() {
-    // TODO hide method atm?
     ArchivalRecord archivalRecord = new ArchivalRecord();
-    // TODO add handle server communication
     String pid = handleClient.generate();
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
@@ -125,7 +123,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord reserveArchivalRecordByPid(String pid) {
-    // TODO hide method atm?
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
           "Cannot create archival record. Archival record with pid already exists: " + pid
