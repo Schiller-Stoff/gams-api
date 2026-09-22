@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping(value = { "/api/curation/v1/archival-records" }) //TODO check auth!!! spring security config
+@RequestMapping(value = { "/api/curation/v1/archival-records" })
 @Slf4j
 @RequiredArgsConstructor
-@Tag(name = OpenAPIConfig.DIGITAL_OBJECTS_TAG, description = OpenAPIConfig.DIGITAL_OBJECTS_TAG_DESCRIPTION) // TODO redo openapi
+@Tag(name = OpenAPIConfig.ARCHIVAL_RECORDS_TAG, description = OpenAPIConfig.ARCHIVAL_RECORDS_TAG_DESCRIPTION)
 public class ArchivalRecordController {
 
   private final IArchivalRecordService archivalRecordService;
