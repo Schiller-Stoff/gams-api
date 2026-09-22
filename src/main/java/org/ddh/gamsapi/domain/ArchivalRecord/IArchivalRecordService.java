@@ -74,4 +74,6 @@ public interface IArchivalRecordService {
    */
   ArchivalRecord publishArchivalRecord(String pid, ArchivalRecordPublishDto archivalRecordPublishDto);
 
+  ArchivalRecord findActiveArchivalRecordForObject(String objectId);
+
 }
