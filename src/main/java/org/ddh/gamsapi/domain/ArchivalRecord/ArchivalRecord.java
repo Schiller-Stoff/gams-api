@@ -42,7 +42,7 @@ public class ArchivalRecord {
   private DigitalObject digitalObject;
 
   @Id
-  @Column(name = "pid") // TODO needs validation
+  @Column(name = "pid")
   @ValidPid
   private String pid;
 
