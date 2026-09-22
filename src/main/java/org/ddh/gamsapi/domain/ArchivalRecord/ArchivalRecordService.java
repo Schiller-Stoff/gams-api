@@ -80,7 +80,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord createArchivalRecordByObjectIdAndPid(String objectId, String pid) {
+  public ArchivalRecord reserveArchivalRecordByObjectIdAndPid(String objectId, String pid) {
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
           "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
@@ -109,7 +109,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord createArchivalRecord() {
+  public ArchivalRecord reserveArchivalRecord() {
     // TODO hide method atm?
     ArchivalRecord archivalRecord = new ArchivalRecord();
     // TODO add handle server communication
@@ -124,7 +124,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord createArchivalRecordByPid(String pid) {
+  public ArchivalRecord reserveArchivalRecordByPid(String pid) {
     // TODO hide method atm?
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(

@@ -32,25 +32,25 @@ public interface IArchivalRecordService {
   ArchivalRecord reserveArchivalRecordByObjectId(String objectId);
 
   /**
-   * Creates an archival record with given pid linked to specified digital object
+   * Creates an archival record with given pid linked to specified digital object (in reserved state)
    * @param objectId id of the linked object
    * @param pid pid of the archival record
    * @return archival record entity
    */
-  ArchivalRecord createArchivalRecordByObjectIdAndPid(String objectId, String pid);
+  ArchivalRecord reserveArchivalRecordByObjectIdAndPid(String objectId, String pid);
 
   /**
-   * Create an archival record
+   * Create an archival record in reserve state
    * @return archival record entity
    */
-  ArchivalRecord createArchivalRecord();
+  ArchivalRecord reserveArchivalRecord();
 
   /**
    * Create an archival record via specifying the pid
    * @param pid pid of the archival record
    * @return archival record entity
    */
-  ArchivalRecord createArchivalRecordByPid(String pid);
+  ArchivalRecord reserveArchivalRecordByPid(String pid);
 
   /**
    * Updates given archival record

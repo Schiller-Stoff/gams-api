@@ -83,12 +83,12 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
-  class CreateArchivalRecord {
+  class ReserveArchivalRecord {
 
     @Test
     void createsExpectedArchivalRecord(){
 
-      var savedRecord = archivalRecordService.createArchivalRecord();
+      var savedRecord = archivalRecordService.reserveArchivalRecord();
 
       Assertions.assertThat(
           archivalRecordRepository.existsById(savedRecord.getPid())
@@ -99,14 +99,14 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
-  class CreateArchivalRecordByPid {
+  class ReserveArchivalRecordByPid {
 
     @Test
     void createsExpectedArchivalRecord(){
 
       final String TEST_PID = HandleGenerator.generate();
 
-      var savedRecord = archivalRecordService.createArchivalRecordByPid(TEST_PID);
+      var savedRecord = archivalRecordService.reserveArchivalRecordByPid(TEST_PID);
 
       Assertions.assertThat(
           archivalRecordRepository.existsById(savedRecord.getPid()))
@@ -120,7 +120,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String ALREADY_EXISTING_PID = testDataSet.archivalRecord().getPid();
 
       Assertions.assertThatThrownBy(
-          () -> archivalRecordService.createArchivalRecordByPid(ALREADY_EXISTING_PID)
+          () -> archivalRecordService.reserveArchivalRecordByPid(ALREADY_EXISTING_PID)
       ).isInstanceOf(ArchivalRecordAlreadyExistsException.class);
 
     }
@@ -194,14 +194,14 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   }
 
   @Nested
-  class CreateArchivalRecordByObjectIdAndPid {
+  class ReserveArchivalRecordByObjectIdAndPid {
 
     @Test
     void createsExpectedArchivalRecordViaProvidingExternalPid(){
 
       final String TEST_PID = HandleGenerator.generate();
 
-      var savedArchivalRecord = archivalRecordService.createArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), TEST_PID);
+      var savedArchivalRecord = archivalRecordService.reserveArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), TEST_PID);
       var foundArchivalRecord = archivalRecordRepository.findById(savedArchivalRecord.getPid()).orElseThrow();
 
       Assertions.assertThat(savedArchivalRecord)
@@ -219,7 +219,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String TEST_PID = HandleGenerator.generate();
       final String NON_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
 
-      Assertions.assertThatThrownBy(() -> archivalRecordService.createArchivalRecordByObjectIdAndPid(NON_EXISTENT_OBJECT_ID, TEST_PID))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.reserveArchivalRecordByObjectIdAndPid(NON_EXISTENT_OBJECT_ID, TEST_PID))
           .isInstanceOf(DigitalObjectNotFoundException.class);
 
     }
@@ -228,7 +228,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     void throwsIfPidAlreadyExists(){
 
       final String ALREADY_EXISTING_PID = testDataSet.archivalRecord().getPid();
-      Assertions.assertThatThrownBy(() -> archivalRecordService.createArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), ALREADY_EXISTING_PID))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.reserveArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), ALREADY_EXISTING_PID))
           .isInstanceOf(ArchivalRecordAlreadyExistsException.class);
     }
 

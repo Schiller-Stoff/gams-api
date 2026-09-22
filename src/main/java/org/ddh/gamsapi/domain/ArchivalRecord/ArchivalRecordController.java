@@ -81,7 +81,7 @@ public class ArchivalRecordController {
       );
     }
 
-    return archivalRecordService.createArchivalRecordByObjectIdAndPid(objectId, normalizedPid);
+    return archivalRecordService.reserveArchivalRecordByObjectIdAndPid(objectId, normalizedPid);
 
   }
 
