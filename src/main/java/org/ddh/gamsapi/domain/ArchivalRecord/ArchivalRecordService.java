@@ -9,6 +9,8 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,24 +38,33 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
   @Override
-  public ArchivalRecord findActiveArchivalRecordForObject(String objectId) {
+  public PagedResponse<ArchivalRecordCompactView> findActiveArchivalRecordForObject(String objectId) {
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
           "Cannot find archival records for digital object: " +  objectId + " The digital object does not exist."
       );
     }
 
-    var foundArchivalRecord = archivalRecordRepository.findActiveByDigitalObjectIdAndArchivalStateIn(
+    var activeRecords = archivalRecordRepository.findActiveArchivalRecordsByDigitalObjectIdAndArchivalStateIn(
         objectId,
-        ArchivalState.getBlockingStatuses()
-    ).orElseThrow(() ->
-      new ArchivalRecordInvalidStateException(
-          "Cannot find any active archival record for digital object: " +  objectId
-      )
+        ArchivalState.getBlockingStatuses(),
+        Pageable.unpaged()
     );
 
-    log.info("Successfully found active archival record {}", foundArchivalRecord);
-    return foundArchivalRecord;
+    if(activeRecords.isEmpty()){
+      throw new ArchivalRecordInvalidStateException(
+          "Cannot find any active archival record for digital object: " +  objectId
+      );
+    }
+
+    if(activeRecords.getTotalElements() > 1){
+      // TODO inconsistency check? should be a server error - throw error
+    }
+
+    log.info("Successfully found active archival record {}", activeRecords.getContent().getFirst());
+    return PagedResponse.from(
+        activeRecords
+    );
 
   }
 

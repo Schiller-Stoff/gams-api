@@ -78,7 +78,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       var foundRecord = archivalRecordService.findActiveArchivalRecordForObject(testDataSet.digitalObject().getId());
 
-      Assertions.assertThat(foundRecord.getPid())
+      Assertions.assertThat(foundRecord.getContent().getFirst().getPid())
           .isEqualTo(testDataSet.archivalRecord().getPid());
 
     }

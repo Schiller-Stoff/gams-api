@@ -1,6 +1,8 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -42,8 +44,8 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   List<ArchivalRecord> findByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
 
-  Optional<ArchivalRecord> findActiveByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
+  Optional<ArchivalRecordCompactView> findActiveByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);
 
-  List<ArchivalRecordCompactView> findArchivalRecordsByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
+  Page<ArchivalRecordCompactView> findActiveArchivalRecordsByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates, Pageable  pageable);
 
 }

@@ -2,6 +2,9 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -74,6 +77,12 @@ public interface IArchivalRecordService {
    */
   ArchivalRecord publishArchivalRecord(String pid, ArchivalRecordPublishDto archivalRecordPublishDto);
 
-  ArchivalRecord findActiveArchivalRecordForObject(String objectId);
+  /**
+   * Should return the only active archival record for a digital object.
+   * @param objectId id of the object
+   * @return paged response of the active archival record.
+   */
+  PagedResponse<ArchivalRecordCompactView> findActiveArchivalRecordForObject(String objectId);
+
 
 }
