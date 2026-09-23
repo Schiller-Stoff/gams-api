@@ -1,6 +1,5 @@
-package org.ddh.gamsapi.domain.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions;
 
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectException;
 import org.springframework.http.HttpStatus;
 
 /**

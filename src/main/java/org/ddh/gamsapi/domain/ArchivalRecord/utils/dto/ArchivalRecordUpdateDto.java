@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

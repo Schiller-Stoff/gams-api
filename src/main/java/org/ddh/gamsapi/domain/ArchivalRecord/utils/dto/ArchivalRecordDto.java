@@ -1,11 +1,9 @@
-package org.ddh.gamsapi.domain.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.dto;
 
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 import lombok.Data;
+import org.ddh.gamsapi.domain.ArchivalRecord.ValidPid;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.hibernate.validator.constraints.Length;
 
 import java.time.Instant;
 
