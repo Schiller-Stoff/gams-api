@@ -18,10 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ArchivalRecordServiceIT extends IntegrationTest {
@@ -68,6 +70,99 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           .isInstanceOf(
               DigitalObjectNotFoundException.class
           );
+    }
+
+  }
+
+  @Nested
+  class FindArchivalRecordsForObject {
+
+    @Test
+    void findsExpectedPublishedArchivalRecords(){
+
+      // use later to search only for published state
+      final Set<ArchivalState> TEST_ARCHIVAL_STATES = Set.of(ArchivalState.PUBLISHED);
+
+     // add another published archival record
+      ArchivalRecord publishedRecord = new ArchivalRecord();
+      publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
+      publishedRecord.setPid(HandleGenerator.generate());
+      publishedRecord.setExternalId("foobarxyz");
+      publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
+
+      DigitalObject linkedObject = new DigitalObject();
+      linkedObject.setId(testDataSet.digitalObject().getId());
+      publishedRecord.setDigitalObject(linkedObject);
+
+      archivalRecordRepository.save(publishedRecord);
+
+      var publishedRecords = archivalRecordService.findArchivalRecordsForObject(
+          testDataSet.digitalObject().getId(),
+          TEST_ARCHIVAL_STATES,
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(publishedRecords.getContent())
+          .hasSize(1);
+
+    }
+
+    @Test
+    void findsExpectedPublishedAndReservedArchivalRecords(){
+
+      // use later to search only for both states
+      final Set<ArchivalState> TEST_ARCHIVAL_STATES = Set.of(ArchivalState.RESERVED, ArchivalState.PUBLISHED);
+
+      // add another published archival record
+      ArchivalRecord publishedRecord = new ArchivalRecord();
+      publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
+      publishedRecord.setPid(HandleGenerator.generate());
+      publishedRecord.setExternalId("foobarxyz");
+      publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
+
+      DigitalObject linkedObject = new DigitalObject();
+      linkedObject.setId(testDataSet.digitalObject().getId());
+      publishedRecord.setDigitalObject(linkedObject);
+
+      archivalRecordRepository.save(publishedRecord);
+
+      var publishedRecords = archivalRecordService.findArchivalRecordsForObject(
+          testDataSet.digitalObject().getId(),
+          TEST_ARCHIVAL_STATES,
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(publishedRecords.getContent())
+          .hasSize(2);
+
+    }
+
+    @Test
+    void findsExpectedArchivalRecords(){
+      // use later to search only for both states
+      final Set<ArchivalState> TEST_ARCHIVAL_STATES = Set.of();
+
+      // add another published archival record
+      ArchivalRecord publishedRecord = new ArchivalRecord();
+      publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
+      publishedRecord.setPid(HandleGenerator.generate());
+      publishedRecord.setExternalId("foobarxyz");
+      publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
+
+      DigitalObject linkedObject = new DigitalObject();
+      linkedObject.setId(testDataSet.digitalObject().getId());
+      publishedRecord.setDigitalObject(linkedObject);
+
+      archivalRecordRepository.save(publishedRecord);
+
+      var publishedRecords = archivalRecordService.findArchivalRecordsForObject(
+          testDataSet.digitalObject().getId(),
+          TEST_ARCHIVAL_STATES,
+          Pageable.unpaged()
+      );
+
+      Assertions.assertThat(publishedRecords.getContent())
+          .hasSize(0);
     }
 
   }

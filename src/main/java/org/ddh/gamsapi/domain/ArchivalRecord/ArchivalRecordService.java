@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -68,6 +69,28 @@ public class ArchivalRecordService implements IArchivalRecordService {
     return PagedResponse.from(
         activeRecords
     );
+
+  }
+
+  @Override
+  public PagedResponse<ArchivalRecordCompactView> findArchivalRecordsForObject(String objectId, Collection<ArchivalState> archivalStates, Pageable pageable) {
+    // TODO test
+    if(!digitalObjectRepository.existsById(objectId)){
+      throw new DigitalObjectNotFoundException(
+          "Cannot find archival records for digital object: " +  objectId + " The digital object does not exist."
+      );
+    }
+
+    var filteredArchivalRecords = archivalRecordRepository.findAllByDigitalObjectIdAndArchivalStateIn(
+        objectId,
+        archivalStates,
+        pageable
+    );
+
+    // TODO test
+    return PagedResponse.from(
+        filteredArchivalRecords
+    ) ;
 
   }
 
@@ -258,4 +281,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);
     return activeRecord;
   }
+
+
 }

@@ -48,4 +48,6 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
 
   Page<ArchivalRecordCompactView> findActiveArchivalRecordsByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates, Pageable  pageable);
 
+  Page<ArchivalRecordCompactView> findAllByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates, Pageable pageable);
+
 }

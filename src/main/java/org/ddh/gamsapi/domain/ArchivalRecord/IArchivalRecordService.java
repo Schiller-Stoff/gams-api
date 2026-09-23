@@ -1,11 +1,13 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -84,5 +86,14 @@ public interface IArchivalRecordService {
    */
   PagedResponse<ArchivalRecordCompactView> findActiveArchivalRecordForObject(String objectId);
 
+
+  /**
+   * Finds all archival records for given object that have given archival state(s).
+   * @param objectId id of the digital object
+   * @param archivalStates archival states to be filtered for
+   * @param pageable pagination information
+   * @return paginated archival records for digital object with given archival state(s)
+   */
+  PagedResponse<ArchivalRecordCompactView> findArchivalRecordsForObject(String objectId, Collection<ArchivalState> archivalStates, Pageable pageable);
 
 }
