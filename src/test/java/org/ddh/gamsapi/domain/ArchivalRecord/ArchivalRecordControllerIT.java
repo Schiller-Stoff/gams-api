@@ -8,6 +8,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -109,10 +112,10 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   class GET {
 
     @Nested
-    class JSONResponse {
+    class FindArchivalRecords {
 
       @Test
-      void jsonContainsExpectedPid() throws Exception {
+      void responseContainsExpectedData() throws Exception {
 
         final String TEST_REQUEST_URL = String.format(
             "/api/curation/v1/archival-records?objectId=%s",
@@ -126,15 +129,52 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
         Assertions.assertThat(responseBody)
             .isNotNull()
-            .contains(
-                testDataSet.archivalRecord().getPid()
-            );
+            .contains(testDataSet.archivalRecord().getPid())
+            .contains(testDataSet.archivalRecord().getArchivalState().name())
+            .contains(testDataSet.archivalRecord().getExternalId())
+
+        ;
 
       }
+
+      @Test
+      void respondsWithExpectedFilteredArchivalRecords() throws Exception {
+
+        // add another published archival record
+        ArchivalRecord publishedRecord = new ArchivalRecord();
+        publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
+        publishedRecord.setPid(HandleGenerator.generate());
+        publishedRecord.setExternalId("foobarxyz");
+        publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
+
+        DigitalObject linkedObject = new DigitalObject();
+        linkedObject.setId(testDataSet.digitalObject().getId());
+        publishedRecord.setDigitalObject(linkedObject);
+
+        archivalRecordRepository.save(publishedRecord);
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records?objectId=%s&state=PUBLISHED",
+            testDataSet.digitalObject().getId()
+        );
+
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(responseBody)
+            .contains(publishedRecord.getPid())
+            .doesNotContain(testDataSet.archivalRecord().getPid())
+            .doesNotContain(ArchivalState.RESERVED.name());
+
+      }
+
     }
 
     @Nested
-    class findActiveArchivalRecord {
+    class FindActiveArchivalRecord {
 
       @Test
       void returnsExpectedActiveArchivalRecord() throws Exception {
@@ -473,7 +513,10 @@ class ArchivalRecordControllerIT extends IntegrationTest {
       ).isTrue();
 
       Assertions.assertThat(
-          archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(testDataSet.digitalObject().getId())
+          archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(
+              testDataSet.digitalObject().getId(),
+              Pageable.unpaged()
+          )
       ).hasSize(2); // has size 2 now!
 
     }

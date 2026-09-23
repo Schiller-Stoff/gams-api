@@ -10,15 +10,17 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
-import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -40,13 +42,26 @@ public class ArchivalRecordController {
               content = @Content)
       }
   )
-  // TODO return paged but unpaged?
   @GetMapping
-  public List<ArchivalRecordCompactView> findArchivalRecords(
+  public PagedResponse<ArchivalRecordCompactView> findArchivalRecords(
       @RequestParam String objectId,
-      @RequestParam(required = false, defaultValue = "false") boolean active
+      @RequestParam(defaultValue = "", required = false, name = "state") Set<ArchivalState> states,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "100") int pageSize
   ) {
-    return archivalRecordService.findForObject(objectId);
+
+    if(states.isEmpty()){
+      return archivalRecordService.findForObject(
+          objectId,
+          PageRequest.of(pageIndex, pageSize, Sort.by("publicationTimeStamp"))
+      );
+    }
+
+    return archivalRecordService.findArchivalRecordsForObject(
+        objectId,
+        states,
+        PageRequest.of(pageIndex, pageSize, Sort.by("publicationTimeStamp"))
+    );
   }
 
   // TODO openapi

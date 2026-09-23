@@ -28,6 +28,7 @@ import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.ddh.gamsapi.infrastructure.System.utils.ControllerUtils;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -155,7 +156,8 @@ public class DigitalObjectController {
       model.addAttribute("submissionRecord", submissionRecord);
     });
 
-    var archivalRecords = archivalRecordService.findForObject(digitalObject.getId());
+    // TODO do i really need this here?
+    var archivalRecords = archivalRecordService.findForObject(digitalObject.getId(), Pageable.unpaged()).getContent();
     model.addAttribute("archivalRecords", archivalRecords);
 
     // TODO atm loading a lot of data, maybe we should use a different projection here? e.g. DatastreamMimeView?

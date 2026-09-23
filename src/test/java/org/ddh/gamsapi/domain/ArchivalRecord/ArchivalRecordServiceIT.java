@@ -56,8 +56,8 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     @Test
     void foundArchivalRecordIsNotNullAndIsNotEmpty(){
-      var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId());
-      Assertions.assertThat(foundRecords)
+      var foundRecords = archivalRecordService.findForObject(testDataSet.digitalObject().getId(), Pageable.unpaged());
+      Assertions.assertThat(foundRecords.getContent())
           .isNotNull()
           .isNotEmpty()
           .hasSize(1);
@@ -66,7 +66,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     @Test
     void throwsIfDigitalObjectDoesNotExist(){
       final String NON_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
-      Assertions.assertThatThrownBy(() -> archivalRecordService.findForObject(NON_EXISTENT_OBJECT_ID))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.findForObject(NON_EXISTENT_OBJECT_ID, Pageable.unpaged()))
           .isInstanceOf(
               DigitalObjectNotFoundException.class
           );

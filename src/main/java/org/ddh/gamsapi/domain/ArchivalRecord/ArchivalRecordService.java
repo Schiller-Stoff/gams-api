@@ -28,7 +28,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   private final IHandleClient handleClient;
 
   @Override
-  public List<ArchivalRecordCompactView> findForObject(String digitalObjectId) {
+  public PagedResponse<ArchivalRecordCompactView> findForObject(String digitalObjectId, Pageable pageable) {
 
     if(!digitalObjectRepository.existsById(digitalObjectId)){
       throw new DigitalObjectNotFoundException(
@@ -36,7 +36,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    return archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(digitalObjectId);
+    return PagedResponse.from(
+        archivalRecordRepository.findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(digitalObjectId, pageable)
+    );
   }
 
   @Override

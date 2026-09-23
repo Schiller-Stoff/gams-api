@@ -20,7 +20,7 @@ public interface IArchivalRecordService {
    * @param digitalObjectId the ID of the associated DigitalObject
    * @return the ArchivalRecord
    */
-  List<ArchivalRecordCompactView> findForObject(String digitalObjectId);
+  PagedResponse<ArchivalRecordCompactView> findForObject(String digitalObjectId, Pageable pageable);
 
 
   /**

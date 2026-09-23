@@ -23,7 +23,7 @@ public interface IArchivalRecordRepository extends CrudRepository<ArchivalRecord
    * @param digitalObjectId the ID of the associated DigitalObject
    * @return the ArchivalRecord
    */
-  List<ArchivalRecordCompactView> findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(String digitalObjectId);
+  Page<ArchivalRecordCompactView> findAllByDigitalObjectIdOrderByPublicationTimeStampDesc(String digitalObjectId, Pageable pageable);
 
   void deleteAllByDigitalObjectId(String digitalObjectId);
 
