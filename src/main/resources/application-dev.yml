@@ -33,5 +33,12 @@ gams:
   services:
     handle:
       base-url: ${HANDLE_SERVER_URL:https://localhost:8000}
+      prefix: ${HANDLE_PREFIX:99999}
+      auth-handle: ${HANDLE_AUTH_HANDLE:99999/ADMIN}
+      auth-index: ${HANDLE_AUTH_INDEX:300}
+      secret-key-path: ${HANDLE_SECRET_KEY_PATH:docker/apps/handle/secrets/handle-admin.secret}
+      admin-handle: ${HANDLE_ADMIN_HANDLE:99999/ADMIN}
+      admin-index: ${HANDLE_ADMIN_INDEX:200}
+
   cors:
     allowed-origin-patterns: ${GAMSAPI_ALLOWED_ORIGIN_PATTERNS:*}
