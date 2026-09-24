@@ -155,6 +155,15 @@ gams:
     semantic-search:
       accessToken: ${QLEVER_ACCESS_TOKEN:gams-dev}
       exportPath: ${QLEVER_EXPORT_PATH:qlever-export}
+    handle:
+      base-url: ${HANDLE_SERVER_URL:https://handle:8000}
+      prefix: ${HANDLE_PREFIX:11471}
+      auth-handle: ${HANDLE_AUTH_HANDLE:11471/GAMS-API}
+      auth-index: ${HANDLE_AUTH_INDEX:300}
+      secret-key-path: ${HANDLE_SECRET_KEY_PATH:/run/secrets/handle-secret}
+      admin-handle: ${HANDLE_ADMIN_HANDLE:11471/ADMIN}
+      admin-index: ${HANDLE_ADMIN_INDEX:200}
+      ssl-bundle: ${HANDLE_SSL_BUNDLE:}
 
   storage:
     # root of GAMS files (datastreams) to be stored.
