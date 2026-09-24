@@ -181,7 +181,7 @@ public class BasicAuthHandleClient implements IHandleClient {
       int status = outcome.status().value();
       if (status == 401 || status == 403) {
         throw new HandleServerException(HttpStatus.INTERNAL_SERVER_ERROR, "Handle server rejected credentials for " + properties.getAuthIndex()
-            + ":" + properties.getAuthHandle() + " (HTTP " + status + ")");
+            + ":" + properties.getAuthHandle() + " (HTTP " + status + ") Response body: " + outcome.body());
       }
       return outcome;
     } catch (ResourceAccessException e) {
