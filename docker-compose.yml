@@ -20,7 +20,8 @@ services:
       - POSTGRES_DB=gams
       - PGDATA=/var/lib/postgresql/data/pgdata
     # optional: persist postgres data via volume
-    # volumes:
+    volumes:
+      - ${PWD}/docker/apps/postgres/init-handle.sql:/docker-entrypoint-initdb.d/init-handle.sql
       # needs additional wsl config to work if under wsl and bug occurs: https://stackoverflow.com/questions/65582382/wsl2-docker-linux-permission-issue-with-volumes
      # - ${PWD}/docker/apps/postgres/postgres-data:/var/lib/postgresql/data
 
@@ -86,6 +87,15 @@ services:
       - QLEVER_URL:http://localhost:7001
       - QLEVER_ACCESS_TOKEN=gams-dev
       - QLEVER_EXPORT_PATH:qlever-export
+
+  handle-server:
+    build:
+      context: ./docker/apps/handle
+    container_name: gams_handle
+    ports:
+      - "8000:8000"
+    depends_on:
+      - relationalDB
 
 
 volumes:
