@@ -86,7 +86,7 @@ public class HandleServerProperties {
    * Requests for PIDs outside this prefix are rejected client-side.
    */
   @NotBlank
-  @Pattern(regexp = "^\\d+(\\.\\d+)*$")
+  //@Pattern(regexp = "^\\d+(\\.\\d+)*$")
   private String prefix = "11471";
 
   /**

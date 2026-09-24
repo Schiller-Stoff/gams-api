@@ -57,6 +57,43 @@ Integration and unittests are meant to be run separately via own maven goals.
 
 ```
 
+### Testing Handle
+
+For testing the integration to the handle server you need to spin up the local docker compose.
+The handle tests run only if the expected testing handle server can be reached - otherwise they are disabled. 
+
+Important files (outside spring / java):
+- docker/apps/postgres/init-handle.sql      creates the admin / utility handles necessary for basic auth etc. to work      
+- docker/apps/handle/certs                  contains certificates for https to work -- handle server will deny basic auth under just http
+- docker/apps/handle/secrets                contains the HS_SECKEY necessary for basic auth. Needs to correspond with value in admin handle defined via init-handle.sql. Needs also be given as path to the spring boot app.
+- docker/apps/handle/config.dct             configuration for the handle server
+- docker/apps/handle/Dockerfile             image to build the handle testing server
+
+Important java files:
+- application.yml AND application-dev.yml                                 configuration needed for successful connection etc.
+- src/*/domain/ArchivalRecords/utils/handle                               package containing handle logic
+- src/*/infrastructure/System/configproperties/HandleServerProperties     handles config parameters given to spring    
+
+
+1. build handle image
+```sh
+docker compose build handle-server
+
+```
+
+2. check that everything has been thrown away
+```sh
+docker compose down -v
+```
+
+3. start docker compose
+
+```sh
+docker compose up -d
+```
+
+
+
 ## Profiles
 
 default - production profile

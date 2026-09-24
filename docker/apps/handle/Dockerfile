@@ -31,6 +31,12 @@ EOF
 
 RUN expect setup.exp
 
+# copy certificates
+COPY certs/handle-dev.crt /hs/svr_1/serverCertificate.pem
+COPY certs/handle-dev.key /tmp/handle-dev.key
+RUN bin/hdl-convert-key -f handle /tmp/handle-dev.key /hs/svr_1/serverCertificatePrivateKey.bin \
+ && rm /tmp/handle-dev.key
+
 # Overwrite the generated config.dct with the SQL-backed config
 COPY config.dct /hs/svr_1/config.dct
 RUN dos2unix /hs/svr_1/config.dct
