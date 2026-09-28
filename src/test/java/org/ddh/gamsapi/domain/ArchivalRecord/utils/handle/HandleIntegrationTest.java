@@ -19,7 +19,8 @@ class HandleIntegrationTest extends IntegrationTest {
   HandleServerProperties handleServerProperties;
 
   /**
-   *
+   * Checks if the handle server is available before each handle test.
+   * If not skips the related tests.
    */
   @BeforeEach
   void assumeHandleServerIsReachable(){
