@@ -14,6 +14,7 @@ spring:
     properties:
       hibernate.format_sql: true
 
+  # certificate setting to trust https during dev for handle
   ssl:
     bundle:
       pem:
