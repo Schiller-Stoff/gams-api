@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleNotRegisteredException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleServerException;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleServerNotReachableException;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;
@@ -142,6 +143,32 @@ public class BasicAuthHandleClient implements IHandleClient {
     }
   }
 
+
+
+  @Override
+  public void verifyReachable() {
+
+    // Handle REST API response codes (manual 14.8)
+    final int RC_SUCCESS = 1;
+    final int RC_HANDLE_NOT_FOUND = 100;
+    final String PROBE_SUFFIX = "gams-reachability-probe";
+
+    String probe = properties.getPrefix() + "/" + PROBE_SUFFIX;
+    var outcome = send(HttpMethod.GET, handleUri(probe), null, false);
+    int status = outcome.status().value();
+    Integer rc = outcome.body() == null ? null : outcome.body().responseCode();
+
+    boolean handleServerAnswered =
+        (status == 404 && Integer.valueOf(RC_HANDLE_NOT_FOUND).equals(rc))
+            || (status == 200 && Integer.valueOf(RC_SUCCESS).equals(rc)); // someone registered the probe handle; still proves reachability
+
+    if (!handleServerAnswered) {
+      throw new HandleServerNotReachableException(
+          "Endpoint at " + baseUri + " did not answer like a handle server (HTTP " + status + ", responseCode " + rc + ")"
+      );
+    }
+  }
+
   // ---------------------------------------------------------------------
   // Basic auth
   // ---------------------------------------------------------------------
@@ -185,7 +212,7 @@ public class BasicAuthHandleClient implements IHandleClient {
       }
       return outcome;
     } catch (ResourceAccessException e) {
-      throw new HandleServerException(HttpStatus.INTERNAL_SERVER_ERROR, "Handle server not reachable at " + baseUri + ": " + e.getMessage(), e);
+      throw new HandleServerNotReachableException("Handle server not reachable at " + baseUri + ": " + e.getMessage(), e);
     }
   }
 

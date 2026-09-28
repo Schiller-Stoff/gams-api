@@ -71,4 +71,11 @@ public interface IHandleClient {
    */
   void delete(String pid);
 
+  /**
+   * Proves that a Handle server (not just any HTTP endpoint) answers at the configured base URL.
+   * Read-only, unauthenticated, no side effects.
+   *
+   * @throws HandleServerException if the server is unreachable or the response is not a handle-server response
+   */
+  void verifyReachable();
 }
