@@ -47,14 +47,6 @@ spring:
             issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
             user-name-attribute: preferred_username
 
-  # Setting certificate for production
-  ssl:
-    bundle:
-      pem:
-        handle:
-          truststore:
-            certificate: file:/run/secrets/handle-server.crt   # mounted, not in the repo
-
   #####
   # Thymeleaf config
   # enables thymeleaf creation of hidden input fields for PUT and POST requests via html forms
@@ -167,10 +159,9 @@ gams:
       prefix: ${HANDLE_PREFIX:11471}
       auth-handle: ${HANDLE_AUTH_HANDLE:11471/GAMS-API}
       auth-index: ${HANDLE_AUTH_INDEX:300}
-      secret-key-path: ${HANDLE_SECRET_KEY_PATH:/run/secrets/handle-secret}
+      secret-key-path: ${HANDLE_SECRET_KEY_PATH:/run/secrets/handle-secret} # basic auth secret
       admin-handle: ${HANDLE_ADMIN_HANDLE:11471/ADMIN}
       admin-index: ${HANDLE_ADMIN_INDEX:200}
-      ssl-bundle: handle
 
   storage:
     # root of GAMS files (datastreams) to be stored.
