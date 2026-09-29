@@ -2,7 +2,6 @@ package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.IHandleClient;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;

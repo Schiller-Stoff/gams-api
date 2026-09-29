@@ -1,9 +1,8 @@
-package org.ddh.gamsapi.domain.ArchivalRecord.utils;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.*;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.ObjectProvider;

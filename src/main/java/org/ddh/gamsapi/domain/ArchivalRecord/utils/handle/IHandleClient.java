@@ -1,8 +1,4 @@
-package org.ddh.gamsapi.domain.ArchivalRecord.utils;
-
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleNotRegisteredException;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleServerException;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import java.net.URI;
 import java.util.Optional;
