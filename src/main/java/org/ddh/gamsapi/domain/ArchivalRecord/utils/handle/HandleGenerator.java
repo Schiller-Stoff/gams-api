@@ -1,6 +1,5 @@
-package org.ddh.gamsapi.domain.ArchivalRecord.utils;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.springframework.stereotype.Component;
 

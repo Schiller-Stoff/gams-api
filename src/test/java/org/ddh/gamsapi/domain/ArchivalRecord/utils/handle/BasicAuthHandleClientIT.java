@@ -1,7 +1,6 @@
 package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import org.assertj.core.api.Assertions;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
