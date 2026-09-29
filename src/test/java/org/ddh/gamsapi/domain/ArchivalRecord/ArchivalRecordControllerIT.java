@@ -48,6 +48,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   @Autowired
   private IArchivalRecordRepository archivalRecordRepository;
 
+  @Autowired
+  private HandleGenerator handleGenerator;
+
   @BeforeEach
   void setup() {
     testDataSet = testDataBuilder.buildTestDataSet();
@@ -143,7 +146,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
         // add another published archival record
         ArchivalRecord publishedRecord = new ArchivalRecord();
         publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
-        publishedRecord.setPid(HandleGenerator.generate());
+        publishedRecord.setPid(handleGenerator.generate().toHdlUri());
         publishedRecord.setExternalId("foobarxyz");
         publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
 
@@ -474,7 +477,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     @Test
     void createsExpectedArchivalRecord() throws Exception {
 
-      final String TEST_PID = HandleGenerator.generate();
+      final String TEST_PID = handleGenerator.generate().toHdlUri();
 
       final String REQUEST_URL = String.format(
           "/api/curation/v1/archival-records/%s?objectId=%s",
@@ -496,7 +499,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
     @Test
     void createsExpectedArchivalRecordWithObjectId() throws Exception {
 
-      final String TEST_PID = HandleGenerator.generate();
+      final String TEST_PID = handleGenerator.generate().toHdlUri();
 
       final String REQUEST_URL = String.format(
           "/api/curation/v1/archival-records/%s?objectId=%s",

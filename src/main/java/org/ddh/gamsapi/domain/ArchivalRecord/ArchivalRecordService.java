@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.IHandleClient;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
@@ -26,6 +27,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   private final IArchivalRecordRepository archivalRecordRepository;
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IHandleClient handleClient;
+  private final HandleGenerator handleGenerator;
 
   @Override
   public PagedResponse<ArchivalRecordCompactView> findForObject(String digitalObjectId, Pageable pageable) {
@@ -126,7 +128,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
-    String pid = handleClient.generate();
+    String pid = handleGenerator.generate().toHdlUri();
     archivalRecord.setPid(pid);
     DigitalObject linkedDigitalObject = new DigitalObject();
     linkedDigitalObject.setId(objectId);
@@ -171,7 +173,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Transactional
   public ArchivalRecord reserveArchivalRecord() {
     ArchivalRecord archivalRecord = new ArchivalRecord();
-    String pid = handleClient.generate();
+    String pid = handleGenerator.generate().toHdlUri();
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 

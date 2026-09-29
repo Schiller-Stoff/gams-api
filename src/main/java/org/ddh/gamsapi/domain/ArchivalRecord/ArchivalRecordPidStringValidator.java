@@ -25,6 +25,11 @@ public class ArchivalRecordPidStringValidator implements ConstraintValidator<Val
       return false;
     }
 
+    if (!pid.startsWith("hdl:")){
+      addViolation(context, "Pid must start with 'hdl:' - Invalid PID: " + pid);
+      return false;
+    }
+
     if (pid.length() < MIN_LENGTH) {
       addViolation(context, "PID is too short (shorter than " + MIN_LENGTH + "). Got: " + pid);
       return false;

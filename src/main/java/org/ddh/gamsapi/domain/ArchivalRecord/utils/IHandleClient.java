@@ -19,15 +19,6 @@ import java.util.Optional;
 public interface IHandleClient {
 
   /**
-   * Generates a new, syntactically valid PID under the configured prefix.
-   * Purely local - does NOT contact the handle server and does NOT guarantee that the
-   * handle is still free there. Use {@link #register(String, URI)} to actually claim it.
-   *
-   * @return e.g. {@code hdl:11471/518.10.1.4714}
-   */
-  String generate();
-
-  /**
    * Creates the handle on the handle server with an HS_ADMIN value and a URL value pointing to {@code target}.
    * <p>
    * Never overwrites: if the handle already exists and already points to the same target the call is

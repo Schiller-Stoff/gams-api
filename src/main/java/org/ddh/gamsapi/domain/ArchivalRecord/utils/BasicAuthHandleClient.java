@@ -46,10 +46,12 @@ public class BasicAuthHandleClient implements IHandleClient {
   private final HandleServerProperties properties;
   private final RestClient restClient;
   private final URI baseUri;
+  private final HandleGenerator handleGenerator;
 
-  public BasicAuthHandleClient(HandleServerProperties properties, ObjectProvider<SslBundles> sslBundles) {
+  public BasicAuthHandleClient(HandleServerProperties properties, ObjectProvider<SslBundles> sslBundles, HandleGenerator handleGenerator) {
     this.properties = properties;
     this.baseUri = URI.create(properties.getBaseUrl().replaceAll("/+$", ""));
+    this.handleGenerator = handleGenerator;
 
     var httpClient = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_1_1)
@@ -65,11 +67,6 @@ public class BasicAuthHandleClient implements IHandleClient {
         .requestFactory(requestFactory)
         .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
         .build();
-  }
-
-  @Override
-  public String generate() {
-    return HandleGenerator.generate(properties.getPrefix());
   }
 
   @Override

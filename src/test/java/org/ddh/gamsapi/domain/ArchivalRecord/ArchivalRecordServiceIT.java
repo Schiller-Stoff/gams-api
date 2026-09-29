@@ -38,6 +38,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
 
+  @Autowired
+  private HandleGenerator handleGenerator;
+
   // Deactivates the auditing process.
   @MockitoBean
   private AuditingHandler auditingHandler;
@@ -46,6 +49,8 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   private TestDataBuilder testDataBuilder;
 
   private TestDataSet testDataSet;
+
+
 
   @BeforeEach
   void setup() {
@@ -87,7 +92,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
      // add another published archival record
       ArchivalRecord publishedRecord = new ArchivalRecord();
       publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
-      publishedRecord.setPid(HandleGenerator.generate());
+      publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
 
@@ -117,7 +122,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // add another published archival record
       ArchivalRecord publishedRecord = new ArchivalRecord();
       publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
-      publishedRecord.setPid(HandleGenerator.generate());
+      publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
 
@@ -146,7 +151,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       // add another published archival record
       ArchivalRecord publishedRecord = new ArchivalRecord();
       publishedRecord.setArchivalState(ArchivalState.PUBLISHED);
-      publishedRecord.setPid(HandleGenerator.generate());
+      publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
 
@@ -206,7 +211,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     void throwsIfUnexpectedlyMultipleActiveRecordsExist(){
 
       ArchivalRecord another = new ArchivalRecord();
-      another.setPid(HandleGenerator.generate());
+      another.setPid(handleGenerator.generate().toHdlUri());
       another.setArchivalState(ArchivalState.RESERVED);
 
       var linkedObject = new DigitalObject();
@@ -258,7 +263,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     @Test
     void createsExpectedArchivalRecord(){
 
-      final String TEST_PID = HandleGenerator.generate();
+      final String TEST_PID = handleGenerator.generate().toHdlUri();
 
       var savedRecord = archivalRecordService.reserveArchivalRecordByPid(TEST_PID);
 
@@ -353,7 +358,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     @Test
     void createsExpectedArchivalRecordViaProvidingExternalPid(){
 
-      final String TEST_PID = HandleGenerator.generate();
+      final String TEST_PID = handleGenerator.generate().toHdlUri();
 
       var savedArchivalRecord = archivalRecordService.reserveArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), TEST_PID);
       var foundArchivalRecord = archivalRecordRepository.findById(savedArchivalRecord.getPid()).orElseThrow();
@@ -370,7 +375,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     @Test
     void throwsIfDigitalObjectWasNotFound(){
 
-      final String TEST_PID = HandleGenerator.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
       final String NON_EXISTENT_OBJECT_ID = testDataSet.project().getProjectAbbr() + ".foobar";
 
       Assertions.assertThatThrownBy(() -> archivalRecordService.reserveArchivalRecordByObjectIdAndPid(NON_EXISTENT_OBJECT_ID, TEST_PID))
@@ -414,7 +419,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     @Test
     void throwsIfArchivalRecordDoesNotExist(){
 
-      final String TEST_PID = HandleGenerator.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
 
       var changeDto = new ArchivalRecordDto();
       changeDto.setPid(TEST_PID);

@@ -1,19 +1,24 @@
 package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.HandleGenerator;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.URI;
 
 class BasicAuthHandleClientIT extends HandleIntegrationTest {
+
+  @Autowired
+  private HandleGenerator handleGenerator;
 
   @Nested
   class Register {
 
     @Test
     void registerExpectedHandleDoesNotThrow(){
-      String pid = handleClient.generate();
+      String pid = handleGenerator.generate().toString();
       org.junit.jupiter.api.Assertions.assertDoesNotThrow(
           () -> handleClient.register(pid, URI.create("https://google.at"))
       );
@@ -21,7 +26,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void registersExpectedHandle(){
-      String pid = handleClient.generate();
+      String pid = handleGenerator.generate().toString();
       handleClient.register(pid, URI.create("https://google.at"));
 
       Assertions.assertThat(
@@ -31,7 +36,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void throwsHandleAlreadyExistsExceptionIfHandleAlreadyExists(){
-      final String PID = handleClient.generate();
+      final String PID = handleGenerator.generate().toString();
       handleClient.register(PID, URI.create("https://google.at"));
 
       final URI DIFFERENT_TARGET = URI.create("https://different-target.at");
@@ -43,7 +48,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void doesNotThrowIfHandleAlreadyExistsButTargetsAreTheSame(){
-      String pid = handleClient.generate();
+      String pid = handleGenerator.generate().toString();
       handleClient.register(pid, URI.create("https://google.at"));
 
       org.junit.jupiter.api.Assertions.assertDoesNotThrow(
@@ -58,7 +63,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void retargetExpectedHandleDoesNotThrow(){
-      String pid = handleClient.generate();
+      String pid = handleGenerator.generate().toString();
       handleClient.register(pid, URI.create("https://google.at"));
       org.junit.jupiter.api.Assertions.assertDoesNotThrow(
           () -> handleClient.retarget(pid, URI.create("https://google.at"))
@@ -68,7 +73,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void resolvesExpectedRetarget(){
-      String pid = handleClient.generate();
+      String pid = handleGenerator.generate().toString();
       handleClient.register(pid, URI.create("https://google.at"));
 
       final String TEST_TARGET = "https://gams.uni-graz.at";
@@ -87,7 +92,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void resolvesExpectedTargetDoesNotThrow(){
-      final String TEST_PID = handleClient.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
       final String TEST_TARGET = "https://google.at";
       handleClient.register(TEST_PID, URI.create(TEST_TARGET));
 
@@ -99,7 +104,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void resolvesExpectedTarget(){
-      final String TEST_PID = handleClient.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
       final String TEST_TARGET = "https://google.at";
 
       handleClient.register(TEST_PID, URI.create(TEST_TARGET));
@@ -118,7 +123,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void returnsTrueWhenHandleExists(){
-      final String TEST_PID = handleClient.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
       handleClient.register(TEST_PID, URI.create("https://google.at"));
       Assertions.assertThat(handleClient.exists(TEST_PID))
           .isTrue();
@@ -126,7 +131,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void returnsFalseWhenHandleDoesNotExist(){
-      final String TEST_PID = handleClient.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
       Assertions.assertThat(handleClient.exists(TEST_PID))
           .isFalse();
     }
@@ -138,7 +143,7 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     @Test
     void deletesExpectedHandle(){
-      final String TEST_PID = handleClient.generate();
+      final String TEST_PID = handleGenerator.generate().toString();
       handleClient.register(TEST_PID, URI.create("https://google.at"));
       Assertions.assertThat(handleClient.exists(TEST_PID)).isTrue();
       handleClient.delete(TEST_PID);
