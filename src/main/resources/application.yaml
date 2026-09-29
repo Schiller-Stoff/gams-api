@@ -47,6 +47,13 @@ spring:
             issuer-uri: ${GAMSAPI_ISSUER_URI:http://localhost:8182/realms/gams-realm}
             user-name-attribute: preferred_username
 
+  # Setting certificate for production
+  ssl:
+    bundle:
+      pem:
+        handle:
+          truststore:
+            certificate: file:/run/secrets/handle-server.crt   # mounted, not in the repo
 
   #####
   # Thymeleaf config
@@ -156,14 +163,14 @@ gams:
       accessToken: ${QLEVER_ACCESS_TOKEN:gams-dev}
       exportPath: ${QLEVER_EXPORT_PATH:qlever-export}
     handle:
-      base-url: ${HANDLE_SERVER_URL:https://handle:8000}
+      base-url: ${HANDLE_SERVER_URL:https://handle-server:8000}
       prefix: ${HANDLE_PREFIX:11471}
       auth-handle: ${HANDLE_AUTH_HANDLE:11471/GAMS-API}
       auth-index: ${HANDLE_AUTH_INDEX:300}
       secret-key-path: ${HANDLE_SECRET_KEY_PATH:/run/secrets/handle-secret}
       admin-handle: ${HANDLE_ADMIN_HANDLE:11471/ADMIN}
       admin-index: ${HANDLE_ADMIN_INDEX:200}
-      ssl-bundle: ${HANDLE_SSL_BUNDLE:}
+      ssl-bundle: handle
 
   storage:
     # root of GAMS files (datastreams) to be stored.

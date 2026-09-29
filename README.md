@@ -212,5 +212,8 @@ docker push zimgraz/gams-api-<VERSION>
 ```
 
 
+## HTTPS / Certificates
 
-
+The handle server requires a certificate to function correctly.
+1. Check related properties in application.yml (search for "handle")
+2. Check files required: Certificate files under docker/apps
