@@ -8,7 +8,7 @@ import java.security.SecureRandom;
 @Component
 public class HandleGenerator {
 
-  private static final char[] ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz".toCharArray();
+  private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstvwxyz".toCharArray();
   private final HandleServerProperties properties;
   private final SecureRandom random = new SecureRandom();  // thread-safe
 
