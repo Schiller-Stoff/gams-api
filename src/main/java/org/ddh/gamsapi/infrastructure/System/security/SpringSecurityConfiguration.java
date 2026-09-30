@@ -104,8 +104,8 @@ public class SpringSecurityConfiguration {
             // any mutating verb (POST/PUT/PATCH/DELETE) under archival-records:
             // restricted to global roles only — project-scoped admins/editors excluded
             .requestMatchers(
-                "/api/curation/v1/projects/{projectAbbr}/objects/{id}/archival-records",
-                "/api/curation/v1/projects/{projectAbbr}/objects/{id}/archival-records/**"
+                "/api/curation/v1/archival-records",
+                "/api/curation/v1/archival-records/**"
             )
             .hasAnyAuthority(
                 GAMSAPIAuthorities.getSuperAdmin(),

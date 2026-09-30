@@ -293,10 +293,7 @@ class AuthorizationIT extends IntegrationTest {
 
     private final String TEST_REQUEST_BODY = "{}";
 
-    private final String ARCHIVAL_RECORDS_URL = String.format(
-        "/api/curation/v1/projects/%s/objects/%s/archival-records",
-        TestProject.PROJECT_ABBR.getValue(), TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
-    );
+    private final String ARCHIVAL_RECORDS_URL = "/api/curation/v1/archival-records";
 
     @Test
     void projectAdminIsForbiddenToPost() throws Exception {
