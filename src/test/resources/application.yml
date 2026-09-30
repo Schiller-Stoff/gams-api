@@ -18,6 +18,14 @@ spring:
         format_sql: true
         # show_sql: true # shows generated SQL statements in console
 
+  # certificate setting to trust https during test for handle
+  ssl:
+    bundle:
+      pem:
+        handle:
+          truststore:
+            certificate: file:docker/apps/handle/certs/handle-dev.crt
+
 # ensures that testcontainers reuses started containers
 # (not sure if properties actually do something)
 testcontainers:
@@ -33,6 +41,16 @@ gams:
     auto-commit: true # this is necessary to directly reflect changes in solr during tests
     batch-size: 100
     commit-interval: 5
+  services:
+    handle:
+      base-url: ${HANDLE_SERVER_URL:https://localhost:8000}
+      prefix: ${HANDLE_PREFIX:99999}
+      auth-handle: ${HANDLE_AUTH_HANDLE:99999/ADMIN}
+      auth-index: ${HANDLE_AUTH_INDEX:300}
+      secret-key-path: ${HANDLE_SECRET_KEY_PATH:docker/apps/handle/secrets/handle-admin.secret}
+      admin-handle: ${HANDLE_ADMIN_HANDLE:99999/ADMIN}
+      admin-index: ${HANDLE_ADMIN_INDEX:200}
+      ssl-bundle: handle
 
 
 ########

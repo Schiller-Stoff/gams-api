@@ -8,11 +8,10 @@ import org.ddh.gamsapi.domain.Datastream.DatastreamId;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamMainResourceDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotWriteFileException;
-import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamNotFoundException;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMainResourceView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.DigitalObject.ArchivalRecord.IArchivalRecordRepository;
+import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
@@ -166,12 +165,8 @@ public class DigitalObjectService implements IDigitalObjectService {
       );
     }
 
-    if (archivalRecordRepository.existsByDigitalObjectId(digitalObject.getId())) {
-      throw new DigitalObjectHasArchivalRecordsException(
-          "Cannot delete digital object " + digitalObject.getId()
-              + ". It still has archival records associated with it."
-      );
-    }
+    // orphan associated archival records instead of blocking delete or cascading
+    archivalRecordRepository.detachAllFromDigitalObject(digitalObject.getId());
 
     submissionRecordRepository.deleteById(digitalObject.getId());
 

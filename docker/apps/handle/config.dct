@@ -1,0 +1,31 @@
+{
+  "server_type" = "server"
+  "interfaces" = (
+    "hdl_http"
+  )
+  "hdl_http_config" = {
+    "bind_address" = "0.0.0.0"
+    "bind_port" = "8000"
+    "log_accesses" = "yes"
+  }
+  "server_config" = {
+    "this_server_id" = "1"
+    "server_admin_full_access" = "yes"
+    "allow_na_admins" = "no"
+    "template_ns_override" = "yes"
+    "auto_homed_prefixes" = (
+      "0.NA/99999"
+    )
+    "server_admins" = (
+      "300:99999/ADMIN"
+    )
+    "storage_type" = "sql"
+    "sql_settings" = {
+      "sql_url" = "jdbc:postgresql://relationalDB:5432/handlesystem"
+      "sql_driver" = "org.postgresql.Driver"
+      "sql_login" = "admin"
+      "sql_passwd" = "admin"
+      "sql_read_only" = "no"
+    }
+  }
+}

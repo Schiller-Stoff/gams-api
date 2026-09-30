@@ -31,6 +31,8 @@ public class OpenAPIConfig {
   public static final String INGEST_TAG_DESCRIPTION = "Ingest digital objects and datastreams in bulk";
   public static final String USER_TAG = "User";
   public static final String USER_TAG_DESCRIPTION = "User management and authentication operations";
+  public static final String ARCHIVAL_RECORDS_TAG = "Archival Records";
+  public static final String ARCHIVAL_RECORDS_TAG_DESCRIPTION = "Archiving digital objects and related entities.";
 
   @Value("${server.port:18085}")
   private String serverPort;
@@ -53,13 +55,15 @@ public class OpenAPIConfig {
             new Tag().name(SEARCH_TAG).description(SEARCH_TAG_DESCRIPTION),
             new Tag().name(INTEGRATION_TAG).description(INTEGRATION_TAG_DESCRIPTION),
             new Tag().name(INGEST_TAG).description(INGEST_TAG_DESCRIPTION),
-            new Tag().name(USER_TAG).description(USER_TAG_DESCRIPTION)
+            new Tag().name(USER_TAG).description(USER_TAG_DESCRIPTION),
+            new Tag().name(ARCHIVAL_RECORDS_TAG).description(ARCHIVAL_RECORDS_TAG_DESCRIPTION)
         ));
   }
 
   private Info getInfo() {
     return new Info()
         .title("GAMS5 API")
+        // TODO inject version?
         .version("1.0.0")
         .description("""
                     REST API for GAMS5 (Geisteswissenschaftliches Asset Management System)
