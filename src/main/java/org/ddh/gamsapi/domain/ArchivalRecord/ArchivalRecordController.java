@@ -17,6 +17,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordUpdateDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPidException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPublicationTimeStampException;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidStateException;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = { "/api/curation/v1/archival-records" })
@@ -49,12 +51,26 @@ public class ArchivalRecordController {
   @GetMapping
   public PagedResponse<ArchivalRecordCompactView> findArchivalRecords(
       @RequestParam String objectId,
-      @RequestParam(defaultValue = "", required = false, name = "state") Set<ArchivalState> states,
+      @RequestParam(defaultValue = "", required = false, name = "state") Set<String> states,
       @RequestParam(defaultValue = "0") int pageIndex,
       @RequestParam(defaultValue = "100") int pageSize
   ) {
 
-    if(states.isEmpty()){
+    //  Manually validate and convert the input strings
+    Set<ArchivalState> validatedStates = states.stream()
+        .filter(s -> !s.isEmpty()) // filter out the default empty string
+        .map(s -> {
+          try {
+            return ArchivalState.valueOf(s.toUpperCase()); // lower case is allowed
+          } catch (IllegalArgumentException _) {
+            throw new ArchivalRecordInvalidStateException(
+                "ArchivalState not known: '" + s + "'"
+            );
+          }
+        })
+        .collect(Collectors.toSet());
+
+    if(validatedStates.isEmpty()){
       return archivalRecordService.findForObject(
           objectId,
           PageRequest.of(pageIndex, pageSize, Sort.by("publicationTimeStamp"))
@@ -63,7 +79,7 @@ public class ArchivalRecordController {
 
     return archivalRecordService.findArchivalRecordsForObject(
         objectId,
-        states,
+        validatedStates,
         PageRequest.of(pageIndex, pageSize, Sort.by("publicationTimeStamp"))
     );
   }

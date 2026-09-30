@@ -9,10 +9,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.data.auditing.AuditingHandler;
@@ -172,6 +169,28 @@ class ArchivalRecordControllerIT extends IntegrationTest {
             .doesNotContain(ArchivalState.RESERVED.name());
 
       }
+
+      @Test
+      @DisplayName("Returns 400 if the archival state is not known")
+      void errorIfArchivalStateIsNotKnown() throws Exception {
+
+        final String NON_EXISTENT_STATE = "foobar";
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records?objectId=%s&state=%s",
+            testDataSet.digitalObject().getId(),
+            NON_EXISTENT_STATE
+        );
+
+        String responseBody = mockMvc.perform(
+            MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(responseBody)
+            .contains(NON_EXISTENT_STATE);
+
+      }
+
 
     }
 
