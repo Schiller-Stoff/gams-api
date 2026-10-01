@@ -19,6 +19,7 @@ public record Handle(String prefix, String suffix) {
    * Parses given handle string to Handle object. Works with hdl:1123/foobar and 1123/foobar. Slash must be contained.
    * @param value handle as string
    * @return parsed handle
+   * @throws IllegalArgumentException if handle is not parseable
    */
   public static Handle parse(String value) {
     if(value == null){
