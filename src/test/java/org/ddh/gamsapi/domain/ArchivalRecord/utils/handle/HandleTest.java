@@ -95,7 +95,7 @@ class HandleTest extends UnitTest {
     @Test
     void throwsIfGivenHandleIsNull(){
       Assertions.assertThatThrownBy(() -> Handle.parse(null))
-          .isInstanceOf(NullPointerException.class);
+          .isInstanceOf(IllegalArgumentException.class);
     }
 
   }

@@ -21,6 +21,9 @@ public record Handle(String prefix, String suffix) {
    * @return parsed handle
    */
   public static Handle parse(String value) {
+    if(value == null){
+      throw new IllegalArgumentException("Given handle value is null which is not allowed");
+    }
     if(value.startsWith("hdl:")){
       value = value.substring("hdl:".length());
     }
@@ -30,7 +33,7 @@ public record Handle(String prefix, String suffix) {
   }
 
   public static boolean isValid(String value) {
-    try { parse(value); return true; } catch (IllegalArgumentException e) { return false; }
+    try { parse(value); return true; } catch (IllegalArgumentException _) { return false; }
   }
 
   /**
