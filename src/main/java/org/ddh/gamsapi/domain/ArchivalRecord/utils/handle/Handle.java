@@ -15,7 +15,15 @@ public record Handle(String prefix, String suffix) {
       throw new IllegalArgumentException("Invalid handle suffix: " + suffix);
   }
 
+  /**
+   * Parses given handle string to Handle object. Works with hdl:1123/foobar and 1123/foobar. Slash must be contained.
+   * @param value handle as string
+   * @return parsed handle
+   */
   public static Handle parse(String value) {
+    if(value.startsWith("hdl:")){
+      value = value.substring("hdl:".length());
+    }
     int slash = value == null ? -1 : value.indexOf('/');
     if (slash <= 0) throw new IllegalArgumentException("Not a handle: " + value);
     return new Handle(value.substring(0, slash), value.substring(slash + 1));
