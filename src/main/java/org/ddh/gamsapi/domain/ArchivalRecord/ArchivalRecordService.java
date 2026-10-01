@@ -177,6 +177,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
 
     Handle handle = handleGenerator.generate();
+
+    // TODO think about doing this inside the database connection
     // small fail-safe for very rare (but possible) handle clashes
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
