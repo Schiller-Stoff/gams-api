@@ -127,6 +127,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // TODO handle server comm
+
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
@@ -156,6 +158,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
           "Cannot create archival record for digital object: " + objectId + ". The archival record already exists with handle: " + pid
       );
     }
+
+    // TODO handle server comm
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
@@ -203,6 +207,16 @@ public class ArchivalRecordService implements IArchivalRecordService {
       throw new ArchivalRecordAlreadyExistsException(
           "Cannot create archival record. Archival record with pid already exists: " + pid
       );
+    }
+
+    try {
+      var parsedHandle = Handle.parse(pid);
+      if(handleGenerator.isManagedHandle(parsedHandle) && handleClient.exists(parsedHandle.toString())){
+         throw new HandleAlreadyExistsException(
+             "Cannot create archival record with pid: " + parsedHandle.toHdlUri() +  ". The handle already exists on the handle server");
+      }
+    } catch (IllegalArgumentException _) {
+      // in case given pid is not a handle
     }
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
