@@ -186,7 +186,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    String pid = handleGenerator.generate().toHdlUri();
+    String pid = handle.toHdlUri();
 
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
