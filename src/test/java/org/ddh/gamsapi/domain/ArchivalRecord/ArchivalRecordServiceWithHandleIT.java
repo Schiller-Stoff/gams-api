@@ -150,4 +150,40 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
 
   }
 
+  @Nested
+  class ReserveArchivalRecordByObjectIdAndPid {
+
+    @Test
+    void createsExpectedArchivalRecord(){
+      // make sure that test object has not test archival record
+      archivalRecordRepository.deleteAll();
+
+      var generatedHandle = handleGenerator.generate();
+
+      var savedRecord = archivalRecordService.reserveArchivalRecordByObjectIdAndPid(
+          testDataSet.digitalObject().getId(),
+          generatedHandle.toHdlUri()
+      );
+
+      Assertions.assertThat(
+          archivalRecordRepository.existsById(savedRecord.getPid()))
+          .isTrue();
+
+    }
+
+    @Test
+    void throwsIfGivenHandleAlreadyExists(){
+      var generatedHandle = handleGenerator.generate();
+
+      handleClient.register(generatedHandle.toString(), URI.create("https://google.at"));
+
+      Assertions.assertThatThrownBy(() ->  archivalRecordService.reserveArchivalRecordByObjectIdAndPid(
+          testDataSet.digitalObject().getId(),
+          generatedHandle.toHdlUri()
+      )).isInstanceOf(HandleAlreadyExistsException.class);
+
+    }
+
+  }
+
 }
