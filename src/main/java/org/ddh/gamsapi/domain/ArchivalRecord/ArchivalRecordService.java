@@ -3,6 +3,8 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
@@ -173,7 +175,17 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Transactional
   public ArchivalRecord reserveArchivalRecord() {
     ArchivalRecord archivalRecord = new ArchivalRecord();
+
+    Handle handle = handleGenerator.generate();
+    // small fail-safe for very rare (but possible) handle clashes
+    if(handleClient.exists(handle.toString())){
+      throw new HandleAlreadyExistsException(
+          "Generated handle already registered in the handle server " + handle
+      );
+    }
+
     String pid = handleGenerator.generate().toHdlUri();
+
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 

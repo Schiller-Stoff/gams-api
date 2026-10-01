@@ -10,6 +10,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -37,6 +38,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
+
+  @MockitoBean
+  IHandleClient handleClient;
 
   @Autowired
   private HandleGenerator handleGenerator;
