@@ -127,13 +127,18 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO handle server comm
+    Handle handle = handleGenerator.generate();
+
+    if(handleClient.exists(handle.toString())){
+      throw new HandleAlreadyExistsException(
+          "Cannot create archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
+      );
+    }
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
+    archivalRecord.setPid(handle.toHdlUri());
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
-    String pid = handleGenerator.generate().toHdlUri();
-    archivalRecord.setPid(pid);
     DigitalObject linkedDigitalObject = new DigitalObject();
     linkedDigitalObject.setId(objectId);
     archivalRecord.setDigitalObject(linkedDigitalObject);

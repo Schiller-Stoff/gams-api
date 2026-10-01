@@ -110,4 +110,44 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
 
   }
 
+  @Nested
+  class ReserveArchivalRecordByObjectId {
+
+    @Test
+    void createsExpectedArchivalRecord(){
+
+      // make sure that test object has not test archival record
+      archivalRecordRepository.deleteAll();
+
+      var savedRecord = archivalRecordService.reserveArchivalRecordByObjectId(
+          testDataSet.digitalObject().getId()
+      );
+
+      Assertions.assertThat(
+          archivalRecordRepository.existsById(savedRecord.getPid())
+      ).isTrue();
+
+    }
+
+    @Test
+    void doesNotCreateHandleOnHandleServer(){
+
+      // make sure that test object has not test archival record
+      archivalRecordRepository.deleteAll();
+
+      var savedRecord = archivalRecordService.reserveArchivalRecordByObjectId(
+          testDataSet.digitalObject().getId()
+      );
+
+      var expectedHandle = Handle.parse(
+          savedRecord.getPid()
+      );
+
+      Assertions.assertThat(
+          handleClient.exists(expectedHandle.toString())
+      ).isFalse();
+    }
+
+  }
+
 }
