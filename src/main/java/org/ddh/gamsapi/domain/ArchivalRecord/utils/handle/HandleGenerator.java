@@ -20,6 +20,24 @@ public class HandleGenerator {
   }
 
   /**
+   * Checks if the prefix of given handle is managed by the gams-api
+   * @param handle given handle
+   * @return boolean if handle is managed or not
+   */
+  public boolean isManagedHandle(Handle handle){
+    return handle.prefix().equals(properties.getPrefix());
+  }
+
+  /**
+   * Checks if given pid is a valid handle
+   * @param pid permanent identifier of a resource
+   * @return boolean if given string is a valid handle
+   */
+  public boolean isHandle(String pid){
+    return Handle.isValid(pid);
+  }
+
+  /**
    * Generates a handle with predefined prefix and random suffix.
    * @return Handle object with predefined prefix and random suffix.
    */
