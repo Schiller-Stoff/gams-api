@@ -1,14 +1,16 @@
-package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
+package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleServerNotReachableException;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-class HandleIntegrationTest extends IntegrationTest {
+public class HandleIntegrationTest extends IntegrationTest {
 
 
   @Autowired
