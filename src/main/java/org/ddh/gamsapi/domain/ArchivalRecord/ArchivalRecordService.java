@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.util.Collection;
 
 @Service
@@ -296,6 +297,27 @@ public class ArchivalRecordService implements IArchivalRecordService {
       throw new ArchivalRecordInvalidStateException(
           "Cannot draft archival record with pid " + pid + ". The requested record has not the required state " + ArchivalState.RESERVED + " Got actual state: " + activeRecord.getArchivalState()
       );
+    }
+
+    // TODO what is with the latest handle? (pointing to latest on invenio? - should this be created at retargeting?)
+    // TODO hardcoded gams.uni-graz value
+    // TODO where to point the target of the handle?
+    String handleTarget = String.format(
+        "https://gams.uni-graz.at/api/curation/v1/projects/%s/objects/%s",
+        activeRecord.getDigitalObject().getProject().getProjectAbbr(),
+        activeRecord.getDigitalObject().getId()
+    );
+
+    try {
+      var parsedHandle = Handle.parse(pid);
+      if(handleGenerator.isManagedHandle(parsedHandle)){
+        handleClient.register(
+            parsedHandle.toString(),
+            URI.create(handleTarget)
+        );
+      }
+    } catch (IllegalArgumentException _) {
+      // in case given pid is not a handle
     }
 
     activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());

@@ -3,6 +3,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
@@ -181,6 +182,54 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
           testDataSet.digitalObject().getId(),
           generatedHandle.toHdlUri()
       )).isInstanceOf(HandleAlreadyExistsException.class);
+
+    }
+
+  }
+
+  @Nested
+  class DraftArchivalRecord {
+
+    @BeforeEach
+    void setup(){
+
+    }
+
+    @Test
+    void createsExpectedHandleOnHandleServer(){
+
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId("foobarxyz");
+
+      var changedRecord = archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      );
+
+      Assertions.assertThat(handleClient.exists(changedRecord.getPid()))
+          .isTrue();
+
+    }
+
+    @Test
+    void createsExpectedHandleTarget(){
+
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId("foobarxyz");
+
+      var changedRecord = archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      );
+
+      final String EXPECTED_HANDLE_TARGET = String.format(
+          "https://gams.uni-graz.at/api/curation/v1/projects/%s/objects/%s",
+          testDataSet.project().getProjectAbbr(),
+          testDataSet.digitalObject().getId()
+      );
+
+      Assertions.assertThat(handleClient.resolveTarget(changedRecord.getPid()).orElseThrow().toString())
+          .isEqualTo(EXPECTED_HANDLE_TARGET);
 
     }
 
