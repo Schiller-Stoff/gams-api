@@ -105,15 +105,24 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public void deleteById(String archivalRecordPid) {
-    if(!archivalRecordRepository.existsById(archivalRecordPid)){
-      throw new ArchivalRecordNotFoundException(
-          "Cannot delete archival record with pid: " + archivalRecordPid + " The archival record does not exist."
-      );
-    }
-    // TODO this now also needs to cleanup the handle server side! (if anything exists)
+  public void deleteById(String pid) {
+    var foundArchivalRecord = archivalRecordRepository.findByIdForUpdate(pid)
+      .orElseThrow(() -> new ArchivalRecordNotFoundException(
+          "Cannot delete archival record with pid: " + pid + " The archival record does not exist."
+      )
+    );
 
-    archivalRecordRepository.deleteById(archivalRecordPid);
+    archivalRecordRepository.deleteById(foundArchivalRecord.getPid());
+    archivalRecordRepository.flush(); // DB errors surface here, before the handle server is touched -> only then also remove from the handle server.
+
+    handleGenerator.parseManagedHandle(pid).ifPresent(handle -> {
+      if(handleClient.exists(handle.toString())){
+        handleClient.delete(handle.toString());
+      }
+    });
+
+    log.info("Successfully deleted archival record {}", foundArchivalRecord);
+
   }
 
   @Override

@@ -14,15 +14,16 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.RestClientException;
 
+import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
@@ -242,6 +243,32 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid())
       ).isFalse();
     }
+
+    @Test
+    @DisplayName("Transaction failure test: Keeps the record when the handle server fails")
+    void rollsBackOnHandleFailure() {
+      var pid = testDataSet.archivalRecord().getPid();
+
+      // create test handle for
+      handleClient.register(
+          pid, URI.create("https://google.at")
+      );
+
+      Mockito.when(handleClient.exists(
+          ArgumentMatchers.any())
+      ).thenReturn(true);
+
+      Mockito.doThrow(
+          new RestClientException("boom")
+      ).when(handleClient).delete(ArgumentMatchers.any());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.deleteById(pid)).isInstanceOf(
+          RestClientException.class
+      );
+
+      Assertions.assertThat(archivalRecordRepository.existsById(pid)).isTrue();
+    }
+
 
   }
 
