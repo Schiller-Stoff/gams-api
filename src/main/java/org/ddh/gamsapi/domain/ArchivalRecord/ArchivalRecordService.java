@@ -317,7 +317,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO refactor: database operations can be rolled back - handle server not
     String handleTarget = String.format(
         "%s/api/curation/v1/projects/%s/objects/%s",
         handleServerProperties.getReserveBaseUrl(),
