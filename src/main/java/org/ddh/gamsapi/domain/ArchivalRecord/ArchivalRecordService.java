@@ -244,16 +244,13 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO refactor: database operations can be rolled back - handle server not
-    try {
-      var parsedHandle = Handle.parse(pid);
-      if(handleGenerator.isManagedHandle(parsedHandle) && handleClient.exists(parsedHandle.toString())){
-         throw new HandleAlreadyExistsException(
-             "Cannot create archival record with pid: " + parsedHandle.toHdlUri() +  ". The handle already exists on the handle server");
-      }
-    } catch (IllegalArgumentException _) {
-      // in case given pid is not a handle
-    }
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> {
+          if(handleClient.exists(handle.toString())){
+            throw new HandleAlreadyExistsException(
+                "Cannot create archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
+          }
+        });
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(pid);
