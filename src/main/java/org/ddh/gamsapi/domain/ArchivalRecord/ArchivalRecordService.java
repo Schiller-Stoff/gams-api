@@ -133,9 +133,13 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     Handle handle = handleGenerator.generate();
-
-    // TODO check if postgres already has an entry!
-
+    // fail-safe check that handle does not exist
+    if(archivalRecordRepository.existsById(handle.toString())){
+      throw new ArchivalRecordAlreadyExistsException(
+          "An archival record with pid " +  handle.toString() + " already exists. This might be a very rare pid clash. Please retry."
+      );
+    }
+    // fail-safe check that handle does not exist
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
           "Cannot create archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
