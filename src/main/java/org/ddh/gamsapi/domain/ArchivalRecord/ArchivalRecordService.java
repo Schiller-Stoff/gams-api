@@ -359,7 +359,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();
-    // TODO what is with the latest handle? (pointing to latest on invenio? - should this be created at retargeting?)
     try {
       var parsedHandle = Handle.parse(pid);
       if(handleGenerator.isManagedHandle(parsedHandle)){
