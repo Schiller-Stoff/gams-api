@@ -272,7 +272,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Transactional
   public ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord) {
 
-    var curArchivalRecord = archivalRecordRepository.findById(archivalRecord.getPid())
+    var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(archivalRecord.getPid())
         .orElseThrow(() ->
           new ArchivalRecordNotFoundException(
               "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
@@ -312,7 +312,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    var activeRecord = archivalRecordRepository.findById(pid)
+    var activeRecord = archivalRecordRepository.findByIdForUpdate(pid)
         .orElseThrow( () -> new ArchivalRecordNotFoundException(
             "Cannot draft archival record with pid: " + pid + " The record does not exist."
         ));
@@ -356,7 +356,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    var activeRecord = archivalRecordRepository.findById(pid)
+    var activeRecord = archivalRecordRepository.findByIdForUpdate(pid)
         .orElseThrow( () -> new ArchivalRecordNotFoundException(
             "Cannot publish archival record with pid: " + pid + " The record does not exist."
         ));
