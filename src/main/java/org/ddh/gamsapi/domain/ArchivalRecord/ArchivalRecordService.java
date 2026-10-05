@@ -134,6 +134,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     Handle handle = handleGenerator.generate();
 
+    // TODO check if postgres already has an entry!
+
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
           "Cannot create archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
@@ -200,6 +202,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
 
     Handle handle = handleGenerator.generate();
+
+    // TODO first check if no clashes in postgres!!!
 
     // TODO think about doing this outside of the database connection
     // small fail-safe for very rare (but possible) handle clashes
