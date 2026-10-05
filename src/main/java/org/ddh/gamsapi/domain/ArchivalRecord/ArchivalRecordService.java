@@ -133,10 +133,11 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     Handle handle = handleGenerator.generate();
+    String pid = handle.toHdlUri();
     // fail-safe check that handle does not exist
-    if(archivalRecordRepository.existsById(handle.toHdlUri())){
+    if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
-          "An archival record with pid " +  handle.toString() + " already exists. This might be a very rare pid clash. Please retry."
+          "An archival record with pid " +  pid + " already exists. This might be a very rare pid clash. Please retry."
       );
     }
     // fail-safe check that handle does not exist
@@ -147,7 +148,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
-    archivalRecord.setPid(handle.toHdlUri());
+    archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
     DigitalObject linkedDigitalObject = new DigitalObject();
@@ -206,8 +207,12 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
 
     Handle handle = handleGenerator.generate();
-
-    // TODO first check if no clashes in postgres!!!
+    String pid = handle.toHdlUri();
+    if(archivalRecordRepository.existsById(pid)){
+      throw new ArchivalRecordAlreadyExistsException(
+          "Cannot reserve archival record with generated pid: " + pid + " The pid unexpectedly already exists. This might be a very rare algorithmic pid clash - please retry."
+      );
+    }
 
     // TODO think about doing this outside of the database connection
     // small fail-safe for very rare (but possible) handle clashes
@@ -216,8 +221,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
           "Generated handle already registered in the handle server " + handle
       );
     }
-
-    String pid = handle.toHdlUri();
 
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
