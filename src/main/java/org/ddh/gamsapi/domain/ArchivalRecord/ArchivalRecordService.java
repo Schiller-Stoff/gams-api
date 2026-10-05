@@ -141,6 +141,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // TODO refactor: database operations can be rolled back - handle server not
+
     Handle handle = handleGenerator.generate();
     String pid = handle.toHdlUri();
     // fail-safe check that handle does not exist
@@ -185,7 +187,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO think about outside database connection
+    // TODO refactor: database operations can be rolled back - handle server not
     try {
       var parsedHandle = Handle.parse(pid);
       if(handleGenerator.isManagedHandle(parsedHandle) && handleClient.exists(parsedHandle.toString())){
@@ -223,7 +225,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO think about doing this outside of the database connection
+    // TODO refactor: database operations can be rolled back - handle server not
     // small fail-safe for very rare (but possible) handle clashes
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
@@ -248,6 +250,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // TODO refactor: database operations can be rolled back - handle server not
     try {
       var parsedHandle = Handle.parse(pid);
       if(handleGenerator.isManagedHandle(parsedHandle) && handleClient.exists(parsedHandle.toString())){
@@ -283,6 +286,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     curArchivalRecord.setExternalId(archivalRecord.getExternalId());
     curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
 
+    // TODO refactor: database operations can be rolled back - handle server not
     if(archivalRecord.getObjectId() != null){
       // check if defined digital object exists.
       if(!digitalObjectRepository.existsById(archivalRecord.getPid())){
@@ -323,6 +327,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // TODO refactor: database operations can be rolled back - handle server not
     String handleTarget = String.format(
         "%s/api/curation/v1/projects/%s/objects/%s",
         handleServerProperties.getReserveBaseUrl(),
@@ -367,6 +372,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // TODO refactor: database operations can be rolled back - handle server not
     String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();
     try {
       var parsedHandle = Handle.parse(pid);
