@@ -35,7 +35,7 @@ public class HandleGenerator {
    * @param pid pid to be analyzed
    * @return optional if given pid is a managed handle
    */
-  public Optional<Handle> isManagedHandle(String pid) {
+  public Optional<Handle> parseManagedHandle(String pid) {
     final Handle handle;
     try {
       handle = Handle.parse(pid);

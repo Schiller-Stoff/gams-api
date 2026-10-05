@@ -63,7 +63,7 @@ class HandleGeneratorTest extends UnitTest {
     @Test
     void returnsTrueAtExpectedHandlesOptional(){
       for (var handleString : MANAGED_HANDLES){
-        Assertions.assertThat(handleGenerator.isManagedHandle(handleString))
+        Assertions.assertThat(handleGenerator.parseManagedHandle(handleString))
             .isPresent();
       }
     }
@@ -80,7 +80,7 @@ class HandleGeneratorTest extends UnitTest {
     @Test
     void returnsFalseAtDifferentHandlesOptional(){
       for (var handleString : MALFORMED_HANDLES){
-        Assertions.assertThat(handleGenerator.isManagedHandle(handleString))
+        Assertions.assertThat(handleGenerator.parseManagedHandle(handleString))
             .isEmpty();
       }
     }
