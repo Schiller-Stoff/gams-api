@@ -151,6 +151,14 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
 
     }
 
+    @Test
+    void throwsIfExpectedHandleDoesNotExist(){
+      final String NON_EXISTENT_PID = handleGenerator.generate().toString();
+      Assertions.assertThatThrownBy(() -> handleClient.delete(NON_EXISTENT_PID))
+          .isInstanceOf(HandleNotRegisteredException.class)
+      ;
+    }
+
   }
 
 }
