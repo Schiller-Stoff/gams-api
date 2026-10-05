@@ -141,8 +141,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO refactor: database operations can be rolled back - handle server not
-
     Handle handle = handleGenerator.generate();
     String pid = handle.toHdlUri();
     // fail-safe check that handle does not exist
@@ -187,16 +185,13 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO refactor: database operations can be rolled back - handle server not
-    try {
-      var parsedHandle = Handle.parse(pid);
-      if(handleGenerator.isManagedHandle(parsedHandle) && handleClient.exists(parsedHandle.toString())){
-        throw new HandleAlreadyExistsException(
-            "Cannot create archival record with pid: " + parsedHandle.toHdlUri() +  ". The handle already exists on the handle server");
-      }
-    } catch (IllegalArgumentException _) {
-      // in case given pid is not a handle
-    }
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> {
+          if(handleClient.exists(handle.toString())){
+            throw new HandleAlreadyExistsException(
+                "Cannot create archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
+          }
+        });
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
@@ -225,11 +220,10 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO refactor: database operations can be rolled back - handle server not
     // small fail-safe for very rare (but possible) handle clashes
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
-          "Generated handle already registered in the handle server " + handle
+          "Generated handle is unexpectedly already registered in the handle server " + handle
       );
     }
 
