@@ -277,7 +277,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
     curArchivalRecord.setExternalId(archivalRecord.getExternalId());
     curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
 
-    // TODO refactor: database operations can be rolled back - handle server not
     if(archivalRecord.getObjectId() != null){
       // check if defined digital object exists.
       if(!digitalObjectRepository.existsById(archivalRecord.getPid())){
