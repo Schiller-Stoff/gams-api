@@ -2,6 +2,8 @@ package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -26,6 +28,21 @@ public class HandleGenerator {
    */
   public boolean isManagedHandle(Handle handle){
     return handle.prefix().equals(properties.getPrefix());
+  }
+
+  /**
+   * Checks if given pid is a managed handle
+   * @param pid pid to be analyzed
+   * @return optional if given pid is a managed handle
+   */
+  public Optional<Handle> isManagedHandle(String pid) {
+    final Handle handle;
+    try {
+      handle = Handle.parse(pid);
+    } catch (IllegalArgumentException e) {
+      return Optional.empty();          // not a handle, e.g. a DOI
+    }
+    return this.isManagedHandle(handle) ? Optional.of(handle) : Optional.empty();
   }
 
   /**
