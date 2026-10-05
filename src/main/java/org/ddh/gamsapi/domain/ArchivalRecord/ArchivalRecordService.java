@@ -303,11 +303,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO what is with the latest handle? (pointing to latest on invenio? - should this be created at retargeting?)
-    // TODO hardcoded gams.uni-graz value
-    // TODO where to point the target of the handle?
     String handleTarget = String.format(
-        "https://gams.uni-graz.at/api/curation/v1/projects/%s/objects/%s",
+        "%s/api/curation/v1/projects/%s/objects/%s",
+        handleServerProperties.getReserveBaseUrl(),
         activeRecord.getDigitalObject().getProject().getProjectAbbr(),
         activeRecord.getDigitalObject().getId()
     );
@@ -349,8 +347,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    String handleTarget = handleServerProperties.getTargetBaseUrl() + activeRecord.getExternalId();
-
+    String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();
+    // TODO what is with the latest handle? (pointing to latest on invenio? - should this be created at retargeting?)
     try {
       var parsedHandle = Handle.parse(pid);
       if(handleGenerator.isManagedHandle(parsedHandle)){

@@ -199,11 +199,6 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
   @Nested
   class DraftArchivalRecord {
 
-    @BeforeEach
-    void setup(){
-
-    }
-
     @Test
     void createsExpectedHandleOnHandleServer(){
 
@@ -232,7 +227,8 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
       );
 
       final String EXPECTED_HANDLE_TARGET = String.format(
-          "https://gams.uni-graz.at/api/curation/v1/projects/%s/objects/%s",
+          "%s/api/curation/v1/projects/%s/objects/%s",
+          handleServerProperties.getReserveBaseUrl(),
           testDataSet.project().getProjectAbbr(),
           testDataSet.digitalObject().getId()
       );
@@ -282,7 +278,7 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
           .orElseThrow();
 
       // must retarget to configured value
-      final String EXPECTED_HANDLE_TARGET = handleServerProperties.getTargetBaseUrl() + TEST_EXTERNAL_ID;
+      final String EXPECTED_HANDLE_TARGET = handleServerProperties.getTargetBaseUrl() + "/" + TEST_EXTERNAL_ID;
 
       Assertions.assertThat(ACTUAL_HANDLE_TARGET.toString())
           .contains(TEST_EXTERNAL_ID)
