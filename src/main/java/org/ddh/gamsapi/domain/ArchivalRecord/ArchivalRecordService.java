@@ -14,6 +14,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IHandleClient handleClient;
   private final HandleGenerator handleGenerator;
+  private final HandleServerProperties  handleServerProperties;
 
   @Override
   public PagedResponse<ArchivalRecordCompactView> findForObject(String digitalObjectId, Pageable pageable) {
@@ -347,8 +349,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO here I need to configure the public invenio adress!
-    String handleTarget = "https://gams.uni-graz.at/repo/" + activeRecord.getExternalId();
+    String handleTarget = handleServerProperties.getTargetBaseUrl() + activeRecord.getExternalId();
 
     try {
       var parsedHandle = Handle.parse(pid);

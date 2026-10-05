@@ -11,6 +11,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsExc
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleNotRegisteredException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
 
   @Autowired
   IArchivalRecordRepository archivalRecordRepository;
+
+  @Autowired
+  HandleServerProperties  handleServerProperties;
 
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
@@ -274,11 +278,16 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
           changeDto
       );
 
-      final URI EXPECTED_RETARGET = handleClient.resolveTarget(foundArchivalRecord.getPid())
+      final URI ACTUAL_HANDLE_TARGET = handleClient.resolveTarget(foundArchivalRecord.getPid())
           .orElseThrow();
 
-      Assertions.assertThat(EXPECTED_RETARGET.toString())
+      // must retarget to configured value
+      final String EXPECTED_HANDLE_TARGET = handleServerProperties.getTargetBaseUrl() + TEST_EXTERNAL_ID;
+
+      Assertions.assertThat(ACTUAL_HANDLE_TARGET.toString())
           .contains(TEST_EXTERNAL_ID)
+          .contains(handleServerProperties.getTargetBaseUrl())
+          .isEqualTo(EXPECTED_HANDLE_TARGET)
           .isNotEqualTo(TEST_ORIGINAL_TARGET.toString());
 
     }

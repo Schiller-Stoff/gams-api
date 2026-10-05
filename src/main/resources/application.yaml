@@ -156,6 +156,7 @@ gams:
       exportPath: ${QLEVER_EXPORT_PATH:qlever-export}
     handle:
       base-url: ${HANDLE_SERVER_URL:https://handle-server:8000}
+      target-base-url: ${TARGET_BASE_URL:https://gams.uni-graz.at/repo/}
       prefix: ${HANDLE_PREFIX:11471}
       auth-handle: ${HANDLE_AUTH_HANDLE:11471/GAMS-API}
       auth-index: ${HANDLE_AUTH_INDEX:300}
