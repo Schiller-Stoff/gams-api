@@ -2,9 +2,13 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.IntegrationTest;
+import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleNotRegisteredException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleServerNotReachableException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +43,17 @@ public class HandleIntegrationTest extends IntegrationTest {
         "Skipping handle server tests because the handle server is not reachable in the testing environment. Expected url: " + handleServerProperties.getBaseUrl()
     );
 
+  }
+
+  @AfterEach
+  void makeSureTestHandleDoesNotExist(){
+    var testHandle = Handle.parse(TestArchivalRecord.PID);
+
+    try {
+      handleClient.delete(testHandle.toHdlUri());
+    } catch (HandleNotRegisteredException _){
+      // in case test handle was not registered
+    }
   }
 
 

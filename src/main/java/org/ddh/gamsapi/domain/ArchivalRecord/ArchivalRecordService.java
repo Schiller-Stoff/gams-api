@@ -109,6 +109,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
           "Cannot delete archival record with pid: " + archivalRecordPid + " The archival record does not exist."
       );
     }
+    // TODO this now also needs to cleanup the handle server side! (if anything exists)
+
     archivalRecordRepository.deleteById(archivalRecordPid);
   }
 
@@ -344,6 +346,22 @@ public class ArchivalRecordService implements IArchivalRecordService {
           "Cannot publish archival record - Requested archival record has not the required DRAFT state. For pid: " + pid + " And archival record: " + archivalRecordPublishDto
       );
     }
+
+    // TODO here I need to configure the public invenio adress!
+    String handleTarget = "https://gams.uni-graz.at/repo/" + activeRecord.getExternalId();
+
+    try {
+      var parsedHandle = Handle.parse(pid);
+      if(handleGenerator.isManagedHandle(parsedHandle)){
+        handleClient.retarget(
+            parsedHandle.toString(),
+            URI.create(handleTarget)
+        );
+      }
+    } catch (IllegalArgumentException _) {
+      // in case given pid is not a handle
+    }
+
 
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);

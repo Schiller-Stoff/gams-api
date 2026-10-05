@@ -3,10 +3,13 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleNotRegisteredException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.net.URI;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
 
@@ -232,6 +237,87 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
           .isEqualTo(EXPECTED_HANDLE_TARGET);
 
     }
+
+  }
+
+
+  @Nested
+  class PublishArchivalRecord {
+
+    @Test
+    void retargetsHandleToExpectedValue(){
+
+      // first need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(
+          testDataSet.archivalRecord().getPid()
+      ).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+      final URI TEST_ORIGINAL_TARGET = URI.create("https://google.at");
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      // create expected handle (would have been created in the DRAFT state)
+      var associatedHandle = Handle.parse(foundArchivalRecord.getPid());
+      handleClient.register(associatedHandle.toString(), TEST_ORIGINAL_TARGET);
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+
+      // publish actual record
+      archivalRecordService.publishArchivalRecord(
+          foundArchivalRecord.getPid(),
+          changeDto
+      );
+
+      final URI EXPECTED_RETARGET = handleClient.resolveTarget(foundArchivalRecord.getPid())
+          .orElseThrow();
+
+      Assertions.assertThat(EXPECTED_RETARGET.toString())
+          .contains(TEST_EXTERNAL_ID)
+          .isNotEqualTo(TEST_ORIGINAL_TARGET.toString());
+
+    }
+
+    @Test
+    void throwsIfExpectedHandleDoesNotExist(){
+      // first need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(
+          testDataSet.archivalRecord().getPid()
+      ).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      // publish actual record
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(
+          Instant.now().truncatedTo(ChronoUnit.SECONDS)
+      );
+
+      // skip registering of handle
+      // make sure that handle does not exist
+      var associatedHandle = Handle.parse(foundArchivalRecord.getPid());
+      Assertions.assertThat(handleClient.exists(associatedHandle.toString()))
+              .isFalse();
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(
+              foundArchivalRecord.getPid(),
+              changeDto
+          )
+      ).isInstanceOf(HandleNotRegisteredException.class);
+
+
+    }
+
 
   }
 
