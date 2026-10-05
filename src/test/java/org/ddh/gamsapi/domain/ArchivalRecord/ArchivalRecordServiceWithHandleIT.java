@@ -240,7 +240,6 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
 
   }
 
-
   @Nested
   class PublishArchivalRecord {
 
@@ -323,6 +322,26 @@ class ArchivalRecordServiceWithHandleIT extends HandleIntegrationTest {
 
     }
 
+
+  }
+
+  @Nested
+  class DeleteById {
+
+    @Test
+    void deletesExpectedHandle(){
+
+      handleClient.register(
+          testDataSet.archivalRecord().getPid(),
+          URI.create("https://google.at")
+      );
+
+      archivalRecordService.deleteById(testDataSet.archivalRecord().getPid());
+
+      Assertions.assertThat(handleClient.exists(testDataSet.archivalRecord().getPid()))
+          .isFalse();
+
+    }
 
   }
 
