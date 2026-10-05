@@ -8,6 +8,7 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,10 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
   @Autowired
   private HandleGenerator handleGenerator;
+
+  // needs to be mocked - otherwise the handle server would need to run
+  @MockitoBean
+  IHandleClient handleClient;
 
   @BeforeEach
   void setup() {
