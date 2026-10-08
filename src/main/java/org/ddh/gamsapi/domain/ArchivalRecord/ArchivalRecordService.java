@@ -329,15 +329,10 @@ public class ArchivalRecordService implements IArchivalRecordService {
     );
 
     handleGenerator.parseManagedHandle(pid)
-        .ifPresent(handle -> {
-          // TODO remove double check!
-          if(handleGenerator.isManagedHandle(handle)){
-            handleClient.register(
-                handle.toString(),
-                URI.create(handleTarget)
-            );
-          }
-        });
+        .ifPresent(handle -> handleClient.register(
+            handle.toString(),
+            URI.create(handleTarget)
+        ));
 
     log.info("Drafted archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
