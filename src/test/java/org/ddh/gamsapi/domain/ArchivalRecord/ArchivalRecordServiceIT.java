@@ -89,6 +89,17 @@ class ArchivalRecordServiceIT extends IntegrationTest {
   class FindArchivalRecordsForObject {
 
     @Test
+    void throwsIfAssociatedDigitalObjectDoesNotExist(){
+      Assertions.assertThatThrownBy(() -> {
+        archivalRecordService.findArchivalRecordsForObject(
+            "foobar",
+            Set.of(ArchivalState.PUBLISHED),
+            Pageable.unpaged()
+        );
+      }).isInstanceOf(DigitalObjectNotFoundException.class);
+    }
+
+    @Test
     void findsExpectedPublishedArchivalRecords(){
 
       // use later to search only for published state

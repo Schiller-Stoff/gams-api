@@ -83,7 +83,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   public PagedResponse<ArchivalRecordCompactView> findArchivalRecordsForObject(String objectId, Collection<ArchivalState> archivalStates, Pageable pageable) {
-    // TODO test
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
           "Cannot find archival records for digital object: " +  objectId + " The digital object does not exist."
@@ -96,7 +95,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
         pageable
     );
 
-    // TODO test
     return PagedResponse.from(
         filteredArchivalRecords
     ) ;
