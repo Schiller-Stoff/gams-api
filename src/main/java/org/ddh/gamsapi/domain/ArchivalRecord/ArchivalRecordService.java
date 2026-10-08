@@ -337,6 +337,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
             );
           }
         });
+
+    log.info("Drafted archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
   }
 
