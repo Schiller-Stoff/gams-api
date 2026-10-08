@@ -14,8 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-public class HandleIntegrationTest extends IntegrationTest {
-
+public abstract class HandleIntegrationTest extends IntegrationTest {
 
   @Autowired
   public IHandleClient handleClient;
@@ -23,38 +22,36 @@ public class HandleIntegrationTest extends IntegrationTest {
   @Autowired
   HandleServerProperties handleServerProperties;
 
+  private boolean handleServerReachable;
+
   /**
    * Checks if the handle server is available before each handle test.
    * If not skips the related tests.
    */
   @BeforeEach
-  void assumeHandleServerIsReachable(){
-
-    boolean handleServerNotReachableExceptionThrown = false;
-
+  void assumeHandleServerIsReachable() {
     try {
       handleClient.verifyReachable();
+      handleServerReachable = true;
     } catch (HandleServerNotReachableException e) {
-      handleServerNotReachableExceptionThrown = true;
+      handleServerReachable = false;
     }
-
-    Assumptions.assumeFalse(
-        handleServerNotReachableExceptionThrown,
-        "Skipping handle server tests because the handle server is not reachable in the testing environment. Expected url: " + handleServerProperties.getBaseUrl()
-    );
-
+    Assumptions.assumeTrue(handleServerReachable,
+        "Skipping handle server tests: handle server not reachable at " + handleServerProperties.getBaseUrl());
   }
 
+  /**
+   * Cleanup if the handle server is reachable.
+   */
   @AfterEach
-  void makeSureTestHandleDoesNotExist(){
-    var testHandle = Handle.parse(TestArchivalRecord.PID);
-
+  void makeSureTestHandleDoesNotExist() {
+    if (!handleServerReachable) {
+      return; // test was aborted in @BeforeEach – nothing to clean up
+    }
     try {
-      handleClient.delete(testHandle.toHdlUri());
-    } catch (HandleNotRegisteredException _){
-      // in case test handle was not registered
+      handleClient.delete(Handle.parse(TestArchivalRecord.PID).toHdlUri());
+    } catch (HandleNotRegisteredException _) {
+      // test handle was not registered
     }
   }
-
-
 }
