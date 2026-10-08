@@ -330,6 +330,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     handleGenerator.parseManagedHandle(pid)
         .ifPresent(handle -> {
+          // TODO remove double check!
           if(handleGenerator.isManagedHandle(handle)){
             handleClient.register(
                 handle.toString(),
@@ -362,23 +363,19 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO refactor: database operations can be rolled back - handle server not
-    String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();
-    try {
-      var parsedHandle = Handle.parse(pid);
-      if(handleGenerator.isManagedHandle(parsedHandle)){
-        handleClient.retarget(
-            parsedHandle.toString(),
-            URI.create(handleTarget)
-        );
-      }
-    } catch (IllegalArgumentException _) {
-      // in case given pid is not a handle
-    }
-
-
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);
+    archivalRecordRepository.flush();   // DB errors surface before the handle server is touched
+
+    // retarget to publication address
+    String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> handleClient.retarget(
+            handle.toString(),
+            URI.create(handleTarget)
+        ));
+
+    log.info("Published archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
   }
 
