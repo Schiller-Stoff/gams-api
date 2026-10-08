@@ -1,6 +1,5 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -39,12 +38,13 @@ public class ArchivalRecordController {
   private final IArchivalRecordService archivalRecordService;
   private final Validator validator;
 
-  // TODO add to openapi the request param
   @Operation(
       summary = "Get archival records for a digital object.",
-      description = "Retrieve the archival records optionally for specific digital objects.",
+      description = "Retrieve the archival records for a specific digital object.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Successful retrieval of the archival records",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "The associated digital object does not exist.",
               content = @Content)
       }
   )
@@ -84,7 +84,18 @@ public class ArchivalRecordController {
     );
   }
 
-  // TODO openapi
+  @Operation(
+      summary = "Get the active archival record for a digital object.",
+      description = "Retrieves the currently active archival record for a specific digital object.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Successful retrieval of the active archival record",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "There is no active archival record for given digital object.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "There are multiple active archival records for the same digital object.",
+              content = @Content)
+      }
+  )
   @GetMapping("/active")
   public PagedResponse<ArchivalRecordCompactView> findActiveArchivalRecord(
       @RequestParam String objectId
@@ -98,6 +109,12 @@ public class ArchivalRecordController {
       description = "Allows to create an archival record for a specific digital object by providing the project abbreviation in the path variable, the digital object ID, and the archival record data in the request body.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Archival record successfully created",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Referenced digital object does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "409", description = "An active archival record for the digital object already exists.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "Server produced an unexpected (and very rare) pid clash at pid generation.",
               content = @Content)
       }
   )
@@ -107,7 +124,22 @@ public class ArchivalRecordController {
     return archivalRecordService.reserveArchivalRecordByObjectId(objectId);
   }
 
-  //TODO open api annotations
+  @Operation(
+      summary = "Reserve an archival record for a digital object via providing a pid",
+      description = "Allows to create an archival record for a specific digital object by providing the pid.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully created",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "Archival record already exists or validation error.",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Referenced digital object does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "409", description = "An active archival record for the digital object already exists.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "Unexpected pid clash on the server.",
+              content = @Content)
+      }
+  )
   @PutMapping(path = "/{*pid}")
   public ArchivalRecord reserveArchivalRecordViaPid(
       @PathVariable String pid,
@@ -130,14 +162,18 @@ public class ArchivalRecordController {
 
   }
 
-  // TODO update open-api annotation
   @DeleteMapping(path = "/{*pid}") // pattern takes everything after (but includes the leading slash!)
   @Operation(
-      summary = "Deletes a archival record by it's pid.",
+      summary = "Deletes an archival record by it's pid.",
       description = "Allows to delete an archival record by the archival record pid.",
       responses = {
           @ApiResponse(responseCode = "200", description = "Archival record successfully deleted",
-              content = @Content)
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Archival record with given pid does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "Unexpected server error.",
+              content = @Content),
+
       }
   )
   public void delete(
@@ -158,9 +194,20 @@ public class ArchivalRecordController {
     archivalRecordService.deleteById(normalizedPid);
   }
 
-  @Hidden
   @PatchMapping(path = "/{*pid}") // pattern takes everything after (but includes the leading slash!)
-  // TODO open api annotations
+  @Operation(
+      summary = "Updates an archival record.",
+      description = "Allows to update an existing archival record. Meant as admin cleanup operation.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully updated.",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Archival record with given pid does not exist or referenced digital object does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "Unexpected server error.",
+              content = @Content),
+
+      }
+  )
   public ArchivalRecord updateArchivalRecord(
       @PathVariable String pid,
       @RequestBody @Valid ArchivalRecordUpdateDto archivalRecordUpdateDto
@@ -203,7 +250,21 @@ public class ArchivalRecordController {
 
   }
 
-  //TODO openapi
+  @Operation(
+      summary = "Updates a reserved archival record to the draft state.",
+      description = "Allows to update a reserved archival record to the draft state via providing the external id of the resource to be archived. Reserves a managed handle.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully drafted.",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "An archival record is already active + validation errors.",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Archival record with given pid does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "Internal handle server communication fails.",
+              content = @Content),
+
+      }
+  )
   @PutMapping("/draft/{*pid}")
   public ArchivalRecord draftArchivalRecord(
       @PathVariable String pid,
@@ -226,6 +287,21 @@ public class ArchivalRecordController {
 
   }
 
+  @Operation(
+      summary = "Updates a reserved archival record to the published state.",
+      description = "Allows to update a draft archival record to the published state via providing the publicationTimestamp of the resource to be archived. Provides handles for managed pids.",
+      responses = {
+          @ApiResponse(responseCode = "200", description = "Archival record successfully published.",
+              content = @Content),
+          @ApiResponse(responseCode = "400", description = "An archival record is already active + validation errors.",
+              content = @Content),
+          @ApiResponse(responseCode = "404", description = "Archival record with given pid does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "500", description = "Internal handle server communication fails.",
+              content = @Content),
+
+      }
+  )
   @PutMapping("/published/{*pid}")
   public ArchivalRecord publishArchivalRecord(
       @PathVariable String pid,

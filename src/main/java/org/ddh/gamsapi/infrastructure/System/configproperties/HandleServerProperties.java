@@ -42,6 +42,19 @@ public class HandleServerProperties {
   private String baseUrl;
 
   /**
+   * Base URL of the handle target using the external id of the gams-api.
+   * Used when publishing handles.
+   */
+  @NotBlank
+  private String targetBaseUrl;
+
+  /**
+   * Base url of the gams-api used for handle reserving
+   */
+  @NotBlank
+  private String reserveBaseUrl;
+
+  /**
    * Optional name of a Spring Boot SSL bundle ({@code spring.ssl.bundle.pem.<name>}) used as truststore,
    * e.g. to trust the handle server's self-signed certificate. Leave empty if the certificate is publicly trusted.
    */

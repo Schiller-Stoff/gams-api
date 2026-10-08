@@ -6,7 +6,7 @@ import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 
 public class TestArchivalRecord {
   public static final String DIGITAL_OBJECT_ID = TestDigitalObject.DIGITAL_OBJECT_ID.getValue();
-  public static final String PID = "hdl:11471/518.10.1.4714";
+  public static final String PID = "hdl:99999/518.10.1.4714";
   public static final String EXTERNAL_ID = "22299576";
   public static final ArchivalState ARCHIVAL_STATE = ArchivalState.RESERVED;
 
