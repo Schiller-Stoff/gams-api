@@ -143,7 +143,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     String pid = handle.toHdlUri();
     // fail-safe check that handle does not exist
     if(archivalRecordRepository.existsById(pid)){
-      throw new ArchivalRecordAlreadyExistsException(
+      throw new HandleAlreadyExistsException(
           "An archival record with pid " +  pid + " already exists. This might be a very rare pid clash. Please retry."
       );
     }
