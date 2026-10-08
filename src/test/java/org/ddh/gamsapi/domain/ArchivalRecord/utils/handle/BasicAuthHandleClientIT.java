@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.ArchivalRecord.utils.handle;
 
 import org.assertj.core.api.Assertions;
+import org.ddh.gamsapi.domain.ArchivalRecord.HandleIntegrationTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +149,14 @@ class BasicAuthHandleClientIT extends HandleIntegrationTest {
       handleClient.delete(TEST_PID);
       Assertions.assertThat(handleClient.exists(TEST_PID)).isFalse();
 
+    }
+
+    @Test
+    void throwsIfExpectedHandleDoesNotExist(){
+      final String NON_EXISTENT_PID = handleGenerator.generate().toString();
+      Assertions.assertThatThrownBy(() -> handleClient.delete(NON_EXISTENT_PID))
+          .isInstanceOf(HandleNotRegisteredException.class)
+      ;
     }
 
   }

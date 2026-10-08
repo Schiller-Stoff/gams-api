@@ -3,6 +3,8 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
@@ -12,11 +14,13 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
+import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.util.Collection;
 
 @Service
@@ -28,6 +32,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   private final IDigitalObjectRepository digitalObjectRepository;
   private final IHandleClient handleClient;
   private final HandleGenerator handleGenerator;
+  private final HandleServerProperties  handleServerProperties;
 
   @Override
   public PagedResponse<ArchivalRecordCompactView> findForObject(String digitalObjectId, Pageable pageable) {
@@ -78,7 +83,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   public PagedResponse<ArchivalRecordCompactView> findArchivalRecordsForObject(String objectId, Collection<ArchivalState> archivalStates, Pageable pageable) {
-    // TODO test
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
           "Cannot find archival records for digital object: " +  objectId + " The digital object does not exist."
@@ -91,7 +95,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
         pageable
     );
 
-    // TODO test
     return PagedResponse.from(
         filteredArchivalRecords
     ) ;
@@ -100,13 +103,24 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public void deleteById(String archivalRecordPid) {
-    if(!archivalRecordRepository.existsById(archivalRecordPid)){
-      throw new ArchivalRecordNotFoundException(
-          "Cannot delete archival record with pid: " + archivalRecordPid + " The archival record does not exist."
-      );
-    }
-    archivalRecordRepository.deleteById(archivalRecordPid);
+  public void deleteById(String pid) {
+    var foundArchivalRecord = archivalRecordRepository.findByIdForUpdate(pid)
+      .orElseThrow(() -> new ArchivalRecordNotFoundException(
+          "Cannot delete archival record with pid: " + pid + " The archival record does not exist."
+      )
+    );
+
+    archivalRecordRepository.deleteById(foundArchivalRecord.getPid());
+    archivalRecordRepository.flush(); // DB errors surface here, before the handle server is touched -> only then also remove from the handle server.
+
+    handleGenerator.parseManagedHandle(pid).ifPresent(handle -> {
+      if(handleClient.exists(handle.toString())){
+        handleClient.delete(handle.toString());
+      }
+    });
+
+    log.info("Successfully deleted archival record {}", foundArchivalRecord);
+
   }
 
   @Override
@@ -125,11 +139,25 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    Handle handle = handleGenerator.generate();
+    String pid = handle.toHdlUri();
+    // fail-safe check that handle does not exist
+    if(archivalRecordRepository.existsById(pid)){
+      throw new HandleAlreadyExistsException(
+          "An archival record with pid " +  pid + " already exists. This might be a very rare pid clash. Please retry."
+      );
+    }
+    // fail-safe check that handle does not exist
+    if(handleClient.exists(handle.toString())){
+      throw new HandleAlreadyExistsException(
+          "Cannot create archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
+      );
+    }
+
     ArchivalRecord archivalRecord = new ArchivalRecord();
+    archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
-    String pid = handleGenerator.generate().toHdlUri();
-    archivalRecord.setPid(pid);
     DigitalObject linkedDigitalObject = new DigitalObject();
     linkedDigitalObject.setId(objectId);
     archivalRecord.setDigitalObject(linkedDigitalObject);
@@ -155,6 +183,14 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> {
+          if(handleClient.exists(handle.toString())){
+            throw new HandleAlreadyExistsException(
+                "Cannot create archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
+          }
+        });
+
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
     archivalRecord.setPid(pid);
@@ -173,7 +209,22 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Transactional
   public ArchivalRecord reserveArchivalRecord() {
     ArchivalRecord archivalRecord = new ArchivalRecord();
-    String pid = handleGenerator.generate().toHdlUri();
+
+    Handle handle = handleGenerator.generate();
+    String pid = handle.toHdlUri();
+    if(archivalRecordRepository.existsById(pid)){
+      throw new ArchivalRecordAlreadyExistsException(
+          "Cannot reserve archival record with generated pid: " + pid + " The pid unexpectedly already exists. This might be a very rare algorithmic pid clash - please retry."
+      );
+    }
+
+    // small fail-safe for very rare (but possible) handle clashes
+    if(handleClient.exists(handle.toString())){
+      throw new HandleAlreadyExistsException(
+          "Generated handle is unexpectedly already registered in the handle server " + handle
+      );
+    }
+
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
@@ -191,6 +242,14 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> {
+          if(handleClient.exists(handle.toString())){
+            throw new HandleAlreadyExistsException(
+                "Cannot create archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
+          }
+        });
+
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
@@ -205,7 +264,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Transactional
   public ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord) {
 
-    var curArchivalRecord = archivalRecordRepository.findById(archivalRecord.getPid())
+    var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(archivalRecord.getPid())
         .orElseThrow(() ->
           new ArchivalRecordNotFoundException(
               "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
@@ -245,7 +304,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    var activeRecord = archivalRecordRepository.findById(pid)
+    var activeRecord = archivalRecordRepository.findByIdForUpdate(pid)
         .orElseThrow( () -> new ArchivalRecordNotFoundException(
             "Cannot draft archival record with pid: " + pid + " The record does not exist."
         ));
@@ -258,6 +317,22 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
     activeRecord.setArchivalState(ArchivalState.DRAFT);
+    archivalRecordRepository.flush();
+
+    String handleTarget = String.format(
+        "%s/api/curation/v1/projects/%s/objects/%s",
+        handleServerProperties.getReserveBaseUrl(),
+        activeRecord.getDigitalObject().getProject().getProjectAbbr(),
+        activeRecord.getDigitalObject().getId()
+    );
+
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> handleClient.register(
+            handle.toString(),
+            URI.create(handleTarget)
+        ));
+
+    log.info("Drafted archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
   }
 
@@ -270,7 +345,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    var activeRecord = archivalRecordRepository.findById(pid)
+    var activeRecord = archivalRecordRepository.findByIdForUpdate(pid)
         .orElseThrow( () -> new ArchivalRecordNotFoundException(
             "Cannot publish archival record with pid: " + pid + " The record does not exist."
         ));
@@ -283,6 +358,17 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);
+    archivalRecordRepository.flush();   // DB errors surface before the handle server is touched
+
+    // retarget to publication address
+    String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> handleClient.retarget(
+            handle.toString(),
+            URI.create(handleTarget)
+        ));
+
+    log.info("Published archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
   }
 

@@ -76,7 +76,7 @@ public class BasicAuthHandleClient implements IHandleClient {
     } else if (status == 409) {
       // idempotent retry: fine if it already points to the same target
       if (!resolveTarget(pid).map(target::equals).orElse(false)) {
-        throw new HandleAlreadyExistsException("Handle " + handle + " already exists with a different target.");
+        throw new HandleAlreadyExistsException("Handle " + handle + " already exists with a different target. Body: " + body);
       }
     } else {
       throw failed("register", handle, status);
@@ -131,7 +131,10 @@ public class BasicAuthHandleClient implements IHandleClient {
   public void delete(String pid) {
     String handle = toHandle(pid);
     int status = send(HttpMethod.DELETE, handleUri(handle), null, true).status().value();
-    if (status != 200 && status != 204 && status != 404) { // 404 = already gone
+    if(status == 404){
+      throw new HandleNotRegisteredException("Cannot delete handle. Handle " + handle + " does not exist.");
+    }
+    if (status != 200 && status != 204) {
       throw failed("delete", handle, status);
     }
   }
