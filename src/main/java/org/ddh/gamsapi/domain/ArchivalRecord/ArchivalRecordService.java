@@ -317,6 +317,10 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
+    activeRecord.setArchivalState(ArchivalState.DRAFT);
+    archivalRecordRepository.flush();
+
     String handleTarget = String.format(
         "%s/api/curation/v1/projects/%s/objects/%s",
         handleServerProperties.getReserveBaseUrl(),
@@ -324,20 +328,15 @@ public class ArchivalRecordService implements IArchivalRecordService {
         activeRecord.getDigitalObject().getId()
     );
 
-    try {
-      var parsedHandle = Handle.parse(pid);
-      if(handleGenerator.isManagedHandle(parsedHandle)){
-        handleClient.register(
-            parsedHandle.toString(),
-            URI.create(handleTarget)
-        );
-      }
-    } catch (IllegalArgumentException _) {
-      // in case given pid is not a handle
-    }
-
-    activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
-    activeRecord.setArchivalState(ArchivalState.DRAFT);
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> {
+          if(handleGenerator.isManagedHandle(handle)){
+            handleClient.register(
+                handle.toString(),
+                URI.create(handleTarget)
+            );
+          }
+        });
     return activeRecord;
   }
 
