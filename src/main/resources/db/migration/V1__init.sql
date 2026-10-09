@@ -5,6 +5,7 @@ create table archival_record
     digital_object_id varchar(255),
     external_id       varchar(255),
     archival_state    varchar(255),
+    created           timestamp(6) with time zone,
     primary key (pid)
 );
 
