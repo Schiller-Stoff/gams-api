@@ -11,7 +11,6 @@ import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamCannotWriteF
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamContentRepository;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamMainResourceView;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.ArchivalRecord.IArchivalRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntryCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntrySummaryView;
@@ -23,7 +22,10 @@ import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectUpdateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectCreatedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectDeletedEvent;
 import org.ddh.gamsapi.domain.DigitalObject.utils.events.DigitalObjectModifiedEvent;
-import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.*;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectAlreadyExistsException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectConversionException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
+import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectValidationException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectIdView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectListItemView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
@@ -64,7 +66,6 @@ public class DigitalObjectService implements IDigitalObjectService {
   private final ApplicationEventPublisher applicationEventPublisher;
   private final ConversionService conversionService;
   private final ISubmissionRecordRepository submissionRecordRepository;
-  private final IArchivalRecordRepository archivalRecordRepository;
   private final IDatastreamContentRepository datastreamContentRepository;
   private final IUserPrincipalAuditorMapping userPrincipalAuditorMapping;
 
