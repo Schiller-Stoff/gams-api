@@ -627,6 +627,35 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    @DisplayName("When a non-managed handle is used the handle client is not being called.")
+    void handleClientIsNotCalledWhenNotManagedHandleIsUsed(){
+
+      String managedHandle = "hdl:11111/foobar";
+      // verify that this handle is managed
+      Assertions.assertThat(handleGenerator.parseManagedHandle(managedHandle))
+          .isEmpty();
+
+      // setting managed handle + digital object to null
+      ArchivalRecord archivalRecord = testDataSet.archivalRecord();
+      archivalRecord.setPid(managedHandle);
+      archivalRecordRepository.save(archivalRecord);
+
+      var dto = new ArchivalRecordDraftDto();
+      dto.setExternalId("external-123");
+      var draftedRecord = archivalRecordService.draftArchivalRecord(testDataSet.archivalRecord().getPid(), dto);
+
+      Mockito.verifyNoInteractions(handleClient);
+
+      Assertions.assertThat(draftedRecord.getArchivalState())
+          .isEqualTo(ArchivalState.DRAFT);
+
+      Assertions.assertThat(draftedRecord.getExternalId())
+          .isEqualTo(dto.getExternalId());
+
+
+    }
+
 
 
   }
