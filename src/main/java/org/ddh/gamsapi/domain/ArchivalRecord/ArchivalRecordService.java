@@ -321,7 +321,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
     if(activeRecord.getDigitalObjectId() != null){
 
       final String OBJECT_ID = activeRecord.getDigitalObjectId();
-      // TODO test
       var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
               .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(
           "Cannot draft archival record. The referenced digital object " + OBJECT_ID +
