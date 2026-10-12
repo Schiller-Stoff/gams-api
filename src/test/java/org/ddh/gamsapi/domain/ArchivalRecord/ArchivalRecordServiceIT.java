@@ -598,6 +598,35 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       Mockito.verifyNoInteractions(handleClient); // requires handleClient as @MockitoBean
     }
 
+    @Test
+    void draftFailsIfObjectWasModifiedAfterReservation(){
+
+      var originalObjectModified =  testDataSet.digitalObject().getModified();
+
+
+      var objectToChange = digitalObjectRepository.findById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      objectToChange.setMainResource("foobar");
+      objectToChange = digitalObjectRepository.save(objectToChange);
+
+      // that first date was before
+      Assertions.assertThat(originalObjectModified).isBefore(objectToChange.getModified());
+
+      var dto = new ArchivalRecordDraftDto();
+      dto.setExternalId("external-123");
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(testDataSet.archivalRecord().getPid(), dto))
+          .isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+
+      var reloaded = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      Assertions.assertThat(reloaded.getArchivalState()).isEqualTo(ArchivalState.RESERVED); // still in reserved state
+      Assertions.assertThat(reloaded.getExternalId())
+          .isEqualTo(testDataSet.archivalRecord().getExternalId())
+          .isNotEqualTo(dto.getExternalId());
+
+    }
+
 
 
   }

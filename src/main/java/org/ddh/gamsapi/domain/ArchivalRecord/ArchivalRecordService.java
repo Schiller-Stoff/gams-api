@@ -341,7 +341,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
         );
       }
 
-      // TODO test
       if(objectModified.isAfter(archivalRecordCreated)){
         throw new ArchivalRecordDigitalObjectInconsistencyException(
             "Cannot draft archival record. The referenced digital object " + digitalObject.getId() +
