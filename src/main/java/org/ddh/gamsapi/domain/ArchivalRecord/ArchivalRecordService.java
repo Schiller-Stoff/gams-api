@@ -312,6 +312,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     }
 
     // handle target is assigned conditionally, but defaults to the reserve base url
+    // if an object exists - the reserved handle will point to the object in the gams-api
     String handleTarget = handleServerProperties.getReserveBaseUrl();
 
     // TODO test
@@ -323,7 +324,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       // TODO test
       var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
               .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(
-          "Cannot update archival record. The referenced digital object " + OBJECT_ID +
+          "Cannot draft archival record. The referenced digital object " + OBJECT_ID +
               " of archival record " + activeRecord.getPid() +
               " was unexpectedly deleted after the initial archival record creation."
       ));
@@ -332,6 +333,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
       Instant archivalRecordCreated = activeRecord.getCreated();
       Instant objectModified = digitalObject.getModified();
 
+      // fail safe if there is no modification date
       // TODO test?
       if(objectModified == null){
         throw new ArchivalRecordInconsistentActiveRecordsException(
@@ -341,7 +343,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
       if(objectModified.isAfter(archivalRecordCreated)){
         throw new ArchivalRecordDigitalObjectInconsistencyException(
-            "Cannot update archival record. The referenced digital object " + digitalObject.getId() +
+            "Cannot draft archival record. The referenced digital object " + digitalObject.getId() +
                 " of archival record " + activeRecord.getPid() +
                 " was unexpectedly changed after the initial archival record creation. Archival record created: "
                 + archivalRecordCreated + ". Digital object modified: " + objectModified
@@ -359,7 +361,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
     activeRecord.setArchivalState(ArchivalState.DRAFT);
-    archivalRecordRepository.flush(); // surface errors here
+    archivalRecordRepository.flush(); // surface errors before the external handle operations
 
     final String HANDLE_TARGET = handleTarget;
     handleGenerator.parseManagedHandle(pid)
