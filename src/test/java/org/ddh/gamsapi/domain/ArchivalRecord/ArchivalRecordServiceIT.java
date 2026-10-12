@@ -12,7 +12,10 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.*;
@@ -40,6 +43,15 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
+
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDublinCoreEntryRepository dublinCoreEntryRepository;
+
+  @Autowired
+  ISubmissionRecordRepository submissionRecordRepository;
 
   @MockitoBean
   IHandleClient handleClient;
@@ -541,6 +553,49 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           changeDto
       )).isInstanceOf(ArchivalRecordInvalidStateException.class);
 
+    }
+
+    @Test
+    void throwsIfDigitalObjectWasAfterReservationDeleted(){
+      submissionRecordRepository.deleteAll();
+      dublinCoreEntryRepository.deleteAll();
+      datastreamRepository.deleteAll();
+      digitalObjectRepository.deleteAll();
+
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(testDataSet.archivalRecord().getExternalId());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      )).isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+    }
+
+    @Test
+    void draftFailsIfDigitalObjectWasDeletedAfterReservation() {
+      var record = testDataSet.archivalRecord();
+      // guard the preconditions, otherwise the test can pass for the wrong reason
+      Assertions.assertThat(record.getArchivalState()).isEqualTo(ArchivalState.RESERVED);
+      Assertions.assertThat(record.getDigitalObjectId()).isNotNull();
+
+      submissionRecordRepository.deleteAll();
+      dublinCoreEntryRepository.deleteAll();
+      datastreamRepository.deleteAll();
+      digitalObjectRepository.deleteAll();
+
+      var dto = new ArchivalRecordDraftDto();
+      dto.setExternalId("external-123");
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(record.getPid(), dto))
+          .isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+
+      var reloaded = archivalRecordRepository.findById(record.getPid()).orElseThrow();
+      Assertions.assertThat(reloaded.getArchivalState()).isEqualTo(ArchivalState.RESERVED);
+      Assertions.assertThat(reloaded.getExternalId())
+          .isEqualTo(record.getExternalId())
+          .isNotEqualTo(dto.getExternalId()); // should be rolled back
+
+      Mockito.verifyNoInteractions(handleClient); // requires handleClient as @MockitoBean
     }
 
 
