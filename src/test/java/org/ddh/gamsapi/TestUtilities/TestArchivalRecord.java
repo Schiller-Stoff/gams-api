@@ -12,7 +12,7 @@ public class TestArchivalRecord {
 
   public static ArchivalRecord generate(DigitalObject digitalObject){
     var archivalRecord = new ArchivalRecord();
-    archivalRecord.setDigitalObject(digitalObject);
+    archivalRecord.setDigitalObjectId(digitalObject.getId());
     archivalRecord.setPid(PID);
     archivalRecord.setExternalId(EXTERNAL_ID);
     archivalRecord.setPublicationTimeStamp(null);
@@ -27,7 +27,7 @@ public class TestArchivalRecord {
       ){
 
     var archivalRecord = new ArchivalRecord();
-    archivalRecord.setDigitalObject(digitalObject);
+    archivalRecord.setDigitalObjectId(digitalObject.getId());
     archivalRecord.setPid(pid);
     archivalRecord.setPublicationTimeStamp(null);
     archivalRecord.setExternalId(externalId);

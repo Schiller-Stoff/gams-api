@@ -23,7 +23,6 @@ import java.util.Objects;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
-@ToString(exclude = "digitalObject") // Prevent circular reference in toString
 public class ArchivalRecord {
 
   public static final String ENTITY_TABLE_NAME = "archival_record";
@@ -36,11 +35,8 @@ public class ArchivalRecord {
   /**
    * Digital object the archival record belongs to.
    */
-  @ManyToOne(fetch = FetchType.LAZY) // fetchType lazy = means that the digital object is loaded only when accessed
-  @JoinColumn(name = "digital_object_id")
-  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-  @JsonIgnore
-  private DigitalObject digitalObject;
+  @Column(name = "digital_object_id", updatable = false, nullable = true)
+  private String digitalObjectId;
 
   /**
    * Permanent identifier of an archival record. MUST include URI schemes e.g. hdl:11471/foobar

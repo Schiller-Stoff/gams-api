@@ -33,15 +33,6 @@ public interface IArchivalRecordRepository extends JpaRepository<ArchivalRecord,
 
   boolean existsByDigitalObjectId(String digitalObjectId);
 
-  /**
-   * Sets all digital object references used from archival records to null.
-   * @param digitalObjectId id of the digital object to be detached from archival records
-   */
-  @Transactional
-  @Modifying(clearAutomatically = true, flushAutomatically = true)
-  @Query("UPDATE ArchivalRecord a SET a.digitalObject = NULL WHERE a.digitalObject.id = :digitalObjectId")
-  void detachAllFromDigitalObject(@Param("digitalObjectId") String digitalObjectId);
-
   boolean existsByDigitalObjectIdAndArchivalState(String digitalObjectId, ArchivalState archivalState);
 
   boolean existsByDigitalObjectIdAndArchivalStateIn(String digitalObjectId, Collection<ArchivalState> archivalStates);

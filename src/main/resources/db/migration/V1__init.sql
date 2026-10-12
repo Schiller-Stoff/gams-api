@@ -169,11 +169,6 @@ create index idx_dc_language
 
 create sequence dublin_core_entry_seq start with 1 increment by 50;
 
-alter table if exists archival_record
-    add constraint fk_archival_record_digital_object
-    foreign key (digital_object_id)
-    references digital_object; -- add "on delete set null" here only if going DB-level route
-
 alter table if exists datastream
     add constraint fk_datastream_digital_object
     foreign key (digital_object_id)

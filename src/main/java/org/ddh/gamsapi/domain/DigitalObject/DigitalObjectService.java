@@ -165,9 +165,6 @@ public class DigitalObjectService implements IDigitalObjectService {
       );
     }
 
-    // orphan associated archival records instead of blocking delete or cascading
-    archivalRecordRepository.detachAllFromDigitalObject(digitalObject.getId());
-
     submissionRecordRepository.deleteById(digitalObject.getId());
 
     Set<Datastream> datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);

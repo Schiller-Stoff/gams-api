@@ -161,9 +161,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
-    DigitalObject linkedDigitalObject = new DigitalObject();
-    linkedDigitalObject.setId(foundObject.getId());
-    archivalRecord.setDigitalObject(linkedDigitalObject); // TODO write test that this doesn't changes the modified property
+    archivalRecord.setDigitalObjectId(foundObject.getId()); // TODO write test that this doesn't changes the modified property
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record with generated pid: {} for digital object: {}", archivalRecord, objectId);
@@ -197,10 +195,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
     archivalRecord.setPid(pid);
-
-    DigitalObject linkedDigitalObject = new DigitalObject();
-    linkedDigitalObject.setId(objectId);
-    archivalRecord.setDigitalObject(linkedDigitalObject);
+    archivalRecord.setDigitalObjectId(objectId);
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record {} for digital object: {}", archivalRecord, objectId);
@@ -285,10 +280,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
             "Cannot change archival record: The digital object with id " + archivalRecord.getObjectId() + " does not exist. For archival record change dto: " + archivalRecord
         );
       }
-      // link digital object if given in dto
-      DigitalObject linkedDigitalObject = new DigitalObject();
-      linkedDigitalObject.setId(archivalRecord.getObjectId());
-      curArchivalRecord.setDigitalObject(linkedDigitalObject);
+
+      curArchivalRecord.setDigitalObjectId(archivalRecord.getObjectId());
     }
 
     log.info("Successfully patched archival record {}", curArchivalRecord);
@@ -324,9 +317,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
     // TODO test
     // TODO openapi doc controller
     // checks if no digital object was referenced by the archival record
-    if(activeRecord.getDigitalObject() != null){
+    if(activeRecord.getDigitalObjectId() != null){
 
-      final String OBJECT_ID = activeRecord.getDigitalObject().getId();
+      final String OBJECT_ID = activeRecord.getDigitalObjectId();
       // TODO test
       var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
               .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(

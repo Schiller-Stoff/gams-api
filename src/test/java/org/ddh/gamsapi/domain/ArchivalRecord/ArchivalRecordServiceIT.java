@@ -112,10 +112,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-      DigitalObject linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      publishedRecord.setDigitalObject(linkedObject);
+      publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(publishedRecord);
 
@@ -142,10 +139,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-      DigitalObject linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      publishedRecord.setDigitalObject(linkedObject);
+      publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(publishedRecord);
 
@@ -171,10 +165,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-      DigitalObject linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      publishedRecord.setDigitalObject(linkedObject);
+      publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(publishedRecord);
 
@@ -230,10 +221,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       ArchivalRecord another = new ArchivalRecord();
       another.setPid(handleGenerator.generate().toHdlUri());
       another.setArchivalState(ArchivalState.RESERVED);
-
-      var linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      another.setDigitalObject(linkedObject);
+      another.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(another);
 
@@ -299,9 +287,9 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     }
 
     @Test
-    void referencedDigitalObjectIsNull(){
+    void referencedDigitalObjectIdIsNull(){
       var savedRecord = archivalRecordService.reserveArchivalRecord();
-      Assertions.assertThat(savedRecord.getDigitalObject()).isNull();
+      Assertions.assertThat(savedRecord.getDigitalObjectId()).isNull();
     }
 
   }
