@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
+import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
@@ -297,6 +298,12 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     }
 
+    @Test
+    void referencedDigitalObjectIsNull(){
+      var savedRecord = archivalRecordService.reserveArchivalRecord();
+      Assertions.assertThat(savedRecord.getDigitalObject()).isNull();
+    }
+
   }
 
   @Nested
@@ -390,7 +397,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           .isInstanceOf(DigitalObjectNotFoundException.class);
 
     }
-
 
   }
 
