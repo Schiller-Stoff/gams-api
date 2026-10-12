@@ -318,12 +318,23 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO strictly speaken this might be null!
-    final String OBJECT_ID = activeRecord.getDigitalObject().getId();
+    // handle target is assigned conditionally, but defaults to the reserve base url
+    String handleTarget = handleServerProperties.getReserveBaseUrl();
 
     // TODO test
     // TODO openapi doc controller
-    digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID).ifPresentOrElse(digitalObject -> {
+    // checks if no digital object was referenced by the archival record
+    if(activeRecord.getDigitalObject() != null){
+
+      final String OBJECT_ID = activeRecord.getDigitalObject().getId();
+      // TODO test
+      var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
+              .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(
+          "Cannot update archival record. The referenced digital object " + OBJECT_ID +
+              " of archival record " + activeRecord.getPid() +
+              " was unexpectedly deleted after the initial archival record creation."
+      ));
+
       // was the object modified after the original archival record was created? -> throw error.
       Instant archivalRecordCreated = activeRecord.getCreated();
       Instant objectModified = digitalObject.getModified();
@@ -344,27 +355,25 @@ public class ArchivalRecordService implements IArchivalRecordService {
         );
       }
 
-      String handleTarget = String.format(
+      handleTarget = String.format(
           "%s/api/curation/v1/projects/%s/objects/%s",
           handleServerProperties.getReserveBaseUrl(),
           digitalObject.getProject().getProjectAbbr(),
           digitalObject.getId()
       );
+    }
 
-      activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
-      activeRecord.setArchivalState(ArchivalState.DRAFT);
-      archivalRecordRepository.flush();
 
-      handleGenerator.parseManagedHandle(pid)
-          .ifPresent(handle -> handleClient.register(
-              handle.toString(),
-              URI.create(handleTarget)
-          ));
+    activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
+    activeRecord.setArchivalState(ArchivalState.DRAFT);
+    archivalRecordRepository.flush(); // surface errors here
 
-    }, () -> {
-      activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
-      activeRecord.setArchivalState(ArchivalState.DRAFT);
-    });
+    final String HANDLE_TARGET = handleTarget;
+    handleGenerator.parseManagedHandle(pid)
+        .ifPresent(handle -> handleClient.register(
+            handle.toString(),
+            URI.create(HANDLE_TARGET)
+        ));
 
     log.info("Drafted archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
