@@ -393,6 +393,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // TODO consistency if digital object changes / was deleted is necessary!
+
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);
     archivalRecordRepository.flush();   // DB errors surface before the handle server is touched
