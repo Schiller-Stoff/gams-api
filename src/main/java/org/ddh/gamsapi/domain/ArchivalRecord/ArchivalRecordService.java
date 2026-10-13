@@ -3,15 +3,14 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.Collection;
 
 @Service
@@ -126,15 +126,14 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord reserveArchivalRecordByObjectId(String objectId) {
-    if(!digitalObjectRepository.existsById(objectId)){
-      throw new DigitalObjectNotFoundException(
-          "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
-      );
-    }
+    var foundObject = digitalObjectRepository.findByIdForUpdate(objectId)
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
+        ));
 
     if(archivalRecordRepository.existsByDigitalObjectIdAndArchivalStateIn(objectId, ArchivalState.getBlockingStatuses())) {
       throw new ArchivalRecordAlreadyActiveException(
-          "Cannot create archival record for digital object " + objectId
+          "Cannot reserve archival record for digital object " + objectId
               + ". An archival record with blocking status already exists."
       );
     }
@@ -150,7 +149,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     // fail-safe check that handle does not exist
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
-          "Cannot create archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
+          "Cannot reserve archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
       );
     }
 
@@ -158,9 +157,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
-    DigitalObject linkedDigitalObject = new DigitalObject();
-    linkedDigitalObject.setId(objectId);
-    archivalRecord.setDigitalObject(linkedDigitalObject);
+    archivalRecord.setDigitalObjectId(foundObject.getId());
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record with generated pid: {} for digital object: {}", archivalRecord, objectId);
@@ -171,15 +168,14 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord reserveArchivalRecordByObjectIdAndPid(String objectId, String pid) {
-    if(!digitalObjectRepository.existsById(objectId)){
-      throw new DigitalObjectNotFoundException(
-          "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
-      );
-    }
+    var foundObject = digitalObjectRepository.findByIdForUpdate(objectId)
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
+        ));
 
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
-          "Cannot create archival record for digital object: " + objectId + ". The archival record already exists with handle: " + pid
+          "Cannot reserve archival record for digital object: " + objectId + ". The archival record already exists with handle: " + pid
       );
     }
 
@@ -187,17 +183,14 @@ public class ArchivalRecordService implements IArchivalRecordService {
         .ifPresent(handle -> {
           if(handleClient.exists(handle.toString())){
             throw new HandleAlreadyExistsException(
-                "Cannot create archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
+                "Cannot reserve archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
           }
         });
 
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
     archivalRecord.setPid(pid);
-
-    DigitalObject linkedDigitalObject = new DigitalObject();
-    linkedDigitalObject.setId(objectId);
-    archivalRecord.setDigitalObject(linkedDigitalObject);
+    archivalRecord.setDigitalObjectId(foundObject.getId());
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record {} for digital object: {}", archivalRecord, objectId);
@@ -266,9 +259,9 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(archivalRecord.getPid())
         .orElseThrow(() ->
-          new ArchivalRecordNotFoundException(
-              "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
-          ));
+            new ArchivalRecordNotFoundException(
+                "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
+            ));
 
     // don't change the pid
     curArchivalRecord.setArchivalState(archivalRecord.getArchivalState());
@@ -282,10 +275,8 @@ public class ArchivalRecordService implements IArchivalRecordService {
             "Cannot change archival record: The digital object with id " + archivalRecord.getObjectId() + " does not exist. For archival record change dto: " + archivalRecord
         );
       }
-      // link digital object if given in dto
-      DigitalObject linkedDigitalObject = new DigitalObject();
-      linkedDigitalObject.setId(archivalRecord.getObjectId());
-      curArchivalRecord.setDigitalObject(linkedDigitalObject);
+
+      curArchivalRecord.setDigitalObjectId(archivalRecord.getObjectId());
     }
 
     log.info("Successfully patched archival record {}", curArchivalRecord);
@@ -315,21 +306,60 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // handle target is assigned conditionally, but defaults to the reserve base url
+    // if an object exists - the reserved handle will point to the object in the gams-api
+    String handleTarget = handleServerProperties.getReserveBaseUrl();
+
+    // checks if no digital object was referenced by the archival record
+    if(activeRecord.getDigitalObjectId() != null){
+
+      final String OBJECT_ID = activeRecord.getDigitalObjectId();
+      var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
+              .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(
+          "Cannot draft archival record. The referenced digital object " + OBJECT_ID +
+              " of archival record " + activeRecord.getPid() +
+              " was unexpectedly deleted after the initial archival record creation."
+      ));
+
+      // was the object modified after the original archival record was created? -> throw error.
+      Instant archivalRecordCreated = activeRecord.getCreated();
+      Instant objectModified = digitalObject.getModified();
+
+      // fail safe if there is no modification date
+      if(objectModified == null){
+        throw new ArchivalRecordInconsistentActiveRecordsException(
+            "The modified date of the digital object " + OBJECT_ID + " is unexpectedly null. For archival record: " + activeRecord.getPid()
+        );
+      }
+
+      if(objectModified.isAfter(archivalRecordCreated)){
+        throw new ArchivalRecordDigitalObjectInconsistencyException(
+            "Cannot draft archival record. The referenced digital object " + digitalObject.getId() +
+                " of archival record " + activeRecord.getPid() +
+                " was unexpectedly changed after the initial archival record creation. Archival record created: "
+                + archivalRecordCreated + ". Digital object modified: " + objectModified
+        );
+      }
+
+      handleTarget = String.format(
+          "%s/api/curation/v1/projects/%s/objects/%s",
+          handleServerProperties.getReserveBaseUrl(),
+          digitalObject.getProject().getProjectAbbr(),
+          digitalObject.getId()
+      );
+    }
+
+
     activeRecord.setExternalId(archivalRecordDraftDto.getExternalId());
     activeRecord.setArchivalState(ArchivalState.DRAFT);
-    archivalRecordRepository.flush();
+    archivalRecordRepository.flush(); // surface errors before the external handle operations
 
-    String handleTarget = String.format(
-        "%s/api/curation/v1/projects/%s/objects/%s",
-        handleServerProperties.getReserveBaseUrl(),
-        activeRecord.getDigitalObject().getProject().getProjectAbbr(),
-        activeRecord.getDigitalObject().getId()
-    );
-
+    // register handle only if managed handle
+    final String HANDLE_TARGET = handleTarget;
     handleGenerator.parseManagedHandle(pid)
         .ifPresent(handle -> handleClient.register(
             handle.toString(),
-            URI.create(handleTarget)
+            URI.create(HANDLE_TARGET)
         ));
 
     log.info("Drafted archival record {} with external id {}", pid, activeRecord.getExternalId());
@@ -356,9 +386,42 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
+    // consistency checks for referenced digital object.
+    if(activeRecord.getDigitalObjectId() != null){
+
+      final String OBJECT_ID = activeRecord.getDigitalObjectId();
+      var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
+          .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(
+              "Cannot publish archival record. The referenced digital object " + OBJECT_ID +
+                  " of archival record " + activeRecord.getPid() +
+                  " was unexpectedly deleted after the initial archival record creation."
+          ));
+
+      // was the object modified after the original archival record was created? -> throw error.
+      Instant archivalRecordCreated = activeRecord.getCreated();
+      Instant objectModified = digitalObject.getModified();
+
+      // fail-safe if there is no modification date
+      if(objectModified == null){
+        throw new ArchivalRecordInconsistentActiveRecordsException(
+            "Cannot publish archival record. The modified date of the digital object " + OBJECT_ID + " is unexpectedly null. For archival record: " + activeRecord.getPid()
+        );
+      }
+
+      if(objectModified.isAfter(archivalRecordCreated)){
+        throw new ArchivalRecordDigitalObjectInconsistencyException(
+            "Cannot publish archival record. The referenced digital object " + digitalObject.getId() +
+                " of archival record " + activeRecord.getPid() +
+                " was unexpectedly changed after the initial archival record creation. Archival record created: "
+                + archivalRecordCreated + ". Digital object modified: " + objectModified
+        );
+      }
+
+    }
+
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);
-    archivalRecordRepository.flush();   // DB errors surface before the handle server is touched
+    archivalRecordRepository.flush(); // DB errors surface before the handle server is touched
 
     // retarget to publication address
     String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();

@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestArchivalRecord;
@@ -150,10 +151,7 @@ class ArchivalRecordControllerIT extends IntegrationTest {
         publishedRecord.setPid(handleGenerator.generate().toHdlUri());
         publishedRecord.setExternalId("foobarxyz");
         publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-        DigitalObject linkedObject = new DigitalObject();
-        linkedObject.setId(testDataSet.digitalObject().getId());
-        publishedRecord.setDigitalObject(linkedObject);
+        publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
         archivalRecordRepository.save(publishedRecord);
 
@@ -268,7 +266,9 @@ class ArchivalRecordControllerIT extends IntegrationTest {
           ).andExpect(status().isOk())
           .andReturn().getResponse().getContentAsString();
 
-      var parsedResponse = new ObjectMapper().readValue(response, ArchivalRecord.class);
+      var mapper = new ObjectMapper();
+      mapper.registerModule(new JavaTimeModule()); // solves a time parsing conflict
+      var parsedResponse = mapper.readValue(response, ArchivalRecord.class);
       String createdPid = parsedResponse.getPid();
 
       Assertions.assertThat(
