@@ -40,7 +40,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     Assertions.assertEquals(digitalObjectCompactDTO.getCreatedBy(), testObjectDetailsView.getCreatedBy());
     Assertions.assertEquals(digitalObjectCompactDTO.getModifiedBy(), testObjectDetailsView.getModifiedBy());
     Assertions.assertEquals(digitalObjectCompactDTO.getPublisher(), testObjectDetailsView.getPublisher());
-    Assertions.assertEquals(digitalObjectCompactDTO.getPublished(), testObjectDetailsView.getPublished());
 
     Assertions.assertEquals(digitalObjectCompactDTO.getFunder(), testObjectDetailsView.getFunder());
 
@@ -59,7 +58,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
 
     private final Instant created = Instant.now();
     private final Instant modified = Instant.now();
-    private final Instant published = Instant.now();
 
     @Override
     public String getId() {
@@ -89,11 +87,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     @Override
     public Instant getCreated() {
       return created;
-    }
-
-    @Override
-    public Instant getPublished() {
-      return published;
     }
 
     @Override
