@@ -310,7 +310,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
     // if an object exists - the reserved handle will point to the object in the gams-api
     String handleTarget = handleServerProperties.getReserveBaseUrl();
 
-    // TODO openapi doc controller
     // checks if no digital object was referenced by the archival record
     if(activeRecord.getDigitalObjectId() != null){
 
@@ -387,7 +386,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO openapi doc controller
     // consistency checks for referenced digital object.
     if(activeRecord.getDigitalObjectId() != null){
 

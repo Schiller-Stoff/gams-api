@@ -260,6 +260,8 @@ public class ArchivalRecordController {
               content = @Content),
           @ApiResponse(responseCode = "404", description = "Archival record with given pid does not exist.",
               content = @Content),
+          @ApiResponse(responseCode = "422", description = "Linked entity (in most cases a digital object) was changed after record creation.",
+              content = @Content),
           @ApiResponse(responseCode = "500", description = "Internal handle server communication fails.",
               content = @Content),
 
@@ -296,6 +298,8 @@ public class ArchivalRecordController {
           @ApiResponse(responseCode = "400", description = "An archival record is already active + validation errors.",
               content = @Content),
           @ApiResponse(responseCode = "404", description = "Archival record with given pid does not exist.",
+              content = @Content),
+          @ApiResponse(responseCode = "422", description = "Linked entity (in most cases a digital object) was changed after record creation.",
               content = @Content),
           @ApiResponse(responseCode = "500", description = "Internal handle server communication fails.",
               content = @Content),
