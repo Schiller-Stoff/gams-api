@@ -390,11 +390,43 @@ public class ArchivalRecordService implements IArchivalRecordService {
       );
     }
 
-    // TODO consistency if digital object changes / was deleted is necessary!
+    // TODO openapi doc controller
+    // consistency checks for referenced digital object.
+    if(activeRecord.getDigitalObjectId() != null){
+
+      final String OBJECT_ID = activeRecord.getDigitalObjectId();
+      var digitalObject = digitalObjectRepository.findDigitalObjectAuditingViewById(OBJECT_ID)
+          .orElseThrow( () -> new ArchivalRecordDigitalObjectInconsistencyException(
+              "Cannot publish archival record. The referenced digital object " + OBJECT_ID +
+                  " of archival record " + activeRecord.getPid() +
+                  " was unexpectedly deleted after the initial archival record creation."
+          ));
+
+      // was the object modified after the original archival record was created? -> throw error.
+      Instant archivalRecordCreated = activeRecord.getCreated();
+      Instant objectModified = digitalObject.getModified();
+
+      // fail-safe if there is no modification date
+      if(objectModified == null){
+        throw new ArchivalRecordInconsistentActiveRecordsException(
+            "Cannot publish archival record. The modified date of the digital object " + OBJECT_ID + " is unexpectedly null. For archival record: " + activeRecord.getPid()
+        );
+      }
+
+      if(objectModified.isAfter(archivalRecordCreated)){
+        throw new ArchivalRecordDigitalObjectInconsistencyException(
+            "Cannot publish archival record. The referenced digital object " + digitalObject.getId() +
+                " of archival record " + activeRecord.getPid() +
+                " was unexpectedly changed after the initial archival record creation. Archival record created: "
+                + archivalRecordCreated + ". Digital object modified: " + objectModified
+        );
+      }
+
+    }
 
     activeRecord.setPublicationTimeStamp(archivalRecordPublishDto.getPublicationTimeStamp());
     activeRecord.setArchivalState(ArchivalState.PUBLISHED);
-    archivalRecordRepository.flush();   // DB errors surface before the handle server is touched
+    archivalRecordRepository.flush(); // DB errors surface before the handle server is touched
 
     // retarget to publication address
     String handleTarget = handleServerProperties.getTargetBaseUrl() + "/" + activeRecord.getExternalId();

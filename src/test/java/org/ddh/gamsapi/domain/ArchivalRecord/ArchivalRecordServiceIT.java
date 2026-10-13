@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
-import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
@@ -13,7 +12,6 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
 import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
@@ -784,6 +782,62 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       ).isInstanceOf(ArchivalRecordInvalidStateException.class);
 
 
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectWasChangedAfterArchivalRecordCreation(){
+
+      // first change digital object
+      testDataSet.digitalObject().setModified(null);
+      digitalObjectRepository.save(testDataSet.digitalObject());
+
+      // second need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(foundArchivalRecord.getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectWasDeletedAfterArchivalRecordCreation(){
+
+      // first delete digital object
+      submissionRecordRepository.deleteAll();
+      dublinCoreEntryRepository.deleteAll();
+      datastreamRepository.deleteAll();
+      digitalObjectRepository.deleteAll();
+
+      // second need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(foundArchivalRecord.getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
 
     }
 
