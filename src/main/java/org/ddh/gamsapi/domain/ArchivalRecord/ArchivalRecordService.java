@@ -330,7 +330,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
       Instant objectModified = digitalObject.getModified();
 
       // fail safe if there is no modification date
-      // TODO test?
       if(objectModified == null){
         throw new ArchivalRecordInconsistentActiveRecordsException(
             "The modified date of the digital object " + OBJECT_ID + " is unexpectedly null. For archival record: " + activeRecord.getPid()
