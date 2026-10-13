@@ -1,6 +1,5 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
-import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 
 import java.time.Instant;
@@ -42,8 +41,6 @@ public interface DigitalObjectDetailsView {
     Set<String> getTags();
 
     boolean isIngested();
-
-    ArchiveState  getArchiveState();
 
     boolean isModifiedAfterCreation();
 
