@@ -66,11 +66,6 @@ public class DigitalObject {
   private String objectType;
 
   /**
-   * Date of publication
-   */
-  private Instant published;
-
-  /**
    * Creation date of the digital object / datastream
    */
   @CreationTimestamp

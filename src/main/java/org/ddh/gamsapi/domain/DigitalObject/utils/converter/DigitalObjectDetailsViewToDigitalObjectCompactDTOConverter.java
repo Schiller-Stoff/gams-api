@@ -18,7 +18,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverter implemen
                 .baseMetadata(source.getBaseMetadata())
                 .created(source.getCreated())
                 .modified(source.getModified())
-                .published(source.getPublished())
                 .createdBy(source.getCreatedBy())
                 .modifiedBy(source.getModifiedBy())
                 .publisher(source.getPublisher())

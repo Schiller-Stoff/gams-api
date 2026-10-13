@@ -24,8 +24,6 @@ public interface DigitalObjectDetailsView {
 
     Instant getCreated();
 
-    Instant getPublished();
-
     Instant getModified();
 
     String getCreatedBy();
