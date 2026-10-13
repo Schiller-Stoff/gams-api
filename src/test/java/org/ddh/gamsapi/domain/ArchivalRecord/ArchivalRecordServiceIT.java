@@ -437,6 +437,18 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           .isInstanceOf(ArchivalRecordAlreadyExistsException.class);
     }
 
+    @Test
+    void modifiedPropertyOnDigitalObjectDoesNotChange(){
+      Instant INITIAL_MODIFIED_DATE = testDataSet.digitalObject().getModified();
+      final String TEST_PID = handleGenerator.generate().toHdlUri();
+      archivalRecordService.reserveArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), TEST_PID);
+
+      var possiblyUpdated = digitalObjectRepository.findById(testDataSet.digitalObject().getId()).orElseThrow();
+      Instant EXPECTED_MODIFIED_DATE = possiblyUpdated.getModified();
+      Assertions.assertThat(INITIAL_MODIFIED_DATE)
+          .isEqualTo(EXPECTED_MODIFIED_DATE);
+    }
+
   }
 
   @Nested

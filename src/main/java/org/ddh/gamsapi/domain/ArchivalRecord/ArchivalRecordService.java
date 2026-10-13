@@ -170,11 +170,10 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord reserveArchivalRecordByObjectIdAndPid(String objectId, String pid) {
-    if(!digitalObjectRepository.existsById(objectId)){
-      throw new DigitalObjectNotFoundException(
-          "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
-      );
-    }
+    var foundObject = digitalObjectRepository.findByIdForUpdate(objectId)
+        .orElseThrow(() -> new DigitalObjectNotFoundException(
+            "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
+        ));
 
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
@@ -193,7 +192,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     ArchivalRecord archivalRecord = new ArchivalRecord();
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
     archivalRecord.setPid(pid);
-    archivalRecord.setDigitalObjectId(objectId);
+    archivalRecord.setDigitalObjectId(foundObject.getId());
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record {} for digital object: {}", archivalRecord, objectId);
