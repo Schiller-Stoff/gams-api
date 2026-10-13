@@ -130,12 +130,12 @@ public class ArchivalRecordService implements IArchivalRecordService {
     // TODO this must be done also in other reserve blocks!
     var foundObject = digitalObjectRepository.findByIdForUpdate(objectId)
         .orElseThrow(() -> new DigitalObjectNotFoundException(
-            "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
+            "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
         ));
 
     if(archivalRecordRepository.existsByDigitalObjectIdAndArchivalStateIn(objectId, ArchivalState.getBlockingStatuses())) {
       throw new ArchivalRecordAlreadyActiveException(
-          "Cannot create archival record for digital object " + objectId
+          "Cannot reserve archival record for digital object " + objectId
               + ". An archival record with blocking status already exists."
       );
     }
@@ -151,7 +151,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     // fail-safe check that handle does not exist
     if(handleClient.exists(handle.toString())){
       throw new HandleAlreadyExistsException(
-          "Cannot create archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
+          "Cannot reserve archival record for object " + objectId + " The generated handle " + handle.toString() + " unexpectedly already exists."
       );
     }
 
@@ -172,13 +172,13 @@ public class ArchivalRecordService implements IArchivalRecordService {
   public ArchivalRecord reserveArchivalRecordByObjectIdAndPid(String objectId, String pid) {
     if(!digitalObjectRepository.existsById(objectId)){
       throw new DigitalObjectNotFoundException(
-          "Cannot create archival record for digital object: " + objectId + " The digital object does not exist."
+          "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
       );
     }
 
     if(archivalRecordRepository.existsById(pid)){
       throw new ArchivalRecordAlreadyExistsException(
-          "Cannot create archival record for digital object: " + objectId + ". The archival record already exists with handle: " + pid
+          "Cannot reserve archival record for digital object: " + objectId + ". The archival record already exists with handle: " + pid
       );
     }
 
@@ -186,7 +186,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
         .ifPresent(handle -> {
           if(handleClient.exists(handle.toString())){
             throw new HandleAlreadyExistsException(
-                "Cannot create archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
+                "Cannot reserve archival record with pid: " + handle.toHdlUri() +  ". The handle already exists on the handle server");
           }
         });
 
