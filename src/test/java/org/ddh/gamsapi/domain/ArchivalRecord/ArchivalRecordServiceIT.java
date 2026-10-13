@@ -506,6 +506,30 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     }
 
     @Test
+    void worksAsExpectedIfDigitalObjectIsNull(){
+
+      // set digital object reference to null
+      testDataSet.archivalRecord().setDigitalObjectId(null);
+      archivalRecordRepository.save(testDataSet.archivalRecord());
+
+      final String TEST_EXTERNAL_REFERENCE = "foobarxyz";
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(TEST_EXTERNAL_REFERENCE);
+
+      var changedRecord = archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      );
+
+      Assertions.assertThat(changedRecord.getExternalId())
+          .isEqualTo(TEST_EXTERNAL_REFERENCE);
+
+      Assertions.assertThat(changedRecord.getArchivalState())
+          .isEqualTo(ArchivalState.DRAFT);
+
+    }
+
+    @Test
     void throwsIfProvidedArchivalRecordExternalIdIsNull(){
       var changeDto = new ArchivalRecordDraftDto();
       changeDto.setExternalId(null);

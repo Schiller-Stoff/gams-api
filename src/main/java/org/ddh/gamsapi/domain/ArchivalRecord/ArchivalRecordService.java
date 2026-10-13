@@ -313,7 +313,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
     // if an object exists - the reserved handle will point to the object in the gams-api
     String handleTarget = handleServerProperties.getReserveBaseUrl();
 
-    // TODO test
     // TODO openapi doc controller
     // checks if no digital object was referenced by the archival record
     if(activeRecord.getDigitalObjectId() != null){
@@ -360,6 +359,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     activeRecord.setArchivalState(ArchivalState.DRAFT);
     archivalRecordRepository.flush(); // surface errors before the external handle operations
 
+    // register handle only if managed handle
     final String HANDLE_TARGET = handleTarget;
     handleGenerator.parseManagedHandle(pid)
         .ifPresent(handle -> handleClient.register(
