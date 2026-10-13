@@ -1,6 +1,6 @@
 
 # ArchivalRecords: The archiving process in GAMS5
-
+ 
 ## How it generally works
 
 The gams-api provides ArchivalRecords that represent the system's view on the archiving state of individual digital objects.
@@ -28,4 +28,5 @@ used GAMS5 will sign in handles to our managed handle-server.
 * Tight inherent coupling:
     - InvenioRDM needs the handle, handle-server needs the invenio-id, gams-api needs both ids, etc.
 * Stateful archiving process:
+    - State machine managed on server side and not locally
     - RESERVE/DRAFT/PUBLISH: To-be-archived resources may be revised or rejected manually. There might be long time-spans between drafting and publishing an archived resource.  
