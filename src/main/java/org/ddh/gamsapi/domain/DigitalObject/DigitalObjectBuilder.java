@@ -24,11 +24,6 @@ public class DigitalObjectBuilder {
     return this;
   }
 
-  public DigitalObjectBuilder published(Instant published) {
-    digitalObject.setPublished(published);
-    return this;
-  }
-
   //TODO remove this? - there might be contradicting information in the project object
   public DigitalObjectBuilder project(Project project) {
     digitalObject.setProject(project);

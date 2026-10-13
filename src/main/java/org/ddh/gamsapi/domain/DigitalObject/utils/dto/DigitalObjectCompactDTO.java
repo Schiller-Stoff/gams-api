@@ -26,8 +26,6 @@ public class DigitalObjectCompactDTO {
 
     private String objectType;
 
-    private Instant published;
-
     private Instant created;
 
     private Instant modified;

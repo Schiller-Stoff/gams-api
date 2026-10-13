@@ -76,7 +76,6 @@ create table digital_object
     modified             timestamp(6) with time zone,
     modified_by          varchar(255),
     object_type          varchar(255),
-    published            timestamp(6) with time zone,
     publisher            varchar(255) not null,
     project_project_abbr varchar(255) not null,
     ingested             boolean       not null default false,

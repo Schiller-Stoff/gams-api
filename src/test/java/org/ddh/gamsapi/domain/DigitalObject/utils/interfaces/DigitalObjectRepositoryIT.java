@@ -89,7 +89,6 @@ class DigitalObjectRepositoryIT extends IntegrationTest {
             Assertions.assertThat(savedDigitalObject.getFunder()).isEqualTo(digitalObject.getFunder());
             Assertions.assertThat(savedDigitalObject.getObjectType()).isEqualTo(digitalObject.getObjectType());
             Assertions.assertThat(savedDigitalObject.getBaseMetadata()).isEqualTo(digitalObject.getBaseMetadata());
-            Assertions.assertThat(savedDigitalObject.getPublished()).isEqualTo(digitalObject.getPublished());
             Assertions.assertThat(savedDigitalObject.getMainResource()).isEqualTo(digitalObject.getMainResource());
 
             // following fields are being defined by the database
