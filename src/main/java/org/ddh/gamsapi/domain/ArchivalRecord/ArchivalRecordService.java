@@ -126,8 +126,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
   @Override
   @Transactional
   public ArchivalRecord reserveArchivalRecordByObjectId(String objectId) {
-    // TODO think about pessimistic locking here! (this is already locked)
-    // TODO this must be done also in other reserve blocks!
     var foundObject = digitalObjectRepository.findByIdForUpdate(objectId)
         .orElseThrow(() -> new DigitalObjectNotFoundException(
             "Cannot reserve archival record for digital object: " + objectId + " The digital object does not exist."
@@ -159,7 +157,7 @@ public class ArchivalRecordService implements IArchivalRecordService {
     archivalRecord.setPid(pid);
     archivalRecord.setArchivalState(ArchivalState.RESERVED);
 
-    archivalRecord.setDigitalObjectId(foundObject.getId()); // TODO write test that this doesn't changes the modified property
+    archivalRecord.setDigitalObjectId(foundObject.getId());
 
     var savedRecord = archivalRecordRepository.save(archivalRecord);
     log.info("Successfully created archival record with generated pid: {} for digital object: {}", archivalRecord, objectId);
