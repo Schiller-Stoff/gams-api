@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -22,7 +23,6 @@ import java.util.Objects;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 @Slf4j
-@ToString(exclude = "digitalObject") // Prevent circular reference in toString
 public class ArchivalRecord {
 
   public static final String ENTITY_TABLE_NAME = "archival_record";
@@ -35,27 +35,44 @@ public class ArchivalRecord {
   /**
    * Digital object the archival record belongs to.
    */
-  @ManyToOne(fetch = FetchType.LAZY) // fetchType lazy = means that the digital object is loaded only when accessed
-  @JoinColumn(name = "digital_object_id")
-  @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-  @JsonIgnore
-  private DigitalObject digitalObject;
+  @Column(name = "digital_object_id", updatable = false, nullable = true)
+  private String digitalObjectId;
 
+  /**
+   * Permanent identifier of an archival record. MUST include URI schemes e.g. hdl:11471/foobar
+   * Also supports dois or other pids.
+   */
   @Id
   @Column(name = "pid")
   @ValidPid
   private String pid;
 
+  /**
+   * Time of publication of the archival record.
+   */
   @Column(name = "publication_timestamp")
   private Instant publicationTimeStamp;
 
+  /**
+   * Id of an archived version of the data to be archived.
+   */
   @Column(name = "external_id")
   private String externalId;
 
+  /**
+   * Archival state of the archival record.
+   */
   @Column(name = "archival_state")
   @Enumerated(EnumType.STRING)
   @NotNull
   private ArchivalState archivalState;
+
+  /**
+   * Creation date of the archival record.
+   * Meant to be used as start date of the archiving process.
+   */
+  @CreationTimestamp
+  private Instant created;
 
   /**
    * Proper equals/hashCode for entities with assigned IDs.

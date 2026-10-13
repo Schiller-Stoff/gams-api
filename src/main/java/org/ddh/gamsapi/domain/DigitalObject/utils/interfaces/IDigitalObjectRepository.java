@@ -1,9 +1,11 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.interfaces;
 
+import jakarta.persistence.LockModeType;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -164,5 +166,21 @@ public interface IDigitalObjectRepository extends CrudRepository<DigitalObject, 
    * Uses the indexed foreign key column — efficient even with millions of rows.
    */
   long countByProject_ProjectAbbr(String projectAbbr);
+
+  /**
+   * Finds and pessimistically locks a digital object in defined projection.
+   * @param id id of the digital object
+   * @return projection of the digital object.
+   */
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select o from DigitalObject o where o.id = :id")
+  Optional<DigitalObjectAuditingView> findByIdForUpdate(@Param("id") String id);
+
+  /**
+   * Finds a digital object's auditing data
+   * @param id id of the digital object
+   * @return projection containing digital object auditing data
+   */
+  Optional<DigitalObjectProjectAuditingView> findDigitalObjectAuditingViewById(String id);
 
 }

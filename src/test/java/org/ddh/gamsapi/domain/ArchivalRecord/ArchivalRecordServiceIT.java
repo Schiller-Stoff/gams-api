@@ -11,7 +11,9 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
-import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
+import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.IDublinCoreEntryRepository;
+import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.junit.jupiter.api.*;
@@ -39,6 +41,15 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   @Autowired
   IDigitalObjectRepository  digitalObjectRepository;
+
+  @Autowired
+  IDatastreamRepository datastreamRepository;
+
+  @Autowired
+  IDublinCoreEntryRepository dublinCoreEntryRepository;
+
+  @Autowired
+  ISubmissionRecordRepository submissionRecordRepository;
 
   @MockitoBean
   IHandleClient handleClient;
@@ -111,10 +122,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-      DigitalObject linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      publishedRecord.setDigitalObject(linkedObject);
+      publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(publishedRecord);
 
@@ -141,10 +149,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-      DigitalObject linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      publishedRecord.setDigitalObject(linkedObject);
+      publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(publishedRecord);
 
@@ -170,10 +175,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       publishedRecord.setPid(handleGenerator.generate().toHdlUri());
       publishedRecord.setExternalId("foobarxyz");
       publishedRecord.setPublicationTimeStamp(Instant.now().minus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MINUTES));
-
-      DigitalObject linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      publishedRecord.setDigitalObject(linkedObject);
+      publishedRecord.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(publishedRecord);
 
@@ -229,10 +231,7 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       ArchivalRecord another = new ArchivalRecord();
       another.setPid(handleGenerator.generate().toHdlUri());
       another.setArchivalState(ArchivalState.RESERVED);
-
-      var linkedObject = new DigitalObject();
-      linkedObject.setId(testDataSet.digitalObject().getId());
-      another.setDigitalObject(linkedObject);
+      another.setDigitalObjectId(testDataSet.digitalObject().getId());
 
       archivalRecordRepository.save(another);
 
@@ -295,6 +294,12 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           archivalRecordRepository.existsById(savedRecord.getPid())
       ).isTrue();
 
+    }
+
+    @Test
+    void referencedDigitalObjectIdIsNull(){
+      var savedRecord = archivalRecordService.reserveArchivalRecord();
+      Assertions.assertThat(savedRecord.getDigitalObjectId()).isNull();
     }
 
   }
@@ -391,7 +396,6 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
     }
 
-
   }
 
   @Nested
@@ -431,6 +435,18 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String ALREADY_EXISTING_PID = testDataSet.archivalRecord().getPid();
       Assertions.assertThatThrownBy(() -> archivalRecordService.reserveArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), ALREADY_EXISTING_PID))
           .isInstanceOf(ArchivalRecordAlreadyExistsException.class);
+    }
+
+    @Test
+    void modifiedPropertyOnDigitalObjectDoesNotChange(){
+      Instant INITIAL_MODIFIED_DATE = testDataSet.digitalObject().getModified();
+      final String TEST_PID = handleGenerator.generate().toHdlUri();
+      archivalRecordService.reserveArchivalRecordByObjectIdAndPid(testDataSet.digitalObject().getId(), TEST_PID);
+
+      var possiblyUpdated = digitalObjectRepository.findById(testDataSet.digitalObject().getId()).orElseThrow();
+      Instant EXPECTED_MODIFIED_DATE = possiblyUpdated.getModified();
+      Assertions.assertThat(INITIAL_MODIFIED_DATE)
+          .isEqualTo(EXPECTED_MODIFIED_DATE);
     }
 
   }
@@ -500,6 +516,30 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     }
 
     @Test
+    void worksAsExpectedIfDigitalObjectIsNull(){
+
+      // set digital object reference to null
+      testDataSet.archivalRecord().setDigitalObjectId(null);
+      archivalRecordRepository.save(testDataSet.archivalRecord());
+
+      final String TEST_EXTERNAL_REFERENCE = "foobarxyz";
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(TEST_EXTERNAL_REFERENCE);
+
+      var changedRecord = archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      );
+
+      Assertions.assertThat(changedRecord.getExternalId())
+          .isEqualTo(TEST_EXTERNAL_REFERENCE);
+
+      Assertions.assertThat(changedRecord.getArchivalState())
+          .isEqualTo(ArchivalState.DRAFT);
+
+    }
+
+    @Test
     void throwsIfProvidedArchivalRecordExternalIdIsNull(){
       var changeDto = new ArchivalRecordDraftDto();
       changeDto.setExternalId(null);
@@ -546,6 +586,107 @@ class ArchivalRecordServiceIT extends IntegrationTest {
           testDataSet.archivalRecord().getPid(),
           changeDto
       )).isInstanceOf(ArchivalRecordInvalidStateException.class);
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectWasAfterReservationDeleted(){
+      submissionRecordRepository.deleteAll();
+      dublinCoreEntryRepository.deleteAll();
+      datastreamRepository.deleteAll();
+      digitalObjectRepository.deleteAll();
+
+      var changeDto = new ArchivalRecordDraftDto();
+      changeDto.setExternalId(testDataSet.archivalRecord().getExternalId());
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(
+          testDataSet.archivalRecord().getPid(),
+          changeDto
+      )).isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+    }
+
+    @Test
+    void draftFailsIfDigitalObjectWasDeletedAfterReservation() {
+      var record = testDataSet.archivalRecord();
+      // guard the preconditions, otherwise the test can pass for the wrong reason
+      Assertions.assertThat(record.getArchivalState()).isEqualTo(ArchivalState.RESERVED);
+      Assertions.assertThat(record.getDigitalObjectId()).isNotNull();
+
+      submissionRecordRepository.deleteAll();
+      dublinCoreEntryRepository.deleteAll();
+      datastreamRepository.deleteAll();
+      digitalObjectRepository.deleteAll();
+
+      var dto = new ArchivalRecordDraftDto();
+      dto.setExternalId("external-123");
+
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(record.getPid(), dto))
+          .isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+
+      var reloaded = archivalRecordRepository.findById(record.getPid()).orElseThrow();
+      Assertions.assertThat(reloaded.getArchivalState()).isEqualTo(ArchivalState.RESERVED);
+      Assertions.assertThat(reloaded.getExternalId())
+          .isEqualTo(record.getExternalId())
+          .isNotEqualTo(dto.getExternalId()); // should be rolled back
+
+      Mockito.verifyNoInteractions(handleClient); // requires handleClient as @MockitoBean
+    }
+
+    @Test
+    void draftFailsIfObjectWasModifiedAfterReservation(){
+
+      var originalObjectModified =  testDataSet.digitalObject().getModified();
+
+
+      var objectToChange = digitalObjectRepository.findById(testDataSet.digitalObject().getId())
+          .orElseThrow();
+
+      objectToChange.setMainResource("foobar");
+      objectToChange = digitalObjectRepository.save(objectToChange);
+
+      // that first date was before
+      Assertions.assertThat(originalObjectModified).isBefore(objectToChange.getModified());
+
+      var dto = new ArchivalRecordDraftDto();
+      dto.setExternalId("external-123");
+      Assertions.assertThatThrownBy(() -> archivalRecordService.draftArchivalRecord(testDataSet.archivalRecord().getPid(), dto))
+          .isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+
+      var reloaded = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      Assertions.assertThat(reloaded.getArchivalState()).isEqualTo(ArchivalState.RESERVED); // still in reserved state
+      Assertions.assertThat(reloaded.getExternalId())
+          .isEqualTo(testDataSet.archivalRecord().getExternalId())
+          .isNotEqualTo(dto.getExternalId());
+
+    }
+
+    @Test
+    @DisplayName("When a non-managed handle is used the handle client is not being called.")
+    void handleClientIsNotCalledWhenNotManagedHandleIsUsed(){
+
+      String managedHandle = "hdl:11111/foobar";
+      // verify that this handle is managed
+      Assertions.assertThat(handleGenerator.parseManagedHandle(managedHandle))
+          .isEmpty();
+
+      // setting managed handle + digital object to null
+      ArchivalRecord archivalRecord = testDataSet.archivalRecord();
+      archivalRecord.setPid(managedHandle);
+      archivalRecordRepository.save(archivalRecord);
+
+      var dto = new ArchivalRecordDraftDto();
+      dto.setExternalId("external-123");
+      var draftedRecord = archivalRecordService.draftArchivalRecord(testDataSet.archivalRecord().getPid(), dto);
+
+      Mockito.verifyNoInteractions(handleClient);
+
+      Assertions.assertThat(draftedRecord.getArchivalState())
+          .isEqualTo(ArchivalState.DRAFT);
+
+      Assertions.assertThat(draftedRecord.getExternalId())
+          .isEqualTo(dto.getExternalId());
+
 
     }
 
@@ -653,6 +794,62 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       ).isInstanceOf(ArchivalRecordInvalidStateException.class);
 
 
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectWasChangedAfterArchivalRecordCreation(){
+
+      // first change digital object
+      testDataSet.digitalObject().setModified(null);
+      digitalObjectRepository.save(testDataSet.digitalObject());
+
+      // second need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(foundArchivalRecord.getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
+
+    }
+
+    @Test
+    void throwsIfDigitalObjectWasDeletedAfterArchivalRecordCreation(){
+
+      // first delete digital object
+      submissionRecordRepository.deleteAll();
+      dublinCoreEntryRepository.deleteAll();
+      datastreamRepository.deleteAll();
+      digitalObjectRepository.deleteAll();
+
+      // second need to get test data to draft state
+      var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      final String TEST_EXTERNAL_ID = "foobarxyz";
+
+      foundArchivalRecord.setArchivalState(ArchivalState.DRAFT);
+      foundArchivalRecord.setExternalId(TEST_EXTERNAL_ID);
+      archivalRecordRepository.save(foundArchivalRecord);
+
+      final Instant TEST_PUBLICATION_TIMESTAMP = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+      ArchivalRecordPublishDto changeDto = new ArchivalRecordPublishDto();
+      changeDto.setPublicationTimeStamp(TEST_PUBLICATION_TIMESTAMP);
+
+      Assertions.assertThatThrownBy(
+          () -> archivalRecordService.publishArchivalRecord(foundArchivalRecord.getPid(), changeDto)
+      ).isInstanceOf(ArchivalRecordDigitalObjectInconsistencyException.class);
 
     }
 

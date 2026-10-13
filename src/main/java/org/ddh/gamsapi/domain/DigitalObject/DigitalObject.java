@@ -80,7 +80,8 @@ public class DigitalObject {
   private Instant created;
 
   /**
-   * Last modified date of the digital object / datastream
+   * Last modified date of the digital object and it's datastreams.
+   * Also tracks changes on datastream + content at the application layer via spring-events.
    */
   @UpdateTimestamp
   private Instant modified;

@@ -320,11 +320,11 @@ class DigitalObjectServiceIT extends IntegrationTest {
           archivalRecordRepository.existsById(testDataSet.archivalRecord().getPid())
       ).isTrue();
 
-      // check if reference is set to null as expected
+      // check if reference is NOT set to null
       var foundArchivalRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid())
           .orElseThrow();
-      Assertions.assertThat(foundArchivalRecord.getDigitalObject())
-          .isNull();
+      Assertions.assertThat(foundArchivalRecord.getDigitalObjectId())
+          .isEqualTo(testDataSet.digitalObject().getId());
 
 
 
