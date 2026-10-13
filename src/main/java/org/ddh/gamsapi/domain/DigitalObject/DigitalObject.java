@@ -9,12 +9,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
 import org.ddh.gamsapi.domain.DigitalObject.utils.validation.ValidDigitalObjectId;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
 import org.ddh.gamsapi.domain.Project.Project;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GeneratedColumn;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.data.annotation.CreatedBy;
@@ -22,7 +20,6 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -145,13 +142,6 @@ public class DigitalObject {
    */
   @Column(name = "ingested", nullable = false, updatable = false)
   private boolean ingested = false;
-
-  /**
-   * Tracks if an object was moved to an archive / repository.
-   */
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private ArchiveState archiveState = ArchiveState.NOT_ARCHIVED;
 
   /**
    * Describes if a digital object was changed after it's creation

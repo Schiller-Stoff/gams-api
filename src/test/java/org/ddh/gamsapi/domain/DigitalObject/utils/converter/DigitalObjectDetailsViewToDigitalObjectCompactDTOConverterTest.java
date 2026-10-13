@@ -1,16 +1,14 @@
 package org.ddh.gamsapi.domain.DigitalObject.utils.converter;
 
 import org.ddh.gamsapi.TestUtilities.TestDigitalObject;
-import org.ddh.gamsapi.domain.DigitalObject.utils.ArchiveState;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.ddh.gamsapi.UnitTest;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCompactDTO;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.DigitalObjectDetailsView;
 import org.ddh.gamsapi.domain.MetadataBaseEntity;
-import org.ddh.gamsapi.UnitTest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.Set;
 
 public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest extends UnitTest {
@@ -49,8 +47,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     Assertions.assertEquals(digitalObjectCompactDTO.getTags(), testObjectDetailsView.getTags());
 
     Assertions.assertEquals(digitalObjectCompactDTO.isIngested(), testObjectDetailsView.isIngested());
-
-    Assertions.assertEquals(digitalObjectCompactDTO.getArchiveState(), testObjectDetailsView.getArchiveState());
 
     Assertions.assertEquals(digitalObjectCompactDTO.isModifiedAfterCreation(), testObjectDetailsView.isModifiedAfterCreation());
 
@@ -138,11 +134,6 @@ public class DigitalObjectDetailsViewToDigitalObjectCompactDTOConverterTest exte
     @Override
     public boolean isIngested(){
       return true;
-    }
-
-    @Override
-    public ArchiveState getArchiveState(){
-      return ArchiveState.NOT_ARCHIVED;
     }
 
     @Override

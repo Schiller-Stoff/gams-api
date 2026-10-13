@@ -80,7 +80,6 @@ create table digital_object
     publisher            varchar(255) not null,
     project_project_abbr varchar(255) not null,
     ingested             boolean       not null default false,
-    archive_state        varchar(255) default 'NOT_ARCHIVED'   not null,
     modified_after_creation boolean default false,
     primary key (id)
 );
