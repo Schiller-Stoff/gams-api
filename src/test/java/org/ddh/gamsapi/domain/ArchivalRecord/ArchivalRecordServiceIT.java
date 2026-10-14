@@ -855,4 +855,82 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
   }
 
+  @Nested
+  class FindDigitalObjectArchivalStatus {
+
+    @Test
+    void findsExpectedArchivalRecordInNeedForArchiving(){
+
+      // the test archival record needs archiving
+      boolean NEEDS_ARCHIVING = true;
+      var result = archivalRecordService.findDigitalObjectArchivalStatus(
+        null,
+          NEEDS_ARCHIVING,
+          null,
+          Pageable.unpaged()
+      );
+      Assertions.assertThat(result.getContent())
+          .hasSize(1);
+
+    }
+
+    @Test
+    void returnsDigitalObjectWithNoArchivalRecords(){
+      // delete all archival records
+      archivalRecordRepository.deleteAll();
+
+      // the test archival record needs archiving
+      boolean NEEDS_ARCHIVING = true;
+      var result = archivalRecordService.findDigitalObjectArchivalStatus(
+          null,
+          NEEDS_ARCHIVING,
+          null,
+          Pageable.unpaged()
+      );
+      Assertions.assertThat(result.getContent())
+          .hasSize(1);
+    }
+
+    @Test
+    void filtersOutObjectsInNoNeedOfArchiving(){
+
+      //first bring the test record to PUBLISHED state
+      var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+      testRecord.setArchivalState(ArchivalState.PUBLISHED);
+      testRecord.setExternalId("foobar");
+      testRecord.setPublicationTimeStamp(Instant.now().plus(1, ChronoUnit.HOURS));
+      archivalRecordRepository.save(testRecord);
+
+      // the test archival record does not need archiving right now
+      boolean NEEDS_ARCHIVING = true;
+      var result = archivalRecordService.findDigitalObjectArchivalStatus(
+          null,
+          NEEDS_ARCHIVING,
+          null,
+          Pageable.unpaged()
+      );
+      Assertions.assertThat(result.getContent())
+          .hasSize(0);
+
+    }
+
+
+    @Test
+    void findsArchivalRecordsIfAskedForAll(){
+      // the test archival record needs archiving
+      boolean NEEDS_ARCHIVING = false;
+      var result = archivalRecordService.findDigitalObjectArchivalStatus(
+          null,
+          NEEDS_ARCHIVING,
+          null,
+          Pageable.unpaged()
+      );
+      Assertions.assertThat(result.getContent())
+          .hasSize(1);
+    }
+
+
+  }
+
 }
