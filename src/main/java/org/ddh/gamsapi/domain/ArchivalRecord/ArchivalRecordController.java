@@ -338,7 +338,7 @@ public class ArchivalRecordController {
       description = "Returns a paginated list of digital objects and their archival records across projects."
   )
   @GetMapping(
-      value = "/api/curation/v1/archival-records/objects",
+      value = "/objects",
       produces = MediaType.APPLICATION_JSON_VALUE
   )
   public ResponseEntity<PagedResponse<DigitalObjectArchivalRecordDto>> getAllDigitalObjectArchivalStatus(
