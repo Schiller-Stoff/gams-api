@@ -72,7 +72,7 @@ public interface IArchivalRecordRepository extends JpaRepository<ArchivalRecord,
               d.modified AS modified
           FROM DigitalObject d
           WHERE (:projectAbbr IS NULL OR d.project.projectAbbr = :projectAbbr)
-            AND (:idPrefix IS NULL OR d.id LIKE CONCAT(:idPrefix, '%'))
+            AND (:idPrefix IS NULL OR d.id LIKE CONCAT(CAST(:idPrefix AS String), '%'))
             AND (
                 :needsArchiving = false
                 OR EXISTS (
@@ -95,7 +95,7 @@ public interface IArchivalRecordRepository extends JpaRepository<ArchivalRecord,
           SELECT COUNT(d.id)
           FROM DigitalObject d
           WHERE (:projectAbbr IS NULL OR d.project.projectAbbr = :projectAbbr)
-            AND (:idPrefix IS NULL OR d.id LIKE CONCAT(:idPrefix, '%'))
+            AND (:idPrefix IS NULL OR d.id LIKE CONCAT(CAST(:idPrefix AS String), '%'))
             AND (
                 :needsArchiving = false
                 OR EXISTS (
