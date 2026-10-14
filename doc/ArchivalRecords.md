@@ -30,3 +30,19 @@ used GAMS5 will sign in handles to our managed handle-server.
 * Stateful archiving process:
     - State machine managed on server side and not locally
     - RESERVE/DRAFT/PUBLISH: To-be-archived resources may be revised or rejected manually. There might be long time-spans between drafting and publishing an archived resource.  
+ 
+## The archiving workflow
+
+From the REST-API view a client operation looks like this:
+**/reserve** (provide or create pid) → **/draft** (provide external-id) → **/publish**  (provide publication-date)
+
+Expanded:
+* /reserve → create handle AND mark "start" of the archiving process via created date of the archival record
+  1. Export data to be archived (e.g. export bag from gams-api)
+  2. AIP generation (metadata expansion etc.)
+  3. Draft data in research data repository (e.g. invenio draft)
+* /draft → client provides the external id of an external research-data repo to the gams-api
+  1. Send actual data to the research data repository
+  2. Automatic / manual checks possible in the RDM-repo
+  3. Finish publication in e.g. invenio
+* /publish -> client provides publicationDate from the RDM-repo
