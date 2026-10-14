@@ -1,7 +1,6 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +14,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPidException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPublicationTimeStampException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidStateException;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.ArchivalRecordCompactView;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.PageRequest;

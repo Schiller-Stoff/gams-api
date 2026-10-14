@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces;
 
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 

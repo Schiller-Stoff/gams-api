@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import jakarta.persistence.LockModeType;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.ArchivalRecordCompactView;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.DigitalObjectArchivalBaseView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

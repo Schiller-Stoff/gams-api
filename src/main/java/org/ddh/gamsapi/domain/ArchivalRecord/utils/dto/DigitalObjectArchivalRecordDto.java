@@ -1,7 +1,7 @@
 package org.ddh.gamsapi.domain.ArchivalRecord.utils.dto;
 
 import jakarta.validation.constraints.NotNull;
-import org.ddh.gamsapi.domain.ArchivalRecord.ArchivalRecordCompactView;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.ArchivalRecordCompactView;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalSyncState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.DigitalObjectArchivalBaseView;
