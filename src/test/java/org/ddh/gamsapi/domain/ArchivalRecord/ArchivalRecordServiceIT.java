@@ -875,6 +875,41 @@ class ArchivalRecordServiceIT extends IntegrationTest {
     }
 
     @Test
+    void containsExpectedArchivalRecordWithExpectedProperties(){
+
+      boolean NEEDS_ARCHIVING = true;
+      var result = archivalRecordService.findDigitalObjectArchivalStatus(
+          null,
+          NEEDS_ARCHIVING,
+          null,
+          Pageable.unpaged()
+      );
+
+      var foundArchivalRecord = result.getContent().getFirst()
+          .archivalRecords().getFirst();
+
+
+      Assertions.assertThat(foundArchivalRecord.getPid())
+          .isEqualTo(testDataSet.archivalRecord().getPid());
+
+      Assertions.assertThat(foundArchivalRecord.getObjectId())
+          .isEqualTo(testDataSet.archivalRecord().getDigitalObjectId());
+
+      Assertions.assertThat(foundArchivalRecord.getArchivalState())
+          .isEqualTo(testDataSet.archivalRecord().getArchivalState());
+
+      Assertions.assertThat(foundArchivalRecord.getExternalId())
+          .isEqualTo(testDataSet.archivalRecord().getExternalId());
+
+      Assertions.assertThat(foundArchivalRecord.getCreated())
+          .isEqualTo(testDataSet.archivalRecord().getCreated());
+
+      Assertions.assertThat(foundArchivalRecord.getPublicationTimeStamp())
+          .isEqualTo(testDataSet.archivalRecord().getPublicationTimeStamp());
+
+    }
+
+    @Test
     void returnsDigitalObjectWithNoArchivalRecords(){
       // delete all archival records
       archivalRecordRepository.deleteAll();

@@ -7,6 +7,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalSyncState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.DigitalObjectArchivalBaseView;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public record DigitalObjectArchivalRecordDto(
     @NotNull Instant modified,
     boolean needsArchiving,
     @NotNull ArchivalSyncState archivalSyncState,
-    @NotNull List<ArchivalRecordCompactView> archivalRecords
+    @NotNull List<ArchivalRecordDto> archivalRecords
 ) {
 
   // TODO test!
@@ -26,6 +27,12 @@ public record DigitalObjectArchivalRecordDto(
       List<ArchivalRecordCompactView> records
   ) {
     List<ArchivalRecordCompactView> safeRecords = (records == null) ? List.of() : records;
+
+    List<ArchivalRecordDto> archivalRecords = new ArrayList<>();
+    for (ArchivalRecordCompactView curRecord : safeRecords) {
+      archivalRecords.add(ArchivalRecordDto.from(curRecord));
+    }
+
     ArchivalSyncState syncState = computeSyncState(digitalObject.getModified(), safeRecords);
     boolean needsArchiving = (syncState != ArchivalSyncState.UP_TO_DATE);
 
@@ -35,7 +42,7 @@ public record DigitalObjectArchivalRecordDto(
         digitalObject.getModified(),
         needsArchiving,
         syncState,
-        safeRecords
+        archivalRecords
     );
   }
 
