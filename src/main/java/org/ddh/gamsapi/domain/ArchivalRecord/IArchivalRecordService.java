@@ -4,6 +4,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.DigitalObjectArchivalRecordDto;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -95,4 +96,20 @@ public interface IArchivalRecordService {
    */
   PagedResponse<ArchivalRecordCompactView> findArchivalRecordsForObject(String objectId, Collection<ArchivalState> archivalStates, Pageable pageable);
 
+
+  /**
+   * TODO jdoc
+   * TODO strange method name
+   * @param projectAbbr
+   * @param needsArchiving
+   * @param idPrefix
+   * @param pageable
+   * @return
+   */
+  PagedResponse<DigitalObjectArchivalRecordDto> findDigitalObjectArchivalStatus(
+      String projectAbbr,
+      boolean needsArchiving,
+      String idPrefix,
+      Pageable pageable
+  );
 }

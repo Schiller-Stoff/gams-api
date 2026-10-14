@@ -9,7 +9,9 @@ import java.time.Instant;
  */
 public interface ArchivalRecordCompactView {
   String getPid();
-  Instant getPublicationTimeStamp();
-  String getExternalId();
+  String getDigitalObjectId();
   ArchivalState getArchivalState();
+  String getExternalId();
+  Instant getCreated();
+  Instant getPublicationTimeStamp();
 }

@@ -1,6 +1,7 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,17 +11,17 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordUpdateDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPidException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPublicationTimeStampException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidStateException;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -37,6 +38,9 @@ public class ArchivalRecordController {
 
   private final IArchivalRecordService archivalRecordService;
   private final Validator validator;
+
+  private static final int MAX_PAGE_SIZE = 100;
+  private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "modified", "created");
 
   @Operation(
       summary = "Get archival records for a digital object.",
@@ -326,6 +330,53 @@ public class ArchivalRecordController {
 
     return archivalRecordService.publishArchivalRecord(normalizedPid, archivalRecordPublishDto);
 
+  }
+
+
+  @Operation(
+      summary = "Get digital objects with their archival records across all projects",
+      description = "Returns a paginated list of digital objects and their archival records across projects."
+  )
+  @GetMapping(
+      value = "/api/curation/v1/archival-records/objects",
+      produces = MediaType.APPLICATION_JSON_VALUE
+  )
+  public ResponseEntity<PagedResponse<DigitalObjectArchivalRecordDto>> getAllDigitalObjectArchivalStatus(
+      @RequestParam(required = false) String projectAbbr,
+      @RequestParam(defaultValue = "false") boolean needsArchiving,
+      @RequestParam(required = false) String idPrefix,
+      @RequestParam(defaultValue = "0") int pageIndex,
+      @RequestParam(defaultValue = "20") int pageSize,
+      @RequestParam(defaultValue = "modified") String sortBy,
+      @RequestParam(defaultValue = "DESC") Sort.Direction sortDirection
+  ) {
+    Pageable pageable = buildSafePageable(pageIndex, pageSize, sortBy, sortDirection);
+    return ResponseEntity.ok(
+        archivalRecordService.findDigitalObjectArchivalStatus(
+            projectAbbr, needsArchiving, idPrefix, pageable
+        )
+    );
+  }
+
+  /**
+   * Prevents PropertyReferenceException on invalid sort fields and guarantees
+   * deterministic pagination by adding "id" as a tie-breaker sort column.
+   */
+  private Pageable buildSafePageable(
+      int pageIndex,
+      int pageSize,
+      String sortBy,
+      Sort.Direction direction
+  ) {
+    int safePageIndex = Math.max(0, pageIndex);
+    int safePageSize = Math.clamp(pageSize, 1, MAX_PAGE_SIZE);
+    String safeSortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "modified";
+
+    Sort sort = Sort.by(direction, safeSortField);
+    if (!"id".equals(safeSortField)) {
+      sort = sort.and(Sort.by(Sort.Direction.ASC, "id"));
+    }
+    return PageRequest.of(safePageIndex, safePageSize, sort);
   }
 
 }

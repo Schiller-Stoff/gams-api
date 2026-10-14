@@ -6,15 +6,18 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.DigitalObjectArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.DigitalObjectArchivalBaseView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -433,6 +439,45 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     log.info("Published archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
+  }
+
+
+  // TODO strange method name
+  @Transactional(readOnly = true)
+  public PagedResponse<DigitalObjectArchivalRecordDto> findDigitalObjectArchivalStatus(
+      String projectAbbr,
+      boolean needsArchiving,
+      String idPrefix,
+      Pageable pageable
+  ) {
+    // 1. Query 1: Fetch paginated DigitalObject base projections
+    Page<DigitalObjectArchivalBaseView> objectPage = archivalRecordRepository
+        .findDigitalObjectsForArchivalCheck(projectAbbr, needsArchiving, idPrefix, pageable);
+
+    if (objectPage.isEmpty()) {
+      return PagedResponse.from(Page.empty(pageable));
+    }
+
+    // 2. Extract IDs for the current page (e.g. 20 IDs)
+    List<String> objectIds = objectPage.getContent().stream()
+        .map(DigitalObjectArchivalBaseView::getObjectId)
+        .toList();
+
+    // 3. Query 2: Batch-fetch all ArchivalRecords for these 20 objects in 1 SQL query
+    Map<String, List<ArchivalRecordCompactView>> recordsByObjectId = archivalRecordRepository
+        .findAllByDigitalObjectIdInOrderByCreatedDesc(objectIds)
+        .stream()
+        .collect(Collectors.groupingBy(ArchivalRecordCompactView::getDigitalObjectId));
+
+    // 4. Map to DTO
+    Page<DigitalObjectArchivalRecordDto> dtoPage = objectPage.map(obj -> {
+      List<ArchivalRecordCompactView> records = recordsByObjectId
+          .getOrDefault(obj.getObjectId(), List.of());
+
+      return DigitalObjectArchivalRecordDto.from(obj, records);
+    });
+
+    return PagedResponse.from(dtoPage);
   }
 
 
