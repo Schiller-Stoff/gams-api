@@ -78,11 +78,6 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
 
     }
 
-  }
-
-  @Nested
-  class ComputeSyncState {
-
     @Test
     void computesExpectedSyncState(){
 
@@ -94,6 +89,27 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
       Assertions.assertThat(result.archivalSyncState())
           .isEqualTo(ArchivalSyncState.ARCHIVING_IN_PROGRESS);
       Assertions.assertThat(result.needsArchiving()).isTrue();
+
+    }
+
+  }
+
+  @Nested
+  class ComputeSyncState {
+
+
+    @Test
+    void computesExpectedNeverArchivedSyncState(){
+
+      Instant testObjectModified = Instant.now().minus(1, ChronoUnit.HOURS);
+
+      var syncState = DigitalObjectArchivalRecordDto.computeSyncState(
+          testObjectModified,
+          List.of()
+      );
+
+      Assertions.assertThat(syncState)
+          .isEqualTo(ArchivalSyncState.NEVER_ARCHIVED);
 
     }
 
