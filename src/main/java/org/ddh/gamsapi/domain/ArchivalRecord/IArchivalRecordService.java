@@ -97,13 +97,12 @@ public interface IArchivalRecordService {
 
 
   /**
-   * TODO jdoc
-   * TODO strange method name
-   * @param projectAbbr
-   * @param needsArchiving
-   * @param idPrefix
-   * @param pageable
-   * @return
+   * Finds digital object per their need for archiving, per project and id prefix.
+   * @param projectAbbr nullable (if null goes over all projects) project abbreviation.
+   * @param needsArchiving toggle if only objects in need for archiving are being shown
+   * @param idPrefix nullable
+   * @param pageable pagination information
+   * @return objects with their archiving data
    */
   PagedResponse<DigitalObjectArchivalRecordDto> findDigitalObjectArchivalStatus(
       String projectAbbr,
