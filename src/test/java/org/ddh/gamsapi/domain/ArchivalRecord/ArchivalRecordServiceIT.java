@@ -6,7 +6,6 @@ import org.ddh.gamsapi.TestUtilities.TestDataBuilder;
 import org.ddh.gamsapi.TestUtilities.TestDataSet;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordUpdateDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
