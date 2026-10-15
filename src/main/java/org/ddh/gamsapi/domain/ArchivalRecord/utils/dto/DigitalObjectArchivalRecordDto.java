@@ -21,7 +21,6 @@ public record DigitalObjectArchivalRecordDto(
     @NotNull List<ArchivalRecordDto> archivalRecords
 ) {
 
-  // TODO test!
   public static DigitalObjectArchivalRecordDto from(
       DigitalObjectArchivalBaseView digitalObject,
       List<ArchivalRecordCompactView> records
@@ -47,7 +46,7 @@ public record DigitalObjectArchivalRecordDto(
   }
 
   // TODO test
-  private static ArchivalSyncState computeSyncState(
+  public static ArchivalSyncState computeSyncState(
       Instant objectModified,
       List<ArchivalRecordCompactView> records
   ) {
