@@ -28,10 +28,9 @@ public class ArchivalRecordDto {
   private ArchivalState archivalState;
 
   /**
-   * TODO jdoc
-   * TODO unittest this method
-   * @param archivalRecordCompactView
-   * @return
+   * Creates an ArchivalRecordDto from an archivalRecordCompact spring projection
+   * @param archivalRecordCompactView spring projection to be converted
+   * @return converted ArchivalRecordDto
    */
   public static ArchivalRecordDto from(ArchivalRecordCompactView archivalRecordCompactView){
     ArchivalRecordDto archivalRecordDto = new ArchivalRecordDto();
