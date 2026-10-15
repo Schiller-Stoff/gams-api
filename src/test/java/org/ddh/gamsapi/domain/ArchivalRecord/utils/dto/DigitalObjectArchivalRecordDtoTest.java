@@ -32,7 +32,7 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
     archivalRecordCompactView.setExternalId(TestArchivalRecord.EXTERNAL_ID);
 
     archivalRecordCompactView.setCreated(Instant.now());
-    archivalRecordCompactView.setPublicationTimeStamp(Instant.now());
+    archivalRecordCompactView.setPublicationTimeStamp(Instant.now().plus(5, ChronoUnit.HOURS));
 
     TEST_ARCHIVAL_RECORD_COMPACT_VIEW = archivalRecordCompactView;
 
@@ -147,7 +147,7 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
     @Test
     void computestExpectedNeedsRearchiving(){
 
-      Instant testObjectModified = Instant.now().plus(5, ChronoUnit.HOURS);
+      Instant testObjectModified = Instant.now().plus(50, ChronoUnit.HOURS);
 
       TEST_ARCHIVAL_RECORD_COMPACT_VIEW.setArchivalState(ArchivalState.PUBLISHED);
 
@@ -268,7 +268,7 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
 
   class DigitalObjectArchivalBaseViewImpl implements DigitalObjectArchivalBaseView {
 
-    final Instant modified = Instant.now();
+    final Instant modified = Instant.now().minus(5, ChronoUnit.HOURS);
 
     @Override
     public String getObjectId() {
