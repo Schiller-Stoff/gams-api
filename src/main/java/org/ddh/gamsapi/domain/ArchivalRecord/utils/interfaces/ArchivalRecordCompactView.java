@@ -1,4 +1,4 @@
-package org.ddh.gamsapi.domain.ArchivalRecord;
+package org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces;
 
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 
@@ -9,7 +9,9 @@ import java.time.Instant;
  */
 public interface ArchivalRecordCompactView {
   String getPid();
-  Instant getPublicationTimeStamp();
-  String getExternalId();
+  String getDigitalObjectId();
   ArchivalState getArchivalState();
+  String getExternalId();
+  Instant getCreated();
+  Instant getPublicationTimeStamp();
 }

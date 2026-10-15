@@ -245,6 +245,83 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
     }
 
+
+    @Nested
+    class GetAllDigitalObjectArchivalStatus {
+
+      @Test
+      void returnsNotPublishedTestArchivalRecord() throws Exception {
+
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/objects?needsArchiving=%s",
+            true
+        );
+
+        String responseBody = mockMvc.perform(
+                MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+
+        Assertions.assertThat(responseBody)
+            .contains(testDataSet.archivalRecord().getPid())
+            .contains(testDataSet.archivalRecord().getArchivalState().name())
+            .contains(testDataSet.archivalRecord().getExternalId())
+            .contains(testDataSet.archivalRecord().getDigitalObjectId())
+            .contains(testDataSet.archivalRecord().getCreated().toString());
+            // publicationTimestamp is null (because not set in test data)
+            //.contains(testDataSet.archivalRecord().getPublicationTimeStamp().toString());
+
+      }
+
+      @Test
+      void returnsNotPublishedTestArchivalRecordByDefaultWithExpectedValues() throws Exception {
+        final String TEST_REQUEST_URL = "/api/curation/v1/archival-records/objects";
+
+        String responseBody = mockMvc.perform(
+                MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+
+        Assertions.assertThat(responseBody)
+            .contains(testDataSet.archivalRecord().getPid())
+            .contains(testDataSet.archivalRecord().getArchivalState().name())
+            .contains(testDataSet.archivalRecord().getExternalId())
+            .contains(testDataSet.archivalRecord().getDigitalObjectId())
+            .contains(testDataSet.archivalRecord().getCreated().toString());
+        // publicationTimestamp is null (because not set in test data)
+        //.contains(testDataSet.archivalRecord().getPublicationTimeStamp().toString());
+      }
+
+      @Test
+      void doesNotReturnPublishedTestArchivalRecordWhenSetToNeedsArchiving() throws Exception {
+        //first bring the test record to PUBLISHED state
+        var testRecord = archivalRecordRepository.findById(testDataSet.archivalRecord().getPid()).orElseThrow();
+
+        testRecord.setArchivalState(ArchivalState.PUBLISHED);
+        testRecord.setExternalId("foobar");
+        testRecord.setPublicationTimeStamp(Instant.now().plus(1, ChronoUnit.HOURS));
+        archivalRecordRepository.save(testRecord);
+
+        // build request
+        final String TEST_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/objects?needsArchiving=%s",
+            true
+        );
+
+        String responseBody = mockMvc.perform(
+                MockMvcRequestBuilders.get(TEST_REQUEST_URL)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(responseBody)
+            .doesNotContain(testRecord.getPid());
+
+      }
+
+    }
+
   }
 
   @Nested

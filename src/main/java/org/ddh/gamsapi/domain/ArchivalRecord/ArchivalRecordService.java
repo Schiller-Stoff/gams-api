@@ -3,25 +3,30 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.ArchivalRecordCompactView;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.DigitalObjectArchivalBaseView;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.infrastructure.System.configproperties.HandleServerProperties;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -255,22 +260,41 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord) {
+  public ArchivalRecord updateArchivalRecord(String pid, ArchivalRecordUpdateDto archivalRecord) {
 
-    var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(archivalRecord.getPid())
+    var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(pid)
         .orElseThrow(() ->
             new ArchivalRecordNotFoundException(
-                "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
+                "Cannot patch archival record. Archival record with pid does not exist: " + pid
             ));
+
+
+    Instant publicationDate;
+    // publication date may be null - else needs to be valid
+    if(archivalRecord.getPublicationTimeStamp() != null){
+      // parse the publication date first (for possible errors)
+      try {
+        publicationDate = Instant.parse(archivalRecord.getPublicationTimeStamp());
+        curArchivalRecord.setPublicationTimeStamp(publicationDate);
+      } catch (DateTimeParseException e) {
+        throw new ArchivalRecordInvalidPublicationTimeStampException(
+            "Cannot parse publication timestamp of given archival record to patch: " + archivalRecord.getPublicationTimeStamp() + " " + archivalRecord,
+            e
+        );
+      }
+    } else {
+      publicationDate = null;
+    }
+
 
     // don't change the pid
     curArchivalRecord.setArchivalState(archivalRecord.getArchivalState());
     curArchivalRecord.setExternalId(archivalRecord.getExternalId());
-    curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
+    curArchivalRecord.setPublicationTimeStamp(publicationDate);
 
     if(archivalRecord.getObjectId() != null){
       // check if defined digital object exists.
-      if(!digitalObjectRepository.existsById(archivalRecord.getPid())){
+      if(!digitalObjectRepository.existsById(archivalRecord.getObjectId())){
         throw new DigitalObjectNotFoundException(
             "Cannot change archival record: The digital object with id " + archivalRecord.getObjectId() + " does not exist. For archival record change dto: " + archivalRecord
         );
@@ -433,6 +457,44 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
     log.info("Published archival record {} with external id {}", pid, activeRecord.getExternalId());
     return activeRecord;
+  }
+
+
+  @Transactional(readOnly = true)
+  public PagedResponse<DigitalObjectArchivalRecordDto> findDigitalObjectArchivalStatus(
+      String projectAbbr,
+      boolean needsArchiving,
+      String idPrefix,
+      Pageable pageable
+  ) {
+    // 1. Query 1: Fetch paginated DigitalObject base projections
+    Page<DigitalObjectArchivalBaseView> objectPage = archivalRecordRepository
+        .findDigitalObjectsForArchivalCheck(projectAbbr, needsArchiving, idPrefix, pageable);
+
+    if (objectPage.isEmpty()) {
+      return PagedResponse.from(Page.empty(pageable));
+    }
+
+    // 2. Extract IDs for the current page (e.g. 20 IDs)
+    List<String> objectIds = objectPage.getContent().stream()
+        .map(DigitalObjectArchivalBaseView::getObjectId)
+        .toList();
+
+    // 3. Query 2: Batch-fetch all ArchivalRecords for these 20 objects in 1 SQL query
+    Map<String, List<ArchivalRecordCompactView>> recordsByObjectId = archivalRecordRepository
+        .findAllByDigitalObjectIdInOrderByCreatedDesc(objectIds)
+        .stream()
+        .collect(Collectors.groupingBy(ArchivalRecordCompactView::getDigitalObjectId));
+
+    // 4. Map to DTO
+    Page<DigitalObjectArchivalRecordDto> dtoPage = objectPage.map(obj -> {
+      List<ArchivalRecordCompactView> records = recordsByObjectId
+          .getOrDefault(obj.getObjectId(), List.of());
+
+      return DigitalObjectArchivalRecordDto.from(obj, records);
+    });
+
+    return PagedResponse.from(dtoPage);
   }
 
 
