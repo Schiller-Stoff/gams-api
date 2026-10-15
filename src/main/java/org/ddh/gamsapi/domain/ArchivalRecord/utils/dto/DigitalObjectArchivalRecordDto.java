@@ -21,6 +21,12 @@ public record DigitalObjectArchivalRecordDto(
     @NotNull List<ArchivalRecordDto> archivalRecords
 ) {
 
+  /**
+   * Transforms spring projections to a transferable dto object.
+   * @param digitalObject digital object projection
+   * @param records archival record projection
+   * @return dto object.
+   */
   public static DigitalObjectArchivalRecordDto from(
       DigitalObjectArchivalBaseView digitalObject,
       List<ArchivalRecordCompactView> records
@@ -45,7 +51,13 @@ public record DigitalObjectArchivalRecordDto(
     );
   }
 
-  // TODO test
+  /**
+   * Computes the archival synchronization state of a digital object based on it's archival records
+   * and modification date.
+   * @param objectModified modification date of a digital object and it's content.
+   * @param records archival record linked to the digital object.
+   * @return archival sync state
+   */
   public static ArchivalSyncState computeSyncState(
       Instant objectModified,
       List<ArchivalRecordCompactView> records
