@@ -1,9 +1,8 @@
 package org.ddh.gamsapi.domain.ArchivalRecord;
 
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.*;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.ArchivalRecordCompactView;
 import org.ddh.gamsapi.infrastructure.System.dto.PagedResponse;
 import org.springframework.data.domain.Pageable;
 
@@ -58,10 +57,11 @@ public interface IArchivalRecordService {
 
   /**
    * Updates given archival record
+   * @param pid id of the archival record
    * @param archivalRecord dto containing data to change the archival record with
    * @return saved archival record entity
    */
-  ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord);
+  ArchivalRecord updateArchivalRecord(String pid, ArchivalRecordUpdateDto archivalRecord);
 
 
   /**
@@ -95,4 +95,20 @@ public interface IArchivalRecordService {
    */
   PagedResponse<ArchivalRecordCompactView> findArchivalRecordsForObject(String objectId, Collection<ArchivalState> archivalStates, Pageable pageable);
 
+
+  /**
+   * TODO jdoc
+   * TODO strange method name
+   * @param projectAbbr
+   * @param needsArchiving
+   * @param idPrefix
+   * @param pageable
+   * @return
+   */
+  PagedResponse<DigitalObjectArchivalRecordDto> findDigitalObjectArchivalStatus(
+      String projectAbbr,
+      boolean needsArchiving,
+      String idPrefix,
+      Pageable pageable
+  );
 }
