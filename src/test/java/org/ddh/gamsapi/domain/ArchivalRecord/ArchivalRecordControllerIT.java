@@ -386,6 +386,78 @@ class ArchivalRecordControllerIT extends IntegrationTest {
 
       }
 
+      @Test
+      void completelyPublishADoiBasedArchivalRecord() throws Exception {
+
+        final String TEST_DOI = "doi:10.5281/zenodo.23314128";
+
+        final String RESERVE_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/%s?objectId=%s",
+            TEST_DOI,
+            testDataSet.digitalObject().getId()
+        );
+
+        String response = mockMvc.perform(
+                MockMvcRequestBuilders.put(RESERVE_REQUEST_URL)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(response)
+            .contains(TEST_DOI);
+
+        final String DRAFT_EXTERNAL_ID = "foobar";
+
+        final String DRAFT_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/draft/%s",
+            TEST_DOI
+        );
+
+        final String DRAFT_REQUEST_BODY = String.format(
+            "{\"externalId\":\"%s\"}",
+            DRAFT_EXTERNAL_ID
+        );
+
+        String draftResponse = mockMvc.perform(
+            MockMvcRequestBuilders.put(DRAFT_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(DRAFT_REQUEST_BODY)
+        ).andExpect(status().isOk()
+        ).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(draftResponse)
+            .contains(DRAFT_EXTERNAL_ID)
+            .contains(TEST_DOI);
+
+        // publication
+        final String PUBLISH_REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/published/%s",
+            TEST_DOI
+        );
+
+        final Instant TEST_PUBLICATION_DATE = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+
+        final String PUBLISH_REQUEST_BODY = String.format(
+            "{\"publicationTimeStamp\":\"%s\"}",
+            TEST_PUBLICATION_DATE
+        );
+
+        String publishResponse = mockMvc.perform(
+            MockMvcRequestBuilders.put(PUBLISH_REQUEST_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(PUBLISH_REQUEST_BODY)
+        ).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+
+        Assertions.assertThat(publishResponse)
+            .contains(TEST_PUBLICATION_DATE.toString());
+
+        var testArchivalRecord = archivalRecordRepository.findById(TEST_DOI).orElseThrow();
+
+        Assertions.assertThat(testArchivalRecord.getPid()).isEqualTo(TEST_DOI);
+        Assertions.assertThat(testArchivalRecord.getPublicationTimeStamp()).isEqualTo(TEST_PUBLICATION_DATE);
+        Assertions.assertThat(testArchivalRecord.getArchivalState()).isEqualTo(ArchivalState.PUBLISHED);
+
+      }
+
     }
 
     @Nested
