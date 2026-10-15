@@ -32,7 +32,7 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
     archivalRecordCompactView.setExternalId(TestArchivalRecord.EXTERNAL_ID);
 
     archivalRecordCompactView.setCreated(Instant.now());
-    archivalRecordCompactView.setModified(Instant.now());
+    archivalRecordCompactView.setPublicationTimeStamp(Instant.now());
 
     TEST_ARCHIVAL_RECORD_COMPACT_VIEW = archivalRecordCompactView;
 
@@ -113,6 +113,69 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
 
     }
 
+    @Test
+    void computesExpectedArchivingInProgress(){
+
+      Instant testObjectModified = Instant.now().minus(1, ChronoUnit.HOURS);
+
+      var syncState = DigitalObjectArchivalRecordDto.computeSyncState(
+          testObjectModified,
+          List.of(TEST_ARCHIVAL_RECORD_COMPACT_VIEW)
+      );
+
+      Assertions.assertThat(syncState)
+          .isEqualTo(ArchivalSyncState.ARCHIVING_IN_PROGRESS);
+
+
+    }
+
+    @Test
+    void computesExpectedActiveRecordOutdated(){
+
+      Instant testObjectModified = Instant.now().plus(5, ChronoUnit.HOURS);
+
+      var syncState = DigitalObjectArchivalRecordDto.computeSyncState(
+          testObjectModified,
+          List.of(TEST_ARCHIVAL_RECORD_COMPACT_VIEW)
+      );
+
+      Assertions.assertThat(syncState)
+          .isEqualTo(ArchivalSyncState.ACTIVE_RECORD_OUTDATED);
+
+    }
+
+    @Test
+    void computestExpectedNeedsRearchiving(){
+
+      Instant testObjectModified = Instant.now().plus(5, ChronoUnit.HOURS);
+
+      TEST_ARCHIVAL_RECORD_COMPACT_VIEW.setArchivalState(ArchivalState.PUBLISHED);
+
+      var syncState = DigitalObjectArchivalRecordDto.computeSyncState(
+          testObjectModified,
+          List.of(TEST_ARCHIVAL_RECORD_COMPACT_VIEW)
+      );
+
+      Assertions.assertThat(syncState)
+          .isEqualTo(ArchivalSyncState.NEEDS_REARCHIVING);
+    }
+
+    @Test
+    void computesExpectedUpToDate(){
+      Instant testObjectModified = Instant.now().minus(5, ChronoUnit.HOURS);
+
+      TEST_ARCHIVAL_RECORD_COMPACT_VIEW.setArchivalState(ArchivalState.PUBLISHED);
+      TEST_ARCHIVAL_RECORD_COMPACT_VIEW.setPublicationTimeStamp(Instant.now());
+
+      var syncState = DigitalObjectArchivalRecordDto.computeSyncState(
+          testObjectModified,
+          List.of(TEST_ARCHIVAL_RECORD_COMPACT_VIEW)
+      );
+
+      Assertions.assertThat(syncState)
+          .isEqualTo(ArchivalSyncState.UP_TO_DATE);
+    }
+
   }
 
 
@@ -125,7 +188,7 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
     String externalId;
 
     Instant created;
-    Instant modified;
+    Instant publicationTimestamp;
 
     public ArchivalRecordCompactViewImpl() {
 
@@ -137,14 +200,14 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
         ArchivalState archivalState,
         String externalId,
         Instant created,
-        Instant modified
+        Instant publicationTimestamp
     ) {
       this.pid = pid;
       this.objectId = objectId;
       this.archivalState = archivalState;
       this.externalId = externalId;
       this.created = created;
-      this.modified = modified;
+      this.publicationTimestamp = publicationTimestamp;
     }
 
     @Override
@@ -172,8 +235,8 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
       this.created = created;
     }
 
-    public void setModified(Instant modified) {
-      this.modified = modified;
+    public void setPublicationTimeStamp(Instant publicationTimeStamp) {
+      this.publicationTimestamp = publicationTimeStamp;
     }
 
     @Override
@@ -198,7 +261,7 @@ class DigitalObjectArchivalRecordDtoTest extends UnitTest {
 
     @Override
     public Instant getPublicationTimeStamp() {
-      return modified;
+      return publicationTimestamp;
     }
   }
 
