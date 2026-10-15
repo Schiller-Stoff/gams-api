@@ -47,11 +47,7 @@ public interface IArchivalRecordRepository extends JpaRepository<ArchivalRecord,
   @Query("SELECT a FROM ArchivalRecord a WHERE a.pid = :pid")   // adapt if the @Id field isn't named pid
   Optional<ArchivalRecord> findByIdForUpdate(@Param("pid") String pid);
 
-  /**
-   * TODO jdoc
-   * @param objectIds
-   * @return
-   */
+
   List<ArchivalRecordCompactView> findAllByDigitalObjectIdInOrderByCreatedDesc(List<String> objectIds);
 
   /**

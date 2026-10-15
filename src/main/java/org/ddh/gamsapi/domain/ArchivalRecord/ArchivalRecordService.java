@@ -460,7 +460,6 @@ public class ArchivalRecordService implements IArchivalRecordService {
   }
 
 
-  // TODO strange method name
   @Transactional(readOnly = true)
   public PagedResponse<DigitalObjectArchivalRecordDto> findDigitalObjectArchivalStatus(
       String projectAbbr,
