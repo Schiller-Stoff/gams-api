@@ -12,6 +12,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * DTO object representing the archival state of each digital object.
+ * Also contains necessary archiving data for a client to use.
+ */
 public record DigitalObjectArchivalRecordDto(
     @NotNull String objectId,
     @NotNull String projectAbbr,
