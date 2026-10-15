@@ -10,9 +10,11 @@ import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.*;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordUpdateDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.DigitalObjectArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPidException;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidPublicationTimeStampException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.ArchivalRecordInvalidStateException;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.interfaces.ArchivalRecordCompactView;
 import org.ddh.gamsapi.infrastructure.System.config.OpenAPIConfig;
@@ -24,8 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -229,28 +229,7 @@ public class ArchivalRecordController {
       );
     }
 
-    var archivalRecordDto = new ArchivalRecordDto();
-    archivalRecordDto.setPid(normalizedPid);
-    archivalRecordDto.setObjectId(archivalRecordUpdateDto.getObjectId());
-    archivalRecordDto.setExternalId(archivalRecordUpdateDto.getExternalId());
-    archivalRecordDto.setArchivalState(archivalRecordUpdateDto.getArchivalState());
-
-    // if no publication date was set -> no parsing needs to be done.
-    if(archivalRecordUpdateDto.getPublicationTimeStamp() == null)
-      archivalRecordService.updateArchivalRecord(archivalRecordDto);
-
-    Instant publicationDate;
-    try {
-      publicationDate = Instant.parse(archivalRecordUpdateDto.getPublicationTimeStamp());
-      archivalRecordDto.setPublicationTimeStamp(publicationDate);
-    } catch (DateTimeParseException e) {
-      throw new ArchivalRecordInvalidPublicationTimeStampException(
-        "Cannot parse publication timestamp of given archival record to patch: " + archivalRecordUpdateDto.getPublicationTimeStamp() + " " + archivalRecordUpdateDto,
-        e
-      );
-    }
-
-    return archivalRecordService.updateArchivalRecord(archivalRecordDto);
+    return archivalRecordService.updateArchivalRecord(normalizedPid, archivalRecordUpdateDto);
 
   }
 

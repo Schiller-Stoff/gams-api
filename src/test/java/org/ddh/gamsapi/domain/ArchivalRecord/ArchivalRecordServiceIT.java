@@ -8,6 +8,7 @@ import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordUpdateDto;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleGenerator;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.IHandleClient;
@@ -460,13 +461,14 @@ class ArchivalRecordServiceIT extends IntegrationTest {
       final String TEST_EXTERNAL_REFERENCE = "foobarxyz";
       final Instant TEST_TIMESTAMP = Instant.now();
 
-      var changeDto = new ArchivalRecordDto();
-      changeDto.setPid(testDataSet.archivalRecord().getPid());
+      var changeDto = new ArchivalRecordUpdateDto();
       changeDto.setExternalId(TEST_EXTERNAL_REFERENCE);
-      changeDto.setPublicationTimeStamp(TEST_TIMESTAMP);
+      changeDto.setPublicationTimeStamp(TEST_TIMESTAMP.toString());
       changeDto.setArchivalState(ArchivalState.PUBLISHED);
 
-      var savedRecord = archivalRecordService.updateArchivalRecord(changeDto);
+      var savedRecord = archivalRecordService.updateArchivalRecord(
+          testDataSet.archivalRecord().getPid(), changeDto
+      );
 
       Assertions.assertThat(savedRecord.getExternalId()).isEqualTo(TEST_EXTERNAL_REFERENCE);
       Assertions.assertThat(savedRecord.getPublicationTimeStamp()).isEqualTo(TEST_TIMESTAMP);
@@ -479,12 +481,11 @@ class ArchivalRecordServiceIT extends IntegrationTest {
 
       final String TEST_PID = handleGenerator.generate().toString();
 
-      var changeDto = new ArchivalRecordDto();
-      changeDto.setPid(TEST_PID);
+      var changeDto = new ArchivalRecordUpdateDto();
       changeDto.setExternalId("foobarxyz");
-      changeDto.setPublicationTimeStamp(Instant.now());
+      changeDto.setPublicationTimeStamp(Instant.now().toString());
 
-      Assertions.assertThatThrownBy(() -> archivalRecordService.updateArchivalRecord(changeDto))
+      Assertions.assertThatThrownBy(() -> archivalRecordService.updateArchivalRecord(TEST_PID, changeDto))
           .isInstanceOf(ArchivalRecordNotFoundException.class);
 
     }

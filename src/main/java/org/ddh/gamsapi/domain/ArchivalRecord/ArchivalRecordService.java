@@ -3,10 +3,7 @@ package org.ddh.gamsapi.domain.ArchivalRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.ArchivalState;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDraftDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.ArchivalRecordPublishDto;
-import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.DigitalObjectArchivalRecordDto;
+import org.ddh.gamsapi.domain.ArchivalRecord.utils.dto.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.exceptions.*;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.Handle;
 import org.ddh.gamsapi.domain.ArchivalRecord.utils.handle.HandleAlreadyExistsException;
@@ -25,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -262,22 +260,41 @@ public class ArchivalRecordService implements IArchivalRecordService {
 
   @Override
   @Transactional
-  public ArchivalRecord updateArchivalRecord(ArchivalRecordDto archivalRecord) {
+  public ArchivalRecord updateArchivalRecord(String pid, ArchivalRecordUpdateDto archivalRecord) {
 
-    var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(archivalRecord.getPid())
+    var curArchivalRecord = archivalRecordRepository.findByIdForUpdate(pid)
         .orElseThrow(() ->
             new ArchivalRecordNotFoundException(
-                "Cannot patch archival record. Archival record with pid does not exist: " + archivalRecord.getPid()
+                "Cannot patch archival record. Archival record with pid does not exist: " + pid
             ));
+
+
+    Instant publicationDate;
+    // publication date may be null - else needs to be valid
+    if(archivalRecord.getPublicationTimeStamp() != null){
+      // parse the publication date first (for possible errors)
+      try {
+        publicationDate = Instant.parse(archivalRecord.getPublicationTimeStamp());
+        curArchivalRecord.setPublicationTimeStamp(publicationDate);
+      } catch (DateTimeParseException e) {
+        throw new ArchivalRecordInvalidPublicationTimeStampException(
+            "Cannot parse publication timestamp of given archival record to patch: " + archivalRecord.getPublicationTimeStamp() + " " + archivalRecord,
+            e
+        );
+      }
+    } else {
+      publicationDate = null;
+    }
+
 
     // don't change the pid
     curArchivalRecord.setArchivalState(archivalRecord.getArchivalState());
     curArchivalRecord.setExternalId(archivalRecord.getExternalId());
-    curArchivalRecord.setPublicationTimeStamp(archivalRecord.getPublicationTimeStamp());
+    curArchivalRecord.setPublicationTimeStamp(publicationDate);
 
     if(archivalRecord.getObjectId() != null){
       // check if defined digital object exists.
-      if(!digitalObjectRepository.existsById(archivalRecord.getPid())){
+      if(!digitalObjectRepository.existsById(archivalRecord.getObjectId())){
         throw new DigitalObjectNotFoundException(
             "Cannot change archival record: The digital object with id " + archivalRecord.getObjectId() + " does not exist. For archival record change dto: " + archivalRecord
         );
