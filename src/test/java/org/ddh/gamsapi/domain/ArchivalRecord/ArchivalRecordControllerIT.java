@@ -361,6 +361,34 @@ class ArchivalRecordControllerIT extends IntegrationTest {
   class PUT {
 
     @Nested
+    class ReserveArchivalRecordViaPid {
+
+      @Test
+      void reservesExpectedDoi() throws Exception {
+
+        final String TEST_DOI = "doi:10.5281/zenodo.23314128";
+
+        final String REQUEST_URL = String.format(
+            "/api/curation/v1/archival-records/%s?objectId=%s",
+            TEST_DOI,
+            testDataSet.digitalObject().getId()
+        );
+
+        String response = mockMvc.perform(
+                MockMvcRequestBuilders.put(REQUEST_URL)
+            ).andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+
+        Assertions.assertThat(response)
+            .contains(TEST_DOI);
+
+
+      }
+
+    }
+
+    @Nested
     class DraftArchivalRecord {
 
       @Test
