@@ -2,13 +2,15 @@ package org.ddh.gamsapi.application.Ingest;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagStatics;
 import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.PlexusSearchProperties;
+import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
+import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
+import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
+import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectService;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
@@ -58,10 +60,13 @@ public class IngestServiceIT extends IntegrationTest {
   IDublinCoreEntryRepository dublinCoreElementRepository;
 
   @Autowired
-  ISubmissionRecordRepository bagEntityRepository;
+  ISubmissionRecordRepository submissionRecordRepository;
 
   @Autowired
   IngestService ingestService;
+
+  @Autowired
+  IDigitalObjectService digitalObjectService;
 
   @Autowired
   private EventCaptureListener eventCaptureListener;
@@ -243,7 +248,7 @@ public class IngestServiceIT extends IntegrationTest {
 
     @Test
     public void ingestCreatesExpectedBagEntityWithNoNullProperties(){
-        var bagEntity = bagEntityRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        var bagEntity = submissionRecordRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
         Assertions.assertThat(bagEntity)
             .isPresent();
 
@@ -254,7 +259,7 @@ public class IngestServiceIT extends IntegrationTest {
 
     @Test
     public void ingestCreatesExpectedMetadataBaseEntity(){
-        var bagEntity = bagEntityRepository.findById(TestSubmissionRecord.ID);
+        var bagEntity = submissionRecordRepository.findById(TestSubmissionRecord.ID);
         Assertions.assertThat(bagEntity)
             .isPresent();
         var foundBagEntity = bagEntity.get();
@@ -578,9 +583,160 @@ public class IngestServiceIT extends IntegrationTest {
             String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), PlexusSearchProperties.DATASTREAM_DSID.name)
         );
 
+      }
+    }
 
+    @Test
+    @DisplayName("Tests if a digital object without submission record is exported as expected.")
+    public void mayExportBagEvenIfNoSubmissionRecordIsAvailable() throws IOException {
+
+      // delete all submission records first (from test data)
+      submissionRecordRepository.deleteAll();
+
+      try (
+          var outputStream = new ByteArrayOutputStream()
+      ) {
+        ingestService.exportAsBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
+
+        // read output stream as zip and check structure
+        var zipBytes = outputStream.toByteArray();
+
+        ZipUtils.walkZippedDir(zipBytes, (zipEntry, byteArrayOutputStream) -> {
+          Assertions.assertThat(zipEntry.getName()).isNotBlank();
+          Assertions.assertThat(byteArrayOutputStream.size()).isGreaterThan(0);
+
+          // read content of some expected files
+          // zipEntry is a path -> only take filename for switch
+          String fileName = Path.of(zipEntry.getName()).getFileName().toString();
+
+          switch (fileName) {
+            case "bagit.txt" -> {
+              String bagitTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagitTxtContent).contains(BagStatics.BAG_VERSION);
+              Assertions.assertThat(bagitTxtContent).contains(BagStatics.TAG_FILE_CHARACTER_ENCODING);
+            }
+            case "bag-info.txt" -> {
+              String bagInfoTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagInfoTxtContent).contains(BagStatics.BAG_CONTACT_MAIL);
+              Assertions.assertThat(bagInfoTxtContent).contains(BagStatics.BAG_EXTERNAL_DESCRIPTION);
+              Assertions.assertThat(bagInfoTxtContent).contains("Payload-Oxum:");
+            }
+            case "sip.json" -> {
+              String sipJsonContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(sipJsonContent).isNotBlank();
+              Assertions.assertThat(sipJsonContent).contains(BagStatics.BAG_SCHEMA);
+            }
+            default -> {
+              // do nothing
+            }
+          }
+        });
+      }
+
+    }
+
+  }
+
+
+  @Nested
+  class ExportBagFromWebclient {
+
+    @Test
+    void exportsExpectedBag() throws IOException {
+      projectRepository.save(ProjectBuilder.builder().projectAbbr(TestProject.PROJECT_ABBR.getValue()).build());
+
+
+      String objectIdSuffix = TestDigitalObject.DIGITAL_OBJECT_ID.getValue()
+          .replace(TestProject.PROJECT_ABBR.getValue() + ".", "");
+
+      // create digital object via service call (=webclient service to manually create a digital object)
+      var dto = new DigitalObjectCreateDto();
+      dto.setIdSuffix(objectIdSuffix);
+      dto.setTitle("Created Title");
+      dto.setCreator("Created Creator");
+      dto.setRights("CC BY 4.0");
+      dto.setPublisher("Created Publisher");
+      dto.setDescription("Created Description");
+      dto.setObjectType("TEI");
+      dto.setFunder("Created Funder");
+      DigitalObject result = digitalObjectService.create(
+          TestProject.PROJECT_ABBR.getValue(), dto
+      );
+
+      try (
+          var outputStream = new ByteArrayOutputStream()
+      ) {
+        ingestService.exportAsBag(result.getId(), outputStream);
+
+        // read output stream as zip and check structure
+        var zipBytes = outputStream.toByteArray();
+
+        List<String> entryNames = new ArrayList<>();
+
+        ZipUtils.walkZippedDir(zipBytes, (zipEntry, byteArrayOutputStream) -> {
+          Assertions.assertThat(zipEntry.getName()).isNotBlank();
+          Assertions.assertThat(byteArrayOutputStream.size()).isGreaterThan(0);
+          entryNames.add(zipEntry.getName());
+
+          // read content of some expected files
+          // zipEntry is a path -> only take filename for switch
+          String fileName = Path.of(zipEntry.getName()).getFileName().toString();
+
+          switch (fileName) {
+            case "bagit.txt" -> {
+              String bagitTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagitTxtContent).contains(BagStatics.BAG_VERSION);
+              Assertions.assertThat(bagitTxtContent).contains(BagStatics.TAG_FILE_CHARACTER_ENCODING);
+            }
+            case "bag-info.txt" -> {
+              String bagInfoTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagInfoTxtContent).contains(BagStatics.BAG_CONTACT_MAIL);
+              Assertions.assertThat(bagInfoTxtContent).contains(BagStatics.BAG_EXTERNAL_DESCRIPTION);
+              Assertions.assertThat(bagInfoTxtContent).contains("Payload-Oxum:");
+            }
+            case "sip.json" -> {
+              String sipJsonContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(sipJsonContent).isNotBlank();
+              Assertions.assertThat(sipJsonContent).contains(BagStatics.BAG_SCHEMA);
+
+              // DC.xml must be contained
+              Assertions.assertThat(sipJsonContent)
+                  .contains(GAMSDsid.DC.getValue());
+
+              Assertions.assertThat(sipJsonContent).doesNotContain(
+                  // sip json must not contain checksums
+                  "md5Checksum",
+                  "sha512Checksum",
+                  // in the test data there should not be any escaped quotes
+                  "\\\""
+              );
+            }
+            default -> {
+              // do nothing
+            }
+          }
+        });
+
+
+        Assertions.assertThat(entryNames.size()).isEqualTo(6);
+
+        // Assert presence of generated files
+        Assertions.assertThat(entryNames).contains(
+            String.format("%s/bagit.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/bag-info.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/manifest-md5.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/manifest-sha512.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
+            String.format("%s/data/meta/sip.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
+
+        );
+
+        // Assert presence of DC.xml file
+        Assertions.assertThat(entryNames).contains(
+            String.format("%s/%s/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), BagFilePaths.BAG_CONTENT_DIR.name, GAMSDsid.DC.getValue())
+        );
 
       }
+
     }
 
   }

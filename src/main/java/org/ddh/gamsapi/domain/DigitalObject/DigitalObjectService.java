@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.DigitalObject;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
 import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.DatastreamBuilder;
 import org.ddh.gamsapi.domain.Datastream.DatastreamId;
@@ -368,7 +369,7 @@ public class DigitalObjectService implements IDigitalObjectService {
                 .build()
         )
         .lang(Set.of("en"))
-        .bagPath(DC_DSID)
+        .bagPath(BagFilePaths.BAG_CONTENT_DIR.name + "/" + DC_DSID)
         .mimeType(MediaType.APPLICATION_XML_VALUE)
         .size((long) dcXmlBytes.length)
         .build();
