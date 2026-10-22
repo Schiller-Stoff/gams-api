@@ -16,6 +16,7 @@ import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamRepository;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.DublinCoreEntry.DublinCoreEntry;
 import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.ISubmissionRecordRepository;
+import org.ddh.gamsapi.domain.DigitalObject.SubmissionRecord.SubmissionRecord;
 import org.ddh.gamsapi.domain.DigitalObject.utils.exceptions.DigitalObjectNotFoundException;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectRepository;
 import org.ddh.gamsapi.domain.Project.exceptions.ProjectNotFoundException;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -219,13 +221,20 @@ public class IngestService implements IIngestService {
         )
     );
 
-    var submissionRecord = submissionRecordRepository.findById(objectId).orElseThrow(
-        () -> {
-          // TODO this is a server error - use different exception?
-          return new DigitalObjectNotFoundException(
-              "Cannot export digital object as bag: " + objectId
-          );
-        }
+    // a submission record is only available when the digital object was ingested
+    var submissionRecord = submissionRecordRepository.findById(objectId).orElseGet(() -> SubmissionRecord.builder()
+        .digitalObject(digitalObject)
+        .baggingDate(Instant.now().toString())
+        .contactMail(BagStatics.BAG_CONTACT_MAIL)
+        .schema(BagStatics.BAG_SCHEMA)
+        .createdBy("") // filled in later
+        .bagVersion(BagStatics.BAG_VERSION)
+        .source(BagStatics.BAG_SOURCE_WEBCLIENT)
+        .externalDescription(BagStatics.BAG_EXTERNAL_DESCRIPTION + " For digital object: " + digitalObject.getId())
+        .gamsApiVersion("") // filled in later
+        .payloadOxum("") // filled in later
+        .tagFileCharacterEncoding(BagStatics.TAG_FILE_CHARACTER_ENCODING)
+        .build()
     );
 
     var datastreams = datastreamRepository.findAllByDigitalObject(digitalObject);
