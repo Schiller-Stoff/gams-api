@@ -58,7 +58,7 @@ public class IngestServiceIT extends IntegrationTest {
   IDublinCoreEntryRepository dublinCoreElementRepository;
 
   @Autowired
-  ISubmissionRecordRepository bagEntityRepository;
+  ISubmissionRecordRepository submissionRecordRepository;
 
   @Autowired
   IngestService ingestService;
@@ -243,7 +243,7 @@ public class IngestServiceIT extends IntegrationTest {
 
     @Test
     public void ingestCreatesExpectedBagEntityWithNoNullProperties(){
-        var bagEntity = bagEntityRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
+        var bagEntity = submissionRecordRepository.findById(TestDigitalObject.DIGITAL_OBJECT_ID.getValue());
         Assertions.assertThat(bagEntity)
             .isPresent();
 
@@ -254,7 +254,7 @@ public class IngestServiceIT extends IntegrationTest {
 
     @Test
     public void ingestCreatesExpectedMetadataBaseEntity(){
-        var bagEntity = bagEntityRepository.findById(TestSubmissionRecord.ID);
+        var bagEntity = submissionRecordRepository.findById(TestSubmissionRecord.ID);
         Assertions.assertThat(bagEntity)
             .isPresent();
         var foundBagEntity = bagEntity.get();
@@ -581,6 +581,23 @@ public class IngestServiceIT extends IntegrationTest {
 
 
       }
+    }
+
+    @Test
+    public void mayExportBagEvenIfNoSubmissionRecordIsAvailable() throws IOException {
+
+      // delete all submission records first (from test data)
+      submissionRecordRepository.deleteAll();
+
+      try (
+          var outputStream = new ByteArrayOutputStream()
+      ) {
+
+        Assertions.assertThatNoException().isThrownBy(() -> {
+          ingestService.exportAsBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
+        });
+      }
+
     }
 
   }
