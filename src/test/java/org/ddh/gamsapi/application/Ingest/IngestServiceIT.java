@@ -2,13 +2,12 @@ package org.ddh.gamsapi.application.Ingest;
 
 import org.assertj.core.api.Assertions;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagStatics;
 import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.PlexusSearchProperties;
+import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
 import org.ddh.gamsapi.infrastructure.System.security.IUserPrincipalAuditorMapping;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
@@ -578,12 +577,11 @@ public class IngestServiceIT extends IntegrationTest {
             String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), PlexusSearchProperties.DATASTREAM_DSID.name)
         );
 
-
-
       }
     }
 
     @Test
+    @DisplayName("Tests if a digital object without submission record is exported as expected.")
     public void mayExportBagEvenIfNoSubmissionRecordIsAvailable() throws IOException {
 
       // delete all submission records first (from test data)
@@ -592,9 +590,40 @@ public class IngestServiceIT extends IntegrationTest {
       try (
           var outputStream = new ByteArrayOutputStream()
       ) {
+        ingestService.exportAsBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
 
-        Assertions.assertThatNoException().isThrownBy(() -> {
-          ingestService.exportAsBag(TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), outputStream);
+        // read output stream as zip and check structure
+        var zipBytes = outputStream.toByteArray();
+
+        ZipUtils.walkZippedDir(zipBytes, (zipEntry, byteArrayOutputStream) -> {
+          Assertions.assertThat(zipEntry.getName()).isNotBlank();
+          Assertions.assertThat(byteArrayOutputStream.size()).isGreaterThan(0);
+
+          // read content of some expected files
+          // zipEntry is a path -> only take filename for switch
+          String fileName = Path.of(zipEntry.getName()).getFileName().toString();
+
+          switch (fileName) {
+            case "bagit.txt" -> {
+              String bagitTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagitTxtContent).contains(BagStatics.BAG_VERSION);
+              Assertions.assertThat(bagitTxtContent).contains(BagStatics.TAG_FILE_CHARACTER_ENCODING);
+            }
+            case "bag-info.txt" -> {
+              String bagInfoTxtContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(bagInfoTxtContent).contains(BagStatics.BAG_CONTACT_MAIL);
+              Assertions.assertThat(bagInfoTxtContent).contains(BagStatics.BAG_EXTERNAL_DESCRIPTION);
+              Assertions.assertThat(bagInfoTxtContent).contains("Payload-Oxum:");
+            }
+            case "sip.json" -> {
+              String sipJsonContent = byteArrayOutputStream.toString();
+              Assertions.assertThat(sipJsonContent).isNotBlank();
+              Assertions.assertThat(sipJsonContent).contains(BagStatics.BAG_SCHEMA);
+            }
+            default -> {
+              // do nothing
+            }
+          }
         });
       }
 
