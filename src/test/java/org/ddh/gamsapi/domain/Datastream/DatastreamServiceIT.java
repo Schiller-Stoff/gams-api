@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import org.ddh.gamsapi.IntegrationTest;
 import org.ddh.gamsapi.TestUtilities.*;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamUpdateDto;
 import org.ddh.gamsapi.domain.Datastream.utils.exceptions.DatastreamAlreadyExistsException;
@@ -446,7 +447,7 @@ public class DatastreamServiceIT extends IntegrationTest {
           new MockMultipartFile("file", "photo.jpg", "image/jpeg", "data".getBytes())
       );
 
-      org.assertj.core.api.Assertions.assertThat(created.getFilePath()).isEqualTo("photo.jpg");
+      org.assertj.core.api.Assertions.assertThat(created.getFilePath()).isEqualTo(BagFilePaths.BAG_CONTENT_DIR.name + "/photo.jpg");
     }
 
     @Test

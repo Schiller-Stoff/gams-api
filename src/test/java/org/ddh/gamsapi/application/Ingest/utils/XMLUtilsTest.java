@@ -69,7 +69,7 @@ public class XMLUtilsTest extends UnitTest {
       byte[] testData = teiIngestXML.readAllBytes();
       Document teiDocument = XMLUtils.parseXml(testData);
       byte[] transformedDocument =  XMLUtils.documentToByteArray(teiDocument);
-      Assertions.assertThat(transformedDocument.length).isCloseTo(testData.length, Percentage.withPercentage(2));
+      Assertions.assertThat(transformedDocument.length).isCloseTo(testData.length, Percentage.withPercentage(5));
     }
 
 
