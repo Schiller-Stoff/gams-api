@@ -13,7 +13,7 @@ services:
     container_name: relationalDB
     hostname: relationalDB
     ports:
-      - "5432:5432"
+      - "5431:5432"
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
@@ -36,19 +36,6 @@ services:
       - "8983:8983"
     environment:
       - SOLR_HEAP=4g
-
-  pgadmin:
-    user: root
-    image: dpage/pgadmin4:7.8
-    container_name: pgadmin4_container
-    restart: always
-    ports:
-      - "8888:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
-      PGADMIN_DEFAULT_PASSWORD: strong-password
-    volumes:
-      - ${PWD}/docker/apps/pgadmin:/var/lib/pgadmin
 
   keycloak:
     image: keycloak/keycloak:24.0.4-0

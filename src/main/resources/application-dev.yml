@@ -5,7 +5,7 @@ logging:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/gams
+    url: jdbc:postgresql://localhost:5431/gams
     username: admin
     password: admin
   # shows hibernate sql statements in console
@@ -29,7 +29,7 @@ spring:
 gams:
   docker:
     # postgres
-    relational-db: "localhost:5432"
+    relational-db: "localhost:5431"
     # from integration-api
     # TODO: problem - there is the gams core hardcoded
     baseSearchUrl: ${BASE_SEARCH_URL:http://localhost:8983}
