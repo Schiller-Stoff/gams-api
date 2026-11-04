@@ -5,7 +5,10 @@ import org.ddh.gamsapi.TestUtilities.*;
 import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagStatics;
 import org.ddh.gamsapi.application.Integration.CustomSearch.CustomSearchProperties;
 import org.ddh.gamsapi.application.Integration.PlexusSearch.PlexusSearchProperties;
+import org.ddh.gamsapi.domain.Datastream.Datastream;
 import org.ddh.gamsapi.domain.Datastream.utils.GAMSDsid;
+import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
+import org.ddh.gamsapi.domain.Datastream.utils.interfaces.IDatastreamService;
 import org.ddh.gamsapi.domain.DigitalObject.DigitalObject;
 import org.ddh.gamsapi.domain.DigitalObject.utils.dto.DigitalObjectCreateDto;
 import org.ddh.gamsapi.domain.DigitalObject.utils.interfaces.IDigitalObjectService;
@@ -14,6 +17,7 @@ import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.auditing.AuditingHandler;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.ddh.gamsapi.EventCaptureListener;
@@ -69,7 +73,12 @@ public class IngestServiceIT extends IntegrationTest {
   IDigitalObjectService digitalObjectService;
 
   @Autowired
+  IDatastreamService datastreamService;
+
+  @Autowired
   private EventCaptureListener eventCaptureListener;
+
+  final private MockMultipartFile TEST_MULTIPART_FILE = TestDatastreamContent.generate();
 
   File bagFile;
 
@@ -663,6 +672,21 @@ public class IngestServiceIT extends IntegrationTest {
           TestProject.PROJECT_ABBR.getValue(), dto
       );
 
+      // create an additional datastream via the webclient
+      DatastreamCreateDto datastreamCreateDto = new DatastreamCreateDto();
+      datastreamCreateDto.setTitle("Test Image");
+      datastreamCreateDto.setCreator("Test Creator");
+      datastreamCreateDto.setRights("CC BY 4.0");
+      datastreamCreateDto.setDescription("Test description");
+
+      Datastream createdDatastream = datastreamService.createFromUpload(
+          result.getId(),
+          "uploaded_file.txt",
+          datastreamCreateDto,
+          TEST_MULTIPART_FILE
+      );
+
+
       try (
           var outputStream = new ByteArrayOutputStream()
       ) {
@@ -703,6 +727,12 @@ public class IngestServiceIT extends IntegrationTest {
               Assertions.assertThat(sipJsonContent)
                   .contains(GAMSDsid.DC.getValue());
 
+              // test datastream must be contained in sip.jon
+              Assertions.assertThat(sipJsonContent)
+                      .contains(
+                          String.format("data/content/%s", createdDatastream.getDsid())
+                      );
+
               Assertions.assertThat(sipJsonContent).doesNotContain(
                   // sip json must not contain checksums
                   "md5Checksum",
@@ -718,7 +748,7 @@ public class IngestServiceIT extends IntegrationTest {
         });
 
 
-        Assertions.assertThat(entryNames.size()).isEqualTo(6);
+        Assertions.assertThat(entryNames.size()).isEqualTo(7);
 
         // Assert presence of generated files
         Assertions.assertThat(entryNames).contains(
@@ -727,7 +757,6 @@ public class IngestServiceIT extends IntegrationTest {
             String.format("%s/manifest-md5.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/manifest-sha512.txt", TestDigitalObject.DIGITAL_OBJECT_ID.getValue()),
             String.format("%s/data/meta/sip.json", TestDigitalObject.DIGITAL_OBJECT_ID.getValue())
-
         );
 
         // Assert presence of DC.xml file
@@ -735,6 +764,10 @@ public class IngestServiceIT extends IntegrationTest {
             String.format("%s/%s/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), BagFilePaths.BAG_CONTENT_DIR.name, GAMSDsid.DC.getValue())
         );
 
+        // Assert presence of created test datastream in data / content
+        Assertions.assertThat(entryNames).contains(
+            String.format("%s/data/content/%s", TestDigitalObject.DIGITAL_OBJECT_ID.getValue(), createdDatastream.getDsid())
+        );
       }
 
     }

@@ -2,6 +2,7 @@ package org.ddh.gamsapi.domain.Datastream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ddh.gamsapi.application.Ingest.utils.Bagit.BagFilePaths;
 import org.ddh.gamsapi.domain.Datastream.DatastreamContent.WriteResult;
 import org.ddh.gamsapi.domain.Datastream.utils.ArchivalPolicy;
 import org.ddh.gamsapi.domain.Datastream.utils.dto.DatastreamCreateDto;
@@ -348,9 +349,9 @@ public class DatastreamService implements IDatastreamService {
         .baseMetadata(metadata)
         .mimeType(resolveMimeType(file))
         .size(file.getSize())
-        .bagPath(dsid)
         .md5Checksum(writeResult.md5Checksum())
         .sha512Checksum(writeResult.sha512Checksum())
+        .bagPath(BagFilePaths.BAG_CONTENT_DIR.name + "/" + dsid) // needs to be defined by gams-api
         .tags(new HashSet<>())
         .lang(new HashSet<>())
         .archivalPolicy(dto.getArchivalPolicy() != null
